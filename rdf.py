@@ -7,7 +7,7 @@ class RDFTester:
     """This little gem (not to be confused with a Ruby gem) loads and
     parses an RDF file."""
     
-    def __init__(file):
+    def __init__(self, file):
         """Open a file, attempt to parse it.
         
         If we can parse the file, return the structure; otherwise None"""

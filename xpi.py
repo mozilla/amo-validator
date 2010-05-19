@@ -16,22 +16,19 @@ class XPIManager:
         # Try opening the XPI as a zip.
         try:
             zf = ZipFile(package)
-        
-            # Everybody loves some Pokemon error handling!
+            
         except zipfile.BadZipfile:
             # The XPI is corrupt or invalid.
             print "The XPI is invalid."
-            return None
+            raise
             
         except IOError:
-            # The package was not found.
             print "Package was not found."
-            return None
+            raise
             
         except:
-            # There's something else wrong with the XPI.
             print "Something strange and deathly happened to the XPI."
-            return None
+            raise
         
         # Save the reference to the XPI to memory
         self.zf = zf
