@@ -11,13 +11,13 @@ class ErrorBundle:
         
         self.detected_type = 0
         
-    def error(self, error, description):
+    def error(self, error, description=''):
         "Stores an error message for the validation process"
         self.errors.append({"message": error,
                             "description": description})
         return self
         
-    def warning(self, warning, description):
+    def warning(self, warning, description=''):
         "Stores a warning message for the validation process"
         self.warnings.append({"message": warning,
                               "description": description})
@@ -56,9 +56,9 @@ class ErrorBundle:
             
             # Print out all the errors:
             for error in self.errors:
-                print "Error: %s" % error
+                print "Error: %s" % error["message"]
             for warning in self.warnings:
-                print "Warning: %s" % warning
+                print "Warning: %s" % warning["message"]
             
         else:
             print "All tests succeeded!"

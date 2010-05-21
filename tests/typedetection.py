@@ -1,7 +1,11 @@
+from xml.dom.minidom import parse
+
+import rdflib
+from rdflib import URIRef
+
 import xpi
 import rdf
 
-from xml.dom.minidom import parse
 
 def detect_type(install_rdf=None, xpi_package=None):
     """Determines the type of addon being validated based on
@@ -30,8 +34,10 @@ def detect_type(install_rdf=None, xpi_package=None):
     type_values = rdfDoc.objects(None, type_uri)
     
     if type_values:
-        # We've found at least one <em:type>. Only accept the first.
-        type = type_values[0].lower()
+        # We've found at least one <em:type>. Only accept one.
+        type = ""
+        for t in type_values:
+            type = t
         
         # We can break out and assume that the type is truthful if it
         # is a valid type value. Otherwise, ignore the type element.
@@ -114,8 +120,8 @@ def detect_opensearch(package):
             # Make a nice error message about the MIME type.
             error_mesg = "The provided MIME type (%s) is not acceptable"
             error_mesg = error_mesg % url.attributes["type"].value
-            return {"failure": True,
-                    "error": error_mesg}
+            return {"failure": True,     
+                    "error": error_mesg} 
         
         # Make sure that there is a {searchTerms} placeholder in the
         # URL template.

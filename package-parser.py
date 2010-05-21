@@ -7,6 +7,8 @@ import rdf
 import tests.typedetection
 import tests.packagelayout
 from xpi import XPIManager
+from rdf import RDFTester
+from errorbundler import ErrorBundle
 
 
 def main(argv=None):
@@ -39,6 +41,8 @@ def main(argv=None):
     error_bundle = ErrorBundle()
     
     results = test_package(error_bundle, argv[1], expectation)
+    
+    results.print_summary()
     
 
 def test_package(eb, package, expectation=0):
@@ -76,7 +80,7 @@ def test_package(eb, package, expectation=0):
             # will validate against other things and make Tier 1 worth
             # it's weight in Python.
             
-        else if expected_search_provider:
+        elif expected_search_provider:
             eb.set_type(5)
             return error_bundle
             
@@ -102,11 +106,14 @@ def test_package(eb, package, expectation=0):
         return eb.error("We were unable to open the file for testing.")
     
     
+    # Cache a copy of the package contents
+    package_contents = p.get_file_data()
+    
+    
     # Test for blacklisted files
-    eb = packagelayout.test_blacklisted_files(eb,
-                                              type,
-                                              package_contents,
-                                              p) or \
+    eb = tests.packagelayout.test_blacklisted_files(eb,
+                                                    package_contents,
+                                                    p) or \
           eb
     
     # Now that we're sure there's nothing inherently evil in the
@@ -133,7 +140,15 @@ def test_package(eb, package, expectation=0):
         install_rdf = RDFTester(install_rdf_data)
         
         # Load up the results of the type detection
-        results = typedetection.detect_type(install_rdf, p)
+        results = tests.typedetection.detect_type(install_rdf, p)
+        
+        if results is None:
+            return eb.error("Unable to determine addon type")
+        
+        # Compare the results of the low-level type detection to
+        # that of the expectation and the assumption.
+        if assumed_type != results:
+            eb.warning("File type does not match detected addon type")
         
         
         
@@ -143,7 +158,7 @@ def test_package(eb, package, expectation=0):
     
     
     # Do we have any T1 errors?
-    if eb.failed()
+    if eb.failed():
         return eb
     
     

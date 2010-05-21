@@ -1,7 +1,7 @@
 
 import xpi
 
-def test_blacklisted_files(eb, type=0, package_contents={}, xpi_package=None):
+def test_blacklisted_files(eb, package_contents={}, xpi_package=None):
     "Detects blacklisted files and extensions."
     
     # Detect blacklisted files based on their extension.
