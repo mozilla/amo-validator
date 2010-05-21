@@ -10,6 +10,7 @@ class ErrorBundle:
         self.warnings = []
         
         self.detected_type = 0
+        self.resources = {}
         
     def error(self, error, description=''):
         "Stores an error message for the validation process"
@@ -32,6 +33,16 @@ class ErrorBundle:
         succeeded or not."""
         
         return self.errors or self.warnings
+        
+    def get_resource(self, name):
+        "Retrieves an object that has been stored by another test."
+        
+        return self.resources[name]
+        
+    def save_resource(self, name, resource):
+        "Saves an object such that it can be used by other tests."
+        
+        self.resources[name] = resource
         
     def print_summary(self):
         "Prints a summary of the validation process so far."

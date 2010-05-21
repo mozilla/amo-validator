@@ -20,6 +20,12 @@ def test_blacklisted_files(eb, package_contents={}, xpi_package=None):
     
     return eb
 
+def test_targetedapplications(eb, package_contents={}, xpi_package=None):
+    """Tests to make sure that the targeted applications in the
+    install.rdf file are legit and that any associated files (I'm looking
+    at you, SeaMonkey) are where they need to be."""
+    
+    
 
 def test_dictionary_layout(eb, package_contents={}, xpi_package=None):
     """Ensures that dictionary packages contain the necessary

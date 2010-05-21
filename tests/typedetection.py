@@ -23,7 +23,16 @@ def detect_type(install_rdf=None, xpi_package=None):
     # If we're missing our install.rdf file, we can try to make some
     # assumptions.
     if install_rdf is None:
-        types
+        types = {"xpi": 3}
+        
+        print "There is no install.rdf, so we'll look elsewhere."
+        
+        # If we know what the file type might be, return it.
+        if xpi_package.extension in types:
+            return types[xpi_package.extension]
+        # Otherwise, we're out of luck :(
+        else:
+            return None
         
     
     # Grab a local reference to the RDF document
@@ -33,19 +42,31 @@ def detect_type(install_rdf=None, xpi_package=None):
     type_uri = URIRef('http://www.mozilla.org/2004/em-rdf#type')
     type_values = rdfDoc.objects(None, type_uri)
     
-	
-	
-    if type_values:
-        # We've found at least one <em:type>. Only accept one.
-        type = ""
-        for t in type_values:
-            type = t
+    type = ""
+    for t in type_values:
+        type = t
+    
+    if type in translated_types:
+        print "Found em:type in install.rdf"
         
-        # We can break out and assume that the type is truthful if it
-        # is a valid type value. Otherwise, ignore the type element.
-        if type in translated_types:
-            # Make sure we translate back to the normalized version
-            return translated_types[type] 
+        # Make sure we translate back to the normalized version
+        return translated_types[type]
+    
+    
+    print "No em:type element found in install.rdf"    
+    
+    # Dictionaries are weird too, they might not have the obligatory
+    # em:type. We can assume that if they have a /dictionaries/ folder,
+    # they are a dictionary because even if they aren't, dictionaries
+    # have an extraordinarily strict set of rules and file filters that
+    # must be passed. It's so crazy secure that it's cool if we use it
+    # as kind of a fallback.
+    
+    package_contents = xpi_package.get_file_data()
+    dictionaries = [file_ for file_ in package_contents.keys() if file_.startswith("dictionaries")]
+    if dictionaries:
+        print "We found indiciations of a dictionary package."
+        return 3 # Dictionary
     
     
     # There's no type element, so the spec says that it's either a
@@ -63,17 +84,6 @@ def detect_type(install_rdf=None, xpi_package=None):
         # Make sure it gets translated back to the normalized version
         install_rdf_type = extensions[xpi_package.extension]
         return translated_types[install_rdf_type]
-    
-    # Dictionaries are weird too, they might not have the obligatory
-    # em:type. We can assume that if they have a /dictionaries/ folder,
-    # they are a dictionary because even if they aren't, dictionaries
-    # have an extraordinarily strict set of rules and file filters that
-    # must be passed. It's so crazy secure that it's cool if we use it
-    # as kind of a fallback.
-    
-    package_contents = xpi_package.get_file_data()
-    if "dictionaries" in package_contents:
-		return 5 # Dictionary
     
     # Otherwise, the extension doesn't qualify to be validated.
     return None
