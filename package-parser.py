@@ -3,6 +3,7 @@ import os
 
 import zipfile
 
+import decorator
 import rdf
 import tests.typedetection
 import tests.packagelayout
@@ -54,14 +55,15 @@ def test_package(eb, package, expectation=0):
     if not os.path.exists(package):
         return eb.error("The package could not be found")
     
-    
-    # ---- Tier 1 Errors ----
+    print "Beginning test suite..."
     
     package_extension = os.path.splitext(package)[1]
     package_extension = package_extension.lower()
     
     # Test for OpenSearch providers
     if package_extension == ".xml":
+        
+        print "Detected possible OpenSearch provider..."
         
         expected_search_provider = expectation in (0, 5)
         
@@ -70,7 +72,9 @@ def test_package(eb, package, expectation=0):
             return eb.warning("Unexpected file extension.")
         
         # Is this a search provider?
-        opensearch_results = typedetection.detect_opensearch(package)
+        opensearch_results = \
+            tests.typedetection.detect_opensearch(package)
+        
         if opensearch_results["failure"]:
             # Failed OpenSearch validation
             error_mesg = "OpenSearch: %s" % opensearch_results["error"]
@@ -82,7 +86,8 @@ def test_package(eb, package, expectation=0):
             
         elif expected_search_provider:
             eb.set_type(5)
-            return error_bundle
+            print "OpenSearch provider confirmed."
+            return eb
             
     
     # Test that the package is an XPI.
@@ -109,31 +114,16 @@ def test_package(eb, package, expectation=0):
     # Cache a copy of the package contents
     package_contents = p.get_file_data()
     
+    assumed_extensions = {"jar": 2,
+                          "xml": 5}
     
-    # Test for blacklisted files
-    eb = tests.packagelayout.test_blacklisted_files(eb,
-                                                    package_contents,
-                                                    p) or \
-          eb
-    
-    # Now that we're sure there's nothing inherently evil in the
-    # package, we can do some analysis on it.
-    
-    
-    # Do some basic type detection to make sure 
-    if p.extension == "jar":
-        assumed_type = 2
+    if p.extension in assumed_extensions:
+        assumed_type = assumed_extensions[p.extension]
         # Is the user expecting a different package type?
-        if not expectation in (0, 2):
+        if not expectation in (0, assumed_type):
             eb.error("Unexpected package type (found theme)")
-              
-    else:     
-        # The addon is probably otherwise an XPI. If it isn't, then
-        # we're going to make a bet that it's supposed to be. No
-        # vulnerability is opened by making this assumption because
-        # the addon still needs to be a well-formed extension.
-        assumed_type = 0
-        
+    
+    # Test the install.rdf file to see if we can get the type that way.
     if "install.rdf" in package_contents:
         # Load up the install.rdf file
         install_rdf_data = p.zf.read("install.rdf")
@@ -141,45 +131,42 @@ def test_package(eb, package, expectation=0):
         
         # Load up the results of the type detection
         results = tests.typedetection.detect_type(install_rdf, p)
+        eb.set_type(results)
         
         if results is None:
             return eb.error("Unable to determine addon type")
         
         # Compare the results of the low-level type detection to
         # that of the expectation and the assumption.
-        if assumed_type != results:
-            eb.warning("File type does not match detected addon type")
+        if not expectation in (0, results):
+            err_mesg = "File extension (%s) mismatch"
+            err_mesg = err_mesg % p.extension
+            eb.warning(err_mesg)
         
         
+    
+    # ---- Begin Tiers ----
+    
+    # Iterate through each tier
+    for tier in decorator.get_tiers():
         
+        print "Entering tier #%d" % tier
         
+        # Iterate through each test
+        for test in decorator.run_tests(tier):
+            # Pass in:
+            # - Error Bundler
+            # - Package listing
+            # - A copy of the package itself
+            test(eb, package_contents, p)
+        
+        # Return any errors at the end of the tier
+        if eb.failed():
+            return eb
     
-    # ---- End Tier 1 ----
-    
-    
-    # Do we have any T1 errors?
-    if eb.failed():
-        return eb
-    
-    
-    # ---- Tier 2 Errors ----
-    
-    
-    # ---- End Tier 2 ----
     
     # Return the results.
     return eb
-    
-
-def compile_errors(at_tier=1, errors=None, warnings=None):
-    "Compiles warnings and errors into a neat little object."
-    
-    output = {"failed": errors or warnings,
-              "errors": errors,
-              "warnings": warnings,
-              "highest_tier": at_tier}
-    
-    return output
     
 
 # Start up the testing and return the output.

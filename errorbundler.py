@@ -47,9 +47,9 @@ class ErrorBundle:
         
         # Make a neat little printout.
         print "Summary:"
-        print "----------------------------------------"
+        print "-" * 30
         print "Detected type: %s" % types[self.detected_type]
-        print "----------------------------------------"
+        print "-" * 30
         
         if self.failed():
             print "Test failed! Errors:"

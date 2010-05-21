@@ -33,6 +33,8 @@ def detect_type(install_rdf=None, xpi_package=None):
     type_uri = URIRef('http://www.mozilla.org/2004/em-rdf#type')
     type_values = rdfDoc.objects(None, type_uri)
     
+	
+	
     if type_values:
         # We've found at least one <em:type>. Only accept one.
         type = ""
@@ -62,6 +64,17 @@ def detect_type(install_rdf=None, xpi_package=None):
         install_rdf_type = extensions[xpi_package.extension]
         return translated_types[install_rdf_type]
     
+    # Dictionaries are weird too, they might not have the obligatory
+    # em:type. We can assume that if they have a /dictionaries/ folder,
+    # they are a dictionary because even if they aren't, dictionaries
+    # have an extraordinarily strict set of rules and file filters that
+    # must be passed. It's so crazy secure that it's cool if we use it
+    # as kind of a fallback.
+    
+    package_contents = xpi_package.get_file_data()
+    if "dictionaries" in package_contents:
+		return 5 # Dictionary
+    
     # Otherwise, the extension doesn't qualify to be validated.
     return None
 
@@ -71,6 +84,7 @@ def detect_opensearch(package):
     
     # Parse the file.
     try:
+        print "Attempting to parse..."
         x = parse(package)
     except:
         # Don't worry that it's a catch-all exception handler; it failed
@@ -78,19 +92,21 @@ def detect_opensearch(package):
         return {"failure": True,
                 "error": "There was an error parsing the file."}
     
+    print "Testing OpenSearch for well-formedness..."
+    
     # Make sure that the root element is OpenSearchDescription.
     if x.documentElement.tagName != "OpenSearchDescription":
         return {"failure": True,
                 "error": "Provider is not a valid OpenSearch provider"}
     
     # Make sure that there is exactly one ShortName.
-    if len(x.documentElement.getElementsByTagName("ShortName")) != 1:
+    if not x.documentElement.getElementsByTagName("ShortName"):
         return {"failure": True,
                 "error": "Missing <ShortName> element"}
     
     
     # Make sure that there is exactly one Description.
-    if len(x.documentElement.getElementsByTagName("Description")) != 1:
+    if not x.documentElement.getElementsByTagName("Description"):
         return {"failure": True,
                 "error": "Missing <Description> element"}
     
@@ -110,8 +126,9 @@ def detect_opensearch(package):
     # Make sure that each Url has the require attributes.
     for url in urls:
         # Test for attribute presence.
-        if not ("type" in url.attributes or \
-                "template" in url.attributes):
+        keys = url.attributes.keys()
+        if not ("type" in keys or \
+                "template" in keys):
             return {"failure": True,
                     "error": "A <Url /> element is missing attributes"}
         
@@ -126,8 +143,14 @@ def detect_opensearch(package):
         # Make sure that there is a {searchTerms} placeholder in the
         # URL template.
         if url.attributes["template"].value.count("{searchTerms}") < 1:
-            name = url.attributes["rel"].value or \
-                   url.attributes["type"].value
+            # Find an attribute that we can use for the name. If there
+            # isn't one, then just use "noname"
+            name_att = ("rel" in keys and url.attributes["rel"]) or \
+                       ("type" in keys and url.attributes["type"])
+            if name_att:
+                name = name_att.value
+            else:
+                name = "(untitled)"
             return {"failure": False,
                     "error": "The template for %s is missing" % name}
         
