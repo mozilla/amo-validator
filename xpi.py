@@ -12,6 +12,7 @@ class XPIManager:
         
         # Store away the filename for future use.
         self.filename = package
+        self.extension = package.split(".").pop()
         
         # Try opening the XPI as a zip.
         try:

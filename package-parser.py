@@ -1,9 +1,11 @@
 import sys
-import getopt
 import os
 
 import zipfile
 
+import rdf
+import tests.typedetection
+import tests.packagelayout
 from xpi import XPIManager
 
 
@@ -12,79 +14,137 @@ def main(argv=None):
     if argv is None:
         argv = sys.argv
     
-    results = test_package(argv[1])
+    expectations = {"any":0,
+                    "extensions":1,
+                    "themes":2,
+                    "dictionaries":3,
+                    "languagepacks":4,
+                    "search":5,
+                    "multi":1} # A multi extension is an extension
     
-    print "Summary:"
-    if bool(results["failed"]):
-        print "Test failed!\n"
-        for error in results["errors"]:
-            print "Error: %s" % error
-        for warning in results["warnings"]:
-            print "Warning: %s" % warning
+    # If we have a specified expectation, adhere to it.
+    if len(argv) > 2:
+        expectation = argv[2] # Grab from the command line
+        if expectation in expectations:
+            # Pair up the expectation with its associated type
+            expectation = expectations[expectation]
+        else:
+            # Inform the user that their command is broke and move on
+            print "We could not find the expected addon type."
+            expectation = 0
+            
     else:
-        print "Test succeeded!"
+        expectation = 0 # Default to any extension type
+    
+    error_bundle = ErrorBundle()
+    
+    results = test_package(error_bundle, argv[1], expectation)
     
 
-def test_package(package):
+def test_package(eb, package, expectation=0):
     "Begins tests for the package."
-    
-    errors = []
-    warnings = []
     
     
     # Test that the package actually exists. I consider this Tier 0
     # since we may not even be dealing with a real file.
     if not os.path.exists(package):
-        errors.append("The package could not be found.")
-        return compile_errors(0, errors, warnings)
+        return eb.error("The package could not be found")
     
     
     # ---- Tier 1 Errors ----
     
+    package_extension = os.path.splitext(package)[1]
+    package_extension = package_extension.lower()
+    
+    # Test for OpenSearch providers
+    if package_extension == ".xml":
+        
+        expected_search_provider = expectation in (0, 5)
+        
+        # If we're not expecting a search provider, warn the user
+        if not expected_search_provider:
+            return eb.warning("Unexpected file extension.")
+        
+        # Is this a search provider?
+        opensearch_results = typedetection.detect_opensearch(package)
+        if opensearch_results["failure"]:
+            # Failed OpenSearch validation
+            error_mesg = "OpenSearch: %s" % opensearch_results["error"]
+            eb.error(error_mesg)
+            
+            # We want this to flow back into the rest of the program. It
+            # will validate against other things and make Tier 1 worth
+            # it's weight in Python.
+            
+        else if expected_search_provider:
+            eb.set_type(5)
+            return error_bundle
+            
+    
     # Test that the package is an XPI.
-    package_extension = package.split(".").pop()
-    if package_extension.lower() != "xpi":
-        errors.append("The package is not of type 'XPI'")
+    if not package_extension in (".xpi", ".jar"):
+        eb.error("The package is not of a recognized type.")
+    
     
     # Load up a new instance of an XPI.
     try:
         p = XPIManager(package)
         if p is None:
-            errors.append("The XPI could not be opened.")
             # Die on this one because the file won't open.
-            return compile_errors(1, errors, warnings)
+            return eb.error("The XPI could not be opened.")
         
     except zipfile.BadZipfile:
         # This likely means that there is a problem with the zip file.
-        errors.append("The XPI file that was submitted is corrupt.")
-        return compile_errors(1, errors, warnings)
+        return eb.error("The XPI file that was submitted is corrupt.")
     
     except IOError:
         # This means that there was something wrong with the command.
-        errors.append("We were unable to open the file for testing.")
-        return compile_errors(1, errors, warnings)
+        return eb.error("We were unable to open the file for testing.")
     
     
-    # Next few tests will search for extension layout errors.
-    package_contents = p.get_file_data()
+    # Test for blacklisted files
+    eb = packagelayout.test_blacklisted_files(eb,
+                                              type,
+                                              package_contents,
+                                              p) or \
+          eb
     
-    # Test for blacklisted file extensions
-    blacklisted_extensions = ("dll", "exe", "dylib", "so",
-                              "sh", "class", "swf")
-    pattern = "File '%s' is using a blacklisted file extension (%s)"
-    for name, file_ in package_contents.items():
-        # Simple test to ensure that the extension isn't blacklisted
-        if file_["extension"] in blacklisted_extensions:
-            warnings.append(pattern % (name, file_extension))
+    # Now that we're sure there's nothing inherently evil in the
+    # package, we can do some analysis on it.
     
     
+    # Do some basic type detection to make sure 
+    if p.extension == "jar":
+        assumed_type = 2
+        # Is the user expecting a different package type?
+        if not expectation in (0, 2):
+            eb.error("Unexpected package type (found theme)")
+              
+    else:     
+        # The addon is probably otherwise an XPI. If it isn't, then
+        # we're going to make a bet that it's supposed to be. No
+        # vulnerability is opened by making this assumption because
+        # the addon still needs to be a well-formed extension.
+        assumed_type = 0
+        
+    if "install.rdf" in package_contents:
+        # Load up the install.rdf file
+        install_rdf_data = p.zf.read("install.rdf")
+        install_rdf = RDFTester(install_rdf_data)
+        
+        # Load up the results of the type detection
+        results = typedetection.detect_type(install_rdf, p)
+        
+        
+        
+        
     
     # ---- End Tier 1 ----
     
     
     # Do we have any T1 errors?
-    if errors > 0 or warnings > 0:
-        return compile_errors(1, errors, warnings)
+    if eb.failed()
+        return eb
     
     
     # ---- Tier 2 Errors ----
@@ -93,13 +153,13 @@ def test_package(package):
     # ---- End Tier 2 ----
     
     # Return the results.
-    return compile_errors(2, errors, warnings)
+    return eb
     
 
 def compile_errors(at_tier=1, errors=None, warnings=None):
     "Compiles warnings and errors into a neat little object."
     
-    output = {"failed": bool(errors or warnings),
+    output = {"failed": errors or warnings,
               "errors": errors,
               "warnings": warnings,
               "highest_tier": at_tier}
