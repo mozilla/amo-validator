@@ -1,0 +1,28 @@
+addons.mozilla.org Validator
+----------------------------------------
+
+This validator is a proposed replacement for the current addon
+validator available at addons.mozilla.org. It is written entirely in
+python.
+
+Running
+------------
+
+Run the validator as follows:
+
+python package-parser.py <path to xpi> [<expected type>]
+
+The path to the XPI should point to an XPI file.
+The expected type should be one of the following values:
+
+-	any : Accepts any extension
+-	extensions : Accepts only extensions
+-	themes : Accepts only themes
+-	dictionaries : Accepts only dictionaries
+-	languagepacks : Accepts only language packs
+-	search : Accepts only OpenSearch XML files (unpackaged)
+-	multi : Accepts only multiextension XPI packages
+
+Specifying an expected type will throw an error if the validator
+does not detect that particular type when scanning. All addon type
+detection mechanisms are used to make this determination.
