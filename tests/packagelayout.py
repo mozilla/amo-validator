@@ -1,5 +1,8 @@
 import fnmatch
 
+import rdflib
+from rdflib import URIRef
+
 import decorator
 import xpi
 
@@ -20,11 +23,44 @@ def test_blacklisted_files(eb, package_contents={}, xpi_package=None):
     
     return eb
 
-def test_targetedapplications(eb, package_contents={}, xpi_package=None):
+def test_targetedapplications(eb, package_contents={},
+                              xpi_package=None):
     """Tests to make sure that the targeted applications in the
-    install.rdf file are legit and that any associated files (I'm looking
-    at you, SeaMonkey) are where they need to be."""
+    install.rdf file are legit and that any associated files (I'm
+    looking at you, SeaMonkey) are where they need to be."""
     
+    # If there isn't an install.rdf, we can't test for SeaMonkey
+    # support. Boo hoo.
+    if not eb.get_resource("has_install_rdf"):
+        return eb
+    
+    rdf = eb.get_resource("install_rdf")
+    rdfDoc = rdf.rdf
+    
+    # Search through the install.rdf document for the SeaMonkey
+    # GUID string.
+    predicate = URIRef("http://www.mozilla.org/2004/em-rdf#targetApplication")
+    
+    for o in rdfDoc.subjects(None, predicate):
+        print o
+        if o == "{92650c4d-4b8e-4d2a-b7eb-24ecf4f6b63a}":
+            print "We found some SeaMonkey action."
+            
+            
+            
+    
+    
+def test_opensearch_updateurl(eb, package_contents={},
+                              xpi_package=None):
+    "Makes sure that a search provider doesn't have an updateURL"
+    
+    xml = eb.get_resource("xml")
+    
+    updateURLs = xml.getElementsByTagName("updateURL")
+    if updateURLs:
+        eb.error("<updateURL> elements are currently disallowed.")
+    
+    return eb
     
 
 def test_dictionary_layout(eb, package_contents={}, xpi_package=None):
@@ -79,5 +115,6 @@ def test_dictionary_layout(eb, package_contents={}, xpi_package=None):
 
 # Register the tests with the decorator.
 decorator.register_test(1, test_blacklisted_files)
-decorator.register_test(1, test_dictionary_layout, 3) # for dictionaries
+decorator.register_test(1, test_dictionary_layout, 3) # dictionaries
+decorator.register_test(2, test_targetedapplications)
 

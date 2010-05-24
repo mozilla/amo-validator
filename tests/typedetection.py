@@ -17,8 +17,7 @@ def detect_type(install_rdf=None, xpi_package=None):
     translated_types = {"2": 1, 
                         "4": 2, 
                         "8": 4, 
-                        "32": 1, 
-                        }
+                        "32": 1}
     
     # If we're missing our install.rdf file, we can try to make some
     # assumptions.
@@ -42,18 +41,20 @@ def detect_type(install_rdf=None, xpi_package=None):
     type_uri = URIRef('http://www.mozilla.org/2004/em-rdf#type')
     type_values = rdfDoc.objects(None, type_uri)
     
-    type = ""
-    for t in type_values:
-        type = t
+    # Pull out one of the types
+    types = list(type_values)
     
-    if type in translated_types:
-        print "Found em:type in install.rdf"
+    if types:
+        type_ = types[0]
         
-        # Make sure we translate back to the normalized version
-        return translated_types[type]
-    
-    
-    print "No em:type element found in install.rdf"    
+        if type_ in translated_types:
+            print "Found em:type in install.rdf"
+            
+            # Make sure we translate back to the normalized version
+            return translated_types[type_]
+            
+    else:
+        print "No em:type element found in install.rdf"    
     
     # Dictionaries are weird too, they might not have the obligatory
     # em:type. We can assume that if they have a /dictionaries/ folder,
@@ -63,7 +64,8 @@ def detect_type(install_rdf=None, xpi_package=None):
     # as kind of a fallback.
     
     package_contents = xpi_package.get_file_data()
-    dictionaries = [file_ for file_ in package_contents.keys() if file_.startswith("dictionaries")]
+    dictionaries = [file_ for file_ in package_contents.keys() if
+                    file_.startswith("dictionaries")]
     if dictionaries:
         print "We found indiciations of a dictionary package."
         return 3 # Dictionary
@@ -100,6 +102,7 @@ def detect_opensearch(package):
         # Don't worry that it's a catch-all exception handler; it failed
         # and that's all that matters.
         return {"failure": True,
+                "decided": False,
                 "error": "There was an error parsing the file."}
     
     print "Testing OpenSearch for well-formedness..."
@@ -107,6 +110,7 @@ def detect_opensearch(package):
     # Make sure that the root element is OpenSearchDescription.
     if x.documentElement.tagName != "OpenSearchDescription":
         return {"failure": True,
+                "decided": False, # Sketch, but we don't really know.
                 "error": "Provider is not a valid OpenSearch provider"}
     
     # Make sure that there is exactly one ShortName.
@@ -137,7 +141,7 @@ def detect_opensearch(package):
     for url in urls:
         # Test for attribute presence.
         keys = url.attributes.keys()
-        if not ("type" in keys or 
+        if not ("type" in keys and 
                 "template" in keys):
             return {"failure": True,
                     "error": "A <Url /> element is missing attributes"}
@@ -147,23 +151,46 @@ def detect_opensearch(package):
             # Make a nice error message about the MIME type.
             error_mesg = "The provided MIME type (%s) is not acceptable"
             error_mesg = error_mesg % url.attributes["type"].value
-            return {"failure": True,     
+            return {"failure": True,
                     "error": error_mesg} 
         
         # Make sure that there is a {searchTerms} placeholder in the
         # URL template.
-        if url.attributes["template"].value.count("{searchTerms}") < 1:
-            # Find an attribute that we can use for the name. If there
-            # isn't one, then just use "noname"
-            name_att = ("rel" in keys and url.attributes["rel"]) or \
-                       ("type" in keys and url.attributes["type"])
-            if name_att:
-                name = name_att.value
-            else:
-                name = "(untitled)"
-            return {"failure": False,
-                    "error": "The template for %s is missing" % name}
+        found_template = \
+            url.attributes["template"].value.count("{searchTerms}") < 1
         
+        # If we didn't find it in a simple parse of the template=""
+        # attribute, look deeper at the <Param /> elements.
+        if not found_template:
+            for param in url.getElementsByTagName("Param"):
+                # As long as we're in here and dependent on the
+                # attributes, we'd might as well validate them.
+                attribute_keys = param.attributes.keys()
+                if not "name" in attribute_keys or \
+                   not "value" in attribute_keys:
+                    return {"failure": True,
+                            "error": "<Param /> missing attributes."}
+                
+                param_value = param.attributes["value"].value
+                if param_value.count("{searchTerms}"):
+                    found_template = True
+                    
+                    # Since we're in a validating spirit, continue
+                    # looking for more errors and don't break
+        
+        if not found_template:
+            ver = (url.attributes["template"].value,
+                   url.attributes["type"].value)
+            
+            return {"failure": True,
+                    "error": "The template for %s:%s is missing" % ver}
+    
+    # Make sure there are no updateURL elements
+    print "Testing for banned elements..."
+    if x.getElementsByTagName("updateURL"):
+        return {"failure": True,
+                "error": "<updateURL> elements are banned from search"}
+    
     # The OpenSearch provider is valid!
     return {"failure": False,
             "error": None}

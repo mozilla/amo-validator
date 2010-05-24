@@ -37,6 +37,9 @@ class ErrorBundle:
     def get_resource(self, name):
         "Retrieves an object that has been stored by another test."
         
+        if not name in self.resources:
+            return False
+        
         return self.resources[name]
         
     def save_resource(self, name, resource):

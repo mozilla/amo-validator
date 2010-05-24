@@ -80,9 +80,13 @@ def test_package(eb, package, expectation=0):
             error_mesg = "OpenSearch: %s" % opensearch_results["error"]
             eb.error(error_mesg)
             
-            # We want this to flow back into the rest of the program. It
-            # will validate against other things and make Tier 1 worth
-            # it's weight in Python.
+            # We want this to flow back into the rest of the program if
+            # the error indicates that we're not sure whether it's an
+            # OpenSearch document or not.
+            
+            if not "decided" in opensearch_results or \
+                not opensearch_results["decided"]:
+                return eb
             
         elif expected_search_provider:
             eb.set_type(5)
@@ -125,10 +129,14 @@ def test_package(eb, package, expectation=0):
     
     # Test the install.rdf file to see if we can get the type that way.
     has_install_rdf = "install.rdf" in package_contents
+    eb.save_resource("has_install_rdf", has_install_rdf)
     if has_install_rdf:
         # Load up the install.rdf file
         install_rdf_data = p.zf.read("install.rdf")
         install_rdf = RDFTester(install_rdf_data)
+        
+        # Save a copy for later tests.
+        eb.save_resource("install_rdf", install_rdf);
         
         # Load up the results of the type detection
         results = tests.typedetection.detect_type(install_rdf, p)
