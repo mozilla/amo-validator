@@ -124,7 +124,8 @@ def test_package(eb, package, expectation=0):
             eb.error("Unexpected package type (found theme)")
     
     # Test the install.rdf file to see if we can get the type that way.
-    if "install.rdf" in package_contents:
+    has_install_rdf = "install.rdf" in package_contents
+    if has_install_rdf:
         # Load up the install.rdf file
         install_rdf_data = p.zf.read("install.rdf")
         install_rdf = RDFTester(install_rdf_data)
@@ -148,12 +149,12 @@ def test_package(eb, package, expectation=0):
     # ---- Begin Tiers ----
     
     # Iterate through each tier
-    for tier in decorator.get_tiers():
+    for tier in sorted(decorator.get_tiers()):
         
         print "Entering tier #%d" % tier
         
-        # Iterate through each test
-        for test in decorator.run_tests(tier):
+        # Iterate through each test of our detected type
+        for test in decorator.run_tests(tier, eb.detected_type):
             # Pass in:
             # - Error Bundler
             # - Package listing

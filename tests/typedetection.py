@@ -137,13 +137,13 @@ def detect_opensearch(package):
     for url in urls:
         # Test for attribute presence.
         keys = url.attributes.keys()
-        if not ("type" in keys or \
+        if not ("type" in keys or 
                 "template" in keys):
             return {"failure": True,
                     "error": "A <Url /> element is missing attributes"}
         
         # Make sure that the type attribute is an acceptable mime type.
-        if not (url.attributes["type"].value in acceptable_mime_types):
+        if not url.attributes["type"].value in acceptable_mime_types:
             # Make a nice error message about the MIME type.
             error_mesg = "The provided MIME type (%s) is not acceptable"
             error_mesg = error_mesg % url.attributes["type"].value

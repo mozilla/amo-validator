@@ -17,16 +17,12 @@ def register_test(tier, test, expected_type=None):
     
 def get_tiers():
     "Returns a list of tier values."
-    global test_tiers
     return test_tiers.keys()
     
 def run_tests(tier, type_=None):
     "Returns a generator of test functions."
     
     # List comprehension to sort and filter and the like.
-    tests = [test["test"] for test in test_tiers[tier] if \
-             test["type"] in (None, 0, type_)]
+    return (test["test"] for test in test_tiers[tier] if
+            test["type"] in (None, 0, type_))
     
-    # Iterate and yield
-    for test in tests:
-        yield test

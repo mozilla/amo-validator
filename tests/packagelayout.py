@@ -36,15 +36,16 @@ def test_dictionary_layout(eb, package_contents={}, xpi_package=None):
     
     # Define rules for the structure.
     mandatory_files = [
-        "index.rdf",
+        "install.rdf",
         "dictionaries/",
         "dictionaries/*.aff",
         "dictionaries/*.dic"]
     whitelisted_files = [
         "install.js",
+        "__MACOSX/*", # I hate them, but there's no way to avoid them.
         "chrome.manifest",
         "chrome/*"]
-    whitelisted_extensions = ("txt")
+    whitelisted_extensions = ("txt",)
     
     for file_ in package_contents:
         # Remove the file from the mandatory file list.
@@ -54,16 +55,12 @@ def test_dictionary_layout(eb, package_contents={}, xpi_package=None):
         if mfile_list:
             # Isolate the mandatory file pattern and remove it.
             mfile = mfile_list[0]
-            del mandatory_files[mfile]
+            mandatory_files.remove(mfile)
             continue
         
         # Remove the file from the whitelist.
-        passes_whitelist = False
-        for wlfile in whitelisted_files:
-            if fnmatch.fnmatch(file_, wlfile):
-                passes_whitelist = True
-                break
-        if passes_whitelist:
+        if any(fnmatch.fnmatch(file_, wlfile) for wlfile in
+               whitelisted_files):
             continue
     
         # Is it a directory?
