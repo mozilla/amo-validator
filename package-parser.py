@@ -53,6 +53,7 @@ def test_package(eb, package, expectation=0):
     # Test that the package actually exists. I consider this Tier 0
     # since we may not even be dealing with a real file.
     if not os.path.exists(package):
+        eb.reject = True
         return eb.error("The package could not be found")
     
     print "Beginning test suite..."
@@ -69,6 +70,7 @@ def test_package(eb, package, expectation=0):
         
         # If we're not expecting a search provider, warn the user
         if not expected_search_provider:
+            eb.reject = True
             return eb.warning("Unexpected file extension.")
         
         # Is this a search provider?
@@ -85,7 +87,8 @@ def test_package(eb, package, expectation=0):
             # OpenSearch document or not.
             
             if not "decided" in opensearch_results or \
-                not opensearch_results["decided"]:
+               opensearch_results["decided"]:
+                eb.reject = True
                 return eb
             
         elif expected_search_provider:
@@ -96,6 +99,7 @@ def test_package(eb, package, expectation=0):
     
     # Test that the package is an XPI.
     if not package_extension in (".xpi", ".jar"):
+        eb.reject = True
         eb.error("The package is not of a recognized type.")
     
     
@@ -148,6 +152,7 @@ def test_package(eb, package, expectation=0):
         # Compare the results of the low-level type detection to
         # that of the expectation and the assumption.
         if not expectation in (0, results):
+            eb.reject = True
             err_mesg = "File extension (%s) mismatch"
             err_mesg = err_mesg % p.extension
             eb.warning(err_mesg)

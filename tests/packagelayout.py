@@ -29,8 +29,11 @@ def test_targetedapplications(eb, package_contents={},
     install.rdf file are legit and that any associated files (I'm
     looking at you, SeaMonkey) are where they need to be."""
     
+    print "Validating target application support..."
+    
     # If there isn't an install.rdf, we can't test for SeaMonkey
     # support. Boo hoo.
+    
     if not eb.get_resource("has_install_rdf"):
         return eb
     
@@ -39,26 +42,28 @@ def test_targetedapplications(eb, package_contents={},
     
     # Search through the install.rdf document for the SeaMonkey
     # GUID string.
-    predicate = URIRef("http://www.mozilla.org/2004/em-rdf#targetApplication")
+    ta_predicate = \
+        URIRef("http://www.mozilla.org/2004/em-rdf#targetApplication")
+    ta_guid_predicate = \
+        URIRef("http://www.mozilla.org/2004/em-rdf#id")
     
-    for o in rdfDoc.subjects(None, predicate):
-        print o
-        if o == "{92650c4d-4b8e-4d2a-b7eb-24ecf4f6b63a}":
-            print "We found some SeaMonkey action."
+    # Isolate all of the bnodes referring to target applications
+    for ta in rdfDoc.objects(None, ta_predicate):
+        
+        # Get the GUID from the target application
+        
+        for ta_guid in rdfDoc.objects(ta, ta_guid_predicate):
             
-            
-            
+            if ta_guid == "{92650c4d-4b8e-4d2a-b7eb-24ecf4f6b63a}":
+                print "We found some SeaMonkey."
+                
+                # Time to test for some install.js
+                if not "install.js" in package_contents:
+                    eb.error("SeaMonkey support found, but missing install.js.")
+                    eb.reject = True
+                
+                break
     
-    
-def test_opensearch_updateurl(eb, package_contents={},
-                              xpi_package=None):
-    "Makes sure that a search provider doesn't have an updateURL"
-    
-    xml = eb.get_resource("xml")
-    
-    updateURLs = xml.getElementsByTagName("updateURL")
-    if updateURLs:
-        eb.error("<updateURL> elements are currently disallowed.")
     
     return eb
     
@@ -73,7 +78,6 @@ def test_dictionary_layout(eb, package_contents={}, xpi_package=None):
     # Define rules for the structure.
     mandatory_files = [
         "install.rdf",
-        "dictionaries/",
         "dictionaries/*.aff",
         "dictionaries/*.dic"]
     whitelisted_files = [
@@ -110,11 +114,16 @@ def test_dictionary_layout(eb, package_contents={}, xpi_package=None):
         # Otherwise, report an error.
         eb.error("Unknown file found in dictionary (%s)" % file_)
     
+    # If there's anything left over, it means there's files missing
+    if mandatory_files:
+        eb.reject = True # Rejection worthy
+        for mfile in mandatory_files:
+            eb.error("%s missing from dictionary." % mfile)
+    
     return eb
-
 
 # Register the tests with the decorator.
 decorator.register_test(1, test_blacklisted_files)
 decorator.register_test(1, test_dictionary_layout, 3) # dictionaries
-decorator.register_test(2, test_targetedapplications)
+decorator.register_test(2, test_targetedapplications, 3)
 

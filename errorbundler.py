@@ -11,6 +11,7 @@ class ErrorBundle:
         
         self.detected_type = 0
         self.resources = {}
+        self.reject = False
         
     def error(self, error, description=''):
         "Stores an error message for the validation process"
@@ -73,6 +74,10 @@ class ErrorBundle:
                 print "Error: %s" % error["message"]
             for warning in self.warnings:
                 print "Warning: %s" % warning["message"]
+            
+            # Awwww... have some self esteem!
+            if self.reject:
+                print "Extension Rejected"
             
         else:
             print "All tests succeeded!"
