@@ -6,6 +6,7 @@ from rdflib import URIRef
 import decorator
 import xpi
 
+@decorator.register_test(1)
 def test_blacklisted_files(eb, package_contents={}, xpi_package=None):
     "Detects blacklisted files and extensions."
     
@@ -21,8 +22,8 @@ def test_blacklisted_files(eb, package_contents={}, xpi_package=None):
         if file_["extension"] in blacklisted_extensions:
             eb.warning(pattern % (name, file_["extension"]))
     
-    return eb
 
+@decorator.register_test(2, 3)
 def test_targetedapplications(eb, package_contents={},
                               xpi_package=None):
     """Tests to make sure that the targeted applications in the
@@ -35,7 +36,7 @@ def test_targetedapplications(eb, package_contents={},
     # support. Boo hoo.
     
     if not eb.get_resource("has_install_rdf"):
-        return eb
+        return
     
     rdf = eb.get_resource("install_rdf")
     rdfDoc = rdf.rdf
@@ -64,10 +65,8 @@ def test_targetedapplications(eb, package_contents={},
                 
                 break
     
-    
-    return eb
-    
 
+@decorator.register_test(1, 3)
 def test_dictionary_layout(eb, package_contents={}, xpi_package=None):
     """Ensures that dictionary packages contain the necessary
     components and that there are no other extraneous files lying
@@ -82,6 +81,8 @@ def test_dictionary_layout(eb, package_contents={}, xpi_package=None):
         "dictionaries/*.dic"]
     whitelisted_files = [
         "install.js",
+        "dictionaries/*.aff", # List again because there must >0
+        "dictionaries/*.dic"
         "__MACOSX/*", # I hate them, but there's no way to avoid them.
         "chrome.manifest",
         "chrome/*"]
@@ -102,7 +103,7 @@ def test_dictionary_layout(eb, package_contents={}, xpi_package=None):
         if any(fnmatch.fnmatch(file_, wlfile) for wlfile in
                whitelisted_files):
             continue
-    
+        
         # Is it a directory?
         if file_.endswith("/"):
             continue
@@ -120,10 +121,11 @@ def test_dictionary_layout(eb, package_contents={}, xpi_package=None):
         for mfile in mandatory_files:
             eb.error("%s missing from dictionary." % mfile)
     
-    return eb
-
-# Register the tests with the decorator.
-decorator.register_test(1, test_blacklisted_files)
-decorator.register_test(1, test_dictionary_layout, 3) # dictionaries
-decorator.register_test(2, test_targetedapplications, 3)
+    
+@decorator.register_test(1, 1)
+def test_extension_layout(eb, package_contents={}, xpi_package=None):
+    "Tests the well-formedness of extensions."
+    
+    if not eb.get_resource("has_install_rdf"):
+        eb.error("Extension missing install.rdf.")
 

@@ -7,10 +7,10 @@ import decorator
 import rdf
 import tests.typedetection
 import tests.packagelayout
+import tests.library_blacklist
 from xpi import XPIManager
 from rdf import RDFTester
 from errorbundler import ErrorBundle
-
 
 def main(argv=None):
     "Main function. Handles delegation to other functions"
@@ -18,10 +18,10 @@ def main(argv=None):
         argv = sys.argv
     
     expectations = {"any":0,
-                    "extensions":1,
-                    "themes":2,
-                    "dictionaries":3,
-                    "languagepacks":4,
+                    "extension":1,
+                    "theme":2,
+                    "dictionary":3,
+                    "languagepack":4,
                     "search":5,
                     "multi":1} # A multi extension is an extension
     
@@ -45,10 +45,21 @@ def main(argv=None):
     
     results.print_summary()
     
+    if error_bundle.failed():
+        sys.exit(1)
+    else:
+        sys.exit(0)
+    
 
 def test_package(eb, package, expectation=0):
     "Begins tests for the package."
     
+    types = {0: "Unknown",
+             1: "Extension/Multi-Extension",
+             2: "Theme",
+             3: "Dictionary",
+             4: "Language Pack",
+             5: "Search Provider"}
     
     # Test that the package actually exists. I consider this Tier 0
     # since we may not even be dealing with a real file.
@@ -153,8 +164,8 @@ def test_package(eb, package, expectation=0):
         # that of the expectation and the assumption.
         if not expectation in (0, results):
             eb.reject = True
-            err_mesg = "File extension (%s) mismatch"
-            err_mesg = err_mesg % p.extension
+            err_mesg = "Extension type mismatch (expected %s, found %s)"
+            err_mesg = err_mesg % (types[expectation], types[results])
             eb.warning(err_mesg)
         
         

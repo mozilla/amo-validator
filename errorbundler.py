@@ -1,4 +1,11 @@
 
+types = {0: "Unknown",
+         1: "Extension/Multi-Extension",
+         2: "Theme",
+         3: "Dictionary",
+         4: "Language Pack",
+         5: "Search Provider"}
+
 class ErrorBundle:
     """This class does all sorts of cool things. It gets passed around
     from test to test and collects up all the errors like the candy man
@@ -8,6 +15,7 @@ class ErrorBundle:
     def __init__(self):
         self.errors = []
         self.warnings = []
+        self.infos = []
         
         self.detected_type = 0
         self.resources = {}
@@ -22,6 +30,12 @@ class ErrorBundle:
     def warning(self, warning, description=''):
         "Stores a warning message for the validation process"
         self.warnings.append({"message": warning,
+                              "description": description})
+        return self
+
+    def info(self, info, description=''):
+        "Stores an informational message about the validation"
+        self.infos.append({"message": info,
                               "description": description})
         return self
         
@@ -48,17 +62,11 @@ class ErrorBundle:
         
         self.resources[name] = resource
         
-    def print_summary(self):
+    def print_summary(self, verbose=False):
         "Prints a summary of the validation process so far."
         
-        # This is a reverse translation of the various types to their
-        # human-friendly names.
-        types = {0: "Unknown",
-                 1: "Extension/Multi-Extension",
-                 2: "Theme",
-                 3: "Dictionary",
-                 4: "Language Pack",
-                 5: "Search Provider"}
+        # Pull this in from the main.
+        global types
         
         # Make a neat little printout.
         print "Summary:"
@@ -75,11 +83,19 @@ class ErrorBundle:
             for warning in self.warnings:
                 print "Warning: %s" % warning["message"]
             
+            self._print_verbose(verbose)
+            
             # Awwww... have some self esteem!
             if self.reject:
                 print "Extension Rejected"
             
         else:
             print "All tests succeeded!"
+            self._print_verbose(verbose)
         
+    def _print_verbose(self, verbose):
+        
+        if self.infos and verbose:
+            for info in self.infos:
+                print "Notice: %s" % info["message"]
         
