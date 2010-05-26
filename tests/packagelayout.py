@@ -6,7 +6,7 @@ from rdflib import URIRef
 import decorator
 import xpi
 
-@decorator.register_test(1)
+@decorator.register_test(tier=1)
 def test_blacklisted_files(eb, package_contents={}, xpi_package=None):
     "Detects blacklisted files and extensions."
     
@@ -23,7 +23,7 @@ def test_blacklisted_files(eb, package_contents={}, xpi_package=None):
             eb.warning(pattern % (name, file_["extension"]))
     
 
-@decorator.register_test(2, 3)
+@decorator.register_test(tier=2, expected_type=3)
 def test_targetedapplications(eb, package_contents={},
                               xpi_package=None):
     """Tests to make sure that the targeted applications in the
@@ -66,7 +66,7 @@ def test_targetedapplications(eb, package_contents={},
                 break
     
 
-@decorator.register_test(1, 3)
+@decorator.register_test(tier=1, expected_type=3)
 def test_dictionary_layout(eb, package_contents={}, xpi_package=None):
     """Ensures that dictionary packages contain the necessary
     components and that there are no other extraneous files lying
@@ -122,7 +122,7 @@ def test_dictionary_layout(eb, package_contents={}, xpi_package=None):
             eb.error("%s missing from dictionary." % mfile)
     
     
-@decorator.register_test(1, 1)
+@decorator.register_test(tier=1, expected_type=1)
 def test_extension_layout(eb, package_contents={}, xpi_package=None):
     "Tests the well-formedness of extensions."
     

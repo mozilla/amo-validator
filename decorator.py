@@ -8,17 +8,13 @@ def register_test(tier=1, expected_type=None):
     
     def wrap(f):
         
-        global test_tiers
-        
-        if not tier in test_tiers:
+        if tier not in test_tiers:
             test_tiers[tier] = []
         
         test_tiers[tier].append({"test": f,
                                  "type": expected_type})
         
-        def wrapped_f(*args):
-            f(*args)
-        return wrapped_f
+        return f
         
     return wrap
     

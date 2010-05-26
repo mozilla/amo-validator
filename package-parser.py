@@ -8,9 +8,11 @@ import rdf
 import tests.typedetection
 import tests.packagelayout
 import tests.library_blacklist
+import tests.conduit
 from xpi import XPIManager
 from rdf import RDFTester
 from errorbundler import ErrorBundle
+
 
 def main(argv=None):
     "Main function. Handles delegation to other functions"
@@ -155,10 +157,11 @@ def test_package(eb, package, expectation=0):
         
         # Load up the results of the type detection
         results = tests.typedetection.detect_type(install_rdf, p)
-        eb.set_type(results)
         
         if results is None:
             return eb.error("Unable to determine addon type")
+        else:
+            eb.set_type(results)
         
         # Compare the results of the low-level type detection to
         # that of the expectation and the assumption.

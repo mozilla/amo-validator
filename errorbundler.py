@@ -1,11 +1,4 @@
 
-types = {0: "Unknown",
-         1: "Extension/Multi-Extension",
-         2: "Theme",
-         3: "Dictionary",
-         4: "Language Pack",
-         5: "Search Provider"}
-
 class ErrorBundle:
     """This class does all sorts of cool things. It gets passed around
     from test to test and collects up all the errors like the candy man
@@ -65,8 +58,12 @@ class ErrorBundle:
     def print_summary(self, verbose=False):
         "Prints a summary of the validation process so far."
         
-        # Pull this in from the main.
-        global types
+        types = {0: "Unknown",
+                 1: "Extension/Multi-Extension",
+                 2: "Theme",
+                 3: "Dictionary",
+                 4: "Language Pack",
+                 5: "Search Provider"}
         
         # Make a neat little printout.
         print "Summary:"
