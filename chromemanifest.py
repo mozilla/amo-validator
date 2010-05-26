@@ -14,7 +14,7 @@ class ChromeManifest:
         for line in self.lines:
             
             # Skip weird lines.
-            if len(line) < 5:
+            if len(line) < 5 or line.startswith("#"):
                 continue
             
             triple = line.split("\t")

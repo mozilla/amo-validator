@@ -8,14 +8,18 @@ def register_test(tier=1, expected_type=None):
     
     def wrap(f):
         
+        # Make sure the tier exists before we add to it
         if tier not in test_tiers:
             test_tiers[tier] = []
         
+        # Add a test object to the test's tier
         test_tiers[tier].append({"test": f,
                                  "type": expected_type})
         
+        # Return the function to be run
         return f
         
+    # Return the wrapping function (for use as a decorator)
     return wrap
     
     

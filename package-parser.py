@@ -13,7 +13,6 @@ from xpi import XPIManager
 from rdf import RDFTester
 from errorbundler import ErrorBundle
 
-
 def main(argv=None):
     "Main function. Handles delegation to other functions"
     if argv is None:

@@ -18,7 +18,7 @@ The expected type should be one of the following values:
 -	any : Accepts any extension
 -	extension : Accepts only extensions
 -	theme : Accepts only themes
--	dictionarie : Accepts only dictionaries
+-	dictionary : Accepts only dictionaries
 -	languagepack : Accepts only language packs
 -	search : Accepts only OpenSearch XML files (unpackaged)
 -	multi : Accepts only multiextension XPI packages
