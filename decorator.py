@@ -1,23 +1,25 @@
 
 # This module is FABULOUS!
 
-test_tiers = {}
+TEST_TIERS = {}
 
-def register_test(tier=1, expected_type=None):
+def register_test(tier=1, expected_type=None, simple=False):
     "Registers tests for the validation flow."
     
-    def wrap(f):
+    def wrap(function):
+        "Wrapper function to decorate registered tests."
         
         # Make sure the tier exists before we add to it
-        if tier not in test_tiers:
-            test_tiers[tier] = []
+        if tier not in TEST_TIERS:
+            TEST_TIERS[tier] = []
         
         # Add a test object to the test's tier
-        test_tiers[tier].append({"test": f,
-                                 "type": expected_type})
+        TEST_TIERS[tier].append({"test": function,
+                                 "type": expected_type,
+                                 "simple": simple})
         
         # Return the function to be run
-        return f
+        return function
         
     # Return the wrapping function (for use as a decorator)
     return wrap
@@ -25,11 +27,16 @@ def register_test(tier=1, expected_type=None):
     
 def get_tiers():
     "Returns a list of tier values."
-    return test_tiers.keys()
+    return TEST_TIERS.keys()
 
-def run_tests(tier, type_=None):
+def get_tests(tier, type_=None):
     "Returns a generator of test functions."
-
+    
+    # List of acceptable types
+    types = (None, 0, type_)
+    
+    # Current Tier
+    ctier = TEST_TIERS[tier]
+    
     # List comprehension to sort and filter and the like.
-    return (test["test"] for test in test_tiers[tier] if
-            test["type"] in (None, 0, type_))
+    return (test for test in ctier if test["type"] in types)

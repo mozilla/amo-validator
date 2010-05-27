@@ -1,13 +1,9 @@
 import fnmatch
 
-import rdflib
-from rdflib import URIRef
-
 import decorator
-import xpi
 
 @decorator.register_test(tier=1)
-def test_blacklisted_files(eb, package_contents={}, xpi_package=None):
+def test_blacklisted_files(err, package_contents=None, xpi_package=None):
     "Detects blacklisted files and extensions."
     
     print "Testing package against extension blacklist..."
@@ -20,11 +16,11 @@ def test_blacklisted_files(eb, package_contents={}, xpi_package=None):
     for name, file_ in package_contents.items():
         # Simple test to ensure that the extension isn't blacklisted
         if file_["extension"] in blacklisted_extensions:
-            eb.warning(pattern % (name, file_["extension"]))
+            err.warning(pattern % (name, file_["extension"]))
     
 
 @decorator.register_test(tier=2, expected_type=3)
-def test_targetedapplications(eb, package_contents={},
+def test_targetedapplications(err, package_contents=None,
                               xpi_package=None):
     """Tests to make sure that the targeted applications in the
     install.rdf file are legit and that any associated files (I'm
@@ -35,39 +31,37 @@ def test_targetedapplications(eb, package_contents={},
     # If there isn't an install.rdf, we can't test for SeaMonkey
     # support. Boo hoo.
     
-    if not eb.get_resource("has_install_rdf"):
+    if not err.get_resource("has_install_rdf"):
         return
     
-    rdf = eb.get_resource("install_rdf")
-    rdfDoc = rdf.rdf
+    install = err.get_resource("install_rdf")
     
     # Search through the install.rdf document for the SeaMonkey
     # GUID string.
-    ta_predicate = \
-        URIRef("http://www.mozilla.org/2004/em-rdf#targetApplication")
-    ta_guid_predicate = \
-        URIRef("http://www.mozilla.org/2004/em-rdf#id")
+    ta_predicate = install.uri("targetApplication")
+    ta_guid_predicate = install.uri("id")
     
     # Isolate all of the bnodes referring to target applications
-    for ta in rdfDoc.objects(None, ta_predicate):
+    for target_app in install.get_objects(None, ta_predicate):
         
         # Get the GUID from the target application
         
-        for ta_guid in rdfDoc.objects(ta, ta_guid_predicate):
+        for ta_guid in install.get_objects(target_app,
+                                           ta_guid_predicate):
             
             if ta_guid == "{92650c4d-4b8e-4d2a-b7eb-24ecf4f6b63a}":
                 print "We found some SeaMonkey."
                 
                 # Time to test for some install.js
                 if not "install.js" in package_contents:
-                    eb.error("SeaMonkey support found, but missing install.js.")
-                    eb.reject = True
+                    err.error("Missing install.js for SeaMonkey.")
+                    err.reject = True
                 
                 break
     
 
 @decorator.register_test(tier=1, expected_type=3)
-def test_dictionary_layout(eb, package_contents={}, xpi_package=None):
+def test_dictionary_layout(err, package_contents=None, xpi_package=None):
     """Ensures that dictionary packages contain the necessary
     components and that there are no other extraneous files lying
     around."""
@@ -113,19 +107,19 @@ def test_dictionary_layout(eb, package_contents={}, xpi_package=None):
             continue
         
         # Otherwise, report an error.
-        eb.error("Unknown file found in dictionary (%s)" % file_)
+        err.error("Unknown file found in dictionary (%s)" % file_)
     
     # If there's anything left over, it means there's files missing
     if mandatory_files:
-        eb.reject = True # Rejection worthy
+        err.reject = True # Rejection worthy
         for mfile in mandatory_files:
-            eb.error("%s missing from dictionary." % mfile)
+            err.error("%s missing from dictionary." % mfile)
     
     
-@decorator.register_test(tier=1, expected_type=1)
-def test_extension_layout(eb, package_contents={}, xpi_package=None):
+@decorator.register_test(tier=1, expected_type=1, simple=True)
+def test_extension_layout(err):
     "Tests the well-formedness of extensions."
     
-    if not eb.get_resource("has_install_rdf"):
-        eb.error("Extension missing install.rdf.")
+    if not err.get_resource("has_install_rdf"):
+        err.error("Extension missing install.rdf.")
 

@@ -32,9 +32,9 @@ class ErrorBundle:
                               "description": description})
         return self
         
-    def set_type(self, type):
+    def set_type(self, type_):
         "Stores the type of addon we're scanning"
-        self.detected_type = type
+        self.detected_type = type_
     
     def failed(self):
         """Returns a boolean value describing whether the validation
@@ -91,6 +91,7 @@ class ErrorBundle:
             self._print_verbose(verbose)
         
     def _print_verbose(self, verbose):
+        "Prints info code to help prevent code duplication"
         
         if self.infos and verbose:
             for info in self.infos:

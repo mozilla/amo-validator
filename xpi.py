@@ -16,7 +16,7 @@ class XPIManager:
         
         # Try opening the XPI as a zip.
         try:
-            zf = ZipFile(package)
+            zip_package = ZipFile(package)
             
         except zipfile.BadZipfile:
             # The XPI is corrupt or invalid.
@@ -32,7 +32,14 @@ class XPIManager:
             raise
         
         # Save the reference to the XPI to memory
-        self.zf = zf
+        self.zf = zip_package
+        
+    def test(self):
+        "Tests the validity and non-corruptness of the zip."
+        
+        # This guy tests the hashes of the content.
+        output = self.zf.testzip()
+        return output is None
         
         
     def get_file_data(self):
@@ -44,15 +51,15 @@ class XPIManager:
         out_files = {}
         
         # Iterate through each file in the XPI.
-        for file in files:
+        for file_ in files:
             
-            file_doc = {"name": file.filename,
-                        "size": file.file_size,
-                        "name_lower": file.filename.lower()}
+            file_doc = {"name": file_.filename,
+                        "size": file_.file_size,
+                        "name_lower": file_.filename.lower()}
             
             file_doc["extension"] = file_doc["name_lower"].split(".").pop()
             
-            out_files[file.filename] = file_doc
+            out_files[file_.filename] = file_doc
         
         return out_files
         

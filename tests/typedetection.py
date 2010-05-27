@@ -1,12 +1,5 @@
 from xml.dom.minidom import parse
 
-import rdflib
-from rdflib import URIRef
-
-import xpi
-import rdf
-
-
 def detect_type(install_rdf=None, xpi_package=None):
     """Determines the type of addon being validated based on
     install.rdf, file extension, and other properties."""
@@ -32,19 +25,13 @@ def detect_type(install_rdf=None, xpi_package=None):
         # Otherwise, we're out of luck :(
         else:
             return None
-        
     
-    # Grab a local reference to the RDF document
-    rdfDoc = install_rdf.rdf
     
     # Attempt to locate the <em:type> node in the RDF doc.
-    type_uri = URIRef('http://www.mozilla.org/2004/em-rdf#type')
-    type_values = rdfDoc.objects(None, type_uri)
+    type_uri = install_rdf.uri("type")
+    type_ = install_rdf.get_object(None, type_uri)
     
-    # Pull out one of the types
-    types = list(type_values)
-    
-    if types:
+    if type_ is not None:
         type_ = types[0]
         
         if type_ in translated_types:
@@ -97,7 +84,7 @@ def detect_opensearch(package):
     # Parse the file.
     try:
         print "Attempting to parse..."
-        x = parse(package)
+        srch_prov = parse(package)
     except:
         # Don't worry that it's a catch-all exception handler; it failed
         # and that's all that matters.
@@ -108,24 +95,24 @@ def detect_opensearch(package):
     print "Testing OpenSearch for well-formedness..."
     
     # Make sure that the root element is OpenSearchDescription.
-    if x.documentElement.tagName != "OpenSearchDescription":
+    if srch_prov.documentElement.tagName != "OpenSearchDescription":
         return {"failure": True,
                 "decided": False, # Sketch, but we don't really know.
                 "error": "Provider is not a valid OpenSearch provider"}
     
     # Make sure that there is exactly one ShortName.
-    if not x.documentElement.getElementsByTagName("ShortName"):
+    if not srch_prov.documentElement.getElementsByTagName("ShortName"):
         return {"failure": True,
                 "error": "Missing <ShortName> element"}
     
     
     # Make sure that there is exactly one Description.
-    if not x.documentElement.getElementsByTagName("Description"):
+    if not srch_prov.documentElement.getElementsByTagName("Description"):
         return {"failure": True,
                 "error": "Missing <Description> element"}
     
     # Grab the URLs and make sure that there is at least one.
-    urls = x.documentElement.getElementsByTagName("Url")
+    urls = srch_prov.documentElement.getElementsByTagName("Url")
     if not urls:
         return {"failure": True,
                 "error": "Missing <Url /> elements"}
@@ -187,7 +174,7 @@ def detect_opensearch(package):
     
     # Make sure there are no updateURL elements
     print "Testing for banned elements..."
-    if x.getElementsByTagName("updateURL"):
+    if srch_prov.getElementsByTagName("updateURL"):
         return {"failure": True,
                 "error": "<updateURL> elements are banned from search"}
     

@@ -40,3 +40,21 @@ class ChromeManifest:
             return triple
         
         return None
+        
+    def get_objects(self, subject=None, predicate=None):
+        """Returns a list of objects that correspond to the specified
+        subjects and predicates"""
+        
+        output = []
+        
+        for triple in self.triples:
+            
+            # Filter out non-matches
+            if (subject and triple["subject"] != subject) or \
+               (predicate and triple["predicate"] != predicate):
+                continue
+                
+            output.append(triple["object"])
+        
+        return output
+        
