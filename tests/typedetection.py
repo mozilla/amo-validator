@@ -1,6 +1,6 @@
 from xml.dom.minidom import parse
 
-def detect_type(install_rdf=None, xpi_package=None):
+def detect_type(err, install_rdf=None, xpi_package=None):
     """Determines the type of addon being validated based on
     install.rdf, file extension, and other properties."""
     

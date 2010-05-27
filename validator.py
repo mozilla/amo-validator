@@ -9,6 +9,7 @@ import tests.packagelayout
 import tests.library_blacklist
 import tests.conduit
 import tests.langpack
+import tests.themes
 from xpi import XPIManager
 from rdf import RDFTester
 from errorbundler import ErrorBundle
@@ -34,7 +35,7 @@ def main(argv=None):
             expectation = expectations[expectation]
         else:
             # Inform the user that their command is broke and move on
-            print "We could not find the expected addon type."
+            err.info("We could not find the expected addon type.")
             expectation = 0
             
     else:
@@ -68,15 +69,11 @@ def test_package(err, package, expectation=0):
         err.reject = True
         return err.error("The package could not be found")
     
-    print "Beginning test suite..."
-    
     package_extension = os.path.splitext(package)[1]
     package_extension = package_extension.lower()
     
     # Test for OpenSearch providers
     if package_extension == ".xml":
-        
-        print "Detected possible OpenSearch provider..."
         
         expected_search_provider = expectation in (0, 5)
         
@@ -105,7 +102,7 @@ def test_package(err, package, expectation=0):
             
         elif expected_search_provider:
             err.set_type(5)
-            print "OpenSearch provider confirmed."
+            err.info("OpenSearch provider confirmed.")
             return err
             
     
@@ -162,7 +159,9 @@ def test_package(err, package, expectation=0):
         err.save_resource("install_rdf", install_rdf)
         
         # Load up the results of the type detection
-        results = tests.typedetection.detect_type(install_rdf, package)
+        results = tests.typedetection.detect_type(err,
+                                                  install_rdf,
+                                                  package)
         
         if results is None:
             return err.error("Unable to determine addon type")

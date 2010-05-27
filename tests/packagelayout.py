@@ -79,8 +79,6 @@ def test_dictionary_layout(err, package_contents=None, xpi_package=None):
     components and that there are no other extraneous files lying
     around."""
     
-    print "Testing dictionary package layout..."
-    
     # Define rules for the structure.
     mandatory_files = [
         "install.rdf",
@@ -93,44 +91,11 @@ def test_dictionary_layout(err, package_contents=None, xpi_package=None):
         "__MACOSX/*", # I hate them, but there's no way to avoid them.
         "chrome.manifest",
         "chrome/*"]
-    whitelisted_extensions = ("txt",)
-    
-    for file_ in package_contents:
-        # Remove the file from the mandatory file list.
-        #if file_ in mandatory_files:
-        mfile_list = \
-             [mf for mf in mandatory_files if fnmatch.fnmatch(file_, mf)]
-        if mfile_list:
-            # Isolate the mandatory file pattern and remove it.
-            mfile = mfile_list[0]
-            mandatory_files.remove(mfile)
-            continue
-        
-        # Remove the file from the whitelist.
-        if any(fnmatch.fnmatch(file_, wlfile) for wlfile in
-               whitelisted_files):
-            continue
-        
-        # Is it a directory?
-        if file_.endswith("/"):
-            continue
+    whitelisted_extensions = ("txt",)    
 
-        # Is the file a sketch file?
-        if test_unknown_file(err, file_):
-            continue
-        
-        # Is it a whitelisted file type?
-        if file_.split(".").pop() in whitelisted_extensions:
-            continue
-        
-        # Otherwise, report an error.
-        err.error("Unknown file found in dictionary (%s)" % file_)
-    
-    # If there's anything left over, it means there's files missing
-    if mandatory_files:
-        err.reject = True # Rejection worthy
-        for mfile in mandatory_files:
-            err.error("%s missing from dictionary." % mfile)
+    test_layout(err, package_contents, mandatory_files,
+                whitelisted_files, whitelisted_extensions,
+                "dictionary")
     
     
 @decorator.register_test(tier=1, expected_type=1, simple=True)
@@ -147,7 +112,28 @@ def test_langpack_layout(err, package_contents=None, xpi_package=None):
     need and nothing more. Otherwise, somebody could sneak something
     sneaking into them."""
 
-    print "Testing language pack layout..."
+    # Define rules for the structure.
+    mandatory_files = [
+        "install.rdf",
+        "chrome/*.jar",
+        "chrome.manifest"]
+    whitelisted_files = [
+        "chrome/*.jar",
+        "__MACOSX/*" # I hate them, but there's no way to avoid them.
+        ]
+    whitelisted_extensions = ("manifest", "rdf", "jar", "dtd",
+                              "properties", "xhtml", "css")
+    
+    test_layout(err, package_contents, mandatory_files,
+                whitelisted_files, whitelisted_extensions,
+                "language pack")
+
+
+@decorator.register_test(tier=1, expected_type=2)
+def test_theme_layout(err, package_contents=None, xpi_package=None):
+    """Ensures that themes only contain exactly what they need and
+    nothing more. Otherwise, somebody could sneak something sneaking
+    into them."""
 
     # Define rules for the structure.
     mandatory_files = [
@@ -158,28 +144,33 @@ def test_langpack_layout(err, package_contents=None, xpi_package=None):
         "chrome/*.jar",
         "__MACOSX/*" # I hate them, but there's no way to avoid them.
         ]
-    whitelisted_extensions = ("manifest",
-                              "rdf",
-                              "jar",
-                              "dtd",
-                              "properties",
-                              "xhtml",
-                              "css")
+    whitelisted_extensions = ("manifest", "rdf", "txt", "jar",
+                              "png", "gif", "jpg")
 
+    test_layout(err, package_contents, mandatory_files,
+                whitelisted_files, whitelisted_extensions,
+                "theme")
+
+def test_layout(err, package_contents, mandatory, whitelisted,
+                white_extensions, pack_type):
+    """Tests the layout of a package. Pass in the various types of files
+    and their levels of requirement and this guy will figure out which
+    files should and should not be in the package."""
+    
     for file_ in package_contents:
         # Remove the file from the mandatory file list.
         #if file_ in mandatory_files:
         mfile_list = \
-             [mf for mf in mandatory_files if fnmatch.fnmatch(file_, mf)]
+             [mf for mf in mandatory if fnmatch.fnmatch(file_, mf)]
         if mfile_list:
             # Isolate the mandatory file pattern and remove it.
             mfile = mfile_list[0]
-            mandatory_files.remove(mfile)
+            mandatory.remove(mfile)
             continue
 
         # Remove the file from the whitelist.
         if any(fnmatch.fnmatch(file_, wlfile) for wlfile in
-               whitelisted_files):
+               whitelisted):
             continue
 
         # Is it a directory?
@@ -191,14 +182,15 @@ def test_langpack_layout(err, package_contents=None, xpi_package=None):
             continue
 
         # Is it a whitelisted file type?
-        if file_.split(".").pop() in whitelisted_extensions:
+        if file_.split(".").pop() in white_extensions:
             continue
 
         # Otherwise, report an error.
-        err.error("Unknown file found in language pack (%s)" % file_)
+        err.error("Unknown file found in %s (%s)" % (pack_type, file_))
 
     # If there's anything left over, it means there's files missing
-    if mandatory_files:
+    if mandatory:
         err.reject = True # Rejection worthy
-        for mfile in mandatory_files:
-            err.error("%s missing from language pack." % mfile)
+        for mfile in mandatory:
+            err.error("%s missing from %s." % (pack_type, mfile))
+    
