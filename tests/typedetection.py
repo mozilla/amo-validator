@@ -32,8 +32,6 @@ def detect_type(install_rdf=None, xpi_package=None):
     type_ = install_rdf.get_object(None, type_uri)
     
     if type_ is not None:
-        type_ = types[0]
-        
         if type_ in translated_types:
             print "Found em:type in install.rdf"
             

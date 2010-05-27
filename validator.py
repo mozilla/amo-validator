@@ -8,6 +8,7 @@ import tests.typedetection
 import tests.packagelayout
 import tests.library_blacklist
 import tests.conduit
+import tests.langpack
 from xpi import XPIManager
 from rdf import RDFTester
 from errorbundler import ErrorBundle

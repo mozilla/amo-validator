@@ -1,4 +1,6 @@
 
+import re
+
 class ChromeManifest:
     """This class enables convenient reading and searching of
     chrome.manifest files."""
@@ -11,13 +13,15 @@ class ChromeManifest:
         
         # Extract the data from the triples in the maniffest
         triples = []
+        
         for line in self.lines:
             
             # Skip weird lines.
             if len(line) < 5 or line.startswith("#"):
                 continue
             
-            triple = line.split("\t")
+            triple = line.split(None, 2)
+            triple = [singlet.strip() for singlet in triple]
             triples.append({"subject": triple[0],
                             "predicate": triple[1],
                             "object": triple[2]})

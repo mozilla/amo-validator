@@ -63,5 +63,10 @@ class XPIManager:
         
         return out_files
         
+    def read(self, filename):
+        "Reads a file from the archive and returns a string."
         
+        data = self.zf.read(filename)
+        
+        return data
         

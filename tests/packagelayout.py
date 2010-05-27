@@ -2,6 +2,19 @@ import fnmatch
 
 import decorator
 
+
+def test_unknown_file(err, filename):
+    "Tests some sketchy files that require silly code."
+    
+    # Extract the file path and the name from the filename
+    path = filename.split("/")
+    name = path.pop()
+    
+    if name == "chromelist.txt":
+        err.info("The extension contains a deprecated file (%s)" % filename)
+        return True
+
+
 @decorator.register_test(tier=1)
 def test_blacklisted_files(err, package_contents=None, xpi_package=None):
     "Detects blacklisted files and extensions."
@@ -58,7 +71,7 @@ def test_targetedapplications(err, package_contents=None,
                     err.reject = True
                 
                 break
-    
+
 
 @decorator.register_test(tier=1, expected_type=3)
 def test_dictionary_layout(err, package_contents=None, xpi_package=None):
@@ -101,6 +114,10 @@ def test_dictionary_layout(err, package_contents=None, xpi_package=None):
         # Is it a directory?
         if file_.endswith("/"):
             continue
+
+        # Is the file a sketch file?
+        if test_unknown_file(err, file_):
+            continue
         
         # Is it a whitelisted file type?
         if file_.split(".").pop() in whitelisted_extensions:
@@ -123,3 +140,65 @@ def test_extension_layout(err):
     if not err.get_resource("has_install_rdf"):
         err.error("Extension missing install.rdf.")
 
+
+@decorator.register_test(tier=1, expected_type=4)
+def test_langpack_layout(err, package_contents=None, xpi_package=None):
+    """Ensures that language packs only contain exactly what they
+    need and nothing more. Otherwise, somebody could sneak something
+    sneaking into them."""
+
+    print "Testing language pack layout..."
+
+    # Define rules for the structure.
+    mandatory_files = [
+        "install.rdf",
+        "chrome/*.jar",
+        "chrome.manifest"]
+    whitelisted_files = [
+        "chrome/*.jar",
+        "__MACOSX/*" # I hate them, but there's no way to avoid them.
+        ]
+    whitelisted_extensions = ("manifest",
+                              "rdf",
+                              "jar",
+                              "dtd",
+                              "properties",
+                              "xhtml",
+                              "css")
+
+    for file_ in package_contents:
+        # Remove the file from the mandatory file list.
+        #if file_ in mandatory_files:
+        mfile_list = \
+             [mf for mf in mandatory_files if fnmatch.fnmatch(file_, mf)]
+        if mfile_list:
+            # Isolate the mandatory file pattern and remove it.
+            mfile = mfile_list[0]
+            mandatory_files.remove(mfile)
+            continue
+
+        # Remove the file from the whitelist.
+        if any(fnmatch.fnmatch(file_, wlfile) for wlfile in
+               whitelisted_files):
+            continue
+
+        # Is it a directory?
+        if file_.endswith("/"):
+            continue
+
+        # Is the file a sketch file?
+        if test_unknown_file(err, file_):
+            continue
+
+        # Is it a whitelisted file type?
+        if file_.split(".").pop() in whitelisted_extensions:
+            continue
+
+        # Otherwise, report an error.
+        err.error("Unknown file found in language pack (%s)" % file_)
+
+    # If there's anything left over, it means there's files missing
+    if mandatory_files:
+        err.reject = True # Rejection worthy
+        for mfile in mandatory_files:
+            err.error("%s missing from language pack." % mfile)
