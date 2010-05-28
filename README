@@ -11,7 +11,7 @@ Running
 Run the validator as follows:
 
 python package-parser.py <path to xpi> [-t <expected type>]
-	[-o <output type>] [-v] [--file <output file>]
+	[-o <output type>] [-v] [--file <output file>] [--boring]
 
 The path to the XPI should point to an XPI file.
 
@@ -60,6 +60,13 @@ Output File:
 Specifying an output file with the "--file" flag captures the output of
 the analysis and stores it to the file specified. Specifying this
 option will not produce any output to the command line.
+
+When outputting to a file, Boring Mode is automatically activated.
+
+
+Boring Mode:
+
+Boring mode, when activated, doesn't print colors to the terminal. 
 
 
 Output

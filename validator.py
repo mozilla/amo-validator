@@ -56,6 +56,11 @@ def main():
                         help="""Specifying a path will write the output
                         of the analysis to a file rather than to the
                         screen.""")
+    parser.add_argument("--boring",
+                        action="store_const",
+                        const=True,
+                        help="""Activating this flag will remove color
+                        support from the terminal.""")
     
     args = parser.parse_args()
     
@@ -67,7 +72,8 @@ def main():
     
     # Print the output of the tests based on the requested format.
     if args.output == "text":
-        results.print_summary(args.verbose)
+        results.print_summary(args.verbose,
+            not args.file == sys.stdout or args.boring)
     elif args.output == "json":
         results.print_json()
     

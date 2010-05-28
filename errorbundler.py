@@ -1,4 +1,5 @@
 import sys
+import re
 
 import curses
 import json
@@ -112,7 +113,7 @@ class ErrorBundle:
         
         # Output the JSON.
         json_output = json.dumps(output)
-        self.pretty_print(json_output)
+        self.pretty_print(json_output, True)
         
     def colorize_text(self, text):
         """Adds escape sequences to colorize text and make it
@@ -141,6 +142,10 @@ class ErrorBundle:
         # Add color to the terminal.
         if not no_color:
             text = self.colorize_text(text)
+        else:
+            pattern = re.compile("\<\<[A-Z]*?\>\>")
+            text = pattern.sub("", text)
+            
         
         text += "\n"
         
@@ -150,7 +155,7 @@ class ErrorBundle:
             sys.stdout(text)
         
     
-    def print_summary(self, verbose=False):
+    def print_summary(self, verbose=False, no_color=False):
         "Prints a summary of the validation process so far."
         
         
@@ -164,36 +169,36 @@ class ErrorBundle:
         detected_type = types[self.detected_type]
         
         # Make a neat little printout.
-        self.pretty_print("\n<<GREEN>>Summary:") # Line break!
+        self.pretty_print("\n<<GREEN>>Summary:", no_color) # Line break!
         self.pretty_print("-" * 30)
-        self.pretty_print("Detected type: <<BLUE>>%s" % detected_type)
+        self.pretty_print("Detected type: <<BLUE>>%s" % detected_type, no_color)
         self.pretty_print("-" * 30)
         
         if self.failed():
-            self.pretty_print("<<BLUE>>Test failed! Errors:")
+            self.pretty_print("<<BLUE>>Test failed! Errors:", no_color)
             
             # Print out all the errors:
             for error in self.errors:
-                self.pretty_print("<<RED>>Error:<<NORMAL>> %s" % error["message"])
+                self.pretty_print("<<RED>>Error:<<NORMAL>> %s" % error["message"], no_color)
             for warning in self.warnings:
-                self.pretty_print("<<YELLOW>>Warning:<<NORMAL>> %s" % warning["message"])
+                self.pretty_print("<<YELLOW>>Warning:<<NORMAL>> %s" % warning["message"], no_color)
             
-            self._print_verbose(verbose)
+            self._print_verbose(verbose, no_color)
             
             # Awwww... have some self esteem!
             if self.reject:
                 self.pretty_print("Extension Rejected")
             
         else:
-            self.pretty_print("<<GREEN>>All tests succeeded!")
-            self._print_verbose(verbose)
+            self.pretty_print("<<GREEN>>All tests succeeded!", no_color)
+            self._print_verbose(verbose, no_color)
             
         self.pretty_print("\n")
         
-    def _print_verbose(self, verbose):
+    def _print_verbose(self, verbose, no_color):
         "Prints info code to help prevent code duplication"
         
         if self.infos and verbose:
             for info in self.infos:
-                self.pretty_print("<<WHITE>>Notice:<<NORMAL>> %s" % info["message"])
+                self.pretty_print("<<WHITE>>Notice:<<NORMAL>> %s" % info["message"], no_color)
         
