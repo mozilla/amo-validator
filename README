@@ -1,7 +1,7 @@
 addons.mozilla.org Validator
 ----------------------------------------
 
-This validator is a proposed replacement for the current addon
+This validator is a proposed replacement for the current add-on
 validator available at addons.mozilla.org. It is written entirely in
 python.
 
@@ -10,12 +10,16 @@ Running
 
 Run the validator as follows:
 
-python package-parser.py <path to xpi> [<expected type>]
+python package-parser.py <path to xpi> [-t <expected type>] [-o <output type>] [-v]
 
 The path to the XPI should point to an XPI file.
+
+
+Expected Type:
+
 The expected type should be one of the following values:
 
--	any : Accepts any extension
+-	any (default) : Accepts any extension
 -	extension : Accepts only extensions
 -	theme : Accepts only themes
 -	dictionary : Accepts only dictionaries
@@ -26,3 +30,69 @@ The expected type should be one of the following values:
 Specifying an expected type will throw an error if the validator
 does not detect that particular type when scanning. All addon type
 detection mechanisms are used to make this determination.
+
+
+Output Type:
+
+The output type may be either of the following:
+
+-	text (default) : Outputs a textual summary of the addo-on
+	analysis. Supports verbose mode.
+-	json : Outputs a JSON snippet representing a full summary of the
+	add-on analysis.
+
+
+Verbose Mode:
+
+If the "-v" flag is set, the output will include informational
+messages in addition to errors and warnings. Informational messages
+contain information about the analysis that do not invalidate the
+add-on, but are contextually relevant.
+
+This mode is only supported by certain output types. Output types
+that do not support verbose mode will output informational messages by
+default.
+
+
+Output
+------------
+
+Text Output Mode:
+
+In text output mode ("text"), output is structured in the format of one
+message per line. The messages are prefixed by their priority level
+(i.e.: "Warning: This is the message").
+
+At the head of the text output is a block describing what the
+add-on type was determined to be.
+
+
+JSON Output Mode:
+
+In JSON output mode ("json"), output is formatted as a JSON snippet
+containing all messages. The format for the JSON output is that of the
+sample document below.
+
+{
+	"detected_type": "extension",
+	"success": false,
+	"messages": [
+		{
+			"type": "error",
+			"message": "This is the error message text.",
+			"description": "Description of the error message."
+		},
+		{
+			"type": "warning",
+			"message": "This is the warning message text.",
+			"description": "Description of the warning message."
+		},
+		{
+			"type": "info",
+			"message": "This is the informational message text.",
+			"description": "Description of the info message."
+		}
+	]
+}
+
+
