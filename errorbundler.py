@@ -1,4 +1,6 @@
 
+import json
+
 class ErrorBundle:
     """This class does all sorts of cool things. It gets passed around
     from test to test and collects up all the errors like the candy man
@@ -55,6 +57,33 @@ class ErrorBundle:
         
         self.resources[name] = resource
         
+    def print_json(self):
+        "Prints a JSON summary of the validation operation."
+        
+        output = {"detected_type": self.detected_type,
+                  "success": not self.failed(),
+                  "messages":[]}
+        
+        messages = output["messages"]
+        
+        # Copy messages to the JSON output
+        for error in self.errors:
+            messages.append({"type": "error",
+                             "message": error["message"],
+                             "description": error["description"]})
+        for warning in self.warnings:
+            messages.append({"type": "warning",
+                             "message": warning["message"],
+                             "description": warning["description"]})
+        for info in self.warnings:
+            messages.append({"type": "info",
+                             "message": info["message"],
+                             "description": info["description"]})
+        
+        # Output the JSON
+        print json.dumps(output)
+        
+    
     def print_summary(self, verbose=False):
         "Prints a summary of the validation process so far."
         

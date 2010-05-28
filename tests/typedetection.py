@@ -18,6 +18,10 @@ def detect_type(err, install_rdf=None, xpi_package=None):
         types = {"xpi": 3}
         
         print "There is no install.rdf, so we'll look elsewhere."
+        err.info("install.rdf was not found.",
+                 """The type should be determined by install.rdf if
+                 present. If it isn't, we still need to know the
+                 type.""")
         
         # If we know what the file type might be, return it.
         if xpi_package.extension in types:
@@ -39,7 +43,9 @@ def detect_type(err, install_rdf=None, xpi_package=None):
             return translated_types[type_]
             
     else:
-        print "No em:type element found in install.rdf"    
+        err.info("No em:type element found in install.rdf",
+                 """It isn't always required, but it is the most
+                 reliable method for determining addon type.""") 
     
     # Dictionaries are weird too, they might not have the obligatory
     # em:type. We can assume that if they have a /dictionaries/ folder,
@@ -52,7 +58,7 @@ def detect_type(err, install_rdf=None, xpi_package=None):
     dictionaries = [file_ for file_ in package_contents.keys() if
                     file_.startswith("dictionaries")]
     if dictionaries:
-        print "We found indiciations of a dictionary package."
+        err.info("We found indiciations of a dictionary package.")
         return 3 # Dictionary
     
     
