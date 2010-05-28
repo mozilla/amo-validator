@@ -3,6 +3,7 @@ import os
 
 import zipfile
 
+import argparse
 import decorator
 import tests.typedetection
 import tests.packagelayout
@@ -14,10 +15,8 @@ from xpi import XPIManager
 from rdf import RDFTester
 from errorbundler import ErrorBundle
 
-def main(argv=None):
+def main():
     "Main function. Handles delegation to other functions"
-    if argv is None:
-        argv = sys.argv
     
     expectations = {"any":0,
                     "extension":1,
@@ -27,25 +26,41 @@ def main(argv=None):
                     "search":5,
                     "multi":1} # A multi extension is an extension
     
-    # If we have a specified expectation, adhere to it.
-    if len(argv) > 2:
-        expectation = argv[2] # Grab from the command line
-        if expectation in expectations:
-            # Pair up the expectation with its associated type
-            expectation = expectations[expectation]
-        else:
-            # Inform the user that their command is broke and move on
-            err.info("We could not find the expected addon type.")
-            expectation = 0
-            
-    else:
-        expectation = 0 # Default to any extension type
+    
+    parser = argparse.ArgumentParser(
+        description="Run tests on a Mozilla-type addon.")
+    
+    parser.add_argument("package",
+                        help="The path of the package you're testing")
+    
+    parser.add_argument("-t",
+                        "--type",
+                        default="any",
+                        choices=expectations.keys(),
+                        help="Type of addon you assume you're testing",
+                        required=False)
+    
+    parser.add_argument("-o",
+                        "--output",
+                        default="text",
+                        choices=("text", "json"),
+                        help="The output format that you expect",
+                        required=False)
+    
+    args = parser.parse_args()
+    print args
+    
+    
+    expectation = expectations[args.type]
     
     error_bundle = ErrorBundle()
     
-    results = test_package(error_bundle, argv[1], expectation)
+    results = test_package(error_bundle, args.package, expectation)
     
-    results.print_summary()
+    if args.output == "text":
+        results.print_summary()
+    elif args.output == "json":
+        results.print_json()
     
     if error_bundle.failed():
         sys.exit(1)
