@@ -19,8 +19,6 @@ def test_unknown_file(err, filename):
 def test_blacklisted_files(err, package_contents=None, xpi_package=None):
     "Detects blacklisted files and extensions."
     
-    print "Testing package against extension blacklist..."
-    
     # Detect blacklisted files based on their extension.
     blacklisted_extensions = ("dll", "exe", "dylib", "so",
                               "sh", "class", "swf")
@@ -38,8 +36,6 @@ def test_targetedapplications(err, package_contents=None,
     """Tests to make sure that the targeted applications in the
     install.rdf file are legit and that any associated files (I'm
     looking at you, SeaMonkey) are where they need to be."""
-    
-    print "Validating target application support..."
     
     # If there isn't an install.rdf, we can't test for SeaMonkey
     # support. Boo hoo.
@@ -63,7 +59,6 @@ def test_targetedapplications(err, package_contents=None,
                                            ta_guid_predicate):
             
             if ta_guid == "{92650c4d-4b8e-4d2a-b7eb-24ecf4f6b63a}":
-                print "We found some SeaMonkey."
                 
                 # Time to test for some install.js
                 if not "install.js" in package_contents:

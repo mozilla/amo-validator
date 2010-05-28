@@ -1,0 +1,6 @@
+[32mSummary:[m
+[34m------------------------------[m
+[37mDetected type: [mExtension/Multi-Extension
+------------------------------
+[32mAll tests succeeded![m
+[37mNotice:[m No em:type element found in install.rdf

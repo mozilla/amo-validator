@@ -17,7 +17,6 @@ def detect_type(err, install_rdf=None, xpi_package=None):
     if install_rdf is None:
         types = {"xpi": 3}
         
-        print "There is no install.rdf, so we'll look elsewhere."
         err.info("install.rdf was not found.",
                  """The type should be determined by install.rdf if
                  present. If it isn't, we still need to know the
@@ -37,8 +36,6 @@ def detect_type(err, install_rdf=None, xpi_package=None):
     
     if type_ is not None:
         if type_ in translated_types:
-            print "Found em:type in install.rdf"
-            
             # Make sure we translate back to the normalized version
             return translated_types[type_]
             
@@ -87,7 +84,6 @@ def detect_opensearch(package):
     
     # Parse the file.
     try:
-        print "Attempting to parse..."
         srch_prov = parse(package)
     except:
         # Don't worry that it's a catch-all exception handler; it failed
@@ -95,8 +91,6 @@ def detect_opensearch(package):
         return {"failure": True,
                 "decided": False,
                 "error": "There was an error parsing the file."}
-    
-    print "Testing OpenSearch for well-formedness..."
     
     # Make sure that the root element is OpenSearchDescription.
     if srch_prov.documentElement.tagName != "OpenSearchDescription":
@@ -177,7 +171,6 @@ def detect_opensearch(package):
                     "error": "The template for %s:%s is missing" % ver}
     
     # Make sure there are no updateURL elements
-    print "Testing for banned elements..."
     if srch_prov.getElementsByTagName("updateURL"):
         return {"failure": True,
                 "error": "<updateURL> elements are banned from search"}

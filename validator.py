@@ -210,7 +210,7 @@ def test_package(err, package, expectation=0):
     # Iterate through each tier.
     for tier in sorted(decorator.get_tiers()):
         
-        print "Entering tier #%d" % tier
+        # print "Entering tier #%d" % tier
         
         # Iterate through each test of our detected type
         for test in decorator.get_tests(tier, err.detected_type):
