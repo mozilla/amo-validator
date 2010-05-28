@@ -26,41 +26,53 @@ def main():
                     "search":5,
                     "multi":1} # A multi extension is an extension
     
-    
+    # Parse the arguments that 
     parser = argparse.ArgumentParser(
         description="Run tests on a Mozilla-type addon.")
     
     parser.add_argument("package",
                         help="The path of the package you're testing")
-    
     parser.add_argument("-t",
                         "--type",
                         default="any",
                         choices=expectations.keys(),
                         help="Type of addon you assume you're testing",
                         required=False)
-    
     parser.add_argument("-o",
                         "--output",
                         default="text",
                         choices=("text", "json"),
                         help="The output format that you expect",
                         required=False)
+    parser.add_argument("-v",
+                        "--verbose",
+                        action="store_const",
+                        const=True,
+                        help="""If the output format supports it, makes
+                        the analysis summary include extra info.""")
+    parser.add_argument("--file",
+                        type=argparse.FileType("w"),
+                        default=sys.stdout,
+                        help="""Specifying a path will write the output
+                        of the analysis to a file rather than to the
+                        screen.""")
     
     args = parser.parse_args()
-    print args
     
+    error_bundle = ErrorBundle(args.file)
     
+    # Parse out the expected add-on type and run the tests.
     expectation = expectations[args.type]
-    
-    error_bundle = ErrorBundle()
-    
     results = test_package(error_bundle, args.package, expectation)
     
+    # Print the output of the tests based on the requested format.
     if args.output == "text":
-        results.print_summary()
+        results.print_summary(args.verbose)
     elif args.output == "json":
         results.print_json()
+    
+    # Close the output stream.
+    args.file.close()
     
     if error_bundle.failed():
         sys.exit(1)

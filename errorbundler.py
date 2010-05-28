@@ -1,4 +1,6 @@
+import sys
 
+import curses
 import json
 
 class ErrorBundle:
@@ -7,7 +9,10 @@ class ErrorBundle:
     'separating the sorrow and collecting up all the cream.' It's
     borderline magical."""
     
-    def __init__(self):
+    def __init__(self, pipe=None):
+        """Specifying pipe allows the output of the bundler to be
+        written to a file rather than to the screen."""
+        
         self.errors = []
         self.warnings = []
         self.infos = []
@@ -15,6 +20,10 @@ class ErrorBundle:
         self.detected_type = 0
         self.resources = {}
         self.reject = False
+        
+        self.pipe = pipe
+        
+        curses.setupterm()
         
     def error(self, error, description=''):
         "Stores an error message for the validation process"
@@ -81,7 +90,22 @@ class ErrorBundle:
                              "description": info["description"]})
         
         # Output the JSON
-        print json.dumps(output)
+        json_output = json.dumps(output)
+        self.pretty_print(json_output)
+        
+    def colorize_text(self, text, color):
+        "Adds escape sequences to colorize text and make it beautiful."
+        
+        
+    def pretty_print(self, text):
+        "Uses curses to print in the fanciest way possible."
+        
+        text += "\n"
+        
+        if self.pipe:
+            self.pipe.write(text)
+        else:
+            sys.stdout(text)
         
     
     def print_summary(self, verbose=False):
@@ -93,27 +117,28 @@ class ErrorBundle:
                  3: "Dictionary",
                  4: "Language Pack",
                  5: "Search Provider"}
+        detected_type = types[self.detected_type]
         
         # Make a neat little printout.
-        print "Summary:"
-        print "-" * 30
-        print "Detected type: %s" % types[self.detected_type]
-        print "-" * 30
+        self.pretty_print("Summary:")
+        self.pretty_print("-" * 30)
+        self.pretty_print("Detected type: %s" % detected_type)
+        self.pretty_print("-" * 30)
         
         if self.failed():
-            print "Test failed! Errors:"
+            self.pretty_print("Test failed! Errors:")
             
             # Print out all the errors:
             for error in self.errors:
-                print "Error: %s" % error["message"]
+                self.pretty_print("Error: %s" % error["message"])
             for warning in self.warnings:
-                print "Warning: %s" % warning["message"]
+                self.pretty_print("Warning: %s" % warning["message"])
             
             self._print_verbose(verbose)
             
             # Awwww... have some self esteem!
             if self.reject:
-                print "Extension Rejected"
+                self.pretty_print("Extension Rejected")
             
         else:
             print "All tests succeeded!"
@@ -124,5 +149,5 @@ class ErrorBundle:
         
         if self.infos and verbose:
             for info in self.infos:
-                print "Notice: %s" % info["message"]
+                self.pretty_print("Notice: %s" % info["message"])
         

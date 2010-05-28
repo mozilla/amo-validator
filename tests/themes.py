@@ -1,5 +1,3 @@
-import fnmatch
-
 import decorator
 from chromemanifest import ChromeManifest
 
