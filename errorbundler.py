@@ -1,11 +1,13 @@
 import sys
 import re
+import platform
 
-import curses
 import json
 
-COLORS = ("BLUE", "RED", "GREEN", "YELLOW", "WHITE", "BLACK")
-
+if platform.system() != "Windows":
+    from outputhandlers.shellcolors import OutputHandler
+else:
+    from outputhandlers.windowscolors import OutputHandler
 
 class ErrorBundle:
     """This class does all sorts of cool things. It gets passed around
@@ -28,26 +30,7 @@ class ErrorBundle:
         self.resources = {}
         self.reject = False
         
-        self.pipe = pipe
-        
-        # Get curses all ready to write some stuff to the screen.
-        curses.setupterm()
-        
-        # Initialize a store for the colors and pre-populate it with
-        # the un-color color.
-        self.colors = {}
-        self.colors["NORMAL"] = curses.tigetstr("sgr0") or ''
-        
-        # Determines capabilities of the terminal.
-        fgColorSeq = curses.tigetstr('setaf') or \
-            curses.tigetstr('setf') or ''
-        
-        # Go through each color and figure out what the sequences are
-        # for each, then store the sequences in the store we made
-        # above.
-        for color in COLORS:
-            colorIndex = getattr(curses, 'COLOR_%s' % color)
-            self.colors[color] = curses.tparm(fgColorSeq, colorIndex)
+        self.handler = OutputHandler(pipe)
             
         
     def error(self, error, description=''):
@@ -163,52 +146,10 @@ class ErrorBundle:
         
         # Output the JSON.
         json_output = json.dumps(output)
-        self.pretty_print(json_output, True)
-        
-    def colorize_text(self, text):
-        """Adds escape sequences to colorize text and make it
-        beautiful. To colorize text, prefix the text you want to color
-        with the color (capitalized) wrapped in double angle brackets
-        (i.e.: <<GREEN>>). End your string with <<NORMAL>>."""
-        
-        # Take note of where the escape sequences are.
-        rnormal = text.rfind("<<NORMAL")
-        rany = text.rfind("<<")
-        
-        # Put in the escape sequences.
-        text = text.replace("<<", "%(").replace(">>", ")s")
-        
-        # Make sure that the last sequence is a NORMAL sequence.
-        if rany > -1 and rnormal < rany:
-            text += "%(NORMAL)s"
-        
-        # Replace our placeholders with the physical sequence data.
-        return text % self.colors
-        
-        
-    def pretty_print(self, text, no_color=False):
-        "Uses curses to print in the fanciest way possible."
-        
-        # Add color to the terminal.
-        if not no_color:
-            text = self.colorize_text(text)
-        else:
-            pattern = re.compile("\<\<[A-Z]*?\>\>")
-            text = pattern.sub("", text)
-            
-        
-        text += "\n"
-        
-        if self.pipe:
-            self.pipe.write(text)
-        else:
-            sys.stdout(text)
-        
+        self.handler.write(json_output, True)
     
     def print_summary(self, verbose=False, no_color=False):
         "Prints a summary of the validation process so far."
-        
-        
         
         types = {0: "Unknown",
                  1: "Extension/Multi-Extension",
@@ -220,36 +161,37 @@ class ErrorBundle:
         detected_type = types[self.detected_type]
         
         # Make a neat little printout.
-        self.pretty_print("\n<<GREEN>>Summary:", no_color) # Line break!
-        self.pretty_print("-" * 30)
-        self.pretty_print("Detected type: <<BLUE>>%s" % detected_type, no_color)
-        self.pretty_print("-" * 30)
+        self.handler.write("\n<<GREEN>>Summary:", no_color) \
+            .write("-" * 30) \
+            .write("Detected type: <<BLUE>>%s" % detected_type, no_color) \
+            .write("-" * 30)
         
         if self.failed():
-            self.pretty_print("<<BLUE>>Test failed! Errors:", no_color)
+            self.handler.write("<<BLUE>>Test failed! Errors:", no_color)
             
             # Print out all the errors:
             for error in self.errors:
-                self.pretty_print("<<RED>>Error:<<NORMAL>> %s" % error["message"], no_color)
+                self.handler.write("<<RED>>Error:<<NORMAL>> %s" % error["message"], no_color)
             for warning in self.warnings:
-                self.pretty_print("<<YELLOW>>Warning:<<NORMAL>> %s" % warning["message"], no_color)
+                self.handler.write("<<YELLOW>>Warning:<<NORMAL>> %s" % warning["message"], no_color)
             
             self._print_verbose(verbose, no_color)
             
             # Awwww... have some self esteem!
             if self.reject:
-                self.pretty_print("Extension Rejected")
+                self.handler.write("Extension Rejected")
             
         else:
-            self.pretty_print("<<GREEN>>All tests succeeded!", no_color)
+            self.handler.write("<<GREEN>>All tests succeeded!", no_color)
             self._print_verbose(verbose, no_color)
             
-        self.pretty_print("\n")
+        self.handler.write("\n")
         
     def _print_verbose(self, verbose, no_color):
         "Prints info code to help prevent code duplication"
         
+        mesg = "<<WHITE>>Notice:<<NORMAL>> %s"
         if self.infos and verbose:
             for info in self.infos:
-                self.pretty_print("<<WHITE>>Notice:<<NORMAL>> %s" % info["message"], no_color)
+                self.handler.write(mesg % info["message"], no_color)
         

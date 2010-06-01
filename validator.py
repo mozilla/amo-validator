@@ -112,12 +112,10 @@ def prepare_package(err, path, expectation=0):
         err.reject = True
         err.error("The package is not of a recognized type.")
     
-    # Open the package and read it into a StringIO.
     package = open(path)
-    pack_data = StringIO(package.read())
     
     
-    return test_package(err, pack_data, path, expectation)
+    return test_package(err, package, path, expectation)
 
 def test_search(err, package, expectation=0):
     "Tests the package to see if it is a search provider."
