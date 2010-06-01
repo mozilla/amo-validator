@@ -1,5 +1,3 @@
-import sys
-import re
 import platform
 
 import json

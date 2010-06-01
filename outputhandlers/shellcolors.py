@@ -1,4 +1,4 @@
-
+import re
 import curses
 
 COLORS = ("BLUE", "RED", "GREEN", "YELLOW", "WHITE", "BLACK")

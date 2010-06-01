@@ -57,8 +57,20 @@ def test_packed_packages(err, package_contents=None, xpi_package=None):
             package.close()
             err.pop_state()
             
-        #elif data["extension"] == "xpi":
+        elif data["extension"] == "xpi":
             
+            # Unpack!
+            package = StringIO(xpi_package.read(name))
+            
+            err.push_state(data["name_lower"])
+            
+            # There are no expected types for packages within a multi-
+            # item package.
+            validator.test_package(err, package, name)
+            
+            package.close()
+            err.pop_state()
+        
 
 @decorator.register_test(tier=2)
 def test_test(err, package_contents=None, xpi_package=None):

@@ -1,4 +1,4 @@
-
+import re
 import ctypes
 
 WC_BLUE = 0x01

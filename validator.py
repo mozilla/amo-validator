@@ -93,7 +93,7 @@ def prepare_package(err, path, expectation=0):
     
     # Test that the package actually exists. I consider this Tier 0
     # since we may not even be dealing with a real file.
-    if not os.path.exists(path):
+    if not os.path.isfile(path):
         err.reject = True
         return err.error("The package could not be found")
     
