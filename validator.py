@@ -2,6 +2,7 @@ import sys
 import os
 
 import zipfile
+from StringIO import StringIO
 
 import argparse
 import decorator
@@ -11,6 +12,7 @@ import tests.library_blacklist
 import tests.conduit
 import tests.langpack
 import tests.themes
+import tests.content
 from xpi import XPIManager
 from rdf import RDFTester
 from errorbundler import ErrorBundle
@@ -68,14 +70,14 @@ def main():
     
     # Parse out the expected add-on type and run the tests.
     expectation = expectations[args.type]
-    results = test_package(error_bundle, args.package, expectation)
+    prepare_package(error_bundle, args.package, expectation)
     
     # Print the output of the tests based on the requested format.
     if args.output == "text":
-        results.print_summary(args.verbose,
+        error_bundle.print_summary(args.verbose,
             not args.file == sys.stdout or args.boring)
     elif args.output == "json":
-        results.print_json()
+        error_bundle.print_json()
     
     # Close the output stream.
     args.file.close()
@@ -86,7 +88,73 @@ def main():
         sys.exit(0)
     
 
-def test_package(err, package, expectation=0):
+def prepare_package(err, path, expectation=0):
+    "Prepares a file-based package for validation."
+    
+    # Test that the package actually exists. I consider this Tier 0
+    # since we may not even be dealing with a real file.
+    if not os.path.exists(path):
+        err.reject = True
+        return err.error("The package could not be found")
+    
+    # Pop the package extension.
+    package_extension = os.path.splitext(path)[1]
+    package_extension = package_extension.lower()
+    
+    if package_extension == ".xml":
+        test_search(err, path, expectation)
+        # If it didn't bork, it must be a valid provider!
+        if not err.failed():
+            return err
+
+    # Test that the package is an XPI.
+    if not package_extension in (".xpi", ".jar"):
+        err.reject = True
+        err.error("The package is not of a recognized type.")
+    
+    # Open the package and read it into a StringIO.
+    package = open(path)
+    pack_data = StringIO(package.read())
+    
+    
+    return test_package(err, pack_data, path, expectation)
+
+def test_search(err, package, expectation=0):
+    "Tests the package to see if it is a search provider."
+    
+    expected_search_provider = expectation in (0, 5)
+    
+    # If we're not expecting a search provider, warn the user and stop
+    # testing it like a search provider.
+    if not expected_search_provider:
+        err.reject = True
+        return err.warning("Unexpected file extension.")
+    
+    # Is this a search provider?
+    opensearch_results = tests.typedetection.detect_opensearch(package)
+    
+    if opensearch_results["failure"]:
+        # Failed OpenSearch validation
+        error_mesg = "OpenSearch: %s" % opensearch_results["error"]
+        err.error(error_mesg)
+        
+        # We want this to flow back into the rest of the program if
+        # the error indicates that we're not sure whether it's an
+        # OpenSearch document or not.
+        
+        if not "decided" in opensearch_results or \
+           opensearch_results["decided"]:
+            err.reject = True
+            return err
+        
+    elif expected_search_provider:
+        err.set_type(5)
+        err.info("OpenSearch provider confirmed.")
+    
+    return err
+    
+
+def test_package(err, package, name, expectation=0):
     "Begins tests for the package."
     
     types = {0: "Unknown",
@@ -96,61 +164,9 @@ def test_package(err, package, expectation=0):
              4: "Language Pack",
              5: "Search Provider"}
     
-    # Test that the package actually exists. I consider this Tier 0
-    # since we may not even be dealing with a real file.
-    if not os.path.exists(package):
-        err.reject = True
-        return err.error("The package could not be found")
-    
-    package_extension = os.path.splitext(package)[1]
-    package_extension = package_extension.lower()
-    
-    # Test for OpenSearch providers
-    if package_extension == ".xml":
-        
-        expected_search_provider = expectation in (0, 5)
-        
-        # If we're not expecting a search provider, warn the user
-        if not expected_search_provider:
-            err.reject = True
-            return err.warning("Unexpected file extension.")
-        
-        # Is this a search provider?
-        opensearch_results = \
-            tests.typedetection.detect_opensearch(package)
-        
-        if opensearch_results["failure"]:
-            # Failed OpenSearch validation
-            error_mesg = "OpenSearch: %s" % opensearch_results["error"]
-            err.error(error_mesg)
-            
-            # We want this to flow back into the rest of the program if
-            # the error indicates that we're not sure whether it's an
-            # OpenSearch document or not.
-            
-            if not "decided" in opensearch_results or \
-               opensearch_results["decided"]:
-                err.reject = True
-                return err
-            
-        elif expected_search_provider:
-            err.set_type(5)
-            err.info("OpenSearch provider confirmed.")
-            return err
-            
-    
-    # Test that the package is an XPI.
-    if not package_extension in (".xpi", ".jar"):
-        err.reject = True
-        err.error("The package is not of a recognized type.")
-    
-    # Do a simple test to see if the XPI is really an archive
-    if not zipfile.is_zipfile(package):
-        return err.error("The XPI could not be opened.")
-    
     # Load up a new instance of an XPI.
     try:
-        package = XPIManager(package)
+        package = XPIManager(package, name)
         if package is None:
             # Die on this one because the file won't open.
             return err.error("The XPI could not be opened.")
@@ -168,9 +184,6 @@ def test_package(err, package, expectation=0):
         err.reject = True
         return err.error("XPI package appears to be corrupt.")
     
-    # Cache a copy of the package contents.
-    package_contents = package.get_file_data()
-    
     assumed_extensions = {"jar": 2,
                           "xml": 5}
     
@@ -179,6 +192,9 @@ def test_package(err, package, expectation=0):
         # Is the user expecting a different package type?
         if not expectation in (0, assumed_type):
             err.error("Unexpected package type (found theme)")
+    
+    # Cache a copy of the package contents.
+    package_contents = package.get_file_data()
     
     # Test the install.rdf file to see if we can get the type that way.
     has_install_rdf = "install.rdf" in package_contents
@@ -208,15 +224,17 @@ def test_package(err, package, expectation=0):
             err_mesg = "Extension type mismatch (expected %s, found %s)"
             err_mesg = err_mesg % (types[expectation], types[results])
             err.warning(err_mesg)
-        
-        
+    
+    return test_inner_package(err, package_contents, package)
+    
+
+def test_inner_package(err, package_contents, package):
+    "Tests a package's inner content."
     
     # ---- Begin Tiers ----
     
     # Iterate through each tier.
     for tier in sorted(decorator.get_tiers()):
-        
-        # print "Entering tier #%d" % tier
         
         # Iterate through each test of our detected type
         for test in decorator.get_tests(tier, err.detected_type):
@@ -237,7 +255,6 @@ def test_package(err, package, expectation=0):
     
     # Return the results.
     return err
-    
 
 # Start up the testing and return the output.
 if __name__ == '__main__':

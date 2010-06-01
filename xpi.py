@@ -7,12 +7,12 @@ class XPIManager:
     needing to worry about things like zip files or IO."""
     
     
-    def __init__(self, package):
+    def __init__(self, package, name=None):
         "Create a new managed XPI package"
         
         # Store away the filename for future use.
-        self.filename = package
-        self.extension = package.split(".").pop()
+        self.filename = name or package
+        self.extension = self.filename.split(".").pop()
         
         # Try opening the XPI as a zip.
         try:

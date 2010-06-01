@@ -21,6 +21,9 @@ class ErrorBundle:
         self.warnings = []
         self.infos = []
         
+        self.subpackages = []
+        self.package_stack = []
+        
         self.detected_type = 0
         self.resources = {}
         self.reject = False
@@ -88,6 +91,53 @@ class ErrorBundle:
         
         self.resources[name] = resource
         
+    
+    def push_state(self, new_file=""):
+        "Saves the current error state to parse subpackages"
+        
+        self.subpackages.append({"errors": self.errors,
+                                 "warnings": self.warnings,
+                                 "infos": self.infos,
+                                 "detected_type": self.detected_type,
+                                 "resources": self.resources})
+        
+        self.errors = []
+        self.warnings = []
+        self.infos = []
+        self.resources = {}
+        
+        self.package_stack.append(new_file)
+    
+    def pop_state(self):
+        "Retrieves the last saved state and restores it."
+        
+        # Save a copy of the current state.
+        state = self.subpackages.pop()
+        errors = self.errors
+        warnings = self.warnings
+        infos = self.infos
+        
+        # Copy the existing state back into place
+        self.errors = state["errors"]
+        self.warnings = state["warnings"]
+        self.infos = state["infos"]
+        self.detected_type = state["detected_type"]
+        self.resources = state["resources"]
+        
+        name = self.package_stack.pop()
+        
+        # Overlay the popped warnings onto the existing ones.
+        for error in errors:
+            self.error("%s > %s" % (name, error["message"]),
+                       error["description"])
+        for warning in warnings:
+            self.warning("%s > %s" % (name, warning["message"]),
+                         warning["description"])
+        for info in infos:
+            self.info("%s > %s" % (name, info["message"]),
+                      info["description"])
+        
+    
     def print_json(self):
         "Prints a JSON summary of the validation operation."
         
@@ -165,7 +215,8 @@ class ErrorBundle:
                  2: "Theme",
                  3: "Dictionary",
                  4: "Language Pack",
-                 5: "Search Provider"}
+                 5: "Search Provider",
+                 7: "Subpackage"}
         detected_type = types[self.detected_type]
         
         # Make a neat little printout.

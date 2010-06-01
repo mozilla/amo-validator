@@ -82,7 +82,7 @@ def test_dictionary_layout(err, package_contents=None, xpi_package=None):
     whitelisted_files = [
         "install.js",
         "dictionaries/*.aff", # List again because there must >0
-        "dictionaries/*.dic"
+        "dictionaries/*.dic",
         "__MACOSX/*", # I hate them, but there's no way to avoid them.
         "chrome.manifest",
         "chrome/*"]
@@ -163,7 +163,7 @@ def test_layout(err, package_contents, mandatory, whitelisted,
             mandatory.remove(mfile)
             continue
 
-        # Remove the file from the whitelist.
+        # Test if the file is in the whitelist.
         if any(fnmatch.fnmatch(file_, wlfile) for wlfile in
                whitelisted):
             continue
