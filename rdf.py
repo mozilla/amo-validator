@@ -2,7 +2,7 @@ from rdflib.graph import Graph
 from rdflib import URIRef
 from cStringIO import StringIO
 
-class RDFTester:
+class RDFParser:
     """This little gem (not to be confused with a Ruby gem) loads and
     parses an RDF file."""
     
@@ -16,7 +16,10 @@ class RDFTester:
         graph = Graph()
         
         # Try it!
-        pseudo_file = StringIO(data) # Wrap data in a pseudo-file
+        if data is not StringIO:
+            pseudo_file = StringIO(data) # Wrap data in a pseudo-file
+        else:
+            pseudo_file = data
         graph.parse(pseudo_file, format="xml")
         
         self.rdf = graph

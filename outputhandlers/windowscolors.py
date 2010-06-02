@@ -9,23 +9,26 @@ class OutputHandler:
     """A handler that hooks up with the error bundler to colorize the
     output of the application for *nix-based terminals."""
     
-    def __init__(self, pipe=None):
+    def __init__(self, pipe=None, no_color=False):
         """Pipe is the output stream that the printed data will be
         written to. For instance, this could be a file, a StringIO
         object, or stdout."""
         
         self.pipe = pipe
-        self.handle = ctypes.windll.kernel32.GetStdHandle(STD_OUTPUT_HANDLE)
+        self.no_color = no_color
         
-        # Initialize a store for the colors and populate with the
-        # necessary color values.
-        self.colors = {"BLUE": WC_BLUE,
-                       "RED": WC_RED,
-                       "GREEN": WC_GREEN,
-                       "YELLOW": WC_GREEN | WC_RED,
-                       "WHITE": WC_BLUE | WC_GREEN | WC_RED,
-                       "BLACK": 0,
-                       "NORMAL": WC_BLUE | WC_GREEN | WC_RED}
+        if not no_color:
+            self.handle = ctypes.windll.kernel32.GetStdHandle(STD_OUTPUT_HANDLE)
+        
+            # Initialize a store for the colors and populate with the
+            # necessary color values.
+            self.colors = {"BLUE": WC_BLUE,
+                           "RED": WC_RED,
+                           "GREEN": WC_GREEN,
+                           "YELLOW": WC_GREEN | WC_RED,
+                           "WHITE": WC_BLUE | WC_GREEN | WC_RED,
+                           "BLACK": 0,
+                           "NORMAL": WC_BLUE | WC_GREEN | WC_RED}
         
     
     def colorize_text(self, color):
@@ -46,11 +49,11 @@ class OutputHandler:
             sys.stdout(text)
         
     
-    def write(self, text, no_color=False):
+    def write(self, text):
         "Uses ctypes to print in the fanciest way possible."
         
         # If there is no color, then we don't need any processing.
-        if no_color:
+        if self.no_color:
             
             # Strip color codes out.
             pattern = re.compile("\<\<[A-Z]*?\>\>")

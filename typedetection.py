@@ -142,7 +142,7 @@ def detect_opensearch(package):
         # Make sure that there is a {searchTerms} placeholder in the
         # URL template.
         found_template = \
-            url.attributes["template"].value.count("{searchTerms}") < 1
+            url.attributes["template"].value.count("{searchTerms}") > 0
         
         # If we didn't find it in a simple parse of the template=""
         # attribute, look deeper at the <Param /> elements.

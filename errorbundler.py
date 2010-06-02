@@ -13,7 +13,7 @@ class ErrorBundle:
     'separating the sorrow and collecting up all the cream.' It's
     borderline magical."""
     
-    def __init__(self, pipe=None):
+    def __init__(self, pipe=None, no_color=False):
         """Specifying pipe allows the output of the bundler to be
         written to a file rather than to the screen."""
         
@@ -28,7 +28,7 @@ class ErrorBundle:
         self.resources = {}
         self.reject = False
         
-        self.handler = OutputHandler(pipe)
+        self.handler = OutputHandler(pipe, no_color)
             
         
     def error(self, error, description=''):
@@ -146,7 +146,7 @@ class ErrorBundle:
         json_output = json.dumps(output)
         self.handler.write(json_output, True)
     
-    def print_summary(self, verbose=False, no_color=False):
+    def print_summary(self, verbose=False):
         "Prints a summary of the validation process so far."
         
         types = {0: "Unknown",
@@ -159,37 +159,37 @@ class ErrorBundle:
         detected_type = types[self.detected_type]
         
         # Make a neat little printout.
-        self.handler.write("\n<<GREEN>>Summary:", no_color) \
+        self.handler.write("\n<<GREEN>>Summary:") \
             .write("-" * 30) \
-            .write("Detected type: <<BLUE>>%s" % detected_type, no_color) \
+            .write("Detected type: <<BLUE>>%s" % detected_type) \
             .write("-" * 30)
         
         if self.failed():
-            self.handler.write("<<BLUE>>Test failed! Errors:", no_color)
+            self.handler.write("<<BLUE>>Test failed! Errors:")
             
             # Print out all the errors:
             for error in self.errors:
-                self.handler.write("<<RED>>Error:<<NORMAL>> %s" % error["message"], no_color)
+                self.handler.write("<<RED>>Error:<<NORMAL>> %s" % error["message"])
             for warning in self.warnings:
-                self.handler.write("<<YELLOW>>Warning:<<NORMAL>> %s" % warning["message"], no_color)
+                self.handler.write("<<YELLOW>>Warning:<<NORMAL>> %s" % warning["message"])
             
-            self._print_verbose(verbose, no_color)
+            self._print_verbose(verbose)
             
             # Awwww... have some self esteem!
             if self.reject:
                 self.handler.write("Extension Rejected")
             
         else:
-            self.handler.write("<<GREEN>>All tests succeeded!", no_color)
-            self._print_verbose(verbose, no_color)
+            self.handler.write("<<GREEN>>All tests succeeded!")
+            self._print_verbose(verbose)
             
         self.handler.write("\n")
         
-    def _print_verbose(self, verbose, no_color):
+    def _print_verbose(self, verbose):
         "Prints info code to help prevent code duplication"
         
         mesg = "<<WHITE>>Notice:<<NORMAL>> %s"
         if self.infos and verbose:
             for info in self.infos:
-                self.handler.write(mesg % info["message"], no_color)
+                self.handler.write(mesg % info["message"])
         

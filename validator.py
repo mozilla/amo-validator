@@ -6,15 +6,15 @@ from StringIO import StringIO
 
 import argparse
 import decorator
-import tests.typedetection
-import tests.packagelayout
-import tests.library_blacklist
-import tests.conduit
-import tests.langpack
-import tests.themes
-import tests.content
+import typedetection
+import testcases.packagelayout
+import testcases.library_blacklist
+import testcases.conduit
+import testcases.langpack
+import testcases.themes
+import testcases.content
 from xpi import XPIManager
-from rdf import RDFTester
+from rdf import RDFParser
 from errorbundler import ErrorBundle
 
 def main():
@@ -66,7 +66,8 @@ def main():
     
     args = parser.parse_args()
     
-    error_bundle = ErrorBundle(args.file)
+    error_bundle = ErrorBundle(args.file,
+        not args.file == sys.stdout or args.boring)
     
     # Parse out the expected add-on type and run the tests.
     expectation = expectations[args.type]
@@ -74,8 +75,7 @@ def main():
     
     # Print the output of the tests based on the requested format.
     if args.output == "text":
-        error_bundle.print_summary(args.verbose,
-            not args.file == sys.stdout or args.boring)
+        error_bundle.print_summary(args.verbose)
     elif args.output == "json":
         error_bundle.print_json()
     
@@ -129,7 +129,8 @@ def test_search(err, package, expectation=0):
         return err.warning("Unexpected file extension.")
     
     # Is this a search provider?
-    opensearch_results = tests.typedetection.detect_opensearch(package)
+    opensearch_results = \
+        testcases.typedetection.detect_opensearch(package)
     
     if opensearch_results["failure"]:
         # Failed OpenSearch validation
@@ -200,15 +201,15 @@ def test_package(err, package, name, expectation=0):
     if has_install_rdf:
         # Load up the install.rdf file.
         install_rdf_data = package.zf.read("install.rdf")
-        install_rdf = RDFTester(install_rdf_data)
+        install_rdf = RDFParser(install_rdf_data)
         
         # Save a copy for later tests.
         err.save_resource("install_rdf", install_rdf)
         
         # Load up the results of the type detection
-        results = tests.typedetection.detect_type(err,
-                                                  install_rdf,
-                                                  package)
+        results = typedetection.detect_type(err,
+                                            install_rdf,
+                                            package)
         
         if results is None:
             return err.error("Unable to determine addon type")

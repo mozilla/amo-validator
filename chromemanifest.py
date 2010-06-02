@@ -11,7 +11,7 @@ class ChromeManifest:
         self.data = data
         self.lines = data.split("\n")
         
-        # Extract the data from the triples in the maniffest
+        # Extract the data from the triples in the manifest
         triples = []
         
         for line in self.lines:

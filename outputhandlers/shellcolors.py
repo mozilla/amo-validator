@@ -7,38 +7,45 @@ class OutputHandler:
     """A handler that hooks up with the error bundler to colorize the
     output of the application for *nix-based terminals."""
     
-    def __init__(self, pipe=None):
+    def __init__(self, pipe=None, no_color=False):
         """Pipe is the output stream that the printed data will be
         written to. For instance, this could be a file, a StringIO
         object, or stdout."""
         
         self.pipe = pipe
+        self.no_color = no_color
         
-        # Get curses all ready to write some stuff to the screen.
-        curses.setupterm()
+        # Don't bother initiating color if there's no color.
+        if not no_color:
         
-        # Initialize a store for the colors and pre-populate it with
-        # the un-color color.
-        self.colors = {}
-        self.colors["NORMAL"] = curses.tigetstr("sgr0") or ''
+            # Get curses all ready to write some stuff to the screen.
+            curses.setupterm()
         
-        # Determines capabilities of the terminal.
-        fgColorSeq = curses.tigetstr('setaf') or \
-            curses.tigetstr('setf') or ''
+            # Initialize a store for the colors and pre-populate it
+            # with the un-color color.
+            self.colors = {}
+            self.colors["NORMAL"] = curses.tigetstr("sgr0") or ''
         
-        # Go through each color and figure out what the sequences are
-        # for each, then store the sequences in the store we made
-        # above.
-        for color in COLORS:
-            colorIndex = getattr(curses, 'COLOR_%s' % color)
-            self.colors[color] = curses.tparm(fgColorSeq, colorIndex)
+            # Determines capabilities of the terminal.
+            fgColorSeq = curses.tigetstr('setaf') or \
+                curses.tigetstr('setf') or ''
+        
+            # Go through each color and figure out what the sequences
+            # are for each, then store the sequences in the store we
+            # made above.
+            for color in COLORS:
+                colorIndex = getattr(curses, 'COLOR_%s' % color)
+                self.colors[color] = curses.tparm(fgColorSeq,
+                                                  colorIndex)
         
     
     def colorize_text(self, text):
         """Adds escape sequences to colorize text and make it
         beautiful. To colorize text, prefix the text you want to color
         with the color (capitalized) wrapped in double angle brackets
-        (i.e.: <<GREEN>>). End your string with <<NORMAL>>."""
+        (i.e.: <<GREEN>>). End your string with <<NORMAL>>. If you
+        don't, it will be done for you (assuming you used a color code
+        in your string."""
         
         # Take note of where the escape sequences are.
         rnormal = text.rfind("<<NORMAL")
@@ -55,11 +62,11 @@ class OutputHandler:
         return text % self.colors
         
         
-    def write(self, text, no_color=False):
+    def write(self, text):
         "Uses curses to print in the fanciest way possible."
         
         # Add color to the terminal.
-        if not no_color:
+        if not self.no_color:
             text = self.colorize_text(text)
         else:
             pattern = re.compile("\<\<[A-Z]*?\>\>")
