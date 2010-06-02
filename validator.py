@@ -200,7 +200,7 @@ def test_package(err, package, name, expectation=0):
     err.save_resource("has_install_rdf", has_install_rdf)
     if has_install_rdf:
         # Load up the install.rdf file.
-        install_rdf_data = package.zf.read("install.rdf")
+        install_rdf_data = package.read("install.rdf")
         install_rdf = RDFParser(install_rdf_data)
         
         # Save a copy for later tests.

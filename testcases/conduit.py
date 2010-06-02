@@ -60,7 +60,7 @@ def test_conduittoolbar(err, package_contents=None, xpi_manager=None):
             chrome = err.get_resource("chrome.manifest")
         else:
             # Not cached, so we grab it.
-            chrome_data = xpi_manager.zf.read("chrome.manifest")
+            chrome_data = xpi_manager.read("chrome.manifest")
             chrome = ChromeManifest(chrome_data)
             err.save_resource("chrome.manifest", chrome)
         

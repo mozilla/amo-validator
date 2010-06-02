@@ -1,5 +1,6 @@
 import re
 import curses
+import sys
 
 COLORS = ("BLUE", "RED", "GREEN", "YELLOW", "WHITE", "BLACK")
 
@@ -78,7 +79,7 @@ class OutputHandler:
         if self.pipe:
             self.pipe.write(text)
         else:
-            sys.stdout(text)
+            sys.stdout.write(text)
         
         return self
         

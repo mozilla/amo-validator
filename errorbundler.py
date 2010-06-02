@@ -144,7 +144,7 @@ class ErrorBundle:
         
         # Output the JSON.
         json_output = json.dumps(output)
-        self.handler.write(json_output, True)
+        self.handler.write(json_output)
     
     def print_summary(self, verbose=False):
         "Prints a summary of the validation process so far."
