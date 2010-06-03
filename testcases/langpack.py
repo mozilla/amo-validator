@@ -44,5 +44,6 @@ def test_langpack_manifest(err, package_contents=None, xpi_package=None):
                not fnmatch.fnmatch(predicate, pattern):
                 err.error("Invalid chrome.manifest object/predicate.",
                     "'override' entry does not match '/%s/'" % pattern,
-                    "chrome.manifest")
+                    "chrome.manifest",
+                    triple["line"])
     

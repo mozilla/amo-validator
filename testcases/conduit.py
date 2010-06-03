@@ -80,6 +80,8 @@ def test_conduittoolbar(err, package_contents=None, xpi_manager=None):
            data["object"].count("ebtoolbarstyle") > 0:
             err.reject = True
             return err.error("Detected Conduit toolbar.",
-                             "'ebtoolbarstyle' found in chrome.manifest")
+                             "'ebtoolbarstyle' found in chrome.manifest",
+                             "chrome.manifest",
+                             data["line"])
         
         

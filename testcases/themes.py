@@ -28,4 +28,6 @@ def test_theme_manifest(err, package_contents=None, xpi_package=None):
                       """chrome.manifest files for themes are only
                       allowed to have 'skin' and 'style' items. Other
                       types of items are disallowed for security
-                      reasons.""")
+                      reasons.""",
+                      "chrome.manifest",
+                      triple["line"])

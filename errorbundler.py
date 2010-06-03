@@ -179,12 +179,13 @@ class ErrorBundle:
         if self.failed():
             self.handler.write("<<BLUE>>Test failed! Errors:")
             
-            # Print out all the errors:
+            # Print out all the errors/warnings:
             for error in self.errors:
-                self.handler.write("<<RED>>Error:<<NORMAL>> %s" % error["message"])
+                self._print_message("<<RED>>Error:<<NORMAL>> ", error, verbose)
             for warning in self.warnings:
-                self.handler.write("<<YELLOW>>Warning:<<NORMAL>> %s" % warning["message"])
+                self._print_message("<<YELLOW>>WARNING:<<NORMAL>> ", warning, verbose)
             
+            # Prints things that only happen during verbose (infos).
             self._print_verbose(verbose)
             
             # Awwww... have some self esteem!
@@ -197,11 +198,52 @@ class ErrorBundle:
             
         self.handler.write("\n")
         
+    def _print_message(self, prefix, message, verbose=True):
+        "Prints a message and takes care of all sorts of nasty code"
+        
+        # Load up the standard output.
+        output = [prefix,
+                  message["message"]]
+        
+        # We have some extra stuff for verbose mode.
+        if verbose:
+            verbose_output = []
+            
+            # Detailed problem description.
+            if message["description"]:
+                # These are dirty, so strip out whitespace and concat.
+                desc = message["description"].split("\n")
+                desc = [line.strip() for line in desc]
+                verbose_output.append(' '.join(desc))
+            
+            # If file information is availe, output that as well.
+            files = message["file"]
+            if files is not None:
+                fmsg = "File:\t%s"
+                
+                # Nested files (subpackes) are stored in a list.
+                if files is list:
+                    verbose_output.append(fmsg % ' > '.join(files))
+                else:
+                    verbose_output.append(fmsg % files)
+            
+            # If there is a line number, that gets put on the end.
+            if message["line"]:
+                verbose_output.append("Line:\t%s" % message["line"])
+                
+            # Stick it in with the standard items.
+            output.append("\n\t")
+            output.append("\n\t".join(verbose_output))
+        
+        # Send the final output to the handler to be rendered.
+        self.handler.write(''.join(output))
+        
+        
     def _print_verbose(self, verbose):
         "Prints info code to help prevent code duplication"
         
-        mesg = "<<WHITE>>Notice:<<NORMAL>> %s"
+        mesg = "<<WHITE>>Notice:<<NORMAL>>"
         if self.infos and verbose:
             for info in self.infos:
-                self.handler.write(mesg % info["message"])
+                self._print_message(mesg, info)
         

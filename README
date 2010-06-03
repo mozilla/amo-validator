@@ -50,6 +50,9 @@ messages in addition to errors and warnings. Informational messages
 contain information about the analysis that do not invalidate the
 add-on, but are contextually relevant.
 
+Verbose mode will also output detailed descriptions of each summary
+item, as well as the file path and line number (if available).
+
 This mode is only supported by certain output types. Output types
 that do not support verbose mode will output informational messages by
 default.
