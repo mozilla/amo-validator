@@ -25,21 +25,29 @@ def _test_type(file_, expectation):
     assert not err.failed()
     
 def test_extension():
+    """When no install.rdf file is present and the file ends with XPI,
+    then the type detection module should return type "Dictionary"."""
+    
+    _test_type("tests/resources/typedetection/td_bad_dict.xpi", 3)
+    
+def test_extension():
     "Tests that type detection can detect an addon of type 'extension'"
     
-    _test_type("tests/resources/typedetection/extension.xpi", 1)
+    _test_type("tests/resources/typedetection/td_notype_ext.xpi", 1)
 
 def test_theme():
     "Tests that type detection can detect an addon of type 'theme'"
     
-    _test_type("tests/resources/typedetection/theme.jar", 2)
+    _test_type("tests/resources/typedetection/td_notype_theme.jar", 2)
 
 def test_dictionary():
     "Tests that type detection can detect an addon of type 'dictionary'"
     
-    _test_type("tests/resources/typedetection/dictionary.xpi", 3)
+    _test_type("tests/resources/typedetection/td_dictionary.xpi", 3)
 
 def test_langpack():
-    "Tests that type detection can detect an addon of type 'langpack'"
+    """Tests that the type detection module can detect a language pack.
+    As an added bonus, this test also verifies that the <em:type>
+    element is correctly interpreted."""
     
-    _test_type("tests/resources/typedetection/langpack.xpi", 4)
+    _test_type("tests/resources/typedetection/td_langpack.xpi", 4)

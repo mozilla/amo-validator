@@ -55,7 +55,6 @@ def detect_type(err, install_rdf=None, xpi_package=None):
     dictionaries = [file_ for file_ in package_contents.keys() if
                     file_.startswith("dictionaries")]
     if dictionaries:
-        err.info("We found indiciations of a dictionary package.")
         return 3 # Dictionary
     
     
