@@ -14,7 +14,7 @@ def test_langpack_manifest(err, package_contents=None, xpi_package=None):
     
     # TODO : Did I read about having multiple chrome.manifest files?
     
-    # Retriece the chrome.manifest if it's cached.
+    # Retrieve the chrome.manifest if it's cached.
     if err.get_resource("chrome.manifest"):
         chrome = err.get_resource("chrome.manifest")
     else:

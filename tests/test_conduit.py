@@ -35,10 +35,33 @@ def _do_test(path, failure=True):
 def test_outright():
     "Tests the Conduit detector against an outright toolbar."
     
-    _do_test("tests/resources/conduit/fail.xpi")
+    _do_test("tests/resources/conduit/basta_bar.xpi")
     
 def test_white():
     "Tests a non-Conduit addon against the library."
     
     _do_test("tests/resources/conduit/pass.xpi", False)
     
+def test_params():
+    """Tests the Conduit detector against a toolbar with parameters in
+    the install.rdf file that indiciate Conduit-ion."""
+    
+    _do_test("tests/resources/conduit/conduit_params.xpi")
+    
+def test_updateurl():
+    """Tests the Conduit detector against a toolbar with its updateURL
+    parameter set to that of a Conduit Toolbar's."""
+    
+    _do_test("tests/resources/conduit/conduit_updateurl.xpi")
+    
+def test_structure():
+    """Tests the Conduit detector against a toolbar with files and
+    folders which resemble those of a Conduit toolbar."""
+    
+    _do_test("tests/resources/conduit/conduit_structure.xpi")
+    
+def test_chrome():
+    """Tests the Conduit detector against a toolbar with
+    chrome.manifest entries that indicate a Conduit toolbar."""
+    
+    _do_test("tests/resources/conduit/conduit_structure.xpi")
