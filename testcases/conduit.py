@@ -30,7 +30,10 @@ def test_conduittoolbar(err, package_contents=None, xpi_manager=None):
             # If the value exists, test for the appropriate content
             if results == k:
                 err.reject = True
-                return err.error("Detected Conduit toolbar.")
+                err_mesg = "Conduit value (%s) found in install.rdf" % k
+                return err.error("Detected Conduit toolbar.",
+                                 err_mesg,
+                                 "install.rdf")
         
         # Also test for the update URL
         update_url_value = "https://ffupdate.conduit-services.com/"
@@ -38,7 +41,9 @@ def test_conduittoolbar(err, package_contents=None, xpi_manager=None):
         results = install.get_object(None, install.uri("updateURL"))
         if results and results.startswith(update_url_value):
             err.reject = True
-            return err.error("Detected Conduit toolbar.")
+            return err.error("Detected Conduit toolbar.",
+                             "Conduit update URL found in install.rdf.",
+                             "install.rdf")
     
         
     # Do some matching on the files in the package
@@ -49,7 +54,9 @@ def test_conduittoolbar(err, package_contents=None, xpi_manager=None):
             # If there's a matching file, it's Conduit
             if fnmatch.fnmatch(file_, bad_file):
                 err.reject = True
-                return err.error("Detected Conduit toolbar.")
+                err_mesg = "Conduit directory (%s) found." % bad_file
+                return err.error("Detected Conduit toolbar.",
+                                 err_mesg)
     
     
     # Do some tests on the chrome.manifest file if it exists
@@ -72,6 +79,7 @@ def test_conduittoolbar(err, package_contents=None, xpi_manager=None):
         if data is not None and \
            data["object"].count("ebtoolbarstyle") > 0:
             err.reject = True
-            return err.error("Detected Conduit toolbar.")
+            return err.error("Detected Conduit toolbar.",
+                             "'ebtoolbarstyle' found in chrome.manifest")
         
         

@@ -12,6 +12,8 @@ def test_langpack_manifest(err, package_contents=None, xpi_package=None):
     if "chrome.manifest" not in package_contents:
         return
     
+    # TODO : Did I read about having multiple chrome.manifest files?
+    
     # Retriece the chrome.manifest if it's cached.
     if err.get_resource("chrome.manifest"):
         chrome = err.get_resource("chrome.manifest")
@@ -25,7 +27,12 @@ def test_langpack_manifest(err, package_contents=None, xpi_package=None):
         # Test to make sure that the triple's subject is valid
         if subject not in ("locale",
                            "override"):
-            err.error("Invalid chrome.manifest subject: %s" % subject)
+            err.error("Invalid chrome.manifest subject: %s" % subject,
+                      """chrome.manifest files in language packs are 
+                      only allowed to contain items that are prefixed
+                      with 'locale' or 'override'. Other values are not
+                      allowed.""",
+                      "chrome.manifest")
         
         if subject == "override":
             object_ = triple["object"]
@@ -36,5 +43,6 @@ def test_langpack_manifest(err, package_contents=None, xpi_package=None):
             if not fnmatch.fnmatch(object_, pattern) or \
                not fnmatch.fnmatch(predicate, pattern):
                 err.error("Invalid chrome.manifest object/predicate.",
-                    "'override' entry does not match %s" % pattern)
+                    "'override' entry does not match '/%s/'" % pattern,
+                    "chrome.manifest")
     

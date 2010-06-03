@@ -11,7 +11,10 @@ def test_unknown_file(err, filename):
     name = path.pop()
     
     if name == "chromelist.txt":
-        err.info("The extension contains a deprecated file (%s)" % filename)
+        err.info("Extension contains a deprecated file (%s)" % filename,
+                 """The file in question is no longer supported by any
+                 modern Mozilla product.""",
+                 filename)
         return True
 
 
@@ -26,8 +29,11 @@ def test_blacklisted_files(err, package_contents=None, xpi_package=None):
     pattern = "File '%s' is using a blacklisted file extension (%s)"
     for name, file_ in package_contents.items():
         # Simple test to ensure that the extension isn't blacklisted
-        if file_["extension"] in blacklisted_extensions:
-            err.warning(pattern % (name, file_["extension"]))
+        extension = file_["extension"]
+        if extension in blacklisted_extensions:
+            err.warning(pattern % (name, extension),
+                        "The extension %s is disallowed." % extension,
+                        name)
     
 
 @decorator.register_test(tier=2, expected_type=3)
@@ -62,7 +68,11 @@ def test_targetedapplications(err, package_contents=None,
                 
                 # Time to test for some install.js
                 if not "install.js" in package_contents:
-                    err.error("Missing install.js for SeaMonkey.")
+                    err.error("Missing install.js for SeaMonkey.",
+                              """SeaMonkey requires install.js, which
+                              was not found. install.rdf indicates that
+                              the addon supports SeaMonkey.""",
+                              "install.rdf")
                     err.reject = True
                 
                 break
@@ -98,7 +108,8 @@ def test_extension_layout(err):
     "Tests the well-formedness of extensions."
     
     if not err.get_resource("has_install_rdf"):
-        err.error("Extension missing install.rdf.")
+        err.error("Extension missing install.rdf.",
+                  "All extensions require an install.rdf file.")
 
 
 @decorator.register_test(tier=1, expected_type=4)
@@ -181,11 +192,19 @@ def test_layout(err, package_contents, mandatory, whitelisted,
             continue
 
         # Otherwise, report an error.
-        err.error("Unknown file found in %s (%s)" % (pack_type, file_))
+        err.error("Unknown file found in %s (%s)" % (pack_type, file_),
+                  """Security limitations ban the use of the file %s
+                  in this type of addon. Remove the file or use an
+                  alternative, supported file format
+                  instead.""" % file_,
+                  file_)
 
     # If there's anything left over, it means there's files missing
     if mandatory:
         err.reject = True # Rejection worthy
         for mfile in mandatory:
-            err.error("%s missing from %s." % (pack_type, mfile))
+            err.error("%s missing from %s." % (pack_type, mfile),
+                      """%s is a required file for this type of addon.
+                      Consult documentation for a full list of required
+                      files.""" % mfile)
     

@@ -24,4 +24,8 @@ def test_theme_manifest(err, package_contents=None, xpi_package=None):
         # Test to make sure that the triple's subject is valid
         if subject not in ("skin",
                            "style"):
-            err.error("Invalid chrome.manifest subject: %s" % subject)
+            err.error("Invalid chrome.manifest subject: %s" % subject,
+                      """chrome.manifest files for themes are only
+                      allowed to have 'skin' and 'style' items. Other
+                      types of items are disallowed for security
+                      reasons.""")

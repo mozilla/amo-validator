@@ -31,22 +31,28 @@ class ErrorBundle:
         self.handler = OutputHandler(pipe, no_color)
             
         
-    def error(self, error, description=''):
+    def error(self, error, description='', filename='', line=0):
         "Stores an error message for the validation process"
         self.errors.append({"message": error,
-                            "description": description})
+                            "description": description,
+                            "file": filename,
+                            "line": line})
         return self
         
-    def warning(self, warning, description=''):
+    def warning(self, warning, description='', filename='', line=0):
         "Stores a warning message for the validation process"
         self.warnings.append({"message": warning,
-                              "description": description})
+                              "description": description,
+                              "file": filename,
+                              "line": line})
         return self
 
-    def info(self, info, description=''):
+    def info(self, info, description='', filename='', line=0):
         "Stores an informational message about the validation"
         self.infos.append({"message": info,
-                              "description": description})
+                           "description": description,
+                           "file": filename,
+                           "line": line})
         return self
         
     def set_type(self, type_):
@@ -110,13 +116,19 @@ class ErrorBundle:
         # Overlay the popped warnings onto the existing ones.
         for error in errors:
             self.error("%s > %s" % (name, error["message"]),
-                       error["description"])
+                       error["description"],
+                       [name, error["file"]],
+                       error["line"])
         for warning in warnings:
             self.warning("%s > %s" % (name, warning["message"]),
-                         warning["description"])
+                         warning["description"],
+                         [name, warning["file"]],
+                         warning["line"])
         for info in infos:
             self.info("%s > %s" % (name, info["message"]),
-                      info["description"])
+                      info["description"],
+                      [name, info["file"]],
+                      info["line"])
         
     
     def print_json(self):

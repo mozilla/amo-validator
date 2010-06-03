@@ -22,7 +22,13 @@ def test_hidden(err, package_contents=None, xpi_package=None):
     hidden_object = install.get_object(None, ta_hidden_predicate)
     
     if hidden_object is not None:
-        err.error("install.rdf contains obsoleted <em:hidden> element")
+        err.warning("install.rdf contains <em:hidden> element",
+                    """The <em:hidden> element is obsoleted in Firefox
+                    version 3.6 and up because it increases difficulty
+                    for users attempting to determine whether they have
+                    a particular extension installed or attempting to
+                    uninstall said extensions.""",
+                    "install.rdf")
     
 
 @decorator.register_test(tier=2)
@@ -43,7 +49,10 @@ def test_packed_packages(err, package_contents=None, xpi_package=None):
             xpi_package = XPIManager(package, name)
             
             if not xpi_package.test():
-                err.error("Subpackage %s is corrupt." % name)
+                err.error("Subpackage %s is corrupt." % name,
+                          """The subpackage could not be opened due to
+                          issues with corruption. Ensure that the file
+                          is valid.""")
                 continue
             
             package_contents = xpi_package.get_file_data()
@@ -70,8 +79,3 @@ def test_packed_packages(err, package_contents=None, xpi_package=None):
             
             package.close()
             err.pop_state()
-        
-
-@decorator.register_test(tier=2)
-def test_test(err, package_contents=None, xpi_package=None):
-    err.info("Test.")

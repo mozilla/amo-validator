@@ -27,5 +27,10 @@ def test_library_blacklist(err, package_contents=None, xpi_package=None):
         
         # Test if the file is blocked
         if hash_ in definitions:
-            err.error("File (%s) is a blacklisted JS library." % file_)
+            err.error("File (%s) is a blacklisted JS library." % file_,
+                      """JavaScript libraries are not permitted within
+                      Firefox addons. Consider modifying your code to
+                      run without the aid of the library in
+                      question.""",
+                      file_)
             
