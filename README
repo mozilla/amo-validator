@@ -98,19 +98,94 @@ sample document below.
 		{
 			"type": "error",
 			"message": "This is the error message text.",
-			"description": "Description of the error message."
+			"description": "Description of the error message.",
+			"file": "",
+			"line": 0
 		},
 		{
 			"type": "warning",
 			"message": "This is the warning message text.",
-			"description": "Description of the warning message."
+			"description": "Description of the warning message.",
+			"file": "testfile.xml",
+			"line": 0
 		},
 		{
 			"type": "info",
 			"message": "This is the informational message text.",
 			"description": "Description of the info message."
+			"file": "chrome.manifest",
+			"line": 21
+		},
+		{
+			"type": "error",
+			"message": "test.xpi > An error was found.",
+			"description": "This error happened within a subpackage."
+			"file": [
+				"test.xpi",
+				"chrome.manifest"
+			],
+			"line": 21
 		}
 	]
 }
 
+JSON Notes:
 
+When a subpackage exists, an angle bracket will delimit the subpackage
+name and the message text.
+
+If no applicable file is available (i.e.: when a file is missing), the
+`file` value will be empty. If a `file` value is available within a
+subpackage, then the `file` attribute will be a list containing the
+name of the outermost subpackage's name, followed by each successive
+concentric subpackage's name, followed by the name of the file that the
+message was generated in. If no applicable file is available within a
+subpackage, the `file` attribute is identical, except the last element
+of the list in the `file` attribute is an empty string.
+
+For instance, this tree would generate the following messages:
+
+package_to_test.xpi
+	|
+	|-install.rdf
+	|-chrome.manifest
+	|-subpackage.xpi
+	|  |
+	|  |-subsubpackage.xpi
+	|     |
+	|     |-chrome.manifest
+	|     |-install.rdf
+	|
+	|-subpackage.jar
+	   |
+	   |-install.rdf
+
+
+{
+	"type": "info",
+	"message": "<em:type> not found in install.rdf",
+	"description": " ... ",
+	"file": "install.rdf",
+	"line": 0
+},
+{
+	"type": "error",
+	"message": "Invalid chrome.manifest subject: override",
+	"description": " ... ",
+	"file": "chrome.manifest",
+	"line": 7
+},
+{
+	"type": "error",
+	"message": "subpackage.xpi > install.rdf missing from theme",
+	"description": " ... ",
+	"file": ["subpackage.xpi", ""],
+	"line": 0
+},
+{
+	"type": "error",
+	"message": "subpackage.xpi > subsubpackage.xpi > Invalid chrome.manifest subject: sytle",
+	"description": " ... ",
+	"file": ["subpackage.xpi", "subsubpackage.xpi", "chrome.manifest"],
+	"line": 5
+}

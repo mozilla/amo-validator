@@ -115,21 +115,47 @@ class ErrorBundle:
         
         # Overlay the popped warnings onto the existing ones.
         for error in errors:
+            trace = [name]
+            if type(error["file"]) is list:
+                trace.extend(error["file"])
+            else:
+                trace.append(error["file"])
+            
             self.error("%s > %s" % (name, error["message"]),
                        error["description"],
-                       [name, error["file"]],
+                       trace,
                        error["line"])
+                       
         for warning in warnings:
+            trace = [name]
+            if type(warning["file"]) is list:
+                trace.extend(warning["file"])
+            else:
+                trace.append(warning["file"])
+            
             self.warning("%s > %s" % (name, warning["message"]),
                          warning["description"],
-                         [name, warning["file"]],
+                         trace,
                          warning["line"])
         for info in infos:
+            trace = [name]
+            if type(info["file"]) is list:
+                trace.extend(info["file"])
+            else:
+                trace.append(info["file"])
+            
             self.info("%s > %s" % (name, info["message"]),
                       info["description"],
-                      [name, info["file"]],
+                      trace,
                       info["line"])
         
+    
+    def _clean_description(self, message):
+        "Cleans all the nasty whitespace from the descriptions."
+        
+        desc = message["description"].split("\n")
+        desc = [line.strip() for line in desc]
+        message["description"] = ' '.join(desc)
     
     def print_json(self):
         "Prints a JSON summary of the validation operation."
@@ -142,17 +168,19 @@ class ErrorBundle:
         
         # Copy messages to the JSON output
         for error in self.errors:
-            messages.append({"type": "error",
-                             "message": error["message"],
-                             "description": error["description"]})
+            error["type"] = "error"
+            self._clean_description(error)
+            messages.append(error)
+            
         for warning in self.warnings:
-            messages.append({"type": "warning",
-                             "message": warning["message"],
-                             "description": warning["description"]})
-        for info in self.warnings:
-            messages.append({"type": "info",
-                             "message": info["message"],
-                             "description": info["description"]})
+            warning["type"] = "warning"
+            self._clean_description(warning)
+            messages.append(warning)
+            
+        for info in self.infos:
+            info["type"] = "info"
+            self._clean_description(info)
+            messages.append(info)
         
         # Output the JSON.
         json_output = json.dumps(output)
@@ -181,9 +209,9 @@ class ErrorBundle:
             
             # Print out all the errors/warnings:
             for error in self.errors:
-                self._print_message("<<RED>>Error:<<NORMAL>> ", error, verbose)
+                self._print_message("<<RED>>Error:<<NORMAL>>\t", error, verbose)
             for warning in self.warnings:
-                self._print_message("<<YELLOW>>WARNING:<<NORMAL>> ", warning, verbose)
+                self._print_message("<<YELLOW>>Warning:<<NORMAL>> ", warning, verbose)
             
             # Prints things that only happen during verbose (infos).
             self._print_verbose(verbose)
@@ -212,24 +240,25 @@ class ErrorBundle:
             # Detailed problem description.
             if message["description"]:
                 # These are dirty, so strip out whitespace and concat.
-                desc = message["description"].split("\n")
-                desc = [line.strip() for line in desc]
-                verbose_output.append(' '.join(desc))
+                self._clean_description(message)
+                verbose_output.append(message["description"])
             
             # If file information is availe, output that as well.
             files = message["file"]
-            if files is not None:
-                fmsg = "File:\t%s"
+            if files is not None and files != "":
+                fmsg = "\tFile:\t%s"
                 
                 # Nested files (subpackes) are stored in a list.
-                if files is list:
+                if type(files) is list:
+                    if files[-1] == "":
+                        files[-1] = "(none)"
                     verbose_output.append(fmsg % ' > '.join(files))
                 else:
                     verbose_output.append(fmsg % files)
             
             # If there is a line number, that gets put on the end.
             if message["line"]:
-                verbose_output.append("Line:\t%s" % message["line"])
+                verbose_output.append("\tLine:\t%s" % message["line"])
                 
             # Stick it in with the standard items.
             output.append("\n\t")
@@ -242,7 +271,7 @@ class ErrorBundle:
     def _print_verbose(self, verbose):
         "Prints info code to help prevent code duplication"
         
-        mesg = "<<WHITE>>Notice:<<NORMAL>>"
+        mesg = "<<WHITE>>Notice:<<NORMAL>>\t"
         if self.infos and verbose:
             for info in self.infos:
                 self._print_message(mesg, info)
