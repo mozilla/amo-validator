@@ -36,18 +36,12 @@ def test_blacklisted_files(err, package_contents=None, xpi_package=None):
                         name)
     
 
-@decorator.register_test(tier=2, expected_type=3)
+@decorator.register_test(tier=2)
 def test_targetedapplications(err, package_contents=None,
                               xpi_package=None):
     """Tests to make sure that the targeted applications in the
     install.rdf file are legit and that any associated files (I'm
     looking at you, SeaMonkey) are where they need to be."""
-    
-    # If there isn't an install.rdf, we can't test for SeaMonkey
-    # support. Boo hoo.
-    
-    if not err.get_resource("has_install_rdf"):
-        return
     
     install = err.get_resource("install_rdf")
     
@@ -103,13 +97,13 @@ def test_dictionary_layout(err, package_contents=None, xpi_package=None):
                 "dictionary")
     
     
-@decorator.register_test(tier=1, expected_type=1, simple=True)
+@decorator.register_test(tier=1, simple=True)
 def test_extension_layout(err):
     "Tests the well-formedness of extensions."
     
     if not err.get_resource("has_install_rdf"):
-        err.error("Extension missing install.rdf.",
-                  "All extensions require an install.rdf file.")
+        err.error("Addon missing install.rdf.",
+                  "All addons require an install.rdf file.")
 
 
 @decorator.register_test(tier=1, expected_type=4)
