@@ -63,11 +63,21 @@ def main():
                         const=True,
                         help="""Activating this flag will remove color
                         support from the terminal.""")
+    parser.add_argument("--selfhosted",
+                        action="store_const",
+                        const=True,
+                        help="""Indicates that the addon will not be
+                        hosted on addons.mozilla.org. This allows the
+                        <em:updateURL> element to be set.""")
     
     args = parser.parse_args()
     
     error_bundle = ErrorBundle(args.file,
         not args.file == sys.stdout or args.boring)
+    
+    # Emulates the "$status" variable in the original validation.php
+    # test file. Equal to "$status == STATUS_LISTED".
+    error_bundle.save_resource("listed", not args.selfhosted)
     
     # Parse out the expected add-on type and run the tests.
     expectation = expectations[args.type]
@@ -229,8 +239,6 @@ def test_package(err, package, name, expectation=0):
 
 def test_inner_package(err, package_contents, package):
     "Tests a package's inner content."
-    
-    # ---- Begin Tiers ----
     
     # Iterate through each tier.
     for tier in sorted(decorator.get_tiers()):

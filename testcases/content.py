@@ -44,9 +44,11 @@ def test_packed_packages(err, package_contents=None, xpi_package=None):
         # If that item is a container file, unzip it and scan it.
         if data["extension"] == "jar":
             
+            is_subpackage = name.count("/") > 0
+            
             # Unpack the package and load it up.
             package = StringIO(xpi_package.read(name))
-            xpi_package = XPIManager(package, name)
+            xpi_package = XPIManager(package, name, is_subpackage)
             
             if not xpi_package.test():
                 err.error("Subpackage %s is corrupt." % name,

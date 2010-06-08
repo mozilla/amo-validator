@@ -116,12 +116,16 @@ class ErrorBundle:
         # Overlay the popped warnings onto the existing ones.
         for error in errors:
             trace = [name]
+            
+            # If there are sub-sub-packages, they'll be in a list.
             if type(error["file"]) is list:
                 trace.extend(error["file"])
             else:
                 trace.append(error["file"])
             
-            self.error("%s > %s" % (name, error["message"]),
+            # Write the errors with the file structure delimited by
+            # right carets.
+            self.error("%s > %s" % name, error["message"],
                        error["description"],
                        trace,
                        error["line"])
@@ -162,6 +166,7 @@ class ErrorBundle:
         
         output = {"detected_type": self.detected_type,
                   "success": not self.failed(),
+                  "rejected": self.reject,
                   "messages":[]}
         
         messages = output["messages"]

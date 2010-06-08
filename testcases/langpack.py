@@ -46,4 +46,3 @@ def test_langpack_manifest(err, package_contents=None, xpi_package=None):
                     "'override' entry does not match '/%s/'" % pattern,
                     "chrome.manifest",
                     triple["line"])
-    
