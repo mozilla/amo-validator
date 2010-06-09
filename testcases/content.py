@@ -5,6 +5,7 @@ from StringIO import StringIO
 
 import decorator
 import validator
+import markuptester
 from xpi import XPIManager
 
 @decorator.register_test(tier=1)
@@ -81,3 +82,14 @@ def test_packed_packages(err, package_contents=None, xpi_package=None):
             
             package.close()
             err.pop_state()
+            
+        elif data["extension"] in ("xul", "xml", "html", "xhtml"):
+            print name
+            parser = markuptester.MarkupParser(err)
+            parser.process(name,
+                           xpi_package.read(name),
+                           data["extension"])
+            
+            
+            
+

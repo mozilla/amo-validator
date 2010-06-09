@@ -125,7 +125,7 @@ class ErrorBundle:
             
             # Write the errors with the file structure delimited by
             # right carets.
-            self.error("%s > %s" % name, error["message"],
+            self.error("%s > %s" % (name, error["message"]),
                        error["description"],
                        trace,
                        error["line"])

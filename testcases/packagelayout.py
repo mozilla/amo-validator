@@ -1,4 +1,5 @@
 import fnmatch
+import re
 from rdflib import BNode
 
 import decorator
@@ -34,60 +35,6 @@ def test_blacklisted_files(err, package_contents=None, xpi_package=None):
             err.warning(pattern % (name, extension),
                         "The extension %s is disallowed." % extension,
                         name)
-    
-
-@decorator.register_test(tier=2)
-def test_targetedapplications(err, package_contents=None,
-                              xpi_package=None):
-    """Tests to make sure that the targeted applications in the
-    install.rdf file are legit and that any associated files (I'm
-    looking at you, SeaMonkey) are where they need to be."""
-    
-    if not err.get_resource("has_install_rdf"):
-        return
-    
-    install = err.get_resource("install_rdf")
-    
-    # Search through the install.rdf document for the SeaMonkey
-    # GUID string.
-    ta_predicate = install.uri("targetApplication")
-    ta_guid_predicate = install.uri("id")
-    
-    used_targets = [];
-    
-    # Isolate all of the bnodes referring to target applications
-    for target_app in install.get_objects(None, ta_predicate):
-        
-        # Get the GUID from the target application
-        
-        for ta_guid in install.get_objects(target_app,
-                                           ta_guid_predicate):
-            
-            used_targets.append(ta_guid)
-            
-            if ta_guid == "{92650c4d-4b8e-4d2a-b7eb-24ecf4f6b63a}":
-                
-                # Time to test for some install.js
-                if not "install.js" in package_contents:
-                    err.warning("Missing install.js for SeaMonkey.",
-                                """SeaMonkey requires install.js, which
-                                was not found. install.rdf indicates
-                                that the addon supports SeaMonkey.""",
-                                "install.rdf")
-                    err.reject = True
-                
-                break
-    
-    no_duplicate_targets = set(used_targets)
-    
-    if len(used_targets) != len(no_duplicate_targets):
-        err.warning("Found duplicate <em:targetApplication> elements.",
-                    """Multiple targetApplication elements were found
-                    in the install.manifest file that refer to the same
-                    application GUID. There should not be duplicate
-                    target applications entries.""",
-                    "install.rdf")
-    
 
 @decorator.register_test(tier=1)
 def test_install_rdf_params(err, package_contents=None,
@@ -162,6 +109,15 @@ def test_install_rdf_params(err, package_contents=None,
         
         # Remove the predicate from move_exist_once if it's there.
         if predicate in must_exist_once:
+            
+            object_value = install.get_object(None, pred_raw)
+            
+            # Test the predicate for specific values.
+            if predicate == "id_":
+                _test_id(err, object_value)
+            elif predicate == "version":
+                _test_version(err, object_value)
+            
             must_exist_once.remove(predicate)
             continue
         
@@ -192,6 +148,40 @@ def test_install_rdf_params(err, package_contents=None,
                       the install manifest specification. It must be
                       added to your addon.""",
                       "install.rdf")
+    
+
+def _test_id(err, value):
+    "Tests an install.rdf GUID value"
+    
+    id_pattern = re.compile("(\{[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}\}|[a-z0-9-\._]*\@[a-z0-9-\._]+)")
+    
+    # Must be a valid version number.
+    if not id_pattern.match(value):
+        err.error("The value of <em:version> is invalid.",
+                  """The values supplied for <em:version> in the
+                  install.rdf file is not a valid version string.""",
+                  "install.rdf")
+    
+
+def _test_version(err, value):
+    "Tests an install.rdf version number"
+    
+    whitespace_pattern = re.compile(".*\s.*")
+    version_pattern = re.compile("\d+(\+|\w+)?(\.\d+(\+|\w+)?)*")
+    
+    # Cannot have whitespace in the pattern.
+    if whitespace_pattern.match(value):
+        err.error("<em:version> value cannot contain whitespace.",
+                  """In your addon's install.rdf file, version numbers
+                  cannot contain whitespace characters of any kind.""",
+                  "install.rdf")
+    
+    # Must be a valid version number.
+    if not version_pattern.match(value):
+        err.error("The value of <em:version> is invalid.",
+                  """The values supplied for <em:version> in the
+                  install.rdf file is not a valid version string.""",
+                  "install.rdf")
     
 
 @decorator.register_test(tier=1, expected_type=3)
@@ -323,7 +313,7 @@ def test_layout(err, package_contents, mandatory, whitelisted,
     if mandatory:
         err.reject = True # Rejection worthy
         for mfile in mandatory:
-            err.error("%s missing from %s." % (pack_type, mfile),
+            err.error("%s missing from %s addon." % (mfile, pack_type),
                       """%s is a required file for this type of addon.
                       Consult documentation for a full list of required
                       files.""" % mfile)

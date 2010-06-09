@@ -13,6 +13,7 @@ import testcases.conduit
 import testcases.langpack
 import testcases.themes
 import testcases.content
+import testcases.targetapplication
 from xpi import XPIManager
 from rdf import RDFParser
 from errorbundler import ErrorBundle
