@@ -5,8 +5,18 @@ from StringIO import StringIO
 
 import decorator
 import validator
-import markuptester
+import testcases.markup.markuptester
+import testcases.langpack
 from xpi import XPIManager
+
+PACKAGE_ANY = 0
+PACKAGE_EXTENSION = 1
+PACKAGE_THEME = 2
+PACKAGE_DICTIONARY = 3
+PACKAGE_LANGPACK = 4
+PACKAGE_SEARCHPROV = 5
+PACKAGE_MULTI = 1
+PACKAGE_SUBPACKAGE = 7
 
 @decorator.register_test(tier=1)
 def test_hidden(err, package_contents=None, xpi_package=None):
@@ -44,7 +54,12 @@ def test_packed_packages(err, package_contents=None, xpi_package=None):
         
         # If that item is a container file, unzip it and scan it.
         if data["extension"] == "jar":
+            # This is either a subpackage or a nested theme.
             
+            # Whether this is a subpackage or a nested theme is
+            # determined by whether it is in the root folder or not.
+            # Subpackages are always found in a directory such as
+            # /chrome or /content.
             is_subpackage = name.count("/") > 0
             
             # Unpack the package and load it up.
@@ -62,7 +77,7 @@ def test_packed_packages(err, package_contents=None, xpi_package=None):
             
             # Let the error bunder know we're in a sub-package.
             err.push_state(data["name_lower"])
-            err.set_type(7) # Subpackage
+            err.set_type(PACKAGE_SUBPACKAGE) # Subpackage
             validator.test_inner_package(err,
                 package_contents, xpi_package)
             
@@ -70,6 +85,8 @@ def test_packed_packages(err, package_contents=None, xpi_package=None):
             err.pop_state()
             
         elif data["extension"] == "xpi":
+            # It's not a subpackage, it's a nested extension. These are
+            # found in multi-extension packages.
             
             # Unpack!
             package = StringIO(xpi_package.read(name))
@@ -84,12 +101,15 @@ def test_packed_packages(err, package_contents=None, xpi_package=None):
             err.pop_state()
             
         elif data["extension"] in ("xul", "xml", "html", "xhtml"):
-            print name
-            parser = markuptester.MarkupParser(err)
+            
+            parser = testcases.markup.markuptester.MarkupParser(err)
             parser.process(name,
                            xpi_package.read(name),
                            data["extension"])
             
+        elif data["extension"] in ("dtd", "properties") and \
+             err.detected_type == PACKAGE_LANGPACK:
             
+            data = xpi_package.read(name)
+            testcases.langpack._test_unsafe_html(err, name, data)
             
-

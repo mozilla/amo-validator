@@ -1,5 +1,14 @@
 from xml.dom.minidom import parse
 
+PACKAGE_ANY = 0
+PACKAGE_EXTENSION = 1
+PACKAGE_THEME = 2
+PACKAGE_DICTIONARY = 3
+PACKAGE_LANGPACK = 4
+PACKAGE_SEARCHPROV = 5
+PACKAGE_MULTI = 1
+PACKAGE_SUBPACKAGE = 7
+
 def detect_type(err, install_rdf=None, xpi_package=None):
     """Determines the type of addon being validated based on
     install.rdf, file extension, and other properties."""
@@ -7,15 +16,15 @@ def detect_type(err, install_rdf=None, xpi_package=None):
     # The types in the install.rdf don't pair up 1:1 with the type
     # system that we're using for expectations and the like. This is
     # to help translate between the two.
-    translated_types = {"2": 1, 
-                        "4": 2, 
-                        "8": 4, 
-                        "32": 1}
+    translated_types = {"2": PACKAGE_EXTENSION,
+                        "4": PACKAGE_THEME,
+                        "8": PACKAGE_LANGPACK,
+                        "32": PACKAGE_MULTI}
     
     # If we're missing our install.rdf file, we can try to make some
     # assumptions.
     if install_rdf is None:
-        types = {"xpi": 3}
+        types = {"xpi": PACKAGE_DICTIONARY}
         
         err.info("install.rdf was not found.",
                  """The type should be determined by install.rdf if
@@ -56,7 +65,7 @@ def detect_type(err, install_rdf=None, xpi_package=None):
     dictionaries = [file_ for file_ in package_contents.keys() if
                     file_.startswith("dictionaries")]
     if dictionaries:
-        return 3 # Dictionary
+        return PACKAGE_DICTIONARY
     
     
     # There's no type element, so the spec says that it's either a

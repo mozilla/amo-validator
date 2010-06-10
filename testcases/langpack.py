@@ -1,4 +1,5 @@
 import fnmatch
+import re
 
 import decorator
 from chromemanifest import ChromeManifest
@@ -46,3 +47,25 @@ def test_langpack_manifest(err, package_contents=None, xpi_package=None):
                     "'override' entry does not match '/%s/'" % pattern,
                     "chrome.manifest",
                     triple["line"])
+
+
+# This function is called by content.py
+def _test_unsafe_html(err, filename, data):
+    "Tests for unsafe HTML tags in language pack files."
+    
+    unsafe_pttrn = re.compile('<(script|embed|object)')
+    
+    if unsafe_pttrn.search(data):
+        err.error("Unsafe HTML found in language pack files.",
+                  """Language packs are not allowed to contain scripts,
+                  embeds, or other executable code in the language
+                  definition files.""",
+                  filename)
+    
+    remote_pttrn = re.compile('(href|src)=["\'](?!(chrome:\/\/|#([A-Za-z][A-Za-z0-9\-_:\.]*)?))')
+    if remote_pttrn.search(data):
+        err.error("Unsafe remote resource found in language pack.",
+                  """Language packs are not allowed to contain
+                  references to remote resources.""",
+                  filename)
+    

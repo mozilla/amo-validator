@@ -5,6 +5,14 @@ This validator is a proposed replacement for the current add-on
 validator available at addons.mozilla.org. It is written entirely in
 python.
 
+Prerequisites
+------------
+
+Python Libraries:
+- rdflib
+- cssutils
+
+
 Running
 ------------
 

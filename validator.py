@@ -8,6 +8,7 @@ import argparse
 import decorator
 import typedetection
 import testcases.packagelayout
+import testcases.installrdf
 import testcases.library_blacklist
 import testcases.conduit
 import testcases.langpack
@@ -17,6 +18,15 @@ import testcases.targetapplication
 from xpi import XPIManager
 from rdf import RDFParser
 from errorbundler import ErrorBundle
+
+PACKAGE_ANY = 0
+PACKAGE_EXTENSION = 1
+PACKAGE_THEME = 2
+PACKAGE_DICTIONARY = 3
+PACKAGE_LANGPACK = 4
+PACKAGE_SEARCHPROV = 5
+PACKAGE_MULTI = 1
+PACKAGE_SUBPACKAGE = 7
 
 def main():
     "Main function. Handles delegation to other functions"
@@ -131,7 +141,8 @@ def prepare_package(err, path, expectation=0):
 def test_search(err, package, expectation=0):
     "Tests the package to see if it is a search provider."
     
-    expected_search_provider = expectation in (0, 5)
+    expected_search_provider = expectation in (PACKAGE_ANY,
+                                               PACKAGE_SEARCHPROV)
     
     # If we're not expecting a search provider, warn the user and stop
     # testing it like a search provider.
@@ -158,7 +169,7 @@ def test_search(err, package, expectation=0):
             return err
         
     elif expected_search_provider:
-        err.set_type(5)
+        err.set_type(PACKAGE_SEARCHPROV)
         err.info("OpenSearch provider confirmed.")
     
     return err
@@ -194,13 +205,13 @@ def test_package(err, package, name, expectation=0):
         err.reject = True
         return err.error("XPI package appears to be corrupt.")
     
-    assumed_extensions = {"jar": 2,
-                          "xml": 5}
+    assumed_extensions = {"jar": PACKAGE_THEME,
+                          "xml": PACKAGE_SEARCHPROV}
     
     if package.extension in assumed_extensions:
         assumed_type = assumed_extensions[package.extension]
         # Is the user expecting a different package type?
-        if not expectation in (0, assumed_type):
+        if not expectation in (PACKAGE_ANY, assumed_type):
             err.error("Unexpected package type (found theme)")
     
     # Cache a copy of the package contents.
@@ -229,7 +240,7 @@ def test_package(err, package, name, expectation=0):
         
         # Compare the results of the low-level type detection to
         # that of the expectation and the assumption.
-        if not expectation in (0, results):
+        if not expectation in (PACKAGE_ANY, results):
             err.reject = True
             err_mesg = "Extension type mismatch (expected %s, found %s)"
             err_mesg = err_mesg % (types[expectation], types[results])
