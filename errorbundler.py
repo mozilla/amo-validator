@@ -7,7 +7,7 @@ if platform.system() != "Windows":
 else:
     from outputhandlers.windowscolors import OutputHandler
 
-class ErrorBundle:
+class ErrorBundle(object):
     """This class does all sorts of cool things. It gets passed around
     from test to test and collects up all the errors like the candy man
     'separating the sorrow and collecting up all the cream.' It's

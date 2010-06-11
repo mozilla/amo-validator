@@ -2,7 +2,7 @@ from rdflib.graph import Graph
 from rdflib import URIRef
 from cStringIO import StringIO
 
-class RDFParser:
+class RDFParser(object):
     """This little gem (not to be confused with a Ruby gem) loads and
     parses an RDF file."""
     

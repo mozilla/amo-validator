@@ -2,6 +2,15 @@ import re
 
 import decorator
 
+PACKAGE_ANY = 0
+PACKAGE_EXTENSION = 1
+PACKAGE_THEME = 2
+PACKAGE_DICTIONARY = 3
+PACKAGE_LANGPACK = 4
+PACKAGE_SEARCHPROV = 5
+PACKAGE_MULTI = 1
+PACKAGE_SUBPACKAGE = 7
+
 @decorator.register_test(tier=1)
 def test_install_rdf_params(err,
                             package_contents=None,
@@ -15,13 +24,13 @@ def test_install_rdf_params(err,
     install = err.get_resource("install_rdf")
     
     if err.get_resource("listed"):
-        shouldnt_exist = ("hidden")
+        shouldnt_exist = ("hidden", )
     else:
         shouldnt_exist = ("updateURL",
                           "updateKey",
                           "hidden")
-    obsolete = ("file")
-    must_exist_once = ["id_",
+    obsolete = ("file", )
+    must_exist_once = ["id",
                        "version",
                        "name",
                        "targetApplication"]
@@ -42,6 +51,9 @@ def test_install_rdf_params(err,
                  "requires",
                  "developer")
     
+    if err.detected_type == PACKAGE_THEME:
+        may_exist_once.append("internalName")
+    
     banned_pattern = "Banned element %s exists in install.rdf."
     obsolete_pattern = "Obsolete element %s found in install.rdf."
     unrecognized_pattern = "Unrecognized element in install.rdf: %s"
@@ -50,11 +62,6 @@ def test_install_rdf_params(err,
     
     for pred_raw in install.rdf.predicates(top_id, None):
         predicate = pred_raw.split("#").pop()
-        
-        # Some of the element names collide with built-in function
-        # names of tuples/lists.
-        if predicate == "id":
-            predicate += "_"
         
         # Test if the predicate is banned
         if predicate in shouldnt_exist:
@@ -74,13 +81,13 @@ def test_install_rdf_params(err,
                      "install.rdf")
             continue
         
-        # Remove the predicate from move_exist_once if it's there.
+        # Remove the predicate from must_exist_once if it's there.
         if predicate in must_exist_once:
             
             object_value = install.get_object(None, pred_raw)
             
             # Test the predicate for specific values.
-            if predicate == "id_":
+            if predicate == "id":
                 _test_id(err, object_value)
             elif predicate == "version":
                 _test_version(err, object_value)
@@ -109,35 +116,35 @@ def test_install_rdf_params(err,
     # Once all of the predicates have been tested, make sure there are
     # no mandatory elements that haven't been found.
     if must_exist_once:
-        for predicate in must_exist_once:
-            err.error("install.rdf is missing element: %s" % predicate,
-                      """The element listed is a required element in
-                      the install manifest specification. It must be
-                      added to your addon.""",
-                      "install.rdf")
+        missing_preds = ', '.join(must_exist_once)
+        err.error("install.rdf missing element(s): %s" % missing_preds,
+                  """The element listed is a required element in the
+                  install manifest specification. It must be added to
+                  your addon.""",
+                  "install.rdf")
     
 
 def _test_id(err, value):
-    "Tests an install.rdf GUID value"
+    "Tests an install.rdf UUID value"
     
-    id_pattern = re.compile("(\{[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}\}|[a-z0-9-\._]*\@[a-z0-9-\._]+)")
+    id_pattern = re.compile("(\{[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}\}|[a-zA-Z0-9-\._]*\@[a-zA-Z0-9-\._]+)")
     
     # Must be a valid version number.
     if not id_pattern.match(value):
-        err.error("The value of <em:version> is invalid.",
-                  """The values supplied for <em:version> in the
-                  install.rdf file is not a valid version string.""",
+        err.error("The value of <em:id> is invalid.",
+                  """The values supplied for <em:id> in the
+                  install.rdf file is not a valid UUID string.""",
                   "install.rdf")
     
 
 def _test_version(err, value):
     "Tests an install.rdf version number"
     
-    whitespace_pattern = re.compile(".*\s.*")
+    whitespace_pattern = re.compile("\s")
     version_pattern = re.compile("\d+(\+|\w+)?(\.\d+(\+|\w+)?)*")
     
     # Cannot have whitespace in the pattern.
-    if whitespace_pattern.match(value):
+    if whitespace_pattern.search(value):
         err.error("<em:version> value cannot contain whitespace.",
                   """In your addon's install.rdf file, version numbers
                   cannot contain whitespace characters of any kind.""",

@@ -1,7 +1,7 @@
 import zipfile
 from zipfile import ZipFile
 
-class XPIManager:
+class XPIManager(object):
     """An XPI reader and management class. Allows fun things like
     reading, listing, and extracting files from an XPI without you
     needing to worry about things like zip files or IO."""
