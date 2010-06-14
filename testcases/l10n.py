@@ -42,6 +42,14 @@ def test_file(err, path):
     output = sys.stdout.getvalue()
     sys.stdout = stdout
     
+    output = output.strip()
+    
+    if not output or output.startswith(("WARNING", "ERROR")):
+        err.info("This extension appears not to be localized.",
+                 """The package does not contain any localization
+                 support.""")
+        return None
+    
     output_parsed = json.loads(output)
     
     if not isinstance(output_parsed, list):
@@ -70,47 +78,45 @@ def test_xpi(err, package_contents, xpi_package):
     path = xpi_package.filename
     path = os.path.realpath(path)
     
+    print "Testing XPI: %s" % path
+    print package_contents
+    
     data = test_file(err, path)
     
     if not data:
         return
-    else:
-        
-        unmod_pattern = \
-            "The %s locale contains %d unmodified translations."
-        missing_pattern = "The %s locale is missing %d entities."
-        missing_file_pattern = "The %s locale is missing %d files."
-        
-        for child in data:
-            children_obj = child["children"]
-            name = children_obj[0]
-            stats = children_obj[1]["children"][0]
-            
-            total_entities = int(stats["total"])
-            
-            if "unmodifiedEntities" in stats:
-                unmodified_entities = int(stats["unmodifiedEntities"])
-                unmodified_ratio = unmodified_entities / total_entities
-                if unmodified_ratio > \
-                   L10N_THRESHOLD:
-                    err.warning(unmod_pattern % (name,
-                                                 unmodified_entities),
-                                """The number of unmodified entities
-                                must not exceed a %d ratio.""" %
-                                unmodified_ratio)
-            
-            if "missingEntities" in stats:
-                missing_entities = int(stats["missingEntities"])
-                err.warning(missing_pattern % (name, missing_entities),
-                            """There should not be missing entities in
-                            any given locale.""")
-            
-            if "missingEntitiesInMissingFiles" in stats and \
-               "missingEntities" in stats:
-                missing_files = \
-                    int(stats["missingEntitiesInMissingFiles"])
-                err.warning(missing_pattern % (name, missing_files),
-                            """Locales should include all locale
-                            files.""")
-            
     
+    unmod_pattern = \
+        "The %s locale contains %d unmodified translations."
+    missing_pattern = "The %s locale is missing %d entities."
+    missing_file_pattern = "The %s locale is missing %d files."
+    
+    for child in data:
+        children_obj = child["children"]
+        name = children_obj[0]
+        stats = children_obj[1]["children"][0]
+        
+        total_entities = int(stats["total"])
+        
+        if "unmodifiedEntities" in stats:
+            unmodified_entities = int(stats["unmodifiedEntities"])
+            unmodified_ratio = unmodified_entities / total_entities
+            if unmodified_ratio > L10N_THRESHOLD:
+                err.warning(unmod_pattern % (name, 
+                                             unmodified_entities),
+                            """The number of unmodified entities must
+                            not exceed a %d ratio.""" %
+                            unmodified_ratio)
+        
+        if "missingEntities" in stats:
+            missing_entities = int(stats["missingEntities"])
+            err.warning(missing_pattern % (name, missing_entities),
+                        """There should not be missing entities in any
+                        given locale.""")
+        
+        if "missingEntitiesInMissingFiles" in stats and \
+           "missingEntities" in stats:
+            missing_files = int(stats["missingEntitiesInMissingFiles"])
+            err.warning(missing_pattern % (name, missing_files),
+                        """Locales should include all locale files.""")
+        
