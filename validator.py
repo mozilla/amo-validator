@@ -15,7 +15,7 @@ import testcases.langpack
 import testcases.themes
 import testcases.content
 import testcases.targetapplication
-#import testcases.l10n
+import testcases.l10n
 from xpi import XPIManager
 from rdf import RDFParser
 from errorbundler import ErrorBundle

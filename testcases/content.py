@@ -6,6 +6,7 @@ from StringIO import StringIO
 import decorator
 import validator
 import testcases.markup.markuptester
+import testcases.markup.csstester
 import testcases.langpack
 from xpi import XPIManager
 
@@ -113,3 +114,7 @@ def test_packed_packages(err, package_contents=None, xpi_package=None):
             data = xpi_package.read(name)
             testcases.langpack._test_unsafe_html(err, name, data)
             
+        elif data["extension"] == "css":
+            
+            data = xpi_package.read(name)
+            #testcases.markup.csstester.test_css_file(err, name, data)

@@ -79,6 +79,11 @@ class ErrorBundle(object):
         self.resources[name] = resource
         
     
+    def is_nested_package(self):
+        "Returns whether the current package is within a PACKAGE_MULTI"
+        
+        return bool(self.package_stack)
+    
     def push_state(self, new_file=""):
         "Saves the current error state to parse subpackages"
         

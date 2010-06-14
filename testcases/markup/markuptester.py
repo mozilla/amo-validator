@@ -27,6 +27,7 @@ SELF_CLOSING_TAGS = ("area",
                      "hr",
                      "img",
                      "input",
+                     "li",
                      "link",
                      "meta",
                      "p",
@@ -229,18 +230,23 @@ class MarkupParser(HTMLParser):
         if tag == "script":
             # TODO: Link up the JS analysis module once it's written.
             pass
+        elif tag == "style":
+            # TODO: Wire up with the CSS analyzer once it's written.
+            pass
         
         
     def handle_data(self, data):
+        self._save_to_buffer(data)
         
-        # We're not interested in data that isn't in a tag.
-        if not self.xml_buffer:
-            return
-        
+    def handle_comment(self, data):
         self._save_to_buffer(data)
     
     def _save_to_buffer(self, data):
         """Save data to the XML buffer for the current tag."""
+        
+        # We're not interested in data that isn't in a tag.
+        if not self.xml_buffer:
+            return
         
         self.xml_buffer[-1] += data
     
