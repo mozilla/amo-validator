@@ -9,4 +9,6 @@
 	<iframe type="content-primary"></iframe>
 	<iframe type="content-targetable"></iframe>
 	
+	<script type="text/javascript" src="foo.bar"></script>
+	
 </dialog>

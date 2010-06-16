@@ -142,45 +142,61 @@ class MarkupParser(HTMLParser):
                                    self.filename,
                                    self.line)
         
-        if tag in ("iframe", "browser"):
+        if tag in ("iframe", "browser") and self.extension == "xul":
             # Bork if XUL iframe has no type attribute
-            if self.extension == "xul":
+            
+            type_ = None
+            src = None
+            for attr in attrs:
+                attr_name = attr[0].lower()
+                if attr_name == "type":
+                    type_ = attr[1].lower()
+                elif attr_name == "src":
+                    src = attr[1].lower()
+            
+            # We say it's true by default to catch elements that are
+            # type="chrome" without an src="" attribute.
+            remote_src = True
+            if isinstance(src, str):
+                remote_src = not self._is_url_local(src)
                 
-                type_ = None
-                src = None
-                for attr in attrs:
-                    attr_name = attr[0].lower()
-                    if attr_name == "type":
-                        type_ = attr[1].lower()
-                    elif attr_name == "src":
-                        src = attr[1].lower()
-                
-                # We say it's true by default to catch elements that are
-                # type="chrome" without an src="" attribute.
-                remote_src = True
-                if isinstance(src, str):
-                    remote_src = not self._is_url_local(src)
-                    
-                if type_ and \
-                   not (type_ in SAFE_IFRAME_TYPES or 
-                        not remote_src):
-                    self.err.warning("iframe missing 'type' attribute",
-                                     """All iframe elements must have
-                                     either a valid `type` attribute or
-                                     a `src` attribute that points to a
-                                     local file.""",
-                                     self.filename,
-                                     self.line)
-                elif (not type_ or 
-                      type_ not in SAFE_IFRAME_TYPES) and \
-                     remote_src:
-                    self.err.warning("Typeless iframes must be local.",
-                                     """iframe elements that lack a
-                                     type attribute must always have
-                                     src attributes that reference
-                                     local resources.""",
-                                     self.filename,
-                                     self.line)
+            if type_ and \
+               not (type_ in SAFE_IFRAME_TYPES or 
+                    not remote_src):
+                self.err.warning("iframe missing 'type' attribute",
+                                 """All iframe elements must have
+                                 either a valid `type` attribute or
+                                 a `src` attribute that points to a
+                                 local file.""",
+                                 self.filename,
+                                 self.line)
+            elif (not type_ or 
+                  type_ not in SAFE_IFRAME_TYPES) and \
+                 remote_src:
+                self.err.warning("Typeless iframes must be local.",
+                                 """iframe elements that lack a
+                                 type attribute must always have
+                                 src attributes that reference
+                                 local resources.""",
+                                 self.filename,
+                                 self.line)
+            
+        elif tag == "script" and self.extension == "xul":
+            # Per the Addon Validator Spect (v2), scripts in XUL
+            # must not be remote.
+            
+            src = None
+            for attr in attrs:
+                if attr[0].lower() == "src":
+                    src = attr[1].lower()
+            
+            if src and not self._is_url_local(src):
+                self.err.error("Scripts must not be remote in XUL",
+                               """In XUL, <script> tags must not be
+                               referenced to script files that are
+                               hosted remotely.""",
+                               self.filename,
+                               self.line)
         
         # Find CSS and JS attributes and handle their values like they
         # would otherwise be handled by the standard parser flow.

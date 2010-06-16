@@ -1,0 +1,6 @@
+<?xml version="1.0"?>
+<dialog
+	xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul">
+	<script type="text/javascript" src="http://foo.bar"></script>
+	
+</dialog>
