@@ -2,7 +2,6 @@ import testcases
 import testcases.markup
 import testcases.markup.csstester
 from errorbundler import ErrorBundle
-from helper import _do_test
 
 def _do_test(path, should_fail=False):
     
@@ -36,3 +35,8 @@ def test_css_webkit():
     "Tests that the scourge of the earth is absent."
     
     _do_test("tests/resources/markup/csstester/webkit.css", True)
+    
+def test_css_identitybox():
+    "Tests that the identity box isn't played with."
+    
+    _do_test("tests/resources/markup/csstester/identity-box.css", True)

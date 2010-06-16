@@ -77,6 +77,7 @@ class MarkupParser(HTMLParser):
                     continue
                 
                 if "script" in self.xml_state:
+                    print "script"
                     if self.alerted_script_comments:
                         continue
                     self.err.info("Missing comments in <script> tag",
@@ -114,6 +115,13 @@ class MarkupParser(HTMLParser):
         
         if DEBUG:
             print self.xml_state, tag, self_closing
+        
+        # A fictional tag for testing purposes.
+        if tag == "xbannedxtestx":
+            self.err.error("Banned element",
+                           "A banned element was detected",
+                           self.filename,
+                           self.line)
         
         if self.err.detected_type == PACKAGE_LANGPACK:
             
@@ -234,6 +242,7 @@ class MarkupParser(HTMLParser):
             # TODO: Wire up with the CSS analyzer once it's written.
             pass
         
+        # TODO : Handle script/CSS attribute values
         
     def handle_data(self, data):
         self._save_to_buffer(data)

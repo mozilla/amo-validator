@@ -49,5 +49,15 @@ def _run_css_tests(err, tokens, filename):
                               package.""",
                               filename,
                               line)
+            
+        elif tok_type == "HASH":
+            
+            if value == "#identity-box":
                 
+                err.warning("Modification to identity box.",
+                            """The identity box (#identity-box) is a
+                            sensitive piece of the interface and should
+                            not be modified.""",
+                            filename,
+                            line)
     
