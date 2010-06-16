@@ -19,15 +19,7 @@ import testcases.l10n
 from xpi import XPIManager
 from rdf import RDFParser
 from errorbundler import ErrorBundle
-
-PACKAGE_ANY = 0
-PACKAGE_EXTENSION = 1
-PACKAGE_THEME = 2
-PACKAGE_DICTIONARY = 3
-PACKAGE_LANGPACK = 4
-PACKAGE_SEARCHPROV = 5
-PACKAGE_MULTI = 1
-PACKAGE_SUBPACKAGE = 7
+from constants import *
 
 def main():
     "Main function. Handles delegation to other functions"

@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<title>Test</title>
+		<style type="text/css">
+		foo bar {
+			-moz-binding: url("chrome://foo/content/bar")
+		}
+		</style>
+		<!-- This is all it takes -->
+		<script></script>
+	</head>
+	<body>
+		This is a valid HTML document.
+		<p style="-moz-binding: url('chrome://foo/content/bar')">
+			Some text.
+			<br />
+			Some more text.
+			<hr>
+			This is the end.
+			<br>
+			End.
+		</p>
+		<img src="">
+		<img src="">
+		<iframe src="chrome://foo/content/bar"></iframe>
+	</body>
+</html>

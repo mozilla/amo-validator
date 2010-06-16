@@ -1,7 +1,8 @@
 import testcases.markup.markuptester
 from errorbundler import ErrorBundle
+from constants import *
 
-def _do_test(path, should_fail=False):
+def _do_test(path, should_fail=False, type_=None):
     
     markup_file = open(path)
     data = markup_file.read()
@@ -11,6 +12,8 @@ def _do_test(path, should_fail=False):
     extension = filename.split(".")[-1]
     
     err = ErrorBundle(None, True)
+    if type_:
+        err.set_type(type_)
     
     parser = testcases.markup.markuptester.MarkupParser(err)
     parser.process(filename, data, extension)
@@ -23,6 +26,20 @@ def _do_test(path, should_fail=False):
         assert not err.failed()
     
     return err
+    
+
+def test_local_url_detector():
+    "Tests that local URLs can be detected."
+    
+    err = ErrorBundle(None, True)
+    mp = testcases.markup.markuptester.MarkupParser(err)
+    tester = mp._is_url_local
+    
+    assert tester("chrome://xyz/content/abc")
+    assert tester("chrome://whatever/")
+    assert tester("local.xul")
+    assert not tester("http://foo.bar/")
+    assert not tester("https://abc.def/")
     
 
 def test_html_file():
@@ -88,4 +105,28 @@ def test_xul_iframes():
     _do_test(
         "tests/resources/markup/markuptester/bad_iframe_remote_missing.xul",
         True)
+    
+def test_lp_passing():
+    "Tests a valid language pack file."
+    
+    _do_test(
+        "tests/resources/markup/markuptester/_langpack/lp_safe.html",
+        False,
+        PACKAGE_LANGPACK)
+    
+def test_lp_unsafe():
+    "Tests a language pack file that contains unsafe elements."
+    
+    _do_test(
+        "tests/resources/markup/markuptester/_langpack/lp_unsafe.html",
+        True,
+        PACKAGE_LANGPACK)
+    
+def test_lp_remote():
+    "Tests a language pack file that contains remote references."
+    
+    _do_test(
+        "tests/resources/markup/markuptester/_langpack/lp_remote.html",
+        True,
+        PACKAGE_LANGPACK)
     

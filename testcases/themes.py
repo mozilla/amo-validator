@@ -1,8 +1,9 @@
 import decorator
 from chromemanifest import ChromeManifest
+from constants import *
 
 
-@decorator.register_test(tier=2, expected_type=2)
+@decorator.register_test(tier=2, expected_type=PACKAGE_THEME)
 def test_theme_manifest(err, package_contents=None, xpi_package=None):
     """Tests the chrome.manifest files in the package for
     compliance with the standard theme triples."""

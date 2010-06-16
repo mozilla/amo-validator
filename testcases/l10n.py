@@ -5,6 +5,7 @@ import json
 from StringIO import StringIO
 
 import decorator
+from constants import *
 
 # Add the path to the lib files we need
 sys.path.append('/Users/moco/dev/silme/lib')
@@ -14,15 +15,6 @@ from mozilla.core.zip import ZipHandler
 import silme.format
 
 silme.format.Manager.register('dtd', 'properties', 'ini', 'inc')
-
-PACKAGE_ANY = 0
-PACKAGE_EXTENSION = 1
-PACKAGE_THEME = 2
-PACKAGE_DICTIONARY = 3
-PACKAGE_LANGPACK = 4
-PACKAGE_SEARCHPROV = 5
-PACKAGE_MULTI = 1
-PACKAGE_SUBPACKAGE = 7
 
 # The threshold that determines the number of entities that must not be
 # missing from the package.

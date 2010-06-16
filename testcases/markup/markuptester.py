@@ -1,20 +1,12 @@
 
-import fnmatch
+import re
 try:
     from HTMLParser import HTMLParser
 except ImportError:
     from html.parser import HTMLParser
     
 from testcases.markup import csstester
-
-PACKAGE_ANY = 0
-PACKAGE_EXTENSION = 1
-PACKAGE_THEME = 2
-PACKAGE_DICTIONARY = 3
-PACKAGE_LANGPACK = 4
-PACKAGE_SEARCHPROV = 5
-PACKAGE_MULTI = 1
-PACKAGE_SUBPACKAGE = 7
+from constants import *
 
 DEBUG = False
 
@@ -81,7 +73,6 @@ class MarkupParser(HTMLParser):
                     continue
                 
                 if "script" in self.xml_state:
-                    print "script"
                     if self.alerted_script_comments:
                         continue
                     self.err.info("Missing comments in <script> tag",
@@ -111,7 +102,8 @@ class MarkupParser(HTMLParser):
     
     def handle_starttag(self, tag, attrs, self_closing=False):
         
-        tag = tag.lower()
+        # Normalize and remove namespaces
+        tag = tag.lower().split(":")[-1]
         
         # Be extra sure it's not a self-closing tag.
         if not self_closing:
@@ -142,7 +134,7 @@ class MarkupParser(HTMLParser):
             # Make sure all src/href attributes are local
             for attr in attrs:
                 if attr[0].lower() in ("src", "href") and \
-                   not attr[1].lower().startswith("chrome://"):
+                   not self._is_url_local(attr[1].lower()):
                     self.err.error("src/href elements must be local.",
                                    """Language packs require that all
                                    src/href attributes must begin with
@@ -150,7 +142,7 @@ class MarkupParser(HTMLParser):
                                    self.filename,
                                    self.line)
         
-        if tag == "iframe":
+        if tag in ("iframe", "browser"):
             # Bork if XUL iframe has no type attribute
             if self.extension == "xul":
                 
@@ -167,7 +159,7 @@ class MarkupParser(HTMLParser):
                 # type="chrome" without an src="" attribute.
                 remote_src = True
                 if isinstance(src, str):
-                    remote_src = not src.startswith("chrome://")
+                    remote_src = not self._is_url_local(src)
                     
                 if type_ and \
                    not (type_ in SAFE_IFRAME_TYPES or 
@@ -303,3 +295,13 @@ class MarkupParser(HTMLParser):
             output.append(attr[0] + '="' + attr[1] + '"')
         
         return " " + " ".join(output)
+        
+    def _is_url_local(self, url):
+        
+        if url.startswith("chrome://"):
+            return True
+        
+        pattern = re.compile("(ht|f)tps?://")
+        
+        return not pattern.match(url)
+        
