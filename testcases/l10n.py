@@ -81,7 +81,7 @@ def test_xpi(err, package_contents, xpi_package):
                              inputtype = 'xpi',
                              returnvalue = 'statistics_json')
     
-    data = _test_file(err, optionpack, path)
+    data = _test_file(err, optionpack)
     _process_results(err, data)
     
 

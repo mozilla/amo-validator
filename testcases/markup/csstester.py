@@ -1,8 +1,7 @@
 import re
-import logging
+import json
 
 import cssutils
-from cssutils import CSSParser
 
 CSS_CURRENT_ERR = None
 CSS_CURRENT_FILE = ""
@@ -22,17 +21,47 @@ def test_css_file(err, filename, data):
     CSS_CURRENT_ERR = err
     CSS_CURRENT_FILE = filename
     
-    cssutils.log.setLevel(logging.FATAL)
+    tokenizer = cssutils.tokenize2.Tokenizer()
+    token_generator = tokenizer.tokenize(data)
     
-    parser = CSSParser(raiseExceptions=False)
-    parser.setFetcher(_fetcher)
+    _run_css_tests(err, token_generator, filename)
     
-    sheet = parser.parseString(data)
-    _run_css_tests(sheet, filename)
-    
-def _run_css_tests(sheet, filename):
+def _run_css_tests(err, tokens, filename):
     """Processes a CSS file to test it for things that could cause it
     to be harmful to the browser."""
+    
+    last_descriptor = None
+    
+    skip_types = ("S", "COMMENT")
+    
+    for (tok_type, value, line, position) in tokens:
+        
+        # Save the last descriptor for reference.
+        if tok_type == "IDENT":
+            last_descriptor = value.lower()
+            if value.startswith("-webkit"):
+                err.error("Blasphemy.",
+                          "WebKit descriptors? Really?",
+                          filename,
+                          line)
+                  
+        elif tok_type == "URI":
+            
+            # If we hit a URI after -moz-binding, we may have a
+            # potential security issue.
+            if last_descriptor == "-moz-binding":
+                # We need to make sure the URI is not remote.
+                value = value[4:-1].strip('"')
+                
+                # Ensure that the resource isn't remote.
+                if value.startswith("http"):
+                    err.error("Cannot reference external scripts.",
+                              """-moz-binding cannot reference external
+                              scripts in CSS. This is considered to be
+                              a security issue.""",
+                              filename,
+                              line)
+                
     
     urls = cssutils.getUrls(sheet)
     

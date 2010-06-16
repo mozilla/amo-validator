@@ -117,4 +117,4 @@ def test_packed_packages(err, package_contents=None, xpi_package=None):
         elif data["extension"] == "css":
             
             data = xpi_package.read(name)
-            #testcases.markup.csstester.test_css_file(err, name, data)
+            testcases.markup.csstester.test_css_file(err, name, data)
