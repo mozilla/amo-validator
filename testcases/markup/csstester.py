@@ -40,7 +40,7 @@ def _run_css_tests(err, tokens, filename):
                 value = value[4:-1].strip('"')
                 
                 # Ensure that the resource isn't remote.
-                if not fnmatch.fnmatch(value, "http?//*/content/*"):
+                if not fnmatch.fnmatch(value, "chrome://*/content/*"):
                     err.error("Cannot reference external scripts.",
                               """-moz-binding cannot reference external
                               scripts in CSS. This is considered to be

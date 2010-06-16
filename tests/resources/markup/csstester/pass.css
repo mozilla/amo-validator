@@ -1,0 +1,3 @@
+#something {
+	-moz-binding:url("chrome://foo/content/bar/whatever");
+}
