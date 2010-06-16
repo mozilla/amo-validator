@@ -1,5 +1,3 @@
-import testcases
-import testcases.markup
 import testcases.markup.markuptester
 from errorbundler import ErrorBundle
 
@@ -37,7 +35,11 @@ def test_xml_file():
     
     _do_test("tests/resources/markup/markuptester/pass.xml")
     
-
+def test_xul_file():
+    "Tests a package with a valid XUL file."
+    
+    _do_test("tests/resources/markup/markuptester/pass.xul")
+    
 def test_xml_bad_nesting():
     "Tests an XML file that has badly nested elements."
     
@@ -59,6 +61,31 @@ def test_xml_extraclosing():
 def test_html_ignore_comment():
     "Tests that HTML comment values are ignored"
     
-    err = _do_test(
+    _do_test(
             "tests/resources/markup/markuptester/ignore_comments.html")
+    
+def test_html_css_style():
+    "Tests that CSS within an element is passed to the CSS tester"
+    
+    _do_test("tests/resources/markup/markuptester/css_style.html",
+             True)
+    
+def test_html_css_inline():
+    "Tests that inline CSS is passed to the CSS tester"
+    
+    _do_test("tests/resources/markup/markuptester/css_inline.html",
+             True)
+    
+def test_xul_iframes():
+    "Tests that iframes are evil in many ways."
+    
+    _do_test(
+        "tests/resources/markup/markuptester/bad_iframe_remote.xul",
+        True)
+    _do_test(
+        "tests/resources/markup/markuptester/bad_iframe_chrome.xul",
+        True)
+    _do_test(
+        "tests/resources/markup/markuptester/bad_iframe_remote_missing.xul",
+        True)
     

@@ -1,7 +1,11 @@
+
+import fnmatch
 try:
     from HTMLParser import HTMLParser
 except ImportError:
     from html.parser import HTMLParser
+    
+from testcases.markup import csstester
 
 PACKAGE_ANY = 0
 PACKAGE_EXTENSION = 1
@@ -151,23 +155,49 @@ class MarkupParser(HTMLParser):
             if self.extension == "xul":
                 
                 type_ = None
+                src = None
                 for attr in attrs:
-                    if attr[0].lower() == "type":
+                    attr_name = attr[0].lower()
+                    if attr_name == "type":
                         type_ = attr[1].lower()
+                    elif attr_name == "src":
+                        src = attr[1].lower()
                 
-                if type_ is None:
+                # We say it's true by default to catch elements that are
+                # type="chrome" without an src="" attribute.
+                remote_src = True
+                if isinstance(src, str):
+                    remote_src = not src.startswith("chrome://")
+                    
+                if type_ and \
+                   not (type_ in SAFE_IFRAME_TYPES or 
+                        not remote_src):
                     self.err.warning("iframe missing 'type' attribute",
                                      """All iframe elements must have
-                                     type attributes.""",
+                                     either a valid `type` attribute or
+                                     a `src` attribute that points to a
+                                     local file.""",
                                      self.filename,
                                      self.line)
-                elif type_ not in SAFE_IFRAME_TYPES:
-                    self.err.error(UNSAFE_IF_TYPE % attrs["type"],
-                                   """It is a security risk to use
-                                   type="%s" on a XUL iframe.""" %
-                                    attrs["type"],
-                                   self.filename,
-                                   self.line)
+                elif (not type_ or 
+                      type_ not in SAFE_IFRAME_TYPES) and \
+                     remote_src:
+                    self.err.warning("Typeless iframes must be local.",
+                                     """iframe elements that lack a
+                                     type attribute must always have
+                                     src attributes that reference
+                                     local resources.""",
+                                     self.filename,
+                                     self.line)
+        
+        # Find CSS and JS attributes and handle their values like they
+        # would otherwise be handled by the standard parser flow.
+        for attr in attrs:
+            if attr[0].lower() == "style":
+                csstester.test_css_snippet(self.err,
+                                           self.filename,
+                                           attr[1],
+                                           self.line)
         
         # When the dev forgets their <!-- --> on a script tag, bad
         # things happen.
@@ -239,10 +269,12 @@ class MarkupParser(HTMLParser):
             # TODO: Link up the JS analysis module once it's written.
             pass
         elif tag == "style":
-            # TODO: Wire up with the CSS analyzer once it's written.
-            pass
+            csstester.test_css_file(self.err,
+                                    self.filename,
+                                    data_buffer,
+                                    self.line)
         
-        # TODO : Handle script/CSS attribute values
+        # TODO : Handle script attribute values
         
     def handle_data(self, data):
         self._save_to_buffer(data)

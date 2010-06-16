@@ -1,0 +1,12 @@
+<?xml version="1.0"?>
+<dialog
+	xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul">
+	<!-- These are not security risks. -->
+	<iframe type="" src="chrome://local"></iframe>
+	<iframe src="chrome://local"></iframe>
+	<iframe type="chrome" src="chrome://local"></iframe>
+	<iframe type="content"></iframe>
+	<iframe type="content-primary"></iframe>
+	<iframe type="content-targetable"></iframe>
+	
+</dialog>

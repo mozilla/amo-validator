@@ -1,0 +1,7 @@
+<?xml version="1.0"?>
+<dialog
+	xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul">
+	<!-- iframes in XUL should default to being remote when there is no src="" attribute present. -->
+	<iframe type="chrome"></iframe>
+	
+</dialog>

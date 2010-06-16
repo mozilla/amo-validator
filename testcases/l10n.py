@@ -133,10 +133,10 @@ def _process_results(err, data):
             unmodified_ratio = unmodified_entities / total_entities
             if unmodified_ratio > L10N_THRESHOLD:
                 err.warning(unmod_pattern % (name, 
-                                             unmodified_entities),
-                            """The number of unmodified entities must
-                            not exceed a %d ratio.""" %
-                            unmodified_ratio)
+                                             L10N_THRESHOLD),
+                            """The number of unmodified entities should
+                            usually not exceed a %d ratio.""" %
+                            L10N_THRESHOLD)
         
         if "missingEntities" in stats:
             missing_entities = int(stats["missingEntities"])

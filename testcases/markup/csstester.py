@@ -4,15 +4,23 @@ import fnmatch
 
 import cssutils
 
-def test_css_file(err, filename, data):
+def test_css_file(err, filename, data, line_start=1):
     "Parse and test a whole CSS file."
     
     tokenizer = cssutils.tokenize2.Tokenizer()
     token_generator = tokenizer.tokenize(data)
     
-    _run_css_tests(err, token_generator, filename)
+    _run_css_tests(err, token_generator, filename, line_start - 1)
     
-def _run_css_tests(err, tokens, filename):
+def test_css_snippet(err, filename, data, line):
+    "Parse and test a CSS nugget."
+    
+    # Re-package to make it CSS-complete
+    data = "#foo{%s}" % data
+    
+    test_css_file(err, filename, data, line)
+    
+def _run_css_tests(err, tokens, filename, line_start=0):
     """Processes a CSS file to test it for things that could cause it
     to be harmful to the browser."""
     
@@ -37,7 +45,7 @@ def _run_css_tests(err, tokens, filename):
             # potential security issue.
             if last_descriptor == "-moz-binding":
                 # We need to make sure the URI is not remote.
-                value = value[4:-1].strip('"')
+                value = value[4:-1].strip('"\'')
                 
                 # Ensure that the resource isn't remote.
                 if not fnmatch.fnmatch(value, "chrome://*/content/*"):
@@ -51,9 +59,8 @@ def _run_css_tests(err, tokens, filename):
                               line)
             
         elif tok_type == "HASH":
-            
+            # Search for interference with the identity box.
             if value == "#identity-box":
-                
                 err.warning("Modification to identity box.",
                             """The identity box (#identity-box) is a
                             sensitive piece of the interface and should
