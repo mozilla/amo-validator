@@ -1,25 +1,11 @@
 import re
 import json
+import fnmatch
 
 import cssutils
 
-CSS_CURRENT_ERR = None
-CSS_CURRENT_FILE = ""
-
-def _fetcher(url):
-    "Tells the CSS parser not to pull in imports."
-    
-    _test_url(url)
-    
-    return (None, '/* no thanks :) */')
-    
-
 def test_css_file(err, filename, data):
     "Parse and test a whole CSS file."
-    
-    global CSS_CURRENT_ERR, CSS_CURRENT_FILE
-    CSS_CURRENT_ERR = err
-    CSS_CURRENT_FILE = filename
     
     tokenizer = cssutils.tokenize2.Tokenizer()
     token_generator = tokenizer.tokenize(data)
@@ -54,35 +40,14 @@ def _run_css_tests(err, tokens, filename):
                 value = value[4:-1].strip('"')
                 
                 # Ensure that the resource isn't remote.
-                if value.startswith("http"):
+                if not fnmatch.fnmatch(value, "http?//*/content/*"):
                     err.error("Cannot reference external scripts.",
                               """-moz-binding cannot reference external
                               scripts in CSS. This is considered to be
-                              a security issue.""",
+                              a security issue. The script file must be
+                              placed in the /content/ directory of the
+                              package.""",
                               filename,
                               line)
                 
-    
-    urls = cssutils.getUrls(sheet)
-    
-    for url in urls:
-        _test_url(url)
-    
-
-def _handle_error():
-    "Handles CSS errors"
-
-def _test_url(url):
-    "Tests a URL to make sure it isn't remote."
-    
-    global CSS_CURRENT_ERR
-    
-    unsuitable_url = re.compile("https?:")
-    
-    if unsuitable_url.match(url):
-        CSS_CURRENT_ERR.error("@import statements may not be remote.",
-                              """When importing CSS, the @import
-                              statement may not reference remote CSS
-                              resources.""",
-                              CSS_CURRENT_FILE)
     
