@@ -15,6 +15,12 @@ def test_install_rdf_params(err,
     
     install = err.get_resource("install_rdf")
     
+    _test_rdf(err, install)
+
+def _test_rdf(err, install):
+    """Wrapper for install.rdf testing to make unit testing so much
+    easier."""
+    
     if err.get_resource("listed"):
         shouldnt_exist = ("hidden", )
     else:
@@ -83,6 +89,8 @@ def test_install_rdf_params(err,
                 _test_id(err, object_value)
             elif predicate == "version":
                 _test_version(err, object_value)
+            elif predicate == "name":
+                _test_name(err, object_value)
             
             must_exist_once.remove(predicate)
             continue
@@ -119,9 +127,9 @@ def test_install_rdf_params(err,
 def _test_id(err, value):
     "Tests an install.rdf UUID value"
     
-    id_pattern = re.compile("(\{[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}\}|[a-zA-Z0-9-\._]*\@[a-zA-Z0-9-\._]+)")
+    id_pattern = re.compile("(\{[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}\}|[a-z0-9-\._]*\@[a-z0-9-\._]+)", re.I)
     
-    # Must be a valid version number.
+    # Must be a valid UUID string.
     if not id_pattern.match(value):
         err.error("The value of <em:id> is invalid.",
                   """The values supplied for <em:id> in the
@@ -149,3 +157,16 @@ def _test_version(err, value):
                   install.rdf file is not a valid version string.""",
                   "install.rdf")
     
+
+def _test_name(err, value):
+    "Tests an install.rdf name value for trademarks."
+    
+    ff_pattern = re.compile("(mozilla|firefox)", re.I)
+    
+    if ff_pattern.match(value):
+        err.error("Addon has illegal name.",
+                  """Addon names cannot contain the Mozilla or Firefox
+                  trademarks. These names should not be contained in
+                  addon names at all.""",
+                  "install.rdf")
+

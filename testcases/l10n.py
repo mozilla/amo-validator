@@ -11,7 +11,6 @@ from constants import *
 sys.path.append('/Users/moco/dev/silme/lib')
 
 from mozilla.core.comparelocales import *
-from mozilla.core.zip import ZipHandler
 import silme.format
 
 silme.format.Manager.register('dtd', 'properties', 'ini', 'inc')
@@ -123,11 +122,12 @@ def _process_results(err, data):
         if "unmodifiedEntities" in stats:
             unmodified_entities = int(stats["unmodifiedEntities"])
             unmodified_ratio = unmodified_entities / total_entities
+            
             if unmodified_ratio > L10N_THRESHOLD:
                 err.warning(unmod_pattern % (name, 
-                                             L10N_THRESHOLD),
+                                             unmodified_entities),
                             """The number of unmodified entities should
-                            usually not exceed a %d ratio.""" %
+                            usually not exceed a %f ratio.""" %
                             L10N_THRESHOLD)
         
         if "missingEntities" in stats:

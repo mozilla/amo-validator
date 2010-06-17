@@ -48,7 +48,6 @@ class XPIManager(object):
         
         # Get a list of ZipInfo objects.
         files = self.zf.infolist()
-        
         out_files = {}
         
         # Iterate through each file in the XPI.
@@ -58,7 +57,7 @@ class XPIManager(object):
                         "size": file_.file_size,
                         "name_lower": file_.filename.lower()}
             
-            file_doc["extension"] = file_doc["name_lower"].split(".").pop()
+            file_doc["extension"] = file_doc["name_lower"].split(".")[-1]
             
             out_files[file_.filename] = file_doc
         

@@ -11,29 +11,6 @@ import testcases.langpack
 from xpi import XPIManager
 from constants import *
 
-@decorator.register_test(tier=1)
-def test_hidden(err, package_contents=None, xpi_package=None):
-    """Test to check for the now-obsolete <em:hidden> element in the
-    install.rdf file. This attribute has been obsoleted because users
-    may have difficulty determining if an addon is installed or not."""
-    
-    if not err.get_resource("has_install_rdf"):
-        return
-    
-    install = err.get_resource("install_rdf")
-    ta_hidden_predicate = install.uri("hidden")
-    
-    hidden_object = install.get_object(None, ta_hidden_predicate)
-    
-    if hidden_object is not None:
-        err.warning("install.rdf contains <em:hidden> element",
-                    """The <em:hidden> element is obsoleted in Firefox
-                    version 3.6 and up because it increases difficulty
-                    for users attempting to determine whether they have
-                    a particular extension installed or attempting to
-                    uninstall said extensions.""",
-                    "install.rdf")
-    
 
 @decorator.register_test(tier=2)
 def test_packed_packages(err, package_contents=None, xpi_package=None):
@@ -95,18 +72,45 @@ def test_packed_packages(err, package_contents=None, xpi_package=None):
             
         elif data["extension"] in ("xul", "xml", "html", "xhtml"):
             
-            parser = testcases.markup.markuptester.MarkupParser(err)
-            parser.process(name,
-                           xpi_package.read(name),
-                           data["extension"])
+            try:
+                file_data = xpi_package.read(name)
+            except KeyError:
+                _read_error(err, name)
+            else:
+                parser = testcases.markup.markuptester.MarkupParser(err)
+                parser.process(name,
+                               file_data,
+                               data["extension"])
             
         elif data["extension"] in ("dtd", "properties") and \
              err.detected_type == PACKAGE_LANGPACK:
             
-            data = xpi_package.read(name)
-            testcases.langpack._test_unsafe_html(err, name, data)
+            try:
+                file_data = xpi_package.read(name)
+            except KeyError:
+                _read_error(err, name)
+            else:
+                testcases.langpack._test_unsafe_html(err,
+                                                     name,
+                                                     file_data)
             
         elif data["extension"] == "css":
             
-            data = xpi_package.read(name)
-            testcases.markup.csstester.test_css_file(err, name, data)
+            try:
+                file_data = xpi_package.read(name)
+            except KeyError:
+                _read_error(err, name)
+            else:
+                testcases.markup.csstester.test_css_file(err,
+                                                         name,
+                                                         file_data)
+ 
+def _read_error(err, name):
+    """Reports to the user that a file in the archive couldn't be
+    read from. Prevents code duplication."""
+
+    err.info("File could not be read: %s" % name,
+             """A File in the archive could not be read. This may be
+             due to corruption or because the path name is too
+             long.""",
+             name)

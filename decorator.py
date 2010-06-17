@@ -1,6 +1,4 @@
 
-# This module is FABULOUS!
-
 TEST_TIERS = {}
 
 def register_test(tier=1, expected_type=None, simple=False):
