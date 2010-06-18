@@ -77,7 +77,7 @@ def test_xpi(err, package_contents, xpi_package):
     
 
 @decorator.register_test(tier=3, expected_type=PACKAGE_LANGPACK)
-def test_xpi(err, package_contents, xpi_package):
+def test_lp_xpi(err, package_contents, xpi_package):
     """Tests an XPI (or JAR, really) for L10n completeness """
     
     optionpack = CompareInit(inputtype = 'xpis',
@@ -137,8 +137,10 @@ def _process_results(err, data):
                         given locale.""")
         
         if "missingEntitiesInMissingFiles" in stats and \
-           "missingEntities" in stats:
-            missing_files = int(stats["missingEntitiesInMissingFiles"])
-            err.warning(missing_pattern % (name, missing_files),
-                        """Locales should include all locale files.""")
+           "missingFiles" in stats:
+            missing_files = int(stats["missingFiles"])
+            err.warning(missing_file_pattern % (name, missing_files),
+                        """Certain files that are present in the
+                        reference locale (i.e.: en-US) are not present
+                        in the %s locale.""" % name)
         

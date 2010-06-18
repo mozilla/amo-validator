@@ -117,13 +117,14 @@ def test_targetedapplications(err, package_contents=None,
             if ta_guid in APPROVED_APPLICATIONS:
                 
                 # Grab the minimum and maximum version numbers.
-                min_version = install.get_object(ta_guid, ta_min_ver)
-                max_version = install.get_object(ta_guid, ta_max_ver)
+                min_version = install.get_object(target_app, ta_min_ver)
+                max_version = install.get_object(target_app, ta_max_ver)
                 
                 app_versions = APPROVED_APPLICATIONS[ta_guid]
                 
                 # Ensure that the version numbers are in the app's
                 # list of acceptable version numbers.
+                
                 try:
                     if min_version is not None:
                         min_ver_pos = app_versions.index(min_version)

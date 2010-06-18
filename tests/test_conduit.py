@@ -6,6 +6,7 @@ import testcases.conduit
 from errorbundler import ErrorBundle
 from xpi import XPIManager
 from rdf import RDFParser
+from constants import *
 
 def _do_test(path, failure=True):
     
@@ -15,7 +16,7 @@ def _do_test(path, failure=True):
     err = ErrorBundle(None, True)
     
     # Populate in the dependencies.
-    err.set_type(1) # Conduit test requires type
+    err.set_type(PACKAGE_EXTENSION) # Conduit test requires type
     err.save_resource("has_install_rdf", True)
     rdf_data = package.read("install.rdf")
     install_rdf = RDFParser(rdf_data)
