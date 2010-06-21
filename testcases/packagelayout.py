@@ -1,9 +1,6 @@
 import fnmatch
-import re
-from rdflib import BNode
 
 import decorator
-from constants import *
 
 
 def test_unknown_file(err, filename):
@@ -122,7 +119,7 @@ def test_theme_layout(err, package_contents=None, xpi_package=None):
                 "theme")
 
 def test_layout(err, package_contents, mandatory, whitelisted,
-                white_extensions, pack_type):
+                white_extensions=None, pack_type="Unknown Addon"):
     """Tests the layout of a package. Pass in the various types of files
     and their levels of requirement and this guy will figure out which
     files should and should not be in the package."""

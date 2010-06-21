@@ -3,7 +3,9 @@ import re
 
 import decorator
 from chromemanifest import ChromeManifest
-from constants import *
+from constants import PACKAGE_LANGPACK
+
+BAD_LINK = '(href|src)=["\'](?!(chrome:\/\/|#([a-z][a-z0-9\-_:\.]*)?))'
 
 @decorator.register_test(tier=2, expected_type=PACKAGE_LANGPACK)
 def test_langpack_manifest(err, package_contents=None, xpi_package=None):
@@ -20,6 +22,7 @@ def test_langpack_manifest(err, package_contents=None, xpi_package=None):
     if err.get_resource("chrome.manifest"):
         chrome = err.get_resource("chrome.manifest")
     else:
+        # Presence is tested by the packagelayout module.
         chrome_data = xpi_package.read("chrome.manifest")
         chrome = ChromeManifest(chrome_data)
         err.save_resource("chrome.manifest", chrome)
@@ -51,7 +54,7 @@ def test_langpack_manifest(err, package_contents=None, xpi_package=None):
 
 
 # This function is called by content.py
-def _test_unsafe_html(err, filename, data):
+def test_unsafe_html(err, filename, data):
     "Tests for unsafe HTML tags in language pack files."
     
     unsafe_pttrn = re.compile('<(script|embed|object)')
@@ -63,7 +66,7 @@ def _test_unsafe_html(err, filename, data):
                   definition files.""",
                   filename)
     
-    remote_pttrn = re.compile('(href|src)=["\'](?!(chrome:\/\/|#([A-Za-z][A-Za-z0-9\-_:\.]*)?))')
+    remote_pttrn = re.compile(BAD_LINK, re.I)
     if remote_pttrn.search(data):
         err.error("Unsafe remote resource found in language pack.",
                   """Language packs are not allowed to contain

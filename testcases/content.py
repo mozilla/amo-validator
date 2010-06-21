@@ -1,6 +1,4 @@
-import re
 
-from rdflib import Graph
 from StringIO import StringIO
 
 import decorator
@@ -9,7 +7,7 @@ import testcases.markup.markuptester
 import testcases.markup.csstester
 import testcases.langpack
 from xpi import XPIManager
-from constants import *
+from constants import PACKAGE_LANGPACK, PACKAGE_SUBPACKAGE
 
 
 @decorator.register_test(tier=2)
@@ -21,6 +19,8 @@ def test_packed_packages(err, package_contents=None, xpi_package=None):
         
         if name.startswith("__MACOSX"):
             continue
+        
+        processed = False
         
         # If that item is a container file, unzip it and scan it.
         if data["extension"] == "jar":
@@ -81,18 +81,9 @@ def test_packed_packages(err, package_contents=None, xpi_package=None):
                 parser.process(name,
                                file_data,
                                data["extension"])
-            
-        elif data["extension"] in ("dtd", "properties") and \
-             err.detected_type == PACKAGE_LANGPACK:
-            
-            try:
-                file_data = xpi_package.read(name)
-            except KeyError:
-                _read_error(err, name)
-            else:
-                testcases.langpack._test_unsafe_html(err,
-                                                     name,
-                                                     file_data)
+                
+                processed = True
+                
             
         elif data["extension"] == "css":
             
@@ -104,6 +95,19 @@ def test_packed_packages(err, package_contents=None, xpi_package=None):
                 testcases.markup.csstester.test_css_file(err,
                                                          name,
                                                          file_data)
+                                                         
+        
+        # This is tested in test_langpack.py
+        if err.detected_type == PACKAGE_LANGPACK and not processed:
+            
+            try:
+                file_data = xpi_package.read(name)
+            except KeyError:
+                _read_error(err, name)
+            else:
+                testcases.langpack.test_unsafe_html(err,
+                                                    name,
+                                                    file_data)
  
 def _read_error(err, name):
     """Reports to the user that a file in the archive couldn't be

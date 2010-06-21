@@ -1,3 +1,6 @@
+"Constants that will be used across files."
+
+# Package type constants.
 PACKAGE_ANY = 0
 PACKAGE_EXTENSION = 1
 PACKAGE_THEME = 2

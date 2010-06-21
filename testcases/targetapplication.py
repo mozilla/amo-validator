@@ -154,7 +154,7 @@ def test_targetedapplications(err, package_contents=None,
                 if min_version is not None and \
                    max_version is not None and \
                    min_ver_pos > max_ver_pos:
-                    err.error(mismatch_error % ta_guid,
+                    err.error(mismatch_pattern % ta_guid,
                               """The veresion numbers provided for the
                               application in question are not in the
                               correct order. The maximum version must

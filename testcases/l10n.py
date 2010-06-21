@@ -5,12 +5,15 @@ import json
 from StringIO import StringIO
 
 import decorator
-from constants import *
+from constants import PACKAGE_EXTENSION, \
+                      PACKAGE_THEME, \
+                      PACKAGE_LANGPACK
 
 # Add the path to the lib files we need
 sys.path.append('/Users/moco/dev/silme/lib')
 
-from mozilla.core.comparelocales import *
+# pylint: disable-msg=F0401,W0613
+from mozilla.core.comparelocales import compareLocales, CompareInit
 import silme.format
 
 silme.format.Manager.register('dtd', 'properties', 'ini', 'inc')
@@ -24,7 +27,7 @@ def _test_file(err, optionpack):
     "Runs the L10n tests against an addon package."
     
     stdout = sys.stdout
-    sys.stdout = StringIO.StringIO()
+    sys.stdout = StringIO()
     
     compareLocales(optionpack)
     
@@ -56,11 +59,8 @@ def test_xpi(err, package_contents, xpi_package):
     """Tests an XPI (or JAR, really) for L10n completeness"""
     
     # Skip over incompatible (or unnecessary) package types.
-    if err.detected_type in (PACKAGE_LANGPACK, # Handled seperately.
-                             PACKAGE_ANY,
-                             PACKAGE_DICTIONARY,
-                             PACKAGE_SEARCHPROV,
-                             PACKAGE_SUBPACKAGE) or \
+    if err.detected_type not in (PACKAGE_EXTENSION,
+                                 PACKAGE_THEME) or \
        err.is_nested_package():
         # NOTE : Should we also do this with PACKAGE_MULTI?
         return
@@ -103,6 +103,7 @@ def test_lp_xpi(err, package_contents, xpi_package):
     
 
 def _process_results(err, data):
+    "Processes the output of the SILME script."
     
     if not data:
         return

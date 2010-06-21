@@ -37,7 +37,7 @@ def test_unsafe_html():
     
     err = ErrorBundle(None, True)
     
-    testcases.langpack._test_unsafe_html(err, None, """
+    testcases.langpack.test_unsafe_html(err, None, """
     This is an <b>innocent</b> file.
     Nothing to <a href="#anchor">suspect</a> here.
     <img src="chrome://asdf/locale/asdf" />
@@ -45,13 +45,13 @@ def test_unsafe_html():
     
     assert not err.failed()
     
-    testcases.langpack._test_unsafe_html(err, "asdf", """
+    testcases.langpack.test_unsafe_html(err, "asdf", """
     This is not an <script>innocent</script> file.""")
     
     assert err.failed()
     
     err = ErrorBundle(None, True)
-    testcases.langpack._test_unsafe_html(err, "asdf", """
+    testcases.langpack.test_unsafe_html(err, "asdf", """
     Nothing to <a href="http://foo.bar/">suspect</a> here.""")
     
     assert err.failed()

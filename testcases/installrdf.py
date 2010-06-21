@@ -127,7 +127,7 @@ def _test_rdf(err, install):
 def _test_id(err, value):
     "Tests an install.rdf UUID value"
     
-    id_pattern = re.compile("(\{[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}\}|[a-z0-9-\._]*\@[a-z0-9-\._]+)", re.I)
+    id_pattern = re.compile("(\{[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}\}|[a-z0-9-\.\+_]*\@[a-z0-9-\._]+)", re.I)
     
     # Must be a valid UUID string.
     if not id_pattern.match(value):
