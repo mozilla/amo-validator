@@ -10,7 +10,13 @@ def test_css_file(err, filename, data, line_start=1):
     tokenizer = cssutils.tokenize2.Tokenizer()
     token_generator = tokenizer.tokenize(data)
     
-    _run_css_tests(err, token_generator, filename, line_start - 1)
+    try:
+        _run_css_tests(err, token_generator, filename, line_start - 1)
+    except UnicodeDecodeError:
+        err.warning("Unicode decode error.",
+                    """While decoding a CSS file, an unknown character
+                    was encountered, causing some problems.""",
+                    filename)
     
 def test_css_snippet(err, filename, data, line):
     "Parse and test a CSS nugget."

@@ -1,4 +1,6 @@
 import unittest
+import zipfile
+from zipfile import ZipFile
 
 from xpi import XPIManager
 
@@ -22,3 +24,21 @@ def test_read_file():
     "Test that a file can be read from the package"
     z = XPIManager("tests/resources/xpi/install_rdf_only.xpi")
     assert z.read("install.rdf") is not None
+
+def test_bad_file():
+    "Tests that the XPI manager correctly reports a bad XPI file."
+    try:
+        x = XPIManager("tests/resources/xpi/junk.xpi")
+    except zipfile.BadZipfile:
+        assert True
+    else:
+        assert False
+
+def test_missing_file():
+    "Tests that the XPI manager correctly reports a missing XPI file."
+    try:
+        x = XPIManager("tests/resources/xpi/_not_here.xpi")
+    except IOError:
+        assert True
+    else:
+        assert False

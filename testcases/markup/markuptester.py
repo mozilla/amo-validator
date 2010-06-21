@@ -5,7 +5,7 @@ try:
 except ImportError:
     from html.parser import HTMLParser
     
-from testcases.markup import csstester
+from testcases.markup import csstester # pragma: no cover
 from constants import *
 
 DEBUG = False
@@ -66,7 +66,7 @@ class MarkupParser(HTMLParser):
                 self.feed(line + "\n")
             except Exception as inst:
                 
-                if DEBUG:
+                if DEBUG: # pragma: no cover
                     print self.xml_state, inst
                 
                 if reported:
@@ -109,7 +109,7 @@ class MarkupParser(HTMLParser):
         if not self_closing:
             self_closing = tag in SELF_CLOSING_TAGS
         
-        if DEBUG:
+        if DEBUG: # pragma: no cover
             print self.xml_state, tag, self_closing
         
         # A fictional tag for testing purposes.
@@ -221,7 +221,7 @@ class MarkupParser(HTMLParser):
         
         tag = tag.lower()
         
-        if DEBUG:
+        if DEBUG: # pragma: no cover
             print tag, self.xml_state
         
         if not self.xml_state:
