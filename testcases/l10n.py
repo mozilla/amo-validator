@@ -14,7 +14,7 @@ sys.path.append('/Users/moco/dev/silme/lib')
 
 # pylint: disable-msg=F0401,W0613
 from mozilla.core.comparelocales import compareLocales, CompareInit
-import silme.format # pragma: no cover
+import silme.format
 
 silme.format.Manager.register('dtd', 'properties', 'ini', 'inc')
 

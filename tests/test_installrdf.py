@@ -67,7 +67,7 @@ def _run_test(filename, failure=True):
     parser = RDFParser(data)
     testcases.installrdf._test_rdf(err, parser)
     
-    if failure:
+    if failure: # pragma: no cover
         assert err.failed()
     else:
         assert not err.failed()

@@ -5,7 +5,7 @@ try:
 except ImportError:
     from html.parser import HTMLParser
     
-from testcases.markup import csstester # pragma: no cover
+from testcases.markup import csstester
 from constants import *
 
 DEBUG = False

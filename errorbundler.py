@@ -4,7 +4,7 @@ import json
 
 if platform.system() != "Windows":
     from outputhandlers.shellcolors import OutputHandler
-else:
+else: # pragma: no cover
     from outputhandlers.windowscolors import OutputHandler
 
 class ErrorBundle(object):

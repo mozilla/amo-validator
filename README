@@ -12,6 +12,9 @@ Python Libraries:
 - rdflib
 - cssutils
 
+Pythong Libraries for Testing:
+- nose
+- coverage
 
 Running
 ------------
@@ -197,3 +200,16 @@ package_to_test.xpi
 	"file": ["subpackage.xpi", "subsubpackage.xpi", "chrome.manifest"],
 	"line": 5
 }
+
+
+Testing
+------------
+
+Unit tests can be run with a simple call to:
+
+	nosetests
+
+However, to turn run unit tests with code coverage, the appropriate
+command would be:
+
+	nosetests --with-coverage --cover-skip=silme,mozilla,rdflib,json,xml,cssutils,HTMLParser,cgi,curses,encodings,encutils,hashlib,httplib,markupbase,mimetools,rfc822,urllib2,weakref,zipfile,validator.argparse,ctypes --cover-inclusive --cover-tests
