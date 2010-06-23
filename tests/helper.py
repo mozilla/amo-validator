@@ -14,7 +14,7 @@ def _do_test(path, test, failure=True,
     
     # Populate in the dependencies.
     if set_type:
-        err.set_type(1) # Conduit test requires type
+        err.set_type(set_type) # Conduit test requires type
     if require_install:
         err.save_resource("has_install_rdf", True)
         rdf_data = package.read("install.rdf")
@@ -29,3 +29,5 @@ def _do_test(path, test, failure=True,
         assert err.failed()
     else:
         assert not err.failed()
+    
+    return err

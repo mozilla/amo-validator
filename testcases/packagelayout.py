@@ -63,7 +63,6 @@ def test_dictionary_layout(err, package_contents=None, xpi_package=None):
         "install.js",
         "dictionaries/*.aff", # List again because there must >0
         "dictionaries/*.dic",
-        "__MACOSX/*", # I hate them, but there's no way to avoid them.
         "chrome.manifest",
         "chrome/*"]
     whitelisted_extensions = ("txt",)    
@@ -84,10 +83,7 @@ def test_langpack_layout(err, package_contents=None, xpi_package=None):
         "install.rdf",
         "chrome/*.jar",
         "chrome.manifest"]
-    whitelisted_files = [
-        "chrome/*.jar",
-        "__MACOSX/*" # I hate them, but there's no way to avoid them.
-        ]
+    whitelisted_files = ["chrome/*.jar"]
     whitelisted_extensions = ("manifest", "rdf", "jar", "dtd",
                               "properties", "xhtml", "css")
     
@@ -107,10 +103,7 @@ def test_theme_layout(err, package_contents=None, xpi_package=None):
         "install.rdf",
         "chrome/*.jar",
         "chrome.manifest"]
-    whitelisted_files = [
-        "chrome/*.jar",
-        "__MACOSX/*" # I hate them, but there's no way to avoid them.
-        ]
+    whitelisted_files = ["chrome/*.jar"]
     whitelisted_extensions = ("manifest", "rdf", "txt", "jar",
                               "png", "gif", "jpg")
 
@@ -125,6 +118,11 @@ def test_layout(err, package_contents, mandatory, whitelisted,
     files should and should not be in the package."""
     
     for file_ in package_contents:
+        
+        if fnmatch.fnmatch(file_, "__MACOSX/*") or \
+           fnmatch.fnmatch(file_, ".DS_Store"):
+            continue
+        
         # Remove the file from the mandatory file list.
         #if file_ in mandatory_files:
         mfile_list = \
@@ -149,7 +147,7 @@ def test_layout(err, package_contents, mandatory, whitelisted,
             continue
 
         # Is it a whitelisted file type?
-        if file_.split(".").pop() in white_extensions:
+        if file_.split(".")[-1] in white_extensions:
             continue
 
         # Otherwise, report an error.

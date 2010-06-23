@@ -1,13 +1,5 @@
 from xml.dom.minidom import parse
-
-PACKAGE_ANY = 0
-PACKAGE_EXTENSION = 1
-PACKAGE_THEME = 2
-PACKAGE_DICTIONARY = 3
-PACKAGE_LANGPACK = 4
-PACKAGE_SEARCHPROV = 5
-PACKAGE_MULTI = 1
-PACKAGE_SUBPACKAGE = 7
+from constants import *
 
 def detect_type(err, install_rdf=None, xpi_package=None):
     """Determines the type of addon being validated based on
@@ -47,9 +39,15 @@ def detect_type(err, install_rdf=None, xpi_package=None):
         if type_ in translated_types:
             # Make sure we translate back to the normalized version
             return translated_types[type_]
-            
+        else:
+            err.error("Invalid <em:type> value.",
+                      """The only valid values for <em:type> are 2, 4,
+                      8, and 32. Any other values are either invalid or
+                      deprecated.""",
+                      "install.rdf")
+            return
     else:
-        err.info("No em:type element found in install.rdf",
+        err.info("No <em:type> element found in install.rdf",
                  """It isn't always required, but it is the most
                  reliable method for determining addon type.""",
                  "install.rdf") 
@@ -84,8 +82,6 @@ def detect_type(err, install_rdf=None, xpi_package=None):
         install_rdf_type = extensions[xpi_package.extension]
         return translated_types[install_rdf_type]
     
-    # Otherwise, the extension doesn't qualify to be validated.
-    return None
 
 
 def detect_opensearch(package):

@@ -2,7 +2,7 @@
 import re
 try:
     from HTMLParser import HTMLParser
-except ImportError:
+except ImportError: # pragma: no cover
     from html.parser import HTMLParser
     
 from testcases.markup import csstester
@@ -102,8 +102,8 @@ class MarkupParser(HTMLParser):
     
     def handle_starttag(self, tag, attrs, self_closing=False):
         
-        # Normalize and remove namespaces
-        tag = tag.lower().split(":")[-1]
+        # Normalize!
+        tag = tag.lower()
         
         # Be extra sure it's not a self-closing tag.
         if not self_closing:
@@ -130,6 +130,8 @@ class MarkupParser(HTMLParser):
                                performs.""",
                                self.filename,
                                self.line)
+                if DEBUG: # pragma: no cover
+                    print "Unsafe Tag ------"
             
             # Make sure all src/href attributes are local
             for attr in attrs:
@@ -182,7 +184,7 @@ class MarkupParser(HTMLParser):
                                  self.line)
             
         elif tag == "script" and self.extension == "xul":
-            # Per the Addon Validator Spect (v2), scripts in XUL
+            # Per the Addon Validator Spec (v2), scripts in XUL
             # must not be remote.
             
             src = None
@@ -230,6 +232,8 @@ class MarkupParser(HTMLParser):
                            than it has opening tags.""",
                            self.filename,
                            self.line)
+            if DEBUG: # pragma: no cover
+                print "Too many closing tags ------"
             return
             
         elif "script" in self.xml_state:
@@ -249,6 +253,8 @@ class MarkupParser(HTMLParser):
                              forward-slashes?""",
                              self.filename,
                              self.line)
+            if DEBUG: # pragma: no cover
+                print "Tag closed before opened ------"
             return
         
         data_buffer = self.xml_buffer.pop()
@@ -270,7 +276,8 @@ class MarkupParser(HTMLParser):
                            (%s)""" % self.extension,
                            self.filename,
                            self.line)
-        
+            if DEBUG: # pragma: no cover
+                print "Invalid markup nesting ------"
         
         # Perform analysis on collected data.
         if tag == "script":

@@ -20,7 +20,12 @@ class RDFParser(object):
             pseudo_file = StringIO(data) # Wrap data in a pseudo-file
         else:
             pseudo_file = data
-        graph.parse(pseudo_file, format="xml")
+        
+        try:
+            graph.parse(pseudo_file, format="xml")
+        except Exception as error:
+            print "There was an error parsing an RDF file."
+            return None
         
         self.rdf = graph
         

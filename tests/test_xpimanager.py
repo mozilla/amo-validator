@@ -42,3 +42,15 @@ def test_missing_file():
         assert True
     else:
         assert False
+
+def test_mysterious():
+    """Tests that the XPI manager correctly reports a mysterious XPI
+    file problem."""
+    try:
+        x = XPIManager(123123)
+    except Exception as e:
+        assert not (isinstance(e, IOError) or
+                    isinstance(e, zipfile.BadZipfile))
+    else:
+        assert False
+

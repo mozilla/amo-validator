@@ -212,4 +212,8 @@ Unit tests can be run with a simple call to:
 However, to turn run unit tests with code coverage, the appropriate
 command would be:
 
-	nosetests --with-coverage --cover-skip=silme,mozilla,rdflib,json,xml,cssutils,HTMLParser,cgi,curses,encodings,encutils,hashlib,httplib,markupbase,mimetools,rfc822,urllib2,weakref,zipfile,validator.argparse,ctypes --cover-inclusive --cover-tests
+	nosetests --with-coverage --cover-package=validator --cover-skip=validator.argparse,validator.outputhandlers. --cover-inclusive --cover-tests
+
+Note that in order to use the --cover-skip nose parameter, you must install the included patch for nose's coverage.py plugin:
+
+	extras/cover.py

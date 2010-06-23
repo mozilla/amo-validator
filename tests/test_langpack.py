@@ -56,4 +56,11 @@ def test_unsafe_html():
     
     assert err.failed()
     
+
+def test_has_chrome_manifest():
+    """Makes sure the module fails when a chrome.manifest file is not
+    available."""
     
+    assert testcases.langpack.test_langpack_manifest(None,
+                                                      {},
+                                                      None) is None

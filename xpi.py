@@ -10,11 +10,6 @@ class XPIManager(object):
     def __init__(self, package, name=None, subpackage=False):
         "Create a new managed XPI package"
         
-        # Store away the filename for future use.
-        self.filename = name or package
-        self.extension = self.filename.split(".").pop()
-        self.subpackage = subpackage
-        
         # Try opening the XPI as a zip.
         try:
             zip_package = ZipFile(package)
@@ -31,6 +26,11 @@ class XPIManager(object):
         except:
             print "Something strange and deathly happened to the XPI."
             raise
+        
+        # Store away the filename for future use.
+        self.filename = name or package
+        self.extension = self.filename.split(".")[-1]
+        self.subpackage = subpackage
         
         # Save the reference to the XPI to memory
         self.zf = zip_package

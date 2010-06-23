@@ -24,6 +24,12 @@ def test_opensearch():
     
     _do_test("tests/resources/searchprovider/pass.xml", False)
     
+def test_nonparsing_xml():
+    """Tests that a failure is generated for bad XML on OpenSearch"""
+    
+    output = typedetection.detect_opensearch("foo/bar/_asdf")
+    assert output["failure"]
+    
 def test_broken_updateURL():
     "Tests that there isn't an updateURL element in the provider."
     

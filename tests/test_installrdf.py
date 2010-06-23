@@ -51,9 +51,9 @@ def test_fail_version():
     "Tests that invalid versions will not be accepted."
     
     _test_value("2.0 alpha",
-                testcases.installrdf._test_id)
-    _test_value("1.2alpha",
-                testcases.installrdf._test_id)
+                testcases.installrdf._test_version)
+    _test_value("whatever",
+                testcases.installrdf._test_version)
 
 def _run_test(filename, failure=True):
     "Runs a test on an install.rdf file"
@@ -72,9 +72,49 @@ def _run_test(filename, failure=True):
     else:
         assert not err.failed()
     
+    return err
 
 def test_passing():
     "Tests a passing install.rdf package."
     
     _run_test("tests/resources/installrdf/pass.rdf", False)
+
+def test_must_exist_once():
+    "Tests that elements that must exist once only exist once."
+    
+    _run_test("tests/resources/installrdf/must_exist_once_missing.rdf")
+    _run_test("tests/resources/installrdf/must_exist_once_extra.rdf")
+
+def test_may_exist_once():
+    "Tests that elements that may exist once only exist up to once."
+    
+    _run_test("tests/resources/installrdf/may_exist_once_missing.rdf",
+              False)
+    _run_test("tests/resources/installrdf/may_exist_once_extra.rdf")
+
+def test_may_exist():
+    "Tests that elements that may exist once only exist up to once."
+    
+    _run_test("tests/resources/installrdf/may_exist_missing.rdf",
+              False)
+    _run_test("tests/resources/installrdf/may_exist_extra.rdf", False)
+
+def test_mustmay_exist():
+    "Tests that elements that may exist once only exist up to once."
+    
+    # The first part of this is proven by test_must_exist_once
+    
+    _run_test("tests/resources/installrdf/mustmay_exist_extra.rdf",
+              False)
+
+def test_shouldnt_exist():
+    "Tests that elements that shouldn't exist aren't there."
+    
+    _run_test("tests/resources/installrdf/shouldnt_exist.rdf")
+
+def test_obsolete():
+    "Tests that elements that shouldn't exist aren't there."
+    
+    err = _run_test("tests/resources/installrdf/obsolete.rdf", False)
+    assert err.infos
 

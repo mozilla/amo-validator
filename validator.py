@@ -22,7 +22,7 @@ from errorbundler import ErrorBundle
 from constants import *
 
 def main():
-    "Main function. Handles delegation to other functions"
+    "Main function. Handles delegation to other functions."
     
     expectations = {"any":0,
                     "extension":1,

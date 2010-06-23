@@ -16,8 +16,8 @@ def test_tiers():
     assert len(tiers) == 2
     
 def test_specifictype():
-    """Tests to make sure that the decorator module can return test of
-    a specific type."""
+    """Tests to make sure that the decorator module can return a test
+    of a specific type."""
     
     decorator.TEST_TIERS = {}
     

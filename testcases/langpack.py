@@ -19,7 +19,7 @@ def test_langpack_manifest(err, package_contents=None, xpi_package=None):
     # TODO : Did I read about having multiple chrome.manifest files?
     
     # Retrieve the chrome.manifest if it's cached.
-    if err.get_resource("chrome.manifest"):
+    if err.get_resource("chrome.manifest"): # pragma: no cover
         chrome = err.get_resource("chrome.manifest")
     else:
         # Presence is tested by the packagelayout module.

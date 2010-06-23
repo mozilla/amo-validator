@@ -1,5 +1,6 @@
 
 import decorator
+from constants import *
 
 APPLICATIONS = {
     "{ec8030f7-c20a-464f-9b0e-13a3a9e97384}": "firefox",
@@ -27,7 +28,8 @@ APPROVED_APPLICATIONS = {
         '3.1b3pre', '3.1b3', '3.5b4pre', '3.5b4', '3.5b5pre', '3.5',
         '3.5.*', '3.6a1pre', '3.6a1', '3.6a2pre', '3.6b1pre', '3.6b2',
         '3.6', '3.6.*', '3.7a1pre', '3.7a1', '3.7a2pre', '3.7a2',
-        '3.7a3pre', '3.7a3', '3.7a4pre', '3.7a4', '3.7a5pre'],
+        '3.7a3pre', '3.7a3', '3.7a4pre', '3.7a4', '3.7a5pre',
+        '3.7a6pre'],
     # Mozilla =============================
     "{86c18b42-e466-45a9-ae7a-9b95ba6f5640}":
         ['1.0', '1.1', '1.3', '1.4', '1.4.1', '1.5', '1.5.1', '1.6',
@@ -102,14 +104,14 @@ def test_targetedapplications(err, package_contents=None,
             if ta_guid == "{92650c4d-4b8e-4d2a-b7eb-24ecf4f6b63a}":
                 
                 # Time to test for some install.js.
-                if not "install.js" in package_contents:
+                if "install.js" not in package_contents:
                     err.warning("Missing install.js for SeaMonkey.",
                                 """SeaMonkey requires install.js, which
                                 was not found. install.rdf indicates
                                 that the addon supports SeaMonkey.""",
                                 "install.rdf")
                     # Only reject if it's a dictionary.
-                    if err.detected_type == 2:
+                    if err.detected_type == PACKAGE_DICTIONARY:
                         err.reject = True
                 
                 break
