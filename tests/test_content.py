@@ -138,6 +138,35 @@ def test_css():
                                     "subpackage")
     
 
+def test_langpack():
+    "Tests a language pack in the content validator."
+    
+    err = ErrorBundle(None, True)
+    err.set_type(PACKAGE_LANGPACK)
+    mock_package = MockXPIManager(
+        {"foo.dtd":
+             "tests/resources/content/junk.xpi"})
+                        
+    content.testendpoint_langpack = \
+        MockTestEndpoint(("test_unsafe_html", ))
+    
+    result = content.test_packed_packages(
+                                    err,
+                                    {"foo.dtd":
+                                      {"extension": "dtd",
+                                       "name_lower": "foo.dtd"}},
+                                    mock_package)
+    print result
+    assert result == 1
+    content.testendpoint_langpack.assert_expectation(
+                                    "test_unsafe_html",
+                                    1)
+    content.testendpoint_langpack.assert_expectation(
+                                    "test_unsafe_html",
+                                    0,
+                                    "subpackage")
+    
+
 def test_jar_subpackage_bad():
     "Tests JAR files that are bad subpackages."
     

@@ -8,7 +8,7 @@ except ImportError: # pragma: no cover
 from testcases.markup import csstester
 from constants import *
 
-DEBUG = False
+DEBUG = True
 
 UNSAFE_TAGS = ("script",
                "object",
@@ -38,10 +38,11 @@ TAG_NOT_OPENED = "Tag (%s) being closed before it is opened."
 class MarkupParser(HTMLParser):
     """Parses and inspects various markup languages"""
     
-    def __init__(self, err):
+    def __init__(self, err, debug=False):
         HTMLParser.__init__(self)
         self.err = err
         self.line = 0
+        self.debug = debug
         
         self.xml_state = []
         self.xml_buffer = []
@@ -72,7 +73,8 @@ class MarkupParser(HTMLParser):
                 if reported:
                     continue
                 
-                if "script" in self.xml_state:
+                if "script" in self.xml_state or (
+                   self.debug and "testscript" in self.xml_state):
                     if self.alerted_script_comments:
                         continue
                     self.err.info("Missing comments in <script> tag",
@@ -92,7 +94,6 @@ class MarkupParser(HTMLParser):
                                  self.filename,
                                  self.line)
                 reported = True
-        
     
     def handle_startendtag(self, tag, attrs):
         # Self closing tags don't have an end tag, so we want to
@@ -211,7 +212,7 @@ class MarkupParser(HTMLParser):
         
         # When the dev forgets their <!-- --> on a script tag, bad
         # things happen.
-        if "script" in self.xml_state:
+        if "script" in self.xml_state and tag != "script":
             self._save_to_buffer("<" + tag +
                                  self._format_args(attrs) + ">")
             return

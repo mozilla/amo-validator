@@ -15,7 +15,7 @@ def _do_test(path, should_fail=False, type_=None):
     if type_:
         err.set_type(type_)
     
-    parser = testcases.markup.markuptester.MarkupParser(err)
+    parser = testcases.markup.markuptester.MarkupParser(err, True)
     parser.process(filename, data, extension)
     
     err.print_summary(True)
@@ -93,8 +93,11 @@ def test_html_css_inline():
     _do_test("tests/resources/markup/markuptester/css_inline.html",
              True)
     
-def test_xul_iframes():
-    "Tests that iframes are evil in many ways."
+def test_xul_evil():
+    "Tests for evil kinds of scripts and iframes in XUL."
+    
+    _do_test(
+        "tests/resources/markup/markuptester/remote_src.xul", True)
     
     _do_test(
         "tests/resources/markup/markuptester/bad_iframe_remote.xul",
@@ -103,7 +106,8 @@ def test_xul_iframes():
         "tests/resources/markup/markuptester/bad_iframe_chrome.xul",
         True)
     _do_test(
-        "tests/resources/markup/markuptester/bad_iframe_remote_missing.xul",
+        "tests/resources/markup/markuptester/"
+         "bad_iframe_remote_missing.xul",
         True)
     
 def test_lp_passing():
@@ -130,3 +134,17 @@ def test_lp_remote():
         True,
         PACKAGE_LANGPACK)
     
+def test_invalid_markup():
+    "Tests an markup file that is simply broken."
+    
+    # Test for the banned test element
+    _do_test("tests/resources/markup/markuptester/bad_banned.xml",
+             True)
+    
+    result = _do_test("tests/resources/markup/markuptester/bad.xml",
+             True)
+    assert result.warnings
+    result = _do_test("tests/resources/markup/markuptester/"
+                      "bad_script.xml",
+             False)
+    assert result.infos

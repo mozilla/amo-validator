@@ -23,7 +23,7 @@ def _do_test(path, test, failure=True,
     
     test(err, contents, package)
     
-    err.print_summary()
+    err.print_summary(True)
     
     if failure:
         assert err.failed()
