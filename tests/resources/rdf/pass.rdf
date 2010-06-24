@@ -1,0 +1,22 @@
+<?xml version="1.0"?>
+
+<RDF xmlns="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+		xmlns:em="http://www.mozilla.org/2004/em-rdf#">
+
+	<Description about="urn:mozilla:install-manifest">
+		
+		<!-- This file is for syntax and layout only. -->
+		
+		<em:type>2</em:type>
+		
+		<em:id>bastatestapp1@basta.mozilla.com</em:id>
+		<em:version>1.2.3.4</em:version>
+		<em:name>name_value</em:name>
+		
+		<em:test>test1</em:test>
+		<em:test>test2</em:test>
+		<em:test>test3</em:test>
+    
+    </Description>
+    
+</RDF>

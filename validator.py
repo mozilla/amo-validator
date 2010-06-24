@@ -169,7 +169,7 @@ def test_search(err, package, expectation=0):
     return err
     
 
-def test_package(err, package, name, expectation=0):
+def test_package(err, package, name, expectation=PACKAGE_ANY):
     "Begins tests for the package."
     
     types = {0: "Unknown",

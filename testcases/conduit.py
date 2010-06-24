@@ -62,7 +62,7 @@ def test_conduittoolbar(err, package_contents=None, xpi_manager=None):
     # Do some tests on the chrome.manifest file if it exists
     if "chrome.manifest" in package_contents:
         # Grab the chrome manifest
-        if err.get_resource("chrome.manifest"):
+        if err.get_resource("chrome.manifest"): # pragma: no cover
             # It's cached in the error bundler
             chrome = err.get_resource("chrome.manifest")
         else:

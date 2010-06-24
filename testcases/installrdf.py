@@ -59,7 +59,7 @@ def _test_rdf(err, install):
     top_id = install.get_root_subject()
     
     for pred_raw in install.rdf.predicates(top_id, None):
-        predicate = pred_raw.split("#").pop()
+        predicate = pred_raw.split("#")[-1]
         
         # Test if the predicate is banned
         if predicate in shouldnt_exist:

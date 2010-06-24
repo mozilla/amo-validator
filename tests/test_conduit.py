@@ -61,7 +61,7 @@ def test_chrome():
     """Tests the Conduit detector against a toolbar with
     chrome.manifest entries that indicate a Conduit toolbar."""
     
-    _do_test("tests/resources/conduit/conduit_structure.xpi",
+    _do_test("tests/resources/conduit/conduit_chrome.xpi",
              testcases.conduit.test_conduittoolbar,
              failure=True,
              require_install=True,

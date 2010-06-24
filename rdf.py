@@ -1,6 +1,6 @@
 from rdflib.graph import Graph
 from rdflib import URIRef
-from cStringIO import StringIO
+from StringIO import StringIO
 
 class RDFParser(object):
     """This little gem (not to be confused with a Ruby gem) loads and
@@ -16,7 +16,7 @@ class RDFParser(object):
         graph = Graph()
         
         # Try it!
-        if data is not StringIO:
+        if not isinstance(data, StringIO):
             pseudo_file = StringIO(data) # Wrap data in a pseudo-file
         else:
             pseudo_file = data
@@ -25,9 +25,10 @@ class RDFParser(object):
             graph.parse(pseudo_file, format="xml")
         except Exception as error:
             print "There was an error parsing an RDF file."
+            self.rdf = None
             return None
-        
-        self.rdf = graph
+        else:
+            self.rdf = graph
         
         if namespace is None:
             self.namespace = "http://www.mozilla.org/2004/em-rdf"
@@ -49,10 +50,6 @@ class RDFParser(object):
         NOTE: This is a terribly inefficient function, but until rdflib
         exposes a better way to do it, there isn't much of an
         alternative."""
-        
-        # Graphs must be connected in order to find a root.
-        if not self.rdf.connected():
-            return False
         
         subjects = list(self.rdf.subjects())
         # No root if there aren't any nodes.
