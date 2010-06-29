@@ -8,7 +8,7 @@ except ImportError: # pragma: no cover
 from testcases.markup import csstester
 from constants import *
 
-DEBUG = True
+DEBUG = False
 
 UNSAFE_TAGS = ("script",
                "object",

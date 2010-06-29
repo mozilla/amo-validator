@@ -50,10 +50,8 @@ class ChromeManifest(object):
         return None
         
     def get_objects(self, subject=None, predicate=None):
-        """Returns a list of objects that correspond to the specified
-        subjects and predicates"""
-        
-        output = []
+        """Returns a generator of objects that correspond to the
+        specified subjects and predicates."""
         
         for triple in self.triples:
             
@@ -62,7 +60,23 @@ class ChromeManifest(object):
                (predicate and triple["predicate"] != predicate):
                 continue
                 
-            output.append(triple["object"])
+            yield triple["object"]
         
-        return output
+    def get_triples(self, subject=None, predicate=None, object_=None):
+        """Returns triples that correspond to the specified subject,
+        predicates, and objects."""
+        
+        for triple in self.triples:
+            
+            # Filter out non-matches
+            if subject is not None and triple["subject"] != subject:
+                continue
+            if predicate is not None and \
+               triple["predicate"] != predicate:
+                continue
+            if object_ is not None and triple["object"] != object_:
+                continue
+                
+            yield triple
+        
         

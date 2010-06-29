@@ -15,7 +15,16 @@ def test_open():
     assert manifest.get_value("locale", "basta")["object"] == \
         "resource"
     
-    g_obj = manifest.get_objects("subject", "predicate")
+    g_obj = list(manifest.get_objects("subject", "predicate"))
     
     assert len(g_obj) == 1
     assert g_obj[0] == "object"
+    
+    obj_resource = list(manifest.get_triples(None, None, "resource"))
+    assert len(obj_resource) == 2
+    
+    pred_pred = list(manifest.get_triples(None, "predicate", None))
+    assert len(pred_pred) == 2
+    
+    sub_locale = list(manifest.get_triples("locale", None, None))
+    assert len(sub_locale) == 2
