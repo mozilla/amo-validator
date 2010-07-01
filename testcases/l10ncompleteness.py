@@ -61,7 +61,7 @@ def test_xpi(err, package_contents, xpi_package):
                                  PACKAGE_THEME) or \
        err.is_nested_package():
         # NOTE : Should we also do this with PACKAGE_MULTI?
-        return
+        return None
     
     path = xpi_package.filename
     path = os.path.realpath(path)

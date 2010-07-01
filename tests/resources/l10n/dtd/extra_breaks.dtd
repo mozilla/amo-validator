@@ -1,0 +1,21 @@
+<!ENTITY
+foo
+"bar">
+<!ENTITY
+abc.def
+"xyz">
+<!ENTITY
+	fast
+	'ball'>
+<!ENTITY
+	two
+	'per'
+	><!ENTITY line 'woot'>
+<!ENTITY
+
+this.is.a
+'test'>
+<!ENTITY overwrite
+'foo'>
+<!ENTITY overwrite 'bar'
+>

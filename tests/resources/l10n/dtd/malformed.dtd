@@ -1,0 +1,10 @@
+<!ENTITY foo "bar">
+<!--Malformed line should not overwrite -->
+<!ENTITY< foo "oops">
+<!WHATEVER abc.def "xyz">
+<!ENTITY abc.def "xyz">
+<!ENTITY fast 'ball'>
+<!ENTITY two 'per'><!ENTITY line 'woot'>
+<!ENTITY this.is.a 'test'>
+<!ENTITY overwrite 'foo'>
+<!ENTITY overwrite 'bar'>
