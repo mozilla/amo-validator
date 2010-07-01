@@ -1,43 +1,56 @@
-addons.mozilla.org Validator
-----------------------------------------
+==============================
+ addons.mozilla.org Validator
+==============================
+-------------
+ Version 1.0
+-------------
 
 This validator is a proposed replacement for the current add-on
 validator available at addons.mozilla.org. It is written entirely in
 python.
 
 Prerequisites
-------------
+=============
 
 Python Libraries:
+
 - rdflib
 - cssutils
 
-Pythong Libraries for Testing:
+Python Libraries for Testing:
+
 - nose
 - coverage
 
 Running
-------------
+=======
 
 Run the validator as follows:
 
-python package-parser.py <path to xpi> [-t <expected type>]
-	[-o <output type>] [-v] [--file <output file>] [--boring]
+	python package-parser.py <path to xpi> [-t <expected type>] [-o <output type>] [-v] [--file <output file>] [--boring]
 
 The path to the XPI should point to an XPI file.
 
 
 Expected Type:
+--------------
 
 The expected type should be one of the following values:
 
--	any (default) : Accepts any extension
--	extension : Accepts only extensions
--	theme : Accepts only themes
--	dictionary : Accepts only dictionaries
--	languagepack : Accepts only language packs
--	search : Accepts only OpenSearch XML files (unpackaged)
--	multi : Accepts only multiextension XPI packages
+any (default)
+	Accepts any extension
+extension
+	Accepts only extensions
+theme
+	Accepts only themes
+dictionary
+	Accepts only dictionaries
+languagepack
+	Accepts only language packs
+search
+	Accepts only OpenSearch XML files (unpackaged)
+multi
+	Accepts only multi-item XPI packages
 
 Specifying an expected type will throw an error if the validator
 does not detect that particular type when scanning. All addon type
@@ -45,16 +58,18 @@ detection mechanisms are used to make this determination.
 
 
 Output Type:
+------------
 
 The output type may be either of the following:
 
--	text (default) : Outputs a textual summary of the addo-on
-	analysis. Supports verbose mode.
--	json : Outputs a JSON snippet representing a full summary of the
-	add-on analysis.
+text (default)
+	Outputs a textual summary of the addo-on analysis. Supports verbose mode.
+json
+	Outputs a JSON snippet representing a full summary of the add-on analysis.
 
 
 Verbose Mode:
+-------------
 
 If the "-v" flag is set, the output will include informational
 messages in addition to errors and warnings. Informational messages
@@ -70,6 +85,7 @@ default.
 
 
 Output File:
+------------
 
 Specifying an output file with the "--file" flag captures the output of
 the analysis and stores it to the file specified. Specifying this
@@ -79,14 +95,16 @@ When outputting to a file, Boring Mode is automatically activated.
 
 
 Boring Mode:
+------------
 
 Boring mode, when activated, doesn't print colors to the terminal. 
 
 
 Output
-------------
+======
 
 Text Output Mode:
+-----------------
 
 In text output mode ("text"), output is structured in the format of one
 message per line. The messages are prefixed by their priority level
@@ -97,50 +115,54 @@ add-on type was determined to be.
 
 
 JSON Output Mode:
+-----------------
 
 In JSON output mode ("json"), output is formatted as a JSON snippet
 containing all messages. The format for the JSON output is that of the
 sample document below.
 
-{
-	"detected_type": "extension",
-	"success": false,
-	"messages": [
-		{
-			"type": "error",
-			"message": "This is the error message text.",
-			"description": "Description of the error message.",
-			"file": "",
-			"line": 0
-		},
-		{
-			"type": "warning",
-			"message": "This is the warning message text.",
-			"description": "Description of the warning message.",
-			"file": "testfile.xml",
-			"line": 0
-		},
-		{
-			"type": "info",
-			"message": "This is the informational message text.",
-			"description": "Description of the info message."
-			"file": "chrome.manifest",
-			"line": 21
-		},
-		{
-			"type": "error",
-			"message": "test.xpi > An error was found.",
-			"description": "This error happened within a subpackage."
-			"file": [
-				"test.xpi",
-				"chrome.manifest"
-			],
-			"line": 21
-		}
-	]
-}
+::
+
+	{
+		"detected_type": "extension",
+		"success": false,
+		"messages": [
+			{
+				"type": "error",
+				"message": "This is the error message text.",
+				"description": "Description of the error message.",
+				"file": "",
+				"line": 0
+			},
+			{
+				"type": "warning",
+				"message": "This is the warning message text.",
+				"description": "Description of the warning message.",
+				"file": "testfile.xml",
+				"line": 0
+			},
+			{
+				"type": "info",
+				"message": "This is the informational message text.",
+				"description": "Description of the info message."
+				"file": "chrome.manifest",
+				"line": 21
+			},
+			{
+				"type": "error",
+				"message": "test.xpi > An error was found.",
+				"description": "This error happened within a subpackage."
+				"file": [
+					"test.xpi",
+					"chrome.manifest"
+				],
+				"line": 21
+			}
+		]
+	}
 
 JSON Notes:
+~~~~~~~~~~~
 
 When a subpackage exists, an angle bracket will delimit the subpackage
 name and the message text.
@@ -156,54 +178,57 @@ of the list in the `file` attribute is an empty string.
 
 For instance, this tree would generate the following messages:
 
-package_to_test.xpi
-	|
-	|-install.rdf
-	|-chrome.manifest
-	|-subpackage.xpi
-	|  |
-	|  |-subsubpackage.xpi
-	|     |
-	|     |-chrome.manifest
-	|     |-install.rdf
-	|
-	|-subpackage.jar
-	   |
-	   |-install.rdf
+::
 
+	package_to_test.xpi
+		|
+		|-install.rdf
+		|-chrome.manifest
+		|-subpackage.xpi
+		|  |
+		|  |-subsubpackage.xpi
+		|     |
+		|     |-chrome.manifest
+		|     |-install.rdf
+		|
+		|-subpackage.jar
+		   |
+		   |-install.rdf
 
-{
-	"type": "info",
-	"message": "<em:type> not found in install.rdf",
-	"description": " ... ",
-	"file": "install.rdf",
-	"line": 0
-},
-{
-	"type": "error",
-	"message": "Invalid chrome.manifest subject: override",
-	"description": " ... ",
-	"file": "chrome.manifest",
-	"line": 7
-},
-{
-	"type": "error",
-	"message": "subpackage.xpi > install.rdf missing from theme",
-	"description": " ... ",
-	"file": ["subpackage.xpi", ""],
-	"line": 0
-},
-{
-	"type": "error",
-	"message": "subpackage.xpi > subsubpackage.xpi > Invalid chrome.manifest subject: sytle",
-	"description": " ... ",
-	"file": ["subpackage.xpi", "subsubpackage.xpi", "chrome.manifest"],
-	"line": 5
-}
+::
+
+	{
+		"type": "info",
+		"message": "<em:type> not found in install.rdf",
+		"description": " ... ",
+		"file": "install.rdf",
+		"line": 0
+	},
+	{
+		"type": "error",
+		"message": "Invalid chrome.manifest subject: override",
+		"description": " ... ",
+		"file": "chrome.manifest",
+		"line": 7
+	},
+	{
+		"type": "error",
+		"message": "subpackage.xpi > install.rdf missing from theme",
+		"description": " ... ",
+		"file": ["subpackage.xpi", ""],
+		"line": 0
+	},
+	{
+		"type": "error",
+		"message": "subpackage.xpi > subsubpackage.xpi > Invalid chrome.manifest subject: sytle",
+		"description": " ... ",
+		"file": ["subpackage.xpi", "subsubpackage.xpi", "chrome.manifest"],
+		"line": 5
+	}
 
 
 Testing
-------------
+=======
 
 Unit tests can be run with a simple call to:
 

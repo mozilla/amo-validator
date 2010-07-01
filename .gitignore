@@ -1,0 +1,6 @@
+/testfiles
+/testfiles/*
+*.pyc
+.DS_Store
+.coverage
+.figleaf
