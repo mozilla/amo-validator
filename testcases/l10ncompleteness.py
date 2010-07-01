@@ -11,8 +11,8 @@ from constants import PACKAGE_EXTENSION, \
                       PACKAGE_THEME, \
                       PACKAGE_LANGPACK
 
-import testcases.l10n.dtd
-import testcases.l10n.properties
+import testcases.l10n.dtd as dtd
+import testcases.l10n.properties as properties
 
 # Add the path to the lib files we need
 sys.path.append('/Users/moco/dev/silme/lib')
@@ -158,7 +158,7 @@ def _compare_packages(reference, target):
     for name, file_data in ref_files.items():
         
         # Skip directory entries.
-        if name.endswith("/"):
+        if name.endswith("/"): # pragma: no cover
             continue
         
         extension = name.split(".")[-1]
@@ -220,9 +220,9 @@ def _parse_l10n_doc(name, doc):
     extension = name.split(".")[-1].lower()
     
     handlers = {"dtd":
-                    testcases.l10n.dtd.DTDParser,
+                    dtd.DTDParser,
                 "properties":
-                    testcases.l10n.properties.PropertiesParser}
+                    properties.PropertiesParser}
     if extension not in handlers:
         return None
     
@@ -244,7 +244,7 @@ def _aggregate_results(err, results, locale):
         if ritem["type"] == "missing_files":
             err.error("%s missing translation file (%s)" %
                             (locale,
-                             ritem["filename"]),
+                             rfilename),
                       """Localizations must include a translated copy
                       of each file in the reference locale. The
                       required files may vary from target application
@@ -254,12 +254,12 @@ def _aggregate_results(err, results, locale):
             err.error("%s missing %s in %s" %
                             (locale,
                              ", ".join(ritem["missing_entities"]),
-                             ritem["filename"]),
+                             rfilename),
                       """Localizations must include a translated copy
                       of each entity from each file in the reference
                       locale. The required files may vary from target
                       application to target application.""",
-                      [locale, ritem["filename"]])
+                      [locale, rfilename])
         elif ritem["type"] == "unchanged_entities":
             unchanged_entities += ritem["entities"]
             unchanged_entity_list.extend(ritem["unchanged_entities"])
@@ -268,7 +268,8 @@ def _aggregate_results(err, results, locale):
     
     total_entities += unchanged_entities
     if total_entities > 0 and \
-       unchanged_entities / total_entities >= L10N_THRESHOLD:
+       float(unchanged_entities) / float(total_entities) >= \
+           L10N_THRESHOLD:
         
         err.error("%s contains %d unchanged entities (%s)" %
                     (locale,
@@ -278,7 +279,7 @@ def _aggregate_results(err, results, locale):
                   of each entity from each file in the reference
                   locale. These translations SHOULD differ from
                   the localized text in the reference package.""",
-                  [locale, ritem["filename"]])
+                  [locale, rfilename])
     
 
 def _process_results(err, data):
