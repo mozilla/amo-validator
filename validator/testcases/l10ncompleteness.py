@@ -14,15 +14,6 @@ from constants import PACKAGE_EXTENSION, \
 import testcases.l10n.dtd as dtd
 import testcases.l10n.properties as properties
 
-# Add the path to the lib files we need
-sys.path.append('/Users/moco/dev/silme/lib')
-
-# pylint: disable-msg=F0401,W0613
-from mozilla.core.comparelocales import compareLocales, CompareInit
-import silme.format
-
-silme.format.Manager.register('dtd', 'properties', 'ini', 'inc')
-
 # The threshold that determines the number of entities that must not be
 # missing from the package.
 L10N_THRESHOLD = 0.10
@@ -321,48 +312,3 @@ def _aggregate_results(err, results, locale):
                   the localized text in the reference package.""",
                   [locale["path"], rfilename])
     
-
-def _process_results(err, data):
-    "Processes the output of the SILME script."
-    
-    if not data:
-        return
-    
-    unmod_pattern = \
-        "The %s locale contains %d unmodified translations."
-    missing_pattern = "The %s locale is missing %d entities."
-    missing_file_pattern = "The %s locale is missing %d files."
-    
-    for child in data:
-        children_obj = child["children"]
-        name = children_obj[0]
-        stats = children_obj[1]["children"][0]
-        
-        total_entities = int(stats["total"])
-        
-        if "unmodifiedEntities" in stats:
-            unmodified_entities = int(stats["unmodifiedEntities"])
-            unmodified_ratio = unmodified_entities / total_entities
-            
-            if unmodified_ratio > L10N_THRESHOLD:
-                err.warning(unmod_pattern % (name, 
-                                             unmodified_entities),
-                            """The number of unmodified entities should
-                            usually not exceed a %f ratio.""" %
-                            L10N_THRESHOLD)
-        
-        if "missingEntities" in stats:
-            missing_entities = int(stats["missingEntities"])
-            err.warning(missing_pattern % (name, missing_entities),
-                        """There should not be missing entities in any
-                        given locale.""")
-        
-        if "missingEntitiesInMissingFiles" in stats and \
-           "missingFiles" in stats:
-            missing_files = int(stats["missingFiles"])
-            err.warning(missing_file_pattern % (name, missing_files),
-                        """Certain files that are present in the
-                        reference locale (i.e.: en-US) are not present
-                        in the %s locale.""" % name)
-        
-
