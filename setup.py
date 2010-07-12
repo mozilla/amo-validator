@@ -19,7 +19,7 @@ setup(
     install_requires=['nose',
                       'cssutils',
                       'rdflib'],
-    scripts=["validator.py"],
+    scripts=["validator/validator.py"],
     classifiers=[
         'Development Status :: 4 - Beta',
         'Environment :: Web Environment',

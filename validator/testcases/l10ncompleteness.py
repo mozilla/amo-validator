@@ -52,6 +52,39 @@ def _test_file(err, optionpack):
     return output_parsed
     
 
+def _get_locales(err, xpi_package):
+    "Returns a list of locales from the chrome.manifest file."
+    
+    # TODO : Make this into a generator.
+    
+    # Retrieve the chrome.manifest if it's cached.
+    if err.get_resource("chrome.manifest"): # pragma: no cover
+        chrome = err.get_resource("chrome.manifest")
+    else:
+        chrome_data = xpi_package.read("chrome.manifest")
+        chrome = ChromeManifest(chrome_data)
+        err.save_resource("chrome.manifest", chrome)
+        
+    pack_locales = chrome.get_triples("locale")
+    locales = {}
+    # Find all of the locales referenced in the chrome.manifest file.
+    for locale in pack_locales:
+        locale_jar = locale["object"].split()
+        locale_name = locale_jar[0]
+        location = locale_jar[-1]
+        if not location.startswith("jar:"):
+            continue
+        full_location = location[4:].split("!")
+        location = full_location[0]
+        target = full_location[1]
+        locale_desc = {"path": location,
+                       "target": target,
+                       "name": locale_name}
+        if locale_name not in locales:
+            locales[locale_name] = locale_desc
+    
+    return locales
+
 @decorator.register_test(tier=3)
 def test_xpi(err, package_contents, xpi_package):
     """Tests an XPI (or JAR, really) for L10n completeness"""
@@ -63,15 +96,37 @@ def test_xpi(err, package_contents, xpi_package):
         # NOTE : Should we also do this with PACKAGE_MULTI?
         return None
     
-    path = xpi_package.filename
-    path = os.path.realpath(path)
+    # Don't even both with the test(s) if there's no chrome.manifest.
+    if "chrome.manifest" not in package_contents:
+        return None
     
-    optionpack = CompareInit(inipath = path, 
-                             inputtype = 'xpi',
-                             returnvalue = 'statistics_json')
+    locales = _get_locales(err, xpi_package);
     
-    data = _test_file(err, optionpack)
-    _process_results(err, data)
+    # We need at least a reference and a target.
+    if len(locales) < 2:
+        return
+    
+    ref_name = "en-US"
+    reference = locales[ref_name]
+    reference_jar = StringIO(xpi_package.read(reference["path"]))
+    reference_locale = XPIManager(reference_jar, reference["path"])
+    # Loop through the locales and test the valid ones.
+    for name, locale in locales.items():
+        # Ignore the reference locale
+        if locale["name"] == ref_name:
+            continue
+        
+        locale_jar = StringIO(xpi_package.read(locale["path"]))
+        target_locale = XPIManager(locale_jar, locale["path"])
+        target_locale.locale_name = name
+        
+        # Isolate each of the target locales' results.
+        results = _compare_packages(reference_locale,
+                                    target_locale,
+                                    reference["target"])
+        _aggregate_results(err, results, locale)
+        
+    
     
 
 @decorator.register_test(tier=3, expected_type=PACKAGE_LANGPACK)
@@ -82,28 +137,7 @@ def test_lp_xpi(err, package_contents, xpi_package):
     if "chrome.manifest" not in package_contents:
         return None
 
-    # Retrieve the chrome.manifest if it's cached.
-    if err.get_resource("chrome.manifest"): # pragma: no cover
-        chrome = err.get_resource("chrome.manifest")
-    else:
-        chrome_data = xpi_package.read("chrome.manifest")
-        chrome = ChromeManifest(chrome_data)
-        err.save_resource("chrome.manifest", chrome)
-    
-    pack_locales = chrome.get_triples("locale")
-    locales = []
-    # Find all of the locales referenced in the chrome.manifest file.
-    for locale in pack_locales:
-        locale_jar = locale["object"].split()
-        locale_name = locale_jar[0]
-        location = locale_jar[-1]
-        if not location.startswith("jar:"):
-            continue
-        location = location[4:].split("!")[0]
-        locale_desc = {"path": location,
-                       "name": locale_name}
-        if locale_desc not in locales:
-            locales.append(locale_desc)
+    locales = _get_locales(err, xpi_package);
     
     # Get the reference packages.
     references = []
@@ -143,7 +177,7 @@ def test_lp_xpi(err, package_contents, xpi_package):
         
     
 
-def _compare_packages(reference, target):
+def _compare_packages(reference, target, ref_base=None):
     "Compares two L10n-compatible packages to one another."
     
     ref_files = reference.get_file_data()
@@ -152,6 +186,9 @@ def _compare_packages(reference, target):
     results = []
     total_entities = 0
     
+    if isinstance(ref_base, str):
+        ref_base = ref_base.lstrip("/")
+    
     l10n_docs = ("dtd", "properties", "xhtml", "ini", "inc")
     parsable_docs = ("dtd", "properties")
     
@@ -159,6 +196,9 @@ def _compare_packages(reference, target):
         
         # Skip directory entries.
         if name.endswith("/"): # pragma: no cover
+            continue
+        # Ignore files not considered reference files.
+        if ref_base is not None and not name.startswith(ref_base):
             continue
         
         extension = name.split(".")[-1]
@@ -243,24 +283,24 @@ def _aggregate_results(err, results, locale):
         
         if ritem["type"] == "missing_files":
             err.error("%s missing translation file (%s)" %
-                            (locale,
+                            (locale["path"],
                              rfilename),
                       """Localizations must include a translated copy
                       of each file in the reference locale. The
                       required files may vary from target application
                       to target application.""",
-                      [locale])
+                      [locale["path"]])
         elif ritem["type"] == "missing_entities":
             err.error("%s missing %s in %s" %
-                            (locale,
+                            (locale["path"],
                              ", ".join(ritem["missing_entities"]),
                              rfilename),
                       """Localizations must include a translated copy
                       of each entity from each file in the reference
                       locale. The required files may vary from target
                       application to target application.""",
-                      [locale, rfilename])
-        elif ritem["type"] == "unchanged_entities":
+                      [locale["path"], rfilename])
+        elif ritem["type"] == "unchanged_entity":
             unchanged_entities += ritem["entities"]
             unchanged_entity_list.extend(ritem["unchanged_entities"])
         elif ritem["type"] == "total_entities":
@@ -272,14 +312,14 @@ def _aggregate_results(err, results, locale):
            L10N_THRESHOLD:
         
         err.error("%s contains %d unchanged entities (%s)" %
-                    (locale,
+                    (locale["path"],
                      unchanged_entities,
                      ", ".join(unchanged_entity_list)),
                   """Localizations must include a translated copy
                   of each entity from each file in the reference
                   locale. These translations SHOULD differ from
                   the localized text in the reference package.""",
-                  [locale, rfilename])
+                  [locale["path"], rfilename])
     
 
 def _process_results(err, data):

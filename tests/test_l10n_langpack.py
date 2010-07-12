@@ -32,7 +32,7 @@ def test_results_aggregator():
     l10n._aggregate_results(err,
                             [{"type":"missing_files",
                               "filename":"foo.bar"}],
-                            {"name":"en-US"})
+                            {"name":"en-US", "path":"foo.bar"})
     assert err.failed()
     
     err = ErrorBundle(None, True)
@@ -40,29 +40,29 @@ def test_results_aggregator():
                             [{"type":"missing_entities",
                               "filename":"foo.bar",
                               "missing_entities":["asdf","ghjk"]}],
-                            {"name":"en-US"})
+                            {"name":"en-US", "path":"foo.bar"})
     assert err.failed()
     
     err = ErrorBundle(None, True)
     l10n._aggregate_results(err,
-                            [{"type":"unchanged_entities",
+                            [{"type":"unchanged_entity",
                               "entities":0,
                               "unchanged_entities":["asdf","ghjk"],
                               "filename":"foo.bar"},
                               {"type":"total_entities",
                                "entities":100}],
-                            {"name":"en-US"})
+                            {"name":"en-US", "path":"foo.bar"})
     assert not err.failed()
     
     err = ErrorBundle(None, True)
     l10n._aggregate_results(err,
-                            [{"type":"unchanged_entities",
+                            [{"type":"unchanged_entity",
                               "entities":50,
                               "unchanged_entities":["asdf","ghjk"],
                               "filename":"foo.bar"},
                               {"type":"total_entities",
                                "entities":100}],
-                            {"name":"en-US"})
+                            {"name":"en-US", "path":"foo.bar"})
     assert err.failed()
     
 
