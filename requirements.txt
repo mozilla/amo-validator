@@ -1,0 +1,4 @@
+cssutils==0.9.7b3
+rdflib==3.0.0
+nose==0.11.3
+coverage==3.3.1

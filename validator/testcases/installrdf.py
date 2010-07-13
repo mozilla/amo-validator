@@ -21,11 +21,12 @@ def _test_rdf(err, install):
     """Wrapper for install.rdf testing to make unit testing so much
     easier."""
     
-    if err.get_resource("listed"):
+    if not err.get_resource("listed"):
         shouldnt_exist = ("hidden", )
     else:
         shouldnt_exist = ("updateURL",
                           "updateKey",
+                          "updateLink",
                           "hidden")
     obsolete = ("file", )
     must_exist_once = ["id",
@@ -38,7 +39,13 @@ def _test_rdf(err, install):
                       "aboutURL",
                       "iconURL",
                       "homepageURL",
-                      "creator"]
+                      "creator",
+                      "updateInfoURL",
+                      "updateKey",
+                      "updateURL",
+                      "updateLink", # Banned, but if not, pass it once.
+                      "updateHash",
+                      "signature"]
     may_exist = ("targetApplication",
                  "localized",
                  "description",
