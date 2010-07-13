@@ -22,9 +22,14 @@ Python Libraries for Testing:
 - nose
 - coverage
 
+You can install everything you need for running and testing with ::
+
+    pip install -r requirements.txt
+
 Running
 =======
 
+<<<<<<< HEAD
 Before you begin, you'll need to change the PYTHONPATH of your virtual environment to the ``/validator/`` directory. This can be be done on most *NIX machines with the command:
 
 	export PYTHONPATH=/path/to/validator/directory/
@@ -32,6 +37,9 @@ Before you begin, you'll need to change the PYTHONPATH of your virtual environme
 It would be a good idea to do this in a virtual environment so as not to gum up other apps.
 
 Run the validator as follows:
+=======
+Run the validator as follows ::
+>>>>>>> f7495cca6c9eb2375d04994702acbb210aece020
 
 	python package-parser.py <path to xpi> [-t <expected type>] [-o <output type>] [-v] [--file <output file>] [--boring] [--selfhosted]
 
@@ -103,7 +111,7 @@ When outputting to a file, Boring Mode is automatically activated.
 Boring Mode:
 ------------
 
-Boring mode, when activated, doesn't print colors to the terminal. 
+Boring mode, when activated, doesn't print colors to the terminal.
 
 
 Output
@@ -236,9 +244,13 @@ For instance, this tree would generate the following messages:
 Testing
 =======
 
-Unit tests can be run with a simple call to:
+Unit tests can be run with ::
 
-	nosetests
+	fab test
+
+or, after setting the proper python path: ::
+
+    nosetests
 
 However, to turn run unit tests with code coverage, the appropriate
 command would be:
