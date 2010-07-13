@@ -22,10 +22,14 @@ Python Libraries for Testing:
 - nose
 - coverage
 
+You can install everything you need for running and testing with ::
+
+    pip install -r requirements.txt
+
 Running
 =======
 
-Run the validator as follows:
+Run the validator as follows ::
 
 	python package-parser.py <path to xpi> [-t <expected type>] [-o <output type>] [-v] [--file <output file>] [--boring]
 
@@ -97,7 +101,7 @@ When outputting to a file, Boring Mode is automatically activated.
 Boring Mode:
 ------------
 
-Boring mode, when activated, doesn't print colors to the terminal. 
+Boring mode, when activated, doesn't print colors to the terminal.
 
 
 Output
@@ -230,9 +234,13 @@ For instance, this tree would generate the following messages:
 Testing
 =======
 
-Unit tests can be run with a simple call to:
+Unit tests can be run with ::
 
-	nosetests
+	fab test
+
+or, after setting the proper python path: ::
+
+    nosetests
 
 However, to turn run unit tests with code coverage, the appropriate
 command would be:
