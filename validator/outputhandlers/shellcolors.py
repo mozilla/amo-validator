@@ -1,6 +1,9 @@
 import re
 import curses
+import os
 import sys
+
+from StringIO import StringIO
 
 COLORS = ("BLUE", "RED", "GREEN", "YELLOW", "WHITE", "BLACK")
 
@@ -12,6 +15,10 @@ class OutputHandler:
         """Pipe is the output stream that the printed data will be
         written to. For instance, this could be a file, a StringIO
         object, or stdout."""
+        
+        if not no_color:
+            no_color = isinstance(sys.stdout, StringIO) or \
+                       not sys.stdout.isatty()
         
         self.pipe = pipe
         self.no_color = no_color
