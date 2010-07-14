@@ -30,12 +30,6 @@ You can install everything you need for running and testing with ::
 Running
 =======
 
-Before you begin, you'll need to change the PYTHONPATH of your virtual environment to the ``/validator/`` directory. This can be be done on most *NIX machines with the command ::
-
-	export PYTHONPATH=/path/to/validator/directory/
-
-It would be a good idea to do this in a virtual environment so as not to gum up other apps.
-
 Run the validator as follows ::
 
 	python package-parser.py <path to xpi> [-t <expected type>] [-o <output type>] [-v] [--file <output file>] [--boring] [--selfhosted]
