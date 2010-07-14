@@ -14,8 +14,9 @@ Prerequisites
 
 Python Libraries:
 
-- rdflib
+- argparse
 - cssutils
+- rdflib
 
 Python Libraries for Testing:
 

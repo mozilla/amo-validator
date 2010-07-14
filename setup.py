@@ -18,7 +18,10 @@ setup(
     zip_safe=False,
     install_requires=['nose',
                       'cssutils',
-                      'rdflib'],
+                      'rdflib',
+                      'coverage',
+                      'Fabric',
+                      'argparse'],
     scripts=["validator/validator.py"],
     classifiers=[
         'Development Status :: 4 - Beta',

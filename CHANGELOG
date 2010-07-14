@@ -1,2 +1,6 @@
+7/14/2010
+Added test to make sure XPCOM is not used in Firefox 4
+Removed the argparse library from the source and added it to the install scripts.
+
 7/13/2010
 Added patch from clouserw that helps with installation.
