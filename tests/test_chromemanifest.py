@@ -1,7 +1,7 @@
 import unittest
 import os
 
-from chromemanifest import ChromeManifest
+from validator.chromemanifest import ChromeManifest
 
 def test_open():
     "Open a chrome file and ensure that data can be pulled from it."

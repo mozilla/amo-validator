@@ -1,10 +1,10 @@
-import testcases.l10ncompleteness as l10n
-from testcases.l10n.dtd import DTDParser
-from testcases.l10n.properties import PropertiesParser
-from xpi import XPIManager
-from errorbundler import ErrorBundle
+import validator.testcases.l10ncompleteness as l10n
+from validator.testcases.l10n.dtd import DTDParser
+from validator.testcases.l10n.properties import PropertiesParser
+from validator.xpi import XPIManager
+from validator.errorbundler import ErrorBundle
 from helper import _do_test
-from constants import *
+from validator.constants import *
 
 def test_chromemanifest():
     "Make sure it only accepts packs with chrome.manifest files."

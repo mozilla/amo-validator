@@ -1,8 +1,8 @@
 import os
 
-from rdf import RDFParser
-from xpi import XPIManager
-from errorbundler import ErrorBundle
+from validator.rdf import RDFParser
+from validator.xpi import XPIManager
+from validator.errorbundler import ErrorBundle
 
 def _do_test(path, test, failure=True,
              require_install=False, set_type=0):

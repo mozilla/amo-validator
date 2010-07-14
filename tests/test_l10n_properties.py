@@ -2,7 +2,7 @@ import os
 
 from StringIO import StringIO
 
-import testcases.l10n.properties as properties
+import validator.testcases.l10n.properties as properties
 
 def test_passing_file():
     "Tests a valid properties file by passing in a file path."

@@ -1,10 +1,10 @@
 import os
 
-from errorbundler import ErrorBundle
-from rdf import RDFParser
-from xpi import XPIManager
-from constants import *
-import typedetection
+from validator.errorbundler import ErrorBundle
+from validator.rdf import RDFParser
+from validator.xpi import XPIManager
+from validator.constants import *
+import validator.typedetection as typedetection
 
 def _test_type(file_, expectation, failure=False):
     "Tests a file against the expectations"

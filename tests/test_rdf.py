@@ -2,8 +2,8 @@ import os
 
 from StringIO import StringIO
 
-import rdf
-from rdf import RDFParser
+import validator.rdf as rdf
+from validator.rdf import RDFParser
 
 def _load_rdf(file_):
     "Loads an RDF file into a string."

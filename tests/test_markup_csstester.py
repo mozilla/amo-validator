@@ -1,7 +1,5 @@
-import testcases
-import testcases.markup
-import testcases.markup.csstester
-from errorbundler import ErrorBundle
+import validator.testcases.markup.csstester as csstester
+from validator.errorbundler import ErrorBundle
 
 def _do_test(path, should_fail=False):
     
@@ -11,7 +9,7 @@ def _do_test(path, should_fail=False):
     
     err = ErrorBundle(None, True)
     
-    testcases.markup.csstester.test_css_file(err, "css.css", data)
+    csstester.test_css_file(err, "css.css", data)
     
     err.print_summary()
     

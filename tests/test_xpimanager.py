@@ -1,7 +1,7 @@
 import zipfile
 from zipfile import ZipFile
 
-from xpi import XPIManager
+from validator.xpi import XPIManager
 
 def test_open():
     "Test that the manager will open the package"

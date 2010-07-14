@@ -2,7 +2,7 @@ import os
 
 from StringIO import StringIO
 
-import testcases.l10n.dtd as dtd
+import validator.testcases.l10n.dtd as dtd
 
 def test_passing_file():
     "Tests a valid DTD file by passing in a file path."

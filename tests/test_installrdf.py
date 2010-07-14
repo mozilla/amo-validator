@@ -1,8 +1,8 @@
-import testcases.installrdf
-from errorbundler import ErrorBundle
-from rdf import RDFParser
+import validator.testcases.installrdf as installrdf
+from validator.errorbundler import ErrorBundle
+from validator.rdf import RDFParser
 from helper import _do_test
-from constants import *
+from validator.constants import *
 
 def _test_value(value, test, failure=True):
     "Tests a value against a test."
@@ -20,40 +20,40 @@ def test_pass_id():
     "Tests that valid IDs will be accepted."
     
     _test_value("{12345678-1234-1234-1234-123456789012}",
-                testcases.installrdf._test_id,
+                installrdf._test_id,
                 False)
     _test_value("abc@foo.bar",
-                testcases.installrdf._test_id,
+                installrdf._test_id,
                 False)
     _test_value("a+bc@foo.bar",
-                testcases.installrdf._test_id,
+                installrdf._test_id,
                 False)
     
 def test_fail_id():
     "Tests that invalid IDs will not be accepted."
     
     _test_value("{1234567-1234-1234-1234-123456789012}",
-                testcases.installrdf._test_id)
+                installrdf._test_id)
     _test_value("!@foo.bar",
-                testcases.installrdf._test_id)
+                installrdf._test_id)
     
 def test_pass_version():
     "Tests that valid versions will be accepted."
     
     _test_value("1.2.3.4",
-                testcases.installrdf._test_version,
+                installrdf._test_version,
                 False)
     _test_value("1a.2+.3b",
-                testcases.installrdf._test_version,
+                installrdf._test_version,
                 False)
     
 def test_fail_version():
     "Tests that invalid versions will not be accepted."
     
     _test_value("2.0 alpha",
-                testcases.installrdf._test_version)
+                installrdf._test_version)
     _test_value("whatever",
-                testcases.installrdf._test_version)
+                installrdf._test_version)
 
 def _run_test(filename, failure=True):
     "Runs a test on an install.rdf file"
@@ -65,7 +65,7 @@ def _run_test(filename, failure=True):
     file_.close()
     
     parser = RDFParser(data)
-    testcases.installrdf._test_rdf(err, parser)
+    installrdf._test_rdf(err, parser)
     
     if failure: # pragma: no cover
         assert err.failed()

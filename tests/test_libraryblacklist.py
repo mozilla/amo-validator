@@ -1,11 +1,9 @@
 import os
 
-import decorator
-import testcases
-import testcases.library_blacklist
-from errorbundler import ErrorBundle
-from xpi import XPIManager
-from rdf import RDFParser
+import validator.testcases.library_blacklist as libblacklist
+from validator.errorbundler import ErrorBundle
+from validator.xpi import XPIManager
+from validator.rdf import RDFParser
 
 
 def test_blacklisted_files():
@@ -18,9 +16,9 @@ def test_blacklisted_files():
     contents = package.get_file_data()
     err = ErrorBundle(None, True)
     
-    testcases.library_blacklist.test_library_blacklist(err,
-                                                       contents,
-                                                       package)
+    libblacklist.test_library_blacklist(err,
+                                        contents,
+                                        package)
     
     err.print_summary()
     

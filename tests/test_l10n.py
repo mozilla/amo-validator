@@ -1,7 +1,7 @@
-import testcases.l10ncompleteness as l10n
-from errorbundler import ErrorBundle
+import validator.testcases.l10ncompleteness as l10n
+from validator.errorbundler import ErrorBundle
 from helper import _do_test
-from constants import *
+from validator.constants import *
 
 def test_pass():
     "Test a package with localization that should pass validation."

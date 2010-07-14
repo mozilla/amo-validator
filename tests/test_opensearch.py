@@ -1,6 +1,6 @@
 import os
 
-import typedetection
+import validator.typedetection as typedetection
 from StringIO import StringIO
 
 def _do_test(url, failure=True):

@@ -1,7 +1,6 @@
-import testcases
-import testcases.targetapplication as targetapp
-from constants import *
-from errorbundler import ErrorBundle
+import validator.testcases.targetapplication as targetapp
+from validator.constants import *
+from validator.errorbundler import ErrorBundle
 from helper import _do_test
 
 def test_valid_targetapps():
@@ -88,5 +87,3 @@ def test_is_ff4():
                        True)
     
     assert results.get_resource("ff4")
-    
-

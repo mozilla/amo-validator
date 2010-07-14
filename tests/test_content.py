@@ -2,11 +2,11 @@ import os
 
 from StringIO import StringIO
 
-import xpi
-import testcases.content as content
-from errorbundler import ErrorBundle
+import validator.xpi as xpi
+import validator.testcases.content as content
+from validator.errorbundler import ErrorBundle
 from helper import _do_test
-from constants import *
+from validator.constants import *
 
 def test_ignore_macstuff():
     "Tests that the content manager will ignore Mac-generated files"

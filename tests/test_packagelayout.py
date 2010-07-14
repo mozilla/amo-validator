@@ -1,6 +1,5 @@
-import testcases
-import testcases.packagelayout as packagelayout
-from errorbundler import ErrorBundle
+import validator.testcases.packagelayout as packagelayout
+from validator.errorbundler import ErrorBundle
 from helper import _do_test
 
 def test_blacklisted_files():
@@ -9,7 +8,7 @@ def test_blacklisted_files():
     safe."""
     
     _do_test("tests/resources/packagelayout/ext_blacklist.xpi",
-             testcases.packagelayout.test_blacklisted_files,
+             packagelayout.test_blacklisted_files,
              True)
     
 

@@ -2,8 +2,8 @@
 import json
 from StringIO import StringIO
 
-import errorbundler
-from errorbundler import ErrorBundle
+import validator.errorbundler as errorbundler
+from validator.errorbundler import ErrorBundle
 
 #{"messages": [{"message": "Invalid chrome.manifest object/predicate.", "type": "error", "description": "'override' entry does not match chrome://*/locale/*"}], "detected_type": 4, "success": false}
 

@@ -1,19 +1,19 @@
 import os
 
-import decorator
-import testcases
-import testcases.conduit
-from errorbundler import ErrorBundle
-from xpi import XPIManager
-from rdf import RDFParser
+import validator.decorator as decorator
+import validator.testcases as testcases
+import validator.testcases.conduit as conduit
+from validator.errorbundler import ErrorBundle
+from validator.xpi import XPIManager
+from validator.rdf import RDFParser
 from helper import _do_test
-from constants import *
+from validator.constants import *
 
 def test_outright():
     "Tests the Conduit detector against an outright toolbar."
     
     _do_test("tests/resources/conduit/basta_bar.xpi",
-             testcases.conduit.test_conduittoolbar,
+             conduit.test_conduittoolbar,
              failure=True,
              require_install=True,
              set_type=PACKAGE_EXTENSION)
@@ -22,7 +22,7 @@ def test_white():
     "Tests a non-Conduit addon against the library."
     
     _do_test("tests/resources/conduit/pass.xpi",
-             testcases.conduit.test_conduittoolbar,
+             conduit.test_conduittoolbar,
              failure=False,
              require_install=True,
              set_type=PACKAGE_EXTENSION)
@@ -32,7 +32,7 @@ def test_params():
     the install.rdf file that indiciate Conduit-ion."""
     
     _do_test("tests/resources/conduit/conduit_params.xpi",
-             testcases.conduit.test_conduittoolbar,
+             conduit.test_conduittoolbar,
              failure=True,
              require_install=True,
              set_type=PACKAGE_EXTENSION)
@@ -42,7 +42,7 @@ def test_updateurl():
     parameter set to that of a Conduit Toolbar's."""
     
     _do_test("tests/resources/conduit/conduit_updateurl.xpi",
-             testcases.conduit.test_conduittoolbar,
+             conduit.test_conduittoolbar,
              failure=True,
              require_install=True,
              set_type=PACKAGE_EXTENSION)
@@ -52,7 +52,7 @@ def test_structure():
     folders which resemble those of a Conduit toolbar."""
     
     _do_test("tests/resources/conduit/conduit_structure.xpi",
-             testcases.conduit.test_conduittoolbar,
+             conduit.test_conduittoolbar,
              failure=True,
              require_install=True,
              set_type=PACKAGE_EXTENSION)
@@ -62,7 +62,7 @@ def test_chrome():
     chrome.manifest entries that indicate a Conduit toolbar."""
     
     _do_test("tests/resources/conduit/conduit_chrome.xpi",
-             testcases.conduit.test_conduittoolbar,
+             conduit.test_conduittoolbar,
              failure=True,
              require_install=True,
              set_type=PACKAGE_EXTENSION)

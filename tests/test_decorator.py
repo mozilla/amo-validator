@@ -1,4 +1,4 @@
-import decorator
+import validator.decorator as decorator
 
 def test_tiers():
     """Tests to make sure that the decorator module is properly
