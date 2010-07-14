@@ -22,7 +22,7 @@ setup(
                       'coverage',
                       'Fabric',
                       'argparse'],
-    scripts=["validator/validator.py"],
+    scripts=["addon-validator"],
     classifiers=[
         'Development Status :: 4 - Beta',
         'Environment :: Web Environment',
