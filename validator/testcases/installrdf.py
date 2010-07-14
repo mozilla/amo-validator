@@ -1,7 +1,7 @@
 import re
 
-import decorator
-from constants import *
+from validator import decorator
+from validator.constants import *
 
 @decorator.register_test(tier=1)
 def test_install_rdf_params(err,

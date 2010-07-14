@@ -4,9 +4,9 @@ try:
     from HTMLParser import HTMLParser
 except ImportError: # pragma: no cover
     from html.parser import HTMLParser
-    
-from testcases.markup import csstester
-from constants import *
+
+from validator.testcases.markup import csstester
+from validator.constants import *
 
 DEBUG = False
 

@@ -1,6 +1,6 @@
-import decorator
-from chromemanifest import ChromeManifest
-from constants import PACKAGE_THEME
+from validator import decorator
+from validator.chromemanifest import ChromeManifest
+from validator.constants import PACKAGE_THEME
 
 
 @decorator.register_test(tier=2, expected_type=PACKAGE_THEME)

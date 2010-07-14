@@ -1,7 +1,7 @@
 import fnmatch
 
-import decorator
-from chromemanifest import ChromeManifest
+from validator import decorator
+from validator.chromemanifest import ChromeManifest
 
 @decorator.register_test(1)
 def test_conduittoolbar(err, package_contents=None, xpi_manager=None):
