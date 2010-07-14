@@ -49,14 +49,17 @@ def test_extra_whitelisted():
              False)
 
 
-def _do_simulated_test(function, structure, failure=False):
+def _do_simulated_test(function, structure, failure=False, ff4=False):
     """"Performs a test on a function or set of functions without
     generating a full package."""
     
-    structure.append("__MACOSX/foo.bar")
+    dict_structure = {"__MACOSX/foo.bar": True}
+    for item in structure:
+        dict_structure[item] = True
     
     err = ErrorBundle(None, True)
-    function(err, structure, None)
+    err.save_resource("ff4", ff4)
+    function(err, dict_structure, None)
     
     err.print_summary(True)
     
@@ -83,6 +86,27 @@ def test_langpack_max():
                         "chrome/asdf.properties",
                         "chrome/asdf.xhtml",
                         "chrome/asdf.css"])
+
+def test_ff4():
+    """Tests the package layout module out on a simulated language pack
+    containing the largest number of possible elements."""
+    
+    _do_simulated_test(function=packagelayout.test_xpcom,
+                       structure=["install.rdf",
+                                  "foo.manifest"],
+                       ff4=True,
+                       failure=False)
+    
+    _do_simulated_test(function=packagelayout.test_xpcom,
+                       structure=["install.rdf",
+                                  "components/foo.bar"],
+                       ff4=True,
+                       failure=True)
+    _do_simulated_test(function=packagelayout.test_xpcom,
+                       structure=["install.rdf",
+                                  "components/foo.bar"],
+                       ff4=False,
+                       failure=False)
 
 def test_dict_max():
     """Tests the package layout module out on a simulated dictionary

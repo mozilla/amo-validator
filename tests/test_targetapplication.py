@@ -77,3 +77,16 @@ def test_has_installrdfs():
     # Test package to make sure has_install_rdf is set to True.
     assert targetapp.test_targetedapplications(err, {}, None) is None
 
+def test_is_ff4():
+    """Tests a passing install.rdf package for whether it's built for
+    Firefox 4. This doesn't pass or fail a package, but it is used for
+    other tests in other modules in higher tiers."""
+    
+    results = _do_test("tests/resources/targetapplication/ff4.xpi",
+                       targetapp.test_targetedapplications,
+                       False,
+                       True)
+    
+    assert results.get_resource("ff4")
+    
+

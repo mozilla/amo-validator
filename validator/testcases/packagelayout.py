@@ -39,14 +39,35 @@ def test_blacklisted_files(err, package_contents=None, xpi_package=None):
 def test_layout_all(err, package_contents, xpi_package):
     "Tests the well-formedness of extensions."
     
-    # Subpackages don't need to be tested for install.rdf
+    # Subpackages don't need to be tested for install.rdf.
     if xpi_package.subpackage:
         return
     
     if not err.get_resource("has_install_rdf"):
         err.error("Addon missing install.rdf.",
                   "All addons require an install.rdf file.")
+    
 
+@decorator.register_test(tier=2)
+def test_xpcom(err, package_contents, xpi_package):
+    "Test to make sure XPCOM is not used for FF4+"
+    
+    if not err.get_resource("ff4"):
+        return None
+    
+    # Test for XPCOM incompatibility.
+    for name, file_ in package_contents.items():
+        
+        if name.startswith("components/"):
+            err.warning("XPCOM ties detected",
+                        """Files were found in the /components/ directory,
+                        which generally indicates XPCOM references. Firefox
+                        4 no longer supports XPCOM. This interface is
+                        subject to change.""",
+                        name);
+            break
+        
+    
 
 @decorator.register_test(tier=1, expected_type=3)
 def test_dictionary_layout(err, package_contents=None, xpi_package=None):

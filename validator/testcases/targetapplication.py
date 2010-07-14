@@ -67,7 +67,7 @@ APPROVED_APPLICATIONS = {
 }
 
 
-@decorator.register_test(tier=2)
+@decorator.register_test(tier=1)
 def test_targetedapplications(err, package_contents=None,
                               xpi_package=None):
     """Tests to make sure that the targeted applications in the
@@ -118,6 +118,9 @@ def test_targetedapplications(err, package_contents=None,
             
             if ta_guid in APPROVED_APPLICATIONS:
                 
+                # Remember if the addon supports Firefox.
+                is_firefox = APPLICATIONS[ta_guid] == "firefox"
+                
                 # Grab the minimum and maximum version numbers.
                 min_version = install.get_object(target_app, ta_min_ver)
                 max_version = install.get_object(target_app, ta_max_ver)
@@ -162,6 +165,13 @@ def test_targetedapplications(err, package_contents=None,
                               correct order. The maximum version must
                               be greater than the minimum version.""",
                               "install.rdf")
+                    continue
+                
+                # Test whether it's a FF4 addon
+                if is_firefox:
+                    ff4_pos = APPROVED_APPLICATIONS[ta_guid].index("4.0.*")
+                    if max_ver_pos >= ff4_pos:
+                        err.save_resource("ff4", True)
     
     no_duplicate_targets = set(used_targets)
     
