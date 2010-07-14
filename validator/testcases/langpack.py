@@ -1,9 +1,9 @@
 import fnmatch
 import re
 
-import decorator
-from chromemanifest import ChromeManifest
-from constants import PACKAGE_LANGPACK
+from validator import decorator
+from validator.chromemanifest import ChromeManifest
+from validator.constants import PACKAGE_LANGPACK
 
 BAD_LINK = '(href|src)=["\'](?!(chrome:\/\/|#([a-z][a-z0-9\-_:\.]*)?))'
 

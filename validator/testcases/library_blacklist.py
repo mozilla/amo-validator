@@ -1,6 +1,7 @@
 import hashlib
+import os
 
-import decorator
+from validator import decorator
 
 @decorator.register_test(tier=1)
 def test_library_blacklist(err, package_contents=None, xpi_package=None):
@@ -16,7 +17,8 @@ def test_library_blacklist(err, package_contents=None, xpi_package=None):
     generated using the libhasher.py tool."""
     
     # Generate a tuple of definition data
-    lines = open("hashes.txt").readlines()
+    path = os.path.join(os.path.dirname(__file__), 'hashes.txt')
+    lines = open(path).readlines()
     definitions = [line.strip() for line in lines]
     
     # Iterate each file

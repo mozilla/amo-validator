@@ -5,21 +5,21 @@ import zipfile
 from StringIO import StringIO
 
 import argparse
-import decorator
+from validator import decorator
 import typedetection
-import testcases.packagelayout
-import testcases.installrdf
-import testcases.library_blacklist
-import testcases.conduit
-import testcases.langpack
-import testcases.themes
-import testcases.content
-import testcases.targetapplication
-import testcases.l10ncompleteness
-from xpi import XPIManager
+import validator.testcases.packagelayout
+import validator.testcases.installrdf
+import validator.testcases.library_blacklist
+import validator.testcases.conduit
+import validator.testcases.langpack
+import validator.testcases.themes
+import validator.testcases.content
+import validator.testcases.targetapplication
+import validator.testcases.l10ncompleteness
+from validator.xpi import XPIManager
 from rdf import RDFParser
 from errorbundler import ErrorBundle
-from constants import *
+from validator.constants import *
 
 def main():
     "Main function. Handles delegation to other functions."

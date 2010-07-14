@@ -1,5 +1,5 @@
 from xml.dom.minidom import parse
-from constants import *
+from validator.constants import *
 
 def detect_type(err, install_rdf=None, xpi_package=None):
     """Determines the type of addon being validated based on

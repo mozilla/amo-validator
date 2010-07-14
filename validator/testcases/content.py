@@ -1,13 +1,13 @@
 
 from StringIO import StringIO
 
-import decorator
+from validator import decorator
 import validator as testendpoint_validator
-import testcases.markup.markuptester as testendpoint_markup
-import testcases.markup.csstester as testendpoint_css
-import testcases.langpack as testendpoint_langpack
-from xpi import XPIManager
-from constants import PACKAGE_LANGPACK, PACKAGE_SUBPACKAGE
+import validator.testcases.markup.markuptester as testendpoint_markup
+import validator.testcases.markup.csstester as testendpoint_css
+import validator.testcases.langpack as testendpoint_langpack
+from validator.xpi import XPIManager
+from validator.constants import PACKAGE_LANGPACK, PACKAGE_SUBPACKAGE
 
 
 @decorator.register_test(tier=2)

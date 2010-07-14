@@ -1,6 +1,6 @@
 import fnmatch
 
-import decorator
+from validator import decorator
 
 
 def test_unknown_file(err, filename):

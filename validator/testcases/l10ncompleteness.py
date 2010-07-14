@@ -4,15 +4,15 @@ import os
 import json
 from StringIO import StringIO
 
-import decorator
-from chromemanifest import ChromeManifest
-from xpi import XPIManager
-from constants import PACKAGE_EXTENSION, \
+from validator import decorator
+from validator.chromemanifest import ChromeManifest
+from validator.xpi import XPIManager
+from validator.constants import PACKAGE_EXTENSION, \
                       PACKAGE_THEME, \
                       PACKAGE_LANGPACK
 
-import testcases.l10n.dtd as dtd
-import testcases.l10n.properties as properties
+import validator.testcases.l10n.dtd as dtd
+import validator.testcases.l10n.properties as properties
 
 # The threshold that determines the number of entities that must not be
 # missing from the package.
