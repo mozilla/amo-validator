@@ -24,13 +24,13 @@ from validator.constants import *
 def main():
     "Main function. Handles delegation to other functions."
 
-    expectations = {"any":0,
-                    "extension":1,
-                    "theme":2,
-                    "dictionary":3,
-                    "languagepack":4,
-                    "search":5,
-                    "multi":1} # A multi extension is an extension
+    expectations = {"any":PACKAGE_ANY,
+                    "extension":PACKAGE_EXTENSION,
+                    "theme":PACKAGE_THEME,
+                    "dictionary":PACKAGE_DICTIONARY,
+                    "languagepack":PACKAGE_LANGPACK,
+                    "search":PACKAGE_SEARCHPROV,
+                    "multi":PACKAGE_MULTI}
 
     # Parse the arguments that
     parser = argparse.ArgumentParser(
