@@ -169,10 +169,19 @@ class ErrorBundle(object):
     def print_json(self):
         "Prints a JSON summary of the validation operation."
         
-        output = {"detected_type": self.detected_type,
+        types = {0: "unknown",
+                 1: "extension",
+                 2: "theme",
+                 3: "dictionary",
+                 4: "langpack",
+                 5: "search"}
+        output = {"detected_type": types[self.detected_type],
                   "success": not self.failed(),
                   "rejected": self.reject,
-                  "messages":[]}
+                  "messages":[],
+                  "errors": len(self.errors),
+                  "warnings": len(self.warnings),
+                  "infos": len(self.infos)}
         
         messages = output["messages"]
         
