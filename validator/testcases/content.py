@@ -2,7 +2,7 @@
 from StringIO import StringIO
 
 from validator import decorator
-import validator as testendpoint_validator
+import validator.main as testendpoint_validator
 import validator.testcases.markup.markuptester as testendpoint_markup
 import validator.testcases.markup.csstester as testendpoint_css
 import validator.testcases.langpack as testendpoint_langpack
