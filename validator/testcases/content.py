@@ -2,7 +2,7 @@
 from StringIO import StringIO
 
 from validator import decorator
-import validator.main as testendpoint_validator
+import validator as testendpoint_validator
 import validator.testcases.markup.markuptester as testendpoint_markup
 import validator.testcases.markup.csstester as testendpoint_css
 import validator.testcases.langpack as testendpoint_langpack
@@ -38,7 +38,7 @@ def test_packed_packages(err, package_contents=None, xpi_package=None):
             # Unpack the package and load it up.
             package = StringIO(xpi_package.read(name))
             try:
-                sxpi_package = XPIManager(package, name, is_subpackage)
+                sub_xpi = XPIManager(package, name, is_subpackage)
             except Exception as error:
                 err.error("Subpackage %s is corrupt." % name,
                           """The subpackage could not be opened due to
@@ -46,14 +46,14 @@ def test_packed_packages(err, package_contents=None, xpi_package=None):
                           is valid.""")
                 continue
             
-            package_contents = sxpi_package.get_file_data()
+            temp_contents = sub_xpi.get_file_data()
             
             # Let the error bunder know we're in a sub-package.
             err.push_state(data["name_lower"])
             err.set_type(PACKAGE_SUBPACKAGE) # Subpackage
-            testendpoint_validator.test_inner_package(err,
-                                                      package_contents,
-                                                      sxpi_package)
+            testendpoint_validator.main.test_inner_package(err,
+                                                           temp_contents,
+                                                           sub_xpi)
             
             package.close()
             err.pop_state()
@@ -69,7 +69,7 @@ def test_packed_packages(err, package_contents=None, xpi_package=None):
             
             # There are no expected types for packages within a multi-
             # item package.
-            testendpoint_validator.test_package(err, package, name)
+            testendpoint_validator.main.test_package(err, package, name)
             
             package.close()
             err.pop_state()

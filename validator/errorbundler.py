@@ -159,12 +159,33 @@ class ErrorBundle(object):
                       info["line"])
         
     
-    def _clean_description(self, message):
+    def _clean_description(self, message, json=False):
         "Cleans all the nasty whitespace from the descriptions."
         
-        desc = message["description"].split("\n")
-        desc = [line.strip() for line in desc]
-        message["description"] = ' '.join(desc)
+        if not isinstance(message["description"], list):
+            desc = message["description"].split("\n")
+        
+        output = []
+        merge = []
+        # Loop through each item in the multipart description.
+        for line in desc:
+            # If it's a string, add it to the line buffer for concat.
+            if isinstance(line, str):
+                merge.append(line.strip())
+            # If it's a list, just append it.
+            elif isinstance(line, list):
+                # While you're in here, concat and flush the line buffer.
+                if merge:
+                    output.append(" ".join(merge))
+                
+                # JSON keeps the structure, plain text normalizes.
+                if json:
+                    output.append(line)
+                else:
+                    output.append(" ".join(line))
+        # Finish up the line buffer.
+        if merge:
+            output.append(" ".join(merge))
     
     def print_json(self):
         "Prints a JSON summary of the validation operation."
@@ -188,17 +209,17 @@ class ErrorBundle(object):
         # Copy messages to the JSON output
         for error in self.errors:
             error["type"] = "error"
-            self._clean_description(error)
+            self._clean_description(error, True)
             messages.append(error)
             
         for warning in self.warnings:
             warning["type"] = "warning"
-            self._clean_description(warning)
+            self._clean_description(warning, True)
             messages.append(warning)
             
         for info in self.infos:
             info["type"] = "info"
-            self._clean_description(info)
+            self._clean_description(info, True)
             messages.append(info)
         
         # Output the JSON.
