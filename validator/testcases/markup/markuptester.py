@@ -8,7 +8,7 @@ except ImportError: # pragma: no cover
 from validator.testcases.markup import csstester
 from validator.constants import *
 
-DEBUG = False
+DEBUG = True
 
 UNSAFE_TAGS = ("script",
                "object",

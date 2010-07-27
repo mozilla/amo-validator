@@ -21,6 +21,8 @@ class ErrorBundle(object):
         self.warnings = []
         self.infos = []
         
+        self.metadata = {}
+        
         self.subpackages = []
         self.package_stack = []
         
@@ -31,25 +33,28 @@ class ErrorBundle(object):
         self.handler = OutputHandler(pipe, no_color)
             
         
-    def error(self, error, description='', filename='', line=0):
+    def error(self, err_id, error, description='', filename='', line=0):
         "Stores an error message for the validation process"
-        self.errors.append({"message": error,
+        self.errors.append({"id": err_id,
+                            "message": error,
                             "description": description,
                             "file": filename,
                             "line": line})
         return self
         
-    def warning(self, warning, description='', filename='', line=0):
+    def warning(self, err_id, warning, description='', filename='', line=0):
         "Stores a warning message for the validation process"
-        self.warnings.append({"message": warning,
+        self.warnings.append({"id": err_id,
+                              "message": warning,
                               "description": description,
                               "file": filename,
                               "line": line})
         return self
 
-    def info(self, info, description='', filename='', line=0):
+    def info(self, err_id, info, description='', filename='', line=0):
         "Stores an informational message about the validation"
-        self.infos.append({"message": info,
+        self.infos.append({"id": err_id,
+                           "message": info,
                            "description": description,
                            "file": filename,
                            "line": line})
@@ -130,7 +135,8 @@ class ErrorBundle(object):
             
             # Write the errors with the file structure delimited by
             # right carets.
-            self.error("%s > %s" % (name, error["message"]),
+            self.error(error["id"],
+                       "%s > %s" % (name, error["message"]),
                        error["description"],
                        trace,
                        error["line"])
@@ -142,7 +148,8 @@ class ErrorBundle(object):
             else:
                 trace.append(warning["file"])
             
-            self.warning("%s > %s" % (name, warning["message"]),
+            self.warning(warning["id"],
+                         "%s > %s" % (name, warning["message"]),
                          warning["description"],
                          trace,
                          warning["line"])
@@ -153,7 +160,8 @@ class ErrorBundle(object):
             else:
                 trace.append(info["file"])
             
-            self.info("%s > %s" % (name, info["message"]),
+            self.info(info["id"],
+                      "%s > %s" % (name, info["message"]),
                       info["description"],
                       trace,
                       info["line"])
@@ -164,6 +172,8 @@ class ErrorBundle(object):
         
         if not isinstance(message["description"], list):
             desc = message["description"].split("\n")
+        else:
+            desc = message["description"]
         
         output = []
         merge = []

@@ -18,10 +18,12 @@ def detect_type(err, install_rdf=None, xpi_package=None):
     if install_rdf is None:
         types = {"xpi": PACKAGE_DICTIONARY}
         
-        err.info("install.rdf was not found.",
-                 """The type should be determined by install.rdf if
-                 present. If it isn't, we still need to know the
-                 type.""")
+        err.info(("typedetection",
+                  "detect_type",
+                  "missing_install_rdf"),
+                 "install.rdf was not found.",
+                 """The type should be determined by install.rdf if present.
+                 If it isn't, we still need to know the type.""")
         
         # If we know what the file type might be, return it.
         if xpi_package.extension in types:
@@ -40,9 +42,12 @@ def detect_type(err, install_rdf=None, xpi_package=None):
             # Make sure we translate back to the normalized version
             return translated_types[type_]
         else:
-            err.error("Invalid <em:type> value.",
-                      """The only valid values for <em:type> are 2, 4,
-                      8, and 32. Any other values are either invalid or
+            err.error(("typedetection",
+                       "detect_type",
+                       "invalid_em_type"),
+                      "Invalid <em:type> value.",
+                      """The only valid values for <em:type> are 2, 4, 8, and
+                      32. Any other values are either invalid or
                       deprecated.""",
                       "install.rdf")
             return

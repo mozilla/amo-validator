@@ -109,7 +109,10 @@ def prepare_package(err, path, expectation=0):
     # since we may not even be dealing with a real file.
     if not os.path.isfile(path):
         err.reject = True
-        return err.error("The package could not be found")
+        return err.error(("main",
+                          "prepare_package",
+                          "not_found"),
+                         "The package could not be found")
 
     # Pop the package extension.
     package_extension = os.path.splitext(path)[1]
@@ -124,7 +127,10 @@ def prepare_package(err, path, expectation=0):
     # Test that the package is an XPI.
     if not package_extension in (".xpi", ".jar"):
         err.reject = True
-        err.error("The package is not of a recognized type.")
+        err.error(("main",
+                   "prepare_package",
+                   "unrecognized"),
+                  "The package is not of a recognized type.")
 
     package = open(path)
     output = test_package(err, package, path, expectation)
@@ -142,7 +148,10 @@ def test_search(err, package, expectation=0):
     # testing it like a search provider.
     if not expected_search_provider:
         err.reject = True
-        return err.warning("Unexpected file extension.")
+        return err.warning(("main",
+                            "test_search",
+                            "extension"),
+                           "Unexpected file extension.")
 
     # Is this a search provider?
     opensearch_results = \
@@ -151,7 +160,10 @@ def test_search(err, package, expectation=0):
     if opensearch_results["failure"]:
         # Failed OpenSearch validation
         error_mesg = "OpenSearch: %s" % opensearch_results["error"]
-        err.error(error_mesg)
+        err.error(("main",
+                   "test_search",
+                   "general_failure"),
+                  error_mesg)
 
         # We want this to flow back into the rest of the program if
         # the error indicates that we're not sure whether it's an
@@ -164,7 +176,10 @@ def test_search(err, package, expectation=0):
 
     elif expected_search_provider:
         err.set_type(PACKAGE_SEARCHPROV)
-        err.info("OpenSearch provider confirmed.")
+        err.info(("main",
+                  "test_search",
+                  "confirmed"),
+                 "OpenSearch provider confirmed.")
 
     return err
 
@@ -184,11 +199,17 @@ def test_package(err, package, name, expectation=PACKAGE_ANY):
         package = XPIManager(package, name)
         if package is None:
             # Die on this one because the file won't open.
-            return err.error("The XPI could not be opened.")
+            return err.error(("main",
+                              "test_package",
+                              "unopenable"),
+                             "The XPI could not be opened.")
 
     except zipfile.BadZipfile:
         # This likely means that there is a problem with the zip file.
-        return err.error("The XPI file that was submitted is corrupt.")
+        return err.error(("main",
+                          "test_package",
+                          "bad_zip"),
+                         "The XPI file that was submitted is corrupt.")
 
     except IOError:
         # This means that there was something wrong with the command.
@@ -197,7 +218,10 @@ def test_package(err, package, name, expectation=PACKAGE_ANY):
     # Test the XPI file for corruption.
     if not package.test():
         err.reject = True
-        return err.error("XPI package appears to be corrupt.")
+        return err.error(("main",
+                          "test_package",
+                          "corrupt"),
+                         "XPI package appears to be corrupt.")
 
     assumed_extensions = {"jar": PACKAGE_THEME,
                           "xml": PACKAGE_SEARCHPROV}
@@ -206,7 +230,10 @@ def test_package(err, package, name, expectation=PACKAGE_ANY):
         assumed_type = assumed_extensions[package.extension]
         # Is the user expecting a different package type?
         if not expectation in (PACKAGE_ANY, assumed_type):
-            err.error("Unexpected package type (found theme)")
+            err.error(("main",
+                       "test_package",
+                       "unexpected_type"),
+                      "Unexpected package type (found theme)")
 
     # Cache a copy of the package contents.
     package_contents = package.get_file_data()
@@ -228,7 +255,12 @@ def test_package(err, package, name, expectation=PACKAGE_ANY):
                                             package)
 
         if results is None:
-            return err.error("Unable to determine addon type")
+            return err.error(("main",
+                              "test_package",
+                              "undeterminable_type"),
+                             "Unable to determine addon type",
+                             """The type detection algorithm could not
+                             determine the type of the add-on.""")
         else:
             err.set_type(results)
 
@@ -236,9 +268,13 @@ def test_package(err, package, name, expectation=PACKAGE_ANY):
         # that of the expectation and the assumption.
         if not expectation in (PACKAGE_ANY, results):
             err.reject = True
-            err_mesg = "Extension type mismatch (expected %s, found %s)"
-            err_mesg = err_mesg % (types[expectation], types[results])
-            err.warning(err_mesg)
+            err.warning(("main",
+                         "test_package",
+                         "extension_type_mismatch"),
+                        "Extension Type Mismatch",
+                        'Type "%s" expected, found "%s")' % (
+                                                        types[expectation],
+                                                        types[results]))
 
     return test_inner_package(err, package_contents, package)
 
