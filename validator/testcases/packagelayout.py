@@ -11,9 +11,12 @@ def test_unknown_file(err, filename):
     name = path.pop()
     
     if name == "chromelist.txt":
-        err.info("Extension contains a deprecated file (%s)" % filename,
-                 """The file in question is no longer supported by any
-                 modern Mozilla product.""",
+        err.info(("testcases_packagelayout",
+                  "test_unknown_file",
+                  "deprecated_file"),
+                 "Extension contains a deprecated file",
+                 """The file "%s" is no longer supported by any
+                 modern Mozilla product.""" % filename,
                  filename)
         return True
 
@@ -31,8 +34,13 @@ def test_blacklisted_files(err, package_contents=None, xpi_package=None):
         # Simple test to ensure that the extension isn't blacklisted
         extension = file_["extension"]
         if extension in blacklisted_extensions:
-            err.warning(pattern % (name, extension),
-                        "The extension %s is disallowed." % extension,
+            err.warning(("testcases_packagelayout",
+                         "test_blacklisted_files",
+                         "disallowed_extension"),
+                        "Blacklisted file extension found",
+                        ["""The file "%s" uses a blacklisted file
+                         extension.""" % name,
+                         "The extension %s is disallowed." % extension],
                         name)
 
 @decorator.register_test(tier=1)
@@ -44,7 +52,10 @@ def test_layout_all(err, package_contents, xpi_package):
         return
     
     if not err.get_resource("has_install_rdf"):
-        err.error("Addon missing install.rdf.",
+        err.error(("testcases_packagelayout",
+                  "test_layout_all",
+                  "missing_install_rdf"),
+                 "Addon missing install.rdf.",
                   "All addons require an install.rdf file.")
     
 
@@ -59,11 +70,15 @@ def test_xpcom(err, package_contents, xpi_package):
     for name, file_ in package_contents.items():
         
         if name.startswith("components/"):
-            err.warning("XPCOM ties detected",
-                        """Files were found in the /components/ directory,
-                        which generally indicates XPCOM references. Firefox
-                        4 no longer supports XPCOM. This interface is
-                        subject to change.""",
+            err.warning(("testcases_packagelayout",
+                         "test_xpcom",
+                         "incompatible_xpcom_detected"),
+                        "XPCOM ties detected",
+                        ["""Files were found in the /components/ directory,
+                         which generally indicates XPCOM references. Firefox
+                         4 no longer supports XPCOM. This interface is
+                         subject to change.""",
+                         'File "%s" represents XPCOM ties.' % name],
                         name);
             break
         
@@ -172,19 +187,27 @@ def test_layout(err, package_contents, mandatory, whitelisted,
             continue
 
         # Otherwise, report an error.
-        err.error("Unknown file found in %s (%s)" % (pack_type, file_),
-                  """Security limitations ban the use of the file %s
-                  in this type of addon. Remove the file or use an
-                  alternative, supported file format
-                  instead.""" % file_,
+        err.error(("testcases_packagelayout",
+                   "test_layout",
+                   "unknown_file"),
+                  "Unknown file found in add-on",
+                  ["""Security limitations ban the use of the detected file
+                   in this type of addon. Remove the file or use an
+                   alternative, supported file format
+                   instead.""",
+                   "%s add-ons cannot contain files like %s" % (pack_type,
+                                                                file_)],
                   file_)
 
     # If there's anything left over, it means there's files missing
     if mandatory:
         err.reject = True # Rejection worthy
         for mfile in mandatory:
-            err.error("%s missing from %s addon." % (mfile, pack_type),
-                      """%s is a required file for this type of addon.
-                      Consult documentation for a full list of required
-                      files.""" % mfile)
-    
+            err.error(("testcases_packagelayout",
+                       "test_layout",
+                       "missing_required"),
+                      "Required file missing",
+                      ["""The add-on requires certain files. Consult the
+                       documentation for a full list of required files.""",
+                       'Add-ons of type "%s" require "%s"' % (mfile,
+                                                              pack_type)])

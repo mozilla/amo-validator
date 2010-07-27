@@ -33,7 +33,10 @@ def _test_file(err, optionpack):
     print output
     
     if not output or output.startswith(("WARNING", "ERROR")):
-        err.info("This extension appears not to be localized.",
+        err.info(("testcases_l10ncompleteness",
+                  "_test_file",
+                  "unlocalized"),
+                 "This extension appears not to be localized.",
                  """The package does not contain any localization
                  support.""")
         return None
@@ -135,7 +138,10 @@ def test_lp_xpi(err, package_contents, xpi_package):
     support_references = err.get_resource("supports")
     if not support_references:
         references.append("firefox")
-        err.info("Supported app missing during L10n completeness.",
+        err.info(("testcases_l10ncompleteness",
+                  "test_lp_xpi",
+                  "missing_app_support"),
+                 "Supported app missing during L10n completeness.",
                  """While testing for L10n comleteness, a list of
                  supported applications for the language pack was not
                  found. This is likely because there are no listed
@@ -273,23 +279,30 @@ def _aggregate_results(err, results, locale):
                                                   locale["name"])
         
         if ritem["type"] == "missing_files":
-            err.error("%s missing translation file (%s)" %
-                            (locale["path"],
-                             rfilename),
-                      """Localizations must include a translated copy
-                      of each file in the reference locale. The
-                      required files may vary from target application
-                      to target application.""",
+            err.error(("testcases_l10ncompleteness",
+                       "_aggregate_results",
+                       "missing_file"),
+                      "Missing translation file",
+                      ["""Localizations must include a translated copy
+                       of each file in the reference locale. The
+                       required files may vary from target application
+                       to target application.""",
+                       "%s missing translation file (%s)" % (locale["path"],
+                                                             rfilename)],
                       [locale["path"]])
         elif ritem["type"] == "missing_entities":
-            err.error("%s missing %s in %s" %
+            err.error(("testcases_l10ncompleteness",
+                       "_aggregate_results",
+                       "missing_translation_entity"),
+                      "Missing translation entity",
+                      ["""Localizations must include a translated copy
+                       of each entity from each file in the reference
+                       locale. The required files may vary from target
+                       application to target application.""",
+                       "%s missing %s in %s" %
                             (locale["path"],
                              ", ".join(ritem["missing_entities"]),
-                             rfilename),
-                      """Localizations must include a translated copy
-                      of each entity from each file in the reference
-                      locale. The required files may vary from target
-                      application to target application.""",
+                             rfilename)],
                       [locale["path"], rfilename])
         elif ritem["type"] == "unchanged_entity":
             unchanged_entities += ritem["entities"]
@@ -302,13 +315,17 @@ def _aggregate_results(err, results, locale):
        float(unchanged_entities) / float(total_entities) >= \
            L10N_THRESHOLD:
         
-        err.error("%s contains %d unchanged entities (%s)" %
+        err.error(("testcases_l10ncompleteness",
+                   "_aggregate_results",
+                   "unchnged_entities"),
+                  "Unchanged translation entities",
+                  ["""Localizations must include a translated copy
+                   of each entity from each file in the reference
+                   locale. These translations SHOULD differ from
+                   the localized text in the reference package.""",
+                   "%s contains %d unchanged entities (%s)" %
                     (locale["path"],
                      unchanged_entities,
-                     ", ".join(unchanged_entity_list)),
-                  """Localizations must include a translated copy
-                  of each entity from each file in the reference
-                  locale. These translations SHOULD differ from
-                  the localized text in the reference package.""",
+                     ", ".join(unchanged_entity_list))],
                   [locale["path"], rfilename])
     

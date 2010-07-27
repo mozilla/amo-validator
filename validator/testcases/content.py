@@ -40,10 +40,14 @@ def test_packed_packages(err, package_contents=None, xpi_package=None):
             try:
                 sub_xpi = XPIManager(package, name, is_subpackage)
             except Exception as error:
-                err.error("Subpackage %s is corrupt." % name,
+                err.error(("testcases_content",
+                           "test_packed_packages",
+                           "jar_subpackage_corrupt"),
+                          "Subpackage corrupt.",
                           """The subpackage could not be opened due to
                           issues with corruption. Ensure that the file
-                          is valid.""")
+                          is valid.""",
+                          name)
                 continue
             
             temp_contents = sub_xpi.get_file_data()
@@ -51,9 +55,9 @@ def test_packed_packages(err, package_contents=None, xpi_package=None):
             # Let the error bunder know we're in a sub-package.
             err.push_state(data["name_lower"])
             err.set_type(PACKAGE_SUBPACKAGE) # Subpackage
-            testendpoint_validator.main.test_inner_package(err,
-                                                           temp_contents,
-                                                           sub_xpi)
+            testendpoint_validator.test_inner_package(err,
+                                                      temp_contents,
+                                                      sub_xpi)
             
             package.close()
             err.pop_state()
@@ -69,7 +73,7 @@ def test_packed_packages(err, package_contents=None, xpi_package=None):
             
             # There are no expected types for packages within a multi-
             # item package.
-            testendpoint_validator.main.test_package(err, package, name)
+            testendpoint_validator.test_package(err, package, name)
             
             package.close()
             err.pop_state()
@@ -123,7 +127,10 @@ def _read_error(err, name): # pragma: no cover
     """Reports to the user that a file in the archive couldn't be
     read from. Prevents code duplication."""
 
-    err.info("File could not be read: %s" % name,
+    err.info(("testcases_content",
+              "_read_error",
+              "read_error"),
+             "File could not be read: %s" % name,
              """A File in the archive could not be read. This may be
              due to corruption or because the path name is too
              long.""",

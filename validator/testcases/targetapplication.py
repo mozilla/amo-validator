@@ -88,7 +88,6 @@ def test_targetedapplications(err, package_contents=None,
     
     used_targets = [];
     
-    vererr_pattern = "Invalid version number (%s) for application %s"
     mismatch_pattern = "Version numbers for %s are invalid."
     
     # Isolate all of the bnodes referring to target applications
@@ -105,7 +104,10 @@ def test_targetedapplications(err, package_contents=None,
                 
                 # Time to test for some install.js.
                 if "install.js" not in package_contents:
-                    err.warning("Missing install.js for SeaMonkey.",
+                    err.warning(("testcases_targetapplication",
+                                 "test_targetedapplications",
+                                 "missing_seamonkey_installjs"),
+                                "Missing install.js for SeaMonkey.",
                                 """SeaMonkey requires install.js, which
                                 was not found. install.rdf indicates
                                 that the addon supports SeaMonkey.""",
@@ -134,11 +136,16 @@ def test_targetedapplications(err, package_contents=None,
                     if min_version is not None:
                         min_ver_pos = app_versions.index(min_version)
                 except ValueError:
-                    err.error(vererr_pattern % (min_version, ta_guid),
-                              """The minimum version that was specified
-                              is not an acceptable version number for
-                              the Mozilla product that it corresponds
-                              with.""",
+                    err.error(("testcases_targetapplication",
+                               "test_targetedapplications",
+                               "invalid_min_version"),
+                              "Invalid minimum version number",
+                              ["""The minimum version that was specified
+                               is not an acceptable version number for
+                               the Mozilla product that it corresponds
+                               with.""",
+                               'Version "%s" isn\'t compatible with %s.' %
+                                   (min_version, ta_guid)],
                               "install.rdf")
                     continue
                     
@@ -146,11 +153,16 @@ def test_targetedapplications(err, package_contents=None,
                     if max_version is not None:
                         max_ver_pos = app_versions.index(max_version)
                 except ValueError:
-                    err.error(vererr_pattern % (max_version, ta_guid),
-                              """The maximum version that was specified
-                              is not an acceptable version number for
-                              the Mozilla product that it corresponds
-                              with.""",
+                    err.error(("testcases_targetapplication",
+                               "test_targetedapplications",
+                               "invalid_max_version"),
+                              "Invalid maximum version number",
+                              ["""The maximum version that was specified
+                               is not an acceptable version number for
+                               the Mozilla product that it corresponds
+                               with.""",
+                               'Version "%s" isn\'t compatible with %s.' %
+                                   (max_version, ta_guid)],
                               "install.rdf")
                     continue
                 
@@ -159,11 +171,16 @@ def test_targetedapplications(err, package_contents=None,
                 if min_version is not None and \
                    max_version is not None and \
                    min_ver_pos > max_ver_pos:
-                    err.error(mismatch_pattern % ta_guid,
-                              """The veresion numbers provided for the
-                              application in question are not in the
-                              correct order. The maximum version must
-                              be greater than the minimum version.""",
+                    err.error(("testcases_targetapplication",
+                               "test_targetedapplications",
+                               "invalid_version_order"),
+                              "Invalid min/max versions",
+                              ["""The version numbers provided for the
+                               application in question are not in the correct
+                               order. The maximum version must be greater than
+                               the minimum version.""",
+                               '"%s" is not less than "%s".' % (min_version,
+                                                                max_version)],
                               "install.rdf")
                     continue
                 
@@ -176,7 +193,10 @@ def test_targetedapplications(err, package_contents=None,
     no_duplicate_targets = set(used_targets)
     
     if len(used_targets) != len(no_duplicate_targets):
-        err.warning("Found duplicate <em:targetApplication> elements.",
+        err.warning(("testcases_targetapplication",
+                     "test_targetedapplication",
+                     "duplicate_targetapps"),
+                    "Found duplicate <em:targetApplication> elements.",
                     """Multiple targetApplication elements were found
                     in the install.manifest file that refer to the same
                     application GUID. There should not be duplicate

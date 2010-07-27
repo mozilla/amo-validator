@@ -4,9 +4,7 @@ from validator import decorator
 from validator.constants import *
 
 @decorator.register_test(tier=1)
-def test_install_rdf_params(err,
-                            package_contents=None,
-                            xpi_package=None):
+def test_install_rdf_params(err, package_contents=None, xpi_package=None):
     """Tests to make sure that some of the values in install.rdf
     are not gummed up."""
     
@@ -59,10 +57,6 @@ def _test_rdf(err, install):
     if err.detected_type == PACKAGE_THEME:
         may_exist_once.append("internalName")
     
-    banned_pattern = "Banned element %s exists in install.rdf."
-    obsolete_pattern = "Obsolete element %s found in install.rdf."
-    unrecognized_pattern = "Unrecognized element in install.rdf: %s"
-    
     top_id = install.get_root_subject()
     
     for pred_raw in install.rdf.predicates(top_id, None):
@@ -70,19 +64,27 @@ def _test_rdf(err, install):
         
         # Test if the predicate is banned
         if predicate in shouldnt_exist:
-            err.error(banned_pattern % predicate,
-                      """The detected element is not allowed in addons
-                      under the configuration that you've specified."""
+            err.error(("testcases_installrdf",
+                       "_test_rdf",
+                       "shouldnt_exist"),
+                      "Banned element in install.rdf"
+                      """The element "%s" was found in the add-on's
+                      install.rdf file. It is not allowed in add-ons under
+                      the current configuration.""" % predicate,
                       "install.rdf")
             continue
         
         # Test if the predicate is obsolete
         if predicate in obsolete:
-            err.info(obsolete_pattern % predicate,
-                     """The found element has not been banned, but it
-                     is no longer supported by any modern Mozilla
-                     product. Removing the element is recommended and
-                     will not break support.""",
+            err.info(("testcases_installrdf",
+                      "_test_rdf",
+                      "obsolete"),
+                     "Obsolete element in install.rdf",
+                     """The element "%s" was found in the add-on's install.rdf
+                     file. It has not been banned, but it is no longer
+                     supported by any modern Mozilla product. Removing the
+                     element is recommended and will not break support.""" %
+                        predicate,
                      "install.rdf")
             continue
         
@@ -113,32 +115,43 @@ def _test_rdf(err, install):
         
         # If the predicate isn't in any of the above lists, it is
         # invalid and needs to go.
-        err.error(unrecognized_pattern % predicate,
-                  """The element that was found is not a part of the
+        err.error(("testcases_installrdf",
+                   "_test_rdf",
+                   "unrecognized"),
+                  "Unrecognized element in install.rdf",
+                  """The element "%s" was found is not a part of the
                   install manifest specification, has been used too
                   many times, or is not applicable to the current
-                  configuration.""",
+                  configuration.""" % predicate,
                   "install.rdf")
         
     # Once all of the predicates have been tested, make sure there are
     # no mandatory elements that haven't been found.
     if must_exist_once:
         missing_preds = ', '.join(must_exist_once)
-        err.error("install.rdf missing element(s): %s" % missing_preds,
-                  """The element listed is a required element in the
-                  install manifest specification. It must be added to
-                  your addon.""",
+        err.error(("testcases_installrdf",
+                   "_test_rdf",
+                   "missing_addon"),
+                  "install.rdf missing element(s).",
+                  ["""The element listed is a required element in the install
+                   manifest specification. It must be added to your addon.""",
+                   "Missing elements:",
+                   missing_preds]
+                  ,
                   "install.rdf")
     
 
 def _test_id(err, value):
     "Tests an install.rdf UUID value"
     
-    id_pattern = re.compile("(\{[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}\}|[a-z0-9-\.\+_]*\@[a-z0-9-\._]+)", re.I)
+    id_pattern = re.compile("(\{[0-9a-f]{8}-([0-9a-f]{4}-){3}[0-9a-f]{12}\}|[a-z0-9-\.\+_]*\@[a-z0-9-\._]+)", re.I)
     
     # Must be a valid UUID string.
     if not id_pattern.match(value):
-        err.error("The value of <em:id> is invalid.",
+        err.error(("testcases_installrdf",
+                   "_test_id",
+                   "invalid"),
+                  "The value of <em:id> is invalid.",
                   """The values supplied for <em:id> in the
                   install.rdf file is not a valid UUID string.""",
                   "install.rdf")
@@ -152,14 +165,20 @@ def _test_version(err, value):
     
     # Cannot have whitespace in the pattern.
     if whitespace_pattern.search(value):
-        err.error("<em:version> value cannot contain whitespace.",
+        err.error(("testcases_installrdf",
+                   "_test_version",
+                   "invalid_whitespace"),
+                  "<em:version> value cannot contain whitespace.",
                   """In your addon's install.rdf file, version numbers
                   cannot contain whitespace characters of any kind.""",
                   "install.rdf")
     
     # Must be a valid version number.
     if not version_pattern.match(value):
-        err.error("The value of <em:version> is invalid.",
+        err.error(("testcases_installrdf",
+                   "_test_version",
+                   "invalid_format"),
+                  "The value of <em:version> is invalid.",
                   """The values supplied for <em:version> in the
                   install.rdf file is not a valid version string.""",
                   "install.rdf")
@@ -171,7 +190,10 @@ def _test_name(err, value):
     ff_pattern = re.compile("(mozilla|firefox)", re.I)
     
     if ff_pattern.match(value):
-        err.error("Addon has illegal name.",
+        err.error(("testcases_installrdf",
+                   "_test_name",
+                   "trademark"),
+                  "Addon has illegal name.",
                   """Addon names cannot contain the Mozilla or Firefox
                   trademarks. These names should not be contained in
                   addon names at all.""",

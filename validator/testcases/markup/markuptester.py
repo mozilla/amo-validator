@@ -31,8 +31,6 @@ SELF_CLOSING_TAGS = ("area",
 SAFE_IFRAME_TYPES = ("content",
                      "content-primary",
                      "content-targetable")
-UNSAFE_TAG_PATTERN = "Unsafe tag (%s) found in language pack"
-UNSAFE_IF_TYPE = 'iframe cannot have type="%s"'
 TAG_NOT_OPENED = "Tag (%s) being closed before it is opened."
 
 class MarkupParser(HTMLParser):
@@ -77,7 +75,10 @@ class MarkupParser(HTMLParser):
                    self.debug and "testscript" in self.xml_state):
                     if self.alerted_script_comments:
                         continue
-                    self.err.info("Missing comments in <script> tag",
+                    self.err.info(("testcases_markup_markuptester",
+                                   "process",
+                                   "missing_script_comments"),
+                                  "Missing comments in <script> tag",
                                   """Markup parsing errors occurred
                                   while trying to parse the file. This
                                   can likely be mitigated by wrapping
@@ -88,7 +89,10 @@ class MarkupParser(HTMLParser):
                     self.alerted_script_comments = True
                     continue
                 
-                self.err.warning("Markup parsing error",
+                self.err.warning(("testcases_markup_markuptester",
+                                  "process",
+                                  "parse_error"),
+                                 "Markup parsing error",
                                  """There was an error parsing the
                                  markup document.""",
                                  self.filename,
@@ -115,7 +119,10 @@ class MarkupParser(HTMLParser):
         
         # A fictional tag for testing purposes.
         if tag == "xbannedxtestx":
-            self.err.error("Banned element",
+            self.err.error(("testcases_markup_markuptester",
+                            "handle_starttag",
+                            "banned_element"),
+                           "Banned element",
                            "A banned element was detected",
                            self.filename,
                            self.line)
@@ -123,12 +130,16 @@ class MarkupParser(HTMLParser):
         if self.err.detected_type == PACKAGE_LANGPACK:
             
             if tag in UNSAFE_TAGS:
-                self.err.error(UNSAFE_TAG_PATTERN % tag,
-                               """A tag in your markup has been marked
-                               as being potentially unsafe. Consider
-                               alternate means of accomplishing what
-                               the code executed by this tag
-                               performs.""",
+                self.err.error(("testcases_markup_markuptester",
+                                "handle_starttag",
+                                "unsafe_langpack"),
+                               "Unsafe tag in language pack",
+                               ["""A tag in your markup has been marked
+                                as being potentially unsafe. Consider
+                                alternate means of accomplishing what
+                                the code executed by this tag
+                                performs.""",
+                                'Tag "%s" is disallowed.' % tag],
                                self.filename,
                                self.line)
                 if DEBUG: # pragma: no cover
@@ -138,7 +149,10 @@ class MarkupParser(HTMLParser):
             for attr in attrs:
                 if attr[0].lower() in ("src", "href") and \
                    not self._is_url_local(attr[1].lower()):
-                    self.err.error("src/href elements must be local.",
+                    self.err.error(("testcases_markup_markuptester",
+                                    "handle_starttag",
+                                    "remote_src_href"),
+                                   "src/href attributes must be local.",
                                    """Language packs require that all
                                    src/href attributes must begin with
                                    'chrome://'""",
@@ -166,7 +180,10 @@ class MarkupParser(HTMLParser):
             if type_ and \
                not (type_ in SAFE_IFRAME_TYPES or 
                     not remote_src):
-                self.err.warning("iframe missing 'type' attribute",
+                self.err.warning(("testcases_markup_markuptester",
+                                  "handle_starttag",
+                                  "iframe_type_unsafe"),
+                                 "iframe missing 'type' attribute",
                                  """All iframe elements must have
                                  either a valid `type` attribute or
                                  a `src` attribute that points to a
@@ -176,7 +193,10 @@ class MarkupParser(HTMLParser):
             elif (not type_ or 
                   type_ not in SAFE_IFRAME_TYPES) and \
                  remote_src:
-                self.err.warning("Typeless iframes must be local.",
+                self.err.warning(("testcases_markup_markuptester",
+                                  "handle_starttag",
+                                  "iframe_type_unsafe"),
+                                 "Typeless iframes must be local.",
                                  """iframe elements that lack a
                                  type attribute must always have
                                  src attributes that reference
@@ -194,7 +214,10 @@ class MarkupParser(HTMLParser):
                     src = attr[1].lower()
             
             if src and not self._is_url_local(src):
-                self.err.error("Scripts must not be remote in XUL",
+                self.err.error(("testcases_markup_markuptester",
+                                "handle_starttag",
+                                "banned_remote_scripts"),
+                               "Scripts must not be remote in XUL",
                                """In XUL, <script> tags must not be
                                referenced to script files that are
                                hosted remotely.""",
@@ -228,7 +251,10 @@ class MarkupParser(HTMLParser):
             print tag, self.xml_state
         
         if not self.xml_state:
-            self.err.error("Markup parsing error",
+            self.err.error(("testcases_markup_markuptester",
+                            "handle_endtag",
+                            "extra_closing_tags"),
+                           "Markup parsing error",
                            """The markup file has more closing tags
                            than it has opening tags.""",
                            self.filename,
@@ -247,11 +273,14 @@ class MarkupParser(HTMLParser):
         elif tag not in self.xml_state:
             # If the tag we're processing isn't on the stack, then
             # something is wrong.
-            self.err.warning(TAG_NOT_OPENED % tag,
-                             """Markup tags cannot be closed before
-                             they are opened. Perhaps you were just a
-                             little overzealous with
-                             forward-slashes?""",
+            self.err.warning(("testcases_markup_markuptester",
+                              "handle_endtag",
+                              "extra_closing_tags"),
+                             "Parse error: tag closed before opened",
+                             ["""Markup tags cannot be closed before
+                              they are opened. Perhaps you were just a
+                              little overzealous with forward-slashes?""",
+                              'Tag "%s" closed before it was opened' % tag],
                              self.filename,
                              self.line)
             if DEBUG: # pragma: no cover
@@ -270,11 +299,13 @@ class MarkupParser(HTMLParser):
         # If this is an XML-derived language, everything must nest
         # properly. No overlapping tags.
         if old_state != tag and self.extension[0] == 'x':
-            self.err.error("Markup invalidly nested",
+            self.err.error(("testcases_markup_markuptester",
+                            "handle_endtag",
+                            "invalid_nesting"),
+                           "Markup invalidly nested",
                            """It has been determined that the document
                            invalidly nests its tags. This is not
-                           permitted in the specified document type
-                           (%s)""" % self.extension,
+                           permitted in the specified document type.""",
                            self.filename,
                            self.line)
             if DEBUG: # pragma: no cover

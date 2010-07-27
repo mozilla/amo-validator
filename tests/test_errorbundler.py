@@ -16,9 +16,9 @@ def test_json():
     bundle = ErrorBundle(outbuffer, True) # No color since no output
     bundle.set_type(4)
     
-    bundle.error("error", "description")
-    bundle.warning("warning", "description")
-    bundle.info("info", "description")
+    bundle.error((), "error", "description")
+    bundle.warning((), "warning", "description")
+    bundle.info((), "info", "description")
     
     bundle.print_json()
     
@@ -26,8 +26,10 @@ def test_json():
     
     results = json.load(outbuffer)
     
+    print results
+    
     assert len(results["messages"]) == 3
-    assert results["detected_type"] == 4
+    assert results["detected_type"] == 'langpack'
     assert not results["success"]
     
 def test_boring():
@@ -37,7 +39,7 @@ def test_boring():
     
     # Use the StringIO as an output buffer.
     bundle = ErrorBundle(outbuffer, True) # No color since no output
-    bundle.error("<<BLUE>><<GREEN>><<YELLOW>>")
+    bundle.error((), "<<BLUE>><<GREEN>><<YELLOW>>")
     bundle.print_summary()
     
     outbuffer.seek(0)
@@ -63,26 +65,26 @@ def test_states():
     
     # Populate the bundle with some test data.
     bundle.set_type(4)
-    bundle.error("error")
-    bundle.warning("warning")
-    bundle.info("info")
+    bundle.error((), "error")
+    bundle.warning((), "warning")
+    bundle.info((), "info")
     bundle.save_resource("test", True)
     
     # Push a state
     bundle.push_state("test.xpi")
     
     bundle.set_type(2)
-    bundle.error("nested error")
-    bundle.warning("nested warning")
-    bundle.info("nested info")
+    bundle.error((), "nested error")
+    bundle.warning((), "nested warning")
+    bundle.info((), "nested info")
     
     # Push another state
     bundle.push_state("test2.xpi")
     
     bundle.set_type(3)
-    bundle.error("super nested error")
-    bundle.warning("super nested warning")
-    bundle.info("super nested info")
+    bundle.error((), "super nested error")
+    bundle.warning((), "super nested warning")
+    bundle.info((), "super nested info")
     
     bundle.pop_state()
     
@@ -93,7 +95,7 @@ def test_states():
     output = json.loads(outbuffer.getvalue())
     
     # Run some basic tests
-    assert output["detected_type"] == 4
+    assert output["detected_type"] == "langpack"
     assert len(output["messages"]) == 9
     
     print output
@@ -132,16 +134,16 @@ def test_file_structure():
     bundle = ErrorBundle(outbuffer, True) # No color since no output
     
     # Populate the bundle with some test data.
-    bundle.error("error", "", "file1", 123)
-    bundle.error("error", "", "file2")
-    bundle.error("error")
+    bundle.error((), "error", "", "file1", 123)
+    bundle.error((), "error", "", "file2")
+    bundle.error((), "error")
     
     # Push a state
     bundle.push_state("foo")
     
-    bundle.warning("warning", "", "file4", 123)
-    bundle.warning("warning", "", "file5")
-    bundle.warning("warning")
+    bundle.warning((), "warning", "", "file4", 123)
+    bundle.warning((), "warning", "", "file5")
+    bundle.warning((), "warning")
     
     bundle.pop_state()
     
@@ -200,7 +202,7 @@ def test_info():
     # Use the StringIO as an output buffer.
     bundle = ErrorBundle(outbuffer, True) # No color since no output
     
-    bundle.info("info")
+    bundle.info((), "info")
     
     # Load the JSON output as an object.
     bundle.print_json()
@@ -232,7 +234,7 @@ def test_info_friendly():
     # Use the StringIO as an output buffer.
     bundle = ErrorBundle(outbuffer, True) # No color since no output
     
-    bundle.info("foobar")
+    bundle.info((), "foobar")
     
     # Load the JSON output as an object.
     bundle.print_summary(True)

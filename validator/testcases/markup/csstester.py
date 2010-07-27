@@ -55,7 +55,10 @@ def _run_css_tests(err, tokens, filename, line_start=0):
                 
                 # Ensure that the resource isn't remote.
                 if not fnmatch.fnmatch(value, "chrome://*/content/*"):
-                    err.error("Cannot reference external scripts.",
+                    err.error(("testcases_markup_csstester",
+                               "_run_css_tests",
+                               "-moz-binding_external"),
+                              "Cannot reference external scripts.",
                               """-moz-binding cannot reference external
                               scripts in CSS. This is considered to be
                               a security issue. The script file must be
@@ -67,10 +70,12 @@ def _run_css_tests(err, tokens, filename, line_start=0):
         elif tok_type == "HASH":
             # Search for interference with the identity box.
             if value == "#identity-box":
-                err.warning("Modification to identity box.",
+                err.warning(("testcases_markup_csstester",
+                             "_run_css_tests",
+                             "identity_box"),
+                            "Modification to identity box.",
                             """The identity box (#identity-box) is a
                             sensitive piece of the interface and should
                             not be modified.""",
                             filename,
                             line)
-    

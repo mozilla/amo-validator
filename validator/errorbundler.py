@@ -170,10 +170,14 @@ class ErrorBundle(object):
     def _clean_description(self, message, json=False):
         "Cleans all the nasty whitespace from the descriptions."
         
-        if not isinstance(message["description"], list):
-            desc = message["description"].split("\n")
-        else:
-            desc = message["description"]
+        output = self._clean_message(message["description"], json)
+        message["description"] = output
+        
+    def _clean_message(self, desc, json=False):
+        "Cleans all the nasty whitespace from a string."
+        
+        if not isinstance(desc, list):
+            desc = desc.split("\n")
         
         output = []
         merge = []
@@ -196,6 +200,8 @@ class ErrorBundle(object):
         # Finish up the line buffer.
         if merge:
             output.append(" ".join(merge))
+        
+        return output
     
     def print_json(self):
         "Prints a JSON summary of the validation operation."
@@ -290,8 +296,8 @@ class ErrorBundle(object):
             # Detailed problem description.
             if message["description"]:
                 # These are dirty, so strip out whitespace and concat.
-                self._clean_description(message)
-                verbose_output.append(message["description"])
+                verbose_output.append("\n".join(
+                            self._clean_message(message["description"])))
             
             # If file information is availe, output that as well.
             files = message["file"]
