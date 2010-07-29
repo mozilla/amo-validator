@@ -56,6 +56,11 @@ def main():
                         const=True,
                         help="""If the output format supports it, makes
                         the analysis summary include extra info.""")
+    parser.add_argument("--cluster",
+                        action="store_const",
+                        const=True,
+                        help="""Structures output in clustered format,
+                        grouping similar errors together.""")
     parser.add_argument("--file",
                         type=argparse.FileType("w"),
                         default=sys.stdout,
@@ -78,6 +83,7 @@ def main():
 
     error_bundle = ErrorBundle(args.file,
         not args.file == sys.stdout or args.boring)
+    error_bundle.cluster = args.cluster
 
     # Emulates the "$status" variable in the original validation.php
     # test file. Equal to "$status == STATUS_LISTED".

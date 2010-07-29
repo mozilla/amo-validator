@@ -52,7 +52,10 @@ def detect_type(err, install_rdf=None, xpi_package=None):
                       "install.rdf")
             return
     else:
-        err.info("No <em:type> element found in install.rdf",
+        err.info(("typedetection",
+                  "detect_type",
+                  "no_em:type"),
+                 "No <em:type> element found in install.rdf",
                  """It isn't always required, but it is the most
                  reliable method for determining addon type.""",
                  "install.rdf") 

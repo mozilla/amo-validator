@@ -20,8 +20,10 @@ class ErrorBundle(object):
         self.errors = []
         self.warnings = []
         self.infos = []
+        self.message_tree = {}
         
         self.metadata = {}
+        self.cluster = False
         
         self.subpackages = []
         self.package_stack = []
@@ -35,7 +37,8 @@ class ErrorBundle(object):
         
     def error(self, err_id, error, description='', filename='', line=0):
         "Stores an error message for the validation process"
-        self.errors.append({"id": err_id,
+        self._save_message(self.errors,
+                           {"id": err_id,
                             "message": error,
                             "description": description,
                             "file": filename,
@@ -44,21 +47,38 @@ class ErrorBundle(object):
         
     def warning(self, err_id, warning, description='', filename='', line=0):
         "Stores a warning message for the validation process"
-        self.warnings.append({"id": err_id,
-                              "message": warning,
-                              "description": description,
-                              "file": filename,
-                              "line": line})
+        self._save_message(self.warnings,
+                           {"id": err_id,
+                            "message": warning,
+                            "description": description,
+                            "file": filename,
+                            "line": line})
         return self
 
     def info(self, err_id, info, description='', filename='', line=0):
         "Stores an informational message about the validation"
-        self.infos.append({"id": err_id,
-                           "message": info,
-                           "description": description,
-                           "file": filename,
-                           "line": line})
+        self._save_message(self.infos,
+                           {"id": err_id,
+                            "message": info,
+                            "description": description,
+                            "file": filename,
+                            "line": line})
         return self
+        
+    def _save_message(self, stack, message):
+        "Stores a message in the appropriate message stack."
+        
+        stack.append(message)
+        
+        tree = self.message_tree
+        last_id = None
+        for eid in message["id"]:
+            if last_id is not None:
+                tree = tree[last_id]
+            if eid not in tree:
+                tree[eid] = {}
+            last_id = eid
+        tree[last_id] = message
         
     def set_type(self, type_):
         "Stores the type of addon we're scanning"
@@ -83,7 +103,6 @@ class ErrorBundle(object):
         
         self.resources[name] = resource
         
-    
     def is_nested_package(self):
         "Returns whether the current package is within a PACKAGE_MULTI"
         
@@ -96,12 +115,17 @@ class ErrorBundle(object):
                                  "warnings": self.warnings,
                                  "infos": self.infos,
                                  "detected_type": self.detected_type,
-                                 "resources": self.resources})
+                                 "resources": self.resources,
+                                 "message_tree": self.message_tree})
+        
+        # Note that the message tree is not saved because it is simply rebuilt
+        # when the messages are rewritten.
         
         self.errors = []
         self.warnings = []
         self.infos = []
         self.resources = {}
+        self.message_tree = {}
         
         self.package_stack.append(new_file)
     
@@ -113,6 +137,7 @@ class ErrorBundle(object):
         errors = self.errors
         warnings = self.warnings
         infos = self.infos
+        # We only rebuild message_tree anyway. No need to restore.
         
         # Copy the existing state back into place
         self.errors = state["errors"]
@@ -120,51 +145,34 @@ class ErrorBundle(object):
         self.infos = state["infos"]
         self.detected_type = state["detected_type"]
         self.resources = state["resources"]
+        self.message_tree = state["message_tree"]
         
         name = self.package_stack.pop()
         
+        self._merge_messages(errors, self.error, name)
+        self._merge_messages(warnings, self.warning, name)
+        self._merge_messages(infos, self.info, name)
+        
+    
+    def _merge_messages(self, messages, callback, name):
+        "Merges a stack of messages into another stack of messages"
+        
         # Overlay the popped warnings onto the existing ones.
-        for error in errors:
+        for message in messages:
             trace = [name]
-            
             # If there are sub-sub-packages, they'll be in a list.
-            if type(error["file"]) is list:
-                trace.extend(error["file"])
+            if isinstance(message["file"], list):
+                trace.extend(message["file"])
             else:
-                trace.append(error["file"])
+                trace.append(message["file"])
             
             # Write the errors with the file structure delimited by
             # right carets.
-            self.error(error["id"],
-                       "%s > %s" % (name, error["message"]),
-                       error["description"],
-                       trace,
-                       error["line"])
-                       
-        for warning in warnings:
-            trace = [name]
-            if type(warning["file"]) is list:
-                trace.extend(warning["file"])
-            else:
-                trace.append(warning["file"])
-            
-            self.warning(warning["id"],
-                         "%s > %s" % (name, warning["message"]),
-                         warning["description"],
-                         trace,
-                         warning["line"])
-        for info in infos:
-            trace = [name]
-            if type(info["file"]) is list:
-                trace.extend(info["file"])
-            else:
-                trace.append(info["file"])
-            
-            self.info(info["id"],
-                      "%s > %s" % (name, info["message"]),
-                      info["description"],
-                      trace,
-                      info["line"])
+            callback(message["id"],
+                     "%s > %s" % (name, message["message"]),
+                     message["description"],
+                     trace,
+                     message["line"])
         
     
     def _clean_description(self, message, json=False):
@@ -176,32 +184,20 @@ class ErrorBundle(object):
     def _clean_message(self, desc, json=False):
         "Cleans all the nasty whitespace from a string."
         
-        if not isinstance(desc, list):
-            desc = desc.split("\n")
-        
         output = []
-        merge = []
-        # Loop through each item in the multipart description.
-        for line in desc:
-            # If it's a string, add it to the line buffer for concat.
-            if isinstance(line, str):
-                merge.append(line.strip())
-            # If it's a list, just append it.
-            elif isinstance(line, list):
-                # While you're in here, concat and flush the line buffer.
-                if merge:
-                    output.append(" ".join(merge))
-                
-                # JSON keeps the structure, plain text normalizes.
-                if json:
-                    output.append(line)
-                else:
-                    output.append(" ".join(line))
-        # Finish up the line buffer.
-        if merge:
-            output.append(" ".join(merge))
         
-        return output
+        if not isinstance(desc, list):
+            lines = desc.splitlines()
+            for line in lines:
+                output.append(line.strip())
+            return " ".join(output)
+        else:
+            for line in desc:
+                output.append(self._clean_message(line, json))
+            if json:
+                return output
+            else:
+                return "\n".join(output)
     
     def print_json(self):
         "Prints a JSON summary of the validation operation."
@@ -286,8 +282,7 @@ class ErrorBundle(object):
         "Prints a message and takes care of all sorts of nasty code"
         
         # Load up the standard output.
-        output = [prefix,
-                  message["message"]]
+        output = [prefix, self._clean_message([message["message"]])]
         
         # We have some extra stuff for verbose mode.
         if verbose:
@@ -296,8 +291,8 @@ class ErrorBundle(object):
             # Detailed problem description.
             if message["description"]:
                 # These are dirty, so strip out whitespace and concat.
-                verbose_output.append("\n".join(
-                            self._clean_message(message["description"])))
+                verbose_output.append(
+                            self._clean_message(message["description"]))
             
             # If file information is availe, output that as well.
             files = message["file"]
@@ -327,8 +322,8 @@ class ErrorBundle(object):
     def _print_verbose(self, verbose):
         "Prints info code to help prevent code duplication"
         
-        mesg = "<<WHITE>>Notice:<<NORMAL>>\t"
         if self.infos and verbose:
+            mesg = "<<WHITE>>Notice:<<NORMAL>>\t"
             for info in self.infos:
                 self._print_message(mesg, info)
         

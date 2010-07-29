@@ -13,7 +13,10 @@ def test_css_file(err, filename, data, line_start=1):
     try:
         _run_css_tests(err, token_generator, filename, line_start - 1)
     except UnicodeDecodeError:
-        err.warning("Unicode decode error.",
+        err.warning(("testcases_markup_csstester",
+                     "test_css_file",
+                     "unicode_decode"),
+                    "Unicode decode error.",
                     """While decoding a CSS file, an unknown character
                     was encountered, causing some problems.""",
                     filename)
@@ -40,7 +43,10 @@ def _run_css_tests(err, tokens, filename, line_start=0):
         if tok_type == "IDENT":
             last_descriptor = value.lower()
             if value.startswith("-webkit"):
-                err.error("Blasphemy.",
+                err.error(("testcases_markup_csstester",
+                           "_run_css_tests",
+                           "webkit"),
+                          "Blasphemy.",
                           "WebKit descriptors? Really?",
                           filename,
                           line)

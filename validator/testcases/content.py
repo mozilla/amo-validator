@@ -55,7 +55,7 @@ def test_packed_packages(err, package_contents=None, xpi_package=None):
             # Let the error bunder know we're in a sub-package.
             err.push_state(data["name_lower"])
             err.set_type(PACKAGE_SUBPACKAGE) # Subpackage
-            testendpoint_validator.test_inner_package(err,
+            testendpoint_validator.main.test_inner_package(err,
                                                       temp_contents,
                                                       sub_xpi)
             

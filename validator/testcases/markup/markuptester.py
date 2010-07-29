@@ -8,7 +8,7 @@ except ImportError: # pragma: no cover
 from validator.testcases.markup import csstester
 from validator.constants import *
 
-DEBUG = True
+DEBUG = False
 
 UNSAFE_TAGS = ("script",
                "object",
@@ -45,7 +45,7 @@ class MarkupParser(HTMLParser):
         self.xml_state = []
         self.xml_buffer = []
         
-        self.alerted_script_comments = False
+        self.reported = {}
         
     def process(self, filename, data, extension="xul"):
         """Processes data by splitting it into individual lines, then
@@ -56,48 +56,78 @@ class MarkupParser(HTMLParser):
         self.filename = filename
         self.extension = extension
         
-        reported = False
+        self.reported = {}
         
         lines = data.split("\n")
+        line_buffer = []
+        force_buffer = False
         for line in lines:
-            try:
-                self.line += 1
-                self.feed(line + "\n")
-            except Exception as inst:
-                
-                if DEBUG: # pragma: no cover
-                    print self.xml_state, inst
-                
-                if reported:
-                    continue
-                
-                if "script" in self.xml_state or (
-                   self.debug and "testscript" in self.xml_state):
-                    if self.alerted_script_comments:
+            self.line += 1
+            
+            search_line = line
+            while True:
+                if "<![CDATA[" in search_line and not force_buffer:
+                    cdatapos = search_line.find("<![CDATA[")
+                    post_cdata = search_line[cdatapos:]
+                    
+                    if "]]>" in post_cdata:
+                        search_line = post_cdata[post_cdata.find("]]>")+3:]
                         continue
-                    self.err.info(("testcases_markup_markuptester",
-                                   "process",
-                                   "missing_script_comments"),
-                                  "Missing comments in <script> tag",
-                                  """Markup parsing errors occurred
-                                  while trying to parse the file. This
-                                  can likely be mitigated by wrapping
-                                  <script> tag contents in HTML comment
-                                  tags (<!-- -->)""",
-                                  self.filename,
-                                  self.line)
-                    self.alerted_script_comments = True
-                    continue
-                
-                self.err.warning(("testcases_markup_markuptester",
-                                  "process",
-                                  "parse_error"),
-                                 "Markup parsing error",
-                                 """There was an error parsing the
-                                 markup document.""",
-                                 self.filename,
-                                 self.line)
-                reported = True
+                    force_buffer = True
+                elif "]]>" in search_line and force_buffer:
+                    force_buffer = False
+                break
+            
+            if force_buffer:
+                line_buffer.append(line)
+            else:
+                if line_buffer:
+                    line_buffer.append(line)
+                    line = "\n".join(line_buffer)
+                    line_buffer = []
+                self._feed_parser(line)
+    
+    def _feed_parser(self, line):
+        "Feeds data into the parser"
+        
+        try:
+            self.feed(line + "\n")
+        except Exception as inst:
+            if DEBUG: # pragma: no cover
+                print self.xml_state, inst
+            
+            if "markup" in self.reported:
+                return
+            
+            if "script" in self.xml_state or (
+               self.debug and "testscript" in self.xml_state):
+                if "script_comments" in self.reported:
+                    return
+                self.err.info(("testcases_markup_markuptester",
+                               "_feed",
+                               "missing_script_comments"),
+                              "Missing comments in <script> tag",
+                              """Markup parsing errors occurred
+                              while trying to parse the file. This
+                              can likely be mitigated by wrapping
+                              <script> tag contents in HTML comment
+                              tags (<!-- -->)""",
+                              self.filename,
+                              self.line)
+                self.reported["script_comments"] = True
+                return
+            
+            self.err.warning(("testcases_markup_markuptester",
+                              "_feed",
+                              "parse_error"),
+                             "Markup parsing error",
+                             ["""There was an error parsing the markup
+                              document.""",
+                              str(inst)],
+                             self.filename,
+                             self.line)
+            self.reported["markup"] = True
+        
     
     def handle_startendtag(self, tag, attrs):
         # Self closing tags don't have an end tag, so we want to
@@ -251,6 +281,8 @@ class MarkupParser(HTMLParser):
             print tag, self.xml_state
         
         if not self.xml_state:
+            if "closing_tags" in self.reported:
+                return
             self.err.error(("testcases_markup_markuptester",
                             "handle_endtag",
                             "extra_closing_tags"),
@@ -259,6 +291,7 @@ class MarkupParser(HTMLParser):
                            than it has opening tags.""",
                            self.filename,
                            self.line)
+            self.reported["closing_tags"] = True
             if DEBUG: # pragma: no cover
                 print "Too many closing tags ------"
             return
@@ -328,6 +361,35 @@ class MarkupParser(HTMLParser):
         
     def handle_comment(self, data):
         self._save_to_buffer(data)
+        
+    def parse_marked_section(self, i, report=0):
+        rawdata= self.rawdata
+        _markedsectionclose = re.compile(r']\s*]\s*>')
+        
+        assert rawdata[i:i+3] == '<![', "unexpected call to parse_marked_section()"
+        sectName, j = self._scan_name( i+3, i )
+        if j < 0:
+            return j
+        if sectName in ("temp", "cdata", "ignore", "include", "rcdata"):
+            # look for standard ]]> ending
+            match= _markedsectionclose.search(rawdata, i+3)
+        else:
+            self.error('unknown status keyword %r in marked section' % rawdata[i+3:j])
+        if not match:
+            return -1
+        if report:
+            j = match.start(0)
+            self.unknown_decl(rawdata[i+3: j])
+        return match.end(0)
+        
+    def _unknown_decl(self, decl):
+        "Handles non-DOCTYPE SGML declarations in *ML documents."
+        #print decl
+        decl = decl.strip()
+        split_decl = decl.split()
+        
+        self.out_buffer[split_decl[1]] = split_decl[2].strip('\'"')
+        
     
     def _save_to_buffer(self, data):
         """Save data to the XML buffer for the current tag."""
