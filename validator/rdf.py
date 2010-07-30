@@ -26,7 +26,7 @@ class RDFParser(object):
         except Exception as error:
             print "There was an error parsing an RDF file."
             self.rdf = None
-            return None
+            return
         else:
             self.rdf = graph
         

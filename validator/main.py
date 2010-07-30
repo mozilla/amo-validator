@@ -251,6 +251,13 @@ def test_package(err, package, name, expectation=PACKAGE_ANY):
         # Load up the install.rdf file.
         install_rdf_data = package.read("install.rdf")
         install_rdf = RDFParser(install_rdf_data)
+        
+        if install_rdf.rdf is None:
+            return err.error(("main",
+                              "test_package",
+                              "cannot_parse_installrdf"),
+                             "Cannot Parse install.rdf",
+                             "The install.rdf file could not be parsed.")
 
         # Save a copy for later tests.
         err.save_resource("install_rdf", install_rdf)
