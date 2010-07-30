@@ -1,4 +1,5 @@
 import platform
+import uuid
 
 import json
 
@@ -38,6 +39,7 @@ class ErrorBundle(object):
     def error(self, err_id, error, description='', filename='', line=0):
         "Stores an error message for the validation process"
         self._save_message(self.errors,
+                           "errors",
                            {"id": err_id,
                             "message": error,
                             "description": description,
@@ -48,6 +50,7 @@ class ErrorBundle(object):
     def warning(self, err_id, warning, description='', filename='', line=0):
         "Stores a warning message for the validation process"
         self._save_message(self.warnings,
+                           "warnings",
                            {"id": err_id,
                             "message": warning,
                             "description": description,
@@ -58,6 +61,7 @@ class ErrorBundle(object):
     def info(self, err_id, info, description='', filename='', line=0):
         "Stores an informational message about the validation"
         self._save_message(self.infos,
+                           "infos",
                            {"id": err_id,
                             "message": info,
                             "description": description,
@@ -65,9 +69,12 @@ class ErrorBundle(object):
                             "line": line})
         return self
         
-    def _save_message(self, stack, message):
+    def _save_message(self, stack, type_, message):
         "Stores a message in the appropriate message stack."
         
+        uid = uuid.uuid1().hex
+        
+        message["uid"] = uid
         stack.append(message)
         
         tree = self.message_tree
@@ -76,9 +83,14 @@ class ErrorBundle(object):
             if last_id is not None:
                 tree = tree[last_id]
             if eid not in tree:
-                tree[eid] = {}
+                tree[eid] = {"__errors": 0,
+                             "__warnings": 0,
+                             "__infos": 0,
+                             "__messages": []}
+            tree[eid]["__%s" % type_] += 1
             last_id = eid
-        tree[last_id] = message
+        
+        tree[last_id]['__messages'].append(uid)
         
     def set_type(self, type_):
         "Stores the type of addon we're scanning"
@@ -117,9 +129,6 @@ class ErrorBundle(object):
                                  "detected_type": self.detected_type,
                                  "resources": self.resources,
                                  "message_tree": self.message_tree})
-        
-        # Note that the message tree is not saved because it is simply rebuilt
-        # when the messages are rewritten.
         
         self.errors = []
         self.warnings = []
@@ -199,7 +208,7 @@ class ErrorBundle(object):
             else:
                 return "\n".join(output)
     
-    def print_json(self):
+    def print_json(self, cluster=False):
         "Prints a JSON summary of the validation operation."
         
         types = {0: "unknown",
@@ -214,7 +223,8 @@ class ErrorBundle(object):
                   "messages":[],
                   "errors": len(self.errors),
                   "warnings": len(self.warnings),
-                  "infos": len(self.infos)}
+                  "infos": len(self.infos),
+                  "message_tree": self.message_tree}
         
         messages = output["messages"]
         

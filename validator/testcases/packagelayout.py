@@ -209,5 +209,5 @@ def test_layout(err, package_contents, mandatory, whitelisted,
                       "Required file missing",
                       ["""The add-on requires certain files. Consult the
                        documentation for a full list of required files.""",
-                       'Add-ons of type "%s" require "%s"' % (mfile,
-                                                              pack_type)])
+                       'Add-ons of type "%s" require "%s"' % (pack_type,
+                                                              mfile)])
