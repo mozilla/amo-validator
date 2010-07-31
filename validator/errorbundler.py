@@ -77,20 +77,21 @@ class ErrorBundle(object):
         message["uid"] = uid
         stack.append(message)
         
-        tree = self.message_tree
-        last_id = None
-        for eid in message["id"]:
-            if last_id is not None:
-                tree = tree[last_id]
-            if eid not in tree:
-                tree[eid] = {"__errors": 0,
-                             "__warnings": 0,
-                             "__infos": 0,
-                             "__messages": []}
-            tree[eid]["__%s" % type_] += 1
-            last_id = eid
+        if message["id"]:
+            tree = self.message_tree
+            last_id = None
+            for eid in message["id"]:
+                if last_id is not None:
+                    tree = tree[last_id]
+                if eid not in tree:
+                    tree[eid] = {"__errors": 0,
+                                 "__warnings": 0,
+                                 "__infos": 0,
+                                 "__messages": []}
+                tree[eid]["__%s" % type_] += 1
+                last_id = eid
         
-        tree[last_id]['__messages'].append(uid)
+            tree[last_id]['__messages'].append(uid)
         
     def set_type(self, type_):
         "Stores the type of addon we're scanning"

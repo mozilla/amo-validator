@@ -24,7 +24,6 @@ class RDFParser(object):
         try:
             graph.parse(pseudo_file, format="xml")
         except Exception as error:
-            print "There was an error parsing an RDF file."
             self.rdf = None
             return
         else:
