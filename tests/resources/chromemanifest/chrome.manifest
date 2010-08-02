@@ -1,3 +1,5 @@
 locale	basta	resource
 subject	predicate	object
+#subject predicate whatever
+sub
 locale	predicate	resource

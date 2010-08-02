@@ -12,8 +12,7 @@ def test_open():
     manifest = ChromeManifest(chrome_data)
     assert manifest is not None
     
-    assert manifest.get_value("locale", "basta")["object"] == \
-        "resource"
+    assert manifest.get_value("locale", "basta")["object"] == "resource"
     
     g_obj = list(manifest.get_objects("subject", "predicate"))
     

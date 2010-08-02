@@ -37,7 +37,6 @@ def test_load_rdf_stringio():
     r = RDFParser(sio)
     assert r.rdf
 
-
 def test_namespacing():
     """Tests that the RDF parser successfully creates namespaces."""
     
@@ -47,7 +46,6 @@ def test_namespacing():
     assert str(r.uri("bar")) == "foo#bar"
     assert str(r.uri("bar", "abc")) == "abc#bar"
 
-
 def test_namespacing():
     """Tests that the RDF parser successfully creates namespaces."""
     
@@ -56,18 +54,18 @@ def test_namespacing():
     assert r.namespace == "foo"
     assert str(r.uri("bar")) == "foo#bar"
     assert str(r.uri("bar", "abc")) == "abc#bar"
-    
 
 def test_get_root_subject():
     "Tests the integrity of the get_root_subject() function"
     
     r = RDFParser(_load_rdf("tests/resources/rdf/pass.rdf"))
     type_uri = r.uri("type")
+    
     emtype = r.get_object(None, type_uri)
     assert emtype is not None
+    
     emtype = r.get_object(r.get_root_subject(), type_uri)
     assert emtype is not None
-
 
 def test_get_object():
     """"Tests the integrity of the get_object() and get_objects()
@@ -82,5 +80,3 @@ def test_get_object():
     emtests = r.get_objects(None, test_uri)
     assert len(emtests) == 3
     assert emtests[0] == emtest
-    
-

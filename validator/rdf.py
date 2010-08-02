@@ -51,9 +51,6 @@ class RDFParser(object):
         alternative."""
         
         subjects = list(self.rdf.subjects())
-        # No root if there aren't any nodes.
-        if not subjects:
-            return None
         
         target = subjects[0]
         while True:
