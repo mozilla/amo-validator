@@ -18,6 +18,7 @@ def test_valid_name():
     z = XPIManager("tests/resources/xpi/install_rdf_only.xpi")
     contents = z.get_file_data()
     assert "install.rdf" in contents
+    assert z.test() == False
     
 def test_read_file():
     "Test that a file can be read from the package"
@@ -32,6 +33,10 @@ def test_bad_file():
         assert True
     else:
         assert False
+    
+    x = XPIManager("tests/resources/xpi/corrupt.xpi")
+    assert x.test()
+    
 
 def test_missing_file():
     "Tests that the XPI manager correctly reports a missing XPI file."

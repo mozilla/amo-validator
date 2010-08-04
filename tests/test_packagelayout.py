@@ -132,6 +132,19 @@ def test_unknown_file():
                         "chrome/foo.jar",
                         "chrome.manifest",
                         "chromelist.txt"])
+
+def test_disallowed_file():
+    """Tests that outright improper files are blocked."""
+    
+    # We test against langpack because it is incredibly strict in its
+    # file format.
+    
+    _do_simulated_test(packagelayout.test_langpack_layout,
+                       ["install.rdf",
+                        "chrome/foo.jar",
+                        "chrome.manifest",
+                        "foo.bar"],
+                       True)
     
 
 def test_extra_obsolete():

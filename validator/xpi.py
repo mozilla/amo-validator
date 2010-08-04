@@ -36,12 +36,16 @@ class XPIManager(object):
         self.zf = zip_package
         
     def test(self):
-        "Tests the validity and non-corruptness of the zip."
+        """Tests the validity and non-corruptness of the zip.
+        
+        Will return true on failure."""
         
         # This guy tests the hashes of the content.
-        output = self.zf.testzip()
-        return output is None
-        
+        try:
+            output = self.zf.testzip()
+            return output is not None
+        except:
+            return True
         
     def get_file_data(self):
         "Returns a dictionary of file information"

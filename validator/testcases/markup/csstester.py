@@ -20,6 +20,16 @@ def test_css_file(err, filename, data, line_start=1):
                     """While decoding a CSS file, an unknown character
                     was encountered, causing some problems.""",
                     filename)
+    except: # This happens because tokenize is a generator.
+        # Bravo, Mr. Bond, Bravo.
+        err.error(("testcases_markup_csstester",
+                   "test_css_file",
+                   "could_not_parse"),
+                  "Could not parse CSS file",
+                  ["CSS file could not be parsed by the tokenizer.",
+                   "File: %s" % filename])
+        return
+        
     
 def test_css_snippet(err, filename, data, line):
     "Parse and test a CSS nugget."

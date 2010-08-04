@@ -4,6 +4,7 @@ import zipfile
 
 import validator.testcases as testcases
 import validator.typedetection as typedetection
+from validator.typedetection import detect_opensearch
 from validator.xpi import XPIManager
 from validator.rdf import RDFParser
 from validator import decorator
@@ -62,7 +63,7 @@ def test_search(err, package, expectation=0):
                            "Unexpected file extension.")
                            
     # Is this a search provider?
-    opensearch_results = typedetection.detect_opensearch(package)
+    opensearch_results = detect_opensearch(package)
     
     if opensearch_results["failure"]:
         # Failed OpenSearch validation
@@ -126,7 +127,7 @@ def test_package(err, package, name, expectation=PACKAGE_ANY):
                         "We were unable to open the file for testing.")
                         
     # Test the XPI file for corruption.
-    if not package.test():
+    if package.test():
         err.reject = True
         return err.error(("main",
                           "test_package",
@@ -215,7 +216,6 @@ def test_inner_package(err, package_contents, package):
         # Return any errors at the end of the tier.
         if err.failed():
             return err
-            
             
     # Return the results.
     return err

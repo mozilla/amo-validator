@@ -12,7 +12,7 @@ def test_conduittoolbar(err, package_contents=None, xpi_manager=None):
     if err.detected_type in (PACKAGE_ANY,
                              PACKAGE_THEME,
                              PACKAGE_SEARCHPROV):
-        return
+        return None
     
     # Tests regarding the install.rdf file.
     if err.get_resource("has_install_rdf"):

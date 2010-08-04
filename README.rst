@@ -244,10 +244,10 @@ or, after setting the proper python path: ::
     nosetests
 
 However, to turn run unit tests with code coverage, the appropriate
-command would be:
+command would be: ::
 
-	nosetests --with-coverage --cover-package=validator --cover-skip=validator.argparse,validator.outputhandlers. --cover-inclusive --cover-tests
+	nosetests --with-coverage --cover-package=validator --cover-skip=validator.argparse,validator.outputhandlers.,validator.main --cover-inclusive --cover-tests
 
-Note that in order to use the --cover-skip nose parameter, you must install the included patch for nose's coverage.py plugin:
+Note that in order to use the --cover-skip nose parameter, you must install the included patch for nose's coverage.py plugin: ::
 
 	extras/cover.py

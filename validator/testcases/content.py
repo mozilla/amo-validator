@@ -97,13 +97,22 @@ def test_packed_packages(err, package_contents=None, xpi_package=None):
             
             try:
                 file_data = xpi_package.read(name)
+                if file_data.startswith(chr(239)):
+                    file_data = file_data[3:]
+                    err.info(("testcases_content",
+                              "test_packed_packages",
+                              "byte_order_fail"),
+                             "Nasty Byte Order Mark",
+                             "A particularly unpleasant BOM was found.",
+                             name,
+                             1)
+                
             except KeyError: # pragma: no cover
                 _read_error(err, name)
             else:
                 testendpoint_css.test_css_file(err,
                                                name,
                                                file_data)
-                                                         
         
         # This is tested in test_langpack.py
         if err.detected_type == PACKAGE_LANGPACK and not processed:
@@ -117,7 +126,7 @@ def test_packed_packages(err, package_contents=None, xpi_package=None):
                                                        name,
                                                        file_data)
         
-        # This aids in testing.
+        # This aids in creating unit tests.
         processed_files += 1
             
     return processed_files

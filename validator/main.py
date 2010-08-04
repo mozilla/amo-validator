@@ -19,11 +19,8 @@ from validator.submain import *
 from errorbundler import ErrorBundle
 from validator.constants import *
 
-def main(): # pragma: no cover
+def main():
     "Main function. Handles delegation to other functions."
-    
-    # We don't count the main towards code coverage because the code is
-    # inherently tested by the function of the application.
     
     expectations = {"any":PACKAGE_ANY,
                     "extension":PACKAGE_EXTENSION,

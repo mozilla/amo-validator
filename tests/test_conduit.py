@@ -9,6 +9,18 @@ from validator.rdf import RDFParser
 from helper import _do_test
 from validator.constants import *
 
+def test_invalid_package_type():
+    "No such thing as a Conduit theme."
+    
+    err = ErrorBundle(None, True)
+    err.detected_type = PACKAGE_ANY
+    assert conduit.test_conduittoolbar(err) is None
+    err.detected_type = PACKAGE_THEME
+    assert conduit.test_conduittoolbar(err) is None
+    err.detected_type = PACKAGE_SEARCHPROV
+    assert conduit.test_conduittoolbar(err) is None
+    
+
 def test_outright():
     "Tests the Conduit detector against an outright toolbar."
     
