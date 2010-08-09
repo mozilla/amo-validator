@@ -212,9 +212,9 @@ def test_inner_package(err, package_contents, package):
                 # - Package listing
                 # - A copy of the package itself
                 test_func(err, package_contents, package)
-                
-        # Return any errors at the end of the tier.
-        if err.failed():
+        
+        # Return any errors at the end of the tier if undetermined.
+        if err.failed() and not err.determined:
             return err
             
     # Return the results.

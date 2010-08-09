@@ -54,11 +54,6 @@ def main():
                         const=True,
                         help="""If the output format supports it, makes
                         the analysis summary include extra info.""")
-    parser.add_argument("--cluster",
-                        action="store_const",
-                        const=True,
-                        help="""Structures output in clustered format,
-                        grouping similar errors together.""")
     parser.add_argument("--file",
                         type=argparse.FileType("w"),
                         default=sys.stdout,
@@ -70,6 +65,11 @@ def main():
                         const=True,
                         help="""Activating this flag will remove color
                         support from the terminal.""")
+    parser.add_argument("--determined",
+                        action="store_const",
+                        const=True,
+                        help="""This flag will continue running tests in
+                        successive tests even if a lower tier fails.""")
     parser.add_argument("--selfhosted",
                         action="store_const",
                         const=True,
@@ -81,7 +81,7 @@ def main():
 
     error_bundle = ErrorBundle(args.file,
         not args.file == sys.stdout or args.boring)
-    error_bundle.cluster = args.cluster
+    error_bundle.determined = args.determined
 
     # Emulates the "$status" variable in the original validation.php
     # test file. Equal to "$status == STATUS_LISTED".

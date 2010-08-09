@@ -24,7 +24,7 @@ class ErrorBundle(object):
         self.message_tree = {}
         
         self.metadata = {}
-        self.cluster = False
+        self.determined = False
         
         self.subpackages = []
         self.package_stack = []
