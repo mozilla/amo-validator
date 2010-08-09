@@ -5,6 +5,7 @@ from validator import decorator
 from validator import submain as testendpoint_validator
 import validator.testcases.markup.markuptester as testendpoint_markup
 import validator.testcases.markup.csstester as testendpoint_css
+import validator.testcases.scripting as testendpoint_js
 import validator.testcases.langpack as testendpoint_langpack
 from validator.xpi import XPIManager
 from validator.constants import PACKAGE_LANGPACK, PACKAGE_SUBPACKAGE
@@ -103,26 +104,29 @@ def test_packed_packages(err, package_contents=None, xpi_package=None):
                 processed = True
                 
             
-        elif data["extension"] == "css":
+        elif data["extension"] in ("css", "js"):
             
             try:
                 file_data = xpi_package.read(name)
-                if file_data.startswith(chr(239)):
+                if not file_data:
+                    continue
+                
+                first_char = ord(file_data[0])
+                if first_char > 126 or first_char < 32:
                     file_data = file_data[3:]
-                    err.info(("testcases_content",
-                              "test_packed_packages",
-                              "byte_order_fail"),
-                             "Nasty Byte Order Mark",
-                             "A particularly unpleasant BOM was found.",
-                             name,
-                             1)
+                    # Removed: INFO about BOM because it was too frequent.
                 
             except KeyError: # pragma: no cover
                 _read_error(err, name)
             else:
-                testendpoint_css.test_css_file(err,
-                                               name,
-                                               file_data)
+                if data["extension"] == "css":
+                    testendpoint_css.test_css_file(err,
+                                                   name,
+                                                   file_data)
+                elif data["extension"] == "js":
+                    testendpoint_js.test_js_file(err,
+                                                 name,
+                                                 file_data)
         
         # This is tested in test_langpack.py
         if err.detected_type == PACKAGE_LANGPACK and not processed:

@@ -8,9 +8,7 @@ from StringIO import StringIO
 from validator import decorator
 from validator.chromemanifest import ChromeManifest
 from validator.xpi import XPIManager
-from validator.constants import PACKAGE_EXTENSION, \
-                      PACKAGE_THEME, \
-                      PACKAGE_LANGPACK
+from validator.constants import *
 
 import validator.testcases.l10n.dtd as dtd
 import validator.testcases.l10n.properties as properties
@@ -44,6 +42,7 @@ def _get_locales(err, xpi_package):
     # Find all of the locales referenced in the chrome.manifest file.
     for locale in pack_locales:
         locale_jar = locale["object"].split()
+        
         locale_name = locale_jar[0]
         location = locale_jar[-1]
         if not location.startswith("jar:"):

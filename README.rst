@@ -32,7 +32,7 @@ Running
 
 Run the validator as follows ::
 
-	python package-parser.py <path to xpi> [-t <expected type>] [-o <output type>] [-v] [--file <output file>] [--boring] [--selfhosted]
+	python package-parser.py <path to xpi> [-t <expected type>] [-o <output type>] [-v] [--file <output file>] [--boring] [--selfhosted] [--determined]
 
 The path to the XPI should point to an XPI file.
 
@@ -103,6 +103,19 @@ Boring Mode:
 ------------
 
 Boring mode, when activated, doesn't print colors to the terminal.
+
+Determined Mode:
+----------------
+
+With determination comes perseverance. When in determined mode, the validator
+will not stop validating after errors present themselves in a particular tier.
+Traditionally, if an error tier fails, subsequent tiers are not executed. This
+flag ensures that those tiers are indeed run.
+
+Note that enabling this option may cause issues with certain tests, as some
+higher-level tiers depend on information provided by lower tiers. This data
+may not be available as the add-on was never meant to make it to the higher
+tiers.
 
 
 Output
