@@ -71,12 +71,40 @@ def test_test_inner_package_failtier():
     submain.test_inner_package(err, "foo", "bar")
     
     assert err.failed()
+
+# Test determined modes
+
+def test_test_inner_package_determined():
+    "Tests that the determined test_inner_package function works properly"
+    
+    decorator = MockDecorator(None, True)
+    submain.decorator = decorator
+    err = MockErrorHandler(decorator, True)
+    
+    submain.test_inner_package(err, "foo", "bar")
+    
+    assert not err.failed()
+    assert decorator.last_tier == 5
+    
+def test_test_inner_package_failtier():
+    "Tests the test_inner_package function in determined mode while failing"
+    
+    decorator = MockDecorator(3, True)
+    submain.decorator = decorator
+    err = MockErrorHandler(decorator, True)
+    
+    submain.test_inner_package(err, "foo", "bar")
+    
+    assert err.failed()
+    assert decorator.last_tier == 5
     
 class MockDecorator:
     
-    def __init__(self, fail_tier=None):
+    def __init__(self, fail_tier=None, determined=False):
+        self.determined = determined
         self.ordering = [1]
         self.fail_tier = fail_tier
+        self.last_tier = 0
     
     def get_tiers(self):
         "Returns unordered tiers. These must be in a random order."
@@ -96,8 +124,10 @@ class MockDecorator:
                 yield {"test":lambda x,y,z: x.fail_tier(),
                        "simple":False}
             
-            assert tier <= self.fail_tier
+            assert tier <= self.fail_tier or self.determined
             
+        
+        self.last_tier = tier
         
         for x in range(1,10): # Ten times because we care
             print "Yielding Complex"
@@ -121,10 +151,11 @@ class MockDecorator:
         
 class MockErrorHandler:
     
-    def __init__(self, mock_decorator):
+    def __init__(self, mock_decorator, determined=False):
         self.decorator = mock_decorator
         self.detected_type = 0
         self.has_failed = False
+        self.determined = determined
         
     def report(self, tier):
         "Passes the tier back to the mock decorator to verify the tier"

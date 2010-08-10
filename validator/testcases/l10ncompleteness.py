@@ -2,6 +2,7 @@ import sys
 import os
 
 import json
+import fnmatch
 from StringIO import StringIO
 
 from validator import decorator
@@ -14,42 +15,21 @@ from validator.constants import PACKAGE_EXTENSION, \
 import validator.testcases.l10n.dtd as dtd
 import validator.testcases.l10n.properties as properties
 
+
 # The threshold that determines the number of entities that must not be
 # missing from the package.
-L10N_THRESHOLD = 0.10
+L10N_THRESHOLD = 0.35
+L10N_SIMILAR_THRESHOLD = 0.9 # For en_US/en_GB kind of stuff
 
-def _test_file(err, optionpack):
-    "Runs the L10n tests against an addon package."
-    
-    stdout = sys.stdout
-    sys.stdout = StringIO()
-    
-    compareLocales(optionpack)
-    
-    output = sys.stdout.getvalue()
-    sys.stdout = stdout
-    
-    output = output.strip()
-    print output
-    
-    if not output or output.startswith(("WARNING", "ERROR")):
-        err.info(("testcases_l10ncompleteness",
-                  "_test_file",
-                  "unlocalized"),
-                 "This extension appears not to be localized.",
-                 """The package does not contain any localization
-                 support.""")
-        return None
-    
-    output_parsed = json.loads(output)
-    
-    return output_parsed
-    
+# Only warn about unchanged entities longer than this number of characters.
+L10N_LENGTH_THRESHOLD = 3
+
+# To avoid noise, this value ensures that the percent of unchanged entities
+# is not inflated due to small numbers of entities.
+L10N_MIN_ENTITIES = 18
 
 def _get_locales(err, xpi_package):
     "Returns a list of locales from the chrome.manifest file."
-    
-    # TODO : Make this into a generator.
     
     # Retrieve the chrome.manifest if it's cached.
     if err.get_resource("chrome.manifest"): # pragma: no cover
@@ -101,6 +81,9 @@ def test_xpi(err, package_contents, xpi_package):
         return
     
     ref_name = "en-US"
+    # Fall back on whatever comes first.
+    if ref_name not in locales:
+        ref_name = locales[0]
     reference = locales[ref_name]
     reference_jar = StringIO(xpi_package.read(reference["path"]))
     reference_locale = XPIManager(reference_jar, reference["path"])
@@ -114,14 +97,17 @@ def test_xpi(err, package_contents, xpi_package):
         target_locale = XPIManager(locale_jar, locale["path"])
         target_locale.locale_name = name
         
+        split_target = locale["name"].split("-")
+        
         # Isolate each of the target locales' results.
         results = _compare_packages(reference_locale,
                                     target_locale,
                                     reference["target"])
-        _aggregate_results(err, results, locale)
-        
-    
-    
+        _aggregate_results(err,
+                           results,
+                           locale,
+                           ref_name.startswith(split_target[0]))
+
 
 @decorator.register_test(tier=3, expected_type=PACKAGE_LANGPACK)
 def test_lp_xpi(err, package_contents, xpi_package):
@@ -191,6 +177,8 @@ def _compare_packages(reference, target, ref_base=None):
     
     for name, file_data in ref_files.items():
         
+        entity_count = 0
+        
         # Skip directory entries.
         if name.endswith("/"): # pragma: no cover
             continue
@@ -224,15 +212,19 @@ def _compare_packages(reference, target, ref_base=None):
         unchanged_entities = []
         
         for rname, rvalue in ref_doc.entities.items():
+            entity_count += 1
+            
             if rname not in tar_doc.entities:
                 missing_entities.append(rname)
                 continue
             
-            if rvalue == tar_doc.entities[rname]:
+            if rvalue == tar_doc.entities[rname] and \
+               len(rvalue) > L10N_LENGTH_THRESHOLD and \
+               not fnmatch.fnmatch(rvalue, "http*://*"):
+                
                 unchanged_entities.append(rname)
                 continue
             
-            total_entities += 1
         
         if missing_entities:
             results.append({"type": "missing_entities",
@@ -244,6 +236,13 @@ def _compare_packages(reference, target, ref_base=None):
                             "entities": len(unchanged_entities),
                             "filename": name,
                             "unchanged_entities": unchanged_entities})
+        
+        results.append({"type": "file_entity_count",
+                        "filename": name,
+                        "entities": entity_count})
+        
+        total_entities += entity_count
+        
     
     results.append({"type": "total_entities",
                     "entities": total_entities})
@@ -265,20 +264,22 @@ def _parse_l10n_doc(name, doc):
     
     return handlers[extension](StringIO(doc))
 
-def _aggregate_results(err, results, locale):
+def _aggregate_results(err, results, locale, similar=False):
     """Compiles the errors and warnings in the L10n results list into
     error bundler errors and warnings."""
     
     total_entities = 0
     unchanged_entities = 0
-    unchanged_entity_list = []
+    unchanged_entity_list = {}
+    entity_count = {}
     
     for ritem in results:
         if "filename" in ritem:
             rfilename = ritem["filename"].replace("en-US",
                                                   locale["name"])
         
-        if ritem["type"] == "missing_files":
+        rtype = ritem["type"]
+        if rtype == "missing_files":
             err.error(("testcases_l10ncompleteness",
                        "_aggregate_results",
                        "missing_file"),
@@ -290,7 +291,7 @@ def _aggregate_results(err, results, locale):
                        "%s missing translation file (%s)" % (locale["path"],
                                                              rfilename)],
                       [locale["path"]])
-        elif ritem["type"] == "missing_entities":
+        elif rtype == "missing_entities":
             err.error(("testcases_l10ncompleteness",
                        "_aggregate_results",
                        "missing_translation_entity"),
@@ -304,28 +305,49 @@ def _aggregate_results(err, results, locale):
                              ", ".join(ritem["missing_entities"]),
                              rfilename)],
                       [locale["path"], rfilename])
-        elif ritem["type"] == "unchanged_entity":
-            unchanged_entities += ritem["entities"]
-            unchanged_entity_list.extend(ritem["unchanged_entities"])
-        elif ritem["type"] == "total_entities":
+        elif rtype == "unchanged_entity":
+            filename = ritem["filename"]
+            if not filename in unchanged_entity_list:
+                unchanged_entity_list[filename] = {"count": 0,
+                                                   "entities": []}
+            unchanged = unchanged_entity_list[filename]
+            unchanged["count"] += ritem["entities"]
+            unchanged["entities"].extend(ritem["unchanged_entities"])
+        elif rtype == "total_entities":
             total_entities += ritem["entities"]
+        elif rtype == "file_entity_count":
+            entity_count[ritem["filename"]] = ritem["entities"]
     
-    total_entities += unchanged_entities
-    if total_entities > 0 and \
-       float(unchanged_entities) / float(total_entities) >= \
-           L10N_THRESHOLD:
+    agg_unchanged = []
+    if not similar:
+        unchanged_percentage = L10N_THRESHOLD
+    else:
+        unchanged_percentage = L10N_SIMILAR_THRESHOLD
+    for name, count in entity_count.items():
+        if name not in unchanged_entity_list or \
+           count == 0:
+            continue
         
-        err.error(("testcases_l10ncompleteness",
-                   "_aggregate_results",
-                   "unchnged_entities"),
-                  "Unchanged translation entities",
-                  ["""Localizations must include a translated copy
-                   of each entity from each file in the reference
-                   locale. These translations SHOULD differ from
-                   the localized text in the reference package.""",
-                   "%s contains %d unchanged entities (%s)" %
-                    (locale["path"],
-                     unchanged_entities,
-                     ", ".join(unchanged_entity_list))],
-                  [locale["path"], rfilename])
+        unchanged = unchanged_entity_list[name]
+        total_adjusted = max(count, L10N_MIN_ENTITIES)
+        percentage = float(unchanged["count"]) / float(total_adjusted)
+        if percentage >= unchanged_percentage:
+            agg_unchanged.append(
+                    "%s: %d/%d entities unchanged (%s) at %d percent" %
+                    (name,
+                     unchanged["count"],
+                     count,
+                     ", ".join(unchanged["entities"]),
+                     percentage * 100))
     
+    if agg_unchanged:
+        err.warning(("testcases_l10ncompleteness",
+                     "_aggregate_results",
+                     "unchnged_entities"),
+                    "Unchanged translation entities",
+                    ["""Localizations must include a translated copy of each
+                     entity from each file in the reference locale. These
+                     translations SHOULD differ from the localized text in the
+                     reference package.""",
+                     agg_unchanged],
+                    [locale["path"], locale["target"]])

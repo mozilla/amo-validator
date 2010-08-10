@@ -60,9 +60,14 @@ def test_results_aggregator():
                               "entities":50,
                               "unchanged_entities":["asdf","ghjk"],
                               "filename":"foo.bar"},
-                              {"type":"total_entities",
-                               "entities":100}],
-                            {"name":"en-US", "path":"foo.bar"})
+                             {"type":"file_entity_count",
+                              "filename":"foo.bar",
+                              "entities":100},
+                             {"type":"total_entities",
+                              "entities":100}],
+                            {"name":"en-US",
+                             "path":"foo.bar",
+                             "target":"/locale/en-US/"})
     assert err.failed()
     
 
@@ -88,10 +93,16 @@ def test_comparer():
         "tests/resources/l10n/langpack/missing_entities.jar")
     ment.locale_name = "en-US"
     
-    assert len(l10n._compare_packages(ref, pass_)) == 1
-    assert len(l10n._compare_packages(extra_ref, pass_)) == 1
-    assert len(l10n._compare_packages(ref, extra)) == 1
-    assert len(l10n._compare_packages(ref, mfile)) == 2
-    assert len(l10n._compare_packages(ref, mfileent)) == 2
-    assert len(l10n._compare_packages(ref, ref)) > 1
+    assert _compare_packs(ref, pass_) == 3
+    assert _compare_packs(extra_ref, pass_) == 3
+    assert _compare_packs(ref, extra) == 3
+    assert _compare_packs(ref, mfile) == 4
+    assert _compare_packs(ref, mfileent) == 3
+    assert _compare_packs(ref, ref) > 3
     
+def _compare_packs(reference, target):
+    "Does a simple comparison and prints the output"
+    
+    comparison = l10n._compare_packages(reference, target)
+    print comparison
+    return len(comparison)

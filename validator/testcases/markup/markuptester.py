@@ -66,6 +66,7 @@ class MarkupParser(HTMLParser):
             
             search_line = line
             while True:
+                # CDATA elements are gross. Pass the whole entity as one chunk
                 if "<![CDATA[" in search_line and not force_buffer:
                     cdatapos = search_line.find("<![CDATA[")
                     post_cdata = search_line[cdatapos:]
@@ -368,29 +369,20 @@ class MarkupParser(HTMLParser):
         
         assert rawdata[i:i+3] == '<![', "unexpected call to parse_marked_section()"
         sectName, j = self._scan_name( i+3, i )
-        if j < 0:
+        if j < 0: #pragma: no cover
             return j
         if sectName in ("temp", "cdata", "ignore", "include", "rcdata"):
             # look for standard ]]> ending
             match= _markedsectionclose.search(rawdata, i+3)
-        else:
+        else: #pragma: no cover
             self.error('unknown status keyword %r in marked section' % rawdata[i+3:j])
-        if not match:
+        if not match: #pragma: no cover
             return -1
-        if report:
+        if report: #pragma: no cover
             j = match.start(0)
             self.unknown_decl(rawdata[i+3: j])
         return match.end(0)
         
-    def _unknown_decl(self, decl):
-        "Handles non-DOCTYPE SGML declarations in *ML documents."
-        #print decl
-        decl = decl.strip()
-        split_decl = decl.split()
-        
-        self.out_buffer[split_decl[1]] = split_decl[2].strip('\'"')
-        
-    
     def _save_to_buffer(self, data):
         """Save data to the XML buffer for the current tag."""
         

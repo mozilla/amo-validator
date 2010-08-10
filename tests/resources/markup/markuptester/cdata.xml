@@ -1,0 +1,25 @@
+<?xml version="1.0"?>
+<doc>
+	<element>
+		<![CDATA[
+		This
+		is
+a
+cdata
+element
+]]>
+<![CDATA[]]><element />
+		<node>This is a sample document.</node>
+		<node>This is a sample document.</node>
+	</element>
+	<element>
+		<node>This is a sample document.</node>
+		<node>This is a sample document.</node>
+		<node>This is a sample document.</node>
+	</element>
+	<element>
+		<node>This is a sample document.</node>
+		<node>This is a sample document.</node>
+		<node>This is a sample document.</node>
+	</element>
+</doc>

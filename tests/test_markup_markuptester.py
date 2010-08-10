@@ -62,6 +62,11 @@ def test_xml_bad_nesting():
     
     _do_test("tests/resources/markup/markuptester/bad_nesting.xml", True)
     
+def test_has_cdata():
+    "Tests that CDATA is good to go."
+    
+    _do_test("tests/resources/markup/markuptester/cdata.xml")
+    
 def test_xml_overclosing():
     "Tests an XML file that has overclosed elements"
     

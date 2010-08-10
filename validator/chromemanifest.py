@@ -1,6 +1,4 @@
 
-import re
-
 class ChromeManifest(object):
     """This class enables convenient reading and searching of
     chrome.manifest files."""

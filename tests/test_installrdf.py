@@ -74,6 +74,22 @@ def _run_test(filename, failure=True):
     
     return err
 
+def test_has_rdf():
+    "Tests that tests won't be run if there's no install.rdf"
+    
+    err = ErrorBundle(None, True)
+    err.save_resource("install_rdf", "test")
+    err.save_resource("has_install_rdf", True)
+    testrdf = installrdf._test_rdf
+    installrdf._test_rdf = lambda x, y: y
+    
+    result = installrdf.test_install_rdf_params(err, None, None)
+    installrdf._test_rdf = testrdf
+    
+    print result
+    assert result
+    
+
 def test_passing():
     "Tests a passing install.rdf package."
     

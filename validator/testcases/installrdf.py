@@ -13,7 +13,7 @@ def test_install_rdf_params(err, package_contents=None, xpi_package=None):
     
     install = err.get_resource("install_rdf")
     
-    _test_rdf(err, install)
+    return _test_rdf(err, install)
 
 def _test_rdf(err, install):
     """Wrapper for install.rdf testing to make unit testing so much
@@ -193,8 +193,8 @@ def _test_name(err, value):
         err.error(("testcases_installrdf",
                    "_test_name",
                    "trademark"),
-                  "Addon has illegal name.",
-                  """Addon names cannot contain the Mozilla or Firefox
+                  "Add-on has illegal name.",
+                  """Add-on names cannot contain the Mozilla or Firefox
                   trademarks. These names should not be contained in
                   addon names at all.""",
                   "install.rdf")
