@@ -7,10 +7,12 @@ from validator.constants import *
 def test_prepare_package():
     "Tests that the prepare_package function passes for valid data"
     
+    tp = submain.test_package
     submain.test_package = lambda w,x,y,z: True
     
     err = ErrorBundle(None, True)
     assert submain.prepare_package(err, "tests/resources/main/foo.xpi") == True
+    submain.test_package = tp
     
 def test_prepare_package_missing():
     "Tests that the prepare_package function fails when file is not found"

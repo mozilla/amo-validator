@@ -27,34 +27,15 @@ def test_read_file():
 
 def test_bad_file():
     "Tests that the XPI manager correctly reports a bad XPI file."
-    try:
-        x = XPIManager("tests/resources/xpi/junk.xpi")
-    except zipfile.BadZipfile:
-        assert True
-    else:
-        assert False
     
-    x = XPIManager("tests/resources/xpi/corrupt.xpi")
+    x = XPIManager("tests/resources/junk.xpi")
+    assert not x.zf
+    
+    x = XPIManager("tests/resources/corrupt.xpi")
     assert x.test()
-    
 
 def test_missing_file():
     "Tests that the XPI manager correctly reports a missing XPI file."
-    try:
-        x = XPIManager("tests/resources/xpi/_not_here.xpi")
-    except IOError:
-        assert True
-    else:
-        assert False
-
-def test_mysterious():
-    """Tests that the XPI manager correctly reports a mysterious XPI
-    file problem."""
-    try:
-        x = XPIManager(123123)
-    except Exception as e:
-        assert not (isinstance(e, IOError) or
-                    isinstance(e, zipfile.BadZipfile))
-    else:
-        assert False
-
+    
+    x = XPIManager("tests/resources/foo.bar")
+    assert not x.zf

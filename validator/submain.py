@@ -17,6 +17,9 @@ types = {0: "Unknown",
          4: "Language Pack",
          5: "Search Provider"}
 
+assumed_extensions = {"jar": PACKAGE_THEME,
+                      "xml": PACKAGE_SEARCHPROV}
+
 def prepare_package(err, path, expectation=0):
     "Prepares a file-based package for validation."
 
@@ -98,33 +101,18 @@ def test_search(err, package, expectation=0):
     return err
 
 
-def test_package(err, package, name, expectation=PACKAGE_ANY):
+def test_package(err, file_, name, expectation=PACKAGE_ANY):
     "Begins tests for the package."
     
     # Load up a new instance of an XPI.
-    try:
-        package = XPIManager(package, name)
-        if package is None:
-            # Die on this one because the file won't open.
-            return err.error(("main",
-                              "test_package",
-                              "unopenable"),
-                             "The XPI could not be opened.")
-                             
-    except zipfile.BadZipfile:
-        # This likely means that there is a problem with the zip file.
+    package = XPIManager(file_, name)
+    if not package.zf:
+        # Die on this one because the file won't open.
         return err.error(("main",
                           "test_package",
-                          "bad_zip"),
-                         "The XPI file that was submitted is corrupt.")
-                         
-    except:
-        # This means that there was something wrong with the command.
-        return err.error(("main",
-                          "test_package",
-                          "unable_to_open_package"),
-                        "We were unable to open the file for testing.")
-                        
+                          "unopenable"),
+                         "The XPI could not be opened.")
+    
     # Test the XPI file for corruption.
     if package.test():
         err.reject = True
@@ -132,10 +120,7 @@ def test_package(err, package, name, expectation=PACKAGE_ANY):
                           "test_package",
                           "corrupt"),
                          "XPI package appears to be corrupt.")
-                         
-    assumed_extensions = {"jar": PACKAGE_THEME,
-                          "xml": PACKAGE_SEARCHPROV}
-                          
+    
     if package.extension in assumed_extensions:
         assumed_type = assumed_extensions[package.extension]
         # Is the user expecting a different package type?
@@ -152,7 +137,7 @@ def test_package(err, package, name, expectation=PACKAGE_ANY):
     has_install_rdf = "install.rdf" in package_contents
     err.save_resource("has_install_rdf", has_install_rdf)
     if has_install_rdf:
-        _load_install_rdf(err, package)
+        _load_install_rdf(err, package, expectation)
     
     return test_inner_package(err, package_contents, package)
 

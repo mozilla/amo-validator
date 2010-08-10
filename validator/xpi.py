@@ -10,22 +10,17 @@ class XPIManager(object):
     def __init__(self, package, name=None, subpackage=False):
         "Create a new managed XPI package"
         
+        self.zf = None
+        
         # Try opening the XPI as a zip.
         try:
             zip_package = ZipFile(package)
             
-        except zipfile.BadZipfile:
-            # The XPI is corrupt or invalid.
-            print "The XPI is invalid."
-            raise
-            
-        except IOError:
-            print "Package was not found."
-            raise
-            
         except:
-            print "Something strange and deathly happened to the XPI."
-            raise
+            # Pokemon error handling here is unnecessary. If we can't open
+            # it, we can't open it. We shouldn't be the "why won't the add-on
+            # open" brigade.
+            return
         
         # Store away the filename for future use.
         self.filename = name or package

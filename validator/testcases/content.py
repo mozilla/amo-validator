@@ -37,9 +37,8 @@ def test_packed_packages(err, package_contents=None, xpi_package=None):
             
             # Unpack the package and load it up.
             package = StringIO(xpi_package.read(name))
-            try:
-                sub_xpi = XPIManager(package, name, is_subpackage)
-            except Exception as error:
+            sub_xpi = XPIManager(package, name, is_subpackage)
+            if not sub_xpi.zf:
                 err.error(("testcases_content",
                            "test_packed_packages",
                            "jar_subpackage_corrupt"),
