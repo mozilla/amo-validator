@@ -1,0 +1,35 @@
+<?xml version="1.0"?>
+
+<RDF xmlns="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+		xmlns:em="http://www.mozilla.org/2004/em-rdf#">
+
+	<Description about="urn:mozilla:install-manifest">
+	
+	<em:type>2</em:type>
+	
+	<em:id>bastatestapp1@basta.mozilla.com</em:id>
+	<em:version>1.2.3.4</em:version>
+	<em:name>name_value</em:name>
+	<em:description>description_value</em:description>
+	<em:creator>creator_value</em:creator>
+	<em:homepageURL>hompage_url_value</em:homepageURL>
+
+	<em:contributor>contributor_1_value</em:contributor>
+	<em:contributor>contributor_2_value</em:contributor>
+	<em:contributor>contributor_3_value</em:contributor>
+	<em:contributor>contributor_4_value</em:contributor>
+	
+	<em:targetApplication>
+		<Description>
+		<em:id>{ec8030f7-c20a-464f-9b0e-13a3a9e97384}</em:id>
+		<em:minVersion>3.7a5pre</em:minVersion>
+		<em:maxVersion>0.3</em:maxVersion>
+		</Description>
+	</em:targetApplication>
+	
+	<em:internalName>name_value</em:internalName>
+	<em:internalName>sadfa</em:internalName>
+    
+    </Description>
+    
+</RDF>

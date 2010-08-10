@@ -50,15 +50,30 @@ def test_pass_version():
 def test_fail_version():
     "Tests that invalid versions will not be accepted."
     
-    _test_value("2.0 alpha",
-                installrdf._test_version)
-    _test_value("whatever",
-                installrdf._test_version)
+    _test_value("2.0 alpha", installrdf._test_version)
+    _test_value("whatever", installrdf._test_version)
+    
+def test_pass_name():
+    "Tests that valid names will be accepted."
+    
+    _test_value("Joe Schmoe's Feed Aggregator",
+                installrdf._test_name,
+                False)
+    _test_value("Ozilla of the M",
+                installrdf._test_name,
+                False)
+    
+def test_fail_name():
+    "Tests that invalid names will not be accepted."
+    
+    _test_value("Love of the Firefox", installrdf._test_name)
+    _test_value("Mozilla Feed Aggregator", installrdf._test_name)
 
-def _run_test(filename, failure=True):
+def _run_test(filename, failure=True, detected_type=None):
     "Runs a test on an install.rdf file"
     
     err = ErrorBundle(None, True)
+    err.detected_type = detected_type
     
     file_ = open(filename)
     data = file_.read()
@@ -107,6 +122,19 @@ def test_may_exist_once():
     _run_test("tests/resources/installrdf/may_exist_once_missing.rdf",
               False)
     _run_test("tests/resources/installrdf/may_exist_once_extra.rdf")
+
+def test_may_exist_once_theme():
+    "Tests that elements that may exist once in themes."
+    
+    _run_test("tests/resources/installrdf/may_exist_once_theme.rdf",
+              False,
+              PACKAGE_THEME)
+    _run_test("tests/resources/installrdf/may_exist_once_theme_fail.rdf",
+              True,
+              PACKAGE_THEME)
+    _run_test("tests/resources/installrdf/may_exist_once_extra.rdf",
+              True,
+              PACKAGE_THEME)
 
 def test_may_exist():
     "Tests that elements that may exist once only exist up to once."

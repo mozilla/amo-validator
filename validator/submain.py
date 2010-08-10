@@ -10,6 +10,12 @@ from validator.rdf import RDFParser
 from validator import decorator
 from validator.constants import *
 
+types = {0: "Unknown",
+         1: "Extension/Multi-Extension",
+         2: "Theme",
+         3: "Dictionary",
+         4: "Language Pack",
+         5: "Search Provider"}
 
 def prepare_package(err, path, expectation=0):
     "Prepares a file-based package for validation."
@@ -94,14 +100,7 @@ def test_search(err, package, expectation=0):
 
 def test_package(err, package, name, expectation=PACKAGE_ANY):
     "Begins tests for the package."
-
-    types = {0: "Unknown",
-             1: "Extension/Multi-Extension",
-             2: "Theme",
-             3: "Dictionary",
-             4: "Language Pack",
-             5: "Search Provider"}
-             
+    
     # Load up a new instance of an XPI.
     try:
         package = XPIManager(package, name)
@@ -119,7 +118,7 @@ def test_package(err, package, name, expectation=PACKAGE_ANY):
                           "bad_zip"),
                          "The XPI file that was submitted is corrupt.")
                          
-    except IOError:
+    except:
         # This means that there was something wrong with the command.
         return err.error(("main",
                           "test_package",
