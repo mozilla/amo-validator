@@ -83,7 +83,7 @@ def test_xpi(err, package_contents, xpi_package):
     ref_name = "en-US"
     # Fall back on whatever comes first.
     if ref_name not in locales:
-        ref_name = locales[0]
+        ref_name = locales.keys()[0]
     reference = locales[ref_name]
     reference_jar = StringIO(xpi_package.read(reference["path"]))
     reference_locale = XPIManager(reference_jar, reference["path"])

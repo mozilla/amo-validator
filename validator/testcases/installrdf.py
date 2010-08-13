@@ -67,7 +67,7 @@ def _test_rdf(err, install):
             err.error(("testcases_installrdf",
                        "_test_rdf",
                        "shouldnt_exist"),
-                      "Banned element in install.rdf"
+                      "Banned element in install.rdf",
                       """The element "%s" was found in the add-on's
                       install.rdf file. It is not allowed in add-ons under
                       the current configuration.""" % predicate,
@@ -196,6 +196,6 @@ def _test_name(err, value):
                   "Add-on has illegal name.",
                   """Add-on names cannot contain the Mozilla or Firefox
                   trademarks. These names should not be contained in
-                  addon names at all.""",
+                  add-on names at all.""",
                   "install.rdf")
 

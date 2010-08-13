@@ -231,6 +231,17 @@ For instance, this tree would generate the following messages:
 		"line": 5
 	}
 
+Batch Testing
+=============
+
+As a helpful tool for testing multiple add-ons, the following script will
+allow you to validate a whole directory of add-ons. ::
+
+	find /directory/to/scan/ -type f -exec python addon-validator {} -v --file {}.txt \;
+
+The output from this script will be placed in the same folder as the addons.
+The name of the output files will be the same as the add-on's name with ".txt"
+appended to the end.
 
 Testing
 =======

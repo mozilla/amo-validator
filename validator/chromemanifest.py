@@ -23,6 +23,12 @@ class ChromeManifest(object):
             
             triple = line.split(None, 2)
             triple = [singlet.strip() for singlet in triple]
+            if not triple:
+                continue
+            
+            while len(triple) < 3:
+                triple.append("")
+            
             triples.append({"subject": triple[0],
                             "predicate": triple[1],
                             "object": triple[2],

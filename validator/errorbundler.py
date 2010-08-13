@@ -179,11 +179,11 @@ class ErrorBundle(object):
             # Write the errors with the file structure delimited by
             # right carets.
             callback(message["id"],
-                     "%s > %s" % (name, message["message"]),
+                     message["message"],
                      message["description"],
                      trace,
                      message["line"])
-        
+    
     
     def _clean_description(self, message, json=False):
         "Cleans all the nasty whitespace from the descriptions."

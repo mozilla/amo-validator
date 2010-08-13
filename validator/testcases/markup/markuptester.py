@@ -189,6 +189,7 @@ class MarkupParser(HTMLParser):
                                    'chrome://'""",
                                    self.filename,
                                    self.line)
+                    self.err.reject = True
         
         if tag in ("iframe", "browser") and self.extension == "xul":
             # Bork if XUL iframe has no type attribute
@@ -254,6 +255,7 @@ class MarkupParser(HTMLParser):
                                hosted remotely.""",
                                self.filename,
                                self.line)
+                self.err.reject = True
         
         # Find CSS and JS attributes and handle their values like they
         # would otherwise be handled by the standard parser flow.

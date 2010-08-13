@@ -135,7 +135,6 @@ def test_package(err, file_, name, expectation=PACKAGE_ANY):
     
     # Test the install.rdf file to see if we can get the type that way.
     has_install_rdf = "install.rdf" in package_contents
-    err.save_resource("has_install_rdf", has_install_rdf)
     if has_install_rdf:
         _load_install_rdf(err, package, expectation)
     
@@ -146,15 +145,15 @@ def _load_install_rdf(err, package, expectation):
     install_rdf_data = package.read("install.rdf")
     install_rdf = RDFParser(install_rdf_data)
     
-    if install_rdf.rdf is None:
+    if install_rdf.rdf is None or not install_rdf:
         return err.error(("main",
                           "test_package",
                           "cannot_parse_installrdf"),
                          "Cannot Parse install.rdf",
                          "The install.rdf file could not be parsed.")
-    
-    # Save a copy for later tests.
-    err.save_resource("install_rdf", install_rdf)
+    else:
+        err.save_resource("has_install_rdf", True)
+        err.save_resource("install_rdf", install_rdf)
     
     # Load up the results of the type detection
     results = typedetection.detect_type(err,

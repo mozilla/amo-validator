@@ -23,6 +23,17 @@ def test_packed_packages(err, package_contents=None, xpi_package=None):
            name.startswith(".DS_Store"):
             continue
         
+        if name.split("/")[-1].startswith("._"):
+            err.info(("testcases_content",
+                      "test_packed_packages",
+                      "macintosh_junk"),
+                     "Garbage file found.",
+                     ["""A junk file has been detected. It may cause
+                      problems with proper operation of the add-on down the
+                      road.""",
+                      "It is recommended that you delete the file"],
+                     name)
+        
         processed = False
         
         # If that item is a container file, unzip it and scan it.
