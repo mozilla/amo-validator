@@ -1,5 +1,4 @@
-import subprocess
-from subprocess import Popen
+import json
 
 from validator.constants import *
 
@@ -7,27 +6,13 @@ def test_js_file(err, name, data):
     "Tests a JS file by parsing and analyzing its tokens"
     
     print data
-    print _get_tree(data)
+    #print _get_tree(name, data)
+    
 
-
-def _get_tree(code):
-    pipe = Popen(["/usr/bin/ssh",
-                  "mbasta@khan.mozilla.org"],
-                 stdin=subprocess.PIPE,
-                 stdout=subprocess.PIPE)
+def _get_tree(name, code):
     
-    pipe_out = pipe.stdin
-    pipe_in = pipe.stdout
-    
-    print pipe.communicate(
-        "cd ../clouserw/temp/spidermonkey/js/src/Linux_DBG.OBJ/\n")
-    
-    print pipe.communicate("./js\n")
-    
-    js = code.replace("\n", "\\n")
-    js = js.replace("\r", "\\r")
-    js = js.replace('"', '\\"')
-    
-    print pipe.communicate('Reflect.parse("%s");' % js)
-    
-    pipe.terminate()
+    f = open("testfiles/js_ast/%s" % name)
+    data = f.read()
+    f.close()
+    tree = json.loads(data)
+    return tree

@@ -225,7 +225,8 @@ class ErrorBundle(object):
                   "errors": len(self.errors),
                   "warnings": len(self.warnings),
                   "infos": len(self.infos),
-                  "message_tree": self.message_tree}
+                  "message_tree": self.message_tree,
+                  "metadata": self.metadata}
         
         messages = output["messages"]
         

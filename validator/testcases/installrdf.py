@@ -146,6 +146,8 @@ def _test_id(err, value):
     
     id_pattern = re.compile("(\{[0-9a-f]{8}-([0-9a-f]{4}-){3}[0-9a-f]{12}\}|[a-z0-9-\.\+_]*\@[a-z0-9-\._]+)", re.I)
     
+    err.metadata["id"] = value
+    
     # Must be a valid UUID string.
     if not id_pattern.match(value):
         err.error(("testcases_installrdf",
@@ -162,6 +164,8 @@ def _test_version(err, value):
     
     whitespace_pattern = re.compile("\s")
     version_pattern = re.compile("\d+(\+|\w+)?(\.\d+(\+|\w+)?)*")
+    
+    err.metadata["version"] = value
     
     # Cannot have whitespace in the pattern.
     if whitespace_pattern.search(value):
@@ -188,6 +192,8 @@ def _test_name(err, value):
     "Tests an install.rdf name value for trademarks."
     
     ff_pattern = re.compile("(mozilla|firefox)", re.I)
+    
+    err.metadata["name"] = value
     
     if ff_pattern.match(value):
         err.error(("testcases_installrdf",
