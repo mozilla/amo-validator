@@ -175,8 +175,7 @@ def detect_opensearch(package):
                     
                     # Since we're in a validating spirit, continue
                     # looking for more errors and don't break
-        
-        if not found_template:
+            
             ver = (url.attributes["template"].value,
                    url.attributes["type"].value)
             
@@ -187,6 +186,11 @@ def detect_opensearch(package):
     if srch_prov.getElementsByTagName("updateURL"):
         return {"failure": True,
                 "error": "<updateURL> elements are banned from search"}
+    
+    # Make sure there are no MozParam elements
+    if srch_prov.getElementsByTagName("MozParam"):
+        return {"failure": True,
+                "error": "<MozParam> elements are banned from search"}
     
     # The OpenSearch provider is valid!
     return {"failure": False,
