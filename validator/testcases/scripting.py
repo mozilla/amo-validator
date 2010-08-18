@@ -2,7 +2,6 @@ import hashlib
 import json
 import os
 
-import validator.javascript.traverser as traverser
 from validator.constants import *
 
 def test_js_file(err, name, data, filename=None, line=0):
@@ -26,9 +25,6 @@ def test_js_file(err, name, data, filename=None, line=0):
                   "Source location: testcases/js/%s" %
                       name.replace("/", "_")],
                  name)
-    
-    t = traverser.Traverser(err)
-    t.run(data)
     
 
 def test_js_snippet(err, data, filename=None, line=0):

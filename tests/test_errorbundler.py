@@ -103,12 +103,12 @@ def test_states():
     messages = ["error",
                 "warning",
                 "info",
-                "test.xpi > nested error",
-                "test.xpi > nested warning",
-                "test.xpi > nested info",
-                "test.xpi > test2.xpi > super nested error",
-                "test.xpi > test2.xpi > super nested warning",
-                "test.xpi > test2.xpi > super nested info"]
+                "nested error",
+                "nested warning",
+                "nested info",
+                "super nested error",
+                "super nested warning",
+                "super nested info"]
     
     for message in output["messages"]:
         print message

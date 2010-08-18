@@ -33,6 +33,6 @@ def test_theme_manifest(err, package_contents=None, xpi_package=None):
                        allowed to have 'skin' and 'style' items. Other
                        types of items are disallowed for security
                        reasons.""",
-                       "Invalid subject: " % subject],
+                       "Invalid subject: %s" % subject],
                       "chrome.manifest",
                       triple["line"])
