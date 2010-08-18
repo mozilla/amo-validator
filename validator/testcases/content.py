@@ -11,6 +11,36 @@ from validator.xpi import XPIManager
 from validator.constants import PACKAGE_LANGPACK, PACKAGE_SUBPACKAGE
 
 
+@decorator.register_test(tier=1)
+def test_xpcnativewrappers(err, package_contents=None, xpi_package=None):
+    """Tests the chrome.manifest file to ensure that it doesn't contain
+    xpcnativewrappers objects."""
+
+    # Don't even both with the test(s) if there's no chrome.manifest.
+    if "chrome.manifest" not in package_contents:
+        return None
+
+    # Retrieve the chrome.manifest if it's cached.
+    if err.get_resource("chrome.manifest"): # pragma: no cover
+        chrome = err.get_resource("chrome.manifest")
+    else:
+        chrome_data = xpi_package.read("chrome.manifest")
+        chrome = ChromeManifest(chrome_data)
+        err.save_resource("chrome.manifest", chrome)
+
+    for triple in chrome.triples:
+        # Test to make sure that the triple's subject is valid
+        if [True for t in triple if t.startswith("xpcnativewrappers")]:
+            err.error(("testcases_content",
+                       "test_xpcnativewrappers",
+                       "found_in_chrome_manifest"),
+                      "xpcnativewrappers not allowed in chrome.manifest",
+                      """chrome.manifest files are not allowed to contain
+                      xpcnativewrappers directives.""",
+                      "chrome.manifest",
+                      triple["line"])
+
+
 @decorator.register_test(tier=2)
 def test_packed_packages(err, package_contents=None, xpi_package=None):
     "Tests XPI and JAR files for naughty content."

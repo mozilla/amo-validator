@@ -57,6 +57,7 @@ def test_layout_all(err, package_contents, xpi_package):
                   "missing_install_rdf"),
                  "Addon missing install.rdf.",
                   "All addons require an install.rdf file.")
+        err.reject = True
     
 
 @decorator.register_test(tier=2)
@@ -198,6 +199,7 @@ def test_layout(err, package_contents, mandatory, whitelisted,
                    "%s add-ons cannot contain files like %s" % (pack_type,
                                                                 file_)],
                   file_)
+        err.reject = True
 
     # If there's anything left over, it means there's files missing
     if mandatory:
@@ -211,3 +213,4 @@ def test_layout(err, package_contents, mandatory, whitelisted,
                        documentation for a full list of required files.""",
                        'Add-ons of type "%s" require "%s"' % (pack_type,
                                                               mfile)])
+            err.reject = True

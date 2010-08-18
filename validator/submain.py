@@ -201,6 +201,7 @@ def test_inner_package(err, package_contents, package):
         
         # Return any errors at the end of the tier if undetermined.
         if err.failed() and not err.determined:
+            err.unfinished = True
             return err
             
     # Return the results.

@@ -215,11 +215,10 @@ class MarkupParser(HTMLParser):
                 self.err.warning(("testcases_markup_markuptester",
                                   "handle_starttag",
                                   "iframe_type_unsafe"),
-                                 "iframe missing 'type' attribute",
-                                 """All iframe elements must have
-                                 either a valid `type` attribute or
-                                 a `src` attribute that points to a
-                                 local file.""",
+                                 "iframe/browser missing 'type' attribute",
+                                 """All iframe and browser elements must have
+                                 either a valid `type` attribute or a `src`
+                                 attribute that points to a local file.""",
                                  self.filename,
                                  self.line)
             elif (not type_ or 
@@ -228,11 +227,11 @@ class MarkupParser(HTMLParser):
                 self.err.warning(("testcases_markup_markuptester",
                                   "handle_starttag",
                                   "iframe_type_unsafe"),
-                                 "Typeless iframes must be local.",
-                                 """iframe elements that lack a
-                                 type attribute must always have
-                                 src attributes that reference
-                                 local resources.""",
+                                 "Typeless iframes/browsers must be local.",
+                                 """iframe and browser elements that lack a
+                                 type attribute must always have src
+                                 attributes that reference local
+                                 resources.""",
                                  self.filename,
                                  self.line)
             
@@ -260,17 +259,19 @@ class MarkupParser(HTMLParser):
         # Find CSS and JS attributes and handle their values like they
         # would otherwise be handled by the standard parser flow.
         for attr in attrs:
-            if attr[0].lower() == "style":
+            attr_name = attr[0].lower()
+            if attr_name == "style":
                 csstester.test_css_snippet(self.err,
                                            self.filename,
                                            attr[1],
                                            self.line)
+            elif attr_name.startswith("on"): # JS attribute
+                scripting.test_js_snippet(err, attr[1])
         
         # When the dev forgets their <!-- --> on a script tag, bad
         # things happen.
         if "script" in self.xml_state and tag != "script":
-            self._save_to_buffer("<" + tag +
-                                 self._format_args(attrs) + ">")
+            self._save_to_buffer("<" + tag + self._format_args(attrs) + ">")
             return
         
         self.xml_state.append(tag)
@@ -349,15 +350,15 @@ class MarkupParser(HTMLParser):
         
         # Perform analysis on collected data.
         if tag == "script":
-            # TODO: Link up the JS analysis module once it's written.
-            pass
+            scripting.test_js_snippet(self.err,
+                                      data_buffer,
+                                      self.filename,
+                                      self.line)
         elif tag == "style":
             csstester.test_css_file(self.err,
                                     self.filename,
                                     data_buffer,
                                     self.line)
-        
-        # TODO : Handle script attribute values
         
     def handle_data(self, data):
         self._save_to_buffer(data)
