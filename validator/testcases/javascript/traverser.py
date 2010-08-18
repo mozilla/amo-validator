@@ -42,33 +42,37 @@ class Traverser:
     def _traverse_node(self, node):
         "Finds a node's internal blocks and helps manage state."
         
+        # We're not even going to touch E4X.
+        if node.type.startswith("XML"):
+            return JSObject()
+        
         (branches,
          explicitly_dynamic,
-         estab_context,
-         action) = DEFINITIONS[node.type]
+         establish_context,
+         action,
+         returns) = DEFINITIONS[node.type]
         
-        if estab_context:
+        if establish_context:
             self._push_context()
         
+        docontinue = None
         if action is not None:
-            action(self, node)
+            docontinue = action(self, node)
         
-        for branch in branches:
-            if branch in node:
-                b = node[branch]
-                if isinstance(b, list):
-                    self._interpret_block(b)
-                else:
-                    if establ_context:
-                        self._push_context()
-                    
-                    self._traverse_node(b)
-                    
-                    if establ_context:
-                        self._pop_context()
+        if docontinue is not None:
+            for branch in branches:
+                if branch in node:
+                    b = node[branch]
+                    if isinstance(b, list):
+                        self._interpret_block(b)
+                    else:
+                        self._traverse_node(b)
         
-        if estab_context:
+        if establish_context:
             self._pop_context()
+        
+        if returns:
+            return docontinue
     
     def _push_context(self, default=None):
         "Adds a variable context to the current interpretation frame"
@@ -119,18 +123,25 @@ class Traverser:
 class JSVariable:
     "Mimics a JS variable and stores analysis data from the code"
     
-    def __init__(self):
-        self.type = "string"
+    def __init__(self, err):
+        self.type_ = "string"
         self.value = None
         self.dynamic = False
         self.const = False
     
-    def set_value(self, value, type="string"):
+    def set_value(self, value, type_="string", filename=None, line=0):
         if self.const:
             self.err.error(("testcases_javascript_traverser",
                             "set_value",
-                            "const_assignment"))
+                            "const_assignment"),
+                           "JS Constant re-assigned",
+                           """JavaScript constants (const) should not have
+                           their value re-assigned after they have been
+                           initialized.""",
+                           filename,
+                           line)
         self.value = value
+        self.type_ = type_
 
 class JSObject:
     """Mimics a JS object (function) and is capable of serving as an active
