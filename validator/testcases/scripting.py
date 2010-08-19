@@ -13,6 +13,7 @@ def test_js_file(err, name, data, filename=None, line=0):
     
     tree = _get_tree(name, data)
     if tree is None:
+        return
         err.info(("testcases_scripting",
                   "test_js_file",
                   "ast_conversion_driver"),
@@ -28,7 +29,7 @@ def test_js_file(err, name, data, filename=None, line=0):
                  name)
     
     t = traverser.Traverser(err, filename, line)
-    t.run(data)
+    t.run(tree)
 
 def test_js_snippet(err, data, filename=None, line=0):
     

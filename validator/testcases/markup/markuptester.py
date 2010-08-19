@@ -5,6 +5,7 @@ try:
 except ImportError: # pragma: no cover
     from html.parser import HTMLParser
 
+import validator.testcases.scripting as scripting
 from validator.testcases.markup import csstester
 from validator.constants import *
 
@@ -266,7 +267,7 @@ class MarkupParser(HTMLParser):
                                            attr[1],
                                            self.line)
             elif attr_name.startswith("on"): # JS attribute
-                scripting.test_js_snippet(err, attr[1])
+                scripting.test_js_snippet(self.err, attr[1])
         
         # When the dev forgets their <!-- --> on a script tag, bad
         # things happen.
