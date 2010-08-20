@@ -1,13 +1,21 @@
+import copy
+
 import traverser
 
-def _define_function(traverser, node):
-    "Makes a function happy"
+def _function(traverser, node):
+    "Prevents code duplication"
+    
+    me = traverser.JSObject()
+    
+    traverser._pop_context()
+    traverser._push_context(me)
+    traverser.this_stack.append(me)
     
     params = []
     for param in node["params"]:
         params.append(param["name"])
     
-    local_context = traverser._peek_context()
+    local_context = traverser._peek_context(2)
     for param in params:
         var = traverser.JSVariable(traverser.err)
         
@@ -15,7 +23,24 @@ def _define_function(traverser, node):
         # what calls the function. We want to know whether the function solely
         # returns static values. If so, it is a static function.
         var.dynamic = False
-        local_context[param] = var
+        traverser._set_variable(param, var)
+    
+    traverser.this_stack.pop()
+    
+    return me
+
+def _define_function(traverser, node):
+    "Makes a function happy"
+    
+    me = _function(traverser, node)
+    local_context[node["id"]["name"]] = me
+    
+    return True
+
+def _func_expr(traverser, node):
+    "Represents a lambda function"
+    
+    return _function(traverser, node)
 
 def _define_with(traverser, node):
     "Handles `with` statements"
@@ -39,7 +64,6 @@ def _define_var(traverser, node):
         
         if node["kind"] == "const":
             var.const = True
-        
     
     # The "Declarations" branch contains custom elements.
     return True
@@ -61,6 +85,15 @@ def _define_obj(traverser, node):
     
     return var
 
+def _define_array(traverser, node):
+    "Instantiates an array object"
+    
+    arr = traverser.JSArray()
+    for elem in node["elements"]:
+        arr.elements.append(traverser._traverse_node(elem))
+    
+    return arr
+
 def _define_literal(traverser, node):
     "Creates a JSVariable object based on a literal"
     var = traverser.JSVariable()
@@ -70,3 +103,33 @@ def _define_literal(traverser, node):
 def _call_settimeout(traverser, *args):
     # TODO : Analyze args[0]. If it's a function, return false.
     return True
+
+def _expression(traverser, node):
+    "Evaluates an expression and returns the result"
+    return traverser._traverse_node(node["expression"])
+    
+def _get_this(traverser, node):
+    "Returns the `this` object"
+    
+    if not traverser.this_stack:
+        return None
+    
+    return traverser.this_stack[-1]
+
+def _new(traverser, node):
+    "Returns a new copy of a node."
+    
+    # We don't actually process the arguments as part of the flow because of
+    # the Angry T-Rex effect. For now, we just traverse them to ensure they
+    # don't contain anything dangerous.
+    args = node["arguments"]
+    if isinstance(args, list):
+        for arg in args:
+            traverser._traverse_node(arg)
+    else:
+        traverser._traverse_node(args)
+    
+    elem = traverser._traverse_node(node["constructor"])
+    if elem is None:
+        return None
+    return copy.deepcopy(elem)

@@ -4,6 +4,8 @@ import types
 from validator.testcases.javascript.nodedefinitions import DEFINITIONS
 from validator.testcases.javascript.predefinedentities import GLOBAL_ENTITIES
 
+DEBUG = True
+
 class Traverser:
     "Traverses the AST Tree and determines problems with a chunk of JS."
     
@@ -15,6 +17,10 @@ class Traverser:
         self.start_line = start_line
         self.polluted = False
         self.line = 0
+        
+        # Can use the `this` object
+        self.can_use_this = False
+        self.this_stack = []
     
     def run(self, data):
         
@@ -45,6 +51,9 @@ class Traverser:
     
     def _traverse_node(self, node):
         "Finds a node's internal blocks and helps manage state."
+        
+        if node is None:
+            return None
         
         # Handles all the E4X stuff and anythign that may or may not return
         # a value.
@@ -106,7 +115,7 @@ class Traverser:
         # Keep the global scope on the stack.
         if len(self.contexts) == 1:
             return
-        self.contexts = self.contexts[:-1]
+        self.contexts.pop()
     
     def _peek_context(self, depth=1):
         """Returns the most recent context. Note that this should NOT be used
@@ -170,16 +179,25 @@ class Traverser:
                                self.line)
     
     def _set_variable(self, name, value, glob=False):
-        pass
+        "Sets the value of a variable/object in the local or global scope."
+        
+        if glob:
+            context = self.contexts[0]
+        else:
+            context = self.contexts[-1]
+        context[name] = value
     
 
-class JSContext:
+class JSContext(object):
     "A variable context"
     
     def __init__(self, context_type):
         self.type_ = context_type
     
     def __getattr__(self, name):
+        if name in ("_type", ):
+            return object.__getattr__(self, name)
+        
         if name not in self.__dict__:
             return None
         else:
@@ -191,7 +209,7 @@ class JSContext:
     def has_var(self, name):
         return name in self.__dict__
 
-class JSVariable:
+class JSVariable(object):
     "Mimics a JS variable and stores analysis data from the code"
     
     def __init__(self, dirty=False):
@@ -212,7 +230,7 @@ class JSVariable:
                                 traverser.line)
         self.value = value
 
-class JSObject:
+class JSObject(object):
     """Mimics a JS object (function) and is capable of serving as an active
     context to enable static analysis of `with` statements"""
     
@@ -224,6 +242,9 @@ class JSObject:
         self.anon = anonymous
     
     def __getattr__(self, name):
+        if name in ("anon", "has_var"):
+            return object.__getattr__(self, name)
+        
         "Enables static analysis of `with` statements"
         if name not in self.__dict__:
             if self.anon:
@@ -265,3 +286,13 @@ class JSPrototype:
     
     def has_var(self, name):
         return name in self.__dict__
+
+class JSArray:
+    "A class that represents both a JS Array and a JS list."
+    
+    def __init__(self):
+        self.elements = []
+    
+    def get(self, index):
+        return self.elements[index]
+    
