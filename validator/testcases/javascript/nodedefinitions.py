@@ -83,8 +83,6 @@ DEFINITIONS = {
                              False, False, None, True, False),
     "GeneratorExpression":  (("body", "filter"),
                              False, False, None, True, False),
-    "GraphExpression":      ((), True, False, None, False, False),
-    "GraphIndexExpression": ((), True, False, None, False, False),
     
     "ObjectPattern":        ((), False, False, None, False, False),
     "ArrayPattern":         ((), False, False, None, False, False),
@@ -99,6 +97,8 @@ DEFINITIONS = {
     "Literal":              ((), False, False, actions._define_literal,
                              True, False),
     "Identifier":           ((), False, False, None, True, False),
+    "GraphExpression":      ((), True, False, None, False, False),
+    "GraphIndexExpression": ((), True, False, None, False, False),
     "UnaryOperator":        ((), False, False, None, True, False),
     "BinaryOperator":       ((), False, False, None, True, False),
     "LogicalOperator":      ((), False, False, None, True, False),
