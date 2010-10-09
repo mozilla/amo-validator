@@ -60,7 +60,7 @@ class Traverser:
         if "type" not in node or not self._can_handle_node(node["type"]):
             return JSObject()
         
-        self.line = self.start_line + int(node["start"]["line"])
+        self.line = self.start_line + int(node["loc"]["start"]["line"])
         
         (branches,
          explicitly_dynamic,
