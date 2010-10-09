@@ -137,8 +137,13 @@ def detect_opensearch(package):
     
     # Make sure that each Url has the require attributes.
     for url in urls:
-        # Test for attribute presence.
         keys = url.attributes.keys()
+
+        # If the URL is listed as rel="self", skip over it.
+        if "rel" in keys and url.attributes["rel"].value == "self":
+            continue
+        
+        # Test for attribute presence.
         if not ("type" in keys and 
                 "template" in keys):
             return {"failure": True,
@@ -175,12 +180,12 @@ def detect_opensearch(package):
                     
                     # Since we're in a validating spirit, continue
                     # looking for more errors and don't break
-            
-            ver = (url.attributes["template"].value,
-                   url.attributes["type"].value)
-            
+        
+        # If the template still hasn't been found...
+        if not found_template:
+            tpl = url.attributes["template"].value
             return {"failure": True,
-                    "error": "The template for %s:%s is missing" % ver}
+                    "error": "The template for template '%s' is missing" % tpl}
     
     # Make sure there are no updateURL elements
     if srch_prov.getElementsByTagName("updateURL"):

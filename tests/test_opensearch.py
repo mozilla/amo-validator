@@ -58,7 +58,13 @@ def test_broken_url():
     "Tests that the provider has a <Url> element."
     
     _do_test("tests/resources/searchprovider/sp_no_url.xml")
-    
+
+def test_rel_self_url():
+    "Tests that the parser skips over rel=self URLs"
+
+    _do_test("tests/resources/searchprovider/rel_self_url.xml", False)
+    # It shouldn't fail because it's a "broken" URL that's marked to pass.
+
 def test_broken_url_attributes():
     "Tests that the provider is passing the proper attributes for its urls."
     
