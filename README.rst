@@ -130,16 +130,26 @@ sample document below.
 
 	{
 		"detected_type": "extension",
+		"errors":2,
+		"warnings":1,
+		"infos":1,
 		"success": false,
+	    "rejected": false,
+		"messagetree":{ /* ... */ },
 		"messages": [
 			{
+				"uid": "123456789",
+				"id": ["module", "function", "error"],
 				"type": "error",
 				"message": "This is the error message text.",
-				"description": "Description of the error message.",
+				"description": ["Description of the error message.",
+				                "Additional description text"],
 				"file": "",
 				"line": 0
 			},
 			{
+				"uid": "123456789",
+				"id": ["module", "function", "error"],
 				"type": "warning",
 				"message": "This is the warning message text.",
 				"description": "Description of the warning message.",
@@ -147,6 +157,8 @@ sample document below.
 				"line": 0
 			},
 			{
+				"uid": "123456789",
+				"id": ["module", "function", "error"],
 				"type": "info",
 				"message": "This is the informational message text.",
 				"description": "Description of the info message."
@@ -154,6 +166,8 @@ sample document below.
 				"line": 21
 			},
 			{
+				"uid": "123456789",
+				"id": ["module", "function", "error"],
 				"type": "error",
 				"message": "test.xpi > An error was found.",
 				"description": "This error happened within a subpackage."
@@ -165,6 +179,20 @@ sample document below.
 			}
 		]
 	}
+
+
+The `message_tree` element to the document above contains a series of
+JavaScript objects organized into a tree structure. The key of each element in
+the tree is the the name of each successive part of the validator that
+generated a particular message or set of messages (increasing in specificity as
+the depth of the tree increases). Each tree element also includes a series of
+additional nodes which provide extra information:
+
+::
+	__errors - number - The number of errors generated in this node
+	__warnings - number - The number of warnings generated in this node
+	__infos - number - The number of messages generated in this node
+	__messages - list - A list of UIDs from messages in the `messages` node
 
 JSON Notes:
 ~~~~~~~~~~~
