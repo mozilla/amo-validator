@@ -9,3 +9,6 @@ PACKAGE_LANGPACK = 4
 PACKAGE_SEARCHPROV = 5
 PACKAGE_MULTI = 1 # A multi extension is an extension
 PACKAGE_SUBPACKAGE = 7
+
+SPIDERMONKEY_INSTALLATION = "/moz/mozilla-central/js/src/build-release/js"
+

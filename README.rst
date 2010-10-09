@@ -27,6 +27,23 @@ You can install everything you need for running and testing with ::
 
     pip install -r requirements.txt
 
+Spidermonkey
+------------
+
+A working copy of Spidermonkey (debug or non-debug is fine) is a required. The
+version installed must include support for the Parser API. Downloading and
+installing the latest copy of Tracemonkey from http://mg.mozilla.org/ will
+include this API.
+
+Documentation on getting the latest Spidermonkey source:
+
+https://developer.mozilla.org/En/SpiderMonkey/Getting_SpiderMonkey_source_code#Getting_the_latest_SpiderMonkey_source_code
+
+Once Spidermonkey is installed, the path to the JavaScript shell must be
+specified in the /validator/constants.php file in the
+`SPIDERMONKEY_INSTALLATION` variable. If this variable is set to `None`, no
+JavaScript tests will be run.
+
 Running
 =======
 

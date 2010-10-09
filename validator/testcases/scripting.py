@@ -7,6 +7,9 @@ from validator.constants import SPIDERMONKEY_INSTALLATION as SPIDERMONKEY
 def test_js_file(err, name, data, filename=None, line=0):
     "Tests a JS file by parsing and analyzing its tokens"
     
+    if SPIDERMONKEY is None:
+	return
+
     if filename is None:
         filename = name
     
@@ -16,6 +19,9 @@ def test_js_file(err, name, data, filename=None, line=0):
     t.run(tree)
 
 def test_js_snippet(err, data, filename=None, line=0):
+    
+    if SPIDERMONKEY is None:
+	return
     
     name = hashlib.sha1(data).hexdigest()
     if filename is not None:
