@@ -32,7 +32,7 @@ Running
 
 Run the validator as follows ::
 
-	python package-parser.py <path to xpi> [-t <expected type>] [-o <output type>] [-v] [--file <output file>] [--boring] [--selfhosted] [--determined]
+	python addon-validator <path to xpi> [-t <expected type>] [-o <output type>] [-v] [--file <output file>] [--boring] [--selfhosted]
 
 The path to the XPI should point to an XPI file.
 
