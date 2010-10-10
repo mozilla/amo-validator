@@ -37,10 +37,7 @@ def prepare_package(err, path, expectation=0):
     package_extension = package_extension.lower()
 
     if package_extension == ".xml":
-        test_search(err, path, expectation)
-        # If it didn't bork, it must be a valid provider!
-        if not err.failed():
-            return err
+        return test_search(err, path, expectation)
 
     # Test that the package is an XPI.
     if not package_extension in (".xpi", ".jar"):

@@ -189,6 +189,7 @@ the depth of the tree increases). Each tree element also includes a series of
 additional nodes which provide extra information:
 
 ::
+
 	__errors - number - The number of errors generated in this node
 	__warnings - number - The number of warnings generated in this node
 	__infos - number - The number of messages generated in this node
