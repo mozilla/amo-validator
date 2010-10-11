@@ -57,9 +57,9 @@ def _define_var(traverser, node):
     "Creates a local context variable"
     
     for declaration in node["declarations"]:
-        var = traverser.JSVariable()
+        var = js_traverser.JSVariable()
         var_name = declaration["id"]["name"]
-        var_value = traverser._traverse_node(node["init"])
+        var_value = traverser._traverse_node(declaration["init"])
         var.set_value(traverser, var_value)
         
         if node["kind"] == "const":
@@ -109,7 +109,13 @@ def _call_settimeout(traverser, *args):
 
 def _expression(traverser, node):
     "Evaluates an expression and returns the result"
-    return traverser._traverse_node(node["expression"])
+    result = traverser._traverse_node(node["expression"])
+    if result is None:
+        result = js_traverser.JSVariable()
+        result.set_value(traverser, None)
+        return result
+    else:
+        return result
     
 def _get_this(traverser, node):
     "Returns the `this` object"
@@ -136,3 +142,44 @@ def _new(traverser, node):
     if elem is None:
         return None
     return copy.deepcopy(elem)
+
+def _ident(traverser, node):
+    "Initiates an object lookup on the traverser based on an identifier token"
+    return traverser._seek_variable(node["name"])
+
+def _expr_binary(traverser, node):
+    "Evaluates a BinaryExpression node."
+    
+    traverser.debug_level += 1
+
+    traverser._debug("BIN_EXP>>LEFT")
+    traverser.debug_level += 1
+    left = traverser._traverse_node(node["left"])
+    traverser.debug_level -= 1
+
+    traverser._debug("BIN_EXP>>RIGHT")
+    traverser.debug_level += 1
+    right = traverser._traverse_node(node["right"])
+    traverser.debug_level -= 1
+    
+    
+    if not isinstance(left, js_traverser.JSVariable) or \
+       not isinstance(right, js_traverser.JSVariable):
+        # If we can't nail down a solid BinaryExpression, just fall back on
+        # traversing everything by hand.
+        return False
+
+    left = left.value
+    right = right.value
+
+    operator = node["operator"]
+
+    operators = {
+        "+": lambda l,r: l + r
+    }
+
+    traverser.debug_level -= 1
+
+    if node["operator"] in operators:
+        return operators[operator](left, right)
+    return False

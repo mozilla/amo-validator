@@ -62,7 +62,7 @@ DEFINITIONS = {
     "UnaryExpression":      (("argument", ),
                              False, False, None, True, False),
     "BinaryExpression":     (("left", "right"),
-                             False, False, None, True, False),
+                             False, False, actions._expr_binary, True, False),
     "AssignmentExpression": (("left", "right"),
                              False, False, None, True, False),
     "UpdateExpression":     (("argument", ),
@@ -96,7 +96,7 @@ DEFINITIONS = {
     
     "Literal":              ((), False, False, actions._define_literal,
                              True, False),
-    "Identifier":           ((), False, False, None, True, False),
+    "Identifier":           ((), False, False, actions._ident, True, False),
     "GraphExpression":      ((), True, False, None, False, False),
     "GraphIndexExpression": ((), True, False, None, False, False),
     "UnaryOperator":        ((), False, False, None, True, False),

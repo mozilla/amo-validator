@@ -51,6 +51,10 @@ class Traverser:
 
     def run(self, data):
         
+        x = open("/tmp/output.js", "w")
+        x.write(str(data))
+        x.close()
+
         if "type" not in data or not self._can_handle_node(data["type"]):
             self._debug("ERR>>Cannot handle node type %s" % (data["type"] if
                                                              "type" in data
@@ -67,7 +71,6 @@ class Traverser:
         
         self._debug("START>>")
         
-        self._push_context()
         self._traverse_node(data)
         
         self._debug("END>>")
@@ -111,12 +114,13 @@ class Traverser:
         elif block_level:
             self._push_block_context()
         
-        docontinue = True
+        action_result = None
         if action is not None:
-            docontinue = action(self, node)
-            self._debug("ACTION>>%s" % ("continue" if docontinue else "halt"))
+            action_result = action(self, node)
+            self._debug("ACTION>>%s" %
+                    (str("halt") if action_result else "continue"))
         
-        if docontinue is not None:
+        if not action_result:
             self.debug_level += 1
             for branch in branches:
                 if branch in node:
@@ -134,7 +138,7 @@ class Traverser:
             self._pop_context()
         
         if returns:
-            return docontinue
+            return action_result
     
     def _interpret_block(self, items):
         "Interprets a block of consecutive code"
@@ -183,12 +187,14 @@ class Traverser:
         for c in range(len(self.contexts) - 1, 0):
             context = self.contexts[c]
             if context.has_var(variable):
+                self._debug("SEEK>>FOUND AT DEPTH %d" % c)
                 return context[variable]
             depth -= 1
             if depth == -1:
                 return None
         
-        return self._get_global(self, name)
+        self._debug("SEEK_FAIL>>TRYING GLOBAL")
+        return self._get_global(variable)
     
     def _get_global(self, name, args=None, globs=None):
         "Gets a variable from the predefined variable context."
@@ -196,13 +202,13 @@ class Traverser:
         if globs is None:
             globs = GLOBAL_ENTITIES
         
+        self._debug("SEEK_GLOBAL>>%s" % name)
         if name not in globs:
+            self._debug("SEEK_GLOBAL>>FAILED")
             return None
         
-        for ename, entity in predefinedentities.GLOBAL_ENTITIES.items():
-            if ename == name:
-                return self._build_global(name, entity, args)
-                break
+        self._debug("SEEK_GLOBAL>>FOUND>>%s" % name)
+        return self._build_global(name, globs[name], args)
     
     def _build_global(self, name, entity, args=None):
         "Builds an object based on an entity from the predefined entity list"
@@ -212,6 +218,7 @@ class Traverser:
             if isinstance(dang, types.LambdaType) and args is not None:
                 is_dangerous = dang(*args)
                 if is_dangerous:
+                    self._debug("DANGEROUS>>VIA LAMBDA")
                     self.err.error(("testcases_javascript_traverser",
                                     "_build_global",
                                     "dangerous_global_called"),
@@ -222,6 +229,7 @@ class Traverser:
                                    self.filename,
                                    self.line)
             elif dang:
+                self._debug("DANGEROUS")
                 self.err.error(("testcases_javascript_traverser",
                                 "_build_global",
                                 "dangerous_global"),
@@ -235,11 +243,8 @@ class Traverser:
     def _set_variable(self, name, value, glob=False):
         "Sets the value of a variable/object in the local or global scope."
         
-        if glob:
-            context = self.contexts[0]
-        else:
-            context = self.contexts[-1]
-        context[name] = value
+        self._debug("SETTING_OBJECT")
+        self.contexts[0 if glob else -1][name] = value
     
 
 class JSContext(object):
@@ -285,6 +290,11 @@ class JSVariable(object):
                                 traverser.line)
         traverser._debug("LITERAL::%s" % json.dumps(value))
         self.value = value
+
+    def __str__(self):
+        "Returns a human-readable version of the variable's contents"
+        return "%s%s" % (("const:" if self.const else ""),
+                         json.dumps(self.value))
 
 class JSObject(object):
     """Mimics a JS object (function) and is capable of serving as an active
