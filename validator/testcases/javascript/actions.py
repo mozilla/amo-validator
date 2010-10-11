@@ -1,11 +1,11 @@
 import copy
 
-import traverser
+import traverser as js_traverser
 
 def _function(traverser, node):
     "Prevents code duplication"
     
-    me = traverser.JSObject()
+    me = js_traverser.JSObject()
     
     traverser._pop_context()
     traverser._push_context(me)
@@ -71,7 +71,7 @@ def _define_var(traverser, node):
 def _define_obj(traverser, node):
     "Creates a local context object"
     
-    var = traverser.JSObject()
+    var = js_traverser.JSObject()
     for prop in node["properties"]:
         var_name = ""
         if prop["type"] == "Literal":
@@ -88,7 +88,7 @@ def _define_obj(traverser, node):
 def _define_array(traverser, node):
     "Instantiates an array object"
     
-    arr = traverser.JSArray()
+    arr = js_traverser.JSArray()
     for elem in node["elements"]:
         arr.elements.append(traverser._traverse_node(elem))
     
@@ -96,12 +96,15 @@ def _define_array(traverser, node):
 
 def _define_literal(traverser, node):
     "Creates a JSVariable object based on a literal"
-    var = traverser.JSVariable()
-    var.set_value(node["value"])
+    var = js_traverser.JSVariable()
+    var.set_value(traverser, node["value"])
     return var
 
 def _call_settimeout(traverser, *args):
     # TODO : Analyze args[0]. If it's a function, return false.
+    if js_traverser.DEBUG:
+        print "ACTIONS>>TIMEOUT>>>"
+        print args
     return True
 
 def _expression(traverser, node):

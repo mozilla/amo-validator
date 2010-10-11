@@ -6,11 +6,30 @@ from validator.testcases.javascript.predefinedentities import GLOBAL_ENTITIES
 
 DEBUG = True
 
+class MockBundler:
+    def error(self, id, title, description, file="", line=1):
+        "Represents a mock error"
+        print "-" * 30
+        print title
+        print "~" * len(title)
+        print description
+        print "in %s:line %d" % (file, line)
+
+    def warning(self, id, title, description, file="", line=1):
+        self.error(id, title, description, file, line)
+
+    def info(self, id, title, description, file="", line=1):
+        self.error(id, title, description, file, line)
+
+
 class Traverser:
     "Traverses the AST Tree and determines problems with a chunk of JS."
     
     def __init__(self, err, filename, start_line=0):
-        self.err = err
+        if err is not None:
+            self.err = err
+        else:
+            self.err = MockBundler()
         self.contexts = []
         self.block_contexts = []
         self.filename = filename
@@ -21,10 +40,21 @@ class Traverser:
         # Can use the `this` object
         self.can_use_this = False
         self.this_stack = []
+
+        # For debugging
+        self.debug_level = 0
     
+    def _debug(self, data):
+        "Writes a message to the console if debugging is enabled."
+        if DEBUG:
+            print ". " * self.debug_level + str(data)
+
     def run(self, data):
         
         if "type" not in data or not self._can_handle_node(data["type"]):
+            self._debug("ERR>>Cannot handle node type %s" % (data["type"] if
+                                                             "type" in data
+                                                             else "<unknown>"))
             self.err.error(("testcases_javascript_traverser",
                             "run",
                             "cannot_interpret_js"),
@@ -35,8 +65,13 @@ class Traverser:
                            self.start_line)
             return None
         
+        self._debug("START>>")
+        
+        self._push_context()
         self._traverse_node(data)
         
+        self._debug("END>>")
+
         if self.contexts:
             # This performs the namespace pollution test.
             # {prefix, count}
@@ -60,6 +95,8 @@ class Traverser:
         if "type" not in node or not self._can_handle_node(node["type"]):
             return JSObject()
         
+        self._debug("TRAVERSE>>%s" % (node["type"]))
+
         self.line = self.start_line + int(node["loc"]["start"]["line"])
         
         (branches,
@@ -74,18 +111,24 @@ class Traverser:
         elif block_level:
             self._push_block_context()
         
-        docontinue = None
+        docontinue = True
         if action is not None:
             docontinue = action(self, node)
+            self._debug("ACTION>>%s" % ("continue" if docontinue else "halt"))
         
         if docontinue is not None:
+            self.debug_level += 1
             for branch in branches:
                 if branch in node:
+                    self._debug("BRANCH>>%s" % branch)
+                    self.debug_level += 1
                     b = node[branch]
                     if isinstance(b, list):
                         self._interpret_block(b)
                     else:
                         self._traverse_node(b)
+                    self.debug_level -= 1
+            self.debug_level -= 1
         
         if establish_context or block_level:
             self._pop_context()
@@ -109,13 +152,22 @@ class Traverser:
         if default is None:
             default = JSContext("default")
         self.contexts.append(default)
+
+        self.debug_level += 1
+        self._debug("CONTEXT>>%d" % len(self.contexts))
     
     def _pop_context(self):
         "Adds a variable context to the current interpretation frame"
+        
         # Keep the global scope on the stack.
         if len(self.contexts) == 1:
+            self._debug("CONTEXT>>ROOT POP ABORTED")
             return
-        self.contexts.pop()
+        popped_context = self.contexts.pop()
+        
+        self.debug_level -= 1
+        self._debug("POP_CONTEXT>>%d" % len(self.contexts))
+        self._debug(popped_context.__dict__)
     
     def _peek_context(self, depth=1):
         """Returns the most recent context. Note that this should NOT be used
@@ -126,6 +178,8 @@ class Traverser:
     def _seek_variable(self, variable, depth=-1):
         "Returns the value of a variable that has been declared in a context"
         
+        self._debug("SEEK>>%s>>%d" % (variable, depth))
+
         for c in range(len(self.contexts) - 1, 0):
             context = self.contexts[c]
             if context.has_var(variable):
@@ -192,7 +246,7 @@ class JSContext(object):
     "A variable context"
     
     def __init__(self, context_type):
-        self.type_ = context_type
+        self._type = context_type
     
     def __getattr__(self, name):
         if name in ("_type", ):
@@ -219,6 +273,7 @@ class JSVariable(object):
     
     def set_value(self, traverser, value, line=0):
         if self.const:
+            self._debug("LITERAL>>CONSTANT REASSIGNMENT")
             traverser.err.error(("testcases_javascript_traverser",
                                  "set_value",
                                  "const_assignment"),
@@ -228,6 +283,7 @@ class JSVariable(object):
                                 been initialized.""",
                                 traverser.filename,
                                 traverser.line)
+        traverser._debug("LITERAL::%s" % json.dumps(value))
         self.value = value
 
 class JSObject(object):
