@@ -7,24 +7,30 @@ def _function(traverser, node):
     
     me = js_traverser.JSObject()
     
+    # Replace the current context with a prototypeable JS object.
     traverser._pop_context()
     traverser._push_context(me)
-    traverser.this_stack.append(me)
+    traverser._debug("THIS_PUSH")
+    traverser.this_stack.append(me) # Allow references to "this"
     
+    # Declare parameters in the local scope
     params = []
     for param in node["params"]:
         params.append(param["name"])
     
     local_context = traverser._peek_context(2)
     for param in params:
-        var = traverser.JSVariable(traverser.err)
+        var = traverser.JSVariable()
         
         # We can assume that the params are static because we don't care about
         # what calls the function. We want to know whether the function solely
         # returns static values. If so, it is a static function.
-        var.dynamic = False
-        traverser._set_variable(param, var)
-    
+        #var.dynamic = False
+        local_context.set(param, var)
+    traverser._traverse_node(node["body"])
+
+    # Since we need to manually manage the "this" stack, pop off that context.
+    traverser._debug("THIS_POP")
     traverser.this_stack.pop()
     
     return me
@@ -33,7 +39,7 @@ def _define_function(traverser, node):
     "Makes a function happy"
     
     me = _function(traverser, node)
-    local_context[node["id"]["name"]] = me
+    traverser._peek_context(2)[node["id"]["name"]] = me
     
     return True
 
@@ -175,7 +181,11 @@ def _expr_binary(traverser, node):
     operator = node["operator"]
 
     operators = {
-        "+": lambda l,r: l + r
+        "+": lambda l,r: l + r,
+        "==": lambda l,r: l == r,
+        "!=": lambda l,r: not l == r,
+        "===": lambda l,r: type(l) == type(r) and l == r,
+        "!==": lambda l,r: not (type(l) == type(r) and l == r)
     }
 
     traverser.debug_level -= 1

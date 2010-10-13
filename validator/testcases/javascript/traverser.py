@@ -12,7 +12,18 @@ class MockBundler:
         print "-" * 30
         print title
         print "~" * len(title)
-        print description
+        if isinstance(description, str):
+            print description
+        else:
+            # Errors can have multiple lines
+            for dline in description:
+                # Each line can have multiple lines :(
+                dline = dline.replace("\n", " ")
+                while dline.count("  "):
+                    # Strip out extraneous whitespace!
+                    dline = dline.replace("  ", " ")
+
+                print dline
         print "in %s:line %d" % (file, line)
 
     def warning(self, id, title, description, file="", line=1):
@@ -47,13 +58,16 @@ class Traverser:
     def _debug(self, data):
         "Writes a message to the console if debugging is enabled."
         if DEBUG:
-            print ". " * self.debug_level + str(data)
+            output = data
+            if isinstance(data, JSObject) or isinstance(data, JSContext):
+                output = data.output()
+            print ". " * self.debug_level + output
 
     def run(self, data):
-        
-        x = open("/tmp/output.js", "w")
-        x.write(str(data))
-        x.close()
+        if DEBUG:
+            x = open("/tmp/output.js", "w")
+            x.write(str(data))
+            x.close()
 
         if "type" not in data or not self._can_handle_node(data["type"]):
             self._debug("ERR>>Cannot handle node type %s" % (data["type"] if
@@ -171,7 +185,8 @@ class Traverser:
         
         self.debug_level -= 1
         self._debug("POP_CONTEXT>>%d" % len(self.contexts))
-        self._debug(popped_context.__dict__)
+        self._debug(popped_context)
+
     
     def _peek_context(self, depth=1):
         """Returns the most recent context. Note that this should NOT be used
@@ -244,6 +259,19 @@ class Traverser:
         "Sets the value of a variable/object in the local or global scope."
         
         self._debug("SETTING_OBJECT")
+
+        if name in GLOBAL_ENTITIES:
+            self._debug("GLOBAL_OVERWRITE")
+            self.err.error(("testcases_javascript_traverser",
+                            "_set_variable",
+                            "global_overwrite"),
+                            "Global Overwrite",
+                            ["A local variable was created that overwrites "
+                             "an object in the global scope.",
+                             "Entity name: %s" % name],
+                            self.filename,
+                            self.line)
+
         self.contexts[0 if glob else -1][name] = value
     
 
@@ -252,21 +280,22 @@ class JSContext(object):
     
     def __init__(self, context_type):
         self._type = context_type
+        self.data = {}
     
-    def __getattr__(self, name):
-        if name in ("_type", ):
-            return object.__getattr__(self, name)
-        
-        if name not in self.__dict__:
-            return None
-        else:
-            return self.__dict__[name]
+    def get(self, name):
+        return self.data[name] if name in self.data else None
     
-    def __setattr__(self, name, variable):
-        self.__dict__[name] = variable
+    def set(self, name, variable):
+        self.data[name] = variable
     
     def has_var(self, name):
-        return name in self.__dict__
+        return name in self.data
+
+    def output(self):
+        output = {}
+        for (name, item) in self.data.items():
+            output[name] = relish(item)
+        return json.dumps(output)
 
 class JSVariable(object):
     "Mimics a JS variable and stores analysis data from the code"
@@ -277,6 +306,15 @@ class JSVariable(object):
         self.const = False
     
     def set_value(self, traverser, value, line=0):
+        
+        # Make sure it is a raw type!
+        if isinstance(value, JSVariable):
+            self.value = value.value
+            return self.value
+        elif isinstance(value, JSObject) or \
+             isinstance(value, JSArray):
+            raise Exception("Object/Array assigned to literal variable.")
+
         if self.const:
             self._debug("LITERAL>>CONSTANT REASSIGNMENT")
             traverser.err.error(("testcases_javascript_traverser",
@@ -296,62 +334,79 @@ class JSVariable(object):
         return "%s%s" % (("const:" if self.const else ""),
                          json.dumps(self.value))
 
+    def output(self):
+        "The simple serialization method just calls __str__"
+        return self.__str__()
+
 class JSObject(object):
     """Mimics a JS object (function) and is capable of serving as an active
     context to enable static analysis of `with` statements"""
     
     def __init__(self, anonymous=False):
-        self.__dict__["prototype"] = JSPrototype()
-        self.__dict__["constructor"] = lambda **keys: JSObject(keys["anon"])
+        self.data = {
+            "prototype": JSPrototype(),
+            "constructor": lambda **keys: JSObject(keys["anon"])
+        }
         # An anonymous object doesn't complain when bits of it are accessed,
         # even if those bits don't exist.
         self.anon = anonymous
     
-    def __getattr__(self, name):
-        if name in ("anon", "has_var"):
-            return object.__getattr__(self, name)
-        
+    def get(self, name):
         "Enables static analysis of `with` statements"
-        if name not in self.__dict__:
+        if name not in self.data:
             if self.anon:
                 return JSObject(True)
             else:
                 return None
         else:
-            obj = self.__dict__[name]
+            obj = self.data[name]
             if isinstance(obj, types.LambdaType):
                 obj = obj(anon=True)
             return obj
     
-    def __setattr__(self, name, variable):
+    def set(self, name, variable):
         "Helpful for `with` statements"
-        self.__dict__[name] = variable
+        self.data[name] = variable
     
     def has_var(self, name):
-        return name in self.__dict__
+        return name in self.data
+
+    def output(self):
+        "A simple serialization/visualization output method"
+        output = {}
+        for (name, item) in self.data.items():
+            output[name] = relish(item)
+        return json.dumps(output)
 
 class JSPrototype:
     """A lazy JavaScript object that is assumed not to contain any default
     methods"""
     
     def __init__(self):
-        pass
+        self.data = {}
     
-    def __getattr__(self, name):
+    def get(self, name):
         "Enables static analysis of `with` statements"
         if name == "prototype":
-            return JSPrototype() 
-        elif name not in self.__dict__:
+            return JSPrototype()
+        elif name not in self.data:
             return None
         else:
-            return self.__dict__[name]
+            return self.data[name]
     
-    def __setattr__(self, name, variable):
+    def set(self, name, variable):
         "Helpful for `with` statements"
-        self.__dict__[name] = variable
+        self.data[name] = variable
     
     def has_var(self, name):
-        return name in self.__dict__
+        return name in self.data
+
+    def __str__(self):
+        return "<<PROTOTYPE>>"
+
+    def output(self):
+        "Simply an alias for __str__"
+        return self.__str__()
 
 class JSArray:
     "A class that represents both a JS Array and a JS list."
@@ -361,4 +416,15 @@ class JSArray:
     
     def get(self, index):
         return self.elements[index]
-    
+   
+def relish(obj):
+    if isinstance(obj, JSContext) or \
+       isinstance(obj, JSObject) or \
+       isinstance(obj, JSVariable) or \
+       isinstance(obj, JSPrototype):
+        return obj.output()
+    elif isinstance(obj, types.LambdaType):
+        return "<<LAMBDA>>"
+    else:
+        return obj
+
