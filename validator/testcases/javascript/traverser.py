@@ -110,7 +110,9 @@ class Traverser:
         # Handles all the E4X stuff and anythign that may or may not return
         # a value.
         if "type" not in node or not self._can_handle_node(node["type"]):
-            return JSObject()
+            wrapper = JSWrapper(None)
+            wrapper.set_value(JSObject())
+            return wrapper
         
         self._debug("TRAVERSE>>%s" % (node["type"]))
 
@@ -152,7 +154,8 @@ class Traverser:
             self._pop_context()
         
         if returns:
-            return action_result
+            wrapper = JSWrapper(None)
+            wrapper.set_value(self, action_result)
     
     def _interpret_block(self, items):
         "Interprets a block of consecutive code"
@@ -194,23 +197,33 @@ class Traverser:
         
         return self.contexts[:0 - depth]
         
-    def _seek_variable(self, variable, depth=-1):
+    def _seek_variable(self, variable, depth=-1, args=None):
         "Returns the value of a variable that has been declared in a context"
         
         self._debug("SEEK>>%s>>%d" % (variable, depth))
+        
+        # Look for the variable in the local contexts first
+        local_variable = self._seek_local_variable(variable, depth)
+        if local_variable is not None:
+            return local_variable
 
-        for c in range(len(self.contexts) - 1, 0):
-            context = self.contexts[c]
+        self._debug("SEEK_FAIL>>TRYING GLOBAL")
+
+        # Seek in globals for the variable instead.
+        return self._get_global(variable, args)
+
+
+    def _seek_local_variable(self, variable, depth=-1):
+
+        for c in range(0, len(self.contexts) - 1):
+            context = self.contexts[len(self.contexts) - 1 - c]
             if context.has_var(variable):
                 self._debug("SEEK>>FOUND AT DEPTH %d" % c)
-                return context[variable]
+                return context.get(variable)
             depth -= 1
             if depth == -1:
                 return None
         
-        self._debug("SEEK_FAIL>>TRYING GLOBAL")
-        return self._get_global(variable)
-    
     def _get_global(self, name, args=None, globs=None):
         "Gets a variable from the predefined variable context."
         
@@ -230,6 +243,7 @@ class Traverser:
         
         if "dangerous" in entity:
             dang = entity["dangerous"]
+            print type(dang), args
             if isinstance(dang, types.LambdaType) and args is not None:
                 is_dangerous = dang(*args)
                 if is_dangerous:
@@ -259,7 +273,13 @@ class Traverser:
         "Sets the value of a variable/object in the local or global scope."
         
         self._debug("SETTING_OBJECT")
-
+        
+        for i in range(len(self.contexts) - 1, 0):
+            context = self.contexts[i]
+            if name in context:
+                context.set(name, value)
+                return value
+        
         if name in GLOBAL_ENTITIES:
             self._debug("GLOBAL_OVERWRITE")
             self.err.error(("testcases_javascript_traverser",
@@ -271,8 +291,10 @@ class Traverser:
                              "Entity name: %s" % name],
                             self.filename,
                             self.line)
+            return None
 
-        self.contexts[0 if glob else -1][name] = value
+        self.contexts[0 if glob else -1].set(name, value)
+        return value
     
 
 class JSContext(object):
@@ -297,87 +319,151 @@ class JSContext(object):
             output[name] = relish(item)
         return json.dumps(output)
 
-class JSVariable(object):
-    "Mimics a JS variable and stores analysis data from the code"
-    
-    def __init__(self, dirty=False):
-        self.value = None
-        self.dirty = dirty
-        self.const = False
-    
-    def set_value(self, traverser, value, line=0):
-        
-        # Make sure it is a raw type!
-        if isinstance(value, JSVariable):
-            self.value = value.value
-            return self.value
-        elif isinstance(value, JSObject) or \
-             isinstance(value, JSArray):
-            raise Exception("Object/Array assigned to literal variable.")
+class JSWrapper(object):
+    "Wraps a JS value and handles contextual functions for it."
 
-        if self.const:
-            self._debug("LITERAL>>CONSTANT REASSIGNMENT")
+    def __init__(self, name, const=False, dirty=False, lazy=False):
+        self.name = name
+        self.const = const
+        self.dirty = False
+        self.is_global = False
+
+        self.value = None
+        self.lazy = lazy
+
+    def set_value(self, traverser, value, overwrite_const=False):
+        if self.const and not overwrite_const:
             traverser.err.error(("testcases_javascript_traverser",
-                                 "set_value",
-                                 "const_assignment"),
-                                "JS Constant re-assigned",
-                                """JavaScript constants (const) should not
-                                have their value re-assigned after they have
-                                been initialized.""",
+                                 "JSWrapper_set_value",
+                                 "const_overwrite"),
+                                "Overwritten constant value",
+                                ["A variable declared as constant has been "
+                                 "overwritten in some JS code.",
+                                 "Constant name: %s" % self.name],
                                 traverser.filename,
                                 traverser.line)
-        traverser._debug("LITERAL::%s" % json.dumps(value))
+
+        if value is bool or \
+           value is str or \
+           value is int or \
+           value is float:
+            value = JSLiteral(value)
+        # If the value being assigned is a wrapper as well, copy it in
+        elif value is JSWrapper:
+            self.value = value.value
+            self.lazy = value.lazy
+            self.dirty = True # This may not be necessary
+            self.is_global = value.is_global
+            # const does not carry over on reassignment
+            return self
+
+        self.value = value
+        return self
+    
+    def set_value_from_expression(self, traverser, node):
+        "Sets the value of the variable from a node object"
+        
+        self.set_value(traverser._traverse_node(node))
+
+    def set_value_as_lambda(self, traverser, node):
+        "Sets the value of the variable to that of a callable object"
+        pass
+
+    def has_property(self, property):
+        """Returns a boolean value representing the presence of a property"""
+        
+        if self.value is None:
+            return False
+        
+        if self.value is JSLiteral:
+            return False
+        elif self.value is JSObject or \
+             self.value is JSPrototype:
+            # JSPrototype and JSObject always has a value
+            return True
+
+    def get(self, traverser, name):
+        "Retrieves a property from the variable"
+
+        if self.value is None:
+            return None
+
+        if self.value is JSLiteral:
+            return None # This might need tweaking for properties
+        elif self.value is JSObject or \
+             self.value is JSArray:
+            output = self.value.get(traverser, name)
+        elif self.value is JSPrototype:
+            output = self.value.get(name)
+        else:
+            output = None
+        
+        wrapper = JSWrapper(name)
+        wrapper.set_value(output)
+        return wrapper
+    
+    def is_literal(self):
+        "Returns whether the content is a literal"
+        return self.value is JSLiteral
+
+    def get_literal_value(self):
+        "Returns the literal value of the wrapper"
+        if self.value is None:
+            return None
+        elif self.value is JSLiteral:
+            return self.value.value
+        else:
+            return False # TODO: This needs to be properly implemented
+
+    def output(self):
+        "Returns a readable version of the object"
+
+        if self.value is JSLiteral:
+            return json.dumps(self.value.value)
+        elif self.value is JSPrototype:
+            return "<<PROTOTYPE>>"
+        elif self.value is JSObject:
+            properties = {}
+            for (name, property) in self.value.data:
+                if property is types.LambdaType:
+                    properties[name] = "<<LAMBDA>>"
+                    continue
+                wrapper = JSWrapper(name)
+                wrapper.set_value(property)
+                properties[name] = wrapper.output()
+            return json.dumps(properties)
+        elif self.value is JSArray:
+            return None # These aren't implemented yet!
+
+class JSLiteral(object):
+    "Represents a literal JavaScript value"
+    
+    def __init__(self, value=None):
+        self.value = value
+    
+    def set_value(self, value,):
         self.value = value
 
     def __str__(self):
         "Returns a human-readable version of the variable's contents"
-        return "%s%s" % (("const:" if self.const else ""),
-                         json.dumps(self.value))
-
-    def output(self):
-        "The simple serialization method just calls __str__"
-        return self.__str__()
+        return json.dumps(self.value)
 
 class JSObject(object):
     """Mimics a JS object (function) and is capable of serving as an active
     context to enable static analysis of `with` statements"""
     
-    def __init__(self, anonymous=False):
+    def __init__(self):
         self.data = {
             "prototype": JSPrototype(),
             "constructor": lambda **keys: JSObject(keys["anon"])
         }
-        # An anonymous object doesn't complain when bits of it are accessed,
-        # even if those bits don't exist.
-        self.anon = anonymous
-    
+
     def get(self, name):
-        "Enables static analysis of `with` statements"
-        if name not in self.data:
-            if self.anon:
-                return JSObject(True)
-            else:
-                return None
-        else:
-            obj = self.data[name]
-            if isinstance(obj, types.LambdaType):
-                obj = obj(anon=True)
-            return obj
-    
+        return self.data[name] if name in self.data else None
+
     def set(self, name, variable):
-        "Helpful for `with` statements"
         self.data[name] = variable
     
-    def has_var(self, name):
-        return name in self.data
-
-    def output(self):
-        "A simple serialization/visualization output method"
-        output = {}
-        for (name, item) in self.data.items():
-            output[name] = relish(item)
-        return json.dumps(output)
-
 class JSPrototype:
     """A lazy JavaScript object that is assumed not to contain any default
     methods"""
@@ -416,15 +502,3 @@ class JSArray:
     
     def get(self, index):
         return self.elements[index]
-   
-def relish(obj):
-    if isinstance(obj, JSContext) or \
-       isinstance(obj, JSObject) or \
-       isinstance(obj, JSVariable) or \
-       isinstance(obj, JSPrototype):
-        return obj.output()
-    elif isinstance(obj, types.LambdaType):
-        return "<<LAMBDA>>"
-    else:
-        return obj
-
