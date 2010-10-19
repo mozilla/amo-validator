@@ -17,6 +17,7 @@ Python Libraries:
 - argparse
 - cssutils
 - rdflib
+- chardet
 
 Python Libraries for Testing:
 

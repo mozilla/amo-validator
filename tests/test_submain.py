@@ -47,7 +47,7 @@ def test_prepare_package_xml():
     submain.prepare_package(err, "tests/resources/main/foo.xml")
     
     assert err.failed()
-    assert err.reject
+    assert not err.reject # prepare_package has no authority to reject XML.
 
 
 # Test the function of the decorator iterator

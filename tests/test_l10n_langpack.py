@@ -104,5 +104,12 @@ def _compare_packs(reference, target):
     "Does a simple comparison and prints the output"
     
     comparison = l10n._compare_packages(reference, target)
+    
+    count = 0
+    for error in comparison:
+        if error["type"] != "unexpected_encoding":
+            count += 1
+
     print comparison
-    return len(comparison)
+    return count
+

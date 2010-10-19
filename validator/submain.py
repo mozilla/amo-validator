@@ -40,7 +40,7 @@ def prepare_package(err, path, expectation=0):
         return test_search(err, path, expectation)
 
     # Test that the package is an XPI.
-    if not package_extension in (".xpi", ".jar"):
+    if package_extension not in (".xpi", ".jar"):
         err.reject = True
         err.error(("main",
                    "prepare_package",

@@ -1,6 +1,6 @@
 import sys
 import os
-
+import chardet
 import json
 import fnmatch
 from StringIO import StringIO
@@ -193,6 +193,11 @@ def _compare_packages(reference, target, ref_base=None):
         
         if parsable:
             ref_doc = _parse_l10n_doc(name, reference.read(name))
+            if not ref_doc.expected_encoding:
+                results.append({"type": "unexpected_encoding",
+                                "filename": name,
+                                "expected_encoding": ref_doc.suitable_encoding,
+                                "encoding": ref_doc.found_encoding})
         else:
             ref_doc = ()
         
@@ -208,6 +213,12 @@ def _compare_packages(reference, target, ref_base=None):
         
         tar_doc = _parse_l10n_doc(tar_name, target.read(tar_name))
         
+        if not tar_doc.expected_encoding:
+            results.append({"type": "unexpected_encoding",
+                            "filename": tar_name,
+                            "expected_encoding": tar_doc.suitable_encoding,
+                            "encoding": tar_doc.found_encoding})
+
         missing_entities = []
         unchanged_entities = []
         
@@ -252,17 +263,26 @@ def _compare_packages(reference, target, ref_base=None):
 def _parse_l10n_doc(name, doc):
     "Parses an L10n document."
     
-    wrapper = StringIO(doc)
     extension = name.split(".")[-1].lower()
     
-    handlers = {"dtd":
-                    dtd.DTDParser,
-                "properties":
-                    properties.PropertiesParser}
+    handlers = {"dtd": dtd.DTDParser,
+                "properties": properties.PropertiesParser}
+    # These are expected encodings for the various files.
+    handler_formats = {"dtd": ("UTF-8", ),
+                       "properties": ("ascii", "utf-8")}
     if extension not in handlers:
         return None
     
-    return handlers[extension](StringIO(doc))
+    wrapper = StringIO(doc)
+    loc_doc = handlers[extension](wrapper)
+    
+    encoding = chardet.detect(doc)
+    loc_doc.expected_encoding = \
+            encoding["encoding"] in handler_formats[extension]
+    loc_doc.found_encoding = encoding["encoding"]
+    loc_doc.suitable_encoding = handler_formats[extension]
+
+    return loc_doc
 
 def _aggregate_results(err, results, locale, similar=False):
     """Compiles the errors and warnings in the L10n results list into
@@ -272,6 +292,7 @@ def _aggregate_results(err, results, locale, similar=False):
     unchanged_entities = 0
     unchanged_entity_list = {}
     entity_count = {}
+    unexpected_encodings = []
     
     for ritem in results:
         if "filename" in ritem:
@@ -317,6 +338,11 @@ def _aggregate_results(err, results, locale, similar=False):
             total_entities += ritem["entities"]
         elif rtype == "file_entity_count":
             entity_count[ritem["filename"]] = ritem["entities"]
+        elif rtype == "unexpected_encoding":
+            unexpected_encodings.append(
+                    (ritem["filename"],
+                     ritem["encoding"],
+                     ", ".join(ritem["expected_encoding"])))
     
     agg_unchanged = []
     if not similar:
@@ -351,3 +377,21 @@ def _aggregate_results(err, results, locale, similar=False):
                      reference package.""",
                      agg_unchanged],
                     [locale["path"], locale["target"]])
+
+    if unexpected_encodings:
+        # Compile all of the encoding errors into one nice warning.
+        compilation = ["Detected files:"]
+        for target in unexpected_encodings:
+            compilation.append("%s\n Found: %s\n Expected: %s" % target)
+
+        err.warning(("testcases_l10ncompleteness",
+                     "_aggregate_results",
+                     "unexpected_encodings"),
+                    "Unexpected encodings in L10n files",
+                    ["Localization files were encountered that used encodings "
+                     "that are not characteristic of those types of files.",
+                     "\n".join(compilation),
+                     "Localization files with the wrong encoding can cause "
+                     "issues with locales that include non-ASCII characters."],
+                    [locale["path"], locale["target"]])
+
