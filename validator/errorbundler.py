@@ -22,6 +22,8 @@ class ErrorBundle(object):
         self.warnings = []
         self.infos = []
         self.message_tree = {}
+
+        self.tier = 0
         
         self.metadata = {}
         self.determined = False
@@ -77,6 +79,9 @@ class ErrorBundle(object):
         message["uid"] = uid
         stack.append(message)
         
+        # Mark the tier that the error occurred at
+        message["tier"] = self.tier
+
         if message["id"]:
             tree = self.message_tree
             last_id = None
@@ -86,7 +91,7 @@ class ErrorBundle(object):
                 if eid not in tree:
                     tree[eid] = {"__errors": 0,
                                  "__warnings": 0,
-                                 "__infos": 0,
+                                 "__notices": 0,
                                  "__messages": []}
                 tree[eid]["__%s" % type_] += 1
                 last_id = eid
@@ -224,7 +229,7 @@ class ErrorBundle(object):
                   "messages":[],
                   "errors": len(self.errors),
                   "warnings": len(self.warnings),
-                  "infos": len(self.infos),
+                  "notices": len(self.infos),
                   "message_tree": self.message_tree}
         
         messages = output["messages"]
@@ -241,7 +246,7 @@ class ErrorBundle(object):
             messages.append(warning)
             
         for info in self.infos:
-            info["type"] = "info"
+            info["type"] = "notice"
             self._clean_description(info, True)
             messages.append(info)
         
@@ -299,6 +304,9 @@ class ErrorBundle(object):
         if verbose:
             verbose_output = []
             
+            # Show the user what tier we're on
+            verbose_output.append("Tier: %d" % message["tier"])
+
             # Detailed problem description.
             if message["description"]:
                 # These are dirty, so strip out whitespace and concat.

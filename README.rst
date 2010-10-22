@@ -133,7 +133,7 @@ sample document below.
 		"detected_type": "extension",
 		"errors":2,
 		"warnings":1,
-		"infos":1,
+		"notices":1,
 		"success": false,
 	    "rejected": false,
 		"messagetree":{ /* ... */ },
@@ -160,7 +160,7 @@ sample document below.
 			{
 				"uid": "123456789",
 				"id": ["module", "function", "error"],
-				"type": "info",
+				"type": "notice",
 				"message": "This is the informational message text.",
 				"description": "Description of the info message."
 				"file": "chrome.manifest",
@@ -193,7 +193,7 @@ additional nodes which provide extra information:
 
 	__errors - number - The number of errors generated in this node
 	__warnings - number - The number of warnings generated in this node
-	__infos - number - The number of messages generated in this node
+	__notices - number - The number of messages generated in this node
 	__messages - list - A list of UIDs from messages in the `messages` node
 
 JSON Notes:
@@ -233,7 +233,7 @@ For instance, this tree would generate the following messages:
 ::
 
 	{
-		"type": "info",
+		"type": "notice",
 		"message": "<em:type> not found in install.rdf",
 		"description": " ... ",
 		"file": "install.rdf",

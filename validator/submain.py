@@ -184,6 +184,10 @@ def test_inner_package(err, package_contents, package):
     
     # Iterate through each tier.
     for tier in sorted(decorator.get_tiers()):
+
+        # Let the error bundler know what tier we're on
+        err.tier = tier
+
         # Iterate through each test of our detected type
         for test in decorator.get_tests(tier, err.detected_type):
             test_func = test["test"]

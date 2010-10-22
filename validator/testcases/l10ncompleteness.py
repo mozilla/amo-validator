@@ -59,7 +59,7 @@ def _get_locales(err, xpi_package):
     
     return locales
 
-@decorator.register_test(tier=3)
+@decorator.register_test(tier=4)
 def test_xpi(err, package_contents, xpi_package):
     """Tests an XPI (or JAR, really) for L10n completeness"""
     
@@ -109,7 +109,7 @@ def test_xpi(err, package_contents, xpi_package):
                            ref_name.startswith(split_target[0]))
 
 
-@decorator.register_test(tier=3, expected_type=PACKAGE_LANGPACK)
+@decorator.register_test(tier=4, expected_type=PACKAGE_LANGPACK)
 def test_lp_xpi(err, package_contents, xpi_package):
     "Tests a language pack for L10n completeness"
     
