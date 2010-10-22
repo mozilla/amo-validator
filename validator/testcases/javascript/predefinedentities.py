@@ -14,6 +14,17 @@ GLOBAL_ENTITIES = {
     "setTimeout": {"dangerous": actions._call_settimeout},
     "setInterval": {"dangerous": actions._call_settimeout},
     
+    "encodeURI": {"readonly": True},
+    "decodeURI": {"readonly": True},
+    "encodeURIComponent": {"readonly": True},
+    "decodeURIComponent": {"readonly": True},
+    "escape": {"readonly": True},
+    "unescape": {"readonly": True},
+    "isFinite": {"readonly": True},
+    "isNaN": {"readonly": True},
+    "parseFloat": {"readonly": True},
+    "parseInt": {"readonly": True},
+    
     "eval": {"dangerous": True},
     "Function": {"dangerous": True},
     "Object": {"value": {"prototype": {"dangerous": True}}},
@@ -21,7 +32,10 @@ GLOBAL_ENTITIES = {
     "Array": {"value": {"prototype": {"dangerous": True}}},
     "Number": {"value": {"prototype": {"dangerous": True}}},
     "Boolean": {"value": {"prototype": {"dangerous": True}}},
+    "RegExp": {"value": {"prototype": {"dangerous": True}}},
     "Date": {"value": {"prototype": {"dangerous": True}}},
+    
+    "Math": {"readonly": True},
     
     "netscape":
         {"value": {"security":
@@ -34,7 +48,8 @@ GLOBAL_ENTITIES = {
                    "geolocation": {"dangerous": True}}},
     
     "Components":
-        {"value": {"utils":
+        {"readonly": True,
+         "value": {"utils":
                        {"value": {"evalInSandbox":
                                      {"dangerous": True},
                                   "import":
@@ -50,5 +65,10 @@ GLOBAL_ENTITIES = {
                                   "mozIJSSubScriptLoader":
                                      {"dangerous": True}}}}},
     "extensions": {"dangerous": True},
-    "xpcnativewrappers": {"dangerous": True}
+    "xpcnativewrappers": {"dangerous": True},
+    
+    # Global properties are inherently read-only, though this formalizes it.
+    "Infinity": {"readonly": True},
+    "NaN": {"readonly": True},
+    "undefined": {"readonly": True},
     }
