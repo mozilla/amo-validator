@@ -134,4 +134,4 @@ def test_invalid_markup():
     assert result.warnings
     result = _do_test("tests/resources/markup/markuptester/bad_script.xml",
                       False)
-    assert result.infos
+    assert result.notices

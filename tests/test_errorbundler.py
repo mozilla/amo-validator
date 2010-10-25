@@ -18,7 +18,7 @@ def test_json():
     
     bundle.error((), "error", "description")
     bundle.warning((), "warning", "description")
-    bundle.info((), "info", "description")
+    bundle.notice((), "notice", "description")
     
     bundle.print_json()
     
@@ -67,7 +67,7 @@ def test_states():
     bundle.set_type(4)
     bundle.error((), "error")
     bundle.warning((), "warning")
-    bundle.info((), "info")
+    bundle.notice((), "notice")
     bundle.save_resource("test", True)
     
     # Push a state
@@ -76,7 +76,7 @@ def test_states():
     bundle.set_type(2)
     bundle.error((), "nested error")
     bundle.warning((), "nested warning")
-    bundle.info((), "nested info")
+    bundle.notice((), "nested notice")
     
     # Push another state
     bundle.push_state("test2.xpi")
@@ -84,7 +84,7 @@ def test_states():
     bundle.set_type(3)
     bundle.error((), "super nested error")
     bundle.warning((), "super nested warning")
-    bundle.info((), "super nested info")
+    bundle.notice((), "super nested notice")
     
     bundle.pop_state()
     
@@ -102,13 +102,13 @@ def test_states():
     
     messages = ["error",
                 "warning",
-                "info",
+                "notice",
                 "nested error",
                 "nested warning",
-                "nested info",
+                "nested notice",
                 "super nested error",
                 "super nested warning",
-                "super nested info"]
+                "super nested notice"]
     
     for message in output["messages"]:
         print message
@@ -194,7 +194,7 @@ def test_file_structure():
     assert not messages
 
 
-def test_info():
+def test_notice():
     """Tests notice-related functions of the error bundler."""
     
     outbuffer = StringIO()
@@ -202,7 +202,7 @@ def test_info():
     # Use the StringIO as an output buffer.
     bundle = ErrorBundle(outbuffer, True) # No color since no output
     
-    bundle.info((), "info")
+    bundle.notice((), "")
     
     # Load the JSON output as an object.
     bundle.print_json()
@@ -213,19 +213,19 @@ def test_info():
     
     print output
     
-    has_info = False
+    has_ = False
     
     for message in output["messages"]:
         print message
         
-        if message["type"] == "info":
-            has_info = True
+        if message["type"] == "notice":
+            has_ = True
     
-    assert has_info
+    assert has_
     assert not bundle.failed()
 
 
-def test_info_friendly():
+def test_notice_friendly():
     """Tests notice-related human-friendly text output functions of the
     error bundler."""
     
@@ -234,7 +234,7 @@ def test_info_friendly():
     # Use the StringIO as an output buffer.
     bundle = ErrorBundle(outbuffer, True) # No color since no output
     
-    bundle.info((), "foobar")
+    bundle.notice((), "foobar")
     
     # Load the JSON output as an object.
     bundle.print_summary(True)

@@ -14,19 +14,20 @@ class ErrorBundle(object):
     'separating the sorrow and collecting up all the cream.' It's
     borderline magical."""
     
-    def __init__(self, pipe=None, no_color=False):
+    def __init__(self, pipe=None, no_color=False, determined=True,
+                 listed=False):
         """Specifying pipe allows the output of the bundler to be
         written to a file rather than to the screen."""
         
         self.errors = []
         self.warnings = []
-        self.infos = []
+        self.notices = []
         self.message_tree = {}
 
         self.tier = 0
         
         self.metadata = {}
-        self.determined = False
+        self.determined = determined
         
         self.subpackages = []
         self.package_stack = []
@@ -35,6 +36,9 @@ class ErrorBundle(object):
         self.resources = {}
         self.reject = False
         
+        if listed:
+            self.resources["listed"] = True
+
         self.handler = OutputHandler(pipe, no_color)
             
         
@@ -60,12 +64,16 @@ class ErrorBundle(object):
                             "line": line})
         return self
 
-    def info(self, err_id, info, description='', filename='', line=0):
+    def info(self, err_id, info, description="", filename="", line=0):
+        "An alias for notice"
+        self.notice(err_id, info, description, filename, line)
+
+    def notice(self, err_id, notice, description="", filename="", line=0):
         "Stores an informational message about the validation"
-        self._save_message(self.infos,
-                           "infos",
+        self._save_message(self.notices,
+                           "notices",
                            {"id": err_id,
-                            "message": info,
+                            "message": notice,
                             "description": description,
                             "file": filename,
                             "line": line})
@@ -131,14 +139,14 @@ class ErrorBundle(object):
         
         self.subpackages.append({"errors": self.errors,
                                  "warnings": self.warnings,
-                                 "infos": self.infos,
+                                 "notices": self.notices,
                                  "detected_type": self.detected_type,
                                  "resources": self.resources,
                                  "message_tree": self.message_tree})
         
         self.errors = []
         self.warnings = []
-        self.infos = []
+        self.notices = []
         self.resources = {}
         self.message_tree = {}
         
@@ -151,13 +159,13 @@ class ErrorBundle(object):
         state = self.subpackages.pop()
         errors = self.errors
         warnings = self.warnings
-        infos = self.infos
+        notices = self.notices
         # We only rebuild message_tree anyway. No need to restore.
         
         # Copy the existing state back into place
         self.errors = state["errors"]
         self.warnings = state["warnings"]
-        self.infos = state["infos"]
+        self.notices = state["notices"]
         self.detected_type = state["detected_type"]
         self.resources = state["resources"]
         self.message_tree = state["message_tree"]
@@ -166,7 +174,7 @@ class ErrorBundle(object):
         
         self._merge_messages(errors, self.error, name)
         self._merge_messages(warnings, self.warning, name)
-        self._merge_messages(infos, self.info, name)
+        self._merge_messages(notices, self.notice, name)
         
     
     def _merge_messages(self, messages, callback, name):
@@ -229,7 +237,7 @@ class ErrorBundle(object):
                   "messages":[],
                   "errors": len(self.errors),
                   "warnings": len(self.warnings),
-                  "notices": len(self.infos),
+                  "notices": len(self.notices),
                   "message_tree": self.message_tree}
         
         messages = output["messages"]
@@ -245,10 +253,10 @@ class ErrorBundle(object):
             self._clean_description(warning, True)
             messages.append(warning)
             
-        for info in self.infos:
-            info["type"] = "notice"
-            self._clean_description(info, True)
-            messages.append(info)
+        for notice in self.notices:
+            notice["type"] = "notice"
+            self._clean_description(notice, True)
+            messages.append(notice)
         
         # Output the JSON.
         json_output = json.dumps(output)
@@ -341,8 +349,8 @@ class ErrorBundle(object):
     def _print_verbose(self, verbose):
         "Prints info code to help prevent code duplication"
         
-        if self.infos and verbose:
+        if self.notices and verbose:
             mesg = "<<WHITE>>Notice:<<NORMAL>>\t"
-            for info in self.infos:
-                self._print_message(mesg, info)
+            for notice in self.notices:
+                self._print_message(mesg, notice)
         

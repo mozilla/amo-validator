@@ -160,5 +160,5 @@ def test_obsolete():
     "Tests that elements that shouldn't exist aren't there."
     
     err = _run_test("tests/resources/installrdf/obsolete.rdf", False)
-    assert err.infos
+    assert err.notices
 

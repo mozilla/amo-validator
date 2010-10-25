@@ -79,15 +79,20 @@ def main():
 
     args = parser.parse_args()
 
-    error_bundle = ErrorBundle(args.file,
-        not args.file == sys.stdout or args.boring)
-    error_bundle.determined = args.determined
+    error_bundle = ErrorBundle(pipe=args.file,
+                               no_color=(not args.file == sys.stdout or
+                                         args.boring),
+                               determined=args.determined,
+                               listed=not args.selfhosted)
 
-    # Emulates the "$status" variable in the original validation.php
-    # test file. Equal to "$status == STATUS_LISTED".
-    error_bundle.save_resource("listed", not args.selfhosted)
+    # We want to make sure that the output is expected. Parse out the expected
+    # type for the add-on and pass it in for validation.
+    if args.type not in expectations:
+        # Fail if the user provided invalid input.
+        print "Given expectation (%s) not valid. See --help for details" % \
+                args.type
+        sys.exit(1)
 
-    # Parse out the expected add-on type and run the tests.
     expectation = expectations[args.type]
     submain.prepare_package(error_bundle, args.package, expectation)
 
