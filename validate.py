@@ -10,10 +10,7 @@ def validate(path, format="json"):
 
     output = StringIO()
 
-    bundle = ErrorBundle(pipe=output, no_color=True)
-    bundle.determined = True # Run all tests, even if one tier fails
-    bundle.save_resource("listed", True) # Add-on is headed for AMO
-    
+    bundle = ErrorBundle(pipe=output, no_color=True, listed=True)   
     validator.main.prepare_package(bundle, path, PACKAGE_ANY)
 
     # Write the results to the pipe
