@@ -306,21 +306,24 @@ class ErrorBundle(object):
         "Prints a message and takes care of all sorts of nasty code"
         
         # Load up the standard output.
-        output = [prefix, self._clean_message([message["message"]])]
+        output = ["\n",
+                  prefix,
+                  self._clean_message([message["message"]]),
+                  "\n"]
         
         # We have some extra stuff for verbose mode.
         if verbose:
             verbose_output = []
             
-            # Show the user what tier we're on
-            verbose_output.append("Tier: %d" % message["tier"])
-
             # Detailed problem description.
             if message["description"]:
                 # These are dirty, so strip out whitespace and concat.
                 verbose_output.append(
                             self._clean_message(message["description"]))
             
+            # Show the user what tier we're on
+            verbose_output.append("\tTier: %d" % message["tier"])
+
             # If file information is availe, output that as well.
             files = message["file"]
             if files is not None and files != "":
@@ -339,8 +342,8 @@ class ErrorBundle(object):
                 verbose_output.append("\tLine:\t%s" % message["line"])
                 
             # Stick it in with the standard items.
-            output.append("\n\t")
-            output.append("\n\t".join(verbose_output))
+            output.append("\n")
+            output.append("\n".join(verbose_output))
         
         # Send the final output to the handler to be rendered.
         self.handler.write(''.join(output))
@@ -352,5 +355,5 @@ class ErrorBundle(object):
         if self.notices and verbose:
             mesg = "<<WHITE>>Notice:<<NORMAL>>\t"
             for notice in self.notices:
-                self._print_message(mesg, notice)
+                self._print_message(prefix=mesg, message=notice)
         
