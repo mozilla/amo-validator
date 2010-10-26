@@ -192,12 +192,9 @@ def _compare_packages(reference, target, ref_base=None):
         parsable = extension in parsable_docs
         
         if parsable:
-            ref_doc = _parse_l10n_doc(name, reference.read(name))
-            if not ref_doc.expected_encoding:
-                results.append({"type": "unexpected_encoding",
-                                "filename": name,
-                                "expected_encoding": ref_doc.suitable_encoding,
-                                "encoding": ref_doc.found_encoding})
+            ref_doc = _parse_l10n_doc(name,
+                                      reference.read(name),
+                                      no_encoding=True)
         else:
             ref_doc = ()
         
@@ -260,7 +257,7 @@ def _compare_packages(reference, target, ref_base=None):
     return results
     
 
-def _parse_l10n_doc(name, doc):
+def _parse_l10n_doc(name, doc, no_encoding=False):
     "Parses an L10n document."
     
     extension = name.split(".")[-1].lower()
@@ -269,18 +266,21 @@ def _parse_l10n_doc(name, doc):
                 "properties": properties.PropertiesParser}
     # These are expected encodings for the various files.
     handler_formats = {"dtd": ("UTF-8", ),
-                       "properties": ("ascii", "utf-8")}
+                       "properties": ("ASCII", "UTF-8")}
     if extension not in handlers:
         return None
     
     wrapper = StringIO(doc)
     loc_doc = handlers[extension](wrapper)
     
-    encoding = chardet.detect(doc)
-    loc_doc.expected_encoding = \
+    # Allow the parse to specify files to skip for encoding checks
+    if not no_encoding:
+        encoding = chardet.detect(doc)
+        encoding["encoding"] = encoding["encoding"].upper()
+        loc_doc.expected_encoding = \
             encoding["encoding"] in handler_formats[extension]
-    loc_doc.found_encoding = encoding["encoding"]
-    loc_doc.suitable_encoding = handler_formats[extension]
+        loc_doc.found_encoding = encoding["encoding"]
+        loc_doc.suitable_encoding = handler_formats[extension]
 
     return loc_doc
 
