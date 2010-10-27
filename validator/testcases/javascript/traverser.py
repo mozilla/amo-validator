@@ -134,7 +134,7 @@ class Traverser:
         if action is not None:
             action_result = action(self, node)
             self._debug("ACTION>>%s" %
-                    (str("halt") if action_result else "continue"))
+                    ("halt" if action_result else "continue"))
         
         if not action_result:
             self.debug_level += 1
@@ -154,8 +154,7 @@ class Traverser:
             self._pop_context()
         
         if returns:
-            wrapper = JSWrapper(None)
-            wrapper.set_value(self, action_result)
+            return JSWrapper(action_result)
     
     def _interpret_block(self, items):
         "Interprets a block of consecutive code"
@@ -318,6 +317,7 @@ class JSContext(object):
         self.data = {}
     
     def get(self, name):
+        print self.data[name]
         return self.data[name] if name in self.data else None
     
     def set(self, name, variable):
@@ -329,22 +329,24 @@ class JSContext(object):
     def output(self):
         output = {}
         for (name, item) in self.data.items():
-            output[name] = relish(item)
+            output[name] = str(item)
         return json.dumps(output)
 
 class JSWrapper(object):
     "Wraps a JS value and handles contextual functions for it."
 
-    def __init__(self, name, const=False, dirty=False, lazy=False):
-        self.name = name
-        self.const = const
-        self.dirty = False
-        self.is_global = False
+    def __init__(self, value=None, const=False, dirty=False, lazy=False,
+                 is_global=False):
 
-        self.value = None
+        self.const = False
+        self.set_value(value) # Make sure this is set before const
+        self.const = const
+
+        self.dirty = dirty
+        self.is_global = is_global
         self.lazy = lazy
 
-    def set_value(self, traverser, value, overwrite_const=False):
+    def set_value(self, value, overwrite_const=False):
         if self.const and not overwrite_const:
             traverser.err.error(("testcases_javascript_traverser",
                                  "JSWrapper_set_value",
@@ -356,10 +358,7 @@ class JSWrapper(object):
                                 traverser.filename,
                                 traverser.line)
 
-        if value is bool or \
-           value is str or \
-           value is int or \
-           value is float:
+        if isinstance(value, (bool, str, int, float)):
             value = JSLiteral(value)
         # If the value being assigned is a wrapper as well, copy it in
         elif value is JSWrapper:
@@ -378,10 +377,6 @@ class JSWrapper(object):
         
         self.set_value(traverser._traverse_node(node))
 
-    def set_value_as_lambda(self, traverser, node):
-        "Sets the value of the variable to that of a callable object"
-        pass
-
     def has_property(self, property):
         """Returns a boolean value representing the presence of a property"""
         
@@ -399,7 +394,7 @@ class JSWrapper(object):
         "Retrieves a property from the variable"
 
         if self.value is None:
-            return None
+            return JSWrapper()
 
         if self.value is JSLiteral:
             return None # This might need tweaking for properties
@@ -411,22 +406,19 @@ class JSWrapper(object):
         else:
             output = None
         
-        wrapper = JSWrapper(name)
-        wrapper.set_value(output)
-        return wrapper
+        return JSWrapper(output)
     
     def is_literal(self):
         "Returns whether the content is a literal"
-        return self.value is JSLiteral
+        return isinstance(self.value, JSLiteral)
 
     def get_literal_value(self):
         "Returns the literal value of the wrapper"
+        
         if self.value is None:
             return None
-        elif self.value is JSLiteral:
-            return self.value.value
-        else:
-            return False # TODO: This needs to be properly implemented
+        
+        return self.value.get_literal_value()
 
     def output(self):
         "Returns a readable version of the object"
@@ -448,6 +440,10 @@ class JSWrapper(object):
         elif self.value is JSArray:
             return None # These aren't implemented yet!
 
+    def __str__(self):
+        "Returns a textual version of the object."
+        return str(self.get_literal_value())
+
 class JSLiteral(object):
     "Represents a literal JavaScript value"
     
@@ -460,6 +456,10 @@ class JSLiteral(object):
     def __str__(self):
         "Returns a human-readable version of the variable's contents"
         return json.dumps(self.value)
+
+    def get_literal_value(self):
+        "Returns the literal value of a this literal. Heh."
+        return self.value
 
 class JSObject(object):
     """Mimics a JS object (function) and is capable of serving as an active
@@ -476,6 +476,12 @@ class JSObject(object):
 
     def set(self, name, variable):
         self.data[name] = variable
+
+    def has_var(self, name):
+        return name in self.data
+
+    def output(self):
+        return str(self.data)
     
 class JSPrototype:
     """A lazy JavaScript object that is assumed not to contain any default

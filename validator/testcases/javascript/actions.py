@@ -122,12 +122,12 @@ def _define_var(traverser, node):
         traverser._debug("NAME>>%s" % var_name)
 
         var_value = traverser._traverse_node(declaration["init"])
+        print "vv", var_value
         if var_value is not None:
             traverser._debug("VALUE>>%s" % var_value.output())
 
-        var = js_traverser.JSWrapper(var_name, const=(node["kind"]=="const"))
-        var.set_value(traverser, var_value)
-        
+        var = js_traverser.JSWrapper(value=var_value,
+                                     const=(node["kind"]=="const"))
         traverser._set_variable(var_name, var)
     
     traverser.debug_level -= 1
@@ -150,7 +150,7 @@ def _define_obj(traverser, node):
         
         # TODO: Observe "kind"
     
-    return var
+    return js_traverser.JSWrapper(var, lazy=True)
 
 def _define_array(traverser, node):
     "Instantiates an array object"
@@ -163,9 +163,9 @@ def _define_array(traverser, node):
 
 def _define_literal(traverser, node):
     "Creates a JSVariable object based on a literal"
-    var = js_traverser.JSWrapper(None)
-    var.set_value(traverser, js_traverser.JSLiteral(node["value"]))
-    return var
+
+    var = js_traverser.JSLiteral(node["value"])
+    return js_traverser.JSWrapper(var)
 
 def _call_expression(traverser, node):
     args = node["arguments"]
@@ -197,18 +197,13 @@ def _call_settimeout(traverser, *args):
 def _expression(traverser, node):
     "Evaluates an expression and returns the result"
     result = traverser._traverse_node(node["expression"])
-    if result is None:
-        result = js_traverser.JSVariable()
-        result.set_value(traverser, None)
-        return result
-    else:
-        return result
+    return js_traverser.JSWrapper(result)
     
 def _get_this(traverser, node):
     "Returns the `this` object"
     
     if not traverser.this_stack:
-        return None
+        return js_traverser.JSWrapper()
     
     return traverser.this_stack[-1]
 
@@ -227,7 +222,9 @@ def _new(traverser, node):
     
     elem = traverser._traverse_node(node["constructor"])
     if elem is None:
-        return None
+        return js_traverser.JSWrapper()
+
+    elem = js_traverser.JSWrapper(elem)
     return copy.deepcopy(elem)
 
 def _ident(traverser, node):
@@ -244,7 +241,6 @@ def _expr_binary(traverser, node):
     traverser.debug_level += 1
 
     left = traverser._traverse_node(node["left"])
-    print left
     left = js_traverser.JSWrapper(left)
 
     traverser.debug_level -= 1
