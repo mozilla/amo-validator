@@ -162,6 +162,8 @@ class Traverser:
         
         for item in items:
             self._traverse_node(item)
+
+        # Iterative code will never return a value.
     
     def _push_block_context(self):
         "Adds a block context to the current interpretation frame"
@@ -205,21 +207,29 @@ class Traverser:
         # Look for the variable in the local contexts first
         local_variable = self._seek_local_variable(variable, depth)
         if local_variable is not None:
-            return local_variable
+            return JSWrapper(local_variable)
 
         self._debug("SEEK_FAIL>>TRYING GLOBAL")
 
         # Seek in globals for the variable instead.
-        return self._get_global(variable, args)
+        return JSWrapper(self._get_global(variable, args))
 
 
     def _seek_local_variable(self, variable, depth=-1):
-
+        
+        # Loop through each context in reverse order looking for the defined
+        # variable.
         for c in range(0, len(self.contexts) - 1):
             context = self.contexts[len(self.contexts) - 1 - c]
+
+            # If it has the variable, return it
             if context.has_var(variable):
                 self._debug("SEEK>>FOUND AT DEPTH %d" % c)
                 return context.get(variable)
+
+            # Decrease the level that's being searched through. If we've
+            # reached the bottom (relative to where the user defined it to be),
+            # end the search.
             depth -= 1
             if depth == -1:
                 return None
@@ -227,6 +237,7 @@ class Traverser:
     def _get_global(self, name, args=None, globs=None):
         "Gets a variable from the predefined variable context."
         
+        # Allow overriding of the global entities
         if globs is None:
             globs = GLOBAL_ENTITIES
         
@@ -281,6 +292,8 @@ class Traverser:
                 return value
         
         if name in GLOBAL_ENTITIES:
+            # TODO : In the future, this should account for non-readonly
+            # entities (i.e.: localStorage)
             self._debug("GLOBAL_OVERWRITE")
             self.err.error(("testcases_javascript_traverser",
                             "_set_variable",

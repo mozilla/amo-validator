@@ -21,7 +21,9 @@ def node_has_global_root(traverser, node):
         return name in GLOBAL_ENTITIES
 
     else:
-        base = traverser._traverse_node(node)
+        # If we encounter an expression, just evaluate it and take the parser's
+        # word for whether it's global or not.
+        base = JSWrapper(traverser._traverse_node(node))
         return base.is_global
 
 def trace_member(traverser, node):
@@ -31,9 +33,6 @@ def trace_member(traverser, node):
         # x.y or x[y]
         base = trace_member(traverser, node["object"])
         
-        # if not isinstance(base, js_traverser.JSObject):
-
-
         # base = x
         if node["property"]["type"] == "Identifier":
             # y = token identifier
@@ -49,6 +48,9 @@ def trace_member(traverser, node):
 
     elif node["type"] == "Identifier":
         return traverser._seek_variable(node["name"])
+    else:
+        # It's an expression, so just try your damndest.
+        return JSWrapper(traverser._traverse_node(node))
 
 def _function(traverser, node):
     "Prevents code duplication"
@@ -68,7 +70,7 @@ def _function(traverser, node):
     
     local_context = traverser._peek_context(2)
     for param in params:
-        var = traverser.JSVariable()
+        var = js_traverser.JSWrapper(lazy=True)
         
         # We can assume that the params are static because we don't care about
         # what calls the function. We want to know whether the function solely
@@ -95,7 +97,9 @@ def _define_function(traverser, node):
 def _func_expr(traverser, node):
     "Represents a lambda function"
     
-    return _function(traverser, node)
+    # Collect the result as an object
+    results = _function(traverser, node)
+    return js_traverser.JSWrapper(value=results)
 
 def _define_with(traverser, node):
     "Handles `with` statements"
@@ -235,25 +239,28 @@ def _expr_binary(traverser, node):
     
     traverser.debug_level += 1
 
+
     traverser._debug("BIN_EXP>>LEFT")
     traverser.debug_level += 1
+
     left = traverser._traverse_node(node["left"])
+    print left
+    left = js_traverser.JSWrapper(left)
+
     traverser.debug_level -= 1
+
 
     traverser._debug("BIN_EXP>>RIGHT")
     traverser.debug_level += 1
+
     right = traverser._traverse_node(node["right"])
+    right = js_traverser.JSWrapper(right)
+
     traverser.debug_level -= 1
     
-    
-    if not left.is_literal() or \
-       not right.is_literal():
-        # If we can't nail down a solid BinaryExpression, just fall back on
-        # traversing everything by hand.
-        return False
-
     left = left.get_literal_value()
     right = right.get_literal_value()
+    print left, right
 
     operator = node["operator"]
     traverser._debug("BIN_OPERATOR>>%s" % operator)
