@@ -122,7 +122,6 @@ def _define_var(traverser, node):
         traverser._debug("NAME>>%s" % var_name)
 
         var_value = traverser._traverse_node(declaration["init"])
-        print "vv", var_value
         if var_value is not None:
             traverser._debug("VALUE>>%s" % var_value.output())
 
@@ -165,7 +164,7 @@ def _define_literal(traverser, node):
     "Creates a JSVariable object based on a literal"
 
     var = js_traverser.JSLiteral(node["value"])
-    return js_traverser.JSWrapper(var)
+    return js_traverser.JSWrapper(var, traverser=traverser)
 
 def _call_expression(traverser, node):
     args = node["arguments"]
@@ -203,7 +202,7 @@ def _get_this(traverser, node):
     "Returns the `this` object"
     
     if not traverser.this_stack:
-        return js_traverser.JSWrapper()
+        return js_traverser.JSWrapper(traverser=traverser)
     
     return traverser.this_stack[-1]
 
@@ -224,7 +223,7 @@ def _new(traverser, node):
     if elem is None:
         return js_traverser.JSWrapper()
 
-    elem = js_traverser.JSWrapper(elem)
+    elem = js_traverser.JSWrapper(elem, traverser=traverser)
     return copy.deepcopy(elem)
 
 def _ident(traverser, node):
@@ -234,12 +233,13 @@ def _ident(traverser, node):
     if traverser._is_local_variable(name) or \
        traverser._is_global(name):
         # This function very nicely wraps with JSWrapper for us :)
-        return traverser._seek_variable(name)
+        found = traverser._seek_variable(name)
+        return found
 
     # If the variable doesn't exist, we're going to create a placeholder for
     # it. The placeholder can have stuff assigned to it by things that work
     # like _expr_assignment
-    result = js_traverser.JSWrapper()
+    result = js_traverser.JSWrapper(traverser=traverser)
     traverser._set_variable(name, result)
     return result
 
@@ -259,7 +259,12 @@ def _expr_assignment(traverser, node):
     
     if isinstance(left, js_traverser.JSWrapper):
         lit_left = left.get_literal_value()
-
+        
+        # Don't perform an operation on None. Python freaks out
+        if lit_left is None:
+            lit_left = 0
+        
+        # All of the assignment operators
         operators = {"=":lambda:right,
                      "+=":lambda:lit_left + lit_right,
                      "-=":lambda:lit_left - lit_right,
@@ -280,7 +285,7 @@ def _expr_assignment(traverser, node):
             traverser.debug_level -= 1
             return left
         
-        left.set_value(operators[token]())
+        left.set_value(operators[token](), traverser=traverser)
         traverser.debug_level -= 1
         return left
     
@@ -314,22 +319,43 @@ def _expr_binary(traverser, node):
     
     left = left.get_literal_value()
     right = right.get_literal_value()
-    print left, right
 
     operator = node["operator"]
     traverser._debug("BIN_OPERATOR>>%s" % operator)
 
-
+    type_operators = (">>", "<<", ">>>")
     operators = {
-        "+": lambda l,r: l + r,
-        "==": lambda l,r: l == r,
-        "!=": lambda l,r: not l == r,
-        "===": lambda l,r: type(l) == type(r) and l == r,
-        "!==": lambda l,r: not (type(l) == type(r) and l == r)
+        "==": lambda: left == right,
+        "!=": lambda: left != right,
+        "===": lambda: type(left) == type(right) and left == right,
+        "!==": lambda: not (type(left) == type(right) or left != right),
+        ">": lambda: left > right,
+        "<": lambda: left < right,
+        "<=": lambda: left <= right,
+        ">=": lambda: left >= right,
+        "<<": lambda: left << right,
+        ">>": lambda: left >> right,
+        ">>>": lambda: math.fabs(left) >> right,
+        "+": lambda: left + right,
+        "-": lambda: left - right,
+        "*": lambda: left * right,
+        "/": lambda: left / right,
     }
 
     traverser.debug_level -= 1
+    
+    operator = node["operator"]
+    output = None
+    if operator in type_operators and (
+       left is None or right is None):
+        output = False
+    elif operator in operators:
+        try:
+            traverser._debug("BIN_EXP>>OPERATION FAILED!")
+            output = operators[operator]()
+        except:
+            return js_traverser.JSWrapper(traverser=traverser)
 
-    if node["operator"] in operators:
-        return operators[operator](left, right)
-    return False
+    return js_traverser.JSWrapper(output, traverser=traverser)
+
+

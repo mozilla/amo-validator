@@ -134,7 +134,7 @@ def test_packed_packages(err, package_contents=None, xpi_package=None):
                 processed = True
                 
             
-        elif data["extension"] in ("css", "js"):
+        elif data["extension"] in ("css", "js", "jsm"):
             
             try:
                 file_data = xpi_package.read(name)
@@ -153,7 +153,7 @@ def test_packed_packages(err, package_contents=None, xpi_package=None):
                     testendpoint_css.test_css_file(err,
                                                    name,
                                                    file_data)
-                elif data["extension"] == "js":
+                elif data["extension"] in ("js", "jsm"):
                     testendpoint_js.test_js_file(err,
                                                  name,
                                                  file_data)

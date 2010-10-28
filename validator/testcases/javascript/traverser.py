@@ -92,6 +92,9 @@ class Traverser:
         if self.contexts:
             # This performs the namespace pollution test.
             # {prefix, count}
+
+            # TODO : Make sure to respect JS modules (Bug 531311)
+
             prefixes = []
             global_ns = self.contexts[0]
             for name in global_ns.__dict__.keys():
@@ -107,10 +110,10 @@ class Traverser:
         if node is None:
             return None
         
-        # Handles all the E4X stuff and anythign that may or may not return
+        # Handles all the E4X stuff and anything that may or may not return
         # a value.
         if "type" not in node or not self._can_handle_node(node["type"]):
-            wrapper = JSWrapper(None)
+            wrapper = JSWrapper(None, traverser=self)
             wrapper.set_value(JSObject())
             return wrapper
         
@@ -154,7 +157,7 @@ class Traverser:
             self._pop_context()
         
         if returns:
-            return JSWrapper(action_result)
+            return JSWrapper(action_result, traverser=self)
     
     def _interpret_block(self, items):
         "Interprets a block of consecutive code"
@@ -206,7 +209,7 @@ class Traverser:
         # Look for the variable in the local contexts first
         local_variable = self._seek_local_variable(variable, depth)
         if local_variable is not None:
-            return JSWrapper(local_variable)
+            return JSWrapper(local_variable, traverser=self)
 
         self._debug("SEEK_FAIL>>TRYING GLOBAL")
 
@@ -233,14 +236,14 @@ class Traverser:
             # If it has the variable, return it
             if context.has_var(variable):
                 self._debug("SEEK>>FOUND AT DEPTH %d" % c)
-                return JSWrapper(context.get(variable))
+                return JSWrapper(context.get(variable), traverser=self)
 
             # Decrease the level that's being searched through. If we've
             # reached the bottom (relative to where the user defined it to be),
             # end the search.
             depth -= 1
             if depth == -1:
-                return JSWrapper(None)
+                return JSWrapper(None, traverser=self)
        
     def _is_global(self, name, globs=None):
         "Returns whether a name is a global entity"
@@ -258,9 +261,9 @@ class Traverser:
             globs = GLOBAL_ENTITIES
         
         self._debug("SEEK_GLOBAL>>%s" % name)
-        if name not in globs:
+        if not self._is_global(name, globs):
             self._debug("SEEK_GLOBAL>>FAILED")
-            return JSWrapper(None)
+            return JSWrapper(None, traverser=self)
         
         self._debug("SEEK_GLOBAL>>FOUND>>%s" % name)
         return self._build_global(name, globs[name], args)
@@ -270,7 +273,6 @@ class Traverser:
         
         if "dangerous" in entity:
             dang = entity["dangerous"]
-            print type(dang), args
             if isinstance(dang, types.LambdaType) and args is not None:
                 is_dangerous = dang(*args)
                 if is_dangerous:
@@ -296,8 +298,10 @@ class Traverser:
                                self.filename,
                                self.line)
 
+            return JSWrapper(lazy=True, traverser=self)
+
         # Build out the wrapper object from the global definition.
-        result = JSWrapper(is_global=True)
+        result = JSWrapper(is_global=True, traverser=self)
         result.value = entity
         return result
     
@@ -357,20 +361,26 @@ class JSWrapper(object):
     "Wraps a JS value and handles contextual functions for it."
 
     def __init__(self, value=None, const=False, dirty=False, lazy=False,
-                 is_global=False):
+                 is_global=False, traverser=None):
 
-        self.const = False
+        self.const = const
+        self.traverser = traverser
         self.is_global = is_global # Globals are built seperately
         self.value = None # Instantiate the placeholder value
-
+        
         if value is not None:
             self.set_value(value) # Make sure this is set before const
-        self.const = const
 
         self.dirty = dirty
         self.lazy = lazy
 
     def set_value(self, value, traverser=None, overwrite_const=False):
+        "Assigns a value to the wrapper"
+
+        # Use a global traverser if it's present.
+        if traverser is None:
+            traverser = self.traverser
+
         if self.const and not overwrite_const:
             traverser.err.error(("testcases_javascript_traverser",
                                  "JSWrapper_set_value",
@@ -399,7 +409,7 @@ class JSWrapper(object):
         if isinstance(value, (bool, str, int, float)):
             value = JSLiteral(value)
         # If the value being assigned is a wrapper as well, copy it in
-        elif value is JSWrapper:
+        elif isinstance(value, JSWrapper):
             self.value = value.value
             self.lazy = value.lazy
             self.dirty = True # This may not be necessary
@@ -432,7 +442,7 @@ class JSWrapper(object):
         "Retrieves a property from the variable"
 
         if self.value is None:
-            return JSWrapper()
+            return JSWrapper(traverser=self)
 
         if self.value is JSLiteral:
             return None # This might need tweaking for properties
@@ -444,7 +454,7 @@ class JSWrapper(object):
         else:
             output = None
         
-        return JSWrapper(output)
+        return JSWrapper(output, traverser=self)
     
     def is_literal(self):
         "Returns whether the content is a literal"
@@ -473,12 +483,11 @@ class JSWrapper(object):
                 if property is types.LambdaType:
                     properties[name] = "<<LAMBDA>>"
                     continue
-                wrapper = JSWrapper(name)
-                wrapper.set_value(property)
+                wrapper = JSWrapper(property, traverser=self)
                 properties[name] = wrapper.output()
             return json.dumps(properties)
         elif self.value is JSArray:
-            return None # These aren't implemented yet!
+            return None # TODO: These aren't implemented yet!
 
     def __str__(self):
         "Returns a textual version of the object."
