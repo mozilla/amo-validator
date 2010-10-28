@@ -211,8 +211,17 @@ class Traverser:
         self._debug("SEEK_FAIL>>TRYING GLOBAL")
 
         # Seek in globals for the variable instead.
-        return JSWrapper(self._get_global(variable, args))
+        return self._get_global(variable, args)
 
+    def _is_local_variable(self, variable):
+        "Returns whether a variable is defined in the current scope"
+
+        for c in range(0, len(self.contexts) - 1):
+            context = self.contexts[len(self.contexts) - 1 - c]
+            if context.has_var(variable):
+                return True
+
+        return False
 
     def _seek_local_variable(self, variable, depth=-1):
         
@@ -224,15 +233,23 @@ class Traverser:
             # If it has the variable, return it
             if context.has_var(variable):
                 self._debug("SEEK>>FOUND AT DEPTH %d" % c)
-                return context.get(variable)
+                return JSWrapper(context.get(variable))
 
             # Decrease the level that's being searched through. If we've
             # reached the bottom (relative to where the user defined it to be),
             # end the search.
             depth -= 1
             if depth == -1:
-                return None
+                return JSWrapper(None)
+       
+    def _is_global(self, name, globs=None):
+        "Returns whether a name is a global entity"
         
+        if globs is None:
+            globs = GLOBAL_ENTITIES
+
+        return name in globs
+
     def _get_global(self, name, args=None, globs=None):
         "Gets a variable from the predefined variable context."
         
@@ -243,7 +260,7 @@ class Traverser:
         self._debug("SEEK_GLOBAL>>%s" % name)
         if name not in globs:
             self._debug("SEEK_GLOBAL>>FAILED")
-            return None
+            return JSWrapper(None)
         
         self._debug("SEEK_GLOBAL>>FOUND>>%s" % name)
         return self._build_global(name, globs[name], args)
@@ -278,6 +295,11 @@ class Traverser:
                                 "Accessed object: %s" % name],
                                self.filename,
                                self.line)
+
+        # Build out the wrapper object from the global definition.
+        result = JSWrapper(is_global=True)
+        result.value = entity
+        return result
     
     def _set_variable(self, name, value, glob=False):
         "Sets the value of a variable/object in the local or global scope."
@@ -317,7 +339,6 @@ class JSContext(object):
         self.data = {}
     
     def get(self, name):
-        print self.data[name]
         return self.data[name] if name in self.data else None
     
     def set(self, name, variable):
@@ -339,24 +360,41 @@ class JSWrapper(object):
                  is_global=False):
 
         self.const = False
-        self.set_value(value) # Make sure this is set before const
+        self.is_global = is_global # Globals are built seperately
+        self.value = None # Instantiate the placeholder value
+
+        if value is not None:
+            self.set_value(value) # Make sure this is set before const
         self.const = const
 
         self.dirty = dirty
-        self.is_global = is_global
         self.lazy = lazy
 
-    def set_value(self, value, overwrite_const=False):
+    def set_value(self, value, traverser=None, overwrite_const=False):
         if self.const and not overwrite_const:
             traverser.err.error(("testcases_javascript_traverser",
                                  "JSWrapper_set_value",
                                  "const_overwrite"),
                                 "Overwritten constant value",
-                                ["A variable declared as constant has been "
-                                 "overwritten in some JS code.",
-                                 "Constant name: %s" % self.name],
+                                "A variable declared as constant has been "
+                                "overwritten in some JS code.",
                                 traverser.filename,
                                 traverser.line)
+        
+        # We want to obey the permissions of global objects
+        if self.is_global:
+            # TODO : Write in support for "readonly":False
+            traverser.err.error(("testcases_javascript_traverser",
+                                 "JSWrapper_set_value",
+                                 "global_overwrite"),
+                                "Global overwrite",
+                                "An attempt to overwrite a global varible "
+                                "made in some JS code.",
+                                traverser.filename,
+                                traverser.line)
+            return self
+
+
 
         if isinstance(value, (bool, str, int, float)):
             value = JSLiteral(value)
@@ -417,7 +455,9 @@ class JSWrapper(object):
         
         if self.value is None:
             return None
-        
+        if self.is_global:
+            return ""
+
         return self.value.get_literal_value()
 
     def output(self):
@@ -472,9 +512,15 @@ class JSObject(object):
         }
 
     def get(self, name):
+        "Returns the value associated with a property name"
         return self.data[name] if name in self.data else None
+    
+    def get_literal_value(self):
+        "Objects evaluate to empty strings"
+        return ""
 
     def set(self, name, variable):
+        "Sets the value of a property"
         self.data[name] = variable
 
     def has_var(self, name):
@@ -499,6 +545,10 @@ class JSPrototype:
         else:
             return self.data[name]
     
+    def get_literal_value():
+        "Same as JSObject; returns an empty string"
+        return ""
+
     def set(self, name, variable):
         "Helpful for `with` statements"
         self.data[name] = variable
@@ -521,3 +571,11 @@ class JSArray:
     
     def get(self, index):
         return self.elements[index]
+    
+    def get_literal_value(self):
+        "Arrays return a comma-delimited version of themselves"
+        # Interestingly enough, this allows for things like:
+        # x = [4]
+        # y = x * 3 // y = 12 since x equals "4"
+        return ",".join(self.elements)
+

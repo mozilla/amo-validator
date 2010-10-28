@@ -229,7 +229,65 @@ def _new(traverser, node):
 
 def _ident(traverser, node):
     "Initiates an object lookup on the traverser based on an identifier token"
-    return traverser._seek_variable(node["name"])
+
+    name = node["name"]
+    if traverser._is_local_variable(name) or \
+       traverser._is_global(name):
+        # This function very nicely wraps with JSWrapper for us :)
+        return traverser._seek_variable(name)
+
+    # If the variable doesn't exist, we're going to create a placeholder for
+    # it. The placeholder can have stuff assigned to it by things that work
+    # like _expr_assignment
+    result = js_traverser.JSWrapper()
+    traverser._set_variable(name, result)
+    return result
+
+def _expr_assignment(traverser, node):
+    "Evaluates an AssignmentExpression node."
+    
+    traverser._debug("ASSIGNMENT_EXPRESSION")
+    traverser.debug_level += 1
+
+    traverser._debug("ASSIGNMENT>>PARSING RIGHT")
+    right = traverser._traverse_node(node["right"])
+    right = js_traverser.JSWrapper(right)
+    lit_right = right.get_literal_value()
+    
+    traverser._debug("ASSIGNMENT>>PARSING LEFT")
+    left = traverser._traverse_node(node["left"])
+    
+    if isinstance(left, js_traverser.JSWrapper):
+        lit_left = left.get_literal_value()
+
+        operators = {"=":lambda:right,
+                     "+=":lambda:lit_left + lit_right,
+                     "-=":lambda:lit_left - lit_right,
+                     "*=":lambda:lit_left * lit_right,
+                     "/=":lambda:lit_left / lit_right,
+                     "%=":lambda:lit_left % lit_right,
+                     "<<=":lambda:lit_left << lit_right,
+                     ">>=":lambda:lit_left >> lit_right,
+                     ">>>=":lambda:math.fabs(lit_left) >> lit_right,
+                     "|=":lambda:lit_left | lit_right,
+                     "^=":lambda:lit_left ^ lit_right,
+                     "&=":lambda:lit_left & lit_right}
+        
+        traverser._debug("ASSIGNMENT>>OPERATION")
+        token = node["operator"]
+        if token not in operators:
+            traverser._debug("ASSIGNMENT>>OPERATOR NOT FOUND")
+            traverser.debug_level -= 1
+            return left
+        
+        left.set_value(operators[token]())
+        traverser.debug_level -= 1
+        return left
+    
+    # Though it would otherwise be a syntax error, we say that 4=5 should
+    # evaluate out to 5.
+    traverser.debug_level -= 1
+    return right
 
 def _expr_binary(traverser, node):
     "Evaluates a BinaryExpression node."
