@@ -7,8 +7,15 @@ from validator.testcases.javascript.predefinedentities import GLOBAL_ENTITIES
 DEBUG = True
 
 class MockBundler:
+    def __init__(self):
+        self.message_count = 0
+
     def error(self, id, title, description, file="", line=1):
         "Represents a mock error"
+        
+        # Increment the message counter
+        self.message_count += 1
+
         print "-" * 30
         print title
         print "~" * len(title)
