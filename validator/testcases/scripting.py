@@ -9,7 +9,7 @@ def test_js_file(err, name, data, filename=None, line=0):
     "Tests a JS file by parsing and analyzing its tokens"
     
     if SPIDERMONKEY is None:
-	return
+        return
 
     if filename is None:
         filename = name
@@ -17,16 +17,19 @@ def test_js_file(err, name, data, filename=None, line=0):
     tree = _get_tree(name, data)
     
     if tree is None:
-	return
+        return
 
-    t = traverser.Traverser(err, filename, line)
-    t.run(tree)
+    try:
+        t = traverser.Traverser(err, filename, line)
+        t.run(tree)
+    except:
+        print "An error occurred while running some JavaScript tests."
 
 def test_js_snippet(err, data, filename=None, line=0):
     "Process a JS snippet by passing it through to the file tester."
     
     if SPIDERMONKEY is None:
-	return
+        return
     
     if filename is not None:
         name = "%s:%d" % (filename, line)
@@ -46,7 +49,7 @@ def _get_tree(name, code):
     # parser is going to be installed locally.
     
     if not code:
-	return None
+        return None
 
     data = json.dumps(code)
     data = "JSON.stringify(Reflect.parse(%s))" % data
@@ -62,8 +65,6 @@ def _get_tree(name, code):
 			     stdout=subprocess.PIPE)
     results = shell.communicate()
     data = results[0]
-    if len(data) < 5:
-	print results[1]
     parsed = json.loads(data)
     return parsed
 
