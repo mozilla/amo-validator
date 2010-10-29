@@ -11,19 +11,20 @@ def _do_test(path, should_fail=False):
     
     csstester.test_css_file(err, "css.css", data)
     
-    err.print_summary()
+    err.print_summary(True)
     
     if should_fail:
         assert err.failed()
     else:
         assert not err.failed()
+    
+    return err
 
 def test_css_file():
     "Tests a package with a valid CSS file."
     
     _do_test("tests/resources/markup/csstester/pass.css")
     
-
 def test_css_moz_binding():
     "Tests that remote scripts in CSS are blocked."
     

@@ -192,11 +192,6 @@ def detect_opensearch(package):
         return {"failure": True,
                 "error": "<updateURL> elements are banned from search"}
     
-    # Make sure there are no MozParam elements
-    if srch_prov.getElementsByTagName("MozParam"):
-        return {"failure": True,
-                "error": "<MozParam> elements are banned from search"}
-    
     # The OpenSearch provider is valid!
     return {"failure": False,
             "error": None}

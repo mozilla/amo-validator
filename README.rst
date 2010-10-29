@@ -28,6 +28,23 @@ You can install everything you need for running and testing with ::
 
     pip install -r requirements.txt
 
+Spidermonkey
+------------
+
+A working copy of Spidermonkey (debug or non-debug is fine) is a required. The
+version installed must include support for the Parser API. Downloading and
+installing the latest copy of Tracemonkey from http://mg.mozilla.org/ will
+include this API.
+
+Documentation on getting the latest Spidermonkey source:
+
+https://developer.mozilla.org/En/SpiderMonkey/Getting_SpiderMonkey_source_code#Getting_the_latest_SpiderMonkey_source_code
+
+Once Spidermonkey is installed, the path to the JavaScript shell must be
+specified in the /validator/constants.php file in the
+`SPIDERMONKEY_INSTALLATION` variable. If this variable is set to `None`, no
+JavaScript tests will be run.
+
 Running
 =======
 
@@ -104,6 +121,19 @@ Boring Mode:
 ------------
 
 Boring mode, when activated, doesn't print colors to the terminal.
+
+Determined Mode:
+----------------
+
+With determination comes perseverance. When in determined mode, the validator
+will not stop validating after errors present themselves in a particular tier.
+Traditionally, if an error tier fails, subsequent tiers are not executed. This
+flag ensures that those tiers are indeed run.
+
+Note that enabling this option may cause issues with certain tests, as some
+higher-level tiers depend on information provided by lower tiers. This data
+may not be available as the add-on was never meant to make it to the higher
+tiers.
 
 
 Output

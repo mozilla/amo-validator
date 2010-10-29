@@ -35,6 +35,7 @@ class ErrorBundle(object):
         self.detected_type = 0
         self.resources = {}
         self.reject = False
+        self.unfinished = False
         
         if listed:
             self.resources["listed"] = True
@@ -238,7 +239,8 @@ class ErrorBundle(object):
                   "errors": len(self.errors),
                   "warnings": len(self.warnings),
                   "notices": len(self.notices),
-                  "message_tree": self.message_tree}
+                  "message_tree": self.message_tree,
+                  "metadata": self.metadata}
         
         messages = output["messages"]
         
@@ -301,6 +303,13 @@ class ErrorBundle(object):
             self._print_verbose(verbose)
             
         self.handler.write("\n")
+        if self.unfinished:
+            self.handler.write("<<RED>>Validation terminated early")
+            self.handler.write("Errors during validation are preventing"
+                               "the validation proecss from completing.")
+            self.handler.write("Use the <<YELLOW>>--determined<<NORMAL>> "
+                               "flag to ignore these errors.")
+            self.handler.write("\n")
         
     def _print_message(self, prefix, message, verbose=True):
         "Prints a message and takes care of all sorts of nasty code"
