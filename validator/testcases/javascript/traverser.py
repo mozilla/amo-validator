@@ -125,8 +125,9 @@ class Traverser:
             return wrapper
         
         self._debug("TRAVERSE>>%s" % (node["type"]))
-
-        self.line = self.start_line + int(node["loc"]["start"]["line"])
+        
+        if "loc" in node and node["loc"] is not None:
+            self.line = self.start_line + int(node["loc"]["start"]["line"])
         
         (branches,
          explicitly_dynamic,
@@ -206,7 +207,7 @@ class Traverser:
         """Returns the most recent context. Note that this should NOT be used
         for variable lookups."""
         
-        return self.contexts[:0 - depth]
+        return self.contexts[len(self.contexts) - depth]
         
     def _seek_variable(self, variable, depth=-1, args=None):
         "Returns the value of a variable that has been declared in a context"
@@ -413,7 +414,7 @@ class JSWrapper(object):
 
 
 
-        if isinstance(value, (bool, str, int, float)):
+        if isinstance(value, (bool, str, int, float, unicode)):
             value = JSLiteral(value)
         # If the value being assigned is a wrapper as well, copy it in
         elif isinstance(value, JSWrapper):
@@ -593,5 +594,5 @@ class JSArray:
         # Interestingly enough, this allows for things like:
         # x = [4]
         # y = x * 3 // y = 12 since x equals "4"
-        return ",".join(self.elements)
+        return ",".join([str(w.get_literal_value()) for w in self.elements])
 

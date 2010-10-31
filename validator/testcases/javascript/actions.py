@@ -23,7 +23,7 @@ def node_has_global_root(traverser, node):
     else:
         # If we encounter an expression, just evaluate it and take the parser's
         # word for whether it's global or not.
-        base = JSWrapper(traverser._traverse_node(node))
+        base = JSWrapper(traverser._traverse_node(node), traverser=traverser)
         return base.is_global
 
 def trace_member(traverser, node):
@@ -50,7 +50,7 @@ def trace_member(traverser, node):
         return traverser._seek_variable(node["name"])
     else:
         # It's an expression, so just try your damndest.
-        return JSWrapper(traverser._traverse_node(node))
+        return JSWrapper(traverser._traverse_node(node), traverser=traverser)
 
 def _function(traverser, node):
     "Prevents code duplication"
@@ -66,11 +66,15 @@ def _function(traverser, node):
     # Declare parameters in the local scope
     params = []
     for param in node["params"]:
-        params.append(param["name"])
+        if param["type"] == "Identifier":
+            params.append(param["name"])
+        elif param["type"] == "ArrayPattern":
+            for element in param["elements"]:
+                params.append(element["name"])
     
     local_context = traverser._peek_context(2)
     for param in params:
-        var = js_traverser.JSWrapper(lazy=True)
+        var = js_traverser.JSWrapper(lazy=True, traverser=traverser)
         
         # We can assume that the params are static because we don't care about
         # what calls the function. We want to know whether the function solely
@@ -90,7 +94,7 @@ def _define_function(traverser, node):
     "Makes a function happy"
     
     me = _function(traverser, node)
-    traverser._peek_context(2)[node["id"]["name"]] = me
+    traverser._peek_context(2).set(node["id"]["name"], me)
     
     return True
 
@@ -99,7 +103,7 @@ def _func_expr(traverser, node):
     
     # Collect the result as an object
     results = _function(traverser, node)
-    return js_traverser.JSWrapper(value=results)
+    return js_traverser.JSWrapper(value=results, traverser=traverser)
 
 def _define_with(traverser, node):
     "Handles `with` statements"
@@ -117,20 +121,54 @@ def _define_var(traverser, node):
     
     traverser._debug("VARIABLE_DECLARATION")
     traverser.debug_level += 1
-    for declaration in node["declarations"]:
-        var_name = declaration["id"]["name"]
-        traverser._debug("NAME>>%s" % var_name)
-
-        var_value = traverser._traverse_node(declaration["init"])
-        if var_value is not None:
-            traverser._debug("VALUE>>%s" % var_value.output())
-
-        var = js_traverser.JSWrapper(value=var_value,
-                                     const=(node["kind"]=="const"))
-        traverser._set_variable(var_name, var)
     
-    traverser.debug_level -= 1
+    for declaration in node["declarations"]:
 
+        # It could be deconstruction of variables :(
+        if declaration["id"]["type"] == "ArrayPattern":
+            
+            vars = []
+            for element in declaration["id"]["elements"]:
+                vars.append(element["name"])
+
+            # The variables are not initialized
+            if declaration["init"] is None:
+                # Simple instantiation; no initialization
+                for var in vars:
+                    traverser._set_variable(var, None)
+
+            # The variables are declared inline
+            elif declaration["init"]["type"] == "ArrayPattern":
+                # TODO : Test to make sure len(values) == len(vars)
+                for value in declaration["init"]["elements"]:
+                    traverser._set_variable(var[0],
+                                            js_traverser.JSWrapper(
+                                                traverser._traverse_node(value),
+                                                traverser=traverser))
+                    var = var[1:] # Pop off the first value
+
+            # It's being assigned by a JSArray (presumably)
+            else:
+                pass
+                # TODO : Once JSArray is fully implemented, do this!
+
+
+        else:
+    
+            var_name = declaration["id"]["name"]
+            traverser._debug("NAME>>%s" % var_name)
+    
+            var_value = traverser._traverse_node(declaration["init"])
+            if var_value is not None:
+                traverser._debug("VALUE>>%s" % var_value.output())
+    
+            var = js_traverser.JSWrapper(value=var_value,
+                                         const=(node["kind"]=="const"),
+                                         traverser=traverser)
+            traverser._set_variable(var_name, var)
+            
+    traverser.debug_level -= 1
+    
     # The "Declarations" branch contains custom elements.
     return True
 
@@ -140,16 +178,17 @@ def _define_obj(traverser, node):
     var = js_traverser.JSObject()
     for prop in node["properties"]:
         var_name = ""
-        if prop["type"] == "Literal":
-            var_name = prop["value"]
+        key = prop["key"]
+        if key["type"] == "Literal":
+            var_name = key["value"]
         else:
-            var_name = prop["name"]
-        var_value = traverser._traverse_node(node["value"])
-        var[var_name] = var_value
+            var_name = key["name"]
+        var_value = traverser._traverse_node(prop["value"])
+        var.set(var_name, var_value)
         
         # TODO: Observe "kind"
     
-    return js_traverser.JSWrapper(var, lazy=True)
+    return js_traverser.JSWrapper(var, lazy=True, traverser=traverser)
 
 def _define_array(traverser, node):
     "Instantiates an array object"
@@ -196,7 +235,7 @@ def _call_settimeout(traverser, *args):
 def _expression(traverser, node):
     "Evaluates an expression and returns the result"
     result = traverser._traverse_node(node["expression"])
-    return js_traverser.JSWrapper(result)
+    return js_traverser.JSWrapper(result, traverser=traverser)
     
 def _get_this(traverser, node):
     "Returns the `this` object"
@@ -219,9 +258,9 @@ def _new(traverser, node):
     else:
         traverser._traverse_node(args)
     
-    elem = traverser._traverse_node(node["constructor"])
-    if elem is None:
-        return js_traverser.JSWrapper()
+    elem = traverser._traverse_node(node["callee"])
+    if elem is None: # TODO : This might be wrapped and thus never None :(
+        return js_traverser.JSWrapper(traverser=traverser)
 
     elem = js_traverser.JSWrapper(elem, traverser=traverser)
     return copy.deepcopy(elem)
@@ -251,7 +290,7 @@ def _expr_assignment(traverser, node):
 
     traverser._debug("ASSIGNMENT>>PARSING RIGHT")
     right = traverser._traverse_node(node["right"])
-    right = js_traverser.JSWrapper(right)
+    right = js_traverser.JSWrapper(right, traverser=traverser)
     lit_right = right.get_literal_value()
     
     traverser._debug("ASSIGNMENT>>PARSING LEFT")
@@ -263,7 +302,14 @@ def _expr_assignment(traverser, node):
         # Don't perform an operation on None. Python freaks out
         if lit_left is None:
             lit_left = 0
-        
+        if lit_right is None:
+            lit_right = 0
+
+        if isinstance(lit_left, (str, unicode)) or \
+           isinstance(lit_right, (str, unicode)):
+            lit_left = str(lit_left)
+            lit_right = str(lit_right)
+
         # All of the assignment operators
         operators = {"=":lambda:right,
                      "+=":lambda:lit_left + lit_right,
@@ -304,7 +350,7 @@ def _expr_binary(traverser, node):
     traverser.debug_level += 1
 
     left = traverser._traverse_node(node["left"])
-    left = js_traverser.JSWrapper(left)
+    left = js_traverser.JSWrapper(left, traverser=traverser)
 
     traverser.debug_level -= 1
 
@@ -313,7 +359,7 @@ def _expr_binary(traverser, node):
     traverser.debug_level += 1
 
     right = traverser._traverse_node(node["right"])
-    right = js_traverser.JSWrapper(right)
+    right = js_traverser.JSWrapper(right, traverser=traverser)
 
     traverser.debug_level -= 1
     
