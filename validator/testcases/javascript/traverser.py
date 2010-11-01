@@ -281,20 +281,7 @@ class Traverser:
         
         if "dangerous" in entity:
             dang = entity["dangerous"]
-            if isinstance(dang, types.LambdaType) and args is not None:
-                is_dangerous = dang(*args)
-                if is_dangerous:
-                    self._debug("DANGEROUS>>VIA LAMBDA")
-                    self.err.error(("testcases_javascript_traverser",
-                                    "_build_global",
-                                    "dangerous_global_called"),
-                                   "Dangerous Global Called",
-                                   ["""A dangerous global function was called
-                                    by some JavaScript code.""",
-                                    "Dangerous function: %s" % name],
-                                   self.filename,
-                                   self.line)
-            elif dang:
+            if dang and not isinstance(dang, types.LambdaType):
                 self._debug("DANGEROUS")
                 self.err.error(("testcases_javascript_traverser",
                                 "_build_global",
@@ -306,10 +293,8 @@ class Traverser:
                                self.filename,
                                self.line)
 
-            return JSWrapper(lazy=True, traverser=self)
-
         # Build out the wrapper object from the global definition.
-        result = JSWrapper(is_global=True, traverser=self)
+        result = JSWrapper(is_global=True, traverser=self, lazy=True)
         result.value = entity
         return result
     

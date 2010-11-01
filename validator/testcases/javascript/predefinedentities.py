@@ -1,14 +1,26 @@
 import actions
-#from traverser import JSObject, JSVariable
+
+# A list of identifiers and member values that may not be used.
+BANNED_IDENTIFIERS = ("newThread", )
+
+# For "dangerous" elements, specifying True will throw an error on all
+# detected instances of the particular object. Specifying a lambda function
+# will allow the object to be referenced. If the object is called via a
+# CallExpression, "a" will contain the raw arguments values and "t" will
+# contain a reference to traverser._traverse_node(). "t" will always return a
+# JSWrapper object. The return value of the lambda function will be used as
+# the value for the "dangerous" property. Lastly, specifying a string functions
+# identically to "True", except the string will be outputted when the error is
+# thrown.
 
 # GLOBAL_ENTITIES is also representative of the `window` object.
 GLOBAL_ENTITIES = {
     "window": {"value": lambda: GLOBAL_ENTITIES},
     "document":
         {"value": {"createElement":
-                       {"dangerous": lambda *args: args[0].value == "script"},
+                       {"dangerous": lambda a,t: t(a[0]).get_literal_value() == "script"},
                    "createElementNS":
-                       {"dangerous": lambda *args: args[0].value == "script"}}},
+                       {"dangerous": lambda a,t: t(a[0]).get_literal_value() == "script"}}},
     
     # The nefariuos timeout brothers!
     "setTimeout": {"dangerous": actions._call_settimeout},
@@ -27,7 +39,9 @@ GLOBAL_ENTITIES = {
     
     "eval": {"dangerous": True},
     "Function": {"dangerous": True},
-    "Object": {"value": {"prototype": {"dangerous": True}}},
+    "Object": {"value": {"prototype": {"dangerous": True},
+                         "constructor": # Just an experiment for now
+                             {"value":lambda:GLOBAL_ENTITIES["Function"]}},},
     "String": {"value": {"prototype": {"dangerous": True}}},
     "Array": {"value": {"prototype": {"dangerous": True}}},
     "Number": {"value": {"prototype": {"dangerous": True}}},
@@ -54,7 +68,7 @@ GLOBAL_ENTITIES = {
                                      {"dangerous": True},
                                   "import":
                                      {"dangerous":
-                                         lambda *args: args and args[0].contains("ctypes.jsm")}}},
+                                         lambda a,t: a and a[0].contains("ctypes.jsm")}}},
                    "interfaces":
                        {"value": {"nsIProcess":
                                      {"dangerous": True},

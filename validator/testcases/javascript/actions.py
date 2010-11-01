@@ -1,4 +1,5 @@
 import copy
+import types
 
 import traverser as js_traverser
 
@@ -207,30 +208,37 @@ def _define_literal(traverser, node):
 
 def _call_expression(traverser, node):
     args = node["arguments"]
-    
-    # We want to make sure of a few things. First, if it's not an identifier or
-    # a MemberExpression, any sort of potentially dangerous object is going to
-    # be tested somewhere else anyway. If it is one of those types, we want to
-    # make sure it's a variable that we can actually analyze (i.e.: globals).
-    if node["callee"]["type"] in ("Identifier", "MemberExpression") and \
-       node_has_global_root(node["callee"]):
-        # Yes; it's interesting and we should explore it.
-        arguments = []
-        for arg in args:
-            arguments.append(traverser._traverse_node(arg))
 
-    else:
-        # No; just traverse it like any other tree.
-        return False
+    member = traverser._traverse_node(node["callee"])
+    if member.is_global and \
+       isinstance(member.value["dangerous"], types.LambdaType):
+        dangerous = member.value["dangerous"]
 
-    return True # We want to do all of the processing on our own
+        t = traverser._traverse_node
+        result = dangerous(a=args, t=t)
+        if result:
+            # Generate a string representation of the params
+            params = ", ".join([str(t(p).get_literal_value()) for p in args])
+            traverser.err.error(("testcases_javascript_actions",
+                                 "_call_expression",
+                                 "called_dangerous_global"),
+                                "Global called in dangerous manner",
+                                ["A global function was called using a set "
+                                 "of dangerous parameters. These parameters "
+                                 "have been disallowed.",
+                                 "Params: %s" % params],
+                                traverser.filename,
+                                traverser.line)
 
-def _call_settimeout(traverser, *args):
-    """Handler for setTimeout and setInterval. Should determine whether args[0]
+    return None
+
+def _call_settimeout(a,t):
+    """Handler for setTimeout and setInterval. Should determine whether a[0]
     is a lambda function or a string. Strings are banned, lambda functions are
-    ok."""
-    
-    return True
+    ok. Since we can't do reliable type testing on other variables, we flag
+    those, too."""
+
+    return (not a) or a[0]["type"] != "FunctionExpression"
 
 def _expression(traverser, node):
     "Evaluates an expression and returns the result"
