@@ -19,11 +19,8 @@ def test_js_file(err, name, data, filename=None, line=0):
     if tree is None:
         return
 
-    try:
-        t = traverser.Traverser(err, filename, line)
-        t.run(tree)
-    except:
-        print "An error occurred while running some JavaScript tests."
+    t = traverser.Traverser(err, filename, line)
+    t.run(tree)
 
 def test_js_snippet(err, data, filename=None, line=0):
     "Process a JS snippet by passing it through to the file tester."

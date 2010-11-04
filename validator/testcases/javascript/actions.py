@@ -158,10 +158,9 @@ def _define_var(traverser, node):
     
             var_name = declaration["id"]["name"]
             traverser._debug("NAME>>%s" % var_name)
-    
+            
             var_value = traverser._traverse_node(declaration["init"])
-            if var_value is not None:
-                traverser._debug("VALUE>>%s" % var_value.output())
+            traverser._debug("VALUE>>%s" % var_value.output())
     
             var = js_traverser.JSWrapper(value=var_value,
                                          const=(node["kind"]=="const"),

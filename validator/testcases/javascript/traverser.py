@@ -9,6 +9,7 @@ DEBUG = True
 class MockBundler:
     def __init__(self):
         self.message_count = 0
+        self.final_context = None
 
     def error(self, id, title, description, file="", line=1):
         "Represents a mock error"
@@ -97,6 +98,11 @@ class Traverser:
         self._debug("END>>")
 
         if self.contexts:
+            # If we're in debug mode, save a copy of the global context for
+            # analysis during unit tests.
+            if DEBUG:
+                self.err.final_context = self.contexts[0]
+
             # This performs the namespace pollution test.
             # {prefix, count}
 
@@ -147,7 +153,7 @@ class Traverser:
             self._debug("ACTION>>%s" %
                     ("halt" if action_result else "continue"))
         
-        if not action_result:
+        if action_result is None:
             self.debug_level += 1
             for branch in branches:
                 if branch in node:
@@ -209,7 +215,7 @@ class Traverser:
         
         return self.contexts[len(self.contexts) - depth]
         
-    def _seek_variable(self, variable, depth=-1, args=None):
+    def _seek_variable(self, variable, depth=-1):
         "Returns the value of a variable that has been declared in a context"
         
         self._debug("SEEK>>%s>>%d" % (variable, depth))
@@ -222,25 +228,26 @@ class Traverser:
         self._debug("SEEK_FAIL>>TRYING GLOBAL")
 
         # Seek in globals for the variable instead.
-        return self._get_global(variable, args)
+        return self._get_global(variable)
 
     def _is_local_variable(self, variable):
         "Returns whether a variable is defined in the current scope"
-
-        for c in range(0, len(self.contexts) - 1):
-            context = self.contexts[len(self.contexts) - 1 - c]
+        
+        context_count = len(self.contexts)
+        for c in range(context_count):
+            context = self.contexts[context_count - c - 1]
             if context.has_var(variable):
                 return True
 
         return False
 
     def _seek_local_variable(self, variable, depth=-1):
-        
         # Loop through each context in reverse order looking for the defined
         # variable.
-        for c in range(0, len(self.contexts) - 1):
-            context = self.contexts[len(self.contexts) - 1 - c]
-
+        context_count = len(self.contexts)
+        for c in range(context_count):
+            context = self.contexts[context_count - c - 1]
+            
             # If it has the variable, return it
             if context.has_var(variable):
                 self._debug("SEEK>>FOUND AT DEPTH %d" % c)
@@ -261,7 +268,7 @@ class Traverser:
 
         return name in globs
 
-    def _get_global(self, name, args=None, globs=None):
+    def _get_global(self, name, globs=None):
         "Gets a variable from the predefined variable context."
         
         # Allow overriding of the global entities
@@ -274,9 +281,9 @@ class Traverser:
             return JSWrapper(None, traverser=self)
         
         self._debug("SEEK_GLOBAL>>FOUND>>%s" % name)
-        return self._build_global(name, globs[name], args)
+        return self._build_global(name, globs[name])
     
-    def _build_global(self, name, entity, args=None):
+    def _build_global(self, name, entity):
         "Builds an object based on an entity from the predefined entity list"
         
         if "dangerous" in entity:
@@ -303,17 +310,11 @@ class Traverser:
         
         self._debug("SETTING_OBJECT")
         
-        for i in range(len(self.contexts) - 1, 0):
-            context = self.contexts[i]
-            if name in context:
-                context.set(name, value)
-                return value
-        
         if name in GLOBAL_ENTITIES:
             # TODO : In the future, this should account for non-readonly
             # entities (i.e.: localStorage)
             self._debug("GLOBAL_OVERWRITE")
-            self.err.error(("testcases_javascript_traverser",
+            kself.err.error(("testcases_javascript_traverser",
                             "_set_variable",
                             "global_overwrite"),
                             "Global Overwrite",
@@ -324,6 +325,15 @@ class Traverser:
                             self.line)
             return None
 
+        context_count = len(self.contexts)
+        for i in range(context_count):
+            context = self.contexts[context_count - i - 1]
+            if context.has_var(name):
+                self._debug("SETTING_OBJECT>>LOCAL>>%d" % i)
+                context.set(name, value)
+                return value
+        
+        self._debug("SETTING_OBJECT>>LOCAL")
         self.contexts[0 if glob else -1].set(name, value)
         return value
     
@@ -336,12 +346,15 @@ class JSContext(object):
         self.data = {}
     
     def get(self, name):
+        name = str(name)
         return self.data[name] if name in self.data else None
     
     def set(self, name, variable):
+        name = str(name)
         self.data[name] = variable
     
     def has_var(self, name):
+        name = str(name)
         return name in self.data
 
     def output(self):
@@ -416,7 +429,8 @@ class JSWrapper(object):
     def set_value_from_expression(self, traverser, node):
         "Sets the value of the variable from a node object"
         
-        self.set_value(traverser._traverse_node(node))
+        self.set_value(traverser._traverse_node(node),
+                       traverser=traverser)
 
     def has_property(self, property):
         """Returns a boolean value representing the presence of a property"""
@@ -465,12 +479,11 @@ class JSWrapper(object):
 
     def output(self):
         "Returns a readable version of the object"
-
-        if self.value is JSLiteral:
-            return json.dumps(self.value.value)
-        elif self.value is JSPrototype:
+        if isinstance(self.value, JSLiteral):
+            return self.value.value
+        elif isinstance(self.value, JSPrototype):
             return "<<PROTOTYPE>>"
-        elif self.value is JSObject:
+        elif isinstance(self.value, JSObject):
             properties = {}
             for (name, property) in self.value.data:
                 if property is types.LambdaType:
@@ -479,7 +492,7 @@ class JSWrapper(object):
                 wrapper = JSWrapper(property, traverser=self)
                 properties[name] = wrapper.output()
             return json.dumps(properties)
-        elif self.value is JSArray:
+        elif isinstance(self.value, JSArray):
             return None # TODO: These aren't implemented yet!
 
     def __str__(self):
