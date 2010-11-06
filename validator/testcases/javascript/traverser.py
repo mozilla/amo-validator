@@ -43,7 +43,7 @@ class MockBundler:
 class Traverser:
     "Traverses the AST Tree and determines problems with a chunk of JS."
     
-    def __init__(self, err, filename, start_line=0):
+    def __init__(self, err, filename, start_line=0, context=None):
         if err is not None:
             self.err = err
         else:
@@ -53,7 +53,8 @@ class Traverser:
         self.filename = filename
         self.start_line = start_line
         self.polluted = False
-        self.line = 0
+        self.line = 1
+        self.context = context
         
         # Can use the `this` object
         self.can_use_this = False
@@ -87,7 +88,8 @@ class Traverser:
                            """Some JavaScript code was found, but could not be
                            interpreted.""",
                            self.filename,
-                           self.start_line)
+                           self.start_line,
+                           self.context)
             return None
         
         self._debug("START>>")
@@ -293,7 +295,8 @@ class Traverser:
                                     by some JavaScript code.""",
                                     "Dangerous function: %s" % name],
                                    self.filename,
-                                   self.line)
+                                   self.line,
+                                   self.context)
             elif dang:
                 self._debug("DANGEROUS")
                 self.err.error(("testcases_javascript_traverser",
@@ -304,7 +307,8 @@ class Traverser:
                                 accessed by some JavaScript code.""",
                                 "Accessed object: %s" % name],
                                self.filename,
-                               self.line)
+                               self.line,
+                               self.context)
 
             return JSWrapper(lazy=True, traverser=self)
 
@@ -397,7 +401,8 @@ class JSWrapper(object):
                                 "A variable declared as constant has been "
                                 "overwritten in some JS code.",
                                 traverser.filename,
-                                traverser.line)
+                                traverser.line,
+                                traverser.context)
         
         # We want to obey the permissions of global objects
         if self.is_global:
@@ -409,7 +414,8 @@ class JSWrapper(object):
                                 "An attempt to overwrite a global varible "
                                 "made in some JS code.",
                                 traverser.filename,
-                                traverser.line)
+                                traverser.line,
+                                traverser.context)
             return self
 
 

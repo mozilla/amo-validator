@@ -3,6 +3,7 @@ import os
 import subprocess
 
 import validator.testcases.javascript.traverser as traverser
+from validator.contextgenerator import ContextGenerator
 from validator.constants import SPIDERMONKEY_INSTALLATION as SPIDERMONKEY
 
 def test_js_file(err, name, data, filename=None, line=0):
@@ -19,11 +20,15 @@ def test_js_file(err, name, data, filename=None, line=0):
     if tree is None:
         return
 
-    try:
-        t = traverser.Traverser(err, filename, line)
-        t.run(tree)
-    except:
-        print "An error occurred while running some JavaScript tests."
+    context = ContextGenerator(data)
+    #try:
+    t = traverser.Traverser(err=err,
+                            filename=filename,
+                            start_line=line,
+                            context=context)
+    t.run(tree)
+    #except:
+    #    print "An error occurred while running some JavaScript tests."
 
 def test_js_snippet(err, data, filename=None, line=0):
     "Process a JS snippet by passing it through to the file tester."

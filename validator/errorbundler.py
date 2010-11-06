@@ -365,9 +365,11 @@ class ErrorBundle(object):
             if message["line"]:
                 verbose_output.append("\tLine:\t%s" % message["line"])
             
-            if message["context"]:
+            if "context" in message and message["context"]:
                 verbose_output.append("\tContext:")
-                verbose_output.extend(["\t\t%s" for x in message["context"]])
+                verbose_output.extend(["\t\t%s" % x
+                                       for x
+                                       in message["context"]])
 
             # Stick it in with the standard items.
             output.append("\n")
