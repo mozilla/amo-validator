@@ -346,9 +346,9 @@ class ErrorBundle(object):
                             self._clean_message(message["description"]))
             
             # Show the user what tier we're on
-            verbose_output.append("\tTier: %d" % message["tier"])
+            verbose_output.append("\tTier:\t%d" % message["tier"])
 
-            # If file information is availe, output that as well.
+            # If file information is available, output that as well.
             files = message["file"]
             if files is not None and files != "":
                 fmsg = "\tFile:\t%s"
@@ -364,7 +364,11 @@ class ErrorBundle(object):
             # If there is a line number, that gets put on the end.
             if message["line"]:
                 verbose_output.append("\tLine:\t%s" % message["line"])
-                
+            
+            if message["context"]:
+                verbose_output.append("\tContext:")
+                verbose_output.extend(["\t\t%s" for x in message["context"]])
+
             # Stick it in with the standard items.
             output.append("\n")
             output.append("\n".join(verbose_output))

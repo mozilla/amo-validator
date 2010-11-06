@@ -243,7 +243,6 @@ def _compare_packages(reference, target, ref_base=None):
                             "entities": len(unchanged_entities),
                             "filename": name,
                             "unchanged_entities": unchanged_entities})
-            print results
         
         results.append({"type": "file_entity_count",
                         "filename": name,
@@ -333,7 +332,6 @@ def _aggregate_results(err, results, locale, similar=False):
                                                    "entities": []}
             unchanged = unchanged_entity_list[filename]
             unchanged["count"] += ritem["entities"]
-            print ritem
             unchanged["entities"].extend(ritem["unchanged_entities"])
         elif rtype == "total_entities":
             total_entities += ritem["entities"]
