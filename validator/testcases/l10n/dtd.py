@@ -1,4 +1,6 @@
 
+from validator.contextgenerator import ContextGenerator
+
 try:
     from HTMLParser import HTMLParser
 except ImportError: # pragma: no cover
@@ -16,6 +18,7 @@ class DTDParser(object):
         """
         
         self.entities = {}
+        self.items = []
         
         if isinstance(dtd, str):
             dtd_instance = open(dtd)
@@ -25,6 +28,9 @@ class DTDParser(object):
             data = dtd.getvalue()
         
         self._parse(data)
+
+        # Create a context for the file
+        self.context = ContextGenerator(data)
     
     def __len__(self):
         return len(self.entities)
@@ -43,8 +49,9 @@ class DTDParser(object):
                 parser = DTDXMLParser()
             else:
                 if parser.out_buffer:
-                    for name, value in parser.out_buffer.items():
+                    for name, value, line in parser.out_buffer:
                         self.entities[name] = value
+                        self.items.append((name, value, line))
                     parser.clear_buffer()
         
 
@@ -53,7 +60,7 @@ class DTDXMLParser(HTMLParser):
     
     def __init__(self):
         HTMLParser.__init__(self)
-        self.out_buffer = {}
+        self.out_buffer = []
         
     def unknown_decl(self, decl):
         "Handles non-DOCTYPE SGML declarations in *ML documents."
@@ -67,10 +74,12 @@ class DTDXMLParser(HTMLParser):
             # TODO: Log an error?
             return
         
-        self.out_buffer[split_decl[1]] = split_decl[2].strip('\'"')
+        self.out_buffer.append((split_decl[1],
+                                split_decl[2].strip('\'"'),
+                                self.getpos()[0])) # Pos 0 is the line #
         
     def clear_buffer(self):
         "Clears the return buffer."
-        self.out_buffer = {}
+        self.out_buffer = []
         
 

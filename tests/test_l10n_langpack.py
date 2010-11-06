@@ -47,18 +47,18 @@ def test_results_aggregator():
     l10n._aggregate_results(err,
                             [{"type":"unchanged_entity",
                               "entities":0,
-                              "unchanged_entities":["asdf","ghjk"],
+                              "unchanged_entities":[("asdf", 1), ("ghjk", 1)],
                               "filename":"foo.bar"},
                               {"type":"total_entities",
                                "entities":100}],
                             {"name":"en-US", "path":"foo.bar"})
     assert not err.failed()
-    
+
     err = ErrorBundle(None, True)
     l10n._aggregate_results(err,
                             [{"type":"unchanged_entity",
                               "entities":50,
-                              "unchanged_entities":["asdf","ghjk"],
+                              "unchanged_entities":[("asdf", 1), ("ghjk", 1)],
                               "filename":"foo.bar"},
                              {"type":"file_entity_count",
                               "filename":"foo.bar",
