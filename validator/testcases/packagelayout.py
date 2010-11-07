@@ -83,7 +83,6 @@ def test_xpcom(err, package_contents, xpi_package):
                         name);
             break
         
-    
 
 @decorator.register_test(tier=1, expected_type=3)
 def test_dictionary_layout(err, package_contents=None, xpi_package=None):

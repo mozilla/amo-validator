@@ -3,6 +3,7 @@ import re
 
 from validator import decorator
 from validator.chromemanifest import ChromeManifest
+from validator.contextgenerator import ContextGenerator
 from validator.constants import PACKAGE_LANGPACK
 
 BAD_LINK = '(href|src)=["\'](?!(chrome:\/\/|#([a-z][a-z0-9\-_:\.]*)?))'
@@ -41,7 +42,9 @@ def test_langpack_manifest(err, package_contents=None, xpi_package=None):
                        'locale' or 'override'. Other values are not
                        allowed.""",
                        "Invalid subject: %s" % subject],
-                      "chrome.manifest")
+                      "chrome.manifest",
+                      line=triple["line"],
+                      context=chrome.context)
         
         if subject == "override":
             object_ = triple["object"]
@@ -57,16 +60,21 @@ def test_langpack_manifest(err, package_contents=None, xpi_package=None):
                           "Invalid chrome.manifest object/predicate.",
                           "'override' entry does not match '/%s/'" % pattern,
                           "chrome.manifest",
-                          triple["line"])
+                          line=triple["line"],
+                          context=chrome.context)
 
 
 # This function is called by content.py
 def test_unsafe_html(err, filename, data):
     "Tests for unsafe HTML tags in language pack files."
     
+    context = ContextGenerator(data)
+
     unsafe_pttrn = re.compile('<(script|embed|object)')
     
-    if unsafe_pttrn.search(data):
+    match = unsafe_pttrn.search(data)
+    if match:
+        line = context.get_line(match.start())
         err.error(("testcases_langpack",
                    "test_unsafe_html",
                    "unsafe_content_html"),
@@ -74,15 +82,23 @@ def test_unsafe_html(err, filename, data):
                   """Language packs are not allowed to contain scripts,
                   embeds, or other executable code in the language
                   definition files.""",
-                  filename)
+                  filename,
+                  line=line,
+                  context=context)
     
     remote_pttrn = re.compile(BAD_LINK, re.I)
-    if remote_pttrn.search(data):
+
+    match = remote_pttrn.search(data)
+    if match:
+        line = context.get_line(match.start())
         err.error(("testcases_langpack",
                    "test_unsafe_html",
                    "unsafe_content_link"),
                   "Unsafe remote resource found in language pack.",
                   """Language packs are not allowed to contain
                   references to remote resources.""",
-                  filename)
+                  filename,
+                  line=line,
+                  context=context)
     
+

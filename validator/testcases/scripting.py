@@ -3,6 +3,7 @@ import os
 import subprocess
 
 import validator.testcases.javascript.traverser as traverser
+from validator.contextgenerator import ContextGenerator
 from validator.constants import SPIDERMONKEY_INSTALLATION as SPIDERMONKEY
 
 def test_js_file(err, name, data, filename=None, line=0):
@@ -19,6 +20,7 @@ def test_js_file(err, name, data, filename=None, line=0):
     if tree is None:
         return
 
+    context = ContextGenerator(data)
     t = traverser.Traverser(err, filename, line)
     t.run(tree)
 

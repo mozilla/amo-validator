@@ -218,7 +218,7 @@ def _compare_packages(reference, target, ref_base=None):
         missing_entities = []
         unchanged_entities = []
         
-        for rname, rvalue in ref_doc.entities.items():
+        for rname, rvalue, rline in ref_doc.items:
             entity_count += 1
             
             if rname not in tar_doc.entities:
@@ -229,7 +229,7 @@ def _compare_packages(reference, target, ref_base=None):
                len(rvalue) > L10N_LENGTH_THRESHOLD and \
                not fnmatch.fnmatch(rvalue, "http*://*"):
                 
-                unchanged_entities.append(rname)
+                unchanged_entities.append((rname, rline))
                 continue
             
         
@@ -362,7 +362,9 @@ def _aggregate_results(err, results, locale, similar=False):
                     (name,
                      unchanged["count"],
                      count,
-                     ", ".join(unchanged["entities"]),
+                     ", ".join(["%s (%d)" % (e, line)
+                                for e, line
+                                in unchanged["entities"]]),
                      percentage * 100))
     
     if agg_unchanged:

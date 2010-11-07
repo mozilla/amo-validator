@@ -1,8 +1,8 @@
+import json
 import platform
 import uuid
 
-import json
-
+from contextgenerator import ContextGenerator
 if platform.system() != "Windows":
     from outputhandlers.shellcolors import OutputHandler
 else: # pragma: no cover
@@ -43,7 +43,8 @@ class ErrorBundle(object):
         self.handler = OutputHandler(pipe, no_color)
             
         
-    def error(self, err_id, error, description='', filename='', line=0):
+    def error(self, err_id, error,
+              description='', filename='', line=0, context=None):
         "Stores an error message for the validation process"
         self._save_message(self.errors,
                            "errors",
@@ -51,10 +52,12 @@ class ErrorBundle(object):
                             "message": error,
                             "description": description,
                             "file": filename,
-                            "line": line})
+                            "line": line},
+                           context=context)
         return self
         
-    def warning(self, err_id, warning, description='', filename='', line=0):
+    def warning(self, err_id, warning,
+                description='', filename='', line=0, context=None):
         "Stores a warning message for the validation process"
         self._save_message(self.warnings,
                            "warnings",
@@ -62,14 +65,17 @@ class ErrorBundle(object):
                             "message": warning,
                             "description": description,
                             "file": filename,
-                            "line": line})
+                            "line": line},
+                           context=context)
         return self
 
+    # NOTE : This function WILL NOT support contexts since it's deprecated.
     def info(self, err_id, info, description="", filename="", line=0):
         "An alias for notice"
         self.notice(err_id, info, description, filename, line)
 
-    def notice(self, err_id, notice, description="", filename="", line=0):
+    def notice(self, err_id, notice,
+               description="", filename="", line=0, context=None):
         "Stores an informational message about the validation"
         self._save_message(self.notices,
                            "notices",
@@ -77,15 +83,24 @@ class ErrorBundle(object):
                             "message": notice,
                             "description": description,
                             "file": filename,
-                            "line": line})
+                            "line": line},
+                           context=context)
         return self
         
-    def _save_message(self, stack, type_, message):
+    def _save_message(self, stack, type_, message, context=None):
         "Stores a message in the appropriate message stack."
         
         uid = uuid.uuid1().hex
         
         message["uid"] = uid
+
+        # Get the context for the message (if there's a context available)
+        if context is not None:
+            if isinstance(context, tuple):
+                message["context"] = context
+            else:
+                message["context"] = context.get_context(message["line"])
+
         stack.append(message)
         
         # Mark the tier that the error occurred at
@@ -194,9 +209,10 @@ class ErrorBundle(object):
             # right carets.
             callback(message["id"],
                      message["message"],
-                     message["description"],
-                     trace,
-                     message["line"])
+                     description=message["description"],
+                     filename=trace,
+                     line=message["line"],
+                     context=message["context"])
     
     
     def _clean_description(self, message, json=False):
@@ -331,9 +347,9 @@ class ErrorBundle(object):
                             self._clean_message(message["description"]))
             
             # Show the user what tier we're on
-            verbose_output.append("\tTier: %d" % message["tier"])
+            verbose_output.append("\tTier:\t%d" % message["tier"])
 
-            # If file information is availe, output that as well.
+            # If file information is available, output that as well.
             files = message["file"]
             if files is not None and files != "":
                 fmsg = "\tFile:\t%s"
@@ -349,7 +365,13 @@ class ErrorBundle(object):
             # If there is a line number, that gets put on the end.
             if message["line"]:
                 verbose_output.append("\tLine:\t%s" % message["line"])
-                
+            
+            if "context" in message and message["context"]:
+                verbose_output.append("\tContext:")
+                verbose_output.extend(["\t>\t%s" % x
+                                       for x
+                                       in message["context"]])
+
             # Stick it in with the standard items.
             output.append("\n")
             output.append("\n".join(verbose_output))

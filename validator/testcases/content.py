@@ -38,7 +38,8 @@ def test_xpcnativewrappers(err, package_contents=None, xpi_package=None):
                       """chrome.manifest files are not allowed to contain
                       xpcnativewrappers directives.""",
                       "chrome.manifest",
-                      triple["line"])
+                      line=triple["line"],
+                      context=chrome.context)
 
 
 @decorator.register_test(tier=2)
@@ -55,15 +56,15 @@ def test_packed_packages(err, package_contents=None, xpi_package=None):
             continue
         
         if name.split("/")[-1].startswith("._"):
-            err.info(("testcases_content",
-                      "test_packed_packages",
-                      "macintosh_junk"),
-                     "Garbage file found.",
-                     ["""A junk file has been detected. It may cause
-                      problems with proper operation of the add-on down the
-                      road.""",
-                      "It is recommended that you delete the file"],
-                     name)
+            err.notice(("testcases_content",
+                        "test_packed_packages",
+                        "macintosh_junk"),
+                       "Garbage file found.",
+                       ["""A junk file has been detected. It may cause
+                        problems with proper operation of the add-on down the
+                        road.""",
+                        "It is recommended that you delete the file"],
+                       name)
         
         processed = False
         

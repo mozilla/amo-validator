@@ -35,4 +35,6 @@ def test_theme_manifest(err, package_contents=None, xpi_package=None):
                        reasons.""",
                        "Invalid subject: %s" % subject],
                       "chrome.manifest",
-                      triple["line"])
+                      line=triple["line"],
+                      context=chrome.context)
+

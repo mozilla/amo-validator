@@ -1,3 +1,4 @@
+from validator.contextgenerator import ContextGenerator
 
 class ChromeManifest(object):
     """This class enables convenient reading and searching of
@@ -7,6 +8,7 @@ class ChromeManifest(object):
         "Reads an ntriples style chrome.manifest file"
         
         self.data = data
+        self.context = ContextGenerator(data)
         self.lines = data.split("\n")
         
         # Extract the data from the triples in the manifest

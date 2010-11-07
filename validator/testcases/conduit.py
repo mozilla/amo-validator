@@ -96,6 +96,7 @@ def test_conduittoolbar(err, package_contents=None, xpi_manager=None):
                              "Detected Conduit toolbar.",
                              "'ebtoolbarstyle' found in chrome.manifest",
                              "chrome.manifest",
-                             data["line"])
+                             line=data["line"],
+                             context=chrome.context)
         
         
