@@ -209,9 +209,10 @@ class ErrorBundle(object):
             # right carets.
             callback(message["id"],
                      message["message"],
-                     message["description"],
-                     trace,
-                     message["line"])
+                     description=message["description"],
+                     filename=trace,
+                     line=message["line"],
+                     context=message["context"])
     
     
     def _clean_description(self, message, json=False):
@@ -367,7 +368,7 @@ class ErrorBundle(object):
             
             if "context" in message and message["context"]:
                 verbose_output.append("\tContext:")
-                verbose_output.extend(["\t\t%s" % x
+                verbose_output.extend(["\t>\t%s" % x
                                        for x
                                        in message["context"]])
 

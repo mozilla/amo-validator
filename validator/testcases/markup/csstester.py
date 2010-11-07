@@ -1,17 +1,23 @@
 import re
 import json
 import fnmatch
-
 import cssutils
+
+from validator.contextgenerator import ContextGenerator
 
 def test_css_file(err, filename, data, line_start=1):
     "Parse and test a whole CSS file."
     
     tokenizer = cssutils.tokenize2.Tokenizer()
+    context = ContextGenerator(data)
     token_generator = tokenizer.tokenize(data)
     
     try:
-        _run_css_tests(err, token_generator, filename, line_start - 1)
+        _run_css_tests(err,
+                       tokens=token_generator,
+                       filename=filename,
+                       line_start=line_start - 1,
+                       context=context)
     except: #pragma: no cover
         # This happens because tokenize is a generator.
         # Bravo, Mr. Bond, Bravo.
@@ -28,12 +34,13 @@ def test_css_file(err, filename, data, line_start=1):
 def test_css_snippet(err, filename, data, line):
     "Parse and test a CSS nugget."
     
-    # Re-package to make it CSS-complete
-    data = "#foo{%s}" % data
-    
+    # Re-package to make it CSS-complete. Note the whitespace to prevent
+    # the extra code from showing in the context output.
+    data = "#foo{\n\n%s\n\n}" % data
+
     test_css_file(err, filename, data, line)
     
-def _run_css_tests(err, tokens, filename, line_start=0):
+def _run_css_tests(err, tokens, filename, line_start=0, context=None):
     """Processes a CSS file to test it for things that could cause it
     to be harmful to the browser."""
     
@@ -89,7 +96,8 @@ def _run_css_tests(err, tokens, filename, line_start=0):
                                     be chrome:// URLs. They should not be
                                     used with relative file paths.""",
                                     filename,
-                                    line + line_start)
+                                    line=line + line_start,
+                                    context=context.get_context(line))
                     else:
                         err.error(("testcases_markup_csstester",
                                    "_run_css_tests",
@@ -101,7 +109,8 @@ def _run_css_tests(err, tokens, filename, line_start=0):
                                   placed in the /content/ directory of the
                                   package.""",
                                   filename,
-                                  line + line_start)
+                                  line=line + line_start,
+                                  context=context.get_context(line))
             
         elif tok_type == "HASH":
             # Search for interference with the identity box.
@@ -117,7 +126,7 @@ def _run_css_tests(err, tokens, filename, line_start=0):
                      sensitive piece of the interface and should
                      not be modified.""",
                      "Lines: %s" % ", ".join(identity_box_mods)],
-                filename)
+                    filename)
     if webkit_insts:
         err.error(("testcases_markup_csstester",
                    "_run_css_tests",

@@ -7,6 +7,7 @@ except ImportError: # pragma: no cover
 
 import validator.testcases.scripting as scripting
 from validator.testcases.markup import csstester
+from validator.contextgenerator import ContextGenerator
 from validator.constants import *
 
 DEBUG = False
@@ -42,6 +43,8 @@ class MarkupParser(HTMLParser):
         self.err = err
         self.line = 0
         self.debug = debug
+
+        self.context = None
         
         self.xml_state = []
         self.xml_buffer = []
@@ -59,6 +62,8 @@ class MarkupParser(HTMLParser):
         
         self.reported = {}
         
+        self.context = ContextGenerator(data)
+
         lines = data.split("\n")
         line_buffer = []
         force_buffer = False
@@ -105,17 +110,18 @@ class MarkupParser(HTMLParser):
                self.debug and "testscript" in self.xml_state):
                 if "script_comments" in self.reported:
                     return
-                self.err.info(("testcases_markup_markuptester",
-                               "_feed",
-                               "missing_script_comments"),
-                              "Missing comments in <script> tag",
-                              """Markup parsing errors occurred
-                              while trying to parse the file. This
-                              can likely be mitigated by wrapping
-                              <script> tag contents in HTML comment
-                              tags (<!-- -->)""",
-                              self.filename,
-                              self.line)
+                self.err.notice(("testcases_markup_markuptester",
+                                 "_feed",
+                                 "missing_script_comments"),
+                                "Missing comments in <script> tag",
+                                """Markup parsing errors occurred
+                                while trying to parse the file. This
+                                can likely be mitigated by wrapping
+                                <script> tag contents in HTML comment
+                                tags (<!-- -->)""",
+                                self.filename,
+                                line=self.line,
+                                context=self.context)
                 self.reported["script_comments"] = True
                 return
             
@@ -127,7 +133,8 @@ class MarkupParser(HTMLParser):
                               document.""",
                               str(inst)],
                              self.filename,
-                             self.line)
+                             line=self.line,
+                             context=self.context)
             self.reported["markup"] = True
         
     
@@ -157,7 +164,8 @@ class MarkupParser(HTMLParser):
                            "Banned element",
                            "A banned element was detected",
                            self.filename,
-                           self.line)
+                           line=self.line,
+                           context=self.context)
         
         if self.err.detected_type == PACKAGE_LANGPACK:
             
@@ -173,7 +181,8 @@ class MarkupParser(HTMLParser):
                                 performs.""",
                                 'Tag "%s" is disallowed.' % tag],
                                self.filename,
-                               self.line)
+                               line=self.line,
+                               context=self.context)
                 if DEBUG: # pragma: no cover
                     print "Unsafe Tag ------"
             
@@ -189,7 +198,8 @@ class MarkupParser(HTMLParser):
                                    src/href attributes must begin with
                                    'chrome://'""",
                                    self.filename,
-                                   self.line)
+                                   line=self.line,
+                                   context=self.context)
                     self.err.reject = True
         
         if tag in ("iframe", "browser") and self.extension == "xul":
@@ -221,7 +231,8 @@ class MarkupParser(HTMLParser):
                                  either a valid `type` attribute or a `src`
                                  attribute that points to a local file.""",
                                  self.filename,
-                                 self.line)
+                                 line=self.line,
+                                 context=self.context)
             elif (not type_ or 
                   type_ not in SAFE_IFRAME_TYPES) and \
                  remote_src:
@@ -234,7 +245,8 @@ class MarkupParser(HTMLParser):
                                  attributes that reference local
                                  resources.""",
                                  self.filename,
-                                 self.line)
+                                 line=self.line,
+                                 context=self.context)
             
         elif tag == "script" and self.extension == "xul":
             # Per the Addon Validator Spec (v2), scripts in XUL
@@ -254,7 +266,8 @@ class MarkupParser(HTMLParser):
                                referenced to script files that are
                                hosted remotely.""",
                                self.filename,
-                               self.line)
+                               line=self.line,
+                               context=self.context)
                 self.err.reject = True
         
         # Find CSS and JS attributes and handle their values like they
@@ -295,7 +308,8 @@ class MarkupParser(HTMLParser):
                            """The markup file has more closing tags
                            than it has opening tags.""",
                            self.filename,
-                           self.line)
+                           line=self.line,
+                           context=self.context)
             self.reported["closing_tags"] = True
             if DEBUG: # pragma: no cover
                 print "Too many closing tags ------"
@@ -320,7 +334,8 @@ class MarkupParser(HTMLParser):
                               little overzealous with forward-slashes?""",
                               'Tag "%s" closed before it was opened' % tag],
                              self.filename,
-                             self.line)
+                             line=self.line,
+                             context=self.context)
             if DEBUG: # pragma: no cover
                 print "Tag closed before opened ------"
             return
@@ -345,7 +360,8 @@ class MarkupParser(HTMLParser):
                            invalidly nests its tags. This is not
                            permitted in the specified document type.""",
                            self.filename,
-                           self.line)
+                           line=self.line,
+                           context=self.context)
             if DEBUG: # pragma: no cover
                 print "Invalid markup nesting ------"
         

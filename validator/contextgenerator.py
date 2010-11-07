@@ -16,21 +16,28 @@ class ContextGenerator:
     def get_context(self, line):
         "Returns a tuple containing the context for a line"
         
+        # If there is no data in the file, there can be no context.
         datalen = len(self.data)
         if datalen <= line:
             return None
         
-        output = [None, self.data[line], None]
+        build = [self.data[line]]
+
+        # Add surrounding lines if they're available.
         if line > 0:
-            output[0] = self.data[line - 1]
+            build.insert(0, self.data[line - 1])
         if line < datalen - 1:
-            output[2] = self.data[line + 1]
+            build.append(self.data[line + 1])
 
-        for i in range(3):
-            if output[i] is not None and len(output[i]) >= 140:
-                output[i] = "%s ..." % output[i][:140]
+        for i in range(len(build)):
+            # This erases all leading whitespace. Perhaps we should keep it?
+            build[i] = build[i].strip()
+            # Truncate each line to 140-ish characters
+            if len(build[i]) >= 140:
+                build[i] = "%s ..." % build[i][:140]
 
-        return tuple(output)
+        # Return the final output as a tuple.
+        return tuple(build)
 
     def get_line(self, position):
         "Returns the line that the given string position would be found on"
