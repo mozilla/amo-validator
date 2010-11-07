@@ -21,7 +21,7 @@ def test_js_file(err, name, data, filename=None, line=0):
         return
 
     context = ContextGenerator(data)
-    t = traverser.Traverser(err, filename, line)
+    t = traverser.Traverser(err, filename, line, context=context)
     t.run(tree)
 
 def test_js_snippet(err, data, filename=None, line=0):

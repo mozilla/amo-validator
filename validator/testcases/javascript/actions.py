@@ -3,30 +3,6 @@ import types
 
 import traverser as js_traverser
 
-def node_has_global_root(traverser, node):
-    "Determines whether a MemberExpression/Identifier is rooted as a global"
-    
-    # TODO : This should someday be worked into the various functions that
-    # implement it. I feel like it's very inefficient to do a second lookup
-    # when it's not necessary.
-    if node["type"] == "MemberExpression":
-        return node_has_global_root(traverser, node["object"])
-    elif node["type"] == "Identifier":
-        name = node["name"]
-    
-        # Test if it's an object in the current context
-        if traverser._seek_local_variable(name) is not None:
-            return False
-    
-        # Test if it's an object in the global scope
-        return name in GLOBAL_ENTITIES
-
-    else:
-        # If we encounter an expression, just evaluate it and take the parser's
-        # word for whether it's global or not.
-        base = JSWrapper(traverser._traverse_node(node), traverser=traverser)
-        return base.is_global
-
 def trace_member(traverser, node):
     "Traces a MemberExpression and returns the appropriate object"
     
@@ -160,7 +136,9 @@ def _define_var(traverser, node):
             traverser._debug("NAME>>%s" % var_name)
             
             var_value = traverser._traverse_node(declaration["init"])
-            traverser._debug("VALUE>>%s" % var_value.output())
+            traverser._debug("VALUE>>%s" % (var_value.output()
+                                            if var_value is not None
+                                            else "None"))
     
             var = js_traverser.JSWrapper(value=var_value,
                                          const=(node["kind"]=="const"),
@@ -210,6 +188,7 @@ def _call_expression(traverser, node):
 
     member = traverser._traverse_node(node["callee"])
     if member.is_global and \
+       "dangerous" in member.value and \
        isinstance(member.value["dangerous"], types.LambdaType):
         dangerous = member.value["dangerous"]
 
@@ -227,7 +206,8 @@ def _call_expression(traverser, node):
                                  "have been disallowed.",
                                  "Params: %s" % params],
                                 traverser.filename,
-                                traverser.line)
+                                line=traverser.line,
+                                context=traverser.context)
 
     return None
 
@@ -410,5 +390,4 @@ def _expr_binary(traverser, node):
             return js_traverser.JSWrapper(traverser=traverser)
 
     return js_traverser.JSWrapper(output, traverser=traverser)
-
 

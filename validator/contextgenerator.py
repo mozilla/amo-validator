@@ -16,6 +16,8 @@ class ContextGenerator:
     def get_context(self, line):
         "Returns a tuple containing the context for a line"
         
+        line -= 1 # The line is one-based
+
         # If there is no data in the file, there can be no context.
         datalen = len(self.data)
         if datalen <= line:

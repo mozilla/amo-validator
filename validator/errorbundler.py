@@ -100,7 +100,9 @@ class ErrorBundle(object):
                 message["context"] = context
             else:
                 message["context"] = context.get_context(message["line"])
-
+        else:
+            message["context"] = None
+        
         stack.append(message)
         
         # Mark the tier that the error occurred at

@@ -300,8 +300,8 @@ class Traverser:
                                 accessed by some JavaScript code.""",
                                 "Accessed object: %s" % name],
                                self.filename,
-                               self.line,
-                               self.context)
+                               line=self.line,
+                               context=self.context)
 
         # Build out the wrapper object from the global definition.
         result = JSWrapper(is_global=True, traverser=self, lazy=True)
@@ -317,7 +317,7 @@ class Traverser:
             # TODO : In the future, this should account for non-readonly
             # entities (i.e.: localStorage)
             self._debug("GLOBAL_OVERWRITE")
-            kself.err.error(("testcases_javascript_traverser",
+            self.err.error(("testcases_javascript_traverser",
                             "_set_variable",
                             "global_overwrite"),
                             "Global Overwrite",
@@ -325,7 +325,8 @@ class Traverser:
                              "an object in the global scope.",
                              "Entity name: %s" % name],
                             self.filename,
-                            self.line)
+                            line=self.line,
+                            context=self.context)
             return None
 
         context_count = len(self.contexts)
@@ -378,7 +379,7 @@ class JSWrapper(object):
         self.value = None # Instantiate the placeholder value
         
         if value is not None:
-            self.set_value(value) # Make sure this is set before const
+            self.set_value(value, overwrite_const=True)
 
         self.dirty = dirty
         self.lazy = lazy
@@ -398,8 +399,8 @@ class JSWrapper(object):
                                 "A variable declared as constant has been "
                                 "overwritten in some JS code.",
                                 traverser.filename,
-                                traverser.line,
-                                traverser.context)
+                                line=traverser.line,
+                                context=traverser.context)
         
         # We want to obey the permissions of global objects
         if self.is_global:
@@ -411,8 +412,8 @@ class JSWrapper(object):
                                 "An attempt to overwrite a global varible "
                                 "made in some JS code.",
                                 traverser.filename,
-                                traverser.line,
-                                traverser.context)
+                                line=traverser.line,
+                                context=traverser.context)
             return self
 
 
@@ -490,7 +491,7 @@ class JSWrapper(object):
             return "<<PROTOTYPE>>"
         elif isinstance(self.value, JSObject):
             properties = {}
-            for (name, property) in self.value.data:
+            for (name, property) in self.value.data.items():
                 if property is types.LambdaType:
                     properties[name] = "<<LAMBDA>>"
                     continue
