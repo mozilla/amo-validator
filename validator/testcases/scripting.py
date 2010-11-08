@@ -21,8 +21,11 @@ def test_js_file(err, name, data, filename=None, line=0):
         return
 
     context = ContextGenerator(data)
-    t = traverser.Traverser(err, filename, line, context=context)
-    t.run(tree)
+    try:
+        t = traverser.Traverser(err, filename, line, context=context)
+        t.run(tree)
+    except:
+        print "An error was encountered while attempting to validate a script"
 
 def test_js_snippet(err, data, filename=None, line=0):
     "Process a JS snippet by passing it through to the file tester."
