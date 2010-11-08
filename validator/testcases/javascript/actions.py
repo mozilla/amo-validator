@@ -207,6 +207,7 @@ def _call_expression(traverser, node):
                                  "Params: %s" % params],
                                 traverser.filename,
                                 line=traverser.line,
+                                column=traverser.position,
                                 context=traverser.context)
 
     return None

@@ -11,7 +11,7 @@ class MockBundler:
         self.message_count = 0
         self.final_context = None
 
-    def error(self, id, title, description, file="", line=1):
+    def error(self, id, title, description, file="", line=1, context=None):
         "Represents a mock error"
         
         # Increment the message counter
@@ -34,11 +34,11 @@ class MockBundler:
                 print dline
         print "in %s:line %d" % (file, line)
 
-    def warning(self, id, title, description, file="", line=1):
-        self.error(id, title, description, file, line)
+    def warning(self, id, title, description, file="", line=1, context=None):
+        self.error(id, title, description, file, line, context)
 
-    def info(self, id, title, description, file="", line=1):
-        self.error(id, title, description, file, line)
+    def info(self, id, title, description, file="", line=1, context=None):
+        self.error(id, title, description, file, line, context)
 
 
 class Traverser:
@@ -54,7 +54,8 @@ class Traverser:
         self.filename = filename
         self.start_line = start_line
         self.polluted = False
-        self.line = 1
+        self.line = 1 # Line number
+        self.position = 0 # Column number
         self.context = context
         
         # Can use the `this` object
@@ -136,6 +137,7 @@ class Traverser:
         
         if "loc" in node and node["loc"] is not None:
             self.line = self.start_line + int(node["loc"]["start"]["line"])
+            self.position = int(node["loc"]["start"]["column"])
         
         (branches,
          explicitly_dynamic,
@@ -301,6 +303,7 @@ class Traverser:
                                 "Accessed object: %s" % name],
                                self.filename,
                                line=self.line,
+                               column=self.position,
                                context=self.context)
 
         # Build out the wrapper object from the global definition.
@@ -326,6 +329,7 @@ class Traverser:
                              "Entity name: %s" % name],
                             self.filename,
                             line=self.line,
+                            column=self.position,
                             context=self.context)
             return None
 
@@ -400,6 +404,7 @@ class JSWrapper(object):
                                 "overwritten in some JS code.",
                                 traverser.filename,
                                 line=traverser.line,
+                                column=traverser.position,
                                 context=traverser.context)
         
         # We want to obey the permissions of global objects
@@ -413,6 +418,7 @@ class JSWrapper(object):
                                 "made in some JS code.",
                                 traverser.filename,
                                 line=traverser.line,
+                                column=traverser.position,
                                 context=traverser.context)
             return self
 

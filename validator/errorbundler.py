@@ -44,7 +44,7 @@ class ErrorBundle(object):
             
         
     def error(self, err_id, error,
-              description='', filename='', line=0, context=None):
+              description='', filename='', line=0, column=0, context=None):
         "Stores an error message for the validation process"
         self._save_message(self.errors,
                            "errors",
@@ -52,12 +52,13 @@ class ErrorBundle(object):
                             "message": error,
                             "description": description,
                             "file": filename,
-                            "line": line},
+                            "line": line,
+                            "column": column},
                            context=context)
         return self
         
     def warning(self, err_id, warning,
-                description='', filename='', line=0, context=None):
+                description='', filename='', line=0, column=0, context=None):
         "Stores a warning message for the validation process"
         self._save_message(self.warnings,
                            "warnings",
@@ -65,7 +66,8 @@ class ErrorBundle(object):
                             "message": warning,
                             "description": description,
                             "file": filename,
-                            "line": line},
+                            "line": line,
+                            "column": column},
                            context=context)
         return self
 
@@ -75,7 +77,7 @@ class ErrorBundle(object):
         self.notice(err_id, info, description, filename, line)
 
     def notice(self, err_id, notice,
-               description="", filename="", line=0, context=None):
+               description="", filename="", line=0, column=0, context=None):
         "Stores an informational message about the validation"
         self._save_message(self.notices,
                            "notices",
@@ -83,7 +85,8 @@ class ErrorBundle(object):
                             "message": notice,
                             "description": description,
                             "file": filename,
-                            "line": line},
+                            "line": line,
+                            "column": column},
                            context=context)
         return self
         
@@ -99,7 +102,9 @@ class ErrorBundle(object):
             if isinstance(context, tuple):
                 message["context"] = context
             else:
-                message["context"] = context.get_context(message["line"])
+                message["context"] = \
+                            context.get_context(line=message["line"],
+                                                column=message["column"])
         else:
             message["context"] = None
         
@@ -214,6 +219,7 @@ class ErrorBundle(object):
                      description=message["description"],
                      filename=trace,
                      line=message["line"],
+                     column=message["column"],
                      context=message["context"])
     
     
@@ -367,7 +373,9 @@ class ErrorBundle(object):
             # If there is a line number, that gets put on the end.
             if message["line"]:
                 verbose_output.append("\tLine:\t%s" % message["line"])
-            
+            if message["column"] and message["column"] != 0:
+                verbose_output.append("\tColumn:\t%d" % message["column"])
+
             if "context" in message and message["context"]:
                 verbose_output.append("\tContext:")
                 verbose_output.extend(["\t>\t%s" % x
