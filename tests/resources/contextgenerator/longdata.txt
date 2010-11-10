@@ -1,0 +1,7 @@
+the quick brown fox jumps over the lazy dog. over the lethargic canine the auburn fox jumped, swiftly. nice ice for sale...ten cents a pail.
+This line is especially long. I want to make sure that it is over 140 characters, because if it isn't, the test won't produce an accurate representation of all possible scenarios
+the quick brown fox jumps over the lazy dog. over the lethargic canine the auburn fox jumped, swiftly. nice ice for sale...ten cents a pail.
+
+XXX This line is going to be really really really really really long. We want to make sure that the beginning gets trimmed so the Xs are not visible. If they are, it means things aren't getting trimmed properly.
+This line should be entirely visible.
+This line is going to be really really really really really long. We want to make sure that the ending gets trimmed so the Xs are not visible. If they are, it means things aren't getting trimmed properly. XXX

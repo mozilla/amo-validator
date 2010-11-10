@@ -6,6 +6,9 @@ from StringIO import StringIO
 # errors, warnings, and the like.
 
 class ContextGenerator:
+    """The context generator creates a line-by-line mapping of all files that
+    are validated. It will then use that to help produce useful bits of code
+    for errors, warnings, and the like."""
 
     def __init__(self, data=None):
         if isinstance(data, StringIO):
@@ -31,22 +34,19 @@ class ContextGenerator:
         if line < datalen - 1:
             build.append(self._format_line(line=line + 1, rel_line=2))
 
-        for i in range(len(build)):
-            # Truncate each line to 140-ish characters
-            if len(build[i]) >= 140:
-                
-                build[i] = "%s ..." % build[i][:140]
-
         # Return the final output as a tuple.
         return tuple(build)
 
     def get_line(self, position):
-        "Returns the line that the given string position would be found on"
+        "Returns the line number that the given string position is found on"
 
+        datalen = len(self.data)
         count = len(self.data[0])
         line = 1
         while count < position:
-            count += len(self.data[line])
+            if line >= datalen:
+                break
+            count += len(self.data[line]) + 1
             line += 1
 
         return line
@@ -57,7 +57,7 @@ class ContextGenerator:
         data = self.data[line].strip()
 
         line_length = len(data)
-        if line_length >= 140:
+        if line_length > 140:
             if rel_line == 0:
                 # Trim from the beginning
                 data = "... %s" % data[-140:]
