@@ -1,6 +1,7 @@
 import json
 import os
 import subprocess
+import tempfile
 
 import validator.testcases.javascript.traverser as traverser
 from validator.contextgenerator import ContextGenerator
@@ -21,11 +22,15 @@ def test_js_file(err, name, data, filename=None, line=0):
         return
 
     context = ContextGenerator(data)
-    try:
-        t = traverser.Traverser(err, filename, line, context=context)
-        t.run(tree)
-    except:
-        print "An error was encountered while attempting to validate a script"
+    if traverser.DEBUG:
+        _do_test(err=err, filename=filename, line=line, context=context,
+                 tree=tree)
+    else:
+        try:
+            _do_test(err=err, filename=filename, line=line, context=context,
+                     tree=tree)
+        except:
+            print "An error was encountered while attempting to validate a script"
 
 def test_js_snippet(err, data, filename=None, line=0):
     "Process a JS snippet by passing it through to the file tester."
@@ -44,6 +49,9 @@ def test_js_snippet(err, data, filename=None, line=0):
 
     test_js_file(err, name, data, filename, line)
     
+def _do_test(err, filename, line, context, tree):
+    t = traverser.Traverser(err, filename, line, context=context)
+    t.run(tree)
 
 def _get_tree(name, code):
    
@@ -57,16 +65,20 @@ def _get_tree(name, code):
     data = "JSON.stringify(Reflect.parse(%s))" % data
     data = "print(%s)" % data
 
-    temp = open("/tmp/temp.js", "w")
+    # Push the data to a temporary file
+    temp = tempfile.NamedTemporaryFile(mode="w+")
     temp.write(data)
-    temp.close()
-    
-    shell = subprocess.Popen([SPIDERMONKEY, "-f", "/tmp/temp.js"],
+    temp.flush() # This is very important
+
+    shell = subprocess.Popen([SPIDERMONKEY, "-f", temp.name],
 	                     shell=False,
 			     stderr=subprocess.PIPE,
 			     stdout=subprocess.PIPE)
     results = shell.communicate()
     data = results[0]
+
+    # Closing the temp file will delete it.
+    temp.close()
     parsed = json.loads(data)
     return parsed
 

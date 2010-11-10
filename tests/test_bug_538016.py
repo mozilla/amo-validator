@@ -16,6 +16,7 @@ def test_redefinition():
     
     err = _do_test("tests/resources/bug_538016.js")
     # There should be eight errors.
+    print err.message_count
     assert err.message_count == 8
     
 

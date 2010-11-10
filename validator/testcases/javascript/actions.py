@@ -371,9 +371,9 @@ def _expr_binary(traverser, node):
         ">>": lambda: left >> right,
         ">>>": lambda: math.fabs(left) >> right,
         "+": lambda: left + right,
-        "-": lambda: left - right,
-        "*": lambda: left * right,
-        "/": lambda: left / right,
+        "-": lambda: _get_as_num(left) - _get_as_num(right),
+        "*": lambda: _get_as_num(left) * _get_as_num(right),
+        "/": lambda: _get_as_num(left) / _get_as_num(right),
     }
 
     traverser.debug_level -= 1
@@ -391,4 +391,22 @@ def _expr_binary(traverser, node):
             return js_traverser.JSWrapper(traverser=traverser)
 
     return js_traverser.JSWrapper(output, traverser=traverser)
+
+
+def _get_as_num(value):
+    "Returns the JS numeric equivalent for a value"
+
+    if value is None:
+        return False
+
+    try:
+        if isinstance(value, str):
+            return float(value)
+        elif isinstance(value, int) or isinstance(value, float):
+            return value
+        else:
+            return int(value)
+
+    except:
+        return 0
 

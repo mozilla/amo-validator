@@ -4,14 +4,15 @@ import types
 from validator.testcases.javascript.nodedefinitions import DEFINITIONS
 from validator.testcases.javascript.predefinedentities import GLOBAL_ENTITIES
 
-DEBUG = False
+DEBUG = True
 
 class MockBundler:
     def __init__(self):
         self.message_count = 0
         self.final_context = None
 
-    def error(self, id, title, description, file="", line=1, context=None):
+    def error(self, id, title, description, file="",
+              line=1, column=0, context=None):
         "Represents a mock error"
         
         # Increment the message counter
@@ -32,13 +33,15 @@ class MockBundler:
                     dline = dline.replace("  ", " ")
 
                 print dline
-        print "in %s:line %d" % (file, line)
+        print "in %s:line %d (%d)" % (file, line, column)
 
-    def warning(self, id, title, description, file="", line=1, context=None):
-        self.error(id, title, description, file, line, context)
+    def warning(self, id, title, description, file="",
+                line=1, column=0, context=None):
+        self.error(id, title, description, file, line, column, context)
 
-    def info(self, id, title, description, file="", line=1, context=None):
-        self.error(id, title, description, file, line, context)
+    def info(self, id, title, description, file="",
+             line=1, column=0, context=None):
+        self.error(id, title, description, file, line, column, context)
 
 
 class Traverser:
