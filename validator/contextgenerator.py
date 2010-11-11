@@ -1,10 +1,6 @@
 import os
 from StringIO import StringIO
 
-# The context generator creates a line-by-line mapping of all files that are
-# validated. It will then use that to help produce useful bits of code for
-# errors, warnings, and the like.
-
 class ContextGenerator:
     """The context generator creates a line-by-line mapping of all files that
     are validated. It will then use that to help produce useful bits of code

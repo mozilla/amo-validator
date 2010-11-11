@@ -4,12 +4,13 @@ import types
 from validator.testcases.javascript.nodedefinitions import DEFINITIONS
 from validator.testcases.javascript.predefinedentities import GLOBAL_ENTITIES
 
-DEBUG = True
+DEBUG = False
 
 class MockBundler:
     def __init__(self):
         self.message_count = 0
         self.final_context = None
+        self.tier = 4
 
     def error(self, id, title, description, file="",
               line=1, column=0, context=None):

@@ -13,13 +13,18 @@ def test_js_file(err, name, data, filename=None, line=0):
     if SPIDERMONKEY is None:
         return
 
+    # The filename is 
     if filename is None:
         filename = name
     
+    # Get the AST tree for the JS code
     tree = _get_tree(name, data)
-    
     if tree is None:
-        return
+        return None
+    
+    # Set the tier to 4 (Security Tests)
+    before_tier = err.tier
+    err.tier = 4
 
     context = ContextGenerator(data)
     if traverser.DEBUG:
@@ -31,6 +36,9 @@ def test_js_file(err, name, data, filename=None, line=0):
                      tree=tree)
         except:
             print "An error was encountered while attempting to validate a script"
+
+    # Reset the tier so we don't break the world
+    err.tier = before_tier
 
 def test_js_snippet(err, data, filename=None, line=0):
     "Process a JS snippet by passing it through to the file tester."
