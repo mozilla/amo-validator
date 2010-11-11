@@ -1,7 +1,7 @@
 import fnmatch
 
 from validator import decorator
-
+from validator.constants import *
 
 def test_unknown_file(err, filename):
     "Tests some sketchy files that require silly code."
@@ -82,7 +82,51 @@ def test_xpcom(err, package_contents, xpi_package):
                          'File "%s" represents XPCOM ties.' % name],
                         name);
             break
-        
+
+@decorator.register_test(tier=2)
+def test_emunpack(err, package_contents, xpi_package):
+
+    if err.get_resource("em:unpack") != "true":
+        # Covers bug 597255
+
+        # Dictionaries should always be unpacked
+        fails = err.detected_type != PACKAGE_DICTIONARY
+        if not fails:
+            # Search for unpack-worthy files
+            for file_ in package_contents:
+                if fnmatch.fnmatch(file_, "components/*.exe") or \
+                   fnmatch.fnmatch(file_, "*.ico"):
+                    fails = True
+                    break
+
+        if fails:
+            err.warning(("testcases_packagelayout",
+                         "test_emunpack",
+                         "should_be_true"),
+                        "Add-on should set <em:unpack> to true",
+                        "The add-on meets criteria that would indicate "
+                        "performance issues if <em:unpack> is not set to true "
+                        "in the install.rdf file.")
+
+    else:
+        # Covers bug 551714
+
+        # This only applies to FF4
+        if not err.get_resource("ff4"):
+            return
+
+        for file_ in package_contents:
+            if fnmatch.fnmatch(file_, ".jar"):
+                err.warning(("testcases_packagelayout",
+                             "test_emunpack",
+                             "should_be_false"),
+                            "Add-on contains JAR files with <em:unpack>",
+                            "The add-on sets <em:unpack> to true in "
+                            "install.rdf, but contains JAR files. This can "
+                            "result in performance issues. It is recommended "
+                            "that you no longer use JAR files to package your "
+                            "chrome files.")
+                break
 
 @decorator.register_test(tier=1, expected_type=3)
 def test_dictionary_layout(err, package_contents=None, xpi_package=None):

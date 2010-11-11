@@ -13,7 +13,9 @@ def test_install_rdf_params(err, package_contents=None, xpi_package=None):
     
     install = err.get_resource("install_rdf")
     
-    return _test_rdf(err, install)
+    _test_rdf(err, install)
+
+
 
 def _test_rdf(err, install):
     """Wrapper for install.rdf testing to make unit testing so much
@@ -43,7 +45,8 @@ def _test_rdf(err, install):
                       "updateURL",
                       "updateLink", # Banned, but if not, pass it once.
                       "updateHash",
-                      "signature"]
+                      "signature",
+                      "unpack"] # This has other rules; CAUTION!
     may_exist = ("targetApplication",
                  "localized",
                  "description",
@@ -62,6 +65,11 @@ def _test_rdf(err, install):
     for pred_raw in install.rdf.predicates(top_id, None):
         predicate = pred_raw.split("#")[-1]
         
+        # Mark that the unpack element has been supplied
+        if predicate == "unpack":
+            value = install.get_object(predicate=pred_raw)
+            err.save_resource("em:unpack", value)
+
         # Test if the predicate is banned
         if predicate in shouldnt_exist:
             err.error(("testcases_installrdf",
