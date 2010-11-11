@@ -90,12 +90,19 @@ def test_emunpack(err, package_contents, xpi_package):
         # Covers bug 597255
 
         # Dictionaries should always be unpacked
-        fails = err.detected_type != PACKAGE_DICTIONARY
+        fails = err.detected_type == PACKAGE_DICTIONARY
         if not fails:
+            executables = ("exe","dll","so","dylib","exe","bin")
             # Search for unpack-worthy files
             for file_ in package_contents:
-                if fnmatch.fnmatch(file_, "components/*.exe") or \
-                   fnmatch.fnmatch(file_, "*.ico"):
+                if fnmatch.fnmatch(file_, "*.ico"):
+                    fails = True
+                    break
+                # Executables in /components/ should also be flagged.
+                if fnmatch.fnmatch(file_, "components/*") and \
+                   [x for x in executables
+                      if file_[:-len(x) - 1] == ".%s" % x]:
+                    
                     fails = True
                     break
 
