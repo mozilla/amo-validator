@@ -13,7 +13,8 @@ def test_install_rdf_params(err, package_contents=None, xpi_package=None):
     
     install = err.get_resource("install_rdf")
     
-    _test_rdf(err, install)
+    # This returns for testing reasons
+    return _test_rdf(err, install)
 
 
 

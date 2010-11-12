@@ -1,5 +1,6 @@
 import json
 import os
+import re
 import subprocess
 import tempfile
 
@@ -37,6 +38,8 @@ def test_js_file(err, name, data, filename=None, line=0):
         except:
             print "An error was encountered while attempting to validate a script"
 
+    _regex_tests(err, data, filename)
+
     # Reset the tier so we don't break the world
     err.tier = before_tier
 
@@ -60,6 +63,37 @@ def test_js_snippet(err, data, filename=None, line=0):
 def _do_test(err, filename, line, context, tree):
     t = traverser.Traverser(err, filename, line, context=context)
     t.run(tree)
+
+def _regex_tests(err, data, filename):
+
+    print data
+    c = ContextGenerator(data)
+    
+    np_warning = "Network preferences may not be modified."
+
+    errors = {"globalStorage\\[.*\\].password":
+                  "Global Storage may not be used to store passwords.",
+              "network\\.http": np_warning,
+              "extensions\\.blocklist\\.url": np_warning,
+              "extensions\\.blocklist\\.level": np_warning,
+              "extensions\\.blocklist\\.interval": np_warning,
+              "general\\.useragent": np_warning}
+
+    for regex, message in errors.items():
+        reg = re.compile(regex)
+        match = reg.search(data)
+
+        if match:
+            line = c.get_line(match.start())
+            err.error(("testcases_scripting",
+                       "regex_tests",
+                       "compiled_error"),
+                      "Malicious code detected",
+                      message,
+                      filename=filename,
+                      line=line,
+                      context=c)
+
 
 def _get_tree(name, code):
    
