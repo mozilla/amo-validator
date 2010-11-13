@@ -103,12 +103,20 @@ def test_has_rdf():
     
     print result
     assert result
-    
+
+    return err
 
 def test_passing():
     "Tests a passing install.rdf package."
     
-    _run_test("tests/resources/installrdf/pass.rdf", False)
+    err = _run_test("tests/resources/installrdf/pass.rdf", False)
+    assert not err.get_resource("unpack")
+
+def test_unpack():
+    "Tests that the unpack variable is ."
+    
+    err = _run_test("tests/resources/installrdf/unpack.rdf", False)
+    assert err.get_resource("em:unpack") == "true"
 
 def test_must_exist_once():
     "Tests that elements that must exist once only exist once."

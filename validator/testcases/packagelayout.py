@@ -101,7 +101,7 @@ def test_emunpack(err, package_contents, xpi_package):
                 # Executables in /components/ should also be flagged.
                 if fnmatch.fnmatch(file_, "components/*") and \
                    [x for x in executables
-                      if file_[:-len(x) - 1] == ".%s" % x]:
+                           if file_[-len(x) - 1:] == ".%s" % x]:
                     
                     fails = True
                     break
@@ -123,7 +123,7 @@ def test_emunpack(err, package_contents, xpi_package):
             return
 
         for file_ in package_contents:
-            if fnmatch.fnmatch(file_, ".jar"):
+            if fnmatch.fnmatch(file_, "*.jar"):
                 err.warning(("testcases_packagelayout",
                              "test_emunpack",
                              "should_be_false"),
