@@ -114,8 +114,8 @@ def test_emunpack(err, package_contents, xpi_package):
                         "The add-on meets criteria that would indicate "
                         "performance issues if <em:unpack> is not set to true "
                         "in the install.rdf file.")
+            return
 
-    else:
         # Covers bug 551714
 
         # This only applies to FF4
@@ -133,7 +133,7 @@ def test_emunpack(err, package_contents, xpi_package):
                             "result in performance issues. It is recommended "
                             "that you no longer use JAR files to package your "
                             "chrome files.")
-                break
+                return
 
 @decorator.register_test(tier=1, expected_type=3)
 def test_dictionary_layout(err, package_contents=None, xpi_package=None):

@@ -18,19 +18,18 @@ def test_no_unpack():
 
     assert not _do_test().failed()
 
-def test_unpack_no_ff4():
-    "Tests that if FF4 is not targeted, it should pass if unpack is true."
+def test_unpack_ff4():
+    "Tests that if FF4 is not targeted, it should pass if unpack istrue."
 
     assert not _do_test(unpack="true",
                         contents=("foo.jar", ),
+                        is_ff4=True).failed()
+
+def test_no_unpack_ff4():
+    "When FF4 is not supported and unpack is untrue, JARs should throw errors."
+
+    assert not _do_test(contents=("foo.jar", ),
                         is_ff4=False).failed()
-
-def test_unpack_ff4():
-    "When FF4 is supported and unpack is true, JARs should throw errors."
-
-    assert _do_test(unpack="true",
-                    contents=("foo.jar", ),
-                    is_ff4=True).failed()
 
 def test_no_unpack_dict():
     "When unpack is false/unset, it should always fail for dictionaries."
