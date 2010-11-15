@@ -6,6 +6,7 @@ import traverser as js_traverser
 def trace_member(traverser, node):
     "Traces a MemberExpression and returns the appropriate object"
     
+    traverser._debug("TESTING>>%s" % node["type"])
     if node["type"] == "MemberExpression":
         # x.y or x[y]
         base = trace_member(traverser, node["object"])
@@ -13,14 +14,17 @@ def trace_member(traverser, node):
         # base = x
         if node["property"]["type"] == "Identifier":
             # y = token identifier
-            return base.get(node["property"]["name"])
+            name = node["property"]["name"]
+            test_identifier(traverser, name)
+            return base.get(traverser, name)
         else:
             # y = literal value
             property = traverser._traverse_node(node["property"])
-            if isinstance(property, js_traverser.JSVariable):
+            if isinstance(property, js_traverser.JSWrapper):
                 property_value = str(property)
-                return base.get("property_value") if \
-                       base.has_var(property_value) else \
+                test_identifier(traverser, property_value)
+                return base.get(traverser, property_value) if \
+                       base.has_property(property_value) else \
                        None
 
     elif node["type"] == "Identifier":
@@ -28,6 +32,23 @@ def trace_member(traverser, node):
     else:
         # It's an expression, so just try your damndest.
         return JSWrapper(traverser._traverse_node(node), traverser=traverser)
+
+def test_identifier(traverser, name):
+    "Tests whether an identifier is banned"
+    
+    if name in js_traverser.BANNED_IDENTIFIERS:
+        traverser.err.error(("testcases_scripting",
+                             "create_identifier",
+                             "banned_identifier"),
+                            "Banned JavaScript Identifier",
+                            ["An identifier was used in the JavaScript that "
+                             "is not allowed due to security restrictions.",
+                             "Identifier: %s" % name],
+                            filename=traverser.filename,
+                            line=traverser.line,
+                            column=traverser.position,
+                            context=traverser.context)
+
 
 def _function(traverser, node):
     "Prevents code duplication"
@@ -257,6 +278,10 @@ def _ident(traverser, node):
     "Initiates an object lookup on the traverser based on an identifier token"
 
     name = node["name"]
+
+    # Ban bits like "newThread"
+    test_identifier(traverser, name)
+
     if traverser._is_local_variable(name) or \
        traverser._is_global(name):
         # This function very nicely wraps with JSWrapper for us :)

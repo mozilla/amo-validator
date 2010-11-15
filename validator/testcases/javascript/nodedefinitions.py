@@ -78,7 +78,7 @@ DEFINITIONS = {
                              False, False, actions._call_expression,
                              True, False),
     "MemberExpression":     (("object", "property"),
-                             False, False, None, True, False),
+                             False, False, actions.trace_member, True, False),
     "YieldExpression":      (("argument"), True, False, None, True, False),
     "ComprehensionExpression":
                             (("body", "filter"),

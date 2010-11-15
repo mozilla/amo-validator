@@ -2,9 +2,10 @@ import json
 import types
 
 from validator.testcases.javascript.nodedefinitions import DEFINITIONS
-from validator.testcases.javascript.predefinedentities import GLOBAL_ENTITIES
+from validator.testcases.javascript.predefinedentities import \
+               GLOBAL_ENTITIES, BANNED_IDENTIFIERS
 
-DEBUG = False
+DEBUG = True
 
 class MockBundler:
     def __init__(self):
@@ -12,7 +13,7 @@ class MockBundler:
         self.final_context = None
         self.tier = 4
 
-    def error(self, id, title, description, file="",
+    def error(self, id, title, description, filename="",
               line=1, column=0, context=None):
         "Represents a mock error"
         
