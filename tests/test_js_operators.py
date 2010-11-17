@@ -28,4 +28,17 @@ def test_basic_math():
     assert _get_var(err, "b") == 4
     assert _get_var(err, "c") == 8
 
+def test_in_operator():
+    "Tests the 'in' operator."
+
+    err = _do_test("tests/resources/javascript/in_operator.js")
+    assert err.message_count == 0
+    print err.final_context.output()
+
+    print _get_var(err, "x"), "<<<"
+    assert _get_var(err, "x") == True
+    assert _get_var(err, "y") == True
+    assert _get_var(err, "a") == False
+    assert _get_var(err, "b") == False
+
 

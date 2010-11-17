@@ -455,12 +455,29 @@ class JSWrapper(object):
         if self.value is None:
             return False
         
-        if self.value is JSLiteral:
+        if isinstance(self.value, JSLiteral):
             return False
-        elif self.value is JSObject or \
-             self.value is JSPrototype:
+        elif isinstance(self.value, (JSObject, JSPrototype)):
             # JSPrototype and JSObject always has a value
             return True
+
+    def contains(self, value):
+        "Serves 'in' for BinaryOperators for lists and dictionaries"
+
+        if isinstance(value, JSWrapper):
+            value = value.get_literal_value()
+
+        if isinstance(self.value, JSArray):
+            # Arrays and lists look at content
+            for val in self.value.elements:
+                if val.get_literal_value() == value:
+                    return True
+        elif isinstance(self.value, (JSObject, JSPrototype)):
+            # Dictionaries look at keys
+            return self.value.has_var(value)
+
+        # Nothing else supports "in"
+        return False
 
     def get(self, traverser, name):
         "Retrieves a property from the variable"
@@ -545,7 +562,8 @@ class JSObject(object):
 
     def get(self, name):
         "Returns the value associated with a property name"
-        return self.data[name] if name in self.data else None
+        return self.data[name] if name in self.data \
+                else self.data["prototype"].get(name)
     
     def get_literal_value(self):
         "Objects evaluate to empty strings"
@@ -556,7 +574,12 @@ class JSObject(object):
         self.data[name] = variable
 
     def has_var(self, name):
-        return name in self.data
+        "Determines if a property exists for an object"
+        does_have = name in self.data
+        if does_have:
+            return True
+
+        return self.data["prototype"].has_var(name)
 
     def output(self):
         return str(self.data)

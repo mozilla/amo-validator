@@ -323,19 +323,20 @@ def _expr_assignment(traverser, node):
             lit_left = str(lit_left)
             lit_right = str(lit_right)
 
+        gnum = _get_as_num
         # All of the assignment operators
         operators = {"=":lambda:right,
                      "+=":lambda:lit_left + lit_right,
-                     "-=":lambda:lit_left - lit_right,
-                     "*=":lambda:lit_left * lit_right,
-                     "/=":lambda:lit_left / lit_right,
-                     "%=":lambda:lit_left % lit_right,
-                     "<<=":lambda:lit_left << lit_right,
-                     ">>=":lambda:lit_left >> lit_right,
-                     ">>>=":lambda:math.fabs(lit_left) >> lit_right,
-                     "|=":lambda:lit_left | lit_right,
-                     "^=":lambda:lit_left ^ lit_right,
-                     "&=":lambda:lit_left & lit_right}
+                     "-=":lambda:gnum(lit_left) - gnum(lit_right),
+                     "*=":lambda:gnum(lit_left) * gnum(lit_right),
+                     "/=":lambda:gnum(lit_left) / gnum(lit_right),
+                     "%=":lambda:gnum(lit_left) % gnum(lit_right),
+                     "<<=":lambda:gnum(lit_left) << gnum(lit_right),
+                     ">>=":lambda:gnum(lit_left) >> lit_right,
+                     ">>>=":lambda:math.fabs(gnum(lit_left)) >> gnum(lit_right),
+                     "|=":lambda:gnum(lit_left) | gnum(lit_right),
+                     "^=":lambda:gnum(lit_left) ^ gnum(lit_right),
+                     "&=":lambda:gnum(lit_left) & gnum(lit_right)}
         
         traverser._debug("ASSIGNMENT>>OPERATION")
         token = node["operator"]
@@ -376,29 +377,34 @@ def _expr_binary(traverser, node):
 
     traverser.debug_level -= 1
     
+    left_wrap = left
     left = left.get_literal_value()
+    right_wrap = right
     right = right.get_literal_value()
 
     operator = node["operator"]
     traverser._debug("BIN_OPERATOR>>%s" % operator)
 
     type_operators = (">>", "<<", ">>>")
+    gnum = _get_as_num
     operators = {
-        "==": lambda: left == right,
+        "==": lambda: left == right or gnum(left) == gnum(right),
         "!=": lambda: left != right,
-        "===": lambda: type(left) == type(right) and left == right,
+        "===": lambda: left == right,
         "!==": lambda: not (type(left) == type(right) or left != right),
         ">": lambda: left > right,
         "<": lambda: left < right,
         "<=": lambda: left <= right,
         ">=": lambda: left >= right,
-        "<<": lambda: left << right,
-        ">>": lambda: left >> right,
-        ">>>": lambda: math.fabs(left) >> right,
+        "<<": lambda: gnum(left) << gnum(right),
+        ">>": lambda: gnum(left) >> gnum(right),
+        ">>>": lambda: math.fabs(gnum(left)) >> gnum(right),
         "+": lambda: left + right,
-        "-": lambda: _get_as_num(left) - _get_as_num(right),
-        "*": lambda: _get_as_num(left) * _get_as_num(right),
-        "/": lambda: _get_as_num(left) / _get_as_num(right),
+        "-": lambda: gnum(left) - gnum(right),
+        "*": lambda: gnum(left) * gnum(right),
+        "/": lambda: gnum(left) / gnum(right),
+        "in": lambda: right_wrap.contains(left),
+        # TODO : implement instanceof
     }
 
     traverser.debug_level -= 1
