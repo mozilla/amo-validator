@@ -23,9 +23,10 @@ def test_js_file(err, name, data, filename=None, line=0):
     if tree is None:
         return None
     
-    # Set the tier to 4 (Security Tests)
-    before_tier = err.tier
-    err.tier = 4
+    if err is not None:
+        # Set the tier to 4 (Security Tests)
+        before_tier = err.tier
+        err.tier = 4
 
     context = ContextGenerator(data)
     if traverser.DEBUG:
@@ -40,8 +41,9 @@ def test_js_file(err, name, data, filename=None, line=0):
 
     _regex_tests(err, data, filename)
 
-    # Reset the tier so we don't break the world
-    err.tier = before_tier
+    if err is not None:
+        # Reset the tier so we don't break the world
+        err.tier = before_tier
 
 def test_js_snippet(err, data, filename=None, line=0):
     "Process a JS snippet by passing it through to the file tester."

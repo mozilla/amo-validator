@@ -9,20 +9,33 @@ def trace_member(traverser, node):
     traverser._debug("TESTING>>%s" % node["type"])
     if node["type"] == "MemberExpression":
         # x.y or x[y]
+        traverser._debug("MEMBER_EXP>>BASE")
+        traverser.debug_level += 1
         base = trace_member(traverser, node["object"])
+        traverser.debug_level -= 1
         
+        traverser._debug("MEMBER_EXP>>MEMBER")
+        traverser.debug_level += 1
         # base = x
         if node["property"]["type"] == "Identifier":
             # y = token identifier
             name = node["property"]["name"]
             test_identifier(traverser, name)
+            traverser.debug_level -= 1
             return base.get(traverser, name)
         else:
             # y = literal value
             property = traverser._traverse_node(node["property"])
             if isinstance(property, js_traverser.JSWrapper):
-                property_value = str(property)
+                property_value = property.get_literal_value()
+                traverser._debug("MEMBER_EXP>>MNAME>>%s" % str(property_value))
+
+                # Test the identifier to see if it's banned or what
                 test_identifier(traverser, property_value)
+
+                traverser.debug_level -= 1
+                traverser._debug("MEMBER_EXP>>HASMEM>>%s" %
+                        "y" if base.has_property(property_value) else "n")
                 return base.get(traverser, property_value) if \
                        base.has_property(property_value) else \
                        None

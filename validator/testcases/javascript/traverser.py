@@ -134,16 +134,16 @@ class Traverser:
         # Handles all the E4X stuff and anything that may or may not return
         # a value.
         if "type" not in node or not self._can_handle_node(node["type"]):
-            wrapper = JSWrapper(None, traverser=self)
-            wrapper.set_value(JSObject())
-            return wrapper
+            return JSWrapper(JSObject(), traverser=self)
         
         self._debug("TRAVERSE>>%s" % (node["type"]))
         
+        # Extract location information if it's available
         if "loc" in node and node["loc"] is not None:
             self.line = self.start_line + int(node["loc"]["start"]["line"])
             self.position = int(node["loc"]["start"]["column"])
         
+        # Extract properties about the node that we're traversing
         (branches,
          explicitly_dynamic,
          establish_context,
@@ -151,19 +151,27 @@ class Traverser:
          returns,
          block_level) = DEFINITIONS[node["type"]]
         
+        # If we're supposed to establish a context, do it now
         if establish_context:
             self._push_context()
         elif block_level:
             self._push_block_context()
         
+        # An action allows the traverser to make intelligent decisions based
+        # on the function of the code, rather than just the content. If an
+        # action is availble, run it and store the output.
         action_result = None
         if action is not None:
             action_result = action(self, node)
             self._debug("ACTION>>%s" %
                     ("halt" if action_result else "continue"))
         
+        # If the action doesn't return a result or there is no action, process
+        # the node as if there was no action to begin with.
         if action_result is None:
             self.debug_level += 1
+            # Use the node definition to determine and subsequently traverse
+            # each of the branches.
             for branch in branches:
                 if branch in node:
                     self._debug("BRANCH>>%s" % branch)
@@ -176,11 +184,16 @@ class Traverser:
                     self.debug_level -= 1
             self.debug_level -= 1
         
+        # If we defined a context, pop it.
         if establish_context or block_level:
             self._pop_context()
         
+        # If there is an action and the action returned a value, it should be
+        # returned to the node traversal that initiated this node's traversal.
         if returns:
             return JSWrapper(action_result, traverser=self)
+
+        return JSWrapper(None, traverser=self)
     
     def _interpret_block(self, items):
         "Interprets a block of consecutive code"
@@ -455,6 +468,26 @@ class JSWrapper(object):
         if self.value is None:
             return False
         
+        if self.is_global:
+            # Globals have special rules
+
+            self.traverser._debug("FINDING GLOBAL CHILD")
+            # Make it easier to type (self.value is a pain)
+            data = self.value
+            if "value" not in data: # If there is no value key, return False
+                return False
+
+            # If it's got a dynamic value, evaluate the value and save it.
+            if isinstance(data["value"], types.LambdaType):
+                data["value"] = data["value"]()
+
+            # If it's not a dictionary, it doesn't have the property
+            if not isinstance(data["value"], dict):
+                # TODO: This should implement other types (i.e.: literal props)
+                return False
+
+            return property in data["value"]
+
         if isinstance(self.value, JSLiteral):
             return False
         elif isinstance(self.value, (JSObject, JSPrototype)):
@@ -484,6 +517,15 @@ class JSWrapper(object):
 
         if self.value is None:
             return JSWrapper(traverser=self)
+
+        if self.is_global:
+            traverser._debug("GETTING GLOBAL MEMBER>>%s" % name)
+            if "value" in self.value and \
+               name in self.value["value"]:
+                return traverser._build_global(name=name,
+                                               entity=self.value["value"][name])
+            else:
+                return JSWrapper(None, traverser=self, lazy=True)
 
         if self.value is JSLiteral:
             return None # This might need tweaking for properties
