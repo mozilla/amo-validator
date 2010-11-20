@@ -14,12 +14,13 @@ def trace_member(traverser, node):
         base = trace_member(traverser, node["object"])
         traverser.debug_level -= 1
         
-        traverser._debug("MEMBER_EXP>>MEMBER")
+        traverser._debug("MEMBER_EXP>>MEMBER>>%s" % node["property"]["type"])
         traverser.debug_level += 1
         # base = x
         if node["property"]["type"] == "Identifier":
             # y = token identifier
             name = node["property"]["name"]
+            traverser._debug("MEMBER_EXP>>MNAME>>%s" % name)
             test_identifier(traverser, name)
             traverser.debug_level -= 1
             return base.get(traverser, name)

@@ -527,12 +527,9 @@ class JSWrapper(object):
             else:
                 return JSWrapper(None, traverser=self, lazy=True)
 
-        if self.value is JSLiteral:
+        if isinstance(self.value, JSLiteral):
             return None # This might need tweaking for properties
-        elif self.value is JSObject or \
-             self.value is JSArray:
-            output = self.value.get(traverser, name)
-        elif self.value is JSPrototype:
+        elif isinstance(self.value, (JSObject, JSArray, JSPrototype)):
             output = self.value.get(name)
         else:
             output = None
@@ -667,6 +664,7 @@ class JSArray:
         self.elements = []
     
     def get(self, index):
+        index = int(index)
         return self.elements[index]
     
     def get_literal_value(self):
