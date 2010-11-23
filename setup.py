@@ -16,12 +16,8 @@ setup(
                                     'extras/*']),
     include_package_data=True,
     zip_safe=False,
-    install_requires=['nose',
-                      'cssutils',
-                      'rdflib',
-                      'coverage',
-                      'Fabric',
-                      'argparse'],
+    install_requires=[p.strip() for p in open('./requirements.txt')
+                                              if not p.startswith('#')],
     scripts=["addon-validator"],
     classifiers=[
         'Development Status :: 4 - Beta',
