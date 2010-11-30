@@ -106,6 +106,9 @@ def _define_function(traverser, node):
     "Makes a function happy"
     
     me = _function(traverser, node)
+    me = js_traverser.JSWrapper(value=me,
+                                traverser=traverser,
+                                callable=True)
     traverser._peek_context(2).set(node["id"]["name"], me)
     
     return True
@@ -115,7 +118,9 @@ def _func_expr(traverser, node):
     
     # Collect the result as an object
     results = _function(traverser, node)
-    return js_traverser.JSWrapper(value=results, traverser=traverser)
+    return js_traverser.JSWrapper(value=results,
+                                  traverser=traverser,
+                                  callable=True)
 
 def _define_with(traverser, node):
     "Handles `with` statements"
@@ -373,7 +378,6 @@ def _expr_binary(traverser, node):
     
     traverser.debug_level += 1
 
-
     traverser._debug("BIN_EXP>>LEFT")
     traverser.debug_level += 1
 
@@ -381,7 +385,6 @@ def _expr_binary(traverser, node):
     left = js_traverser.JSWrapper(left, traverser=traverser)
 
     traverser.debug_level -= 1
-
 
     traverser._debug("BIN_EXP>>RIGHT")
     traverser.debug_level += 1
@@ -437,6 +440,43 @@ def _expr_binary(traverser, node):
 
     return js_traverser.JSWrapper(output, traverser=traverser)
 
+def _expr_unary(traverser, node):
+    "Evaluates a UnaryExpression node"
+
+    expr = traver._traverse_node(node["argument"])
+    expr_lit = expr.get_literal_value()
+    expr_num = _get_as_num(expr_lit)
+
+    operators = {"-":lambda:-1 * expr_num,
+                 "+":expr_num,
+                 "!":not expr_lit,
+                 "~":-1 * (expr_num + 1),
+                 "void":None,
+                 "typeof":_expr_unary_typeof(expr),
+                 "delete":None} # We never want to empty the context
+
+def _expr_unary_typeof(wrapper):
+    "Evaluates the type of an object"
+    
+    if wrapper.callable:
+        return "function"
+
+    value = wrapper.value
+    if value is None:
+        return "undefined"
+    elif isinstance(value, (js_traverser.JSObject,
+                            js_traverser.JSPrototype,
+                            js_traverser.JSArray)):
+        return "object"
+    elif isinstance(value, js_traverser.JSLiteral):
+        value = value.value
+
+        if isinstance(value, (int, long, float)):
+            return "number"
+        elif isinstance(value, bool):
+            return "boolean"
+        elif isinstance(value, types.StringTypes):
+            return "string"
 
 def _get_as_num(value):
     "Returns the JS numeric equivalent for a value"

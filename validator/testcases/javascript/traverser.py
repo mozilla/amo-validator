@@ -393,10 +393,11 @@ class JSWrapper(object):
     "Wraps a JS value and handles contextual functions for it."
 
     def __init__(self, value=None, const=False, dirty=False, lazy=False,
-                 is_global=False, traverser=None):
+                 is_global=False, traverser=None, callable=False):
 
         self.const = const
         self.traverser = traverser
+        self.callable = callable
         self.is_global = is_global # Globals are built seperately
         self.value = None # Instantiate the placeholder value
         
