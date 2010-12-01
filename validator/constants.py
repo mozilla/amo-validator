@@ -12,24 +12,21 @@ PACKAGE_SEARCHPROV = 5
 PACKAGE_MULTI = 1 # A multi extension is an extension
 PACKAGE_SUBPACKAGE = 7
 
-# Defaults the the `brew install spidermonkey` default install location.
-# The full path to the Spidermonkey shell.
-SPIDERMONKEY_INSTALLATION = "/usr/bin/local/js"
+# The "earliest" version number for Firefox 4
+FX4_EARLIEST_VERSION = "3.7a1pre"
+
+# Graciously provided by @kumar in bug 614574
+for p in os.environ.get('PATH', '').split(':'):
+    SPIDERMONKEY_INSTALLATION = os.path.join(p, "js")
+    if os.path.exists(os.path.join(p, SPIDERMONKEY_INSTALLATION)):
+        break
 
 if not os.path.exists(SPIDERMONKEY_INSTALLATION):
-    # If that path doesn't exist, try just `js`; it could be in $PATH.
-    SPIDERMONKEY_INSTALLATION = "js"
+    
+    ############ Edit this to change the Spidermonkey location #############
+    SPIDERMONKEY_INSTALLATION = "/usr/bin/js"
 
-    # It's not in the path that Python is looking for, so explore some more.
-    # Graciously provided by @kumar in bug 614574
-    if not os.path.exists(SPIDERMONKEY_INSTALLATION):
-        found = False
-        for p in os.environ.get('PATH', '').split(':'):
-            if os.path.exists(os.path.join(p, SPIDERMONKEY_INSTALLATION)):
-                found = True
-                break
-
-        if not found:
-            # The fallback is simply to disable JS tests.
-            SPIDERMONKEY_INSTALLATION = None
+    if os.path.exists(SPIDERMONKEY_INSTALLATION):
+        # The fallback is simply to disable JS tests.
+        SPIDERMONKEY_INSTALLATION = None
 
