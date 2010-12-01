@@ -8,7 +8,15 @@ from validator.typedetection import detect_opensearch
 from validator.xpi import XPIManager
 from validator.rdf import RDFParser
 from validator import decorator
-from validator.constants import *
+
+# This is modeled after Zamboni's settings_local.py implementation, but
+# it is only designed to allow the constants to be overridden.
+try:
+    import validator.constants_local as constants
+except ImportError:
+    import validator.constants as constants
+
+from constants import *
 
 types = {0: "Unknown",
          1: "Extension/Multi-Extension",

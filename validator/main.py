@@ -17,7 +17,7 @@ import validator.testcases.targetapplication
 import validator.testcases.l10ncompleteness
 from validator.submain import *
 from errorbundler import ErrorBundle
-from validator.constants import *
+from constants import *
 
 def main():
     "Main function. Handles delegation to other functions."

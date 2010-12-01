@@ -6,7 +6,8 @@ import tempfile
 
 import validator.testcases.javascript.traverser as traverser
 from validator.contextgenerator import ContextGenerator
-from validator.constants import SPIDERMONKEY_INSTALLATION as SPIDERMONKEY
+import validator.submain as submain
+SPIDERMONKEY = submain.constants.SPIDERMONKEY_INSTALLATION
 
 def test_js_file(err, name, data, filename=None, line=0):
     "Tests a JS file by parsing and analyzing its tokens"
@@ -66,7 +67,6 @@ def _do_test(err, filename, line, context, tree):
 
 def _regex_tests(err, data, filename):
 
-    print data
     c = ContextGenerator(data)
     
     np_warning = "Network preferences may not be modified."

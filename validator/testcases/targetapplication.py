@@ -185,6 +185,11 @@ def test_targetedapplications(err, package_contents=None,
                     continue
                 
                 # Test whether it's a FF4 addon
+
+                # NOTE: This should probably also be extrapolated for
+                # Thunderbird and the like when they get up to speed. The tests
+                # will likely be the same down the line, so we can keep the
+                # "ff4" resource as a legacy thing and worry about it later.
                 if is_firefox:
                     ff4_pos = APPROVED_APPLICATIONS[ta_guid].index("4.0.*")
                     if max_ver_pos >= ff4_pos:
