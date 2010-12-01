@@ -29,7 +29,7 @@ def _test_rdf(err, install):
                           "updateKey",
                           "updateLink",
                           "hidden")
-    obsolete = ("file", )
+    obsolete = ("file", "skin")
     must_exist_once = ["id",
                        "version",
                        "name",
