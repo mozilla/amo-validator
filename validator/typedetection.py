@@ -151,11 +151,9 @@ def detect_opensearch(package):
         
         # Make sure that the type attribute is an acceptable mime type.
         if not url.attributes["type"].value in acceptable_mime_types:
-            # Make a nice error message about the MIME type.
-            error_mesg = "The provided MIME type (%s) is not acceptable"
-            error_mesg = error_mesg % url.attributes["type"].value
-            return {"failure": True,
-                    "error": error_mesg} 
+            # If it's not an acceptable MIME type, it shouldn't be allowed in,
+            # but it also isn't hurting anything so just skip this URL.
+            continue
         
         # Make sure that there is a {searchTerms} placeholder in the
         # URL template.
