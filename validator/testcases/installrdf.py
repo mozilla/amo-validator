@@ -39,6 +39,7 @@ def _test_rdf(err, install):
                       "optionsURL",
                       "aboutURL",
                       "iconURL",
+                      "internalName",
                       "homepageURL",
                       "creator",
                       "updateInfoURL",
@@ -47,6 +48,7 @@ def _test_rdf(err, install):
                       "updateLink", # Banned, but if not, pass it once.
                       "updateHash",
                       "signature",
+                      "skinnable",
                       "unpack"] # This has other rules; CAUTION!
     may_exist = ("targetApplication",
                  "localized",
