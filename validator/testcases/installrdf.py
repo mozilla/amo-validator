@@ -39,7 +39,6 @@ def _test_rdf(err, install):
                       "optionsURL",
                       "aboutURL",
                       "iconURL",
-                      "internalName",
                       "homepageURL",
                       "creator",
                       "updateInfoURL",

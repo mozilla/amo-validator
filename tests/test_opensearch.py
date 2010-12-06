@@ -70,11 +70,6 @@ def test_broken_url_attributes():
     
     _do_test("tests/resources/searchprovider/sp_bad_url_atts.xml")
     
-def test_broken_url_mime():
-    "Tests that the provider has a legit MIME on the URL."
-    
-    _do_test("tests/resources/searchprovider/sp_bad_url_mime.xml")
-    
 def test_broken_url_searchterms():
     "Tests that a search term field is provided for the <Url> element."
     
