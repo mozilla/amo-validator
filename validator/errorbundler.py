@@ -257,6 +257,7 @@ class ErrorBundle(object):
                  4: "langpack",
                  5: "search"}
         output = {"detected_type": types[self.detected_type],
+                  "ending_tier": self.tier,
                   "success": not self.failed(),
                   "rejected": self.reject,
                   "messages":[],
