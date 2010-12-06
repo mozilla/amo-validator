@@ -1,5 +1,6 @@
 import sys
 import os
+import json
 
 import zipfile
 from StringIO import StringIO
@@ -76,6 +77,10 @@ def main():
                         help="""Indicates that the addon will not be
                         hosted on addons.mozilla.org. This allows the
                         <em:updateURL> element to be set.""")
+    parser.add_argument("--approved_applications",
+                        type=argparse.FileType("r"),
+                        help="""A JSON file containing acceptable applications
+                        and their versions""")
 
     args = parser.parse_args()
 
@@ -84,6 +89,16 @@ def main():
                                          args.boring),
                                determined=args.determined,
                                listed=not args.selfhosted)
+
+    # Load in the approved applications if specified
+    app_versions = {}
+    if args.approved_applications:
+        app_versions = args.approved_applications.read()
+    else:
+        app_versions = open("validator/app_versions.json").read()
+
+    validator.testcases.targetapplication.APPROVED_APPLICATIONS = \
+            json.loads(app_versions)
 
     # We want to make sure that the output is expected. Parse out the expected
     # type for the add-on and pass it in for validation.
