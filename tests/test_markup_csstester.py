@@ -37,11 +37,6 @@ def test_css_unicode():
     # the css parser library.
     # _do_test("tests/resources/markup/csstester/unicode_ewwww.css", True)
     
-def test_css_webkit():
-    "Tests that the scourge of the earth is absent."
-    
-    _do_test("tests/resources/markup/csstester/webkit.css", True)
-    
 def test_css_identitybox():
     "Tests that the identity box isn't played with."
     

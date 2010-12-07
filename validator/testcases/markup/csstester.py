@@ -48,7 +48,6 @@ def _run_css_tests(err, tokens, filename, line_start=0, context=None):
     
     skip_types = ("S", "COMMENT")
     
-    webkit_insts = []
     identity_box_mods = []
     unicode_errors = []
     
@@ -73,9 +72,7 @@ def _run_css_tests(err, tokens, filename, line_start=0, context=None):
         # Save the last descriptor for reference.
         if tok_type == "IDENT":
             last_descriptor = value.lower()
-            if value.startswith("-webkit"):
-                webkit_insts.append(str(line + line_start))
-                  
+             
         elif tok_type == "URI":
             
             # If we hit a URI after -moz-binding, we may have a
@@ -127,14 +124,6 @@ def _run_css_tests(err, tokens, filename, line_start=0, context=None):
                      not be modified.""",
                      "Lines: %s" % ", ".join(identity_box_mods)],
                     filename)
-    if webkit_insts:
-        err.error(("testcases_markup_csstester",
-                   "_run_css_tests",
-                   "webkit"),
-                  "Blasphemy.",
-                  ["WebKit descriptors? Really?"
-                   "Nonsense found on lines: %s" % ", ".join(webkit_insts)],
-                  filename)
     if unicode_errors:
         err.info(("testcases_markup_csstester",
                   "test_css_file",
