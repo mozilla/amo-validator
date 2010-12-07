@@ -24,7 +24,7 @@ class ErrorBundle(object):
         self.notices = []
         self.message_tree = {}
 
-        self.tier = 0
+        self.tier = 1
         
         self.metadata = {}
         self.determined = determined
