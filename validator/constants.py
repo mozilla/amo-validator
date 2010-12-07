@@ -13,7 +13,7 @@ PACKAGE_MULTI = 1 # A multi extension is an extension
 PACKAGE_SUBPACKAGE = 7
 
 # The "earliest" version number for Firefox 4
-FX4_EARLIEST_VERSION = "3.7a1pre"
+FF4_MIN = "3.7a1pre"
 
 # Graciously provided by @kumar in bug 614574
 for p in os.environ.get('PATH', '').split(':'):

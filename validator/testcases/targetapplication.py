@@ -1,6 +1,7 @@
 from validator import decorator
 import validator.submain as submain
 PACKAGE_DICTIONARY = submain.constants.PACKAGE_DICTIONARY
+FF4_MIN = submain.constants.FF4_MIN
 
 APPLICATIONS = {
     "{ec8030f7-c20a-464f-9b0e-13a3a9e97384}": "firefox",
@@ -64,8 +65,13 @@ def test_targetedapplications(err, package_contents=None,
                 
                 break
             
-            if ta_guid in APPROVED_APPLICATIONS:
-                
+            found_guid = False
+            for (guid, key) in [(x["guid"], y) for (y, x) in
+                                    APPROVED_APPLICATIONS.items()]:
+                if guid == ta_guid:
+                    found_guid = key
+
+            if found_guid:
                 # Remember if the addon supports Firefox.
                 is_firefox = APPLICATIONS[ta_guid] == "firefox"
                 
@@ -73,7 +79,7 @@ def test_targetedapplications(err, package_contents=None,
                 min_version = install.get_object(target_app, ta_min_ver)
                 max_version = install.get_object(target_app, ta_max_ver)
                 
-                app_versions = APPROVED_APPLICATIONS[ta_guid]
+                app_versions = APPROVED_APPLICATIONS[found_guid]["versions"]
                 
                 # Ensure that the version numbers are in the app's
                 # list of acceptable version numbers.
@@ -137,7 +143,7 @@ def test_targetedapplications(err, package_contents=None,
                 # will likely be the same down the line, so we can keep the
                 # "ff4" resource as a legacy thing and worry about it later.
                 if is_firefox:
-                    ff4_pos = APPROVED_APPLICATIONS[ta_guid].index("4.0.*")
+                    ff4_pos = app_versions.index(FF4_MIN)
                     if max_ver_pos >= ff4_pos:
                         err.save_resource("ff4", True)
     

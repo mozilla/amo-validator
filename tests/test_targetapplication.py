@@ -1,12 +1,18 @@
+import json
 import validator.testcases.targetapplication as targetapp
 from validator.constants import *
 from validator.errorbundler import ErrorBundle
 from helper import _do_test
 
+targetapp.APPROVED_APPLICATIONS = \
+        json.load(open("validator/app_versions.json"))
+
 def test_valid_targetapps():
     """Tests that the install.rdf contains only valid entries for
     target applications."""
     
+    print targetapp.APPROVED_APPLICATIONS
+
     _do_test("tests/resources/targetapplication/pass.xpi",
              targetapp.test_targetedapplications,
              False,
