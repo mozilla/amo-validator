@@ -112,12 +112,14 @@ def _get_tree(name, code):
     temp.write(data)
     temp.flush() # This is very important
 
-    shell = subprocess.Popen([SPIDERMONKEY, "-f", temp.name],
+    cmd = [SPIDERMONKEY, "-f", temp.name]
+    shell = subprocess.Popen(cmd,
 	                     shell=False,
 			     stderr=subprocess.PIPE,
 			     stdout=subprocess.PIPE)
-    results = shell.communicate()
-    data = results[0]
+    data, stderr = shell.communicate()
+    if stderr:
+        raise RuntimeError('Error calling %r: %s', (cmd, stderr))
 
     # Closing the temp file will delete it.
     temp.close()
