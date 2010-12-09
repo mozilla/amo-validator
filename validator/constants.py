@@ -26,7 +26,7 @@ if not os.path.exists(SPIDERMONKEY_INSTALLATION):
     ############ Edit this to change the Spidermonkey location #############
     SPIDERMONKEY_INSTALLATION = "/usr/bin/js"
 
-    if os.path.exists(SPIDERMONKEY_INSTALLATION):
+    if not os.path.exists(SPIDERMONKEY_INSTALLATION):
         # The fallback is simply to disable JS tests.
         SPIDERMONKEY_INSTALLATION = None
 
