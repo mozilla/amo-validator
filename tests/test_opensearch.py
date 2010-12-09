@@ -28,6 +28,16 @@ def test_opensearch():
     
     _do_test("tests/resources/searchprovider/pass.xml", False)
     
+def test_missing_xmlns():
+    "Tests that an xmlns attribute is present."
+
+    _do_test("tests/resources/searchprovider/no_xmlns.xml")
+
+def test_bad_xmlns():
+    "Tests that an xmlns attribute is an appropriate value."
+
+    _do_test("tests/resources/searchprovider/bad_xmlns.xml")
+
 def test_nonparsing_xml():
     """Tests that a failure is generated for bad XML on OpenSearch"""
     

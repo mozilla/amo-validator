@@ -3,5 +3,5 @@
                        xmlns:moz="http://www.mozilla.org/2006/browser/search/">
     <ShortName>shortname</ShortName>
     <Description>description</Description>
-    <Url rel="self" />
+    <Url rel="self" type="text/html" template="http://foo.bar/" />
 </OpenSearchDescription>

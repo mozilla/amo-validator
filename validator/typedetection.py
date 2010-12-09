@@ -110,7 +110,22 @@ def detect_opensearch(package):
         return {"failure": True,
                 "decided": False, # Sketch, but we don't really know.
                 "error": "Provider is not a valid OpenSearch provider"}
-    
+
+
+    # Per bug 617822
+    if not srch_prov.documentElement.hasAttribute("xmlns"):
+        return {"failure": True,
+                "error": "Missing XML Namespace"}
+
+    if srch_prov.documentElement.attributes["xmlns"].value not in (
+                    'http://a9.com/-/spec/opensearch/1.0/',
+                    'http://a9.com/-/spec/opensearch/1.1/',
+                    'http://a9.com/-/spec/opensearchdescription/1.1/',
+                    'http://a9.com/-/spec/opensearchdescription/1.0/'):
+        return {"failure": True,
+                "error": "Invalid XML Namespace"}
+
+
     # Make sure that there is exactly one ShortName.
     if not srch_prov.documentElement.getElementsByTagName("ShortName"):
         return {"failure": True,
@@ -128,37 +143,40 @@ def detect_opensearch(package):
         return {"failure": True,
                 "error": "Missing <Url /> elements"}
     
-    acceptable_mime_types = ("text/html",
-                             "application/xhtml+xml",
-                             "text/xml",
-                             "application/rss+xml"
-                             "application/json",
-                             "application/opensearchdescription+xml")
-    
+    acceptable_mimes = ("text/html", "application/xhtml+xml")
+    acceptable_urls = [url for url in urls if url.hasAttribute("type") and
+                          url.attributes["type"].value in acceptable_mimes]
+
+    # At least one Url must be text/html
+    if not acceptable_urls:
+        return {"failure": True,
+                "error": "No <Url /> elements of HTML type (i.e.: text/html)"}
+
     # Make sure that each Url has the require attributes.
-    for url in urls:
-        keys = url.attributes.keys()
+    for url in acceptable_urls:
 
         # If the URL is listed as rel="self", skip over it.
-        if "rel" in keys and url.attributes["rel"].value == "self":
+        if url.hasAttribute("rel") and url.attributes["rel"].value == "self":
             continue
         
-        # Test for attribute presence.
-        if not ("type" in keys and 
-                "template" in keys):
+        if url.hasAttribute("method") and \
+           url.attributes["method"].value.upper() not in ("GET", "POST"):
             return {"failure": True,
-                    "error": "A <Url /> element is missing attributes"}
+                    "error": "An invalid HTTP method was set for <Url />"}
+
+        # Test for attribute presence.
+        if not url.hasAttribute("template"):
+            return {"failure": True,
+                    "error": "<Url /> element missing template attribute"}
         
-        # Make sure that the type attribute is an acceptable mime type.
-        if not url.attributes["type"].value in acceptable_mime_types:
-            # If it's not an acceptable MIME type, it shouldn't be allowed in,
-            # but it also isn't hurting anything so just skip this URL.
-            continue
-        
+        url_template = url.attributes["template"].value
+        if url_template[:4] != "http":
+            return {"failure": True,
+                    "error": "<Url /> contains invalid template (not HTTP)"}
+
         # Make sure that there is a {searchTerms} placeholder in the
         # URL template.
-        found_template = \
-            url.attributes["template"].value.count("{searchTerms}") > 0
+        found_template = url_template.count("{searchTerms}") > 0
         
         # If we didn't find it in a simple parse of the template=""
         # attribute, look deeper at the <Param /> elements.
