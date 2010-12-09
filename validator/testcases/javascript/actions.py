@@ -251,7 +251,7 @@ def _new(traverser, node):
         return js_traverser.JSWrapper(traverser=traverser)
 
     elem = js_traverser.JSWrapper(elem, traverser=traverser)
-    return copy.deepcopy(elem)
+    return elem
 
 def _ident(traverser, node):
     "Initiates an object lookup on the traverser based on an identifier token"
