@@ -93,7 +93,7 @@ class ErrorBundle(object):
     def _save_message(self, stack, type_, message, context=None):
         "Stores a message in the appropriate message stack."
         
-        uid = uuid.uuid1().hex
+        uid = uuid.uuid4().hex
         
         message["uid"] = uid
 
