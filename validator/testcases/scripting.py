@@ -1,3 +1,4 @@
+import chardet
 import json
 import os
 import re
@@ -103,7 +104,14 @@ def _get_tree(name, code):
     if not code:
         return None
 
-    data = json.dumps(code)
+    try:
+        code = unicode(code)
+        data = json.dumps(code)
+    except UnicodeDecodeError:
+        # If it's not an easily decodeable encoding, detect it and decode that
+        encoding = chardet.detect(code)["encoding"].lower()
+        data = json.dumps(code, encoding=encoding)
+
     data = "JSON.stringify(Reflect.parse(%s))" % data
     data = "print(%s)" % data
 
