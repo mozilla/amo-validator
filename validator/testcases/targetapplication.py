@@ -1,7 +1,5 @@
 from validator import decorator
-import validator.submain as submain
-PACKAGE_DICTIONARY = submain.constants.PACKAGE_DICTIONARY
-FF4_MIN = submain.constants.FF4_MIN
+from validator.constants import PACKAGE_DICTIONARY, FF4_MIN
 
 APPLICATIONS = {
     "{ec8030f7-c20a-464f-9b0e-13a3a9e97384}": "firefox",

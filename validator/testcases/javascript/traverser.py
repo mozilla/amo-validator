@@ -12,6 +12,11 @@ class MockBundler:
         self.final_context = None
         self.tier = 4
 
+    def get_resource(self, name):
+        "Represents a resource store"
+
+        return False
+
     def error(self, id, title, description, file="",
               line=1, column=0, context=None):
         "Represents a mock error"

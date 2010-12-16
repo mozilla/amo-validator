@@ -30,3 +30,8 @@ if not os.path.exists(SPIDERMONKEY_INSTALLATION):
         # The fallback is simply to disable JS tests.
         SPIDERMONKEY_INSTALLATION = None
 
+try:
+    from validator.constants_local import *
+except ImportError:
+    pass
+

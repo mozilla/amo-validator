@@ -2,6 +2,7 @@ import json
 from StringIO import StringIO
 
 import validator.main
+import validator.constants
 import validator.testcases.targetapplication
 from validator.errorbundler import ErrorBundle
 from validator.constants import PACKAGE_ANY
@@ -9,7 +10,8 @@ from validator.constants import PACKAGE_ANY
 
 def validate(path, format="json",
              approved_applications="validator/app_versions.json",
-             determined=True):
+             determined=True,
+             spidermonkey=None):
     "Perform validation in one easy step!"
 
     output = StringIO()
@@ -20,6 +22,9 @@ def validate(path, format="json",
 
     bundle = ErrorBundle(pipe=output, no_color=True, listed=True,
                          determined=determined)
+    if spidermonkey is not None:
+        bundle.save_resource("SPIDERMONKEY", spidermonkey)
+
     validator.main.prepare_package(bundle, path, PACKAGE_ANY)
 
     # Write the results to the pipe

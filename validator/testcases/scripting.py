@@ -6,14 +6,14 @@ import subprocess
 import tempfile
 
 import validator.testcases.javascript.traverser as traverser
+from validator.constants import SPIDERMONKEY_INSTALLATION
 from validator.contextgenerator import ContextGenerator
-import validator.submain as submain
-SPIDERMONKEY = submain.constants.SPIDERMONKEY_INSTALLATION
 
 def test_js_file(err, name, data, filename=None, line=0):
     "Tests a JS file by parsing and analyzing its tokens"
     
-    if SPIDERMONKEY is None:
+    if SPIDERMONKEY_INSTALLATION is None and \
+           not err.get_resource("SPIDERMONKEY"):
         return
 
     # The filename is 
@@ -21,7 +21,8 @@ def test_js_file(err, name, data, filename=None, line=0):
         filename = name
     
     # Get the AST tree for the JS code
-    tree = _get_tree(name, data)
+    tree = _get_tree(name, data, err.get_resource("SPIDERMONKEY") or
+                         SPIDERMONKEY_INSTALLATION)
     if tree is None:
         return None
     
@@ -47,9 +48,6 @@ def test_js_file(err, name, data, filename=None, line=0):
 
 def test_js_snippet(err, data, filename=None, line=0):
     "Process a JS snippet by passing it through to the file tester."
-    
-    if SPIDERMONKEY is None:
-        return
     
     if filename is not None:
         name = "%s:%d" % (filename, line)
@@ -96,7 +94,7 @@ def _regex_tests(err, data, filename):
                       context=c)
 
 
-def _get_tree(name, code):
+def _get_tree(name, code, shell=SPIDERMONKEY_INSTALLATION):
    
     # TODO : It seems appropriate to cut the `name` parameter out if the
     # parser is going to be installed locally.
@@ -120,7 +118,7 @@ def _get_tree(name, code):
     temp.write(data)
     temp.flush() # This is very important
 
-    cmd = [SPIDERMONKEY, "-f", temp.name]
+    cmd = [shell, "-f", temp.name]
     shell = subprocess.Popen(cmd,
 	                     shell=False,
 			     stderr=subprocess.PIPE,
