@@ -1,6 +1,6 @@
 import sys
 import os
-import chardet
+import fastchardet
 import json
 import fnmatch
 from StringIO import StringIO
@@ -336,7 +336,7 @@ def _parse_l10n_doc(name, doc, no_encoding=False):
     
     # Allow the parse to specify files to skip for encoding checks
     if not no_encoding:
-        encoding = chardet.detect(doc)
+        encoding = fastchardet.detect(doc)
         encoding["encoding"] = encoding["encoding"].upper()
         loc_doc.expected_encoding = encoding["encoding"] in handler_formats
         loc_doc.found_encoding = encoding["encoding"]
