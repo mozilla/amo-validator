@@ -13,7 +13,7 @@ def test_js_file(err, name, data, filename=None, line=0):
     "Tests a JS file by parsing and analyzing its tokens"
     
     if SPIDERMONKEY_INSTALLATION is None and \
-           not err.get_resource("SPIDERMONKEY"):
+       err.get_resource("SPIDERMONKEY") is None: # Default value is False
         return
 
     # The filename is 
@@ -21,8 +21,21 @@ def test_js_file(err, name, data, filename=None, line=0):
         filename = name
     
     # Get the AST tree for the JS code
-    tree = _get_tree(name, data, err.get_resource("SPIDERMONKEY") or
-                         SPIDERMONKEY_INSTALLATION)
+    try:
+        tree = _get_tree(name, data, err.get_resource("SPIDERMONKEY") or
+                                     SPIDERMONKEY_INSTALLATION)
+    except RuntimeError:
+        err.error(("testcases_scripting",
+                   "test_js_file",
+                   "retrieving_tree"),
+                  "JS Syntax error prevented validation",
+                  "An error in the syntax of a JavaScript file prevented "
+                  "the file from being properly read by the Spidermonkey JS "
+                  "engine.",
+                  filename=filename)
+        return
+
+
     if tree is None:
         return None
     
@@ -39,7 +52,8 @@ def test_js_file(err, name, data, filename=None, line=0):
             _do_test(err=err, filename=filename, line=line, context=context,
                      tree=tree)
         except:
-            print "An error was encountered while attempting to validate a script"
+            pass
+            #print "An error was encountered while attempting to validate a script"
 
     _regex_tests(err, data, filename)
 
@@ -125,7 +139,7 @@ def _get_tree(name, code, shell=SPIDERMONKEY_INSTALLATION):
 			     stdout=subprocess.PIPE)
     data, stderr = shell.communicate()
     if stderr:
-        raise RuntimeError('Error calling %r: %s', (cmd, stderr))
+        raise RuntimeError('Error calling %r: %s' % (cmd, stderr))
 
     # Closing the temp file will delete it.
     temp.close()
