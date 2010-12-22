@@ -101,7 +101,7 @@ def _test_rdf(err, install):
         # Remove the predicate from must_exist_once if it's there.
         if predicate in must_exist_once:
             
-            object_value = install.get_object(None, pred_raw)
+            object_value = install.get_object(top_id, pred_raw)
             
             # Test the predicate for specific values.
             if predicate == "id":
