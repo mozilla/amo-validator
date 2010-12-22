@@ -24,11 +24,17 @@ class ContextGenerator:
         
         build = [self._format_line(line=line, column=column)]
 
-        # Add surrounding lines if they're available.
+        # Add surrounding lines if they're available. There must always be
+        # three elements in the context.
         if line > 0:
             build.insert(0, self._format_line(line=line - 1, rel_line=0))
+        else:
+            build.insert(0, None)
+
         if line < datalen - 1:
             build.append(self._format_line(line=line + 1, rel_line=2))
+        else:
+            build.append(None)
 
         # Return the final output as a tuple.
         return tuple(build)
@@ -50,9 +56,12 @@ class ContextGenerator:
     def _format_line(self, line, column=0, rel_line=1):
         "Formats a line from the data to be the appropriate length"
 
-        data = self.data[line].strip()
+        raw_data = self.data[line].rstrip()
 
+        with_ws = len(raw_data)
+        data = raw_data.lstrip()
         line_length = len(data)
+
         if line_length > 140:
             if rel_line == 0:
                 # Trim from the beginning
@@ -71,5 +80,6 @@ class ContextGenerator:
                 # Trim from the end
                 data = "%s ..." % data[:140]
 
+        data = "%s%s" % (raw_data[0:with_ws - line_length], data)
         return data
 

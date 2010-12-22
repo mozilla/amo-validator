@@ -27,11 +27,13 @@ def test_get_context():
     c_end = c.get_context(line=11, column=0)
     print c_start
     print c_end
-    # First and last lines should only have a context of length 2
-    assert len(c_start) == 2
-    assert len(c_end) == 2
+    # Contexts are always length 3
+    assert len(c_start) == 3
+    assert c_start[0] == None
+    assert len(c_end) == 3
+    assert c_end[2] == None
     
-    assert c_start[0] == "0123456789"
+    assert c_start[1] == "0123456789"
     assert c_end[0] == "9012345678"
     assert c_end[1] == ""
 
