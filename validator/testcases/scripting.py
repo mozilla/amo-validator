@@ -22,9 +22,10 @@ def test_js_file(err, name, data, filename=None, line=0):
     
     # Get the AST tree for the JS code
     try:
-        tree = _get_tree(name, data, err.get_resource("SPIDERMONKEY") or
+        tree = _get_tree(name, data, (err and
+                                      err.get_resource("SPIDERMONKEY")) or
                                      SPIDERMONKEY_INSTALLATION)
-    except RuntimeError:
+    except JSReflectException:
         err.error(("testcases_scripting",
                    "test_js_file",
                    "retrieving_tree"),
@@ -40,8 +41,9 @@ def test_js_file(err, name, data, filename=None, line=0):
         return None
     
     # Set the tier to 4 (Security Tests)
-    before_tier = err.tier
-    err.tier = 4
+    if err is not None:
+        before_tier = err.tier
+        err.tier = 4
 
     context = ContextGenerator(data)
     if traverser.DEBUG:
@@ -58,7 +60,8 @@ def test_js_file(err, name, data, filename=None, line=0):
     _regex_tests(err, data, filename)
 
     # Reset the tier so we don't break the world
-    err.tier = before_tier
+    if err is not None:
+        err.tier = before_tier
 
 def test_js_snippet(err, data, filename=None, line=0):
     "Process a JS snippet by passing it through to the file tester."
@@ -108,6 +111,16 @@ def _regex_tests(err, data, filename):
                       context=c)
 
 
+class JSReflectException(Exception):
+    "An exception to indicate that tokenization has failed"
+
+    def __init__(self, value):
+        self.value = value
+
+    def __str__(self):
+        return repr(self.value)
+
+
 def _get_tree(name, code, shell=SPIDERMONKEY_INSTALLATION):
    
     # TODO : It seems appropriate to cut the `name` parameter out if the
@@ -124,8 +137,11 @@ def _get_tree(name, code, shell=SPIDERMONKEY_INSTALLATION):
         encoding = chardet.detect(code)["encoding"].lower()
         data = json.dumps(code, encoding=encoding)
 
-    data = "JSON.stringify(Reflect.parse(%s))" % data
-    data = "print(%s)" % data
+    data = """try{
+        print(JSON.stringify(Reflect.parse(%s)));
+    } catch(e) {
+        print('{"error":true}');
+    }""" % data
 
     # Push the data to a temporary file
     temp = tempfile.NamedTemporaryFile(mode="w+")
@@ -144,5 +160,9 @@ def _get_tree(name, code, shell=SPIDERMONKEY_INSTALLATION):
     # Closing the temp file will delete it.
     temp.close()
     parsed = json.loads(data)
+
+    if "error" in parsed and parsed["error"]:
+        raise JSReflectException("Reflection exception")
+
     return parsed
 
