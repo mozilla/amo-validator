@@ -10,7 +10,13 @@ def test_blacklisted_files():
     _do_test("tests/resources/packagelayout/ext_blacklist.xpi",
              packagelayout.test_blacklisted_files,
              True)
-    
+
+def test_blacklisted_magic_numbers():
+    "Tests that blacklisted magic numbers are banned"
+
+    _do_test("tests/resources/packagelayout/magic_number.xpi",
+            packagelayout.test_blacklisted_files,
+            True)
 
 # These functions will test the code with manually constructed packages
 # that contain valid or failing versions of the specified package. The

@@ -29,6 +29,18 @@ def test_blacklisted_files(err, package_contents=None, xpi_package=None):
     blacklisted_extensions = ("dll", "exe", "dylib", "so",
                               "sh", "class", "swf")
     
+    blacklisted_magic_numbers = (
+            (0x4d, 0x5a), # EXE/DLL
+            (0x5a, 0x4d), # Alternative for EXE/DLL
+            (0x7f, 0x45, 0x4c, 0x46), # UNIX elf
+            (0x23, 0x21), # Shebang (shell script)
+            (0xca, 0xfe, 0xba, 0xbe), # Java + Mach-O (dylib)
+            (0xca, 0xfe, 0xd0, 0x0d), # Java (packed)
+            (0xfe, 0xed, 0xfa, 0xce), # Mach-O
+            (0x46, 0x57, 0x53), # Uncompressed SWF
+            (0x43, 0x57, 0x53), # ZLIB compressed SWF
+        )
+
     pattern = "File '%s' is using a blacklisted file extension (%s)"
     for name, file_ in package_contents.items():
         # Simple test to ensure that the extension isn't blacklisted
@@ -42,6 +54,23 @@ def test_blacklisted_files(err, package_contents=None, xpi_package=None):
                          extension.""" % name,
                          "The extension %s is disallowed." % extension],
                         name)
+            continue
+
+        # Perform a deep inspection to detect magic numbers for known binary
+        # and executable file types.
+        zip = xpi_package.zf.open(name)
+        bytes = tuple([ord(x) for x in zip.read(4)]) # Longest is 4 bytes
+        if [x for x in blacklisted_magic_numbers if bytes[0:len(x)] == x]:
+            err.error(("testcases_packagelayout",
+                       "test_blacklisted_files",
+                       "disallowed_file_type"),
+                      "Blacklisted file type found",
+                      ["A file was found to contain blacklisted content "
+                           "(i.e.: executable data).",
+                       "The file \"%s\" contains banned content" % name],
+                      filename=name)
+            
+
 
 @decorator.register_test(tier=1)
 def test_layout_all(err, package_contents, xpi_package):
