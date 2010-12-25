@@ -13,7 +13,8 @@ def trace_member(traverser, node):
         # base = x
         if node["property"]["type"] == "Identifier":
             # y = token identifier
-            return base.get(node["property"]["name"])
+            return base.get(traverser=traverser,
+                            name=node["property"]["name"])
         else:
             # y = literal value
             property = traverser._traverse_node(node["property"])
@@ -24,8 +25,10 @@ def trace_member(traverser, node):
                        None
 
     elif node["type"] == "Identifier":
+        traverser._debug("MEMBER_EXP>>ROOT:IDENTIFIER")
         return traverser._seek_variable(node["name"])
     else:
+        traverser._debug("MEMBER_EXP>>ROOT:EXPRESSION")
         # It's an expression, so just try your damndest.
         return JSWrapper(traverser._traverse_node(node), traverser=traverser)
 
@@ -312,8 +315,8 @@ def _expr_assignment(traverser, node):
                      "^=":lambda:lit_left ^ lit_right,
                      "&=":lambda:lit_left & lit_right}
         
-        traverser._debug("ASSIGNMENT>>OPERATION")
         token = node["operator"]
+        traverser._debug("ASSIGNMENT>>OPERATION:%s" % token)
         if token not in operators:
             traverser._debug("ASSIGNMENT>>OPERATOR NOT FOUND")
             traverser.debug_level -= 1

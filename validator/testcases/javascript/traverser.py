@@ -318,6 +318,9 @@ class Traverser:
         # Build out the wrapper object from the global definition.
         result = JSWrapper(is_global=True, traverser=self, lazy=True)
         result.value = entity
+
+        self._debug("BUILT_GLOBAL")
+
         return result
     
     def _set_variable(self, name, value, glob=False):
@@ -472,13 +475,30 @@ class JSWrapper(object):
         if self.value is None:
             return JSWrapper(traverser=self)
 
-        if self.value is JSLiteral:
-            return None # This might need tweaking for properties
-        elif self.value is JSObject or \
-             self.value is JSArray:
-            output = self.value.get(traverser, name)
-        elif self.value is JSPrototype:
-            output = self.value.get(name)
+        value = self.value
+        if self.is_global:
+            if "value" not in value:
+                return JSWrapper(None, traverser=self)
+
+            value_val = value["value"]
+            if isinstance(value_val, types.LambdaType):
+                value_val = value_val()
+
+            if isinstance(value_val, dict):
+                if name in value_val:
+                    return JSWrapper(value=value_val[name],
+                                     is_global=True,
+                                     traverser=traverser)
+            else:
+                value = value_val
+
+
+        if value is JSLiteral:
+            return None # This will need tweaking for properties
+        elif isinstance(value, (JSObject, JSArray)):
+            output = value.get(traverser, name)
+        elif isinstance(value, JSPrototype):
+            output = value.get(name)
         else:
             output = None
         
