@@ -140,7 +140,7 @@ def _get_tree(name, code, shell=SPIDERMONKEY_INSTALLATION):
     data = """try{
         print(JSON.stringify(Reflect.parse(%s)));
     } catch(e) {
-        print('{"error":true}');
+        print('{"error":true, "error_message":' + JSON.stringify(e.toString()) + '}');
     }""" % data
 
     # Push the data to a temporary file
@@ -162,7 +162,11 @@ def _get_tree(name, code, shell=SPIDERMONKEY_INSTALLATION):
     parsed = json.loads(data)
 
     if "error" in parsed and parsed["error"]:
-        raise JSReflectException("Reflection exception")
+        if parsed["error_message"][:14] == "ReferenceError":
+            raise RuntimeError("Spidermonkey version too old; "
+                               "1.8pre+ required")
+        else:
+            raise JSReflectException("Reflection exception")
 
     return parsed
 
