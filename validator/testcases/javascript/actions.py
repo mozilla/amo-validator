@@ -322,6 +322,8 @@ def _expr_assignment(traverser, node):
             traverser.debug_level -= 1
             return left
         
+        traverser._debug("ASSIGNMENT::LEFT>>%s" % str(left.is_global))
+        traverser._debug("ASSIGNMENT::RIGHT>>%s" % str(operators[token]()))
         left.set_value(operators[token](), traverser=traverser)
         traverser.debug_level -= 1
         return left

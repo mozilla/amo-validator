@@ -163,8 +163,9 @@ class Traverser:
         action_result = None
         if action is not None:
             action_result = action(self, node)
-            self._debug("ACTION>>%s" %
-                    ("halt" if action_result else "continue"))
+            self._debug("ACTION>>%s (%s)" %
+                    ("halt" if action_result else "continue",
+                     node["type"]))
         
         if action_result is None:
             self.debug_level += 1
@@ -391,11 +392,14 @@ class JSWrapper(object):
 
         self.const = const
         self.traverser = traverser
-        self.is_global = is_global # Globals are built seperately
         self.value = None # Instantiate the placeholder value
+        self.is_global = False # Not yet......
         
         if value is not None:
             self.set_value(value, overwrite_const=True)
+        
+        if not self.is_global:
+            self.is_global = is_global # Globals are built seperately
 
         self.dirty = dirty
         self.lazy = lazy
@@ -419,6 +423,9 @@ class JSWrapper(object):
                                 column=traverser.position,
                                 context=traverser.context)
         
+        if value == self.value:
+            return
+
         # We want to obey the permissions of global objects
         if self.is_global:
             # TODO : Write in support for "readonly":False
@@ -486,9 +493,8 @@ class JSWrapper(object):
 
             if isinstance(value_val, dict):
                 if name in value_val:
-                    return JSWrapper(value=value_val[name],
-                                     is_global=True,
-                                     traverser=traverser)
+                    return traverser._build_global(name=name,
+                                                   entity=value_val[name])
             else:
                 value = value_val
 
@@ -511,6 +517,8 @@ class JSWrapper(object):
     def get_literal_value(self):
         "Returns the literal value of the wrapper"
         
+        if self.is_global:
+            return None
         if self.value is None:
             return None
         if self.is_global:
