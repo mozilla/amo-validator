@@ -4,6 +4,7 @@ import os
 import re
 import subprocess
 import tempfile
+from cStringIO import StringIO
 
 import validator.testcases.javascript.traverser as traverser
 from validator.constants import SPIDERMONKEY_INSTALLATION
@@ -22,17 +23,21 @@ def test_js_file(err, name, data, filename=None, line=0):
     
     # Get the AST tree for the JS code
     try:
-        tree = _get_tree(name, data, (err and
-                                      err.get_resource("SPIDERMONKEY")) or
-                                     SPIDERMONKEY_INSTALLATION)
-    except JSReflectException:
+        tree = _get_tree(name,
+                         data,
+                         shell=(err and err.get_resource("SPIDERMONKEY")) or
+                               SPIDERMONKEY_INSTALLATION,
+                         errorbundle=err)
+
+    except JSReflectException as exc:
         err.error(("testcases_scripting",
                    "test_js_file",
                    "retrieving_tree"),
                   "JS Syntax error prevented validation",
-                  "An error in the syntax of a JavaScript file prevented "
-                  "the file from being properly read by the Spidermonkey JS "
-                  "engine.",
+                  ["An error in the syntax of a JavaScript file prevented "
+                   "the file from being properly read by the Spidermonkey JS "
+                   "engine.",
+                   str(exc)],
                   filename=filename)
         return
 
@@ -121,7 +126,7 @@ class JSReflectException(Exception):
         return repr(self.value)
 
 
-def _get_tree(name, code, shell=SPIDERMONKEY_INSTALLATION):
+def _get_tree(name, code, shell=SPIDERMONKEY_INSTALLATION, errorbundle=None):
    
     # TODO : It seems appropriate to cut the `name` parameter out if the
     # parser is going to be installed locally.
@@ -129,8 +134,47 @@ def _get_tree(name, code, shell=SPIDERMONKEY_INSTALLATION):
     if not code:
         return None
 
+    encoding = None
     try:
         code = unicode(code)
+        
+        line_num = 1
+        out_code = StringIO()
+        is_ctrl_char = lambda x:(lambda y:y >= 0 and
+                                          y <= 31 and
+                                          y not in (10, 13)
+                                     )(ord(x))
+        has_warned_ctrlchar = False
+
+        for line in code.split("\n"):
+
+            charpos = 0
+            for char in line:
+                if not is_ctrl_char(char):
+                    out_code.write(char)
+                else:
+                    if not has_warned_ctrlchar and errorbundle is not None:
+                        errorbundle.warning(
+                                ("testcases_scripting",
+                                 "_get_tree",
+                                 "control_char_filter"),
+                                "Invalid character in JS file",
+                                "An invalid character (ASCII 0-31, except CR "
+                                "and LF) has been found in a JS file. These "
+                                "are considered unsafe and should be removed.",
+                                filename=name,
+                                line=line_num,
+                                column=charpos,
+                                context=ContextGenerator(code))
+                    has_warned_ctrlchar = True
+
+                charpos += 1
+
+            out_code.write("\n")
+            line_num += 1
+
+        code = out_code.getvalue()
+
         data = json.dumps(code)
     except UnicodeDecodeError:
         # If it's not an easily decodeable encoding, detect it and decode that
@@ -159,14 +203,17 @@ def _get_tree(name, code, shell=SPIDERMONKEY_INSTALLATION):
 
     # Closing the temp file will delete it.
     temp.close()
-    parsed = json.loads(data)
+    if encoding is not None:
+        parsed = json.loads(data)
+    else:
+        parsed = json.loads(data, encoding=encoding)
 
     if "error" in parsed and parsed["error"]:
         if parsed["error_message"][:14] == "ReferenceError":
             raise RuntimeError("Spidermonkey version too old; "
                                "1.8pre+ required")
         else:
-            raise JSReflectException("Reflection exception")
+            raise JSReflectException(parsed["error_message"])
 
     return parsed
 

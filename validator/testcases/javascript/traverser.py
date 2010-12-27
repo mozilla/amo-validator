@@ -17,7 +17,7 @@ class MockBundler:
 
         return False
 
-    def error(self, id, title, description, file="",
+    def error(self, id, title, description, filename="",
               line=1, column=0, context=None):
         "Represents a mock error"
         
@@ -41,11 +41,11 @@ class MockBundler:
                 print dline
         print "in %s:line %d (%d)" % (file, line, column)
 
-    def warning(self, id, title, description, file="",
+    def warning(self, id, title, description, filename="",
                 line=1, column=0, context=None):
         self.error(id, title, description, file, line, column, context)
 
-    def info(self, id, title, description, file="",
+    def info(self, id, title, description, filename="",
              line=1, column=0, context=None):
         self.error(id, title, description, file, line, column, context)
 
