@@ -30,15 +30,31 @@ def test_js_file(err, name, data, filename=None, line=0):
                          errorbundle=err)
 
     except JSReflectException as exc:
-        err.error(("testcases_scripting",
-                   "test_js_file",
-                   "retrieving_tree"),
-                  "JS Syntax error prevented validation",
-                  ["An error in the syntax of a JavaScript file prevented "
-                   "the file from being properly read by the Spidermonkey JS "
-                   "engine.",
-                   str(exc)],
-                  filename=filename)
+        str_exc = str(exc)
+        if "SyntaxError" in str_exc:
+            err.error(("testcases_scripting",
+                       "test_js_file",
+                       "syntax_error"),
+                       "Javascript Syntax Error",
+                       ["A syntax error in the Javascript halted validation "
+                        "of that file.",
+                        "Message: %s" % str_exc[15:-1]],
+                       filename=filename,
+                       line=exc.line)
+        else:
+            err.error(("testcases_scripting",
+                       "test_js_file",
+                       "retrieving_tree"),
+                      "JS reflection error prevented validation",
+                      ["An error in the JavaScript file prevented it from "
+                       "being properly read by the Spidermonkey JS engine.",
+                       str(exc)],
+                      filename=filename)
+
+            import sys
+            etype, err, tb = sys.exc_info()
+            raise exc, None, tb
+
         return
 
 
@@ -121,41 +137,35 @@ class JSReflectException(Exception):
 
     def __init__(self, value):
         self.value = value
+        self.line = None
 
     def __str__(self):
         return repr(self.value)
 
+    def line_num(self, line_num):
+        "Set the line number and return self for chaining"
+        self.line = int(line_num)
+        return self
 
-def _get_tree(name, code, shell=SPIDERMONKEY_INSTALLATION, errorbundle=None):
-   
-    # TODO : It seems appropriate to cut the `name` parameter out if the
-    # parser is going to be installed locally.
-    
-    if not code:
-        return None
+def is_ctrl_char(x):
+    "Returns whether X is an ASCII control character"
+    y = ord(x)
+    return 0 <= y <= 31 and y not in (9, 10, 13) # TAB, LF, CR
 
-    encoding = None
-    try:
-        code = unicode(code)
-        
-        line_num = 1
-        out_code = StringIO()
-        is_ctrl_char = lambda x:(lambda y:y >= 0 and
-                                          y <= 31 and
-                                          y not in (10, 13)
-                                     )(ord(x))
-        has_warned_ctrlchar = False
+def strip_weird_chars(chardata, err=None, name=""):
+    line_num = 1
+    out_code = StringIO()
+    has_warned_ctrlchar = False
 
-        for line in code.split("\n"):
+    for line in chardata.split("\n"):
 
-            charpos = 0
-            for char in line:
-                if not is_ctrl_char(char):
-                    out_code.write(char)
-                else:
-                    if not has_warned_ctrlchar and errorbundle is not None:
-                        errorbundle.warning(
-                                ("testcases_scripting",
+        charpos = 0
+        for char in line:
+            if not is_ctrl_char(char):
+                out_code.write(char)
+            else:
+                if not has_warned_ctrlchar and err is not None:
+                    err.warning(("testcases_scripting",
                                  "_get_tree",
                                  "control_char_filter"),
                                 "Invalid character in JS file",
@@ -165,26 +175,43 @@ def _get_tree(name, code, shell=SPIDERMONKEY_INSTALLATION, errorbundle=None):
                                 filename=name,
                                 line=line_num,
                                 column=charpos,
-                                context=ContextGenerator(code))
-                    has_warned_ctrlchar = True
+                                context=ContextGenerator(chardata))
+                has_warned_ctrlchar = True
 
-                charpos += 1
+            charpos += 1
 
-            out_code.write("\n")
-            line_num += 1
+        out_code.write("\n")
+        line_num += 1
 
-        code = out_code.getvalue()
+    return out_code.getvalue()
 
+def _get_tree(name, code, shell=SPIDERMONKEY_INSTALLATION, errorbundle=None):
+    "Returns an AST tree of the JS passed in `code`."
+    
+    if not code:
+        return None
+
+    encoding = None
+    try:
+        code = unicode(code) # Make sure we can get a Unicode representation
+        
+        code = strip_weird_chars(code, errorbundle, name=name)
         data = json.dumps(code)
     except UnicodeDecodeError:
         # If it's not an easily decodeable encoding, detect it and decode that
         encoding = chardet.detect(code)["encoding"].lower()
+        if any([is_ctrl_char(x) for x in code]):
+            raise JSReflectException("Invalid encoding; control character")
         data = json.dumps(code, encoding=encoding)
 
     data = """try{
         print(JSON.stringify(Reflect.parse(%s)));
     } catch(e) {
-        print('{"error":true, "error_message":' + JSON.stringify(e.toString()) + '}');
+        print(JSON.stringify({
+            "error":true,
+            "error_message":e.toString(),
+            "line_number":e.lineNumber
+        }));
     }""" % data
 
     # Push the data to a temporary file
@@ -203,17 +230,19 @@ def _get_tree(name, code, shell=SPIDERMONKEY_INSTALLATION, errorbundle=None):
 
     # Closing the temp file will delete it.
     temp.close()
-    if encoding is not None:
-        parsed = json.loads(data)
-    else:
-        parsed = json.loads(data, encoding=encoding)
+
+    # Strip weird chars again; it doesn't hurt the analyzer and it prevents
+    # devs from hiding bad unicode characters in their JS.
+    #data = strip_weird_chars(data, errorbundle, name)
+    parsed = json.loads(data, encoding=encoding, strict=False) # Encoding defaults to None
 
     if "error" in parsed and parsed["error"]:
         if parsed["error_message"][:14] == "ReferenceError":
             raise RuntimeError("Spidermonkey version too old; "
                                "1.8pre+ required")
         else:
-            raise JSReflectException(parsed["error_message"])
+            raise JSReflectException(parsed["error_message"]).line_num(
+                    parsed["line_number"])
 
     return parsed
 
