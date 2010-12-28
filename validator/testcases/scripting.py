@@ -40,7 +40,8 @@ def test_js_file(err, name, data, filename=None, line=0):
                         "of that file.",
                         "Message: %s" % str_exc[15:-1]],
                        filename=filename,
-                       line=exc.line)
+                       line=exc.line,
+                       context=ContextGenerator(data))
         else:
             err.error(("testcases_scripting",
                        "test_js_file",
