@@ -216,7 +216,7 @@ def _get_tree(name, code, shell=SPIDERMONKEY_INSTALLATION, errorbundle=None):
     }""" % data
 
     # Push the data to a temporary file
-    temp = tempfile.NamedTemporaryFile(mode="w+")
+    temp = tempfile.NamedTemporaryFile(mode="w+", delete=True)
     temp.write(data)
     temp.flush() # This is very important
 
@@ -232,9 +232,12 @@ def _get_tree(name, code, shell=SPIDERMONKEY_INSTALLATION, errorbundle=None):
     # Closing the temp file will delete it.
     temp.close()
 
-    # Strip weird chars again; it doesn't hurt the analyzer and it prevents
-    # devs from hiding bad unicode characters in their JS.
+    ## Strip weird chars again; it doesn't hurt the analyzer and it prevents
+    ## devs from hiding bad unicode characters in their JS.
     #data = strip_weird_chars(data, errorbundle, name)
+    #for escapechar in ("\\x", "\\u"):
+    #    data = data.replace(escapechar, "")
+    data = unicode(data)
     parsed = json.loads(data, encoding=encoding, strict=False) # Encoding defaults to None
 
     if "error" in parsed and parsed["error"]:

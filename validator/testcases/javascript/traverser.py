@@ -89,18 +89,8 @@ class Traverser:
             x.close()
 
         if "type" not in data or not self._can_handle_node(data["type"]):
-            self._debug("ERR>>Cannot handle node type %s" % (data["type"] if
-                                                             "type" in data
-                                                             else "<unknown>"))
-            self.err.error(("testcases_javascript_traverser",
-                            "run",
-                            "cannot_interpret_js"),
-                           "Cannot interpret JavaScript",
-                           """Some JavaScript code was found, but could not be
-                           interpreted.""",
-                           self.filename,
-                           self.start_line,
-                           self.context)
+            self._debug("ERR>>Cannot handle node type %s" %
+                            (data["type"] if "type" in data else "<unknown>"))
             return None
         
         self._debug("START>>")
@@ -304,17 +294,17 @@ class Traverser:
             dang = entity["dangerous"]
             if dang and not isinstance(dang, types.LambdaType):
                 self._debug("DANGEROUS")
-                self.err.error(("testcases_javascript_traverser",
-                                "_build_global",
-                                "dangerous_global"),
-                               "Dangerous Global Object",
-                               ["""A dangerous or banned global object was
-                                accessed by some JavaScript code.""",
-                                "Accessed object: %s" % name],
-                               self.filename,
-                               line=self.line,
-                               column=self.position,
-                               context=self.context)
+                self.err.warning(("testcases_javascript_traverser",
+                                  "_build_global",
+                                  "dangerous_global"),
+                                 "Dangerous Global Object",
+                                 ["""A dangerous or banned global object was
+                                  accessed by some JavaScript code.""",
+                                  "Accessed object: %s" % name],
+                                 self.filename,
+                                 line=self.line,
+                                 column=self.position,
+                                 context=self.context)
 
         # Build out the wrapper object from the global definition.
         result = JSWrapper(is_global=True, traverser=self, lazy=True)
@@ -333,17 +323,17 @@ class Traverser:
             # TODO : In the future, this should account for non-readonly
             # entities (i.e.: localStorage)
             self._debug("GLOBAL_OVERWRITE")
-            self.err.error(("testcases_javascript_traverser",
-                            "_set_variable",
-                            "global_overwrite"),
-                            "Global Overwrite",
-                            ["A local variable was created that overwrites "
-                             "an object in the global scope.",
-                             "Entity name: %s" % name],
-                            self.filename,
-                            line=self.line,
-                            column=self.position,
-                            context=self.context)
+            self.err.warning(("testcases_javascript_traverser",
+                              "_set_variable",
+                              "global_overwrite"),
+                             "Global Overwrite",
+                             ["A local variable was created that overwrites "
+                              "an object in the global scope.",
+                              "Entity name: %s" % name],
+                             self.filename,
+                             line=self.line,
+                             column=self.position,
+                             context=self.context)
             return None
 
         context_count = len(self.contexts)
@@ -412,16 +402,16 @@ class JSWrapper(object):
             traverser = self.traverser
 
         if self.const and not overwrite_const:
-            traverser.err.error(("testcases_javascript_traverser",
-                                 "JSWrapper_set_value",
-                                 "const_overwrite"),
-                                "Overwritten constant value",
-                                "A variable declared as constant has been "
-                                "overwritten in some JS code.",
-                                traverser.filename,
-                                line=traverser.line,
-                                column=traverser.position,
-                                context=traverser.context)
+            traverser.err.warning(("testcases_javascript_traverser",
+                                   "JSWrapper_set_value",
+                                   "const_overwrite"),
+                                  "Overwritten constant value",
+                                  "A variable declared as constant has been "
+                                  "overwritten in some JS code.",
+                                  traverser.filename,
+                                  line=traverser.line,
+                                  column=traverser.position,
+                                  context=traverser.context)
         
         if value == self.value:
             return
@@ -429,16 +419,16 @@ class JSWrapper(object):
         # We want to obey the permissions of global objects
         if self.is_global:
             # TODO : Write in support for "readonly":False
-            traverser.err.error(("testcases_javascript_traverser",
-                                 "JSWrapper_set_value",
-                                 "global_overwrite"),
-                                "Global overwrite",
-                                "An attempt to overwrite a global varible "
-                                "made in some JS code.",
-                                traverser.filename,
-                                line=traverser.line,
-                                column=traverser.position,
-                                context=traverser.context)
+            traverser.err.warning(("testcases_javascript_traverser",
+                                   "JSWrapper_set_value",
+                                   "global_overwrite"),
+                                  "Global overwrite",
+                                  "An attempt to overwrite a global varible "
+                                  "made in some JS code.",
+                                  traverser.filename,
+                                  line=traverser.line,
+                                  column=traverser.position,
+                                  context=traverser.context)
             return self
 
 

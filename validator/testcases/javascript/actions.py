@@ -200,18 +200,18 @@ def _call_expression(traverser, node):
         if result:
             # Generate a string representation of the params
             params = ", ".join([str(t(p).get_literal_value()) for p in args])
-            traverser.err.error(("testcases_javascript_actions",
-                                 "_call_expression",
-                                 "called_dangerous_global"),
-                                "Global called in dangerous manner",
-                                ["A global function was called using a set "
-                                 "of dangerous parameters. These parameters "
-                                 "have been disallowed.",
-                                 "Params: %s" % params],
-                                traverser.filename,
-                                line=traverser.line,
-                                column=traverser.position,
-                                context=traverser.context)
+            traverser.err.warning(("testcases_javascript_actions",
+                                   "_call_expression",
+                                   "called_dangerous_global"),
+                                  "Global called in dangerous manner",
+                                  ["A global function was called using a set "
+                                   "of dangerous parameters. These parameters "
+                                   "have been disallowed.",
+                                   "Params: %s" % params],
+                                  traverser.filename,
+                                  line=traverser.line,
+                                  column=traverser.position,
+                                  context=traverser.context)
 
     return None
 
