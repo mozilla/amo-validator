@@ -1,4 +1,4 @@
-
+import hashlib
 from StringIO import StringIO
 
 from validator import decorator
@@ -48,6 +48,10 @@ def test_packed_packages(err, package_contents=None, xpi_package=None):
     "Tests XPI and JAR files for naughty content."
     
     processed_files = 0
+
+    hash_whitelist = [x[:-1] for x in
+                      open(os.path.join(os.path.dirname(__file__),
+                                        'whitelist_hashes.txt')).readlines()]
     
     # Iterate each item in the package.
     for name, data in package_contents.items():
@@ -67,6 +71,16 @@ def test_packed_packages(err, package_contents=None, xpi_package=None):
                         "It is recommended that you delete the file"],
                        name)
         
+        try:
+            file_data = xpi_package.read(name)
+        except KeyError: # pragma: no cover
+            _read_error(err, name)
+
+        # Skip over whitelisted hashes
+        hash = hashlib.sha1(file_data).hexdigest()
+        if hash in hash_whitelist:
+            continue
+
         processed = False
         # If that item is a container file, unzip it and scan it.
         if data["extension"] == "jar":
@@ -79,7 +93,7 @@ def test_packed_packages(err, package_contents=None, xpi_package=None):
             is_subpackage = name.count("/") > 0
             
             # Unpack the package and load it up.
-            package = StringIO(xpi_package.read(name))
+            package = StringIO(file_data)
             sub_xpi = XPIManager(package, name, is_subpackage)
             if not sub_xpi.zf:
                 err.error(("testcases_content",
@@ -109,7 +123,7 @@ def test_packed_packages(err, package_contents=None, xpi_package=None):
             # found in multi-extension packages.
             
             # Unpack!
-            package = StringIO(xpi_package.read(name))
+            package = StringIO(file_data)
             
             err.push_state(data["name_lower"])
             
@@ -122,54 +136,38 @@ def test_packed_packages(err, package_contents=None, xpi_package=None):
             
         elif data["extension"] in ("xul", "xml", "html", "xhtml"):
             
-            try:
-                file_data = xpi_package.read(name)
-            except KeyError: # pragma: no cover
-                _read_error(err, name)
-            else:
-                parser = testendpoint_markup.MarkupParser(err)
-                parser.process(name,
-                               file_data,
-                               data["extension"])
-                
-                processed = True
+            parser = testendpoint_markup.MarkupParser(err)
+            parser.process(name,
+                           file_data,
+                           data["extension"])
+            
+            processed = True
                 
             
         elif data["extension"] in ("css", "js", "jsm"):
             
-            try:
-                file_data = xpi_package.read(name)
-                if not file_data:
-                    continue
-                
-                first_char = ord(file_data[0])
-                if first_char > 126 or first_char < 32:
-                    file_data = file_data[3:]
-                    # Removed: INFO about BOM because it was too frequent.
-                
-            except KeyError: # pragma: no cover
-                _read_error(err, name)
-            else:
-                if data["extension"] == "css":
-                    testendpoint_css.test_css_file(err,
-                                                   name,
-                                                   file_data)
-                elif data["extension"] in ("js", "jsm"):
-                    testendpoint_js.test_js_file(err,
-                                                 name,
-                                                 file_data)
-        
+            if not file_data:
+                continue
+            
+            first_char = ord(file_data[0])
+            if first_char > 126 or first_char < 32:
+                file_data = file_data[3:]
+                # Removed: INFO about BOM because it was too frequent.
+            
+            if data["extension"] == "css":
+                testendpoint_css.test_css_file(err,
+                                               name,
+                                               file_data)
+            elif data["extension"] in ("js", "jsm"):
+                testendpoint_js.test_js_file(err,
+                                             name,
+                                             file_data)
         # This is tested in test_langpack.py
         if err.detected_type == PACKAGE_LANGPACK and not processed:
             
-            try:
-                file_data = xpi_package.read(name)
-            except KeyError: # pragma: no cover
-                _read_error(err, name)
-            else:
-                testendpoint_langpack.test_unsafe_html(err,
-                                                       name,
-                                                       file_data)
+            testendpoint_langpack.test_unsafe_html(err,
+                                                   name,
+                                                   file_data)
         
         # This aids in creating unit tests.
         processed_files += 1
