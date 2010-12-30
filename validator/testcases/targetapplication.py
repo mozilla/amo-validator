@@ -82,6 +82,10 @@ def test_targetedapplications(err, package_contents=None,
                 # Ensure that the version numbers are in the app's
                 # list of acceptable version numbers.
                 
+                app_name = APPLICATIONS[ta_guid] if \
+                           ta_guid in APPLICATIONS else \
+                           ta_guid
+
                 try:
                     if min_version is not None:
                         min_ver_pos = app_versions.index(min_version)
@@ -94,8 +98,8 @@ def test_targetedapplications(err, package_contents=None,
                                is not an acceptable version number for
                                the Mozilla product that it corresponds
                                with.""",
-                               'Version "%s" isn\'t compatible with %s.' %
-                                   (min_version, ta_guid)],
+                               'Version "%s" isn\'t compatible with "%s".' %
+                                   (min_version, app_name)],
                               "install.rdf")
                     continue
                     
@@ -111,8 +115,8 @@ def test_targetedapplications(err, package_contents=None,
                                is not an acceptable version number for
                                the Mozilla product that it corresponds
                                with.""",
-                               'Version "%s" isn\'t compatible with %s.' %
-                                   (max_version, ta_guid)],
+                               'Version "%s" isn\'t compatible with "%s".' %
+                                   (max_version, app_name)],
                               "install.rdf")
                     continue
                 
