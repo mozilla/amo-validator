@@ -1,12 +1,9 @@
 import json
-import platform
 import uuid
+from StringIO import StringIO
 
 from contextgenerator import ContextGenerator
-if platform.system() != "Windows":
-    from outputhandlers.shellcolors import OutputHandler
-else: # pragma: no cover
-    from outputhandlers.windowscolors import OutputHandler
+from outputhandlers.shellcolors import OutputHandler
 
 class ErrorBundle(object):
     """This class does all sorts of cool things. It gets passed around
@@ -14,11 +11,10 @@ class ErrorBundle(object):
     'separating the sorrow and collecting up all the cream.' It's
     borderline magical."""
     
-    def __init__(self, pipe=None, no_color=False, determined=True,
-                 listed=False):
-        """Specifying pipe allows the output of the bundler to be
-        written to a file rather than to the screen."""
+    def __init__(self, determined=True, listed=True):
         
+        self.handler = None
+
         self.errors = []
         self.warnings = []
         self.notices = []
@@ -40,9 +36,6 @@ class ErrorBundle(object):
         if listed:
             self.resources["listed"] = True
 
-        self.handler = OutputHandler(pipe, no_color)
-            
-        
     def error(self, err_id, error,
               description='', filename='', line=0, column=0, context=None):
         "Stores an error message for the validation process"
@@ -164,13 +157,11 @@ class ErrorBundle(object):
                                  "warnings": self.warnings,
                                  "notices": self.notices,
                                  "detected_type": self.detected_type,
-                                 "resources": self.resources,
                                  "message_tree": self.message_tree})
         
         self.errors = []
         self.warnings = []
         self.notices = []
-        self.resources = {}
         self.message_tree = {}
         
         self.package_stack.append(new_file)
@@ -190,7 +181,6 @@ class ErrorBundle(object):
         self.warnings = state["warnings"]
         self.notices = state["notices"]
         self.detected_type = state["detected_type"]
-        self.resources = state["resources"]
         self.message_tree = state["message_tree"]
         
         name = self.package_stack.pop()
@@ -247,8 +237,8 @@ class ErrorBundle(object):
             else:
                 return "\n".join(output)
     
-    def print_json(self, cluster=False):
-        "Prints a JSON summary of the validation operation."
+    def render_json(self, cluster=False):
+        "Returns a JSON summary of the validation operation."
         
         types = {0: "unknown",
                  1: "extension",
@@ -286,10 +276,9 @@ class ErrorBundle(object):
             messages.append(notice)
         
         # Output the JSON.
-        json_output = json.dumps(output)
-        self.handler.write(json_output)
+        return json.dumps(output)
     
-    def print_summary(self, verbose=False):
+    def print_summary(self, verbose=False, no_color=False):
         "Prints a summary of the validation process so far."
         
         types = {0: "Unknown",
@@ -301,6 +290,9 @@ class ErrorBundle(object):
                  7: "Subpackage"}
         detected_type = types[self.detected_type]
         
+        buffer = StringIO()
+        self.handler = OutputHandler(buffer, no_color)
+
         # Make a neat little printout.
         self.handler.write("\n<<GREEN>>Summary:") \
             .write("-" * 30) \
@@ -312,12 +304,12 @@ class ErrorBundle(object):
             
             # Print out all the errors/warnings:
             for error in self.errors:
-                self._print_message("<<RED>>Error:<<NORMAL>>\t", error, verbose)
+                self._print_message("<<RED>>Error:<<NORMAL>>\t",
+                                    error, verbose)
             for warning in self.warnings:
-                self._print_message("<<YELLOW>>Warning:<<NORMAL>> ", warning, verbose)
+                self._print_message("<<YELLOW>>Warning:<<NORMAL>> ",
+                                    warning, verbose)
             
-            # Prints things that only happen during verbose (infos).
-            self._print_verbose(verbose)
             
             # Awwww... have some self esteem!
             if self.reject:
@@ -325,8 +317,14 @@ class ErrorBundle(object):
             
         else:
             self.handler.write("<<GREEN>>All tests succeeded!")
-            self._print_verbose(verbose)
             
+        
+        if self.notices:
+            for notice in self.notices:
+                self._print_message(prefix="<<WHITE>>Notice:<<NORMAL>>\t",
+                                    message=notice,
+                                    verbose=verbose)
+        
         self.handler.write("\n")
         if self.unfinished:
             self.handler.write("<<RED>>Validation terminated early")
@@ -335,6 +333,8 @@ class ErrorBundle(object):
             self.handler.write("Use the <<YELLOW>>--determined<<NORMAL>> "
                                "flag to ignore these errors.")
             self.handler.write("\n")
+
+        return buffer.getvalue()
         
     def _print_message(self, prefix, message, verbose=True):
         "Prints a message and takes care of all sorts of nasty code"
@@ -379,7 +379,9 @@ class ErrorBundle(object):
 
             if "context" in message and message["context"]:
                 verbose_output.append("\tContext:")
-                verbose_output.extend(["\t>\t%s" % x
+                verbose_output.extend([("\t>\t%s" % x
+                                        if x is not None
+                                        else "\t>" + ("-" * 20))
                                        for x
                                        in message["context"]])
 
@@ -389,13 +391,4 @@ class ErrorBundle(object):
         
         # Send the final output to the handler to be rendered.
         self.handler.write(''.join(output))
-        
-        
-    def _print_verbose(self, verbose):
-        "Prints info code to help prevent code duplication"
-        
-        if self.notices and verbose:
-            mesg = "<<WHITE>>Notice:<<NORMAL>>\t"
-            for notice in self.notices:
-                self._print_message(prefix=mesg, message=notice)
         

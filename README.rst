@@ -50,7 +50,7 @@ Running
 
 Run the validator as follows ::
 
-	python addon-validator <path to xpi> [-t <expected type>] [-o <output type>] [-v] [--file <output file>] [--boring] [--selfhosted]
+	python addon-validator <path to xpi> [-t <expected type>] [-o <output type>] [-v] [--boring] [--selfhosted]
 
 The path to the XPI should point to an XPI file.
 
@@ -105,16 +105,6 @@ item, as well as the file path and line number (if available).
 This mode is only supported by certain output types. Output types
 that do not support verbose mode will output informational messages by
 default.
-
-
-Output File:
-------------
-
-Specifying an output file with the "--file" flag captures the output of
-the analysis and stores it to the file specified. Specifying this
-option will not produce any output to the command line.
-
-When outputting to a file, Boring Mode is automatically activated.
 
 
 Boring Mode:
@@ -290,18 +280,6 @@ For instance, this tree would generate the following messages:
 		"file": ["subpackage.xpi", "subsubpackage.xpi", "chrome.manifest"],
 		"line": 5
 	}
-
-Batch Testing
-=============
-
-As a helpful tool for testing multiple add-ons, the following script will
-allow you to validate a whole directory of add-ons. ::
-
-	find /directory/to/scan/ -type f -exec python addon-validator {} -v --file {}.txt \;
-
-The output from this script will be placed in the same folder as the addons.
-The name of the output files will be the same as the add-on's name with ".txt"
-appended to the end.
 
 Testing
 =======

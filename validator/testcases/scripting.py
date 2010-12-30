@@ -13,7 +13,7 @@ from validator.contextgenerator import ContextGenerator
 def test_js_file(err, name, data, filename=None, line=0):
     "Tests a JS file by parsing and analyzing its tokens"
     
-    if SPIDERMONKEY_INSTALLATION is None and \
+    if SPIDERMONKEY_INSTALLATION is None or \
        err.get_resource("SPIDERMONKEY") is None: # Default value is False
         return
 
@@ -221,10 +221,13 @@ def _get_tree(name, code, shell=SPIDERMONKEY_INSTALLATION, errorbundle=None):
     temp.flush() # This is very important
 
     cmd = [shell, "-f", temp.name]
-    shell = subprocess.Popen(cmd,
-	                     shell=False,
-			     stderr=subprocess.PIPE,
-			     stdout=subprocess.PIPE)
+    try:
+        shell = subprocess.Popen(cmd,
+    	                     shell=False,
+    			     stderr=subprocess.PIPE,
+    			     stdout=subprocess.PIPE)
+    except OSError:
+        raise OSError("Spidermonkey shell could not be run.")
     data, stderr = shell.communicate()
     if stderr:
         raise RuntimeError('Error calling %r: %s' % (cmd, stderr))

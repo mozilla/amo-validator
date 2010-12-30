@@ -1,19 +1,15 @@
-
 import json
+import sys
 from StringIO import StringIO
 
 import validator.errorbundler as errorbundler
 from validator.errorbundler import ErrorBundle
 
-#{"messages": [{"message": "Invalid chrome.manifest object/predicate.", "type": "error", "description": "'override' entry does not match chrome://*/locale/*"}], "detected_type": 4, "success": false}
-
 def test_json():
     "Tests the JSON output capability of the error bundler."
     
-    outbuffer = StringIO()
-    
     # Use the StringIO as an output buffer.
-    bundle = ErrorBundle(outbuffer, True) # No color since no output
+    bundle = ErrorBundle() # No color since no output
     bundle.set_type(4)
     bundle.tier = 3
     
@@ -21,11 +17,7 @@ def test_json():
     bundle.warning((), "warning", "description")
     bundle.notice((), "notice", "description")
     
-    bundle.print_json()
-    
-    outbuffer.seek(0)
-    
-    results = json.load(outbuffer)
+    results = json.loads(bundle.render_json())
     
     print results
     
@@ -37,13 +29,16 @@ def test_json():
 def test_boring():
     "Tests that boring output strips out color sequences."
     
-    outbuffer = StringIO()
+    stdout = sys.stdout
+    sys.stdout = StringIO()
     
     # Use the StringIO as an output buffer.
-    bundle = ErrorBundle(outbuffer, True) # No color since no output
+    bundle = ErrorBundle()
     bundle.error((), "<<BLUE>><<GREEN>><<YELLOW>>")
-    bundle.print_summary()
+    bundle.print_summary(no_color=True)
     
+    outbuffer = sys.stdout
+    sys.stdout = stdout
     outbuffer.seek(0)
     
     assert outbuffer.getvalue().count("<<GREEN>>") == 0
@@ -52,7 +47,7 @@ def test_type():
     """Tests that detected type is being stored properly in the error
     bundle."""
     
-    bundle = ErrorBundle(None, True)
+    bundle = ErrorBundle()
     
     bundle.set_type(5)
     assert bundle.detected_type == 5
@@ -60,10 +55,8 @@ def test_type():
 def test_states():
     """Tests that detected type is preserved, even in subpackages."""
     
-    outbuffer = StringIO()
-    
     # Use the StringIO as an output buffer.
-    bundle = ErrorBundle(outbuffer, True) # No color since no output
+    bundle = ErrorBundle()
     
     # Populate the bundle with some test data.
     bundle.set_type(4)
@@ -93,8 +86,7 @@ def test_states():
     bundle.pop_state()
     
     # Load the JSON output as an object.
-    bundle.print_json()
-    output = json.loads(outbuffer.getvalue())
+    output = json.loads(bundle.render_json())
     
     # Run some basic tests
     assert output["detected_type"] == "langpack"
@@ -129,11 +121,8 @@ def test_file_structure():
     """Tests the means by which file names and line numbers are stored
     in errors, warnings, and messages."""
     
-    outbuffer = StringIO()
-    outbuffer2 = StringIO()
-    
     # Use the StringIO as an output buffer.
-    bundle = ErrorBundle(outbuffer, True) # No color since no output
+    bundle = ErrorBundle(True) # No color since no output
     
     # Populate the bundle with some test data.
     bundle.error((), "error", "", "file1", 123)
@@ -150,19 +139,14 @@ def test_file_structure():
     bundle.pop_state()
     
     # Load the JSON output as an object.
-    bundle.print_json()
-    output = json.loads(outbuffer.getvalue())
+    output = json.loads(bundle.render_json())
     
     # Do the same for friendly output
-    bundle.handler.pipe = outbuffer2
-    bundle.print_summary(False)
-    output2 = outbuffer2.getvalue()
-    outbuffer2.seek(0)
+    output2 = bundle.print_summary(verbose=False)
     
     # Do the same for verbose friendly output
-    bundle.print_summary(True)
-    output3 = outbuffer2.getvalue()
-    
+    output3 = bundle.print_summary(verbose=True)
+
     # Run some basic tests
     assert len(output["messages"]) == 6
     assert len(output2) < len(output3)
@@ -199,16 +183,13 @@ def test_file_structure():
 def test_notice():
     """Tests notice-related functions of the error bundler."""
     
-    outbuffer = StringIO()
-    
     # Use the StringIO as an output buffer.
-    bundle = ErrorBundle(outbuffer, True) # No color since no output
+    bundle = ErrorBundle()
     
     bundle.notice((), "")
     
     # Load the JSON output as an object.
-    bundle.print_json()
-    output = json.loads(outbuffer.getvalue())
+    output = json.loads(bundle.render_json())
     
     # Run some basic tests
     assert len(output["messages"]) == 1
@@ -231,17 +212,13 @@ def test_notice_friendly():
     """Tests notice-related human-friendly text output functions of the
     error bundler."""
     
-    outbuffer = StringIO()
-    
     # Use the StringIO as an output buffer.
-    bundle = ErrorBundle(outbuffer, True) # No color since no output
+    bundle = ErrorBundle()
     
     bundle.notice((), "foobar")
     
     # Load the JSON output as an object.
-    bundle.print_summary(True)
-    output = outbuffer.getvalue()
-    
+    output = bundle.print_summary(verbose=True, no_color=True)
     print output
     
     assert output.count("foobar")

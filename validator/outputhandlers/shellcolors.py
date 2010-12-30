@@ -11,16 +11,12 @@ class OutputHandler:
     """A handler that hooks up with the error bundler to colorize the
     output of the application for *nix-based terminals."""
     
-    def __init__(self, pipe=None, no_color=False):
-        """Pipe is the output stream that the printed data will be
-        written to. For instance, this could be a file, a StringIO
-        object, or stdout."""
+    def __init__(self, buffer=sys.stdout, no_color=False):
         
         if not no_color:
             no_color = isinstance(sys.stdout, StringIO) or \
                        not sys.stdout.isatty()
         
-        self.pipe = pipe
         self.no_color = no_color
         
         # Don't bother initiating color if there's no color.
@@ -45,7 +41,8 @@ class OutputHandler:
                 colorIndex = getattr(curses, 'COLOR_%s' % color)
                 self.colors[color] = curses.tparm(fgColorSeq,
                                                   colorIndex)
-        
+       
+        self.buffer = buffer
     
     def colorize_text(self, text):
         """Adds escape sequences to colorize text and make it
@@ -83,10 +80,7 @@ class OutputHandler:
         
         text += "\n"
         
-        if self.pipe:
-            self.pipe.write(text)
-        else:
-            sys.stdout.write(text)
-        
+        self.buffer.write(text)
+
         return self
         

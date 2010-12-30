@@ -1,23 +1,11 @@
-import sys
-import os
+import argparse
 import json
-
+import os
+import sys
 import zipfile
 from StringIO import StringIO
 
-import argparse
-import validator.submain as submain
-import validator.testcases.packagelayout
-import validator.testcases.installrdf
-import validator.testcases.library_blacklist
-import validator.testcases.conduit
-import validator.testcases.langpack
-import validator.testcases.themes
-import validator.testcases.content
-import validator.testcases.targetapplication
-import validator.testcases.l10ncompleteness
-from validator.submain import *
-from errorbundler import ErrorBundle
+from validator.validate import validate
 from constants import *
 
 def main():
@@ -55,12 +43,6 @@ def main():
                         const=True,
                         help="""If the output format supports it, makes
                         the analysis summary include extra info.""")
-    parser.add_argument("--file",
-                        type=argparse.FileType("w"),
-                        default=sys.stdout,
-                        help="""Specifying a path will write the output
-                        of the analysis to a file rather than to the
-                        screen.""")
     parser.add_argument("--boring",
                         action="store_const",
                         const=True,
@@ -78,28 +60,12 @@ def main():
                         hosted on addons.mozilla.org. This allows the
                         <em:updateURL> element to be set.""")
     parser.add_argument("--approved_applications",
-                        type=argparse.FileType("r"),
+                        default="validator/app_versions.json",
                         help="""A JSON file containing acceptable applications
                         and their versions""")
 
     args = parser.parse_args()
-
-    error_bundle = ErrorBundle(pipe=args.file,
-                               no_color=(not args.file == sys.stdout or
-                                         args.boring),
-                               determined=args.determined,
-                               listed=not args.selfhosted)
-
-    # Load in the approved applications if specified
-    app_versions = {}
-    if args.approved_applications:
-        app_versions = args.approved_applications.read()
-    else:
-        app_versions = open("validator/app_versions.json").read()
-
-    validator.testcases.targetapplication.APPROVED_APPLICATIONS = \
-            json.loads(app_versions)
-
+    
     # We want to make sure that the output is expected. Parse out the expected
     # type for the add-on and pass it in for validation.
     if args.type not in expectations:
@@ -109,16 +75,18 @@ def main():
         sys.exit(1)
 
     expectation = expectations[args.type]
-    submain.prepare_package(error_bundle, args.package, expectation)
+    error_bundle = validate(args.package,
+                            format=None,
+                            approved_applications=args.approved_applications,
+                            determined=args.determined,
+                            listed=not args.selfhosted)
 
     # Print the output of the tests based on the requested format.
     if args.output == "text":
-        error_bundle.print_summary(args.verbose)
+        print error_bundle.print_summary(verbose=args.verbose,
+                                         no_color=args.boring)
     elif args.output == "json":
-        error_bundle.print_json()
-
-    # Close the output stream.
-    args.file.close()
+        sys.stdout.write(error_bundle.render_json())
 
     if error_bundle.failed():
         sys.exit(1)
