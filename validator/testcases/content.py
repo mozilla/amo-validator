@@ -9,7 +9,7 @@ import validator.testcases.scripting as testendpoint_js
 import validator.testcases.langpack as testendpoint_langpack
 from validator.xpi import XPIManager
 from validator.chromemanifest import ChromeManifest
-from validator.constants import PACKAGE_LANGPACK, PACKAGE_SUBPACKAGE
+from validator.constants import *
 
 
 @decorator.register_test(tier=1)

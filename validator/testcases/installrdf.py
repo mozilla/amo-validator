@@ -58,9 +58,12 @@ def _test_rdf(err, install):
                  "targetPlatform",
                  "requires",
                  "developer")
-    
-    if err.detected_type == PACKAGE_THEME:
-        may_exist_once.append("internalName")
+   
+    print err.detected_type, PACKAGE_THEME
+    if err.detected_type == PACKAGE_THEME or \
+          (err.subpackages and
+           err.subpackages[0]["detected_type"] == PACKAGE_THEME):
+        must_exist_once.append("internalName")
     
     top_id = install.get_root_subject()
     
