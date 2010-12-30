@@ -9,6 +9,6 @@ validator.testcases.javascript.traverser.DEBUG = True
 path = sys.argv[1]
 script = open(path).read()
 err = MockBundler()
-validator.testcases.scripting.test_js_file(err,
-                                           path,
-                                           script)
+validator.testcases.scripting.test_js_file(err=err,
+                                           filename=path,
+                                           data=script)

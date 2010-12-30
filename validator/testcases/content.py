@@ -68,7 +68,6 @@ def test_packed_packages(err, package_contents=None, xpi_package=None):
                        name)
         
         processed = False
-        
         # If that item is a container file, unzip it and scan it.
         if data["extension"] == "jar":
             # This is either a subpackage or a nested theme.

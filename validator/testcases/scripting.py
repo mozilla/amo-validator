@@ -10,20 +10,16 @@ import validator.testcases.javascript.traverser as traverser
 from validator.constants import SPIDERMONKEY_INSTALLATION
 from validator.contextgenerator import ContextGenerator
 
-def test_js_file(err, name, data, filename=None, line=0):
+def test_js_file(err, filename, data, line=0):
     "Tests a JS file by parsing and analyzing its tokens"
     
     if SPIDERMONKEY_INSTALLATION is None or \
        err.get_resource("SPIDERMONKEY") is None: # Default value is False
         return
 
-    # The filename is 
-    if filename is None:
-        filename = name
-    
     # Get the AST tree for the JS code
     try:
-        tree = _get_tree(name,
+        tree = _get_tree(filename,
                          data,
                          shell=(err and err.get_resource("SPIDERMONKEY")) or
                                SPIDERMONKEY_INSTALLATION,
@@ -85,19 +81,14 @@ def test_js_file(err, name, data, filename=None, line=0):
     if err is not None:
         err.tier = before_tier
 
-def test_js_snippet(err, data, filename=None, line=0):
+def test_js_snippet(err, data, filename, line=0):
     "Process a JS snippet by passing it through to the file tester."
-    
-    if filename is not None:
-        name = "%s:%d" % (filename, line)
-    else:
-        name = str(line)
     
     # Wrap snippets in a function to prevent the parser from freaking out
     # when return statements exist without a corresponding function.
     data = "(function(){%s\n})()" % data
 
-    test_js_file(err, name, data, filename, line)
+    test_js_file(err, filename, data, line)
     
 def _do_test(err, filename, line, context, tree):
     t = traverser.Traverser(err, filename, line, context=context)
@@ -123,14 +114,14 @@ def _regex_tests(err, data, filename):
 
         if match:
             line = c.get_line(match.start())
-            err.error(("testcases_scripting",
-                       "regex_tests",
-                       "compiled_error"),
-                      "Malicious code detected",
-                      message,
-                      filename=filename,
-                      line=line,
-                      context=c)
+            err.warning(("testcases_scripting",
+                         "regex_tests",
+                         "compiled_error"),
+                        "Potentially malicious JS",
+                        message,
+                        filename=filename,
+                        line=line,
+                        context=c)
 
 
 class JSReflectException(Exception):

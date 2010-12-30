@@ -58,6 +58,7 @@ class Traverser:
             self.err = err
         else:
             self.err = MockBundler()
+
         self.contexts = []
         self.block_contexts = []
         self.filename = filename
