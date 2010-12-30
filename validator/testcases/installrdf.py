@@ -59,7 +59,6 @@ def _test_rdf(err, install):
                  "requires",
                  "developer")
    
-    print err.detected_type, PACKAGE_THEME
     if err.detected_type == PACKAGE_THEME or \
           (err.subpackages and
            err.subpackages[0]["detected_type"] == PACKAGE_THEME):

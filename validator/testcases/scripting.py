@@ -240,7 +240,11 @@ def _get_tree(name, code, shell=SPIDERMONKEY_INSTALLATION, errorbundle=None):
     #data = strip_weird_chars(data, errorbundle, name)
     #for escapechar in ("\\x", "\\u"):
     #    data = data.replace(escapechar, "")
-    data = unicode(data)
+    try:
+        data = unicode(data)
+    except UnicodeDecodeError:
+        data = unicode("".join([x for x in data if ord(x) < 128]))
+
     parsed = json.loads(data, encoding=encoding, strict=False) # Encoding defaults to None
 
     if "error" in parsed and parsed["error"]:
