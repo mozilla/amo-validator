@@ -30,14 +30,6 @@ def test_theme_passing():
              packagelayout.test_theme_layout,
              False)
 
-def test_theme_missing_mandatory():
-    "Tests the layout of a theme that's missing its chrome/*.jar"
-    
-    _do_test("tests/resources/packagelayout/theme_nojar.jar",
-             packagelayout.test_theme_layout,
-             True)
-    
-
 def test_extra_unimportant():
     """Tests the layout of a theme that contains an unimportant but
     extra directory."""
@@ -45,14 +37,6 @@ def test_extra_unimportant():
     _do_test("tests/resources/packagelayout/theme_extra_unimportant.jar",
              packagelayout.test_theme_layout,
              False)
-
-def test_extra_whitelisted():
-    """Tests the layout of a theme that contains a whitelisted file."""
-    
-    _do_test("tests/resources/packagelayout/theme_extra_whitelisted.jar",
-             packagelayout.test_theme_layout,
-             False)
-
 
 def _do_simulated_test(function, structure, failure=False, ff4=False):
     """"Performs a test on a function or set of functions without

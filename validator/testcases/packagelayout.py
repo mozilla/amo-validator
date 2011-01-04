@@ -217,15 +217,11 @@ def test_theme_layout(err, package_contents=None, xpi_package=None):
     # Define rules for the structure.
     mandatory_files = [
         "install.rdf",
-        "chrome/*.jar",
         "chrome.manifest"]
     whitelisted_files = ["chrome/*.jar"]
-    whitelisted_extensions = ("manifest", "rdf", "txt", "jar",
-                              "png", "gif", "jpg")
 
     test_layout(err, package_contents, mandatory_files,
-                whitelisted_files, whitelisted_extensions,
-                "theme")
+                whitelisted_files, None, "theme")
 
 def test_layout(err, package_contents, mandatory, whitelisted,
                 white_extensions=None, pack_type="Unknown Addon"):
@@ -233,16 +229,18 @@ def test_layout(err, package_contents, mandatory, whitelisted,
     and their levels of requirement and this guy will figure out which
     files should and should not be in the package."""
     
+    # A shortcut to prevent excessive lookups
+    fnm = fnmatch.fnmatch
+
     for file_ in package_contents:
         
-        if fnmatch.fnmatch(file_, "__MACOSX/*") or \
-           fnmatch.fnmatch(file_, ".DS_Store"):
+        if fnm(file_, "__MACOSX/*") or \
+           fnm(file_, ".DS_Store"):
             continue
         
         # Remove the file from the mandatory file list.
         #if file_ in mandatory_files:
-        mfile_list = \
-             [mf for mf in mandatory if fnmatch.fnmatch(file_, mf)]
+        mfile_list = [mf for mf in mandatory if fnm(file_, mf)]
         if mfile_list:
             # Isolate the mandatory file pattern and remove it.
             mfile = mfile_list[0]
@@ -250,8 +248,7 @@ def test_layout(err, package_contents, mandatory, whitelisted,
             continue
 
         # Test if the file is in the whitelist.
-        if any(fnmatch.fnmatch(file_, wlfile) for wlfile in
-               whitelisted):
+        if any(fnm(file_, wlfile) for wlfile in whitelisted):
             continue
 
         # Is it a directory?
@@ -263,7 +260,7 @@ def test_layout(err, package_contents, mandatory, whitelisted,
             continue
 
         # Is it a whitelisted file type?
-        if file_.split(".")[-1] in white_extensions:
+        if white_extensions is None or file_.split(".")[-1] in white_extensions:
             continue
 
         # Otherwise, report an error.
@@ -271,25 +268,23 @@ def test_layout(err, package_contents, mandatory, whitelisted,
                    "test_layout",
                    "unknown_file"),
                   "Unknown file found in add-on",
-                  ["""Security limitations ban the use of the detected file
-                   in this type of addon. Remove the file or use an
-                   alternative, supported file format
-                   instead.""",
-                   "%s add-ons cannot contain files like %s" % (pack_type,
-                                                                file_)],
+                  ["Files have been detected that are not allowed within this "
+                   "type of add-on. Remove the file or use an alternative, "
+                   "supported file format instead.",
+                   "Detected file: %s" % file_],
                   file_)
         err.reject = True
 
     # If there's anything left over, it means there's files missing
     if mandatory:
         err.reject = True # Rejection worthy
-        for mfile in mandatory:
-            err.error(("testcases_packagelayout",
-                       "test_layout",
-                       "missing_required"),
-                      "Required file missing",
-                      ["""The add-on requires certain files. Consult the
-                       documentation for a full list of required files.""",
-                       'Add-ons of type "%s" require "%s"' % (pack_type,
-                                                              mfile)])
-            err.reject = True
+        err.error(("testcases_packagelayout",
+                   "test_layout",
+                   "missing_required"),
+                  "Required file missing",
+                  ["This add-on is missing required files. Consult the "
+                   "documentation for a full list of required files.",
+                   "Add-ons of type '%s' require files: %s" %
+                        (pack_type, ", ".join(mandatory))])
+        err.reject = True
+
