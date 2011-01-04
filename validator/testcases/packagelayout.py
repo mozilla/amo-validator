@@ -41,7 +41,6 @@ def test_blacklisted_files(err, package_contents=None, xpi_package=None):
             (0x43, 0x57, 0x53), # ZLIB compressed SWF
         )
 
-    pattern = "File '%s' is using a blacklisted file extension (%s)"
     for name, file_ in package_contents.items():
         # Simple test to ensure that the extension isn't blacklisted
         extension = file_["extension"]
@@ -61,14 +60,14 @@ def test_blacklisted_files(err, package_contents=None, xpi_package=None):
         zip = xpi_package.zf.open(name)
         bytes = tuple([ord(x) for x in zip.read(4)]) # Longest is 4 bytes
         if [x for x in blacklisted_magic_numbers if bytes[0:len(x)] == x]:
-            err.error(("testcases_packagelayout",
-                       "test_blacklisted_files",
-                       "disallowed_file_type"),
-                      "Blacklisted file type found",
-                      ["A file was found to contain blacklisted content "
-                           "(i.e.: executable data).",
-                       "The file \"%s\" contains banned content" % name],
-                      filename=name)
+            err.warning(("testcases_packagelayout",
+                         "test_blacklisted_files",
+                         "disallowed_file_type"),
+                        "Blacklisted file type found",
+                        ["A file was found to contain blacklisted content "
+                             "(i.e.: executable data).",
+                         "The file \"%s\" contains banned content" % name],
+                        filename=name)
             
 
 
