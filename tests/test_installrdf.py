@@ -69,30 +69,31 @@ def test_fail_name():
     _test_value("Love of the Firefox", installrdf._test_name)
     _test_value("Mozilla Feed Aggregator", installrdf._test_name)
 
-def _run_test(filename, failure=True, detected_type=None):
+def _run_test(filename, failure=True, detected_type=0):
     "Runs a test on an install.rdf file"
     
-    err = ErrorBundle(None, True)
+    err = ErrorBundle()
     err.detected_type = detected_type
     
-    file_ = open(filename)
-    data = file_.read()
-    file_.close()
+    data = open(filename).read()
     
     parser = RDFParser(data)
     installrdf._test_rdf(err, parser)
     
+    print err.print_summary()
+
     if failure: # pragma: no cover
-        assert err.failed()
+        assert err.failed() or err.notices
     else:
-        assert not err.failed()
+        assert not err.failed() and not err.notices
     
     return err
 
 def test_has_rdf():
     "Tests that tests won't be run if there's no install.rdf"
     
-    err = ErrorBundle(None, True)
+    err = ErrorBundle()
+    err.detected_type = 0
     err.save_resource("install_rdf", "test")
     err.save_resource("has_install_rdf", True)
     testrdf = installrdf._test_rdf
@@ -165,8 +166,8 @@ def test_shouldnt_exist():
     _run_test("tests/resources/installrdf/shouldnt_exist.rdf")
 
 def test_obsolete():
-    "Tests that elements that shouldn't exist aren't there."
+    "Tests that obsolete elements are reported."
     
-    err = _run_test("tests/resources/installrdf/obsolete.rdf", False)
-    assert err.notices
+    err = _run_test("tests/resources/installrdf/obsolete.rdf")
+    assert err.notices and not err.failed()
 

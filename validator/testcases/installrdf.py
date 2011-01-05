@@ -35,6 +35,7 @@ def _test_rdf(err, install):
                        "name",
                        "targetApplication"]
     may_exist_once = ["about", # For <Description> element
+                      "bootstrap",
                       "type",
                       "optionsURL",
                       "aboutURL",
@@ -127,15 +128,16 @@ def _test_rdf(err, install):
         
         # If the predicate isn't in any of the above lists, it is
         # invalid and needs to go.
-        err.error(("testcases_installrdf",
-                   "_test_rdf",
-                   "unrecognized"),
-                  "Unrecognized element in install.rdf",
-                  """The element "%s" was found is not a part of the
-                  install manifest specification, has been used too
-                  many times, or is not applicable to the current
-                  configuration.""" % predicate,
-                  "install.rdf")
+        err.notice(("testcases_installrdf",
+                    "_test_rdf",
+                    "unrecognized"),
+                   "Unrecognized element in install.rdf",
+                   ["An element was found in the install manifest, however it "
+                    "does not appear to be a part of the specification, it "
+                    "has been used too many times, or is not applicable to the "
+                    "current configuration.",
+                    "Detected element: <em:%s>" % predicate],
+                   "install.rdf")
         
     # Once all of the predicates have been tested, make sure there are
     # no mandatory elements that haven't been found.
@@ -147,9 +149,7 @@ def _test_rdf(err, install):
                   "install.rdf missing element(s).",
                   ["""The element listed is a required element in the install
                    manifest specification. It must be added to your addon.""",
-                   "Missing elements:",
-                   missing_preds]
-                  ,
+                   "Missing elements: %s" % ", ".join(must_exist_once)],
                   "install.rdf")
     
 
