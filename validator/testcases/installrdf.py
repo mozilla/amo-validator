@@ -166,8 +166,8 @@ def _test_id(err, value):
                    "_test_id",
                    "invalid"),
                   "The value of <em:id> is invalid.",
-                  """The values supplied for <em:id> in the
-                  install.rdf file is not a valid UUID string.""",
+                  "The values supplied for <em:id> in the install.rdf file is "
+                  "not a valid UUID string or email address.",
                   "install.rdf")
     
 
