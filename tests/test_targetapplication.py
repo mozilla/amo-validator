@@ -18,31 +18,6 @@ def test_valid_targetapps():
              False,
              True)
 
-def test_ta_seamonkey():
-    """Tests that files that list SeaMonkey support include the
-    mandatory install.js file."""
-    
-    err = _do_test(
-            "tests/resources/targetapplication/bad_seamonkey.xpi",
-            targetapp.test_targetedapplications,
-            True,
-            True)
-    
-    assert not err.reject
-
-def test_ta_seamonkey_dict():
-    """Tests that SeaMonkey support is mandatory for dictionary
-    packages."""
-    
-    err = _do_test(
-            "tests/resources/targetapplication/bad_seamonkey.xpi",
-            targetapp.test_targetedapplications,
-            True,
-            True,
-            PACKAGE_DICTIONARY)
-    
-    assert err.reject
-
 def test_bad_min_max():
     """Tests that the lower/upper-bound version number for a
     targetApplication entry is indeed a valid version number"""

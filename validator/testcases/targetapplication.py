@@ -48,24 +48,6 @@ def test_targetedapplications(err, package_contents=None,
             
             used_targets.append(ta_guid)
             
-            if ta_guid == "{92650c4d-4b8e-4d2a-b7eb-24ecf4f6b63a}":
-                
-                # Time to test for some install.js.
-                if "install.js" not in package_contents:
-                    err.warning(("testcases_targetapplication",
-                                 "test_targetedapplications",
-                                 "missing_seamonkey_installjs"),
-                                "Missing install.js for SeaMonkey.",
-                                """SeaMonkey requires install.js, which
-                                was not found. install.rdf indicates
-                                that the addon supports SeaMonkey.""",
-                                "install.rdf")
-                    # Only reject if it's a dictionary.
-                    if err.detected_type == PACKAGE_DICTIONARY:
-                        err.reject = True
-                
-                break
-            
             found_guid = False
             for (guid, key) in [(x["guid"], y) for (y, x) in
                                     APPROVED_APPLICATIONS.items()]:
