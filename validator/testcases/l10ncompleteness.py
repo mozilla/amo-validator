@@ -134,7 +134,8 @@ def test_lp_xpi(err, package_contents, xpi_package):
                  file.""")
     else:
         for support in support_references:
-            ref_pack = XPIManager("langpacks/%s.xpi" % support)
+            ref_pack = XPIManager(os.path.join(os.path.dirname(__file__),
+                                               "langpacks/%s.xpi" % support))
             ref_pack_data = StringIO(ref_pack.read("en-US.jar"))
             ref_xpi = XPIManager(ref_pack_data, "en-US.jar")
             ref_xpi.app_name = support
@@ -143,12 +144,13 @@ def test_lp_xpi(err, package_contents, xpi_package):
     
     
     # Iterate each locale and run tests.
-    for locale in locales:
+    for locale_name in locales:
+        locale = locales[locale_name]
         results = []
         
         package = StringIO(xpi_package.read(locale["path"]))
         locale_jar = XPIManager(package, locale["path"])
-        locale_jar.locale_name = locale["name"]
+        locale_jar.locale_name = locale_name
         
         # Iterate each of the reference locales.
         for reference in references:
@@ -283,7 +285,7 @@ def _parse_l10n_doc(name, doc, no_encoding=False):
 
     return loc_doc
 
-def _aggregate_results(err, results, locale, similar=False):
+def _aggregate_results(err, results, locale, similar=False, base="en-US"):
     """Compiles the errors and warnings in the L10n results list into
     error bundler errors and warnings."""
     
@@ -295,8 +297,7 @@ def _aggregate_results(err, results, locale, similar=False):
     
     for ritem in results:
         if "filename" in ritem:
-            rfilename = ritem["filename"].replace("en-US",
-                                                  locale["name"])
+            rfilename = ritem["filename"].replace(base, locale["name"])
         
         rtype = ritem["type"]
         if rtype == "missing_files":
