@@ -87,29 +87,29 @@ def test_layout_all(err, package_contents, xpi_package):
                   "All addons require an install.rdf file.")
         err.reject = True
     
-
-@decorator.register_test(tier=2)
-def test_xpcom(err, package_contents, xpi_package):
-    "Test to make sure XPCOM is not used for FF4+"
-    
-    if not err.get_resource("ff4"):
-        return None
-    
-    # Test for XPCOM incompatibility.
-    for name, file_ in package_contents.items():
-        
-        if name.startswith("components/"):
-            err.warning(("testcases_packagelayout",
-                         "test_xpcom",
-                         "incompatible_xpcom_detected"),
-                        "XPCOM ties detected",
-                        ["""Files were found in the /components/ directory,
-                         which generally indicates XPCOM references. Firefox
-                         4 no longer supports XPCOM. This interface is
-                         subject to change.""",
-                         'File "%s" represents XPCOM ties.' % name],
-                        name);
-            break
+# Per @jorgev, this test is invalid.
+# @decorator.register_test(tier=2)
+# def test_xpcom(err, package_contents, xpi_package):
+#     "Test to make sure XPCOM is not used for FF4+"
+#     
+#     if not err.get_resource("ff4"):
+#         return None
+#     
+#     # Test for XPCOM incompatibility.
+#     for name, file_ in package_contents.items():
+#         
+#         if name.startswith("components/"):
+#             err.warning(("testcases_packagelayout",
+#                          "test_xpcom",
+#                          "incompatible_xpcom_detected"),
+#                         "XPCOM ties detected",
+#                         ["""Files were found in the /components/ directory,
+#                          which generally indicates XPCOM references. Firefox
+#                          4 no longer supports XPCOM. This interface is
+#                          subject to change.""",
+#                          'File "%s" represents XPCOM ties.' % name],
+#                         name);
+#             break
 
 @decorator.register_test(tier=2)
 def test_emunpack(err, package_contents, xpi_package):
