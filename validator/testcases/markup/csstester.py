@@ -10,6 +10,9 @@ def test_css_file(err, filename, data, line_start=1):
     
     tokenizer = cssutils.tokenize2.Tokenizer()
     context = ContextGenerator(data)
+
+    data = "".join(c for c in data if 8 < ord(c) < 127)
+
     token_generator = tokenizer.tokenize(data)
     
     try:
