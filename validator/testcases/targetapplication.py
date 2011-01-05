@@ -12,6 +12,9 @@ APPLICATIONS = {
 
 APPROVED_APPLICATIONS = {}
 
+APP_VERSIONS_URL = \
+        "https://addons.mozilla.org/en-US/firefox/pages/appversions/"
+
 @decorator.register_test(tier=1)
 def test_targetedapplications(err, package_contents=None,
                               xpi_package=None):
@@ -94,12 +97,12 @@ def test_targetedapplications(err, package_contents=None,
                                "test_targetedapplications",
                                "invalid_min_version"),
                               "Invalid minimum version number",
-                              ["""The minimum version that was specified
-                               is not an acceptable version number for
-                               the Mozilla product that it corresponds
-                               with.""",
+                              ["The minimum version that was specified is not "
+                               "an acceptable version number for the Mozilla "
+                               "product that it corresponds with.",
                                'Version "%s" isn\'t compatible with "%s".' %
-                                   (min_version, app_name)],
+                                   (min_version, app_name),
+                               APP_VERSIONS_URL],
                               "install.rdf")
                     continue
                     
@@ -111,12 +114,12 @@ def test_targetedapplications(err, package_contents=None,
                                "test_targetedapplications",
                                "invalid_max_version"),
                               "Invalid maximum version number",
-                              ["""The maximum version that was specified
-                               is not an acceptable version number for
-                               the Mozilla product that it corresponds
-                               with.""",
+                              ["The maximum version that was specified is not "
+                               "an acceptable version number for the Mozilla "
+                               "product that it corresponds with.",
                                'Version "%s" isn\'t compatible with "%s".' %
-                                   (max_version, app_name)],
+                                   (max_version, app_name),
+                               APP_VERSIONS_URL],
                               "install.rdf")
                     continue
                 
