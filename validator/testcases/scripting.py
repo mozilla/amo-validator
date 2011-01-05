@@ -28,25 +28,25 @@ def test_js_file(err, filename, data, line=0):
     except JSReflectException as exc:
         str_exc = str(exc)
         if "SyntaxError" in str_exc:
-            err.error(("testcases_scripting",
-                       "test_js_file",
-                       "syntax_error"),
-                       "Javascript Syntax Error",
-                       ["A syntax error in the Javascript halted validation "
-                        "of that file.",
-                        "Message: %s" % str_exc[15:-1]],
-                       filename=filename,
-                       line=exc.line,
-                       context=ContextGenerator(data))
+            err.warning(("testcases_scripting",
+                         "test_js_file",
+                         "syntax_error"),
+                         "Javascript Syntax Error",
+                         ["A syntax error in the Javascript halted validation "
+                          "of that file.",
+                          "Message: %s" % str_exc[15:-1]],
+                         filename=filename,
+                         line=exc.line,
+                         context=ContextGenerator(data))
         else:
-            err.error(("testcases_scripting",
-                       "test_js_file",
-                       "retrieving_tree"),
-                      "JS reflection error prevented validation",
-                      ["An error in the JavaScript file prevented it from "
-                       "being properly read by the Spidermonkey JS engine.",
-                       str(exc)],
-                      filename=filename)
+            err.warning(("testcases_scripting",
+                         "test_js_file",
+                         "retrieving_tree"),
+                        "JS reflection error prevented validation",
+                        ["An error in the JavaScript file prevented it from "
+                         "being properly read by the Spidermonkey JS engine.",
+                         str(exc)],
+                        filename=filename)
 
             import sys
             etype, err, tb = sys.exc_info()
