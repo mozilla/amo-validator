@@ -26,6 +26,8 @@ L10N_LENGTH_THRESHOLD = 3
 # is not inflated due to small numbers of entities.
 L10N_MIN_ENTITIES = 18
 
+LOCALE_CACHE = {}
+
 def _get_locales(err, xpi_package):
     "Returns a list of locales from the chrome.manifest file."
     
@@ -58,6 +60,17 @@ def _get_locales(err, xpi_package):
     
     return locales
 
+def _get_locale_manager(addon, path):
+    "Returns the XPIManager object for a locale"
+
+    if path in LOCALE_CACHE:
+        return LOCALE_CACHE[path]
+    jar = StringIO(addon.read(path))
+    locale = XPIManager(jar, path)
+
+    LOCALE_CACHE[path] = locale
+    return locale
+
 @decorator.register_test(tier=3)
 def test_xpi(err, package_contents, xpi_package):
     """Tests an XPI (or JAR, really) for L10n completeness"""
@@ -83,25 +96,24 @@ def test_xpi(err, package_contents, xpi_package):
     # Fall back on whatever comes first.
     if ref_name not in locales:
         ref_name = locales.keys()[0]
+
     reference = locales[ref_name]
-    reference_jar = StringIO(xpi_package.read(reference["path"]))
-    reference_locale = XPIManager(reference_jar, reference["path"])
+    reference_locale = _get_locale_manager(xpi_package, reference["path"])
     # Loop through the locales and test the valid ones.
     for name, locale in locales.items():
         # Ignore the reference locale
         if locale["name"] == ref_name:
             continue
         
-        locale_jar = StringIO(xpi_package.read(locale["path"]))
-        target_locale = XPIManager(locale_jar, locale["path"])
-        target_locale.locale_name = name
+        target_locale = _get_locale_manager(xpi_package, locale["path"])
         
         split_target = locale["name"].split("-")
         
         # Isolate each of the target locales' results.
         results = _compare_packages(reference_locale,
                                     target_locale,
-                                    reference["target"])
+                                    reference["target"],
+                                    locale["target"])
         _aggregate_results(err,
                            results,
                            locale,
@@ -141,16 +153,12 @@ def test_lp_xpi(err, package_contents, xpi_package):
             ref_xpi.app_name = support
             references.append(ref_xpi)
             
-    
-    
     # Iterate each locale and run tests.
     for locale_name in locales:
         locale = locales[locale_name]
         results = []
         
-        package = StringIO(xpi_package.read(locale["path"]))
-        locale_jar = XPIManager(package, locale["path"])
-        locale_jar.locale_name = locale_name
+        locale_jar = _get_locale_manager(xpi_package, locale["path"])
         
         # Iterate each of the reference locales.
         for reference in references:
@@ -158,10 +166,9 @@ def test_lp_xpi(err, package_contents, xpi_package):
         
         # Throw errors and whatnot in a seperate function.
         _aggregate_results(err, results, locale)
-        
-    
 
-def _compare_packages(reference, target, ref_base=None):
+
+def _compare_packages(reference, target, ref_base="", locale_base=""):
     "Compares two L10n-compatible packages to one another."
     
     ref_files = reference.get_file_data()
@@ -170,8 +177,8 @@ def _compare_packages(reference, target, ref_base=None):
     results = []
     total_entities = 0
     
-    if isinstance(ref_base, str):
-        ref_base = ref_base.lstrip("/")
+    ref_base = ref_base.lstrip("/")
+    locale_base = locale_base.lstrip("/")
     
     l10n_docs = ("dtd", "properties", "xhtml", "ini", "inc")
     parsable_docs = ("dtd", "properties")
@@ -183,8 +190,9 @@ def _compare_packages(reference, target, ref_base=None):
         # Skip directory entries.
         if name.endswith("/"): # pragma: no cover
             continue
+
         # Ignore files not considered reference files.
-        if ref_base is not None and not name.startswith(ref_base):
+        if ref_base and not name.startswith(ref_base):
             continue
         
         extension = name.split(".")[-1]
@@ -199,7 +207,7 @@ def _compare_packages(reference, target, ref_base=None):
         else:
             ref_doc = ()
         
-        tar_name = name.replace("en-US", target.locale_name)
+        tar_name = locale_base + name[len(ref_base):]
         if tar_name not in tar_files:
             results.append({"type": "missing_files",
                             "entities": len(ref_doc),
@@ -238,16 +246,16 @@ def _compare_packages(reference, target, ref_base=None):
         if missing_entities:
             results.append({"type": "missing_entities",
                             "entities": len(missing_entities),
-                            "filename": name,
+                            "filename": tar_name,
                             "missing_entities": missing_entities})
         if unchanged_entities:
             results.append({"type": "unchanged_entity",
                             "entities": len(unchanged_entities),
-                            "filename": name,
+                            "filename": tar_name,
                             "unchanged_entities": unchanged_entities})
         
         results.append({"type": "file_entity_count",
-                        "filename": name,
+                        "filename": tar_name,
                         "entities": entity_count})
         
         total_entities += entity_count
@@ -297,7 +305,7 @@ def _aggregate_results(err, results, locale, similar=False, base="en-US"):
     
     for ritem in results:
         if "filename" in ritem:
-            rfilename = ritem["filename"].replace(base, locale["name"])
+            rfilename = ritem["filename"]
         
         rtype = ritem["type"]
         if rtype == "missing_files":
