@@ -139,10 +139,16 @@ class JSReflectException(Exception):
         self.line = int(line_num)
         return self
 
-def is_ctrl_char(x):
+def is_ctrl_char(x, y=None):
     "Returns whether X is an ASCII control character"
-    y = ord(x)
+    if y is None:
+        y = ord(x)
     return 0 <= y <= 31 and y not in (9, 10, 13) # TAB, LF, CR
+
+def is_standard_ascii(x):
+    "Returns whether X is a standard, non-control ASCII character"
+    y = ord(x)
+    return not (is_ctrl_char(x, y) or y > 126)
 
 def strip_weird_chars(chardata, err=None, name=""):
     line_num = 1
@@ -189,12 +195,17 @@ def _get_tree(name, code, shell=SPIDERMONKEY_INSTALLATION, errorbundle=None):
         
         code = strip_weird_chars(code, errorbundle, name=name)
         data = json.dumps(code)
+
     except UnicodeDecodeError:
         # If it's not an easily decodeable encoding, detect it and decode that
         encoding = chardet.detect(code)["encoding"].lower()
-        if any([is_ctrl_char(x) for x in code]):
+        if any(is_ctrl_char(x) for x in code):
             raise JSReflectException("Invalid encoding; control character")
         data = json.dumps(code, encoding=encoding)
+
+    # Acceptable unicode characters still need to be stripped
+    data = data.replace("\\u", "")
+    data = data.replace("\\x", "")
 
     data = """try{
         print(JSON.stringify(Reflect.parse(%s)));
@@ -226,15 +237,10 @@ def _get_tree(name, code, shell=SPIDERMONKEY_INSTALLATION, errorbundle=None):
     # Closing the temp file will delete it.
     temp.close()
 
-    ## Strip weird chars again; it doesn't hurt the analyzer and it prevents
-    ## devs from hiding bad unicode characters in their JS.
-    #data = strip_weird_chars(data, errorbundle, name)
-    #for escapechar in ("\\x", "\\u"):
-    #    data = data.replace(escapechar, "")
     try:
         data = unicode(data)
     except UnicodeDecodeError:
-        data = unicode("".join([x for x in data if ord(x) < 128]))
+        data = unicode("".join(x for x in data if is_standard_ascii(x)))
 
     parsed = json.loads(data, encoding=encoding, strict=False) # Encoding defaults to None
 
