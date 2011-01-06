@@ -1,6 +1,8 @@
 import os
 from StringIO import StringIO
 
+import textfilter
+
 class ContextGenerator:
     """The context generator creates a line-by-line mapping of all files that
     are validated. It will then use that to help produce useful bits of code
@@ -81,5 +83,6 @@ class ContextGenerator:
                 data = "%s ..." % data[:140]
 
         data = "%s%s" % (raw_data[0:with_ws - line_length], data)
+        data = textfilter.filter_ascii(data)
         return data
 

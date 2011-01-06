@@ -9,6 +9,7 @@ from cStringIO import StringIO
 import validator.testcases.javascript.traverser as traverser
 from validator.constants import SPIDERMONKEY_INSTALLATION
 from validator.contextgenerator import ContextGenerator
+from validator.textfilter import *
 
 def test_js_file(err, filename, data, line=0):
     "Tests a JS file by parsing and analyzing its tokens"
@@ -139,16 +140,6 @@ class JSReflectException(Exception):
         self.line = int(line_num)
         return self
 
-def is_ctrl_char(x, y=None):
-    "Returns whether X is an ASCII control character"
-    if y is None:
-        y = ord(x)
-    return 0 <= y <= 31 and y not in (9, 10, 13) # TAB, LF, CR
-
-def is_standard_ascii(x):
-    "Returns whether X is a standard, non-control ASCII character"
-    y = ord(x)
-    return not (is_ctrl_char(x, y) or y > 126)
 
 def strip_weird_chars(chardata, err=None, name=""):
     line_num = 1
@@ -192,7 +183,6 @@ def _get_tree(name, code, shell=SPIDERMONKEY_INSTALLATION, errorbundle=None):
     encoding = None
     try:
         code = unicode(code) # Make sure we can get a Unicode representation
-        
         code = strip_weird_chars(code, errorbundle, name=name)
         data = json.dumps(code)
 
@@ -203,9 +193,10 @@ def _get_tree(name, code, shell=SPIDERMONKEY_INSTALLATION, errorbundle=None):
             raise JSReflectException("Invalid encoding; control character")
         data = json.dumps(code, encoding=encoding)
 
-    # Acceptable unicode characters still need to be stripped
-    data = data.replace("\\u", "")
-    data = data.replace("\\x", "")
+    # Acceptable unicode characters still need to be stripped. Just remove the
+    # slash: a character is necessary to prevent bad identifier errors
+    data = data.replace("\\u", "u") 
+    data = data.replace("\\x", "x")
 
     data = """try{
         print(JSON.stringify(Reflect.parse(%s)));

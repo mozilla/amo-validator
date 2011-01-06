@@ -4,6 +4,7 @@ from StringIO import StringIO
 
 from contextgenerator import ContextGenerator
 from outputhandlers.shellcolors import OutputHandler
+from textfilter import filter_ascii
 
 class ErrorBundle(object):
     """This class does all sorts of cool things. It gets passed around
@@ -100,6 +101,9 @@ class ErrorBundle(object):
                                                 column=message["column"])
         else:
             message["context"] = None
+        
+        message["message"] = filter_ascii(message["message"])
+        message["description"] = filter_ascii(message["description"])
         
         stack.append(message)
         
