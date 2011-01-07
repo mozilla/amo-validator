@@ -7,10 +7,11 @@ def test_pass():
     "Test a package with localization that should pass validation."
     
     l10n.LOCALE_CACHE = {}
-    _do_test("tests/resources/l10n/pass.xpi",
-             l10n.test_xpi,
-             failure=False,
-             set_type=PACKAGE_EXTENSION)
+    output = _do_test("tests/resources/l10n/pass.xpi",
+                      l10n.test_xpi,
+                      failure=True,
+                      set_type=PACKAGE_EXTENSION)
+    assert not output.errors
 
 def test_unlocalizable():
     "Test a package without localization data."

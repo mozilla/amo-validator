@@ -76,27 +76,6 @@ def test_langpack_max():
                         "chrome/asdf.xhtml",
                         "chrome/asdf.css"])
 
-def test_ff4():
-    """Tests the package layout module out on a simulated language pack
-    containing the largest number of possible elements."""
-    
-    _do_simulated_test(function=packagelayout.test_xpcom,
-                       structure=["install.rdf",
-                                  "foo.manifest"],
-                       ff4=True,
-                       failure=False)
-    
-    _do_simulated_test(function=packagelayout.test_xpcom,
-                       structure=["install.rdf",
-                                  "components/foo.bar"],
-                       ff4=True,
-                       failure=True)
-    _do_simulated_test(function=packagelayout.test_xpcom,
-                       structure=["install.rdf",
-                                  "components/foo.bar"],
-                       ff4=False,
-                       failure=False)
-
 def test_dict_max():
     """Tests the package layout module out on a simulated dictionary
     containing the largest number of possible elements."""

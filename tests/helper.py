@@ -10,7 +10,7 @@ def _do_test(path, test, failure=True,
     package_data = open(path)
     package = XPIManager(package_data, path)
     contents = package.get_file_data()
-    err = ErrorBundle(None, True)
+    err = ErrorBundle()
     
     # Populate in the dependencies.
     if set_type:
@@ -23,7 +23,7 @@ def _do_test(path, test, failure=True,
     
     test(err, contents, package)
     
-    err.print_summary(True)
+    print err.print_summary(verbose=True)
     
     if failure:
         assert err.failed()

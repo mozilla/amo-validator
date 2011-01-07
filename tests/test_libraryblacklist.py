@@ -14,12 +14,12 @@ def test_blacklisted_files():
     package_data = open("tests/resources/libraryblacklist/blocked.xpi")
     package = XPIManager(package_data, "blocked.xpi")
     contents = package.get_file_data()
-    err = ErrorBundle(None, True)
+    err = ErrorBundle()
     
     libblacklist.test_library_blacklist(err,
                                         contents,
                                         package)
     
-    err.print_summary()
+    print err.print_summary()
     
-    assert err.failed()
+    assert err.notices
