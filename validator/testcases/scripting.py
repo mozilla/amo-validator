@@ -32,8 +32,8 @@ def test_js_file(err, filename, data, line=0):
             err.warning(("testcases_scripting",
                          "test_js_file",
                          "syntax_error"),
-                         "Javascript Syntax Error",
-                         ["A syntax error in the Javascript halted validation "
+                         "JavaScript Syntax Error",
+                         ["A syntax error in the JavaScript halted validation "
                           "of that file.",
                           "Message: %s" % str_exc[15:-1]],
                          filename=filename,
