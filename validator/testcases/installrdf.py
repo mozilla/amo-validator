@@ -209,12 +209,12 @@ def _test_name(err, value):
     err.metadata["name"] = value
     
     if ff_pattern.match(value):
-        err.error(("testcases_installrdf",
-                   "_test_name",
-                   "trademark"),
-                  "Add-on has illegal name.",
-                  """Add-on names cannot contain the Mozilla or Firefox
-                  trademarks. These names should not be contained in
-                  add-on names at all.""",
-                  "install.rdf")
+        err.warning(("testcases_installrdf",
+                     "_test_name",
+                     "trademark"),
+                    "Add-on has illegal name.",
+                    """Add-on names cannot contain the Mozilla or Firefox
+                    trademarks. These names should not be contained in
+                    add-on names at all.""",
+                    "install.rdf")
 
