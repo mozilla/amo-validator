@@ -121,6 +121,8 @@ def test_xpi(err, package_contents, xpi_package):
                            locale,
                            ref_name.startswith(split_target[0]))
 
+    # Clear the cache at the end of the test
+    L10N_CACHE = {}
 
 @decorator.register_test(tier=3, expected_type=PACKAGE_LANGPACK)
 def test_lp_xpi(err, package_contents, xpi_package):
@@ -180,6 +182,8 @@ def test_lp_xpi(err, package_contents, xpi_package):
         # Throw errors and whatnot in a seperate function.
         _aggregate_results(err, results, locale)
 
+    # Clear the cache at the end of the test
+    LOCALE_CACHE = {}
 
 def _compare_packages(reference, target, ref_base="", locale_base=""):
     "Compares two L10n-compatible packages to one another."

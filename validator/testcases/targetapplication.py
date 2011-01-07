@@ -12,7 +12,7 @@ APPLICATIONS = {
 
 APPROVED_APPLICATIONS = {}
 
-APP_VERSIONS_URL = \
+APP_VERSIONS_URL = "Please check the list of valid versions at: "\
         "https://addons.mozilla.org/en-US/firefox/pages/appversions/"
 
 @decorator.register_test(tier=1)
