@@ -9,7 +9,8 @@ def trace_member(traverser, node):
     if node["type"] == "MemberExpression":
         # x.y or x[y]
         base = trace_member(traverser, node["object"])
-        
+        base = js_traverser.JSWrapper(base, traverser=traverser)
+
         # base = x
         if node["property"]["type"] == "Identifier":
             # y = token identifier
@@ -18,11 +19,7 @@ def trace_member(traverser, node):
         else:
             # y = literal value
             property = traverser._traverse_node(node["property"])
-            if isinstance(property, js_traverser.JSVariable):
-                property_value = str(property)
-                return base.get("property_value") if \
-                       base.has_var(property_value) else \
-                       None
+            return property.get_literal_value()
 
     elif node["type"] == "Identifier":
         traverser._debug("MEMBER_EXP>>ROOT:IDENTIFIER")
@@ -30,7 +27,8 @@ def trace_member(traverser, node):
     else:
         traverser._debug("MEMBER_EXP>>ROOT:EXPRESSION")
         # It's an expression, so just try your damndest.
-        return JSWrapper(traverser._traverse_node(node), traverser=traverser)
+        return js_traverser.JSWrapper(traverser._traverse_node(node),
+                                      traverser=traverser)
 
 def _function(traverser, node):
     "Prevents code duplication"
@@ -250,9 +248,6 @@ def _new(traverser, node):
         traverser._traverse_node(args)
     
     elem = traverser._traverse_node(node["callee"])
-    if elem is None: # TODO : This might be wrapped and thus never None :(
-        return js_traverser.JSWrapper(traverser=traverser)
-
     elem = js_traverser.JSWrapper(elem, traverser=traverser)
     return elem
 

@@ -493,7 +493,7 @@ class JSWrapper(object):
         if value is JSLiteral:
             return None # This will need tweaking for properties
         elif isinstance(value, (JSObject, JSArray)):
-            output = value.get(traverser, name)
+            output = value.get(name)
         elif isinstance(value, JSPrototype):
             output = value.get(name)
         else:
