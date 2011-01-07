@@ -32,43 +32,45 @@ def _get_locales(err, xpi_package):
     "Returns a list of locales from the chrome.manifest file."
     
     # Retrieve the chrome.manifest if it's cached.
-    if err.get_resource("chrome.manifest"): # pragma: no cover
+    if err is not None and \
+       err.get_resource("chrome.manifest"): # pragma: no cover
         chrome = err.get_resource("chrome.manifest")
     else:
         chrome_data = xpi_package.read("chrome.manifest")
         chrome = ChromeManifest(chrome_data)
-        err.save_resource("chrome.manifest", chrome)
+        if err is not None:
+            err.save_resource("chrome.manifest", chrome)
         
     pack_locales = chrome.get_triples("locale")
     locales = {}
     # Find all of the locales referenced in the chrome.manifest file.
     for locale in pack_locales:
         locale_jar = locale["object"].split()
-        
-        locale_name = locale_jar[0]
+
         location = locale_jar[-1]
         if not location.startswith("jar:"):
             continue
         full_location = location[4:].split("!")
-        location = full_location[0]
-        target = full_location[1]
-        locale_desc = {"path": location,
-                       "target": target,
-                       "name": locale_name}
+        locale_desc = {"predicate": locale["predicate"],
+                       "path": full_location[0],
+                       "target": full_location[1],
+                       "name": locale_jar[0]}
+        locale_name = "%s:%s" % (locale["predicate"], locale_jar[0])
         if locale_name not in locales:
             locales[locale_name] = locale_desc
     
     return locales
 
-def _get_locale_manager(addon, path):
+def _get_locale_manager(addon, path, no_cache=False):
     "Returns the XPIManager object for a locale"
 
-    if path in LOCALE_CACHE:
+    if path in LOCALE_CACHE and not no_cache:
         return LOCALE_CACHE[path]
     jar = StringIO(addon.read(path))
     locale = XPIManager(jar, path)
 
-    LOCALE_CACHE[path] = locale
+    if not no_cache:
+        LOCALE_CACHE[path] = locale
     return locale
 
 @decorator.register_test(tier=3)
@@ -146,12 +148,12 @@ def test_lp_xpi(err, package_contents, xpi_package):
                  file.""")
     else:
         for support in support_references:
-            ref_pack = XPIManager(os.path.join(os.path.dirname(__file__),
-                                               "langpacks/%s.xpi" % support))
-            ref_pack_data = StringIO(ref_pack.read("en-US.jar"))
-            ref_xpi = XPIManager(ref_pack_data, "en-US.jar")
+            ref_xpi = XPIManager(os.path.join(os.path.dirname(__file__),
+                                              "langpacks/%s.xpi" % support))
             ref_xpi.app_name = support
-            references.append(ref_xpi)
+            reference_locales = _get_locales(None, ref_xpi)
+
+            references.append((ref_xpi, reference_locales))
             
     # Iterate each locale and run tests.
     for locale_name in locales:
@@ -162,7 +164,18 @@ def test_lp_xpi(err, package_contents, xpi_package):
         
         # Iterate each of the reference locales.
         for reference in references:
-            results.extend(_compare_packages(reference, locale_jar))
+            ref_locales = reference[1]
+            ref_data = [ref_locales[r] for r
+                        in ref_locales
+                        if ref_locales[r]["predicate"] == locale["predicate"]
+                        ][0]
+            ref_pack = _get_locale_manager(reference[0],
+                                           "en-US.jar",
+                                           no_cache=True)
+            results.extend(_compare_packages(reference=ref_pack,
+                                             target=locale_jar,
+                                             ref_base=ref_data["target"],
+                                             locale_base=locale["target"]))
         
         # Throw errors and whatnot in a seperate function.
         _aggregate_results(err, results, locale)
@@ -274,8 +287,7 @@ def _parse_l10n_doc(name, doc, no_encoding=False):
     handlers = {"dtd": dtd.DTDParser,
                 "properties": properties.PropertiesParser}
     # These are expected encodings for the various files.
-    handler_formats = {"dtd": ("UTF-8", ),
-                       "properties": ("ASCII", "UTF-8")}
+    handler_formats = ("ASCII", "UTF-8")
     if extension not in handlers:
         return None
     
@@ -286,10 +298,9 @@ def _parse_l10n_doc(name, doc, no_encoding=False):
     if not no_encoding:
         encoding = chardet.detect(doc)
         encoding["encoding"] = encoding["encoding"].upper()
-        loc_doc.expected_encoding = \
-            encoding["encoding"] in handler_formats[extension]
+        loc_doc.expected_encoding = encoding["encoding"] in handler_formats
         loc_doc.found_encoding = encoding["encoding"]
-        loc_doc.suitable_encoding = handler_formats[extension]
+        loc_doc.suitable_encoding = handler_formats
 
     return loc_doc
 
