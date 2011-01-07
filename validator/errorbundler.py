@@ -38,7 +38,8 @@ class ErrorBundle(object):
             self.resources["listed"] = True
 
     def error(self, err_id, error,
-              description='', filename='', line=0, column=0, context=None):
+              description='', filename='', line=0, column=0, context=None,
+              tier=None):
         "Stores an error message for the validation process"
         self._save_message(self.errors,
                            "errors",
@@ -47,12 +48,14 @@ class ErrorBundle(object):
                             "description": description,
                             "file": filename,
                             "line": line,
-                            "column": column},
+                            "column": column,
+                            "tier": tier},
                            context=context)
         return self
         
     def warning(self, err_id, warning,
-                description='', filename='', line=0, column=0, context=None):
+                description='', filename='', line=0, column=0, context=None,
+                tier=None):
         "Stores a warning message for the validation process"
         self._save_message(self.warnings,
                            "warnings",
@@ -61,7 +64,8 @@ class ErrorBundle(object):
                             "description": description,
                             "file": filename,
                             "line": line,
-                            "column": column},
+                            "column": column,
+                            "tier": tier},
                            context=context)
         return self
 
@@ -71,7 +75,8 @@ class ErrorBundle(object):
         self.notice(err_id, info, description, filename, line)
 
     def notice(self, err_id, notice,
-               description="", filename="", line=0, column=0, context=None):
+               description="", filename="", line=0, column=0, context=None,
+               tier=None):
         "Stores an informational message about the validation"
         self._save_message(self.notices,
                            "notices",
@@ -80,7 +85,8 @@ class ErrorBundle(object):
                             "description": description,
                             "file": filename,
                             "line": line,
-                            "column": column},
+                            "column": column,
+                            "tier": tier},
                            context=context)
         return self
         
@@ -108,7 +114,8 @@ class ErrorBundle(object):
         stack.append(message)
         
         # Mark the tier that the error occurred at
-        message["tier"] = self.tier
+        if message["tier"] is None:
+            message["tier"] = self.tier
 
         if message["id"]:
             tree = self.message_tree
@@ -214,7 +221,8 @@ class ErrorBundle(object):
                      filename=trace,
                      line=message["line"],
                      column=message["column"],
-                     context=message["context"])
+                     context=message["context"],
+                     tier=message["tier"])
     
     
     def _clean_description(self, message, json=False):
