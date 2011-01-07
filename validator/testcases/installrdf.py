@@ -33,10 +33,10 @@ def _test_rdf(err, install):
     must_exist_once = ["id",
                        "version",
                        "name",
-                       "targetApplication"]
+                       "targetApplication",
+                       "type"] # em:type required, per bug 623419
     may_exist_once = ["about", # For <Description> element
                       "bootstrap",
-                      "type",
                       "optionsURL",
                       "aboutURL",
                       "iconURL",
