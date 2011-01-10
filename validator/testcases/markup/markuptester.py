@@ -303,15 +303,15 @@ class MarkupParser(HTMLParser):
         if not self.xml_state:
             if "closing_tags" in self.reported:
                 return
-            self.err.error(("testcases_markup_markuptester",
-                            "handle_endtag",
-                            "extra_closing_tags"),
-                           "Markup parsing error",
-                           """The markup file has more closing tags
-                           than it has opening tags.""",
-                           self.filename,
-                           line=self.line,
-                           context=self.context)
+            self.err.warning(("testcases_markup_markuptester",
+                              "handle_endtag",
+                              "extra_closing_tags"),
+                             "Markup parsing error",
+                             "The markup file has more closing tags than it "
+                             "has opening tags.",
+                             self.filename,
+                             line=self.line,
+                             context=self.context)
             self.reported["closing_tags"] = True
             if DEBUG: # pragma: no cover
                 print "Too many closing tags ------"
@@ -354,16 +354,16 @@ class MarkupParser(HTMLParser):
         # If this is an XML-derived language, everything must nest
         # properly. No overlapping tags.
         if old_state != tag and self.extension[0] == 'x':
-            self.err.error(("testcases_markup_markuptester",
-                            "handle_endtag",
-                            "invalid_nesting"),
-                           "Markup invalidly nested",
-                           """It has been determined that the document
-                           invalidly nests its tags. This is not
-                           permitted in the specified document type.""",
-                           self.filename,
-                           line=self.line,
-                           context=self.context)
+            self.err.warning(("testcases_markup_markuptester",
+                              "handle_endtag",
+                              "invalid_nesting"),
+                             "Markup invalidly nested",
+                             """It has been determined that the document
+                             invalidly nests its tags. This is not
+                             permitted in the specified document type.""",
+                             self.filename,
+                             line=self.line,
+                             context=self.context)
             if DEBUG: # pragma: no cover
                 print "Invalid markup nesting ------"
         
