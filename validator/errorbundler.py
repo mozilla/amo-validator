@@ -137,11 +137,11 @@ class ErrorBundle(object):
         "Stores the type of addon we're scanning"
         self.detected_type = type_
     
-    def failed(self):
+    def failed(self, fail_on_warnings=True):
         """Returns a boolean value describing whether the validation
         succeeded or not."""
         
-        return self.errors or self.warnings
+        return self.errors or (fail_on_warnings and self.warnings)
         
     def get_resource(self, name):
         "Retrieves an object that has been stored by another test."

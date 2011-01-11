@@ -174,6 +174,6 @@ class MockErrorHandler:
         assert y is None
         assert z is None
         
-    def failed(self):
+    def failed(self, fail_on_warnings=False):
         "Simple accessor because the standard error handler has one"
         return self.has_failed
