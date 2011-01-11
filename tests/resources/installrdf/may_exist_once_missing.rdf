@@ -5,13 +5,14 @@
 
 	<Description about="urn:mozilla:install-manifest">
 	
-	<em:type>2</em:type>
+    <!--<em:type>2</em:type> -->
 	
 	<em:id>bastatestapp1@basta.mozilla.com</em:id>
 	<em:version>1.2.3.4</em:version>
 	<em:name>name_value</em:name>
 	<em:description>description_value</em:description>
-	<em:creator>creator_value</em:creator>
+    <em:creator>creator_value</em:creator>
+    <em:homepageURL>homepage_url_value</em:homepageURL>
 
 	<em:contributor>contributor_1_value</em:contributor>
 	<em:contributor>contributor_2_value</em:contributor>
