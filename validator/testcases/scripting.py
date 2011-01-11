@@ -150,7 +150,7 @@ def strip_weird_chars(chardata, err=None, name=""):
 
         charpos = 0
         for char in line:
-            if not is_ctrl_char(char):
+            if is_standard_ascii(char):
                 out_code.write(char)
             else:
                 if not has_warned_ctrlchar and err is not None:
@@ -180,23 +180,22 @@ def _get_tree(name, code, shell=SPIDERMONKEY_INSTALLATION, errorbundle=None):
     if not code:
         return None
 
+    code = strip_weird_chars(code, errorbundle, name=name)
+    
+    # Acceptable unicode characters still need to be stripped. Just remove the
+    # slash: a character is necessary to prevent bad identifier errors
+    code = code.replace("\\u", "u") 
+    code = code.replace("\\x", "x")
+
     encoding = None
     try:
         code = unicode(code) # Make sure we can get a Unicode representation
-        code = strip_weird_chars(code, errorbundle, name=name)
         data = json.dumps(code)
 
     except UnicodeDecodeError:
         # If it's not an easily decodeable encoding, detect it and decode that
         encoding = chardet.detect(code)["encoding"].lower()
-        if any(is_ctrl_char(x) for x in code):
-            raise JSReflectException("Invalid encoding; control character")
         data = json.dumps(code, encoding=encoding)
-
-    # Acceptable unicode characters still need to be stripped. Just remove the
-    # slash: a character is necessary to prevent bad identifier errors
-    data = data.replace("\\u", "u") 
-    data = data.replace("\\x", "x")
 
     data = """try{
         print(JSON.stringify(Reflect.parse(%s)));
@@ -232,7 +231,7 @@ def _get_tree(name, code, shell=SPIDERMONKEY_INSTALLATION, errorbundle=None):
         data = unicode(data)
     except UnicodeDecodeError:
         data = unicode("".join(x for x in data if is_standard_ascii(x)))
-
+    
     parsed = json.loads(data, encoding=encoding, strict=False) # Encoding defaults to None
 
     if "error" in parsed and parsed["error"]:
