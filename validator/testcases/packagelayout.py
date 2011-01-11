@@ -263,15 +263,15 @@ def test_layout(err, package_contents, mandatory, whitelisted,
             continue
 
         # Otherwise, report an error.
-        err.error(("testcases_packagelayout",
-                   "test_layout",
-                   "unknown_file"),
-                  "Unknown file found in add-on",
-                  ["Files have been detected that are not allowed within this "
-                   "type of add-on. Remove the file or use an alternative, "
-                   "supported file format instead.",
-                   "Detected file: %s" % file_],
-                  file_)
+        err.warning(("testcases_packagelayout",
+                     "test_layout",
+                     "unknown_file"),
+                    "Unknown file found in add-on",
+                    ["Files have been detected that are not allowed within "
+                     "this type of add-on. Remove the file or use an "
+                     "alternative, supported file format instead.",
+                     "Detected file: %s" % file_],
+                    file_)
         err.reject = True
 
     # If there's anything left over, it means there's files missing
