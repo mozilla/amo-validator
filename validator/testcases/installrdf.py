@@ -73,7 +73,7 @@ def _test_rdf(err, install):
         # Mark that the unpack element has been supplied
         if predicate == "unpack":
             value = install.get_object(predicate=pred_raw)
-            err.save_resource("em:unpack", value)
+            err.save_resource("em:unpack", value, pushable=True)
 
         # Test if the predicate is banned
         if predicate in shouldnt_exist:

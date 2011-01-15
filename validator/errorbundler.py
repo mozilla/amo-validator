@@ -31,6 +31,7 @@ class ErrorBundle(object):
         
         self.detected_type = 0
         self.resources = {}
+        self.pushable_resources = {}
         self.reject = False
         self.unfinished = False
         
@@ -146,15 +147,20 @@ class ErrorBundle(object):
     def get_resource(self, name):
         "Retrieves an object that has been stored by another test."
         
-        if not name in self.resources:
+        if name in self.resources:
+            return self.resources[name]
+        elif name in self.pushable_resources:
+            return self.pushable_resources[name]
+        else:
             return False
         
-        return self.resources[name]
-        
-    def save_resource(self, name, resource):
+    def save_resource(self, name, resource, pushable=False):
         "Saves an object such that it can be used by other tests."
         
-        self.resources[name] = resource
+        if pushable:
+            self.pushable_resources[name] = resource
+        else:
+            self.resources[name] = resource
         
     def is_nested_package(self):
         "Returns whether the current package is within a PACKAGE_MULTI"
@@ -168,12 +174,16 @@ class ErrorBundle(object):
                                  "warnings": self.warnings,
                                  "notices": self.notices,
                                  "detected_type": self.detected_type,
-                                 "message_tree": self.message_tree})
+                                 "message_tree": self.message_tree,
+                                 "resources": self.pushable_resources,
+                                 "metadata": self.metadata})
         
         self.errors = []
         self.warnings = []
         self.notices = []
         self.message_tree = {}
+        self.pushable_resources = {}
+        self.metadata = {}
         
         self.package_stack.append(new_file)
     
@@ -193,6 +203,8 @@ class ErrorBundle(object):
         self.notices = state["notices"]
         self.detected_type = state["detected_type"]
         self.message_tree = state["message_tree"]
+        self.pushable_resources = state["resources"]
+        self.metadata = state["metadata"]
         
         name = self.package_stack.pop()
         

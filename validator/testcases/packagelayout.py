@@ -83,7 +83,7 @@ def test_layout_all(err, package_contents, xpi_package):
         err.error(("testcases_packagelayout",
                   "test_layout_all",
                   "missing_install_rdf"),
-                 "Addon missing install.rdf.",
+                  "Addon missing install.rdf.",
                   "All addons require an install.rdf file.")
         err.reject = True
     
@@ -141,7 +141,8 @@ def test_emunpack(err, package_contents, xpi_package):
                         "Add-on should set <em:unpack> to true",
                         "The add-on meets criteria that would indicate "
                         "performance issues if <em:unpack> is not set to true "
-                        "in the install.rdf file.")
+                        "in the install.rdf file.",
+                        filename="install.rdf")
             return
 
         # Covers bug 551714
@@ -155,12 +156,13 @@ def test_emunpack(err, package_contents, xpi_package):
                 err.warning(("testcases_packagelayout",
                              "test_emunpack",
                              "should_be_false"),
-                            "Add-on contains JAR files with <em:unpack>",
-                            "The add-on sets <em:unpack> to true in "
-                            "install.rdf, but contains JAR files. This can "
-                            "result in performance issues. It is recommended "
-                            "that you no longer use JAR files to package your "
-                            "chrome files.")
+                            "Add-on contains JAR files, no <em:unpack>",
+                            "The add-on contains JAR files and does not set "
+                            "<em:unpack> to 'true'. This can result in "
+                            "performance issues. It is recommended that you no "
+                            "longer use JAR files to package your chrome "
+                            "files.",
+                            filename="install.rdf")
                 return
 
 @decorator.register_test(tier=1, expected_type=3)
