@@ -6,7 +6,7 @@ from validator.chromemanifest import ChromeManifest
 from validator.contextgenerator import ContextGenerator
 from validator.constants import PACKAGE_LANGPACK
 
-BAD_LINK = '(href|src)=["\'](?!(chrome:\/\/|#([a-z][a-z0-9\-_:\.]*)?))'
+BAD_LINK = '(href|src)=["\'](?!chrome:\/\/)(([a-z]*:)?\/\/|data:)'
 
 @decorator.register_test(tier=2, expected_type=PACKAGE_LANGPACK)
 def test_langpack_manifest(err, package_contents=None, xpi_package=None):
@@ -16,8 +16,6 @@ def test_langpack_manifest(err, package_contents=None, xpi_package=None):
     # Don't even both with the test(s) if there's no chrome.manifest.
     if "chrome.manifest" not in package_contents:
         return
-    
-    # TODO : Did I read about having multiple chrome.manifest files?
     
     # Retrieve the chrome.manifest if it's cached.
     if err.get_resource("chrome.manifest"): # pragma: no cover
@@ -31,8 +29,7 @@ def test_langpack_manifest(err, package_contents=None, xpi_package=None):
     for triple in chrome.triples:
         subject = triple["subject"]
         # Test to make sure that the triple's subject is valid
-        if subject not in ("locale",
-                           "override"):
+        if subject not in ("locale", "override"):
             err.error(("testcases_langpack",
                         "test_langpack_manifest",
                         "invalid_subject"),
@@ -70,7 +67,7 @@ def test_unsafe_html(err, filename, data):
     
     context = ContextGenerator(data)
 
-    unsafe_pttrn = re.compile('<(script|embed|object)')
+    unsafe_pttrn = re.compile('<(script|embed|object)', re.I)
     
     match = unsafe_pttrn.search(data)
     if match:

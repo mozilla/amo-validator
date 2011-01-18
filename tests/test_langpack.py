@@ -43,19 +43,33 @@ def test_unsafe_html():
     <img src="chrome://asdf/locale/asdf" />
     <tag href="#" />""")
     
+    langpack.test_unsafe_html(err, None, "<tag href='foo' />")
+
+    langpack.test_unsafe_html(err, None, "<tag src='foo' />")
+    langpack.test_unsafe_html(err, None, "<tag src='/foo/bar' />")
+
     assert not err.failed()
     
     langpack.test_unsafe_html(err, "asdf", """
     This is not an <script>innocent</script> file.""")
-    
     assert err.failed()
     
-    err = ErrorBundle(None, True)
+    err = ErrorBundle()
     langpack.test_unsafe_html(err, "asdf", """
     Nothing to <a href="http://foo.bar/">suspect</a> here.""")
-    
     assert err.failed()
     
+    err = ErrorBundle()
+    langpack.test_unsafe_html(err, "asdf", "src='data:foobar")
+    assert err.failed()
+
+    err = ErrorBundle()
+    langpack.test_unsafe_html(err, "asdf", "src='//remote/resource")
+    assert err.failed()
+
+    err = ErrorBundle()
+    langpack.test_unsafe_html(err, "asdf", 'href="ftp://foo.bar/')
+    assert err.failed()
 
 def test_has_chrome_manifest():
     """Makes sure the module fails when a chrome.manifest file is not
