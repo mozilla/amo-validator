@@ -157,31 +157,40 @@ def test_lp_xpi(err, package_contents, xpi_package):
 
             references.append((ref_xpi, reference_locales))
             
-    # Iterate each locale and run tests.
-    for locale_name in locales:
-        locale = locales[locale_name]
-        results = []
-        
-        locale_jar = _get_locale_manager(xpi_package, locale["path"])
-        
-        # Iterate each of the reference locales.
-        for reference in references:
-            ref_locales = reference[1]
-            ref_data = [ref_locales[r] for r
-                        in ref_locales
-                        if ref_locales[r]["predicate"] == locale["predicate"]
-                        ][0]
-            ref_pack = _get_locale_manager(reference[0],
-                                           "en-US.jar",
-                                           no_cache=True)
-            results.extend(_compare_packages(reference=ref_pack,
-                                             target=locale_jar,
-                                             ref_base=ref_data["target"],
-                                             locale_base=locale["target"]))
-        
-        # Throw errors and whatnot in a seperate function.
-        _aggregate_results(err, results, locale)
+    # Iterate each supported reference package
+    for (ref_xpi, ref_locales) in references:
+        # Iterate each locale in each supported reference package
+        ref_pack = _get_locale_manager(ref_xpi, "en-US.jar", no_cache=True)
+        for ref_locale_name in ref_locales:
+            ref_locale = ref_locales[ref_locale_name]
+            ref_predicate = ref_locale["predicate"]
+            corresp_locales = [locales[name] for name
+                               in locales
+                               if locales[name]["predicate"] == ref_predicate]
+            # If we found no matching locale, then it's missing from the pack
+            if not corresp_locales:
+                err.warning(("testcases_l10ncompleteness",
+                             "test_lp_xpi",
+                             "find_corresponding_locale"),
+                            "Could not find corresponding locale",
+                            ["A locale was found in the reference package, "
+                             "however it was not found in the target package.",
+                             "Missing locale: %s" % ref_predicate],
+                            filename="chrome.manifest")
+                continue
+            
+            target_locale = corresp_locales[0]
+            target_pack = _get_locale_manager(xpi_package,
+                                              target_locale["path"])
 
+            results = _compare_packages(reference=ref_pack,
+                                        target=target_pack,
+                                        ref_base=ref_locale["target"],
+                                        locale_base=target_locale["target"])
+
+            # Report the findings after each supported app's locale
+            _aggregate_results(err, results, target_locale)
+    
     # Clear the cache at the end of the test
     LOCALE_CACHE = {}
 
