@@ -6,7 +6,7 @@ import cssutils
 from validator.contextgenerator import ContextGenerator
 
 BAD_URL_PAT = "url\(['\"]?(?!(chrome:|resource:))(\/\/|(ht|f)tps?:\/\/|data:)[a-z0-9\/\-\.#]*['\"]?\)"
-BAD_URL = re.compile(BAD_URL_PAT)
+BAD_URL = re.compile(BAD_URL_PAT, re.I)
 
 def test_css_file(err, filename, data, line_start=1):
     "Parse and test a whole CSS file."
