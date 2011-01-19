@@ -182,7 +182,7 @@ def test_lp_xpi(err, package_contents, xpi_package):
         ref_pack = _get_locale_manager(err,
                                        ref_xpi,
                                        "en-US.jar",
-                                       package_contents,
+                                       ref_xpi.get_file_data(),
                                        no_cache=True)
         for ref_locale_name in ref_locales:
             ref_locale = ref_locales[ref_locale_name]
