@@ -39,6 +39,15 @@ def test_js_file(err, filename, data, line=0):
                          filename=filename,
                          line=exc.line,
                          context=ContextGenerator(data))
+        elif "InternalError: too much recursion" in str_exc:
+            err.notice(("testcases_scripting",
+                        "test_js_file",
+                        "recursion_error"),
+                       "JS too deeply nested for validation",
+                       "A JS file was encountered that could not be valiated "
+                       "due to limitations with Spidermonkey. It should be "
+                       "manually inspected.",
+                       filename=filename)
         else:
             err.warning(("testcases_scripting",
                          "test_js_file",
