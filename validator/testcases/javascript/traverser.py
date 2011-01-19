@@ -11,6 +11,7 @@ class MockBundler:
         self.message_count = 0
         self.final_context = None
         self.tier = 4
+        self.ids = []
 
     def get_resource(self, name):
         "Represents a resource store"
@@ -23,6 +24,8 @@ class MockBundler:
         
         # Increment the message counter
         self.message_count += 1
+
+        self.ids.append(id)
 
         print "-" * 30
         print title

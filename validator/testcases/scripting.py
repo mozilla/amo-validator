@@ -27,8 +27,8 @@ def test_js_file(err, filename, data, line=0):
                          errorbundle=err)
 
     except JSReflectException as exc:
-        str_exc = str(exc)
-        if "SyntaxError" in str_exc:
+        str_exc = str(exc).strip("'\"")
+        if str_exc.startswith("SyntaxError"):
             err.warning(("testcases_scripting",
                          "test_js_file",
                          "syntax_error"),
@@ -57,13 +57,10 @@ def test_js_file(err, filename, data, line=0):
                          "being properly read by the Spidermonkey JS engine.",
                          str(exc)],
                         filename=filename)
-
             import sys
             etype, err, tb = sys.exc_info()
             raise exc, None, tb
-
         return
-
 
     if tree is None:
         return None
@@ -82,8 +79,8 @@ def test_js_file(err, filename, data, line=0):
             _do_test(err=err, filename=filename, line=line, context=context,
                      tree=tree)
         except:
+            # We do this because the validator can still be damn unstable.
             pass
-            #print "An error was encountered while attempting to validate a script"
 
     _regex_tests(err, data, filename)
 
@@ -166,7 +163,7 @@ def strip_weird_chars(chardata, err=None, name=""):
                     err.warning(("testcases_scripting",
                                  "_get_tree",
                                  "control_char_filter"),
-                                "Invalid character in JS file",
+                                "Invalid control character in JS file",
                                 "An invalid character (ASCII 0-31, except CR "
                                 "and LF) has been found in a JS file. These "
                                 "are considered unsafe and should be removed.",
@@ -189,23 +186,19 @@ def _get_tree(name, code, shell=SPIDERMONKEY_INSTALLATION, errorbundle=None):
     if not code:
         return None
 
-    code = strip_weird_chars(code, errorbundle, name=name)
-    
     # Acceptable unicode characters still need to be stripped. Just remove the
     # slash: a character is necessary to prevent bad identifier errors
-    code = code.replace("\\u", "u") 
-    code = code.replace("\\x", "x")
+    code = code.replace("\\u", "u").replace("\\x", "x")
 
     encoding = None
     try:
         code = unicode(code) # Make sure we can get a Unicode representation
-        data = json.dumps(code)
-
+        code = strip_weird_chars(code, errorbundle, name=name)
     except UnicodeDecodeError:
         # If it's not an easily decodeable encoding, detect it and decode that
-        encoding = chardet.detect(code)["encoding"].lower()
-        data = json.dumps(code, encoding=encoding)
+        code = filter_ascii(code)
 
+    data = json.dumps(code)
     data = """try{
         print(JSON.stringify(Reflect.parse(%s)));
     } catch(e) {
@@ -229,9 +222,9 @@ def _get_tree(name, code, shell=SPIDERMONKEY_INSTALLATION, errorbundle=None):
     			     stdout=subprocess.PIPE)
     except OSError:
         raise OSError("Spidermonkey shell could not be run.")
+    
     data, stderr = shell.communicate()
-    if stderr:
-        raise RuntimeError('Error calling %r: %s' % (cmd, stderr))
+    if stderr: raise RuntimeError('Error calling %r: %s' % (cmd, stderr))
 
     # Closing the temp file will delete it.
     temp.close()
@@ -241,7 +234,7 @@ def _get_tree(name, code, shell=SPIDERMONKEY_INSTALLATION, errorbundle=None):
     except UnicodeDecodeError:
         data = unicode("".join(x for x in data if is_standard_ascii(x)))
     
-    parsed = json.loads(data, encoding=encoding, strict=False) # Encoding defaults to None
+    parsed = json.loads(data, encoding=encoding, strict=False)
 
     if "error" in parsed and parsed["error"]:
         if parsed["error_message"][:14] == "ReferenceError":
