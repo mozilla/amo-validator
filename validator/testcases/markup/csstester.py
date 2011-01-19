@@ -5,6 +5,9 @@ import cssutils
 
 from validator.contextgenerator import ContextGenerator
 
+BAD_URL_PAT = "url\(['\"]?(?!(chrome:|resource:))(\/\/|(ht|f)tps?:\/\/|data:)[a-z0-9\/\-\.#]*['\"]?\)"
+BAD_URL = re.compile(BAD_URL_PAT)
+
 def test_css_file(err, filename, data, line_start=1):
     "Parse and test a whole CSS file."
     
@@ -82,35 +85,19 @@ def _run_css_tests(err, tokens, filename, line_start=0, context=None):
             # potential security issue.
             if last_descriptor == "-moz-binding":
                 # We need to make sure the URI is not remote.
-                value = value[4:-1].strip('"\'')
-                
-                # Ensure that the resource isn't remote.
-                # TODO : This might need to be chrome://*/content/*
-                if not fnmatch.fnmatch(value, "chrome://*"):
-                    if not fnmatch.fnmatch(value, "*tp*"):
-                        err.warning(("testcases_markup_csstester",
-                                     "_run_css_tests",
-                                     "-moz-binding_external"),
-                                    "Non-chrome:// -moz-binding found.",
-                                    """-moz-binding descriptors should always
-                                    be chrome:// URLs. They should not be
-                                    used with relative file paths.""",
-                                    filename,
-                                    line=line + line_start,
-                                    context=context.get_context(line))
-                    else:
-                        err.error(("testcases_markup_csstester",
-                                   "_run_css_tests",
-                                   "-moz-binding_external"),
-                                  "Cannot reference external scripts.",
-                                  """-moz-binding cannot reference external
-                                  scripts in CSS. This is considered to be a
-                                  security issue. The script file must be
-                                  placed in the /content/ directory of the
-                                  package.""",
-                                  filename,
-                                  line=line + line_start,
-                                  context=context.get_context(line))
+                if BAD_URL.match(value):
+                    err.error(("testcases_markup_csstester",
+                               "_run_css_tests",
+                               "-moz-binding_external"),
+                              "Cannot reference external scripts.",
+                              """-moz-binding cannot reference external
+                              scripts in CSS. This is considered to be a
+                              security issue. The script file must be
+                              placed in the /content/ directory of the
+                              package.""",
+                              filename,
+                              line=line + line_start,
+                              context=context.get_context(line))
             
         elif tok_type == "HASH":
             # Search for interference with the identity box.

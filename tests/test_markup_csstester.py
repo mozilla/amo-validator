@@ -29,6 +29,7 @@ def test_css_moz_binding():
     "Tests that remote scripts in CSS are blocked."
     
     _do_test("tests/resources/markup/csstester/mozbinding.css", True)
+    _do_test("tests/resources/markup/csstester/mozbinding-pass.css", False)
     
 def test_css_unicode():
     "Tests that bad unicode is frowned upon."
@@ -41,3 +42,22 @@ def test_css_identitybox():
     "Tests that the identity box isn't played with."
     
     _do_test("tests/resources/markup/csstester/identity-box.css", True)
+
+def test_remote_urls():
+    "Tests the Regex used to detect remote URLs"
+
+    t = lambda s:csstester.BAD_URL.match(s) is not None
+
+    assert not t("url(foo/bar.abc)")
+    assert not t('url("foo/bar.abc")')
+    assert not t("url('foo/bar.abc')")
+
+    assert not t("url(chrome://foo/bar)")
+    assert not t("url(resource:asdf)")
+
+    assert t("url(http://abc.def)")
+    assert t("url(https://abc.def)")
+    assert t("url(ftp://abc.def)")
+    assert t("url(//abcdef)")
+    assert not t("url(/abc.def)")
+

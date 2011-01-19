@@ -1,0 +1,4 @@
+#something {
+	/*This should pass. Really.*/
+    -moz-binding:url("/foo.bar/remote/sites/are/bad");
+}
