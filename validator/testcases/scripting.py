@@ -11,6 +11,8 @@ from validator.constants import SPIDERMONKEY_INSTALLATION
 from validator.contextgenerator import ContextGenerator
 from validator.textfilter import *
 
+JS_ESCAPE = re.compile("\\\\+[ux]", re.I)
+
 def test_js_file(err, filename, data, line=0):
     "Tests a JS file by parsing and analyzing its tokens"
     
@@ -28,7 +30,7 @@ def test_js_file(err, filename, data, line=0):
 
     except JSReflectException as exc:
         str_exc = str(exc).strip("'\"")
-        if str_exc.startswith("SyntaxError"):
+        if "SyntaxError" in str_exc:
             err.warning(("testcases_scripting",
                          "test_js_file",
                          "syntax_error"),
@@ -185,10 +187,11 @@ def _get_tree(name, code, shell=SPIDERMONKEY_INSTALLATION, errorbundle=None):
     
     if not code:
         return None
-
+    
+    
     # Acceptable unicode characters still need to be stripped. Just remove the
     # slash: a character is necessary to prevent bad identifier errors
-    code = code.replace("\\u", "u").replace("\\x", "x")
+    code = JS_ESCAPE.sub("u", code)
 
     encoding = None
     try:
@@ -232,9 +235,9 @@ def _get_tree(name, code, shell=SPIDERMONKEY_INSTALLATION, errorbundle=None):
     try:
         data = unicode(data)
     except UnicodeDecodeError:
-        data = unicode("".join(x for x in data if is_standard_ascii(x)))
+        data = unicode(filter_ascii(data))
     
-    parsed = json.loads(data, encoding=encoding, strict=False)
+    parsed = json.loads(data, strict=False)
 
     if "error" in parsed and parsed["error"]:
         if parsed["error_message"][:14] == "ReferenceError":

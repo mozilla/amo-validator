@@ -10,11 +10,9 @@ def _do_test(path):
 
     return err
 
-def test_mb_chars():
-    "Tests that multi-byte characters are stripped properly"
+def test_double_escaped():
+    "Tests that escaped characters don't result in errors"
 
-    err = _do_test("tests/resources/bug_626496.js")
-    # There should be a single error.
-    print err.ids
-    assert err.ids[0][2] == "syntax_error"
+    err = _do_test("tests/resources/bug_626878.js")
+    assert not err.message_count
 
