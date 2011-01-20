@@ -10,6 +10,7 @@ import validator.testcases.langpack as testendpoint_langpack
 from validator.xpi import XPIManager
 from validator.chromemanifest import ChromeManifest
 from validator.constants import *
+from validator.textfilter import is_standard_ascii
 
 
 @decorator.register_test(tier=1)
@@ -151,10 +152,8 @@ def test_packed_packages(err, package_contents=None, xpi_package=None):
             if not file_data:
                 continue
             
-            first_char = ord(file_data[0])
-            if first_char > 126 or first_char < 32:
-                file_data = file_data[3:]
-                # Removed: INFO about BOM because it was too frequent.
+            while not is_standard_ascii(file_data[0]):
+                file_data = file_data[1:]
             
             if data["extension"] == "css":
                 testendpoint_css.test_css_file(err,
