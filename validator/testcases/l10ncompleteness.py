@@ -360,31 +360,31 @@ def _aggregate_results(err, results, locale, similar=False, base="en-US"):
         
         rtype = ritem["type"]
         if rtype == "missing_files":
-            err.error(("testcases_l10ncompleteness",
-                       "_aggregate_results",
-                       "missing_file"),
-                      "Missing translation file",
-                      ["""Localizations must include a translated copy
-                       of each file in the reference locale. The
-                       required files may vary from target application
-                       to target application.""",
-                       "%s missing translation file (%s)" % (locale["path"],
-                                                             rfilename)],
+            err.warning(("testcases_l10ncompleteness",
+                        "_aggregate_results",
+                        "missing_file"),
+                       "Missing translation file",
+                       ["""Localizations must include a translated copy
+                        of each file in the reference locale. The
+                        required files may vary from target application
+                        to target application.""",
+                        "%s missing translation file (%s)" % (locale["path"],
+                                                              rfilename)],
                       [locale["path"]])
         elif rtype == "missing_entities":
-            err.error(("testcases_l10ncompleteness",
-                       "_aggregate_results",
-                       "missing_translation_entity"),
-                      "Missing translation entity",
-                      ["""Localizations must include a translated copy
-                       of each entity from each file in the reference
-                       locale. The required files may vary from target
-                       application to target application.""",
-                       "%s missing %s in %s" %
-                            (locale["path"],
-                             ", ".join(ritem["missing_entities"]),
-                             rfilename)],
-                      [locale["path"], rfilename])
+            err.warning(("testcases_l10ncompleteness",
+                         "_aggregate_results",
+                         "missing_translation_entity"),
+                        "Missing translation entity",
+                        ["""Localizations must include a translated copy
+                         of each entity from each file in the reference
+                         locale. The required files may vary from target
+                         application to target application.""",
+                         "%s missing %s in %s" %
+                             (locale["path"],
+                              ", ".join(ritem["missing_entities"]),
+                              rfilename)],
+                        [locale["path"], rfilename])
         elif rtype == "unchanged_entity":
             filename = ritem["filename"]
             if not filename in unchanged_entity_list:
