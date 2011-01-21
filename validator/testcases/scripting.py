@@ -20,6 +20,12 @@ def test_js_file(err, filename, data, line=0):
        err.get_resource("SPIDERMONKEY") is None: # Default value is False
         return
 
+    before_tier = None
+    # Set the tier to 4 (Security Tests)
+    if err is not None:
+        before_tier = err.tier
+        err.tier = 4
+
     # Get the AST tree for the JS code
     try:
         tree = _get_tree(filename,
@@ -62,16 +68,16 @@ def test_js_file(err, filename, data, line=0):
             import sys
             etype, err, tb = sys.exc_info()
             raise exc, None, tb
+
+        if before_tier:
+            err.tier = before_tier
         return
 
     if tree is None:
+        if before_tier:
+            err.tier = before_tier
         return None
     
-    # Set the tier to 4 (Security Tests)
-    if err is not None:
-        before_tier = err.tier
-        err.tier = 4
-
     context = ContextGenerator(data)
     if traverser.DEBUG:
         _do_test(err=err, filename=filename, line=line, context=context,
