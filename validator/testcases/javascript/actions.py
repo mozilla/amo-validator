@@ -211,7 +211,7 @@ def _call_expression(traverser, node):
                                   column=traverser.position,
                                   context=traverser.context)
 
-    return None
+    return True
 
 def _call_settimeout(a,t):
     """Handler for setTimeout and setInterval. Should determine whether a[0]

@@ -628,7 +628,14 @@ class JSArray:
         self.elements = []
     
     def get(self, index):
-        return self.elements[index]
+        if index == "length":
+            return len(self.elements)
+
+        # Courtesy of Ian Bicking: http://bit.ly/hxv6qt
+        try:
+            return self.elements[int(index.strip().split()[0])]
+        except (ValueError, IndexError, KeyError):
+            return None
     
     def get_literal_value(self):
         "Arrays return a comma-delimited version of themselves"
