@@ -68,15 +68,15 @@ def _get_locale_manager(err, addon, path, files, no_cache=False):
         return LOCALE_CACHE[path]
 
     if path not in files:
-        err.error(("testcases_l10ncompleteness",
-                   "_get_locale_manager",
-                   "manager_absent"),
-                  "Listed locale does not exist",
-                  ["A locale JAR is listed in chrome.manifest, but it could "
-                   "not be located. Check the spelling and capitalization of "
-                   "the path.",
-                   "Missing JAR: %s" % path],
-                  filename="chrome.manifest")
+        err.warning(("testcases_l10ncompleteness",
+                     "_get_locale_manager",
+                     "manager_absent"),
+                    "Listed locale does not exist",
+                    ["A locale JAR is listed in chrome.manifest, but it could "
+                     "not be located. Check the spelling and capitalization "
+                     "of the path.",
+                     "Missing JAR: %s" % path],
+                    filename="chrome.manifest")
         return None
     jar = StringIO(addon.read(path))
     locale = XPIManager(jar, path)

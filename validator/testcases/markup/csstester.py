@@ -27,12 +27,12 @@ def test_css_file(err, filename, data, line_start=1):
     except: #pragma: no cover
         # This happens because tokenize is a generator.
         # Bravo, Mr. Bond, Bravo.
-        err.error(("testcases_markup_csstester",
-                   "test_css_file",
-                   "could_not_parse"),
-                  "Could not parse CSS file",
-                  "CSS file could not be parsed by the tokenizer.",
-                  filename)
+        err.warning(("testcases_markup_csstester",
+                     "test_css_file",
+                     "could_not_parse"),
+                    "Could not parse CSS file",
+                    "CSS file could not be parsed by the tokenizer.",
+                    filename)
         #raise
         return
         
@@ -86,18 +86,18 @@ def _run_css_tests(err, tokens, filename, line_start=0, context=None):
             if last_descriptor == "-moz-binding":
                 # We need to make sure the URI is not remote.
                 if BAD_URL.match(value):
-                    err.error(("testcases_markup_csstester",
-                               "_run_css_tests",
-                               "-moz-binding_external"),
-                              "Cannot reference external scripts.",
-                              """-moz-binding cannot reference external
-                              scripts in CSS. This is considered to be a
-                              security issue. The script file must be
-                              placed in the /content/ directory of the
-                              package.""",
-                              filename,
-                              line=line + line_start,
-                              context=context.get_context(line))
+                    err.warning(("testcases_markup_csstester",
+                                 "_run_css_tests",
+                                 "-moz-binding_external"),
+                                "Cannot reference external scripts.",
+                                """-moz-binding cannot reference external
+                                scripts in CSS. This is considered to be a
+                                security issue. The script file must be
+                                placed in the /content/ directory of the
+                                package.""",
+                                filename,
+                                line=line + line_start,
+                                context=context.get_context(line))
             
         elif tok_type == "HASH":
             # Search for interference with the identity box.

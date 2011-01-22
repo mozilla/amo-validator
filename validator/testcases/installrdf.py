@@ -77,14 +77,14 @@ def _test_rdf(err, install):
 
         # Test if the predicate is banned
         if predicate in shouldnt_exist:
-            err.error(("testcases_installrdf",
-                       "_test_rdf",
-                       "shouldnt_exist"),
-                      "Banned element in install.rdf",
-                      """The element "%s" was found in the add-on's
-                      install.rdf file. It is not allowed in add-ons under
-                      the current configuration.""" % predicate,
-                      "install.rdf")
+            err.warning(("testcases_installrdf",
+                         "_test_rdf",
+                         "shouldnt_exist"),
+                        "Banned element in install.rdf",
+                        """The element "%s" was found in the add-on's
+                        install.rdf file. It is not allowed in add-ons under
+                        the current configuration.""" % predicate,
+                        "install.rdf")
             continue
         
         # Test if the predicate is obsolete
@@ -213,7 +213,7 @@ def _test_name(err, value):
         err.warning(("testcases_installrdf",
                      "_test_name",
                      "trademark"),
-                    "Add-on has illegal name.",
+                    "Add-on has potentially illegal name.",
                     """Add-on names cannot contain the Mozilla or Firefox
                     trademarks. These names should not be contained in
                     add-on names at all.""",

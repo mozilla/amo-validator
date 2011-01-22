@@ -279,13 +279,13 @@ def test_layout(err, package_contents, mandatory, whitelisted,
     # If there's anything left over, it means there's files missing
     if mandatory:
         err.reject = True # Rejection worthy
-        err.error(("testcases_packagelayout",
-                   "test_layout",
-                   "missing_required"),
-                  "Required file missing",
-                  ["This add-on is missing required files. Consult the "
-                   "documentation for a full list of required files.",
-                   "Add-ons of type '%s' require files: %s" %
-                        (pack_type, ", ".join(mandatory))])
+        err.warning(("testcases_packagelayout",
+                     "test_layout",
+                     "missing_required"),
+                    "Required file missing",
+                    ["This add-on is missing required files. Consult the "
+                     "documentation for a full list of required files.",
+                     "Add-ons of type '%s' require files: %s" %
+                          (pack_type, ", ".join(mandatory))])
         err.reject = True
 

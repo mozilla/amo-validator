@@ -33,15 +33,15 @@ def test_xpcnativewrappers(err, package_contents=None, xpi_package=None):
     for triple in chrome.triples:
         # Test to make sure that the triple's subject is valid
         if [True for t in triple if t.startswith("xpcnativewrappers")]:
-            err.error(("testcases_content",
-                       "test_xpcnativewrappers",
-                       "found_in_chrome_manifest"),
-                      "xpcnativewrappers not allowed in chrome.manifest",
-                      """chrome.manifest files are not allowed to contain
-                      xpcnativewrappers directives.""",
-                      "chrome.manifest",
-                      line=triple["line"],
-                      context=chrome.context)
+            err.warning(("testcases_content",
+                         "test_xpcnativewrappers",
+                         "found_in_chrome_manifest"),
+                        "xpcnativewrappers not allowed in chrome.manifest",
+                        """chrome.manifest files are not allowed to contain
+                        xpcnativewrappers directives.""",
+                        "chrome.manifest",
+                        line=triple["line"],
+                        context=chrome.context)
 
 
 @decorator.register_test(tier=2)

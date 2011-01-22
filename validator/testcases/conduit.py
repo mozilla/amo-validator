@@ -34,12 +34,12 @@ def test_conduittoolbar(err, package_contents=None, xpi_manager=None):
             if results == k:
                 err.reject = True
                 err_mesg = "Conduit value (%s) found in install.rdf" % k
-                return err.error(("testcases_conduit",
-                                  "test_conduittoolbar",
-                                  "detected_rdf"),
-                                 "Detected Conduit toolbar.",
-                                 err_mesg,
-                                 "install.rdf")
+                return err.warning(("testcases_conduit",
+                                    "test_conduittoolbar",
+                                    "detected_rdf"),
+                                   "Detected Conduit toolbar.",
+                                   err_mesg,
+                                   "install.rdf")
         
         # Also test for the update URL
         update_url_value = "https://ffupdate.conduit-services.com/"
@@ -47,12 +47,12 @@ def test_conduittoolbar(err, package_contents=None, xpi_manager=None):
         results = install.get_object(None, install.uri("updateURL"))
         if results and results.startswith(update_url_value):
             err.reject = True
-            return err.error(("testcases_conduit",
-                              "test_conduittoolbar",
-                              "detected_updateurl"),
-                             "Detected Conduit toolbar.",
-                             "Conduit update URL found in install.rdf.",
-                             "install.rdf")
+            return err.warning(("testcases_conduit",
+                                "test_conduittoolbar",
+                                "detected_updateurl"),
+                               "Detected Conduit toolbar.",
+                               "Conduit update URL found in install.rdf.",
+                               "install.rdf")
     
         
     # Do some matching on the files in the package
@@ -63,11 +63,11 @@ def test_conduittoolbar(err, package_contents=None, xpi_manager=None):
             # If there's a matching file, it's Conduit
             if fnmatch.fnmatch(file_, bad_file):
                 err.reject = True
-                return err.error(("testcases_conduit",
-                                  "test_conduittoolbar",
-                                  "detected_files"),
-                                 "Detected Conduit toolbar.",
-                                 "Conduit directory (%s) found." % bad_file)
+                return err.warning(("testcases_conduit",
+                                    "test_conduittoolbar",
+                                    "detected_files"),
+                                   "Detected Conduit toolbar.",
+                                   "Conduit directory (%s) found." % bad_file)
     
     
     # Do some tests on the chrome.manifest file if it exists
@@ -90,13 +90,13 @@ def test_conduittoolbar(err, package_contents=None, xpi_manager=None):
         if data is not None and \
            data["object"].count("ebtoolbarstyle") > 0:
             err.reject = True
-            return err.error(("testcases_conduit",
-                              "test_conduittoolbar",
-                              "detected_chrome_manifest"),
-                             "Detected Conduit toolbar.",
-                             "'ebtoolbarstyle' found in chrome.manifest",
-                             "chrome.manifest",
-                             line=data["line"],
-                             context=chrome.context)
+            return err.warning(("testcases_conduit",
+                                "test_conduittoolbar",
+                                "detected_chrome_manifest"),
+                               "Detected Conduit toolbar.",
+                               "'ebtoolbarstyle' found in chrome.manifest",
+                               "chrome.manifest",
+                               line=data["line"],
+                               context=chrome.context)
         
         

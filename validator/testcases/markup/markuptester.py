@@ -170,19 +170,19 @@ class MarkupParser(HTMLParser):
         if self.err.detected_type == PACKAGE_LANGPACK:
             
             if tag in UNSAFE_TAGS:
-                self.err.error(("testcases_markup_markuptester",
-                                "handle_starttag",
-                                "unsafe_langpack"),
-                               "Unsafe tag in language pack",
-                               ["""A tag in your markup has been marked
-                                as being potentially unsafe. Consider
-                                alternate means of accomplishing what
-                                the code executed by this tag
-                                performs.""",
-                                'Tag "%s" is disallowed.' % tag],
-                               self.filename,
-                               line=self.line,
-                               context=self.context)
+                self.err.warning(("testcases_markup_markuptester",
+                                  "handle_starttag",
+                                  "unsafe_langpack"),
+                                 "Unsafe tag in language pack",
+                                 ["""A tag in your markup has been marked
+                                  as being potentially unsafe. Consider
+                                  alternate means of accomplishing what
+                                  the code executed by this tag
+                                  performs.""",
+                                  'Tag "%s" is disallowed.' % tag],
+                                 self.filename,
+                                 line=self.line,
+                                 context=self.context)
                 if DEBUG: # pragma: no cover
                     print "Unsafe Tag ------"
             
@@ -190,16 +190,15 @@ class MarkupParser(HTMLParser):
             for attr in attrs:
                 if attr[0].lower() in ("src", "href") and \
                    not self._is_url_local(attr[1].lower()):
-                    self.err.error(("testcases_markup_markuptester",
-                                    "handle_starttag",
-                                    "remote_src_href"),
-                                   "src/href attributes must be local.",
-                                   """Language packs require that all
-                                   src/href attributes must begin with
-                                   'chrome://'""",
-                                   self.filename,
-                                   line=self.line,
-                                   context=self.context)
+                    self.err.warning(("testcases_markup_markuptester",
+                                      "handle_starttag",
+                                      "remote_src_href"),
+                                     "src/href attributes must be local.",
+                                     "Language packs require that all src and "
+                                     "href attributes are relative URLs.",
+                                     self.filename,
+                                     line=self.line,
+                                     context=self.context)
                     self.err.reject = True
         
         if tag in ("iframe", "browser") and self.extension == "xul":
@@ -258,17 +257,16 @@ class MarkupParser(HTMLParser):
                     src = attr[1].lower()
             
             if src and not self._is_url_local(src):
-                self.err.error(("testcases_markup_markuptester",
-                                "handle_starttag",
-                                "banned_remote_scripts"),
-                               "Scripts must not be remote in XUL",
-                               """In XUL, <script> tags must not be
-                               referenced to script files that are
-                               hosted remotely.""",
-                               self.filename,
-                               line=self.line,
-                               context=self.context)
-                self.err.reject = True
+                self.err.warning(("testcases_markup_markuptester",
+                                  "handle_starttag",
+                                  "banned_remote_scripts"),
+                                 "Scripts must not be remote in XUL",
+                                 """In XUL, <script> tags must not be
+                                 referenced to script files that are
+                                 hosted remotely.""",
+                                 self.filename,
+                                 line=self.line,
+                                 context=self.context)
         
         # Find CSS and JS attributes and handle their values like they
         # would otherwise be handled by the standard parser flow.

@@ -25,16 +25,16 @@ def test_theme_manifest(err, package_contents=None, xpi_package=None):
         # Test to make sure that the triple's subject is valid
         if subject not in ("skin",
                            "style"):
-            err.error(("testcases_themes",
-                       "test_theme_manifest",
-                       "invalid_chrome_manifest_subject"),
-                      "Invalid chrome.manifest subject.",
-                      ["""chrome.manifest files for themes are only
-                       allowed to have 'skin' and 'style' items. Other
-                       types of items are disallowed for security
-                       reasons.""",
-                       "Invalid subject: %s" % subject],
-                      "chrome.manifest",
-                      line=triple["line"],
-                      context=chrome.context)
+            err.warning(("testcases_themes",
+                         "test_theme_manifest",
+                         "invalid_chrome_manifest_subject"),
+                        "Invalid chrome.manifest subject.",
+                        ["""chrome.manifest files for themes are only
+                         allowed to have 'skin' and 'style' items. Other
+                         types of items are disallowed for security
+                         reasons.""",
+                         "Invalid subject: %s" % subject],
+                        "chrome.manifest",
+                        line=triple["line"],
+                        context=chrome.context)
 
