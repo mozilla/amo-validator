@@ -75,34 +75,34 @@ def test_targetedapplications(err, package_contents=None,
                     if min_version is not None:
                         min_ver_pos = app_versions.index(min_version)
                 except ValueError:
-                    err.warning(("testcases_targetapplication",
-                                 "test_targetedapplications",
-                                 "invalid_min_version"),
-                                "Invalid minimum version number",
-                                ["The minimum version that was specified is not "
-                                 "an acceptable version number for the Mozilla "
-                                 "product that it corresponds with.",
-                                 'Version "%s" isn\'t compatible with "%s".' %
-                                     (min_version, app_name),
-                                 APP_VERSIONS_URL],
-                                "install.rdf")
+                    err.error(("testcases_targetapplication",
+                               "test_targetedapplications",
+                               "invalid_min_version"),
+                              "Invalid minimum version number",
+                              ["The minimum version that was specified is not "
+                               "an acceptable version number for the Mozilla "
+                               "product that it corresponds with.",
+                               'Version "%s" isn\'t compatible with "%s".' %
+                                  (min_version, app_name),
+                               APP_VERSIONS_URL],
+                              "install.rdf")
                     continue
                     
                 try:
                     if max_version is not None:
                         max_ver_pos = app_versions.index(max_version)
                 except ValueError:
-                    err.warning(("testcases_targetapplication",
-                                 "test_targetedapplications",
-                                 "invalid_max_version"),
-                                "Invalid maximum version number",
-                                ["The maximum version that was specified is not "
-                                 "an acceptable version number for the Mozilla "
-                                 "product that it corresponds with.",
-                                 'Version "%s" isn\'t compatible with "%s".' %
-                                     (max_version, app_name),
-                                 APP_VERSIONS_URL],
-                                "install.rdf")
+                    err.error(("testcases_targetapplication",
+                               "test_targetedapplications",
+                               "invalid_max_version"),
+                              "Invalid maximum version number",
+                              ["The maximum version that was specified is not "
+                               "an acceptable version number for the Mozilla "
+                               "product that it corresponds with.",
+                               'Version "%s" isn\'t compatible with "%s".' %
+                                   (max_version, app_name),
+                               APP_VERSIONS_URL],
+                               "install.rdf")
                     continue
                 
                 # Now we need to check to see if the version numbers
