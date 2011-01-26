@@ -1,5 +1,8 @@
 import re
-import curses
+try:
+    import curses
+except ImportError:
+    curses = None
 import os
 import sys
 
@@ -12,7 +15,8 @@ class OutputHandler:
     output of the application for *nix-based terminals."""
     
     def __init__(self, buffer=sys.stdout, no_color=False):
-        
+        if not curses:
+            no_color = True
         if not no_color:
             no_color = isinstance(sys.stdout, StringIO) or \
                        not sys.stdout.isatty()
