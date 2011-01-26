@@ -220,24 +220,31 @@ def _get_tree(name, code, shell=SPIDERMONKEY_INSTALLATION, errorbundle=None):
     }""" % data
 
     # Push the data to a temporary file
-    temp = tempfile.NamedTemporaryFile(mode="w+", delete=True)
-    temp.write(data)
-    temp.flush() # This is very important
-
-    cmd = [shell, "-f", temp.name]
+    # Cannot use NamedTemporaryFile with delete=True, as on windows such files
+    # cannot be opened by other processes
+    temp = tempfile.NamedTemporaryFile(mode="w+", delete=False)
     try:
-        shell = subprocess.Popen(cmd,
-    	                     shell=False,
-    			     stderr=subprocess.PIPE,
-    			     stdout=subprocess.PIPE)
-    except OSError:
-        raise OSError("Spidermonkey shell could not be run.")
-    
-    data, stderr = shell.communicate()
-    if stderr: raise RuntimeError('Error calling %r: %s' % (cmd, stderr))
+        temp.write(data)
+        temp.flush() # This is very important
 
-    # Closing the temp file will delete it.
-    temp.close()
+        cmd = [shell, "-f", temp.name]
+        try:
+            shell = subprocess.Popen(cmd,
+                               shell=False,
+                   stderr=subprocess.PIPE,
+                   stdout=subprocess.PIPE)
+        except OSError:
+            raise OSError("Spidermonkey shell could not be run.")
+
+        data, stderr = shell.communicate()
+        if stderr: raise RuntimeError('Error calling %r: %s' % (cmd, stderr))
+
+        # Closing the temp file will delete it.
+    finally:
+        try:
+            temp.close()
+            os.unlink(temp.name)
+        except: pass
 
     try:
         data = unicode(data)
