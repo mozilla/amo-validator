@@ -48,7 +48,7 @@ def prepare_package(err, path, expectation=0):
                    "unrecognized"),
                   "The package is not of a recognized type.")
 
-    package = open(path)
+    package = open(path, "rb")
     output = test_package(err, package, path, expectation)
     package.close()
 
