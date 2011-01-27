@@ -5,7 +5,7 @@ from validator.errorbundler import ErrorBundle
 from validator.xpi import XPIManager
 from validator.constants import *
 
-def _run_test(filename, expectation, should_fail=True, should_reject=False):
+def _run_test(filename, expectation, should_fail=True):
     
     name = "tests/resources/submain/%s" % filename
     pack = open(name)
@@ -19,8 +19,6 @@ def _run_test(filename, expectation, should_fail=True, should_reject=False):
     else:
         assert not err.failed()
         assert err.get_resource("install_rdf")
-    
-    assert err.reject == should_reject
     
     return err
 
@@ -65,6 +63,6 @@ def test_load_irdf_expectation():
     
     dt = submain.typedetection.detect_type
     submain.typedetection.detect_type = lambda x, y, z: PACKAGE_THEME
-    _run_test("install_rdf.xpi", PACKAGE_EXTENSION, True, True)
+    _run_test("install_rdf.xpi", PACKAGE_EXTENSION, True)
     submain.typedetection.detect_type = dt
     

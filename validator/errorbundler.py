@@ -33,7 +33,6 @@ class ErrorBundle(object):
         self.detected_type = 0
         self.resources = {}
         self.pushable_resources = {}
-        self.reject = False
         self.unfinished = False
         
         if listed:
@@ -280,7 +279,6 @@ class ErrorBundle(object):
         output = {"detected_type": types[self.detected_type],
                   "ending_tier": self.ending_tier,
                   "success": not self.failed(),
-                  "rejected": self.reject,
                   "messages":[],
                   "errors": len(self.errors),
                   "warnings": len(self.warnings),
@@ -340,12 +338,6 @@ class ErrorBundle(object):
             for warning in self.warnings:
                 self._print_message("<<YELLOW>>Warning:<<NORMAL>> ",
                                     warning, verbose)
-            
-            
-            # Awwww... have some self esteem!
-            if self.reject:
-                self.handler.write("Extension Rejected")
-            
         else:
             self.handler.write("<<GREEN>>All tests succeeded!")
             

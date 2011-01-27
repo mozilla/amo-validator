@@ -1,4 +1,3 @@
-import zipfile
 from zipfile import ZipFile
 
 class XPIManager(object):

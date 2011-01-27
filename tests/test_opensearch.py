@@ -130,7 +130,6 @@ def test_search_failure():
     submain.test_search(err, None, PACKAGE_ANY)
     
     assert err.failed()
-    assert err.reject
     
 def test_search_failure_undecided():
     "Tests the submain test_search function with an unrejected fail case"
@@ -142,5 +141,4 @@ def test_search_failure_undecided():
     submain.test_search(err, None, PACKAGE_ANY)
     
     assert err.failed()
-    assert not err.reject
     

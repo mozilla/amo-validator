@@ -2,6 +2,7 @@ import os
 
 import validator.submain as submain
 from validator.errorbundler import ErrorBundle
+from validator.chromemanifest import ChromeManifest
 from validator.constants import *
 
 def test_prepare_package():
@@ -21,7 +22,6 @@ def test_prepare_package_missing():
     submain.prepare_package(err, "foo/bar/asdf/qwerty.xyz")
     
     assert err.failed()
-    assert err.reject
     
 def test_prepare_package_bad_file():
     "Tests that the prepare_package function fails for unknown files"
@@ -30,7 +30,6 @@ def test_prepare_package_bad_file():
     submain.prepare_package(err, "tests/resources/main/foo.bar")
     
     assert err.failed()
-    assert err.reject
     
 def test_prepare_package_xml():
     "Tests that the prepare_package function passes with search providers"
@@ -41,14 +40,11 @@ def test_prepare_package_xml():
     submain.prepare_package(err, "tests/resources/main/foo.xml")
     
     assert not err.failed()
-    assert not err.reject
     
     submain.test_search = lambda err,y,z: err.error(("x"), "Failed")
     submain.prepare_package(err, "tests/resources/main/foo.xml")
     
     assert err.failed()
-    assert not err.reject # prepare_package has no authority to reject XML.
-
 
 # Test the function of the decorator iterator
 
@@ -73,6 +69,25 @@ def test_test_inner_package_failtier():
     submain.test_inner_package(err, "foo", "bar")
     
     assert err.failed()
+
+# Test chrome.manifest populator
+
+def test_populate_chrome_manifest():
+    err = MockErrorHandler(None)
+    package_contents = {"chrome.manifest":{"foo":"bar"}}
+    package = MockXPIPackage(package_contents)
+
+    submain.populate_chrome_manifest(err, {"foo":"bar"}, package)
+    assert not err.pushable_resources
+
+    submain.populate_chrome_manifest(err, package_contents, package)
+    assert err.pushable_resources
+    assert err.pushable_resources["chrome.manifest"]
+    print err.pushable_resources
+    assert isinstance(err.pushable_resources["chrome.manifest"],
+                      ChromeManifest)
+
+    assert not err.resources
 
 # Test determined modes
 
@@ -158,11 +173,19 @@ class MockErrorHandler:
         self.detected_type = 0
         self.has_failed = False
         self.determined = determined
-   
+
+        self.pushable_resources = {}
+        self.resources = {}
+
+    def save_resource(self, name, value, pushable=False):
+        "Saves a resource to the bundler"
+        resources = self.pushable_resources if pushable else self.resources
+        resources[name] = value
+    
     def set_tier(self, tier):
         "Sets the tier"
         pass
-    
+
     def report(self, tier):
         "Passes the tier back to the mock decorator to verify the tier"
         self.decorator.report_tier(tier)
@@ -181,3 +204,26 @@ class MockErrorHandler:
     def failed(self, fail_on_warnings=False):
         "Simple accessor because the standard error handler has one"
         return self.has_failed
+
+class MockXPIPackage:
+    "A class that pretends to be an add-on package"
+
+    def __init__(self, file_data=None):
+        self.filename = "foo.bar"
+        self.extension = "bar"
+        self.subpackage = False
+        self.zf = None
+        self.file_data = file_data
+
+    def test():
+        "We don't ever want it to be faulty"
+        return True
+    
+    def get_file_data(self):
+        "Returns the pre-populated file data"
+        return self.file_data
+
+    def read(self, filename):
+        "Return the filename so we can verify we're reading the right one"
+        return filename
+

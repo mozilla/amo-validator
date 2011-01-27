@@ -5,8 +5,9 @@ import zipfile
 import validator.testcases as testcases
 import validator.typedetection as typedetection
 from validator.typedetection import detect_opensearch
-from validator.xpi import XPIManager
+from validator.chromemanifest import ChromeManifest
 from validator.rdf import RDFParser
+from validator.xpi import XPIManager
 from validator import decorator
 
 from constants import *
@@ -181,9 +182,20 @@ def _load_install_rdf(err, package, expectation):
                                                     types[expectation],
                                                     types[results]))
 
-def test_inner_package(err, package_contents, package):
+def populate_chrome_manifest(err, package_contents, xpi_package):
+    "Loads the chrome.manifest if it's present"
+
+    if "chrome.manifest" in package_contents:
+        chrome_data = xpi_package.read("chrome.manifest")
+        chrome = ChromeManifest(chrome_data)
+        err.save_resource("chrome.manifest", chrome, pushable=True)
+
+
+def test_inner_package(err, package_contents, xpi_package):
     "Tests a package's inner content."
     
+    populate_chrome_manifest(err, package_contents, xpi_package)
+
     # Iterate through each tier.
     for tier in sorted(decorator.get_tiers()):
 
@@ -200,7 +212,7 @@ def test_inner_package(err, package_contents, package):
                 # - Error Bundler
                 # - Package listing
                 # - A copy of the package itself
-                test_func(err, package_contents, package)
+                test_func(err, package_contents, xpi_package)
         
         # Return any errors at the end of the tier if undetermined.
         if err.failed(fail_on_warnings=False) and not err.determined:
