@@ -128,14 +128,13 @@ def test_packed_packages(err, package_contents=None, xpi_package=None):
             
             err.push_state(data["name_lower"])
             
-
             # There are no expected types for packages within a multi-
             # item package.
             testendpoint_validator.test_package(err, package, name)
-            err.tier = 2 # Reset to the current tier
             
             package.close()
             err.pop_state()
+            err.tier = 2 # Reset to the current tier
             
         elif data["extension"] in ("xul", "xml", "html", "xhtml"):
             
