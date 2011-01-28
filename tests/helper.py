@@ -25,8 +25,7 @@ def _do_test(path, test, failure=True,
         install_rdf = RDFParser(rdf_data)
         err.save_resource("install_rdf", install_rdf)
 
-    if "chrome.manifest" in contents:
-        populate_chrome_manifest(err, contents, package)
+    populate_chrome_manifest(err, contents, package)
     
     test(err, contents, package)
     

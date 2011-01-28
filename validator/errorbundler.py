@@ -2,7 +2,6 @@ import json
 import uuid
 from StringIO import StringIO
 
-from contextgenerator import ContextGenerator
 from outputhandlers.shellcolors import OutputHandler
 from textfilter import filter_ascii
 
