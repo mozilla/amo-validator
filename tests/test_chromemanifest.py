@@ -45,7 +45,7 @@ four def abc""")
 def test_incomplete_triplets():
     "Tests that incomplete triplets are ignored"
 
-    c = ChromeManifest("foo\nabc def")
+    c = ChromeManifest("foo\nbar")
     assert not c.triples
 
 def test_duplicate_subjects():

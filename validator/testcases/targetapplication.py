@@ -36,8 +36,6 @@ def test_targetedapplications(err, package_contents=None,
     
     used_targets = [];
     
-    mismatch_pattern = "Version numbers for %s are invalid."
-    
     # Isolate all of the bnodes referring to target applications
     for target_app in install.get_objects(None, ta_predicate):
         

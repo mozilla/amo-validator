@@ -5,13 +5,29 @@ from StringIO import StringIO
 import validator.xpi as xpi
 import validator.testcases.content as content
 from validator.errorbundler import ErrorBundle
+from validator.chromemanifest import ChromeManifest
 from helper import _do_test
 from validator.constants import *
+
+def test_xpcnativewrappers():
+    "Tests that xpcnativewrappers is not in the chrome.manifest"
+
+    err = ErrorBundle()
+
+    err.save_resource("chrome.manifest",
+                      ChromeManifest("foo bar"))
+    content.test_xpcnativewrappers(err, {}, None)
+    assert not err.failed()
+
+    err.save_resource("chrome.manifest",
+                      ChromeManifest("xpcnativewrappers on"))
+    content.test_xpcnativewrappers(err, {}, None)
+    assert err.failed()
 
 def test_ignore_macstuff():
     "Tests that the content manager will ignore Mac-generated files"
     
-    err = ErrorBundle(None, True)
+    err = ErrorBundle()
     result = content.test_packed_packages(err,
                                           {"__MACOSX": None,
                                            "__MACOSX/foo": None,

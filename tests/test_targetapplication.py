@@ -13,10 +13,14 @@ def test_valid_targetapps():
     
     print targetapp.APPROVED_APPLICATIONS
 
-    _do_test("tests/resources/targetapplication/pass.xpi",
-             targetapp.test_targetedapplications,
-             False,
-             True)
+    results = _do_test("tests/resources/targetapplication/pass.xpi",
+                       targetapp.test_targetedapplications,
+                       False,
+                       True)
+    print results.get_resource("supports")
+    supports = results.get_resource("supports")
+    assert "firefox" in supports and "mozilla" in supports
+    assert len(supports) == 2
 
 def test_bad_min_max():
     """Tests that the lower/upper-bound version number for a
@@ -68,3 +72,6 @@ def test_is_ff4():
                        True)
     
     assert results.get_resource("ff4")
+    assert results.get_resource("supports")
+    assert "firefox" in results.get_resource("supports")
+

@@ -34,6 +34,7 @@ def test_prepare_package_bad_file():
 def test_prepare_package_xml():
     "Tests that the prepare_package function passes with search providers"
     
+    smts = submain.test_search
     submain.test_search = lambda err,y,z: True
     
     err = ErrorBundle(None, True)
@@ -45,12 +46,14 @@ def test_prepare_package_xml():
     submain.prepare_package(err, "tests/resources/main/foo.xml")
     
     assert err.failed()
+    submain.test_search = smts
 
 # Test the function of the decorator iterator
 
 def test_test_inner_package():
     "Tests that the test_inner_package function works properly"
     
+    smd = submain.decorator
     decorator = MockDecorator()
     submain.decorator = decorator
     err = MockErrorHandler(decorator)
@@ -58,10 +61,12 @@ def test_test_inner_package():
     submain.test_inner_package(err, "foo", "bar")
     
     assert not err.failed()
+    submain.decorator = smd
     
 def test_test_inner_package_failtier():
     "Tests that the test_inner_package function fails at a failed tier"
     
+    smd = submain.decorator
     decorator = MockDecorator(3)
     submain.decorator = decorator
     err = MockErrorHandler(decorator)
@@ -69,10 +74,13 @@ def test_test_inner_package_failtier():
     submain.test_inner_package(err, "foo", "bar")
     
     assert err.failed()
+    submain.decorator = smd
 
 # Test chrome.manifest populator
 
 def test_populate_chrome_manifest():
+    "Ensures that the chrome manifest is populated if available"
+
     err = MockErrorHandler(None)
     package_contents = {"chrome.manifest":{"foo":"bar"}}
     package = MockXPIPackage(package_contents)
@@ -94,6 +102,7 @@ def test_populate_chrome_manifest():
 def test_test_inner_package_determined():
     "Tests that the determined test_inner_package function works properly"
     
+    smd = submain.decorator
     decorator = MockDecorator(None, True)
     submain.decorator = decorator
     err = MockErrorHandler(decorator, True)
@@ -102,10 +111,12 @@ def test_test_inner_package_determined():
     
     assert not err.failed()
     assert decorator.last_tier == 5
+    submain.decorator = smd
     
 def test_test_inner_package_failtier():
     "Tests the test_inner_package function in determined mode while failing"
     
+    smd = submain.decorator
     decorator = MockDecorator(3, True)
     submain.decorator = decorator
     err = MockErrorHandler(decorator, True)
@@ -114,6 +125,7 @@ def test_test_inner_package_failtier():
     
     assert err.failed()
     assert decorator.last_tier == 5
+    submain.decorator = smd
     
 class MockDecorator:
     

@@ -23,8 +23,13 @@ class ChromeManifest(object):
                 continue
             
             triple = line.split(None, 2)
-            if not triple or len(triple) < 3:
+            if not triple:
                 continue
+            elif len(triple) == 2:
+                triple.append("")
+            if len(triple) < 3:
+                continue
+
             
             triples.append({"subject": triple[0],
                             "predicate": triple[1],

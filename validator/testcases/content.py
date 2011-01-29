@@ -19,20 +19,13 @@ def test_xpcnativewrappers(err, package_contents=None, xpi_package=None):
     xpcnativewrappers objects."""
 
     # Don't even both with the test(s) if there's no chrome.manifest.
-    if "chrome.manifest" not in package_contents:
+    chrome = err.get_resource("chrome.manifest")
+    if not chrome:
         return None
-
-    # Retrieve the chrome.manifest if it's cached.
-    if err.get_resource("chrome.manifest"): # pragma: no cover
-        chrome = err.get_resource("chrome.manifest")
-    else:
-        chrome_data = xpi_package.read("chrome.manifest")
-        chrome = ChromeManifest(chrome_data)
-        err.save_resource("chrome.manifest", chrome)
 
     for triple in chrome.triples:
         # Test to make sure that the triple's subject is valid
-        if [True for t in triple if t.startswith("xpcnativewrappers")]:
+        if triple["subject"] == "xpcnativewrappers":
             err.warning(("testcases_content",
                          "test_xpcnativewrappers",
                          "found_in_chrome_manifest"),
@@ -116,9 +109,9 @@ def test_packed_packages(err, package_contents=None, xpi_package=None):
             testendpoint_validator.test_inner_package(err,
                                                       temp_contents,
                                                       sub_xpi)
-            err.set_tier(2)
             package.close()
             err.pop_state()
+            err.set_tier(2)
             
         elif data["extension"] == "xpi":
             # It's not a subpackage, it's a nested extension. These are
@@ -181,11 +174,10 @@ def _read_error(err, name): # pragma: no cover
     """Reports to the user that a file in the archive couldn't be
     read from. Prevents code duplication."""
 
-    err.info(("testcases_content",
-              "_read_error",
-              "read_error"),
-             "File could not be read: %s" % name,
-             """A File in the archive could not be read. This may be
-             due to corruption or because the path name is too
-             long.""",
-             name)
+    err.notice(("testcases_content",
+                "_read_error",
+                "read_error"),
+               "File could not be read: %s" % name,
+               "A File in the archive could not be read. This may be due to "
+               "corruption or because the path name is too long.",
+               name)

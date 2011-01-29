@@ -224,3 +224,18 @@ def test_notice_friendly():
     
     assert output.count("foobar")
 
+def test_initializer():
+    "Tests that the __init__ paramaters are doing their jobs"
+
+    e = ErrorBundle()
+    assert e.determined
+    assert e.get_resource("listed")
+
+    e = ErrorBundle(determined=False)
+    assert not e.determined
+    assert e.get_resource("listed")
+
+    e = ErrorBundle(listed=False)
+    assert e.determined
+    assert not e.get_resource("listed")
+

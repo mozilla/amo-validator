@@ -14,17 +14,9 @@ def test_langpack_manifest(err, package_contents=None, xpi_package=None):
     compliance with the standard language pack triples."""
     
     # Don't even both with the test(s) if there's no chrome.manifest.
-    if "chrome.manifest" not in package_contents:
+    chrome = err.get_resource("chrome.manifest")
+    if not chrome:
         return
-    
-    # Retrieve the chrome.manifest if it's cached.
-    if err.get_resource("chrome.manifest"): # pragma: no cover
-        chrome = err.get_resource("chrome.manifest")
-    else:
-        # Presence is tested by the packagelayout module.
-        chrome_data = xpi_package.read("chrome.manifest")
-        chrome = ChromeManifest(chrome_data)
-        err.save_resource("chrome.manifest", chrome)
     
     for triple in chrome.triples:
         subject = triple["subject"]
