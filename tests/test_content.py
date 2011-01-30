@@ -13,6 +13,7 @@ def test_xpcnativewrappers():
     "Tests that xpcnativewrappers is not in the chrome.manifest"
 
     err = ErrorBundle()
+    assert content.test_xpcnativewrappers(err, {}, None) is None
 
     err.save_resource("chrome.manifest",
                       ChromeManifest("foo bar"))

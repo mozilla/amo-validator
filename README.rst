@@ -160,7 +160,6 @@ sample document below.
 		"warnings":1,
 		"notices":1,
 		"success": false,
-	    "rejected": false,
 		"messagetree":{ /* ... */ },
 		"messages": [
 			{
@@ -307,3 +306,9 @@ command would be: ::
 Note that in order to use the --cover-skip nose parameter, you must install the included patch for nose's coverage.py plugin: ::
 
 	extras/cover.py
+
+This file should overwrite the standard nose coverage plugin at the appropriate location: ::
+
+    ~/.virtualenvs/[virtual environment]/lib/pythonX.X/site-packages/nose/plugins/cover.py
+    /usr/lib/pythonX.X/site-packages/nose/plugins/cover.py
+
