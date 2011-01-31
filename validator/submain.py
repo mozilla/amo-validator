@@ -70,7 +70,8 @@ def test_search(err, package, expectation=0):
                            "Unexpected file extension.")
                            
     # Is this a search provider?
-    opensearch_results = detect_opensearch(package)
+    opensearch_results = detect_opensearch(package,
+                                           listed=err.get_resource("listed"))
     
     if opensearch_results["failure"]:
         # Failed OpenSearch validation

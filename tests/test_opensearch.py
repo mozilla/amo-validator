@@ -7,13 +7,13 @@ import validator.submain as submain
 from validator.errorbundler import ErrorBundle
 from validator.constants import *
 
-def _do_test(url, failure=True):
+def _do_test(url, failure=True, listed=False):
     
     xml_file = open(url)
     data = xml_file.read()
     wrapper = StringIO(data)
     
-    results = typedetection.detect_opensearch(wrapper)
+    results = typedetection.detect_opensearch(wrapper, listed=listed)
     
     if results["error"]:
         print results["error"]
@@ -72,8 +72,8 @@ def test_broken_url():
 def test_rel_self_url():
     "Tests that the parser skips over rel=self URLs"
 
+    _do_test("tests/resources/searchprovider/rel_self_url.xml", listed=True)
     _do_test("tests/resources/searchprovider/rel_self_url.xml", False)
-    # It shouldn't fail because it's a "broken" URL that's marked to pass.
 
 def test_broken_url_attributes():
     "Tests that the provider is passing the proper attributes for its urls."
@@ -105,7 +105,7 @@ def test_search_pass():
     "Tests the submain test_search function with passing data."
     
     err = ErrorBundle(None, True)
-    submain.detect_opensearch = lambda x: {"failure":False}
+    submain.detect_opensearch = lambda x, listed: {"failure":False}
     submain.test_search(err, None, PACKAGE_ANY)
     
     assert not err.failed()
@@ -114,7 +114,7 @@ def test_search_bad_type():
     "Tests the submain test_search function with a bad package type."
     
     err = ErrorBundle(None, True)
-    submain.detect_opensearch = lambda x: {"failure":False}
+    submain.detect_opensearch = lambda x, listed: {"failure":False}
     submain.test_search(err, None, PACKAGE_THEME)
     
     assert err.failed()
@@ -123,8 +123,8 @@ def test_search_failure():
     "Tests the submain test_search function with a failure"
     
     err = ErrorBundle(None, True)
-    submain.detect_opensearch = lambda x: {"failure":True,
-                                           "error":""}
+    submain.detect_opensearch = lambda x, listed: {"failure":True,
+                                                   "error":""}
     submain.test_search(err, None, PACKAGE_ANY)
     
     assert err.failed()
@@ -134,9 +134,9 @@ def test_search_failure_undecided():
     "Tests the submain test_search function with an unrejected fail case"
     
     err = ErrorBundle(None, True)
-    submain.detect_opensearch = lambda x: {"failure":True,
-                                           "error":"",
-                                           "decided":False}
+    submain.detect_opensearch = lambda x, listed: {"failure":True,
+                                                   "error":"",
+                                                   "decided":False}
     submain.test_search(err, None, PACKAGE_ANY)
     
     assert err.failed()

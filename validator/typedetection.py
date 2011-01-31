@@ -92,7 +92,7 @@ def detect_type(err, install_rdf=None, xpi_package=None):
     
 
 
-def detect_opensearch(package):
+def detect_opensearch(package, listed=False):
     "Detect, parse, and validate an OpenSearch provider"
     
     # Parse the file.
@@ -157,6 +157,13 @@ def detect_opensearch(package):
 
         # If the URL is listed as rel="self", skip over it.
         if url.hasAttribute("rel") and url.attributes["rel"].value == "self":
+            if listed:
+                return {"failure": True,
+                        "error": "Per AMO guidelines, OpenSearch providers "
+                                 "cannot contain <Url /> elements with a 'rel' "
+                                 "attribute pointing to the URL's current "
+                                 "location. It must be removed before posting "
+                                 "this provider to AMO."}
             continue
         
         if url.hasAttribute("method") and \
