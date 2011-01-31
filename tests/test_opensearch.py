@@ -58,6 +58,8 @@ def test_broken_shortname():
     "Tests that the provider has a <ShortName> element."
     
     _do_test("tests/resources/searchprovider/sp_no_shortname.xml")
+    _do_test("tests/resources/searchprovider/sp_dup_shortname.xml")
+    _do_test("tests/resources/searchprovider/sp_long_shortname.xml")
     
 def test_broken_description():
     "Tests that the provider has a <Description> element."

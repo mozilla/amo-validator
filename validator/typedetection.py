@@ -127,10 +127,22 @@ def detect_opensearch(package, listed=False):
 
 
     # Make sure that there is exactly one ShortName.
-    if not srch_prov.documentElement.getElementsByTagName("ShortName"):
+    sn = srch_prov.documentElement.getElementsByTagName("ShortName")
+    if not sn:
         return {"failure": True,
                 "error": "Missing <ShortName> element"}
-    
+    elif len(sn) > 1:
+        return {"failure": True,
+                "error": "Too many <ShortName> elements"}
+    else:
+        sn_children = sn[0].childNodes
+        short_name = 0
+        for node in sn_children:
+            if node.nodeType == node.TEXT_NODE:
+                short_name += len(node.data)
+        if short_name > 16:
+            return {"failure": True,
+                    "error": "<ShortName> too long; must be <17 characters"}
     
     # Make sure that there is exactly one Description.
     if not srch_prov.documentElement.getElementsByTagName("Description"):
@@ -192,8 +204,8 @@ def detect_opensearch(package, listed=False):
                 # As long as we're in here and dependent on the
                 # attributes, we'd might as well validate them.
                 attribute_keys = param.attributes.keys()
-                if not "name" in attribute_keys or \
-                   not "value" in attribute_keys:
+                if "name" not in attribute_keys or \
+                   "value" not in attribute_keys:
                     return {"failure": True,
                             "error": "<Param /> missing attributes."}
                 
