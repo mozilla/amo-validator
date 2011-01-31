@@ -55,6 +55,25 @@ def test_jar_subpackage():
                                     "subpackage")
     
 
+def test_xpi_tiererror():
+    "Tests that tiers are reset when a subpackage is encountered"
+
+    err = ErrorBundle()
+    mock_package = MockXPIManager(
+        {"foo.xpi":
+             "tests/resources/content/subpackage.jar"})
+    content.testendpoint_validator = MockTestEndpoint(("test_package", ),
+                                                      td_error=True)
+
+    err.tier = 2
+    result = content.test_packed_packages(err,
+                                          {"foo.xpi":
+                                               {"extension":"xpi",
+                                                "name_lower":"foo.xpi"}},
+                                          mock_package)
+    assert err.errors[0]["tier"] == 1
+
+
 def test_xpi_nonsubpackage():
     "Tests XPI files that are not subpackages."
     
@@ -63,8 +82,7 @@ def test_xpi_nonsubpackage():
         {"foo.xpi":
              "tests/resources/content/subpackage.jar"})
                         
-    content.testendpoint_validator = \
-        MockTestEndpoint(("test_package", ))
+    content.testendpoint_validator = MockTestEndpoint(("test_package", ))
     
     result = content.test_packed_packages(
                                     err,
@@ -192,7 +210,7 @@ class MockTestEndpoint(object):
     """Simulates a test module and reports whether individual tests
     have been attempted on it."""
     
-    def __init__(self, expected):
+    def __init__(self, expected, td_error=False):
         expectations = {}
         
         for expectation in expected:
@@ -200,6 +218,7 @@ class MockTestEndpoint(object):
                                          "subpackage": 0}
         
         self.expectations = expectations
+        self.td_error = td_error
         
     def __getattribute__(self, name):
         """"Detects requests for validation tests and returns an
@@ -207,8 +226,14 @@ class MockTestEndpoint(object):
         
         print "Requested: %s" % name
         
+        if name == "test_package" and self.td_error:
+            return lambda err, pcon, xpi:err.error(("foo", ),
+                                                   "Tier error",
+                                                   "Just a test")
+
         if name in ("expectations",
-                    "assert_expectation"):
+                    "assert_expectation",
+                    "td_error"):
             return object.__getattribute__(self, name)
         
         if name in self.expectations:

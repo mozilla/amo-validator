@@ -112,6 +112,7 @@ def test_packed_packages(err, package_contents=None, xpi_package=None):
             # Let the error bunder know we're in a sub-package.
             err.push_state(data["name_lower"])
             err.set_type(PACKAGE_SUBPACKAGE) # Subpackage
+            err.tier = 1
             testendpoint_validator.test_inner_package(err,
                                                       temp_contents,
                                                       sub_xpi)
@@ -127,6 +128,7 @@ def test_packed_packages(err, package_contents=None, xpi_package=None):
             package = StringIO(file_data)
             
             err.push_state(data["name_lower"])
+            err.tier = 1
             
             # There are no expected types for packages within a multi-
             # item package.
