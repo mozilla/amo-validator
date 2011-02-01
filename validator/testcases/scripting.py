@@ -121,8 +121,7 @@ def _regex_tests(err, data, filename):
               "extensions\\.blocklist\\.url": np_warning,
               "extensions\\.blocklist\\.level": np_warning,
               "extensions\\.blocklist\\.interval": np_warning,
-              "general\\.useragent": np_warning,
-              "createElement": "Markup elements may not be created dynamically"}
+              "general\\.useragent": np_warning,}
 
     for regex, message in errors.items():
         reg = re.compile(regex)

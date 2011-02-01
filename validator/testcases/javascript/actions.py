@@ -210,7 +210,28 @@ def _call_expression(traverser, node):
                                   line=traverser.line,
                                   column=traverser.position,
                                   context=traverser.context)
-
+    elif node["callee"]["type"] == "MemberExpression" and \
+         node["callee"]["property"]["type"] == "Identifier":
+        identifier_name =  node["callee"]["property"]["name"]
+        simple_args = [str(traverser._traverse_node(a).get_literal_value()) for
+                       a in
+                       args]
+        if (identifier_name == "createElement" and
+            simple_args[0] == "script") or \
+           (identifier_name == "createElementNS" and
+            "script" in simple_args[1]):
+            traverser.err.warning(("testcases_javascript_actions",
+                                   "_call_expression",
+                                   "called_createelement"),
+                                  "createElement() used to create script tag"
+                                  "The createElement() function was used to "
+                                  "create a script tag in a JavaScript file. "
+                                  "Add-ons are not allowed to create script "
+                                  "tags or load code dynamically from the web.",
+                                  traverser.filename,
+                                  line=traverser.line,
+                                  column=traverser.position,
+                                  context=traverser.context)
     return True
 
 def _call_settimeout(a,t):
