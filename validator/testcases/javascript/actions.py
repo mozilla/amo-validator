@@ -212,14 +212,14 @@ def _call_expression(traverser, node):
                                   context=traverser.context)
     elif node["callee"]["type"] == "MemberExpression" and \
          node["callee"]["property"]["type"] == "Identifier":
-        identifier_name =  node["callee"]["property"]["name"]
-        simple_args = [str(traverser._traverse_node(a).get_literal_value()) for
-                       a in
-                       args]
+        identifier_name = node["callee"]["property"]["name"]
+        simple_args = [traverser._traverse_node(a) for a in args]
         if (identifier_name == "createElement" and
-            simple_args[0] == "script") or \
+            simple_args and
+            str(simple_args[0].get_literal_value()) == "script") or \
            (identifier_name == "createElementNS" and
-            "script" in simple_args[1]):
+            len(simple_args) > 1 and
+            "script" in str(simple_args[1].get_literal_value())):
             traverser.err.warning(("testcases_javascript_actions",
                                    "_call_expression",
                                    "called_createelement"),
@@ -232,6 +232,30 @@ def _call_expression(traverser, node):
                                   line=traverser.line,
                                   column=traverser.position,
                                   context=traverser.context)
+        elif (identifier_name == "createElement" and
+              simple_args and
+              simple_args[0].is_literal() and
+              not isinstance(simple_args[0], str)) or \
+             (identifier_name == "createElementNS" and
+              simple_args and
+              simple_args[1].is_literal() and
+              not isinstance(simple_args[1], str)):
+            traverser.err.warning(("testcases_javascript_actions",
+                                   "_call_expression",
+                                   "createelement_variable"),
+                                  "Variable element type being created",
+                                  ["createElement or createElementNS were used "
+                                   "with a variable rather than a raw string. "
+                                   "Literal values should be used when taking "
+                                   "advantage of the element creation "
+                                   "functions.",
+                                   "E.g.: createElement('foo') rather than "
+                                   "createElement(el_type)"],
+                                  traverser.filename,
+                                  line=traverser.line,
+                                  column=traverser.position,
+                                  context=traverser.context)
+
     return True
 
 def _call_settimeout(a,t):

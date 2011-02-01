@@ -15,8 +15,8 @@ def _do_test_raw(script):
 def _get_var(err, name):
     return err.final_context.data[name].get_literal_value()
 
-def test_basic_math():
-    "Tests that contexts work and that basic math is executed properly"
+def test_createElement():
+    "Tests that createElement and createElementNS throw errors."
     
     err = _do_test_raw("""
     var x = foo;
@@ -36,4 +36,10 @@ def test_basic_math():
     """)
     assert err.message_count == 1
 
+    err = _do_test_raw("""
+    let scr = "scr";
+    scr += "ipt";
+    foo.bar.createElement(scr);
+    """)
+    assert err.message_count == 1
 
