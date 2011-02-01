@@ -1,3 +1,4 @@
+import inspect
 import json
 import types
 
@@ -31,6 +32,13 @@ class JSWrapper(object):
 
     def __init__(self, value=None, const=False, dirty=False, lazy=False,
                  is_global=False, traverser=None):
+        
+        if traverser is not None:
+            traverser.debug_level += 1
+            traverser._debug("-----New JSWrapper-----")
+            if isinstance(value, JSWrapper):
+                traverser._debug(">>> Rewrap <<<")
+            traverser.debug_level -= 1
 
         self.const = const
         self.traverser = traverser
@@ -122,12 +130,12 @@ class JSWrapper(object):
         "Retrieves a property from the variable"
 
         if self.value is None:
-            return JSWrapper(traverser=self)
+            return JSWrapper(traverser=traverser)
 
         value = self.value
         if self.is_global:
             if "value" not in value:
-                return JSWrapper(None, traverser=self)
+                return JSWrapper(traverser=traverser)
 
             value_val = value["value"]
             if isinstance(value_val, types.LambdaType):
@@ -150,7 +158,9 @@ class JSWrapper(object):
         else:
             output = None
         
-        return JSWrapper(output, traverser=self)
+        if not isinstance(output, JSWrapper):
+            return JSWrapper(output, traverser=traverser)
+        return output
     
     def is_literal(self):
         "Returns whether the content is a literal"
@@ -178,7 +188,10 @@ class JSWrapper(object):
                 if property is types.LambdaType:
                     properties[name] = "<<LAMBDA>>"
                     continue
-                wrapper = JSWrapper(property, traverser=self)
+                if not isinstance(property, JSWrapper):
+                    wrapper = JSWrapper(property, traverser=self.traverser)
+                else:
+                    wrapper = property
                 properties[name] = wrapper.output()
             return json.dumps(properties)
         elif isinstance(self.value, JSArray):

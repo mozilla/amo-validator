@@ -2,6 +2,7 @@ import copy
 import types
 
 import traverser as js_traverser
+from jstypes import *
 
 def trace_member(traverser, node):
     "Traces a MemberExpression and returns the appropriate object"
@@ -9,7 +10,8 @@ def trace_member(traverser, node):
     if node["type"] == "MemberExpression":
         # x.y or x[y]
         base = trace_member(traverser, node["object"])
-        base = js_traverser.JSWrapper(base, traverser=traverser)
+        if not isinstance(base, JSWrapper):
+            base = JSWrapper(base, traverser=traverser)
 
         # base = x
         if node["property"]["type"] == "Identifier":
@@ -27,13 +29,15 @@ def trace_member(traverser, node):
     else:
         traverser._debug("MEMBER_EXP>>ROOT:EXPRESSION")
         # It's an expression, so just try your damndest.
-        return js_traverser.JSWrapper(traverser._traverse_node(node),
-                                      traverser=traverser)
+        traversed = traverser._traverse_node(node)
+        if not isinstance(traversed, JSWrapper):
+            return JSWrapper(traversed, traverser=traverser)
+        return traversed
 
 def _function(traverser, node):
     "Prevents code duplication"
     
-    me = js_traverser.JSObject()
+    me = JSObject()
     
     # Replace the current context with a prototypeable JS object.
     traverser._pop_context()
@@ -52,7 +56,7 @@ def _function(traverser, node):
     
     local_context = traverser._peek_context(2)
     for param in params:
-        var = js_traverser.JSWrapper(lazy=True, traverser=traverser)
+        var = JSWrapper(lazy=True, traverser=traverser)
         
         # We can assume that the params are static because we don't care about
         # what calls the function. We want to know whether the function solely
@@ -81,7 +85,9 @@ def _func_expr(traverser, node):
     
     # Collect the result as an object
     results = _function(traverser, node)
-    return js_traverser.JSWrapper(value=results, traverser=traverser)
+    if not isinstance(results, JSWrapper):
+        return JSWrapper(value=results, traverser=traverser)
+    return results
 
 def _define_with(traverser, node):
     "Handles `with` statements"
@@ -120,7 +126,7 @@ def _define_var(traverser, node):
                 # TODO : Test to make sure len(values) == len(vars)
                 for value in declaration["init"]["elements"]:
                     traverser._set_variable(var[0],
-                                            js_traverser.JSWrapper(
+                                            JSWrapper(
                                                 traverser._traverse_node(value),
                                                 traverser=traverser))
                     var = var[1:] # Pop off the first value
@@ -140,10 +146,14 @@ def _define_var(traverser, node):
             traverser._debug("VALUE>>%s" % (var_value.output()
                                             if var_value is not None
                                             else "None"))
-    
-            var = js_traverser.JSWrapper(value=var_value,
-                                         const=(node["kind"]=="const"),
-                                         traverser=traverser)
+            
+            if not isinstance(var_value, JSWrapper):
+                var = JSWrapper(value=var_value,
+                                const=(node["kind"]=="const"),
+                                traverser=traverser)
+            else:
+                var = var_value
+                var.const = node["kind"] == "const"
             traverser._set_variable(var_name, var)
             
     traverser.debug_level -= 1
@@ -154,7 +164,7 @@ def _define_var(traverser, node):
 def _define_obj(traverser, node):
     "Creates a local context object"
     
-    var = js_traverser.JSObject()
+    var = JSObject()
     for prop in node["properties"]:
         var_name = ""
         key = prop["key"]
@@ -167,12 +177,15 @@ def _define_obj(traverser, node):
         
         # TODO: Observe "kind"
     
-    return js_traverser.JSWrapper(var, lazy=True, traverser=traverser)
+    if not isinstance(var, JSWrapper):
+        return JSWrapper(var, lazy=True, traverser=traverser)
+    var.lazy = True
+    return var
 
 def _define_array(traverser, node):
     "Instantiates an array object"
     
-    arr = js_traverser.JSArray()
+    arr = JSArray()
     for elem in node["elements"]:
         arr.elements.append(traverser._traverse_node(elem))
     
@@ -181,8 +194,8 @@ def _define_array(traverser, node):
 def _define_literal(traverser, node):
     "Creates a JSVariable object based on a literal"
 
-    var = js_traverser.JSLiteral(node["value"])
-    return js_traverser.JSWrapper(var, traverser=traverser)
+    var = JSLiteral(node["value"])
+    return JSWrapper(var, traverser=traverser)
 
 def _call_expression(traverser, node):
     args = node["arguments"]
@@ -234,12 +247,12 @@ def _call_expression(traverser, node):
                                   context=traverser.context)
         elif (identifier_name == "createElement" and
               simple_args and
-              simple_args[0].is_literal() and
-              not isinstance(simple_args[0], str)) or \
+              (not simple_args[0].is_literal() or
+               not isinstance(simple_args[0], str))) or \
              (identifier_name == "createElementNS" and
               simple_args and
-              simple_args[1].is_literal() and
-              not isinstance(simple_args[1], str)):
+              (not simple_args[1].is_literal() or
+               not isinstance(simple_args[1], str))):
             traverser.err.warning(("testcases_javascript_actions",
                                    "_call_expression",
                                    "createelement_variable"),
@@ -269,13 +282,15 @@ def _call_settimeout(a,t):
 def _expression(traverser, node):
     "Evaluates an expression and returns the result"
     result = traverser._traverse_node(node["expression"])
-    return js_traverser.JSWrapper(result, traverser=traverser)
+    if not isinstance(result, JSWrapper):
+        return JSWrapper(result, traverser=traverser)
+    return result
     
 def _get_this(traverser, node):
     "Returns the `this` object"
     
     if not traverser.this_stack:
-        return js_traverser.JSWrapper(traverser=traverser)
+        return JSWrapper(traverser=traverser)
     
     return traverser.this_stack[-1]
 
@@ -293,7 +308,8 @@ def _new(traverser, node):
         traverser._traverse_node(args)
     
     elem = traverser._traverse_node(node["callee"])
-    elem = js_traverser.JSWrapper(elem, traverser=traverser)
+    if not isinstance(elem, JSWrapper):
+        elem = JSWrapper(elem, traverser=traverser)
     return elem
 
 def _ident(traverser, node):
@@ -309,7 +325,7 @@ def _ident(traverser, node):
     # If the variable doesn't exist, we're going to create a placeholder for
     # it. The placeholder can have stuff assigned to it by things that work
     # like _expr_assignment
-    result = js_traverser.JSWrapper(traverser=traverser)
+    result = JSWrapper(traverser=traverser)
     traverser._set_variable(name, result)
     return result
 
@@ -321,13 +337,14 @@ def _expr_assignment(traverser, node):
 
     traverser._debug("ASSIGNMENT>>PARSING RIGHT")
     right = traverser._traverse_node(node["right"])
-    right = js_traverser.JSWrapper(right, traverser=traverser)
+    right = JSWrapper(right, traverser=traverser)
     lit_right = right.get_literal_value()
     
     traverser._debug("ASSIGNMENT>>PARSING LEFT")
     left = traverser._traverse_node(node["left"])
+    traverser._debug("ASSIGNMENT>>DONE PARSING LEFT")
     
-    if isinstance(left, js_traverser.JSWrapper):
+    if isinstance(left, JSWrapper):
         lit_left = left.get_literal_value()
         
         # Don't perform an operation on None. Python freaks out
@@ -383,7 +400,7 @@ def _expr_binary(traverser, node):
     traverser.debug_level += 1
 
     left = traverser._traverse_node(node["left"])
-    left = js_traverser.JSWrapper(left, traverser=traverser)
+    left = JSWrapper(left, traverser=traverser)
 
     traverser.debug_level -= 1
 
@@ -392,7 +409,7 @@ def _expr_binary(traverser, node):
     traverser.debug_level += 1
 
     right = traverser._traverse_node(node["right"])
-    right = js_traverser.JSWrapper(right, traverser=traverser)
+    right = JSWrapper(right, traverser=traverser)
 
     traverser.debug_level -= 1
     
@@ -433,9 +450,11 @@ def _expr_binary(traverser, node):
             traverser._debug("BIN_EXP>>OPERATION FAILED!")
             output = operators[operator]()
         except:
-            return js_traverser.JSWrapper(traverser=traverser)
-
-    return js_traverser.JSWrapper(output, traverser=traverser)
+            return JSWrapper(traverser=traverser)
+    
+    if not isinstance(output, JSWrapper):
+        return JSWrapper(output, traverser=traverser)
+    return output
 
 
 def _get_as_num(value):

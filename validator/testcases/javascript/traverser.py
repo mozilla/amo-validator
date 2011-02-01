@@ -133,7 +133,7 @@ class Traverser:
         # Handles all the E4X stuff and anything that may or may not return
         # a value.
         if "type" not in node or not self._can_handle_node(node["type"]):
-            wrapper = JSWrapper(None, traverser=self)
+            wrapper = JSWrapper(traverser=self)
             wrapper.set_value(JSObject())
             return wrapper
         
@@ -159,7 +159,9 @@ class Traverser:
         if action is not None:
             action_result = action(self, node)
             self._debug("ACTION>>%s (%s)" %
-                    ("halt" if action_result else "continue",
+                    ("halt>>%s" % str(action_result) if
+                        action_result else
+                        "continue",
                      node["type"]))
         
         if action_result is None:
@@ -180,7 +182,9 @@ class Traverser:
             self._pop_context()
         
         if returns:
-            return JSWrapper(action_result, traverser=self)
+            if not isinstance(action_result, JSWrapper):
+                return JSWrapper(action_result, traverser=self)
+            return action_result
     
     def _interpret_block(self, items):
         "Interprets a block of consecutive code"
@@ -232,7 +236,9 @@ class Traverser:
         # Look for the variable in the local contexts first
         local_variable = self._seek_local_variable(variable, depth)
         if local_variable is not None:
-            return JSWrapper(local_variable, traverser=self)
+            if not isinstance(local_variable, JSWrapper):
+                return JSWrapper(local_variable, traverser=self)
+            return local_variable
 
         self._debug("SEEK_FAIL>>TRYING GLOBAL")
 
@@ -260,14 +266,17 @@ class Traverser:
             # If it has the variable, return it
             if context.has_var(variable):
                 self._debug("SEEK>>FOUND AT DEPTH %d" % c)
-                return JSWrapper(context.get(variable), traverser=self)
+                var = context.get(variable)
+                if not isinstance(var, JSWrapper):
+                    return JSWrapper(var, traverser=self)
+                return var
 
             # Decrease the level that's being searched through. If we've
             # reached the bottom (relative to where the user defined it to be),
             # end the search.
             depth -= 1
             if depth == -1:
-                return JSWrapper(None, traverser=self)
+                return JSWrapper(traverser=self)
        
     def _is_global(self, name, globs=None):
         "Returns whether a name is a global entity"
@@ -287,7 +296,7 @@ class Traverser:
         self._debug("SEEK_GLOBAL>>%s" % name)
         if not self._is_global(name, globs):
             self._debug("SEEK_GLOBAL>>FAILED")
-            return JSWrapper(None, traverser=self)
+            return JSWrapper(traverser=self)
         
         self._debug("SEEK_GLOBAL>>FOUND>>%s" % name)
         return self._build_global(name, globs[name])
