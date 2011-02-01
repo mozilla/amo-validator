@@ -111,7 +111,7 @@ def test_layout_all(err, package_contents, xpi_package):
 #                         name);
 #             break
 
-@decorator.register_test(tier=2)
+@decorator.register_test(tier=1)
 def test_emunpack(err, package_contents, xpi_package):
 
     if err.get_resource("em:unpack") != "true":
