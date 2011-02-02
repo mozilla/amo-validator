@@ -141,7 +141,7 @@ def test_emunpack(err, package_contents, xpi_package):
             executables = ("exe","dll","so","dylib","exe","bin")
             # Search for unpack-worthy files
             for file_ in package_contents:
-                if fnmatch.fnmatch(file_, "*.ico"):
+                if fnmatch.fnmatch(file_, "chrome/icons/default/*"):
                     fails = True
                     break
                 # Executables in /components/ should also be flagged.

@@ -39,7 +39,7 @@ def test_no_unpack_dict():
 def test_no_unpacked_ico():
     "Packages containing ICO files and unpack is unset/false should fail."
 
-    assert _do_test(contents=("foo.ico", )).failed()
+    assert _do_test(contents=("chrome/icons/default/foo.png", )).failed()
 
 def test_no_unpacked_exec_safe():
     """Packages containing executable files outside the /components/ directory
