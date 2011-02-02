@@ -22,7 +22,7 @@ def test_createElement():
     var x = foo;
     foo.bar.whateverElement("script");
     """)
-    assert err.message_count == 0
+    assert not err.message_count
 
     err = _do_test_raw("""
     var x = foo;
@@ -42,4 +42,19 @@ def test_createElement():
     foo.bar.createElement(scr);
     """)
     assert err.message_count == 1
+
+    err = _do_test_raw("""
+    document.createElement("style");
+    function x(doc) {
+        doc.createElement("style");
+    }""")
+    assert not err.message_count
+
+    err = _do_test_raw("""
+    document.createElement("sty"+"le");
+    var x = "sty";
+    x += "le";
+    document.createElement(x);
+    """)
+    assert not err.message_count
 

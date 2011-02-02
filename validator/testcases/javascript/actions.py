@@ -247,12 +247,12 @@ def _call_expression(traverser, node):
                                   context=traverser.context)
         elif (identifier_name == "createElement" and
               simple_args and
-              (not simple_args[0].is_literal() or
-               not isinstance(simple_args[0], str))) or \
+              not (simple_args[0].is_literal() or
+                   isinstance(simple_args[0].get_literal_value(), str))) or \
              (identifier_name == "createElementNS" and
-              simple_args and
-              (not simple_args[1].is_literal() or
-               not isinstance(simple_args[1], str))):
+              len(simple_args) > 1 and
+              not (simple_args[1].is_literal() or
+                   isinstance(simple_args[1].get_literal_value(), str))):
             traverser.err.warning(("testcases_javascript_actions",
                                    "_call_expression",
                                    "createelement_variable"),
