@@ -154,7 +154,17 @@ def detect_opensearch(package, listed=False):
     if not urls:
         return {"failure": True,
                 "error": "Missing <Url /> elements"}
-    
+
+
+    if listed and any(url.hasAttribute("rel") and
+                      url.attributes["rel"].value =="self" for
+                      url in urls):
+        return {"failure": True,
+                "error": "Per AMO guidelines, OpenSearch providers cannot "
+                         "contain <Url /> elements with a 'rel' attribute "
+                         "pointing to the URL's current location. It must be "
+                         "removed before posting this provider to AMO."}
+
     acceptable_mimes = ("text/html", "application/xhtml+xml")
     acceptable_urls = [url for url in urls if url.hasAttribute("type") and
                           url.attributes["type"].value in acceptable_mimes]
@@ -167,15 +177,7 @@ def detect_opensearch(package, listed=False):
     # Make sure that each Url has the require attributes.
     for url in acceptable_urls:
 
-        # If the URL is listed as rel="self", skip over it.
         if url.hasAttribute("rel") and url.attributes["rel"].value == "self":
-            if listed:
-                return {"failure": True,
-                        "error": "Per AMO guidelines, OpenSearch providers "
-                                 "cannot contain <Url /> elements with a 'rel' "
-                                 "attribute pointing to the URL's current "
-                                 "location. It must be removed before posting "
-                                 "this provider to AMO."}
             continue
         
         if url.hasAttribute("method") and \
