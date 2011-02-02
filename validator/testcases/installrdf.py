@@ -27,7 +27,6 @@ def _test_rdf(err, install):
     else:
         shouldnt_exist = ("updateURL",
                           "updateKey",
-                          "updateLink",
                           "hidden")
     obsolete = ("file", "skin")
     must_exist_once = ["id",
@@ -77,14 +76,14 @@ def _test_rdf(err, install):
 
         # Test if the predicate is banned
         if predicate in shouldnt_exist:
-            err.warning(("testcases_installrdf",
-                         "_test_rdf",
-                         "shouldnt_exist"),
-                        "Banned element in install.rdf",
-                        """The element "%s" was found in the add-on's
-                        install.rdf file. It is not allowed in add-ons under
-                        the current configuration.""" % predicate,
-                        "install.rdf")
+            err.error(("testcases_installrdf",
+                       "_test_rdf",
+                       "shouldnt_exist"),
+                      "Banned element in install.rdf",
+                      """The element "%s" was found in the add-on's
+                      install.rdf file. It is not allowed in add-ons under
+                      the current configuration.""" % predicate,
+                      "install.rdf")
             continue
         
         # Test if the predicate is obsolete
