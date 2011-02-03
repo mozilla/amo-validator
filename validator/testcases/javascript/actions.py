@@ -215,10 +215,9 @@ def _call_expression(traverser, node):
                                    "_call_expression",
                                    "called_dangerous_global"),
                                   "Global called in dangerous manner",
-                                  ["A global function was called using a set "
-                                   "of dangerous parameters. These parameters "
-                                   "have been disallowed.",
-                                   "Params: %s" % params],
+                                  "A global function was called using a set "
+                                  "of dangerous parameters. These parameters "
+                                  "have been disallowed.",
                                   traverser.filename,
                                   line=traverser.line,
                                   column=traverser.position,
