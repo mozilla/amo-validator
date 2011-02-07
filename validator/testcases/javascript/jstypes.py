@@ -77,14 +77,16 @@ class JSWrapper(object):
             return
 
         # We want to obey the permissions of global objects
-        if self.is_global:
+        if self.is_global and (isinstance(self.value, dict) and
+                               ("overwriteable" not in self.value or
+                                self.value["overwriteable"] == False)):
             # TODO : Write in support for "readonly":False
-            traverser.err.warning(("testcases_javascript_traverser",
+            traverser.err.warning(("testcases_javascript_jstypes",
                                    "JSWrapper_set_value",
                                    "global_overwrite"),
                                   "Global overwrite",
-                                  "An attempt to overwrite a global varible "
-                                  "made in some JS code.",
+                                  "An attempt to overwrite a global variable "
+                                  "was made in some JS code.",
                                   traverser.filename,
                                   line=traverser.line,
                                   column=traverser.position,

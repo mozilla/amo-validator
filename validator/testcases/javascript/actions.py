@@ -309,6 +309,8 @@ def _new(traverser, node):
     elem = traverser._traverse_node(node["callee"])
     if not isinstance(elem, JSWrapper):
         elem = JSWrapper(elem, traverser=traverser)
+    if elem.is_global:
+        elem.value["overwriteable"] = True
     return elem
 
 def _ident(traverser, node):
