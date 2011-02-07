@@ -112,11 +112,11 @@ def test_packed_packages(err, package_contents=None, xpi_package=None):
             # Let the error bunder know we're in a sub-package.
             err.push_state(data["name_lower"])
             err.set_type(PACKAGE_SUBPACKAGE) # Subpackage
-            err.tier = 1
+            err.set_tier(1)
             testendpoint_validator.test_inner_package(err,
                                                       temp_contents,
                                                       sub_xpi)
-            err.tier = 2
+            err.set_tier(2)
             package.close()
             err.pop_state()
             
@@ -128,15 +128,15 @@ def test_packed_packages(err, package_contents=None, xpi_package=None):
             package = StringIO(file_data)
             
             err.push_state(data["name_lower"])
-            err.tier = 1
-            
+            err.set_tier(1)
+
             # There are no expected types for packages within a multi-
             # item package.
             testendpoint_validator.test_package(err, package, name)
             
             package.close()
             err.pop_state()
-            err.tier = 2 # Reset to the current tier
+            err.set_tier(2) # Reset to the current tier
             
         elif data["extension"] in ("xul", "xml", "html", "xhtml"):
             

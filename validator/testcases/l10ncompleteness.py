@@ -85,7 +85,7 @@ def _get_locale_manager(err, addon, path, files, no_cache=False):
         LOCALE_CACHE[path] = locale
     return locale
 
-@decorator.register_test(tier=3)
+@decorator.register_test(tier=4)
 def test_xpi(err, package_contents, xpi_package):
     """Tests an XPI (or JAR, really) for L10n completeness"""
     
@@ -143,7 +143,7 @@ def test_xpi(err, package_contents, xpi_package):
     # Clear the cache at the end of the test
     L10N_CACHE = {}
 
-@decorator.register_test(tier=3, expected_type=PACKAGE_LANGPACK)
+@decorator.register_test(tier=4, expected_type=PACKAGE_LANGPACK)
 def test_lp_xpi(err, package_contents, xpi_package):
     "Tests a language pack for L10n completeness"
     

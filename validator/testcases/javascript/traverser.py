@@ -14,6 +14,10 @@ class MockBundler:
         self.tier = 4
         self.ids = []
 
+    def set_tier(self, tier):
+        "Sets the tier; compatibility with ErrorBundle"
+        self.tier = tier
+
     def get_resource(self, name):
         "Represents a resource store"
 

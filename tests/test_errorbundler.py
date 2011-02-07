@@ -11,7 +11,8 @@ def test_json():
     # Use the StringIO as an output buffer.
     bundle = ErrorBundle() # No color since no output
     bundle.set_type(4)
-    bundle.tier = 3
+    bundle.set_tier(4)
+    bundle.set_tier(3)
     
     bundle.error((), "error", "description")
     bundle.warning((), "warning", "description")
@@ -24,7 +25,7 @@ def test_json():
     assert len(results["messages"]) == 3
     assert results["detected_type"] == 'langpack'
     assert not results["success"]
-    assert results["ending_tier"] == 3
+    assert results["ending_tier"] == 4
     
 def test_boring():
     "Tests that boring output strips out color sequences."

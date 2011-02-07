@@ -21,6 +21,7 @@ class ErrorBundle(object):
         self.notices = []
         self.message_tree = {}
 
+        self.ending_tier = 1
         self.tier = 1
         
         self.metadata = {}
@@ -90,6 +91,12 @@ class ErrorBundle(object):
                             "tier": tier},
                            context=context)
         return self
+
+    def set_tier(self, tier):
+        "Updates the tier and ending tier"
+        self.tier = tier
+        if tier > self.ending_tier:
+            self.ending_tier = tier
         
     def _save_message(self, stack, type_, message, context=None):
         "Stores a message in the appropriate message stack."
@@ -271,7 +278,7 @@ class ErrorBundle(object):
                  4: "langpack",
                  5: "search"}
         output = {"detected_type": types[self.detected_type],
-                  "ending_tier": self.tier,
+                  "ending_tier": self.ending_tier,
                   "success": not self.failed(),
                   "rejected": self.reject,
                   "messages":[],

@@ -24,7 +24,7 @@ def test_js_file(err, filename, data, line=0):
     # Set the tier to 4 (Security Tests)
     if err is not None:
         before_tier = err.tier
-        err.tier = 4
+        err.set_tier(3)
 
     # Get the AST tree for the JS code
     try:
@@ -70,12 +70,12 @@ def test_js_file(err, filename, data, line=0):
             raise exc, None, tb
 
         if before_tier:
-            err.tier = before_tier
+            err.set_tier(before_tier)
         return
 
     if tree is None:
         if before_tier:
-            err.tier = before_tier
+            err.set_tier(before_tier)
         return None
     
     context = ContextGenerator(data)
@@ -94,7 +94,7 @@ def test_js_file(err, filename, data, line=0):
 
     # Reset the tier so we don't break the world
     if err is not None:
-        err.tier = before_tier
+        err.set_tier(before_tier)
 
 def test_js_snippet(err, data, filename, line=0):
     "Process a JS snippet by passing it through to the file tester."

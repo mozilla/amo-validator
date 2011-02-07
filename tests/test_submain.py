@@ -158,7 +158,11 @@ class MockErrorHandler:
         self.detected_type = 0
         self.has_failed = False
         self.determined = determined
-        
+   
+    def set_tier(self, tier):
+        "Sets the tier"
+        pass
+    
     def report(self, tier):
         "Passes the tier back to the mock decorator to verify the tier"
         self.decorator.report_tier(tier)
