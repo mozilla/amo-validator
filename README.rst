@@ -1,9 +1,11 @@
 ==============================
  addons.mozilla.org Validator
 ==============================
--------------
- Version 1.0
--------------
+
+
+-------
+ Setup
+-------
 
 This validator is a proposed replacement for the current add-on
 validator available at addons.mozilla.org. It is written entirely in
@@ -18,6 +20,7 @@ Python Libraries:
 - cssutils
 - rdflib
 - chardet
+- fastchardet
 
 Python Libraries for Testing:
 
@@ -29,7 +32,7 @@ You can install everything you need for running and testing with ::
     pip install -r requirements.txt
 
 Spidermonkey
-------------
+============
 
 A working copy of Spidermonkey (debug or non-debug is fine) is a required. The
 version installed must include support for the Parser API. Downloading and
@@ -45,8 +48,9 @@ specified in the /validator/constants.php file in the
 `SPIDERMONKEY_INSTALLATION` variable. If this variable is set to `None`, no
 JavaScript tests will be run.
 
-Running
-=======
+---------
+ Running
+---------
 
 Run the validator as follows ::
 
@@ -56,7 +60,7 @@ The path to the XPI should point to an XPI file.
 
 
 Expected Type:
---------------
+==============
 
 The expected type should be one of the following values:
 
@@ -81,7 +85,7 @@ detection mechanisms are used to make this determination.
 
 
 Output Type:
-------------
+============
 
 The output type may be either of the following:
 
@@ -92,7 +96,7 @@ json
 
 
 Verbose Mode:
--------------
+=============
 
 If the "-v" flag is set, the output will include informational
 messages in addition to errors and warnings. Informational messages
@@ -108,12 +112,12 @@ default.
 
 
 Boring Mode:
-------------
+============
 
 Boring mode, when activated, doesn't print colors to the terminal.
 
 Determined Mode:
-----------------
+================
 
 With determination comes perseverance. When in determined mode, the validator
 will not stop validating after errors present themselves in a particular tier.
@@ -126,11 +130,12 @@ may not be available as the add-on was never meant to make it to the higher
 tiers.
 
 
-Output
-======
+--------
+ Output
+--------
 
 Text Output Mode:
------------------
+=================
 
 In text output mode ("text"), output is structured in the format of one
 message per line. The messages are prefixed by their priority level
@@ -141,7 +146,7 @@ add-on type was determined to be.
 
 
 JSON Output Mode:
------------------
+=================
 
 In JSON output mode ("json"), output is formatted as a JSON snippet
 containing all messages. The format for the JSON output is that of the
@@ -216,8 +221,9 @@ additional nodes which provide extra information:
 	__notices - number - The number of messages generated in this node
 	__messages - list - A list of UIDs from messages in the `messages` node
 
+
 JSON Notes:
-~~~~~~~~~~~
+-----------
 
 When a subpackage exists, an angle bracket will delimit the subpackage
 name and the message text.
@@ -281,8 +287,9 @@ For instance, this tree would generate the following messages:
 		"line": 5
 	}
 
-Testing
-=======
+---------
+ Testing
+---------
 
 Unit tests can be run with ::
 
