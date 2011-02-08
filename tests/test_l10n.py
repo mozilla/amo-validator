@@ -9,7 +9,7 @@ def test_pass():
     l10n.LOCALE_CACHE = {}
     output = _do_test("tests/resources/l10n/pass.xpi",
                       l10n.test_xpi,
-                      failure=True,
+                      failure=False,
                       set_type=PACKAGE_EXTENSION)
     assert not output.errors
 
