@@ -329,7 +329,7 @@ def _parse_l10n_doc(name, doc, no_encoding=False):
     handlers = {"dtd": dtd.DTDParser,
                 "properties": properties.PropertiesParser}
     # These are expected encodings for the various files.
-    handler_formats = ("ASCII", "UTF-8")
+    handler_formats = ("ASCII", "UTF_8")
     if extension not in handlers:
         return None
     
