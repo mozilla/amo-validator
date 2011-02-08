@@ -106,10 +106,13 @@ def test_xpi(err, package_contents, xpi_package):
     if len(locales) < 2:
         return
     
-    ref_name = "en-US"
-    # Fall back on whatever comes first.
-    if ref_name not in locales:
-        ref_name = locales.keys()[0]
+    # Use the first locale by default
+    ref_name = locales.keys()[0]
+    # Try to find en-US, as this is where the majority of users is
+    for name, locale in locales.items():
+        if locale["name"] == 'en-US':
+            ref_name = name
+            break
 
     reference = locales[ref_name]
     reference_locale = _get_locale_manager(err,
@@ -119,7 +122,7 @@ def test_xpi(err, package_contents, xpi_package):
     # Loop through the locales and test the valid ones.
     for name, locale in locales.items():
         # Ignore the reference locale
-        if locale["name"] == ref_name:
+        if name == ref_name:
             continue
         
         target_locale = _get_locale_manager(err,
