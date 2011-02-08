@@ -275,8 +275,7 @@ def _compare_packages(reference, target, ref_base="", locale_base=""):
         if not tar_doc.expected_encoding:
             results.append({"type": "unexpected_encoding",
                             "filename": tar_name,
-                            "expected_encoding": tar_doc.suitable_encoding,
-                            "encoding": tar_doc.found_encoding})
+                            "expected_encoding": tar_doc.suitable_encoding})
 
         missing_entities = []
         unchanged_entities = []
@@ -336,10 +335,8 @@ def _parse_l10n_doc(name, doc, no_encoding=False):
     
     # Allow the parse to specify files to skip for encoding checks
     if not no_encoding:
-        encoding = fastchardet.detect(doc)
-        encoding["encoding"] = encoding["encoding"].upper()
-        loc_doc.expected_encoding = encoding["encoding"] in handler_formats
-        loc_doc.found_encoding = encoding["encoding"]
+        encoding = fastchardet.detect(doc)["encoding"].upper()
+        loc_doc.expected_encoding = encoding in handler_formats
         loc_doc.suitable_encoding = handler_formats
 
     return loc_doc
@@ -400,7 +397,6 @@ def _aggregate_results(err, results, locale, similar=False, base="en-US"):
         elif rtype == "unexpected_encoding":
             unexpected_encodings.append(
                     (ritem["filename"],
-                     ritem["encoding"],
                      ", ".join(ritem["expected_encoding"])))
     
     agg_unchanged = []
@@ -443,7 +439,7 @@ def _aggregate_results(err, results, locale, similar=False, base="en-US"):
         # Compile all of the encoding errors into one nice warning.
         compilation = ["Detected files:"]
         for target in unexpected_encodings:
-            compilation.append("%s\n Found: %s\n Expected: %s" % target)
+            compilation.append("%s\n (expected: %s)" % target)
 
         err.warning(("testcases_l10ncompleteness",
                      "_aggregate_results",
