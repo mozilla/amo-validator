@@ -11,13 +11,13 @@ def test_unknown_file(err, filename):
     name = path.pop()
     
     if name == "chromelist.txt":
-        err.info(("testcases_packagelayout",
-                  "test_unknown_file",
-                  "deprecated_file"),
-                 "Extension contains a deprecated file",
-                 """The file "%s" is no longer supported by any
-                 modern Mozilla product.""" % filename,
-                 filename)
+        err.notice(("testcases_packagelayout",
+                    "test_unknown_file",
+                    "deprecated_file"),
+                   "Extension contains a deprecated file",
+                   "The file \"%s\" is no longer supported by any modern "
+                   "Mozilla product." % filename,
+                   filename)
         return True
 
 @decorator.register_test(tier=2, expected_type=PACKAGE_EXTENSION)

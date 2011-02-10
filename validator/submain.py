@@ -93,10 +93,10 @@ def test_search(err, package, expectation=0):
 
     elif expected_search_provider:
         err.set_type(PACKAGE_SEARCHPROV)
-        err.info(("main",
-                  "test_search",
-                  "confirmed"),
-                 "OpenSearch provider confirmed.")
+        err.notice(("main",
+                    "test_search",
+                    "confirmed"),
+                   "OpenSearch provider confirmed.")
 
     return err
 

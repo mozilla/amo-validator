@@ -88,16 +88,16 @@ def _test_rdf(err, install):
         
         # Test if the predicate is obsolete
         if predicate in obsolete:
-            err.info(("testcases_installrdf",
-                      "_test_rdf",
-                      "obsolete"),
-                     "Obsolete element in install.rdf",
-                     """The element "%s" was found in the add-on's install.rdf
-                     file. It has not been banned, but it is no longer
-                     supported by any modern Mozilla product. Removing the
-                     element is recommended and will not break support.""" %
-                        predicate,
-                     "install.rdf")
+            err.notice(("testcases_installrdf",
+                        "_test_rdf",
+                        "obsolete"),
+                       "Obsolete element in install.rdf",
+                       "The element \"%s\" was found in the add-on's "
+                       "install.rdf file. It has not been banned, but it is no "
+                       "longer supported by any modern Mozilla product. "
+                       "Removing the element is recommended and will not break "
+                       "support." % predicate,
+                       "install.rdf")
             continue
         
         # Remove the predicate from must_exist_once if it's there.

@@ -69,11 +69,6 @@ class ErrorBundle(object):
                            context=context)
         return self
 
-    # NOTE : This function WILL NOT support contexts since it's deprecated.
-    def info(self, err_id, info, description="", filename="", line=0):
-        "An alias for notice"
-        self.notice(err_id, info, description, filename, line)
-
     def notice(self, err_id, notice,
                description="", filename="", line=0, column=0, context=None,
                tier=None):
