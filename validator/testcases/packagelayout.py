@@ -175,17 +175,17 @@ def test_emunpack(err, package_contents, xpi_package):
 
         for file_ in package_contents:
             if fnmatch.fnmatch(file_, "*.jar"):
-                err.warning(("testcases_packagelayout",
-                             "test_emunpack",
-                             "should_be_false"),
-                            "Add-on contains JAR files, no <em:unpack>",
-                            "The add-on contains JAR files and does not set "
-                            "<em:unpack> to 'true'. This can result in "
-                            "performance issues. It is recommended that you no "
-                            "longer use JAR files to package your chrome "
-                            "files.",
-                            filename="install.rdf",
-                            tier=1)
+                err.notice(("testcases_packagelayout",
+                            "test_emunpack",
+                            "should_be_false"),
+                           "Add-on contains JAR files, no <em:unpack>",
+                           "The add-on contains JAR files and does not set "
+                           "<em:unpack> to 'true'. This can result in "
+                           "performance issues in add-ons that target Firefox "
+                           "4. It is recommended that you consider no longer "
+                           "using JAR files to package your chrome files.",
+                           filename="install.rdf",
+                           tier=1)
                 return
 
 @decorator.register_test(tier=1, expected_type=3)
