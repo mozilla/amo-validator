@@ -129,7 +129,10 @@ def test_layout_all(err, package_contents, xpi_package):
 #                         name);
 #             break
 
-@decorator.register_test(tier=1)
+# This test needs to happen in tier 2. install.rdf analysis happens in tier
+# 1, which may cause this to generate false positives if it's also on tier 1
+# (bug 631340)
+@decorator.register_test(tier=2)
 def test_emunpack(err, package_contents, xpi_package):
 
     if err.get_resource("em:unpack") != "true":
@@ -160,7 +163,8 @@ def test_emunpack(err, package_contents, xpi_package):
                         "The add-on meets criteria that would indicate "
                         "performance issues if <em:unpack> is not set to true "
                         "in the install.rdf file.",
-                        filename="install.rdf")
+                        filename="install.rdf",
+                        tier=1)
             return
 
         # Covers bug 551714
@@ -180,7 +184,8 @@ def test_emunpack(err, package_contents, xpi_package):
                             "performance issues. It is recommended that you no "
                             "longer use JAR files to package your chrome "
                             "files.",
-                            filename="install.rdf")
+                            filename="install.rdf",
+                            tier=1)
                 return
 
 @decorator.register_test(tier=1, expected_type=3)
