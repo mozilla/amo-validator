@@ -90,11 +90,11 @@ def _run_css_tests(err, tokens, filename, line_start=0, context=None):
                                  "_run_css_tests",
                                  "-moz-binding_external"),
                                 "Cannot reference external scripts.",
-                                """-moz-binding cannot reference external
-                                scripts in CSS. This is considered to be a
-                                security issue. The script file must be
-                                placed in the /content/ directory of the
-                                package.""",
+                                "-moz-binding cannot reference external "
+                                "scripts in CSS. This is considered to be a "
+                                "security issue. The script file must be "
+                                "placed in the /content/ directory of the "
+                                "package.",
                                 filename,
                                 line=line + line_start,
                                 context=context.get_context(line))
@@ -109,9 +109,8 @@ def _run_css_tests(err, tokens, filename, line_start=0, context=None):
                     "_run_css_tests",
                     "identity_box"),
                     "Modification to identity box.",
-                    ["""The identity box (#identity-box) is a
-                     sensitive piece of the interface and should
-                     not be modified.""",
+                    ["The identity box (#identity-box) is a sensitive piece "
+                     "of the interface and should not be modified.",
                      "Lines: %s" % ", ".join(identity_box_mods)],
                     filename)
     if unicode_errors:
@@ -119,7 +118,7 @@ def _run_css_tests(err, tokens, filename, line_start=0, context=None):
                   "test_css_file",
                   "unicode_decode"),
                  "Unicode decode error.",
-                 ["""While decoding a CSS file, an unknown character
-                  was encountered, causing some problems.""",
+                 ["While decoding a CSS file, an unknown character was "
+                  "encountered, causing some problems.",
                   "Lines: %s" % ", ".join(unicode_errors)],
                  filename)

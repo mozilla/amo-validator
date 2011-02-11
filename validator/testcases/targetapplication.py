@@ -112,10 +112,10 @@ def test_targetedapplications(err, package_contents=None,
                                  "test_targetedapplications",
                                  "invalid_version_order"),
                                 "Invalid min/max versions",
-                                ["""The version numbers provided for the
-                                 application in question are not in the correct
-                                 order. The maximum version must be greater than
-                                 the minimum version.""",
+                                ["The version numbers provided for the "
+                                 "application in question are not in the "
+                                 "correct order. The maximum version must be "
+                                 "greater than the minimum version.",
                                  '"%s" is not less than "%s".' % (min_version,
                                                                   max_version)],
                                 "install.rdf")
@@ -139,10 +139,10 @@ def test_targetedapplications(err, package_contents=None,
                      "test_targetedapplication",
                      "duplicate_targetapps"),
                     "Found duplicate <em:targetApplication> elements.",
-                    """Multiple targetApplication elements were found
-                    in the install.manifest file that refer to the same
-                    application GUID. There should not be duplicate
-                    target applications entries.""",
+                    "Multiple targetApplication elements were found in the "
+                    "install.manifest file that refer to the same application "
+                    "GUID. There should not be duplicate target applications "
+                    "entries.",
                     "install.rdf")
     
     # This finds the UUID of the supported applications and puts it in

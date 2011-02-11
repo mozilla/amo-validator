@@ -114,11 +114,10 @@ class MarkupParser(HTMLParser):
                                  "_feed",
                                  "missing_script_comments"),
                                 "Missing comments in <script> tag",
-                                """Markup parsing errors occurred
-                                while trying to parse the file. This
-                                can likely be mitigated by wrapping
-                                <script> tag contents in HTML comment
-                                tags (<!-- -->)""",
+                                "Markup parsing errors occurred while trying "
+                                "to parse the file. This would likely be "
+                                "mitigated by wrapping <script> tag contents "
+                                "in HTML comment tags (<!-- -->)",
                                 self.filename,
                                 line=self.line,
                                 context=self.context)
@@ -129,8 +128,7 @@ class MarkupParser(HTMLParser):
                               "_feed",
                               "parse_error"),
                              "Markup parsing error",
-                             ["""There was an error parsing the markup
-                              document.""",
+                             ["There was an error parsing the markup document.",
                               str(inst)],
                              self.filename,
                              line=self.line,
@@ -174,11 +172,10 @@ class MarkupParser(HTMLParser):
                                   "handle_starttag",
                                   "unsafe_langpack"),
                                  "Unsafe tag in language pack",
-                                 ["""A tag in your markup has been marked
-                                  as being potentially unsafe. Consider
-                                  alternate means of accomplishing what
-                                  the code executed by this tag
-                                  performs.""",
+                                 ["A tag in your markup has been marked as "
+                                  "being potentially unsafe. Consider "
+                                  "alternate means of accomplishing what the "
+                                  "code executed by this tag performs.",
                                   'Tag "%s" is disallowed.' % tag],
                                  self.filename,
                                  line=self.line,
@@ -226,9 +223,9 @@ class MarkupParser(HTMLParser):
                                   "handle_starttag",
                                   "iframe_type_unsafe"),
                                  "iframe/browser missing 'type' attribute",
-                                 """All iframe and browser elements must have
-                                 either a valid `type` attribute or a `src`
-                                 attribute that points to a local file.""",
+                                 "All iframe and browser elements must have "
+                                 "either a valid `type` attribute or a `src` "
+                                 "attribute that points to a local file.",
                                  self.filename,
                                  line=self.line,
                                  context=self.context)
@@ -239,10 +236,9 @@ class MarkupParser(HTMLParser):
                                   "handle_starttag",
                                   "iframe_type_unsafe"),
                                  "Typeless iframes/browsers must be local.",
-                                 """iframe and browser elements that lack a
-                                 type attribute must always have src
-                                 attributes that reference local
-                                 resources.""",
+                                 "iframe and browser elements that lack a type "
+                                 "attribute must always have src attributes "
+                                 "that reference local resources.",
                                  self.filename,
                                  line=self.line,
                                  context=self.context)
@@ -261,9 +257,8 @@ class MarkupParser(HTMLParser):
                                   "handle_starttag",
                                   "banned_remote_scripts"),
                                  "Scripts must not be remote in XUL",
-                                 """In XUL, <script> tags must not be
-                                 referenced to script files that are
-                                 hosted remotely.""",
+                                 "In XUL, <script> tags must not be referenced "
+                                 "to script files that are hosted remotely.",
                                  self.filename,
                                  line=self.line,
                                  context=self.context)
@@ -329,9 +324,9 @@ class MarkupParser(HTMLParser):
                               "handle_endtag",
                               "extra_closing_tags"),
                              "Parse error: tag closed before opened",
-                             ["""Markup tags cannot be closed before
-                              they are opened. Perhaps you were just a
-                              little overzealous with forward-slashes?""",
+                             ["Markup tags cannot be closed before they are "
+                              "opened. Perhaps you were just a little "
+                              "overzealous with forward-slashes?",
                               'Tag "%s" closed before it was opened' % tag],
                              self.filename,
                              line=self.line,
@@ -356,9 +351,9 @@ class MarkupParser(HTMLParser):
                               "handle_endtag",
                               "invalid_nesting"),
                              "Markup invalidly nested",
-                             """It has been determined that the document
-                             invalidly nests its tags. This is not
-                             permitted in the specified document type.""",
+                             "It has been determined that the document "
+                             "invalidly nests its tags. This is not permitted "
+                             "in the specified document type.",
                              self.filename,
                              line=self.line,
                              context=self.context)

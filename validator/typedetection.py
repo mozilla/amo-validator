@@ -46,9 +46,8 @@ def detect_type(err, install_rdf=None, xpi_package=None):
                        "detect_type",
                        "invalid_em_type"),
                       "Invalid <em:type> value.",
-                      """The only valid values for <em:type> are 2, 4, 8, and
-                      32. Any other values are either invalid or
-                      deprecated.""",
+                      "The only valid values for <em:type> are 2, 4, 8, and "
+                      "32. Any other values are either invalid or deprecated.",
                       "install.rdf")
             return
     else:

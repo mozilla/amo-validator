@@ -30,8 +30,8 @@ def test_xpcnativewrappers(err, package_contents=None, xpi_package=None):
                          "test_xpcnativewrappers",
                          "found_in_chrome_manifest"),
                         "xpcnativewrappers not allowed in chrome.manifest",
-                        """chrome.manifest files are not allowed to contain
-                        xpcnativewrappers directives.""",
+                        "chrome.manifest files are not allowed to contain "
+                        "xpcnativewrappers directives.",
                         "chrome.manifest",
                         line=triple["line"],
                         context=chrome.context)
@@ -59,9 +59,8 @@ def test_packed_packages(err, package_contents=None, xpi_package=None):
                         "test_packed_packages",
                         "macintosh_junk"),
                        "Garbage file found.",
-                       ["""A junk file has been detected. It may cause
-                        problems with proper operation of the add-on down the
-                        road.""",
+                       ["A junk file has been detected. It may cause problems "
+                        "with proper operation of the add-on down the road.",
                         "It is recommended that you delete the file"],
                        name)
         
@@ -94,9 +93,8 @@ def test_packed_packages(err, package_contents=None, xpi_package=None):
                            "test_packed_packages",
                            "jar_subpackage_corrupt"),
                           "Subpackage corrupt.",
-                          """The subpackage could not be opened due to
-                          issues with corruption. Ensure that the file
-                          is valid.""",
+                          "The subpackage could not be opened due to issues "
+                          "with corruption. Ensure that the file is valid.",
                           name)
                 continue
             

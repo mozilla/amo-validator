@@ -165,11 +165,10 @@ def test_lp_xpi(err, package_contents, xpi_package):
                   "test_lp_xpi",
                   "missing_app_support"),
                  "Supported app missing during L10n completeness.",
-                 """While testing for L10n comleteness, a list of
-                 supported applications for the language pack was not
-                 found. This is likely because there are no listed
-                 <em:targetApplication> elements in the install.rdf
-                 file.""")
+                 "While testing for L10n comleteness, a list of supported "
+                 "applications for the language pack was not found. This is "
+                 "likely because there are no listed <em:targetApplication> "
+                 "elements in the install.rdf file.")
     else:
         for support in support_references:
             ref_xpi = XPIManager(os.path.join(os.path.dirname(__file__),
@@ -364,10 +363,9 @@ def _aggregate_results(err, results, locale, similar=False, base="en-US"):
                         "_aggregate_results",
                         "missing_file"),
                        "Missing translation file",
-                       ["""Localizations must include a translated copy
-                        of each file in the reference locale. The
-                        required files may vary from target application
-                        to target application.""",
+                       ["Localizations must include a translated copy of each "
+                        "file in the reference locale. The required files may "
+                        "vary from target application to target application.",
                         "%s missing translation file (%s)" % (locale["path"],
                                                               rfilename)],
                       [locale["path"]])
@@ -376,14 +374,14 @@ def _aggregate_results(err, results, locale, similar=False, base="en-US"):
                          "_aggregate_results",
                          "missing_translation_entity"),
                         "Missing translation entity",
-                        ["""Localizations must include a translated copy
-                         of each entity from each file in the reference
-                         locale. The required files may vary from target
-                         application to target application.""",
+                        ["Localizations must include a translated copy of each "
+                         "entity from each file in the reference locale. The "
+                         "required files may vary from target application to "
+                         "target application.",
                          "%s missing %s in %s" %
-                             (locale["path"],
-                              ", ".join(ritem["missing_entities"]),
-                              rfilename)],
+                            (locale["path"],
+                             ", ".join(ritem["missing_entities"]),
+                             rfilename)],
                         [locale["path"], rfilename])
         elif rtype == "unchanged_entity":
             filename = ritem["filename"]
@@ -431,10 +429,10 @@ def _aggregate_results(err, results, locale, similar=False, base="en-US"):
                      "_aggregate_results",
                      "unchnged_entities"),
                     "Unchanged translation entities",
-                    ["""Localizations must include a translated copy of each
-                     entity from each file in the reference locale. These
-                     translations SHOULD differ from the localized text in the
-                     reference package.""",
+                    ["Localizations must include a translated copy of each "
+                     "entity from each file in the reference locale. These "
+                     "translations SHOULD differ from the localized text in "
+                     "the reference package.",
                      agg_unchanged],
                     [locale["path"], locale["target"]])
 

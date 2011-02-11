@@ -26,10 +26,10 @@ def test_langpack_manifest(err, package_contents=None, xpi_package=None):
                          "test_langpack_manifest",
                          "invalid_subject"),
                         "Invalid chrome.manifest subject",
-                        ["""chrome.manifest files in language packs are only
-                         allowed to contain items that are prefixed with
-                         'locale' or 'override'. Other values are not
-                         allowed.""",
+                        ["chrome.manifest files in language packs are only "
+                         "allowed to contain items that are prefixed with "
+                         "'locale' or 'override'. Other values are not "
+                         "allowed.",
                          "Invalid subject: %s" % subject],
                         "chrome.manifest",
                         line=triple["line"],
@@ -68,9 +68,9 @@ def test_unsafe_html(err, filename, data):
                      "test_unsafe_html",
                      "unsafe_content_html"),
                     "Unsafe HTML found in language pack files.",
-                    """Language packs are not allowed to contain scripts,
-                    embeds, or other executable code in the language
-                    definition files.""",
+                    "Language packs are not allowed to contain scripts, "
+                    "embeds, or other executable code in the language "
+                    "definition files.",
                     filename,
                     line=line,
                     context=context)
@@ -84,8 +84,8 @@ def test_unsafe_html(err, filename, data):
                      "test_unsafe_html",
                      "unsafe_content_link"),
                     "Unsafe remote resource found in language pack.",
-                    """Language packs are not allowed to contain
-                    references to remote resources.""",
+                    "Language packs are not allowed to contain references to "
+                    "remote resources.",
                     filename,
                     line=line,
                     context=context)
