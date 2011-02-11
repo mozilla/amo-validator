@@ -29,7 +29,7 @@ Python Libraries for Testing:
 
 You can install everything you need for running and testing with ::
 
-    pip install -r requirements.txt
+	pip install -r requirements.txt
 
 Spidermonkey
 ============
@@ -156,11 +156,40 @@ sample document below.
 
 	{
 		"detected_type": "extension",
-		"errors":2,
-		"warnings":1,
-		"notices":1,
+		"errors": 2,
+		"warnings": 1,
+		"notices": 1,
 		"success": false,
-		"messagetree":{ /* ... */ },
+		"message_tree": {
+			"type1": {
+				"function1": {
+					"test1": {
+						"__messages": ["uuid_foo", "uuid_bar"],
+						"__errors": 1,
+						"__warnings": 0,
+						"__notices": 1
+					},
+					"test2": {
+						"__messages": ["uuid_abc", "uuid_def"],
+						"__errors": 0,
+						"__warnings": 2,
+						"__notices": 0
+					},
+					"__messages": [],
+					"__errors": 1,
+					"__warnings": 2,
+					"__notices": 1
+				},
+				"__messages": [],
+				"__errors": 1,
+				"__warnings": 2,
+				"__notices": 1
+			},
+			"__messages": [],
+			"__errors": 1,
+			"__warnings": 2,
+			"__notices": 1
+		},
 		"messages": [
 			{
 				"uid": "123456789",
@@ -168,7 +197,7 @@ sample document below.
 				"type": "error",
 				"message": "This is the error message text.",
 				"description": ["Description of the error message.",
-				                "Additional description text"],
+								"Additional description text"],
 				"file": "",
 				"line": 0
 			},
@@ -188,7 +217,13 @@ sample document below.
 				"message": "This is the informational message text.",
 				"description": "Description of the info message."
 				"file": "chrome.manifest",
-				"line": 21
+				"line": 21,
+				"column": 4,
+				"context":[
+					"locale foo bar",
+					"foo bar xyz",
+					null
+				]
 			},
 			{
 				"uid": "123456789",
@@ -224,6 +259,9 @@ additional nodes which provide extra information:
 JSON Notes:
 -----------
 
+File Hierarchy
+~~~~~~~~~~~~~~
+
 When a subpackage exists, an angle bracket will delimit the subpackage
 name and the message text.
 
@@ -247,9 +285,9 @@ For instance, this tree would generate the following messages:
 		|-subpackage.xpi
 		|  |
 		|  |-subsubpackage.xpi
-		|     |
-		|     |-chrome.manifest
-		|     |-install.rdf
+		|	  |
+		|	  |-chrome.manifest
+		|	  |-install.rdf
 		|
 		|-subpackage.jar
 		   |
@@ -286,6 +324,28 @@ For instance, this tree would generate the following messages:
 		"line": 5
 	}
 
+Line Numbers and Columns
+~~~~~~~~~~~~~~~~~~~~~~~~
+
+Line numbers are 1-based. Column numbers are 0-based. This can be confusing from a programmatic standpoint, but makes literal sense. "Line One" would obviously refer to the first line of a file.
+
+Contexts
+~~~~~~~~
+
+The context attribute of messages will either be a list or null. Null contexts represent the validator's inability to determine surrounding code. As a list, there will always be three elements. Each element represents a line surrounding the message's location.
+
+The middle element of the context list represents the line of interest. If an element of the context list is null, that line does not exist. For instance, if an error is on the first line of a file, the context might look like:
+
+::
+	
+	[
+		null,
+		"This is the line with the error",
+		"This is the second line of the file"
+	]
+
+The same rule applies for the end of a file.
+
 ---------
  Testing
 ---------
@@ -296,7 +356,7 @@ Unit tests can be run with ::
 
 or, after setting the proper python path: ::
 
-    nosetests
+	nosetests
 
 However, to turn run unit tests with code coverage, the appropriate
 command would be: ::
@@ -309,6 +369,6 @@ Note that in order to use the --cover-skip nose parameter, you must install the 
 
 This file should overwrite the standard nose coverage plugin at the appropriate location: ::
 
-    ~/.virtualenvs/[virtual environment]/lib/pythonX.X/site-packages/nose/plugins/cover.py
-    /usr/lib/pythonX.X/site-packages/nose/plugins/cover.py
+	~/.virtualenvs/[virtual environment]/lib/pythonX.X/site-packages/nose/plugins/cover.py
+	/usr/lib/pythonX.X/site-packages/nose/plugins/cover.py
 
