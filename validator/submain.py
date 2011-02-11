@@ -1,8 +1,5 @@
 import os
 
-import zipfile
-
-import validator.testcases as testcases
 import validator.typedetection as typedetection
 from validator.typedetection import detect_opensearch
 from validator.chromemanifest import ChromeManifest
@@ -27,12 +24,12 @@ def prepare_package(err, path, expectation=0):
 
     # Test that the package actually exists. I consider this Tier 0
     # since we may not even be dealing with a real file.
-    if not os.path.isfile(path):
-        err.reject = True
-        return err.error(("main",
-                          "prepare_package",
-                          "not_found"),
-                         "The package could not be found")
+    if err and not os.path.isfile(path):
+        err.error(("main",
+                   "prepare_package",
+                   "not_found"),
+                  "The package could not be found")
+        return
 
     # Pop the package extension.
     package_extension = os.path.splitext(path)[1]
@@ -43,11 +40,12 @@ def prepare_package(err, path, expectation=0):
 
     # Test that the package is an XPI.
     if package_extension not in (".xpi", ".jar"):
-        err.reject = True
-        err.error(("main",
-                   "prepare_package",
-                   "unrecognized"),
-                  "The package is not of a recognized type.")
+        if err:
+            err.error(("main",
+                       "prepare_package",
+                       "unrecognized"),
+                      "The package is not of a recognized type.")
+        return False
 
     package = open(path, "rb")
     output = test_package(err, package, path, expectation)
@@ -64,7 +62,6 @@ def test_search(err, package, expectation=0):
     # If we're not expecting a search provider, warn the user and stop
     # testing it like a search provider.
     if not expected_search_provider:
-        err.reject = True
         return err.warning(("main",
                             "test_search",
                             "extension"),
@@ -88,7 +85,6 @@ def test_search(err, package, expectation=0):
 
         if not "decided" in opensearch_results or \
            opensearch_results["decided"]:
-            err.reject = True
             return err
 
     elif expected_search_provider:
@@ -115,7 +111,6 @@ def test_package(err, file_, name, expectation=PACKAGE_ANY):
     
     # Test the XPI file for corruption.
     if package.test():
-        err.reject = True
         return err.error(("main",
                           "test_package",
                           "corrupt"),
@@ -173,7 +168,6 @@ def _load_install_rdf(err, package, expectation):
     # Compare the results of the low-level type detection to
     # that of the expectation and the assumption.
     if not expectation in (PACKAGE_ANY, results):
-        err.reject = True
         err.warning(("main",
                      "test_package",
                      "extension_type_mismatch"),

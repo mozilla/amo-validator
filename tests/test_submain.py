@@ -14,7 +14,17 @@ def test_prepare_package():
     err = ErrorBundle(None, True)
     assert submain.prepare_package(err, "tests/resources/main/foo.xpi") == True
     submain.test_package = tp
-    
+   
+def test_prepare_package_extension():
+    "Tests that bad extensions get outright rejections"
+
+    assert submain.prepare_package(None, "foo/bar/test.foo") == False
+
+    ts = submain.test_search
+    submain.test_search = lambda x,y,z:True
+    assert submain.prepare_package(None, "foo/bar/test.xml") == True
+    submain.test_search = ts
+
 def test_prepare_package_missing():
     "Tests that the prepare_package function fails when file is not found"
     
