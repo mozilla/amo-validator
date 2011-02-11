@@ -4,6 +4,7 @@ from StringIO import StringIO
 
 import validator.errorbundler as errorbundler
 from validator.errorbundler import ErrorBundle
+from validator.contextgenerator import ContextGenerator
 
 def test_json():
     "Tests the JSON output capability of the error bundler."
@@ -207,6 +208,7 @@ def test_notice():
     
     assert has_
     assert not bundle.failed()
+    assert not bundle.failed(True)
 
 
 def test_notice_friendly():
@@ -238,4 +240,96 @@ def test_initializer():
     e = ErrorBundle(listed=False)
     assert e.determined
     assert not e.get_resource("listed")
+
+def test_json_constructs():
+    "This tests some of the internal JSON stuff so we don't break zamboni"
+
+    e = ErrorBundle()
+    e.set_type(1)
+    e.error(("a", "b", "c"),
+            "Test")
+    e.error(("a", "b", "foo"),
+            "Test")
+    e.error(("a", "foo", "c"),
+            "Test")
+    e.error(("a", "foo", "c"),
+            "Test")
+    e.error(("b", "foo", "bar"),
+            "Test")
+    e.warning((), "Context test",
+              context=("x", "y", "z"))
+    e.warning((), "Context test",
+              context=ContextGenerator("x\ny\nz\n"),
+              line=2,
+              column=0)
+    e.notice((), "none")
+    e.notice((), "line",
+             line=1)
+    e.notice((), "column",
+             column=0)
+    e.notice((), "line column",
+             line=1,
+             column=1)
+
+    results = e.render_json()
+    print results
+    j = json.loads(results)
+
+    assert "detected_type" in j
+    assert j["detected_type"] == "extension"
+
+    assert "message_tree" in j
+    tree = j["message_tree"]
+    
+    assert "__errors" not in tree
+    assert not tree["a"]["__messages"]
+    assert tree["a"]["__errors"] == 4
+    assert not tree["a"]["b"]["__messages"]
+    assert tree["a"]["b"]["__errors"] == 2
+    assert not tree["a"]["b"]["__messages"]
+    assert tree["a"]["b"]["c"]["__errors"] == 1
+    assert tree["a"]["b"]["c"]["__messages"]
+
+    assert "messages" in j
+    for m in (m for m in j["messages"] if m["type"] == "warning"):
+        assert m["context"] == ["x", "y", "z"]
+
+    for m in (m for m in j["messages"] if m["type"] == "notice"):
+        if "line" in m["message"]:
+            assert m["line"] is not None
+            assert isinstance(m["line"], int)
+            assert m["line"] > 0
+        else:
+            assert m["line"] is None
+
+        if "column" in m["message"]:
+            assert m["column"] is not None
+            assert isinstance(m["column"], int)
+            assert m["column"] > -1
+        else:
+            assert m["column"] is None
+
+def test_pushable_resources():
+    "Tests that normal resources are preserved but pushable ones are pushed"
+
+    e = ErrorBundle()
+    e.save_resource("nopush", True)
+    e.save_resource("push", True, pushable=True)
+
+    assert e.get_resource("nopush")
+    assert e.get_resource("push")
+
+    e.push_state()
+
+    assert e.get_resource("nopush")
+    assert not e.get_resource("push")
+
+    e.save_resource("pushed", True, pushable=True)
+    assert e.get_resource("pushed")
+
+    e.pop_state()
+
+    assert e.get_resource("nopush")
+    assert e.get_resource("push")
+    assert not e.get_resource("pushed")
 

@@ -38,7 +38,7 @@ class ErrorBundle(object):
             self.resources["listed"] = True
 
     def error(self, err_id, error,
-              description='', filename='', line=0, column=0, context=None,
+              description='', filename='', line=None, column=None, context=None,
               tier=None):
         "Stores an error message for the validation process"
         self._save_message(self.errors,
@@ -54,7 +54,7 @@ class ErrorBundle(object):
         return self
         
     def warning(self, err_id, warning,
-                description='', filename='', line=0, column=0, context=None,
+                description='', filename='', line=None, column=None, context=None,
                 tier=None):
         "Stores a warning message for the validation process"
         self._save_message(self.warnings,
@@ -70,7 +70,7 @@ class ErrorBundle(object):
         return self
 
     def notice(self, err_id, notice,
-               description="", filename="", line=0, column=0, context=None,
+               description="", filename="", line=None, column=None, context=None,
                tier=None):
         "Stores an informational message about the validation"
         self._save_message(self.notices,
@@ -261,7 +261,7 @@ class ErrorBundle(object):
             else:
                 return "\n".join(output)
     
-    def render_json(self, cluster=False):
+    def render_json(self):
         "Returns a JSON summary of the validation operation."
         
         types = {0: "unknown",
