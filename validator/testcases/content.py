@@ -8,7 +8,6 @@ import validator.testcases.markup.csstester as testendpoint_css
 import validator.testcases.scripting as testendpoint_js
 import validator.testcases.langpack as testendpoint_langpack
 from validator.xpi import XPIManager
-from validator.chromemanifest import ChromeManifest
 from validator.constants import *
 from validator.textfilter import is_standard_ascii
 
@@ -67,7 +66,7 @@ def test_packed_packages(err, package_contents=None, xpi_package=None):
         try:
             file_data = xpi_package.read(name)
         except KeyError: # pragma: no cover
-            _read_error(err, name)
+            pass
 
         # Skip over whitelisted hashes
         hash = hashlib.sha1(file_data).hexdigest()
@@ -144,6 +143,7 @@ def test_packed_packages(err, package_contents=None, xpi_package=None):
             if not file_data:
                 continue
             
+            # Skip BOMs and the like
             while not is_standard_ascii(file_data[0]):
                 file_data = file_data[1:]
             
@@ -167,15 +167,3 @@ def test_packed_packages(err, package_contents=None, xpi_package=None):
             
     return processed_files
     
-
-def _read_error(err, name): # pragma: no cover
-    """Reports to the user that a file in the archive couldn't be
-    read from. Prevents code duplication."""
-
-    err.notice(("testcases_content",
-                "_read_error",
-                "read_error"),
-               "File could not be read: %s" % name,
-               "A File in the archive could not be read. This may be due to "
-               "corruption or because the path name is too long.",
-               name)

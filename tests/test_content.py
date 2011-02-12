@@ -82,14 +82,15 @@ def test_xpi_tiererror():
     content.testendpoint_validator = MockTestEndpoint(("test_package", ),
                                                       td_error=True)
 
-    err.tier = 2
+    err.set_tier(2)
     result = content.test_packed_packages(err,
                                           {"foo.xpi":
                                                {"extension":"xpi",
                                                 "name_lower":"foo.xpi"}},
                                           mock_package)
     assert err.errors[0]["tier"] == 1
-
+    assert err.tier == 2
+    assert all(x == 1 for x in content.testendpoint_validator.found_tiers)
 
 def test_xpi_nonsubpackage():
     "Tests XPI files that are not subpackages."
@@ -222,21 +223,28 @@ def test_jar_subpackage_bad():
     print result
     assert err.failed()
     
-
 class MockTestEndpoint(object):
     """Simulates a test module and reports whether individual tests
     have been attempted on it."""
     
     def __init__(self, expected, td_error=False):
         expectations = {}
-        
         for expectation in expected:
             expectations[expectation] = {"count": 0,
                                          "subpackage": 0}
         
         self.expectations = expectations
         self.td_error = td_error
+        self.found_tiers = []
         
+    def _tier_test(self, err, package_contents, xpi):
+        "A simulated test case for tier errors"
+        print "Generating subpackage tier error..."
+        self.found_tiers.append(err.tier)
+        err.error(("foo", ),
+                  "Tier error",
+                  "Just a test")
+
     def __getattribute__(self, name):
         """"Detects requests for validation tests and returns an
         object that simulates the outcome of a test."""
@@ -244,13 +252,13 @@ class MockTestEndpoint(object):
         print "Requested: %s" % name
         
         if name == "test_package" and self.td_error:
-            return lambda err, pcon, xpi:err.error(("foo", ),
-                                                   "Tier error",
-                                                   "Just a test")
+            return self._tier_test
 
         if name in ("expectations",
                     "assert_expectation",
-                    "td_error"):
+                    "td_error",
+                    "_tier_test",
+                    "found_tiers"):
             return object.__getattribute__(self, name)
         
         if name in self.expectations:

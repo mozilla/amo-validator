@@ -1,7 +1,6 @@
 import fnmatch
 
 from validator import decorator
-from validator.chromemanifest import ChromeManifest
 from validator.constants import *
 
 @decorator.register_test(1)

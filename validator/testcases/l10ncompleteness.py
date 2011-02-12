@@ -1,12 +1,9 @@
-import sys
 import os
 import fastchardet
-import json
 import fnmatch
 from StringIO import StringIO
 
 from validator import decorator
-from validator.chromemanifest import ChromeManifest
 from validator.xpi import XPIManager
 from validator.constants import *
 
@@ -32,15 +29,12 @@ def _get_locales(err, xpi_package):
     "Returns a list of locales from the chrome.manifest file."
     
     # Retrieve the chrome.manifest if it's cached.
-    if err is not None and \
-       err.get_resource("chrome.manifest"): # pragma: no cover
+    chrome = False
+    if err is not None:
         chrome = err.get_resource("chrome.manifest")
-    else:
-        chrome_data = xpi_package.read("chrome.manifest")
-        chrome = ChromeManifest(chrome_data)
-        if err is not None:
-            err.save_resource("chrome.manifest", chrome)
-        
+    if not chrome:
+        return None
+
     pack_locales = chrome.get_triples("locale")
     locales = {}
     # Find all of the locales referenced in the chrome.manifest file.

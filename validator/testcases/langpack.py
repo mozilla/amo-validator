@@ -2,7 +2,6 @@ import fnmatch
 import re
 
 from validator import decorator
-from validator.chromemanifest import ChromeManifest
 from validator.contextgenerator import ContextGenerator
 from validator.constants import PACKAGE_LANGPACK
 

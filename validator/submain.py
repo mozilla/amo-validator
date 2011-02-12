@@ -83,9 +83,9 @@ def test_search(err, package, expectation=0):
         # the error indicates that we're not sure whether it's an
         # OpenSearch document or not.
 
-        if not "decided" in opensearch_results or \
+        if "decided" not in opensearch_results or \
            opensearch_results["decided"]:
-            return err
+            return
 
     elif expected_search_provider:
         err.set_type(PACKAGE_SEARCHPROV)
@@ -94,7 +94,7 @@ def test_search(err, package, expectation=0):
                     "confirmed"),
                    "OpenSearch provider confirmed.")
 
-    return err
+    return
 
 
 def test_package(err, file_, name, expectation=PACKAGE_ANY):
