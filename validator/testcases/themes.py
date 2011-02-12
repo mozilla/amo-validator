@@ -1,5 +1,4 @@
 from validator import decorator
-from validator.chromemanifest import ChromeManifest
 from validator.constants import PACKAGE_THEME
 
 

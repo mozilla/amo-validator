@@ -44,7 +44,7 @@ Documentation on getting the latest Spidermonkey source:
 https://developer.mozilla.org/En/SpiderMonkey/Getting_SpiderMonkey_source_code#Getting_the_latest_SpiderMonkey_source_code
 
 Once Spidermonkey is installed, the path to the JavaScript shell must be
-specified in the /validator/constants.php file in the
+specified in the /validator/constants.py file in the
 `SPIDERMONKEY_INSTALLATION` variable. If this variable is set to `None`, no
 JavaScript tests will be run.
 
@@ -361,7 +361,7 @@ or, after setting the proper python path: ::
 However, to turn run unit tests with code coverage, the appropriate
 command would be: ::
 
-	nosetests --with-coverage --cover-package=validator --cover-skip=validator.argparse,validator.outputhandlers.,validator.main --cover-inclusive --cover-tests
+	nosetests --with-coverage --cover-package=validator --cover-skip=validator.outputhandlers.,validator.main,validator.constants,validator.constants_local --cover-inclusive --cover-tests
 
 Note that in order to use the --cover-skip nose parameter, you must install the included patch for nose's coverage.py plugin: ::
 
