@@ -110,9 +110,9 @@ def test_xpi(err, package_contents, xpi_package):
                         "test_xpi",
                         "no_locales"),
                        "Add-on cannot be localized",
-                       "In order to localize this add-on, at least one "
-                       "'locale' entry needs to be present in the chrome."
-                       "manifest file.",
+                       "The add-on doesn't have any locale entries in its "
+                       "chrome.manifest file, making it impossible to "
+                       "localize.",
                        filename="chrome.manifest")
         return
     
