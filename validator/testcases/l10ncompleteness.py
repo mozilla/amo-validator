@@ -103,7 +103,17 @@ def test_xpi(err, package_contents, xpi_package):
     locales = _get_locales(err, xpi_package);
     
     # We need at least a reference and a target.
-    if len(locales) < 2:
+    num_locales = len(locales)
+    if num_locales < 2:
+        if num_locales == 0:
+            err.notice(("testcases_l10ncompleteness",
+                        "test_xpi",
+                        "no_locales"),
+                       "Add-on cannot be localized",
+                       "In order to localize this add-on, at least one "
+                       "'locale' entry needs to be present in the chrome."
+                       "manifest file.",
+                       filename="chrome.manifest")
         return
     
     # Use the first locale by default

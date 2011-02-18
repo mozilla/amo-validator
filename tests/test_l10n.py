@@ -17,10 +17,21 @@ def test_unlocalizable():
     "Test a package without localization data."
     
     l10n.LOCALE_CACHE = {}
-    _do_test("tests/resources/l10n/unlocalizable.xpi",
-             l10n.test_xpi,
-             failure=False,
-             set_type=PACKAGE_EXTENSION)
+    output = _do_test("tests/resources/l10n/unlocalizable.xpi",
+                      l10n.test_xpi,
+                      failure=False,
+                      set_type=PACKAGE_EXTENSION)
+    assert output.notices # Should alert about lack of locales
+
+def test_localizable():
+    "Tests a package with minimal localization data."
+
+    l10n.LOCALE_CACHE = {}
+    output = _do_test("tests/resources/l10n/localizable.xpi",
+                      l10n.test_xpi,
+                      failure=False,
+                      set_type=PACKAGE_EXTENSION)
+    assert not output.notices
 
 def test_missing():
     "Test a package with missing localization entities."
