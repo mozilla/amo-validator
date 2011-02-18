@@ -67,4 +67,25 @@ def test_load_irdf_expectation():
     submain.typedetection.detect_type = lambda x, y, z: PACKAGE_THEME
     _run_test("install_rdf.xpi", PACKAGE_EXTENSION, True, True)
     submain.typedetection.detect_type = dt
-    
+   
+def test_doctype():
+    "Asserts that install.rdf files with doctypes break validation"
+
+    err = ErrorBundle()
+    xpi = MockXPIManager(
+            {"install.rdf": "tests/resources/installrdf/doctype.rdf"})
+    assert isinstance(submain._load_install_rdf(err, xpi, None), ErrorBundle)
+    assert err.failed()
+    assert not err.get_resource("has_install_rdf")
+    assert not err.get_resource("install_rdf")
+
+class MockXPIManager(object):
+    "Pretends to be a simple XPI manager"
+
+    def __init__(self, data):
+        self.data = data
+
+    def read(self, name):
+        "Simulates a read operation"
+        assert name in self.data
+        return open(self.data[name]).read()

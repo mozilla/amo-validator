@@ -97,7 +97,8 @@ def test_layout_all(err, package_contents, xpi_package):
     if xpi_package.subpackage:
         return
     
-    if not err.get_resource("has_install_rdf"):
+    if not err.get_resource("has_install_rdf") and \
+       not err.get_resource("bad_install_rdf"):
         err.error(("testcases_packagelayout",
                   "test_layout_all",
                   "missing_install_rdf"),

@@ -1,4 +1,5 @@
 import os
+import re
 
 import zipfile
 
@@ -142,6 +143,18 @@ def test_package(err, file_, name, expectation=PACKAGE_ANY):
 def _load_install_rdf(err, package, expectation):
     # Load up the install.rdf file.
     install_rdf_data = package.read("install.rdf")
+
+    if re.search('<!doctype', install_rdf_data, re.I):
+        err.save_resource("bad_install_rdf", True)
+        return err.error(("main",
+                          "test_package",
+                          "doctype_in_installrdf"),
+                         "DOCTYPEs are not permitted in install.rdf",
+                         "The add-on's install.rdf file contains a DOCTYPE. "
+                         "It must be removed before your add-on can be "
+                         "validated.",
+                         filename="install.rdf")
+
     install_rdf = RDFParser(install_rdf_data)
     
     if install_rdf.rdf is None or not install_rdf:
@@ -149,7 +162,8 @@ def _load_install_rdf(err, package, expectation):
                           "test_package",
                           "cannot_parse_installrdf"),
                          "Cannot Parse install.rdf",
-                         "The install.rdf file could not be parsed.")
+                         "The install.rdf file could not be parsed.",
+                         filename="install.rdf")
     else:
         err.save_resource("has_install_rdf", True)
         err.save_resource("install_rdf", install_rdf)
