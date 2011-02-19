@@ -38,7 +38,7 @@ DEFINITIONS = {
                              False, False, None, False, True),
     "DoWhileStatement":     (("test", "body"),
                              False, False, None, False, True),
-    "ForStatement":         (("init", "test", "update"),
+    "ForStatement":         (("init", "test", "update", "body"),
                              False, False, None, False, True),
     "ForInStatement":       (("left", "right", "body"),
                              False, False, None, False, True),

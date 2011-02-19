@@ -168,6 +168,7 @@ class Traverser:
                         "continue",
                      node["type"]))
         
+        # print node["type"], branches
         if action_result is None:
             self.debug_level += 1
             for branch in branches:
