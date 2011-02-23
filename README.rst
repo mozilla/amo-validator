@@ -36,7 +36,7 @@ Spidermonkey
 
 A working copy of Spidermonkey (debug or non-debug is fine) is a required. The
 version installed must include support for the Parser API. Downloading and
-installing the latest copy of Tracemonkey from http://mg.mozilla.org/ will
+installing the latest copy of Tracemonkey from http://hg.mozilla.org/ will
 include this API.
 
 Documentation on getting the latest Spidermonkey source:
