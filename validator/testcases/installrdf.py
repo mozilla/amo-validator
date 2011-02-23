@@ -57,7 +57,8 @@ def _test_rdf(err, install):
                  "contributor",
                  "targetPlatform",
                  "requires",
-                 "developer")
+                 "developer",
+                 "icon64URL")
    
     if err.detected_type == PACKAGE_THEME or \
           (err.subpackages and
