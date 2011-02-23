@@ -317,7 +317,8 @@ class Traverser:
                                   "_build_global",
                                   "dangerous_global"),
                                  "Dangerous Global Object",
-                                 ["A dangerous or banned global object was "
+                                 [dang if isinstance(dang, str) else
+                                  "A dangerous or banned global object was "
                                   "accessed by some JavaScript code.",
                                   "Accessed object: %s" % name],
                                  self.filename,

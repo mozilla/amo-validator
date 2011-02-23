@@ -215,6 +215,7 @@ def _call_expression(traverser, node):
                                    "_call_expression",
                                    "called_dangerous_global"),
                                   "Global called in dangerous manner",
+                                  result if isinstance(result, str) else
                                   "A global function was called using a set "
                                   "of dangerous parameters. These parameters "
                                   "have been disallowed.",

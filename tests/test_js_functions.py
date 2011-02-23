@@ -43,3 +43,20 @@ def test_createElement():
     """)
     assert not err.message_count
 
+def test_synchronous_xhr():
+    "Tests that syncrhonous AJAX requests are marked as dangerous"
+
+    err = _do_test_raw("""
+    var x = new XMLHttpRequest();
+    x.open("GET", "http://foo/bar", true);
+    x.send(null);
+    """)
+    assert not err.message_count
+
+    err = _do_test_raw("""
+    var x = new XMLHttpRequest();
+    x.open("GET", "http://foo/bar", false);
+    x.send(null);
+    """)
+    assert err.message_count
+

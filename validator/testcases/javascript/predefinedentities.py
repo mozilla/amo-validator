@@ -63,23 +63,38 @@ GLOBAL_ENTITIES = {
     
     "Components":
         {"readonly": True,
-         "value": {"utils":
-                       {"value": {"evalInSandbox":
-                                     {"dangerous": True},
-                                  "import":
-                                     {"dangerous":
-                                         lambda a,t: a and a[0].contains("ctypes.jsm")}}},
-                   "interfaces":
-                       {"value": {"nsIProcess":
-                                     {"dangerous": True},
-                                  "nsIDOMGeoGeolocation":
-                                     {"dangerous": True},
-                                  "nsIX509CertDB":
-                                     {"dangerous": True},
-                                  "mozIJSSubScriptLoader":
-                                     {"dangerous": True}}}}},
+         "value":
+             {"utils":
+                  {"value": {"evalInSandbox":
+                                 {"dangerous": True},
+                             "import":
+                                 {"dangerous":
+                                      lambda a,t:a and \
+                                                 a[0].contains("ctypes.jsm")}}},
+              "interfaces":
+                  {"value": {"nsIProcess":
+                                {"dangerous": True},
+                             "nsIDOMGeoGeolocation":
+                                {"dangerous": True},
+                             "nsIX509CertDB":
+                                {"dangerous": True},
+                             "mozIJSSubScriptLoader":
+                                {"dangerous": True}}}}},
     "extensions": {"dangerous": True},
     "xpcnativewrappers": {"dangerous": True},
+
+    "XMLHttpRequest":
+        {"value":
+             {"open":{"dangerous":
+                          # Ban syncrhonous XHR by making sure the third arg
+                          # is absent and false.
+                          lambda a,t:a and \
+                                     len(a) > 2 and \
+                                     not t(a[2]).get_literal_value() and \
+                                     "Synchronous HTTP requests can cause "
+                                     "serious UI performance problems, "
+                                     "especially to users with slow network "
+                                     "connections."}}},
     
     # Global properties are inherently read-only, though this formalizes it.
     "Infinity": {"readonly": True},
