@@ -147,8 +147,8 @@ def _load_install_rdf(err, package, expectation):
                          "Cannot Parse install.rdf",
                          "The install.rdf file could not be parsed.")
     else:
-        err.save_resource("has_install_rdf", True)
-        err.save_resource("install_rdf", install_rdf)
+        err.save_resource("has_install_rdf", True, pushable=True)
+        err.save_resource("install_rdf", install_rdf, pushable=True)
     
     # Load up the results of the type detection
     results = typedetection.detect_type(err,
