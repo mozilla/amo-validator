@@ -11,13 +11,13 @@ def test_unknown_file(err, filename):
     name = path.pop()
     
     if name == "chromelist.txt":
-        err.info(("testcases_packagelayout",
-                  "test_unknown_file",
-                  "deprecated_file"),
-                 "Extension contains a deprecated file",
-                 """The file "%s" is no longer supported by any
-                 modern Mozilla product.""" % filename,
-                 filename)
+        err.notice(("testcases_packagelayout",
+                    "test_unknown_file",
+                    "deprecated_file"),
+                   "Extension contains a deprecated file",
+                   "The file \"%s\" is no longer supported by any modern "
+                   "Mozilla product." % filename,
+                   filename)
         return True
 
 @decorator.register_test(tier=2, expected_type=PACKAGE_EXTENSION)
@@ -67,8 +67,8 @@ def test_blacklisted_files(err, package_contents=None, xpi_package=None):
                          "test_blacklisted_files",
                          "disallowed_extension"),
                         "Blacklisted file extension found",
-                        ["""The file "%s" uses a blacklisted file
-                         extension.""" % name,
+                        ["The file \"%s\" uses a blacklisted file extension." %
+                            name,
                          "The extension %s is disallowed." % extension],
                         name)
             continue
@@ -122,10 +122,10 @@ def test_layout_all(err, package_contents, xpi_package):
 #                          "test_xpcom",
 #                          "incompatible_xpcom_detected"),
 #                         "XPCOM ties detected",
-#                         ["""Files were found in the /components/ directory,
-#                          which generally indicates XPCOM references. Firefox
-#                          4 no longer supports XPCOM. This interface is
-#                          subject to change.""",
+#                         ["Files were found in the /components/ directory, "
+#                          "which generally indicates XPCOM references. Firefox "
+#                          "4 no longer supports XPCOM. This interface is "
+#                          "subject to change.",
 #                          'File "%s" represents XPCOM ties.' % name],
 #                         name);
 #             break

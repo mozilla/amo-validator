@@ -2,7 +2,6 @@ import json
 import uuid
 from StringIO import StringIO
 
-from contextgenerator import ContextGenerator
 from outputhandlers.shellcolors import OutputHandler
 from textfilter import filter_ascii
 
@@ -33,14 +32,13 @@ class ErrorBundle(object):
         self.detected_type = 0
         self.resources = {}
         self.pushable_resources = {}
-        self.reject = False
         self.unfinished = False
         
         if listed:
             self.resources["listed"] = True
 
     def error(self, err_id, error,
-              description='', filename='', line=0, column=0, context=None,
+              description='', filename='', line=None, column=None, context=None,
               tier=None):
         "Stores an error message for the validation process"
         self._save_message(self.errors,
@@ -56,7 +54,7 @@ class ErrorBundle(object):
         return self
         
     def warning(self, err_id, warning,
-                description='', filename='', line=0, column=0, context=None,
+                description='', filename='', line=None, column=None, context=None,
                 tier=None):
         "Stores a warning message for the validation process"
         self._save_message(self.warnings,
@@ -71,13 +69,8 @@ class ErrorBundle(object):
                            context=context)
         return self
 
-    # NOTE : This function WILL NOT support contexts since it's deprecated.
-    def info(self, err_id, info, description="", filename="", line=0):
-        "An alias for notice"
-        self.notice(err_id, info, description, filename, line)
-
     def notice(self, err_id, notice,
-               description="", filename="", line=0, column=0, context=None,
+               description="", filename="", line=None, column=None, context=None,
                tier=None):
         "Stores an informational message about the validation"
         self._save_message(self.notices,
@@ -244,31 +237,7 @@ class ErrorBundle(object):
                      tier=message["tier"])
     
     
-    def _clean_description(self, message, json=False):
-        "Cleans all the nasty whitespace from the descriptions."
-        
-        output = self._clean_message(message["description"], json)
-        message["description"] = output
-        
-    def _clean_message(self, desc, json=False):
-        "Cleans all the nasty whitespace from a string."
-        
-        output = []
-        
-        if not isinstance(desc, list):
-            lines = desc.splitlines()
-            for line in lines:
-                output.append(line.strip())
-            return " ".join(output)
-        else:
-            for line in desc:
-                output.append(self._clean_message(line, json))
-            if json:
-                return output
-            else:
-                return "\n".join(output)
-    
-    def render_json(self, cluster=False):
+    def render_json(self):
         "Returns a JSON summary of the validation operation."
         
         types = {0: "unknown",
@@ -280,7 +249,6 @@ class ErrorBundle(object):
         output = {"detected_type": types[self.detected_type],
                   "ending_tier": self.ending_tier,
                   "success": not self.failed(),
-                  "rejected": self.reject,
                   "messages":[],
                   "errors": len(self.errors),
                   "warnings": len(self.warnings),
@@ -293,17 +261,14 @@ class ErrorBundle(object):
         # Copy messages to the JSON output
         for error in self.errors:
             error["type"] = "error"
-            self._clean_description(error, True)
             messages.append(error)
             
         for warning in self.warnings:
             warning["type"] = "warning"
-            self._clean_description(warning, True)
             messages.append(warning)
             
         for notice in self.notices:
             notice["type"] = "notice"
-            self._clean_description(notice, True)
             messages.append(notice)
         
         # Output the JSON.
@@ -340,12 +305,6 @@ class ErrorBundle(object):
             for warning in self.warnings:
                 self._print_message("<<YELLOW>>Warning:<<NORMAL>> ",
                                     warning, verbose)
-            
-            
-            # Awwww... have some self esteem!
-            if self.reject:
-                self.handler.write("Extension Rejected")
-            
         else:
             self.handler.write("<<GREEN>>All tests succeeded!")
             
@@ -366,14 +325,24 @@ class ErrorBundle(object):
             self.handler.write("\n")
 
         return buffer.getvalue()
-        
+       
+    def _flatten_list(self, data):
+        "Flattens nested lists into strings."
+
+        if data is None:
+            return ""
+        if isinstance(data, (str, unicode)):
+            return data
+        elif isinstance(data, (list, tuple)):
+            return "\n".join([self._flatten_list(x) for x in data])
+
     def _print_message(self, prefix, message, verbose=True):
         "Prints a message and takes care of all sorts of nasty code"
         
         # Load up the standard output.
         output = ["\n",
                   prefix,
-                  self._clean_message([message["message"]]),
+                  message["message"],
                   "\n"]
         
         # We have some extra stuff for verbose mode.
@@ -382,9 +351,7 @@ class ErrorBundle(object):
             
             # Detailed problem description.
             if message["description"]:
-                # These are dirty, so strip out whitespace and concat.
-                verbose_output.append(
-                            self._clean_message(message["description"]))
+                verbose_output.append(self._flatten_list(message["description"]))
             
             # Show the user what tier we're on
             verbose_output.append("\tTier:\t%d" % message["tier"])

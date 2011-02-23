@@ -7,7 +7,6 @@ class ChromeManifest(object):
     def __init__(self, data):
         "Reads an ntriples style chrome.manifest file"
         
-        self.data = data
         self.context = ContextGenerator(data)
         self.lines = data.split("\n")
         
@@ -20,16 +19,17 @@ class ChromeManifest(object):
             counter += 1
             
             # Skip weird lines.
-            if len(line) < 5 or line.startswith("#"):
+            if line.startswith("#"):
                 continue
             
             triple = line.split(None, 2)
-            triple = [singlet.strip() for singlet in triple]
             if not triple:
                 continue
-            
-            while len(triple) < 3:
+            elif len(triple) == 2:
                 triple.append("")
+            if len(triple) < 3:
+                continue
+
             
             triples.append({"subject": triple[0],
                             "predicate": triple[1],

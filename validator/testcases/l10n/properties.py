@@ -17,9 +17,7 @@ class PropertiesParser(object):
         self.items = []
         
         if isinstance(dtd, str):
-            dtd_instance = open(dtd)
-            data = dtd_instance.read()
-            dtd_instance.close()
+            data = open(dtd).read()
         else:
             data = dtd.getvalue()
         

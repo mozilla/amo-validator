@@ -88,7 +88,6 @@ def test_package_extension_bad_expectation():
     
     submain.test_inner_package = tip
     
-    assert err.reject
     assert err.failed()
 
 

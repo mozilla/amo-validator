@@ -89,16 +89,16 @@ def _test_rdf(err, install):
         
         # Test if the predicate is obsolete
         if predicate in obsolete:
-            err.info(("testcases_installrdf",
-                      "_test_rdf",
-                      "obsolete"),
-                     "Obsolete element in install.rdf",
-                     """The element "%s" was found in the add-on's install.rdf
-                     file. It has not been banned, but it is no longer
-                     supported by any modern Mozilla product. Removing the
-                     element is recommended and will not break support.""" %
-                        predicate,
-                     "install.rdf")
+            err.notice(("testcases_installrdf",
+                        "_test_rdf",
+                        "obsolete"),
+                       "Obsolete element in install.rdf",
+                       "The element \"%s\" was found in the add-on's "
+                       "install.rdf file. It has not been banned, but it is no "
+                       "longer supported by any modern Mozilla product. "
+                       "Removing the element is recommended and will not break "
+                       "support." % predicate,
+                       "install.rdf")
             continue
         
         # Remove the predicate from must_exist_once if it's there.
@@ -147,8 +147,8 @@ def _test_rdf(err, install):
                    "_test_rdf",
                    "missing_addon"),
                   "install.rdf missing element(s).",
-                  ["""The element listed is a required element in the install
-                   manifest specification. It must be added to your addon.""",
+                  ["The element listed is a required element in the install "
+                   "manifest specification. It must be added to your addon.",
                    "Missing elements: %s" % ", ".join(must_exist_once)],
                   "install.rdf")
     
@@ -187,8 +187,8 @@ def _test_version(err, value):
                    "_test_version",
                    "invalid_whitespace"),
                   "<em:version> value cannot contain whitespace.",
-                  """In your addon's install.rdf file, version numbers
-                  cannot contain whitespace characters of any kind.""",
+                  "In your addon's install.rdf file, version numbers cannot "
+                  "contain whitespace characters of any kind.",
                   "install.rdf")
     
     # Must be a valid version number.
@@ -197,8 +197,8 @@ def _test_version(err, value):
                    "_test_version",
                    "invalid_format"),
                   "The value of <em:version> is invalid.",
-                  """The values supplied for <em:version> in the
-                  install.rdf file is not a valid version string.""",
+                  "The values supplied for <em:version> in the install.rdf "
+                  "file is not a valid version string.",
                   "install.rdf")
     
 
@@ -214,8 +214,8 @@ def _test_name(err, value):
                      "_test_name",
                      "trademark"),
                     "Add-on has potentially illegal name.",
-                    """Add-on names cannot contain the Mozilla or Firefox
-                    trademarks. These names should not be contained in
-                    add-on names at all.""",
+                    "Add-on names cannot contain the Mozilla or Firefox "
+                    "trademarks. These names should not be contained in add-on "
+                    "names if at all possible.",
                     "install.rdf")
 

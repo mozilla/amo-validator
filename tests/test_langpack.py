@@ -75,6 +75,19 @@ def test_has_chrome_manifest():
     """Makes sure the module fails when a chrome.manifest file is not
     available."""
     
-    assert langpack.test_langpack_manifest(None,
+    assert langpack.test_langpack_manifest(ErrorBundle(),
                                            {},
                                            None) is None
+
+def test_valid_chrome_manifest():
+    "Chrome manifests must only contain certain elements"
+
+    err = ErrorBundle()
+    err.save_resource("chrome.manifest", ChromeManifest("locale foo bar"))
+    langpack.test_langpack_manifest(err, {}, None)
+    assert not err.failed()
+
+    err.save_resource("chrome.manifest", ChromeManifest("foo bar asdf"))
+    langpack.test_langpack_manifest(err, {}, None)
+    assert err.failed()
+

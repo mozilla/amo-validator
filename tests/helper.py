@@ -1,5 +1,6 @@
 import os
 
+from validator.submain import populate_chrome_manifest
 from validator.rdf import RDFParser
 from validator.xpi import XPIManager
 from validator.errorbundler import ErrorBundle
@@ -23,6 +24,8 @@ def _do_test(path, test, failure=True,
         rdf_data = package.read("install.rdf")
         install_rdf = RDFParser(rdf_data)
         err.save_resource("install_rdf", install_rdf)
+
+    populate_chrome_manifest(err, contents, package)
     
     test(err, contents, package)
     

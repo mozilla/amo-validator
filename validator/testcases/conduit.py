@@ -1,7 +1,6 @@
 import fnmatch
 
 from validator import decorator
-from validator.chromemanifest import ChromeManifest
 from validator.constants import *
 
 @decorator.register_test(1)
@@ -32,7 +31,6 @@ def test_conduittoolbar(err, package_contents=None, xpi_manager=None):
             results = install.get_object(None, uri_reference)
             # If the value exists, test for the appropriate content
             if results == k:
-                err.reject = True
                 err_mesg = "Conduit value (%s) found in install.rdf" % k
                 return err.warning(("testcases_conduit",
                                     "test_conduittoolbar",
@@ -46,7 +44,6 @@ def test_conduittoolbar(err, package_contents=None, xpi_manager=None):
         
         results = install.get_object(None, install.uri("updateURL"))
         if results and results.startswith(update_url_value):
-            err.reject = True
             return err.warning(("testcases_conduit",
                                 "test_conduittoolbar",
                                 "detected_updateurl"),
@@ -62,7 +59,6 @@ def test_conduittoolbar(err, package_contents=None, xpi_manager=None):
         for bad_file in conduit_files:
             # If there's a matching file, it's Conduit
             if fnmatch.fnmatch(file_, bad_file):
-                err.reject = True
                 return err.warning(("testcases_conduit",
                                     "test_conduittoolbar",
                                     "detected_files"),
@@ -73,14 +69,7 @@ def test_conduittoolbar(err, package_contents=None, xpi_manager=None):
     # Do some tests on the chrome.manifest file if it exists
     if "chrome.manifest" in package_contents:
         # Grab the chrome manifest
-        if err.get_resource("chrome.manifest"): # pragma: no cover
-            # It's cached in the error bundler
-            chrome = err.get_resource("chrome.manifest")
-        else:
-            # Not cached, so we grab it.
-            chrome_data = xpi_manager.read("chrome.manifest")
-            chrome = ChromeManifest(chrome_data)
-            err.save_resource("chrome.manifest", chrome)
+        chrome = err.get_resource("chrome.manifest")
         
         # Get all styles for customizing the toolbar
         data = chrome.get_value("style",
@@ -89,7 +78,6 @@ def test_conduittoolbar(err, package_contents=None, xpi_manager=None):
         # If the style exists and it contains "ebtoolbarstyle"...
         if data is not None and \
            data["object"].count("ebtoolbarstyle") > 0:
-            err.reject = True
             return err.warning(("testcases_conduit",
                                 "test_conduittoolbar",
                                 "detected_chrome_manifest"),

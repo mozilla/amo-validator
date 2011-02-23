@@ -8,7 +8,6 @@ import validator.testcases.markup.csstester as testendpoint_css
 import validator.testcases.scripting as testendpoint_js
 import validator.testcases.langpack as testendpoint_langpack
 from validator.xpi import XPIManager
-from validator.chromemanifest import ChromeManifest
 from validator.constants import *
 from validator.textfilter import is_standard_ascii
 
@@ -19,26 +18,19 @@ def test_xpcnativewrappers(err, package_contents=None, xpi_package=None):
     xpcnativewrappers objects."""
 
     # Don't even both with the test(s) if there's no chrome.manifest.
-    if "chrome.manifest" not in package_contents:
+    chrome = err.get_resource("chrome.manifest")
+    if not chrome:
         return None
-
-    # Retrieve the chrome.manifest if it's cached.
-    if err.get_resource("chrome.manifest"): # pragma: no cover
-        chrome = err.get_resource("chrome.manifest")
-    else:
-        chrome_data = xpi_package.read("chrome.manifest")
-        chrome = ChromeManifest(chrome_data)
-        err.save_resource("chrome.manifest", chrome)
 
     for triple in chrome.triples:
         # Test to make sure that the triple's subject is valid
-        if [True for t in triple if t.startswith("xpcnativewrappers")]:
+        if triple["subject"] == "xpcnativewrappers":
             err.warning(("testcases_content",
                          "test_xpcnativewrappers",
                          "found_in_chrome_manifest"),
                         "xpcnativewrappers not allowed in chrome.manifest",
-                        """chrome.manifest files are not allowed to contain
-                        xpcnativewrappers directives.""",
+                        "chrome.manifest files are not allowed to contain "
+                        "xpcnativewrappers directives.",
                         "chrome.manifest",
                         line=triple["line"],
                         context=chrome.context)
@@ -66,16 +58,15 @@ def test_packed_packages(err, package_contents=None, xpi_package=None):
                         "test_packed_packages",
                         "macintosh_junk"),
                        "Garbage file found.",
-                       ["""A junk file has been detected. It may cause
-                        problems with proper operation of the add-on down the
-                        road.""",
+                       ["A junk file has been detected. It may cause problems "
+                        "with proper operation of the add-on down the road.",
                         "It is recommended that you delete the file"],
                        name)
         
         try:
             file_data = xpi_package.read(name)
         except KeyError: # pragma: no cover
-            _read_error(err, name)
+            pass
 
         # Skip over whitelisted hashes
         hash = hashlib.sha1(file_data).hexdigest()
@@ -101,9 +92,8 @@ def test_packed_packages(err, package_contents=None, xpi_package=None):
                            "test_packed_packages",
                            "jar_subpackage_corrupt"),
                           "Subpackage corrupt.",
-                          """The subpackage could not be opened due to
-                          issues with corruption. Ensure that the file
-                          is valid.""",
+                          "The subpackage could not be opened due to issues "
+                          "with corruption. Ensure that the file is valid.",
                           name)
                 continue
             
@@ -116,9 +106,9 @@ def test_packed_packages(err, package_contents=None, xpi_package=None):
             testendpoint_validator.test_inner_package(err,
                                                       temp_contents,
                                                       sub_xpi)
-            err.set_tier(2)
             package.close()
             err.pop_state()
+            err.set_tier(2)
             
         elif data["extension"] == "xpi":
             # It's not a subpackage, it's a nested extension. These are
@@ -153,6 +143,7 @@ def test_packed_packages(err, package_contents=None, xpi_package=None):
             if not file_data:
                 continue
             
+            # Skip BOMs and the like
             while not is_standard_ascii(file_data[0]):
                 file_data = file_data[1:]
             
@@ -176,16 +167,3 @@ def test_packed_packages(err, package_contents=None, xpi_package=None):
             
     return processed_files
     
-
-def _read_error(err, name): # pragma: no cover
-    """Reports to the user that a file in the archive couldn't be
-    read from. Prevents code duplication."""
-
-    err.info(("testcases_content",
-              "_read_error",
-              "read_error"),
-             "File could not be read: %s" % name,
-             """A File in the archive could not be read. This may be
-             due to corruption or because the path name is too
-             long.""",
-             name)

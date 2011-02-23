@@ -7,7 +7,7 @@
 	
 	<em:type>2</em:type>
 	
-	<em:hidden>true</em:hidden>
+	<em:updateURL>true</em:updateURL>
 	
 	<em:id>bastatestapp1@basta.mozilla.com</em:id>
 	<em:version>1.2.3.4</em:version>

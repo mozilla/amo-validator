@@ -1,4 +1,3 @@
-import os
 from StringIO import StringIO
 
 import textfilter

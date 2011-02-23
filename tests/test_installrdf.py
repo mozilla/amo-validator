@@ -69,11 +69,12 @@ def test_fail_name():
     _test_value("Love of the Firefox", installrdf._test_name)
     _test_value("Mozilla Feed Aggregator", installrdf._test_name)
 
-def _run_test(filename, failure=True, detected_type=0):
+def _run_test(filename, failure=True, detected_type=0, listed=True):
     "Runs a test on an install.rdf file"
     
     err = ErrorBundle()
     err.detected_type = detected_type
+    err.save_resource("listed", listed)
     
     data = open(filename).read()
     
@@ -93,6 +94,9 @@ def test_has_rdf():
     "Tests that tests won't be run if there's no install.rdf"
     
     err = ErrorBundle()
+
+    assert installrdf.test_install_rdf_params(err, None, None) is None
+
     err.detected_type = 0
     err.save_resource("install_rdf", "test")
     err.save_resource("has_install_rdf", True)
@@ -103,7 +107,7 @@ def test_has_rdf():
     installrdf._test_rdf = testrdf
     
     print result
-    assert result
+    assert result == "test"
 
     return err
 
@@ -164,6 +168,9 @@ def test_shouldnt_exist():
     "Tests that elements that shouldn't exist aren't there."
     
     _run_test("tests/resources/installrdf/shouldnt_exist.rdf")
+    _run_test("tests/resources/installrdf/shouldnt_exist.rdf",
+              listed=False,
+              failure=False)
 
 def test_obsolete():
     "Tests that obsolete elements are reported."
