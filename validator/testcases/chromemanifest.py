@@ -22,7 +22,7 @@ def test_categories(err):
                  "JavaScript-DOM-class",
                  "JavaScript-DOM-interface") or
             (triple["predicate"] == "JavaScript" and
-             (triple["object"],startswith("global ") or
+             (triple["object"].startswith("global ") or
               triple["object"].startswith("DOM ")))):
             err.warning(("testcases_chromemanifest",
                          "test_categories",

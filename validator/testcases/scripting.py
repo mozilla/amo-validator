@@ -137,7 +137,39 @@ def _regex_tests(err, data, filename):
                         filename=filename,
                         line=line,
                         context=c)
+    
+    # JS category hunting; bug 635423
+    
+    # Generate regexes for all of them. Note that they all begin with
+    # "JavaScript". Capitalization matters, bro.
+    category_regexes = map(re.compile,
+                           map(lambda r:"%s%s" % ("JavaScript[\\-\\ ]",
+                                                  r.replace("-", "[\\-\\ ]")),
+                               ("global-constructor",
+                                "global-constructor-prototype-alias",
+                                "global-property",
+                                "global-privileged-property",
+                                "global-static-nameset",
+                                "global-dynamic-nameset",
+                                "DOM-class",
+                                "DOM-interface")))
+    
+    for cat_regex in category_regexes:
+        match = cat_regex.search(data)
 
+        if match:
+            line = c.get_line(match.start())
+            err.warning(("testcases_scripting",
+                         "regex_tests",
+                         "category_regex_tests"),
+                        "Potential JavaScript category registration",
+                        "Add-ons should not register JavaScript categories"
+                        "It appears that a JavaScript category was registered "
+                        "via a script to attach properties to JavaScript "
+                        "globals. This is not allowed.",
+                        filename=filename,
+                        line=line,
+                        context=c)
 
 class JSReflectException(Exception):
     "An exception to indicate that tokenization has failed"

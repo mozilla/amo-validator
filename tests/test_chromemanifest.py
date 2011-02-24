@@ -1,6 +1,3 @@
-import unittest
-import os
-
 from validator.chromemanifest import ChromeManifest
 
 def test_open():
