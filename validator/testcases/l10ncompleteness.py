@@ -168,11 +168,11 @@ def test_lp_xpi(err, package_contents, xpi_package):
         err.info(("testcases_l10ncompleteness",
                   "test_lp_xpi",
                   "missing_app_support"),
-                 "Supported app missing during L10n completeness.",
-                 "While testing for L10n comleteness, a list of supported "
-                 "applications for the language pack was not found. This is "
-                 "likely because there are no listed <em:targetApplication> "
-                 "elements in the install.rdf file.")
+                 "Supported app missing in localization completeness.",
+                 "While testing in localization comleteness, a list of "
+                 "supported applications for the language pack was not found. "
+                 "This is likely because there are no listed "
+                 "<em:targetApplication> elements in the install.rdf file.")
     else:
         for support in support_references:
             ref_xpi = XPIManager(os.path.join(os.path.dirname(__file__),
@@ -449,7 +449,7 @@ def _aggregate_results(err, results, locale, similar=False, base="en-US"):
         err.warning(("testcases_l10ncompleteness",
                      "_aggregate_results",
                      "unexpected_encodings"),
-                    "Unexpected encodings in L10n files",
+                    "Unexpected encodings in locale files",
                     ["Localization files were encountered that used encodings "
                      "that are not characteristic of those types of files.",
                      "\n".join(compilation),
