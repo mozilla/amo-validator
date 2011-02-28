@@ -118,22 +118,28 @@ def _define_var(traverser, node):
             
             vars = []
             for element in declaration["id"]["elements"]:
+                if element is None:
+                    vars.append(None)
+                    continue
                 vars.append(element["name"])
 
             # The variables are not initialized
             if declaration["init"] is None:
                 # Simple instantiation; no initialization
                 for var in vars:
+                    if not var:
+                        continue
                     traverser._set_variable(var, None)
 
             # The variables are declared inline
             elif declaration["init"]["type"] == "ArrayPattern":
                 # TODO : Test to make sure len(values) == len(vars)
                 for value in declaration["init"]["elements"]:
-                    traverser._set_variable(var[0],
-                                            JSWrapper(
-                                                traverser._traverse_node(value),
-                                                traverser=traverser))
+                    if var[0]:
+                        traverser._set_variable(
+                                var[0],
+                                JSWrapper(traverser._traverse_node(value),
+                                          traverser=traverser))
                     var = var[1:] # Pop off the first value
 
             # It's being assigned by a JSArray (presumably)
@@ -141,9 +147,10 @@ def _define_var(traverser, node):
                 pass
                 # TODO : Once JSArray is fully implemented, do this!
 
-
+        elif declaration["id"]["type"] == "ObjectPattern":
+            # This is craziness. I don't even know how to handle this sanely.
+            pass
         else:
-    
             var_name = declaration["id"]["name"]
             traverser._debug("NAME>>%s" % var_name)
             
@@ -241,7 +248,7 @@ def _call_expression(traverser, node):
             traverser.err.warning(("testcases_javascript_actions",
                                    "_call_expression",
                                    "called_createelement"),
-                                  "createElement() used to create script tag"
+                                  "createElement() used to create script tag",
                                   "The createElement() function was used to "
                                   "create a script tag in a JavaScript file. "
                                   "Add-ons are not allowed to create script "

@@ -16,3 +16,26 @@ def test_xmlhttprequest():
     assert "value" in req
     assert "open" in req["value"]
 
+def test_evalinsandbox():
+    "Tests Components.utils.evalInSandbox()"
+
+    err = _do_test_raw("""
+    var Cu = Components.utils;
+    Cu.foo("bar");
+    """)
+    assert not err.failed()
+
+    err = _do_test_raw("""
+    var Cu = Components.utils;
+    Cu.evalInSandbox("foo");
+    """)
+    assert err.failed()
+
+    err = _do_test_raw("""
+    const Cu = Components.utils;
+    Cu.evalInSandbox("foo");
+    """)
+    assert err.failed()
+
+
+

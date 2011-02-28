@@ -18,9 +18,13 @@ GLOBAL_ENTITIES = {
     "window": {"value": lambda: GLOBAL_ENTITIES},
     "document":
         {"value": {"createElement":
-                       {"dangerous": lambda a,t: t(a[0]).get_literal_value() == "script"},
+                       {"dangerous":
+                            lambda a,t: t(a[0]).get_literal_value()
+                                               .lower() == "script"},
                    "createElementNS":
-                       {"dangerous": lambda a,t: t(a[0]).get_literal_value() == "script"}}},
+                       {"dangerous":
+                            lambda a,t: t(a[0]).get_literal_value()
+                                               .lower() == "script"}}},
     
     # The nefariuos timeout brothers!
     "setTimeout": {"dangerous": actions._call_settimeout},
@@ -75,7 +79,8 @@ GLOBAL_ENTITIES = {
                              "import":
                                  {"dangerous":
                                       lambda a,t:a and \
-                                                 a[0].contains("ctypes.jsm")}}},
+                                                 str(t(a[0]).get_literal_value())
+                                                            .count("ctypes.jsm")}}},
               "interfaces":
                   {"value": {"nsIXMLHttpRequest":
                                 {"xpcom_map":

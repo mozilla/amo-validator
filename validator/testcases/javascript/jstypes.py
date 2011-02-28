@@ -289,7 +289,7 @@ class JSPrototype:
         else:
             return self.data[name]
     
-    def get_literal_value():
+    def get_literal_value(self):
         "Same as JSObject; returns an empty string"
         return ""
 
