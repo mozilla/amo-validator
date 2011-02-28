@@ -14,6 +14,10 @@ class MockBundler:
         self.tier = 4
         self.ids = []
 
+    def failed(self):
+        "Returns whether messages have been reported"
+        return bool(self.message_count)
+
     def set_tier(self, tier):
         "Sets the tier; compatibility with ErrorBundle"
         self.tier = tier
