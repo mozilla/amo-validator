@@ -173,7 +173,7 @@ def _load_install_rdf(err, package, expectation):
         return err.error(("main",
                           "test_package",
                           "undeterminable_type"),
-                         "Unable to determine addon type",
+                         "Unable to determine add-on type",
                          "The type detection algorithm could not determine the "
                          "type of the add-on.")
     else:

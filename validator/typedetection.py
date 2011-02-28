@@ -2,7 +2,7 @@ from xml.dom.minidom import parse
 from validator.constants import *
 
 def detect_type(err, install_rdf=None, xpi_package=None):
-    """Determines the type of addon being validated based on
+    """Determines the type of add-on being validated based on
     install.rdf, file extension, and other properties."""
     
     # The types in the install.rdf don't pair up 1:1 with the type
@@ -56,7 +56,7 @@ def detect_type(err, install_rdf=None, xpi_package=None):
                     "no_em:type"),
                    "No <em:type> element found in install.rdf",
                    "It isn't always required, but it is the most reliable "
-                   "method for determining addon type.",
+                   "method for determining add-on type.",
                    "install.rdf") 
     
     # Dictionaries are weird too, they might not have the obligatory
@@ -82,7 +82,7 @@ def detect_type(err, install_rdf=None, xpi_package=None):
     
     # If the package's extension is listed in the [tiny] extension
     # dictionary, then just return that. We'll validate against that
-    # addon type's layout later. Better to false positive than to false
+    # add-on type's layout later. Better to false positive than to false
     # negative.
     if xpi_package.extension in extensions:
         # Make sure it gets translated back to the normalized version
