@@ -234,7 +234,7 @@ def _call_expression(traverser, node):
         simple_args = [traverser._traverse_node(a) for a in args]
         if (identifier_name == "createElement" and
             simple_args and
-            str(simple_args[0].get_literal_value()) == "script") or \
+            str(simple_args[0].get_literal_value()).lower() == "script") or \
            (identifier_name == "createElementNS" and
             len(simple_args) > 1 and
             "script" in str(simple_args[1].get_literal_value())):

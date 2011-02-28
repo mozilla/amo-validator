@@ -15,6 +15,13 @@ def test_createElement():
     """)
     assert err.message_count == 1
     
+    # Part of bug 636835
+    err = _do_test_raw("""
+    var x = foo;
+    foo.bar.createElement("scRipt");
+    """)
+    assert err.message_count == 1
+
     err = _do_test_raw("""
     var x = foo;
     foo.bar.createElementNS("http://foo.bar/", "asdf:" +"scr"+"ipt");
