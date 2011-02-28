@@ -142,17 +142,18 @@ def _regex_tests(err, data, filename):
     
     # Generate regexes for all of them. Note that they all begin with
     # "JavaScript". Capitalization matters, bro.
-    category_regexes = map(re.compile,
-                           map(lambda r:"%s%s" % ("JavaScript[\\-\\ ]",
-                                                  r.replace("-", "[\\-\\ ]")),
-                               ("global-constructor",
-                                "global-constructor-prototype-alias",
-                                "global-property",
-                                "global-privileged-property",
-                                "global-static-nameset",
-                                "global-dynamic-nameset",
-                                "DOM-class",
-                                "DOM-interface")))
+    category_regexes = \
+            map(re.compile,
+                map(lambda r: '''"%s"|'%s'|%s''' % (r, r, r.replace(' ', '-')),
+                    map(lambda r: "%s%s" % ("JavaScript ", r),
+                        ("global constructor",
+                         "global constructor prototype alias",
+                         "global property",
+                         "global privileged property",
+                         "global static nameset",
+                         "global dynamic nameset",
+                         "DOM class",
+                         "DOM interface"))))
     
     for cat_regex in category_regexes:
         match = cat_regex.search(data)
