@@ -139,14 +139,19 @@ class JSWrapper(object):
             if "value" not in value:
                 return JSWrapper(traverser=traverser)
 
+            _evaluate_lambdas = lambda node:_evaluate_lambdas(node()) if \
+                                            isinstance(node,
+                                                       types.LambdaType) else\
+                                            node
+
             value_val = value["value"]
-            if isinstance(value_val, types.LambdaType):
-                value_val = value_val()
+            value_val = _evaluate_lambdas(value_val)
 
             if isinstance(value_val, dict):
                 if name in value_val:
+                    value_val = _evaluate_lambdas(value_val[name])
                     return traverser._build_global(name=name,
-                                                   entity=value_val[name])
+                                                   entity=value_val)
             else:
                 value = value_val
 
@@ -164,6 +169,25 @@ class JSWrapper(object):
             return JSWrapper(output, traverser=traverser)
         return output
     
+    def del_value(self, member):
+        "Deletes a member"
+        if self.is_global:
+            self.traverser.err.warning(("testcases_js_jstypes",
+                                        "del_value",
+                                        "global_member_deletion"),
+                                       "Global member deletion",
+                                       "Members of global object cannot be "
+                                       "deleted.",
+                                       filename=self.traverser.filename,
+                                       line=self.traverser.line,
+                                       column=self.traverser.position,
+                                       context=self.traverser.context)
+            return
+        elif isinstance(self.value, (JSObject, JSPrototype)):
+            if member not in self.value.data:
+                return
+            del self.value.data[member]
+
     def is_literal(self):
         "Returns whether the content is a literal"
         return isinstance(self.value, JSLiteral)

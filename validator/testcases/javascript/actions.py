@@ -1,4 +1,3 @@
-import copy
 import types
 
 import traverser as js_traverser
@@ -9,11 +8,17 @@ def trace_member(traverser, node):
     
     if node["type"] == "MemberExpression":
         # x.y or x[y]
+        # x = base
         base = trace_member(traverser, node["object"])
         if not isinstance(base, JSWrapper):
             base = JSWrapper(base, traverser=traverser)
 
-        # base = x
+        # If we've got an XPCOM wildcard, just return the base, minus the WC
+        if base.is_global and \
+                "xpcom_wildcard" in base.value:
+            del base.value["xpcom_wildcard"]
+            return base
+
         if node["property"]["type"] == "Identifier":
             # y = token identifier
             return base.get(traverser=traverser,
@@ -268,6 +273,12 @@ def _call_expression(traverser, node):
                                   line=traverser.line,
                                   column=traverser.position,
                                   context=traverser.context)
+
+
+    if member.is_global and "return" in member.value:
+        return member.value["return"](wrapper=member,
+                                      arguments=args,
+                                      traverser=traverser)
 
     return True
 

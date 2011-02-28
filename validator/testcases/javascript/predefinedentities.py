@@ -1,4 +1,4 @@
-import actions
+import actions, call_definitions
 
 # A list of identifiers and member values that may not be used.
 BANNED_IDENTIFIERS = ("newThread", )
@@ -64,7 +64,12 @@ GLOBAL_ENTITIES = {
     "Components":
         {"readonly": True,
          "value":
-             {"utils":
+             {"classes":
+                  {"xpcom_wildcard": True,
+                   "value":
+                       {"createInstance":
+                           {"return": call_definitions.xpcom_createInstance}}},
+              "utils":
                   {"value": {"evalInSandbox":
                                  {"dangerous": True},
                              "import":
@@ -72,7 +77,10 @@ GLOBAL_ENTITIES = {
                                       lambda a,t:a and \
                                                  a[0].contains("ctypes.jsm")}}},
               "interfaces":
-                  {"value": {"nsIProcess":
+                  {"value": {"nsIXMLHttpRequest":
+                                {"xpcom_map":
+                                     lambda: GLOBAL_ENTITIES["XMLHttpRequest"]},
+                             "nsIProcess":
                                 {"dangerous": True},
                              "nsIDOMGeoGeolocation":
                                 {"dangerous": True},
