@@ -61,6 +61,7 @@ class OutputHandler:
         rany = text.rfind("<<")
         
         # Put in the escape sequences.
+        text = text.replace("%", "%%")
         text = text.replace("<<", "%(").replace(">>", ")s")
         
         # Make sure that the last sequence is a NORMAL sequence.
