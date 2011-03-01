@@ -1,4 +1,3 @@
-import chardet
 import json
 import os
 import re
@@ -57,17 +56,17 @@ def test_js_file(err, filename, data, line=0):
                        "manually inspected.",
                        filename=filename)
         else:
-            err.warning(("testcases_scripting",
-                         "test_js_file",
-                         "retrieving_tree"),
-                        "JS reflection error prevented validation",
-                        ["An error in the JavaScript file prevented it from "
-                         "being properly read by the Spidermonkey JS engine.",
-                         str(exc)],
-                        filename=filename)
-            import sys
-            etype, err, tb = sys.exc_info()
-            raise exc, None, tb
+            err.error(("testcases_scripting",
+                       "test_js_file",
+                       "retrieving_tree"),
+                      "JS reflection error prevented validation",
+                      ["An error in the JavaScript file prevented it from "
+                       "being properly read by the Spidermonkey JS engine.",
+                       str(exc)],
+                      filename=filename)
+            #import sys
+            #etype, err, tb = sys.exc_info()
+            #raise exc, None, tb
 
         if before_tier:
             err.set_tier(before_tier)
@@ -244,26 +243,22 @@ def _get_tree(name, code, shell=SPIDERMONKEY_INSTALLATION, errorbundle=None):
         # If it's not an easily decodeable encoding, detect it and decode that
         code = filter_ascii(code)
 
-    data = json.dumps(code)
+    temp = tempfile.NamedTemporaryFile(mode="w+", delete=False)
+    temp.write(code)
+    temp.flush()
+
     data = """try{
-        print(JSON.stringify(Reflect.parse(%s)));
+        print(JSON.stringify(Reflect.parse(read(%s))));
     } catch(e) {
         print(JSON.stringify({
             "error":true,
             "error_message":e.toString(),
             "line_number":e.lineNumber
         }));
-    }""" % data
+    }""" % json.dumps(temp.name)
 
-    # Push the data to a temporary file
-    # Cannot use NamedTemporaryFile with delete=True, as on windows such files
-    # cannot be opened by other processes
-    temp = tempfile.NamedTemporaryFile(mode="w+", delete=False)
     try:
-        temp.write(data)
-        temp.flush() # This is very important
-
-        cmd = [shell, "-f", temp.name]
+        cmd = [shell, "-e", data]
         try:
             shell = subprocess.Popen(cmd,
                                shell=False,
@@ -281,6 +276,9 @@ def _get_tree(name, code, shell=SPIDERMONKEY_INSTALLATION, errorbundle=None):
             temp.close()
             os.unlink(temp.name)
         except: pass
+
+    if not data:
+        raise JSReflectException("Reflection failed")
 
     try:
         data = unicode(data)
