@@ -121,7 +121,11 @@ def _regex_tests(err, data, filename):
               "extensions\\.blocklist\\.url": np_warning,
               "extensions\\.blocklist\\.level": np_warning,
               "extensions\\.blocklist\\.interval": np_warning,
-              "general\\.useragent": np_warning,}
+              "general\\.useragent": np_warning,
+              "launch\\(\\)":
+                  "Use of 'launch()' is disallowed because of restrictions on "
+                  "nsILocalFile. If the code does not use nsILocalFile, "
+                  "consider a different function name."}
 
     for regex, message in errors.items():
         reg = re.compile(regex)
@@ -164,7 +168,7 @@ def _regex_tests(err, data, filename):
                          "regex_tests",
                          "category_regex_tests"),
                         "Potential JavaScript category registration",
-                        "Add-ons should not register JavaScript categories"
+                        "Add-ons should not register JavaScript categories. "
                         "It appears that a JavaScript category was registered "
                         "via a script to attach properties to JavaScript "
                         "globals. This is not allowed.",
