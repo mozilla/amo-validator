@@ -17,7 +17,8 @@ setup(
     include_package_data=True,
     zip_safe=False,
     install_requires=[p.strip() for p in open('./requirements.txt')
-                                              if not p.startswith('#')],
+                                              if not p.startswith(('#',
+                                                                   '-e'))],
     scripts=["addon-validator"],
     classifiers=[
         'Development Status :: 4 - Beta',
