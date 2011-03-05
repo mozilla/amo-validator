@@ -26,8 +26,8 @@ L10N_MIN_ENTITIES = 18
 LOCALE_CACHE = {}
 
 
-def _get_locales(err, xpi_package):
-    "Returns a list of locales from the chrome.manifest file."
+def _list_locales(err, xpi_packages):
+    "Returns a raw list of locales from chrome.manifest"
 
     # Retrieve the chrome.manifest if it's cached.
     chrome = False
@@ -37,9 +37,18 @@ def _get_locales(err, xpi_package):
         return None
 
     pack_locales = chrome.get_triples("locale")
-    locales = {}
-    # Find all of the locales referenced in the chrome.manifest file.
-    for locale in pack_locales:
+    return list(pack_locales)
+
+def _get_locales(err, xpi_package, locales=None):
+    "Returns a list of locales from the chrome.manifest file."
+
+    if not locales:
+        locales = _list_locales(err, xpi_package)
+    if not locales:
+        return None
+
+    processed_locales = {}
+    for locale in locales:
         locale_jar = locale["object"].split()
 
         location = locale_jar[-1]
@@ -51,10 +60,10 @@ def _get_locales(err, xpi_package):
                        "target": full_location[1],
                        "name": locale_jar[0]}
         locale_name = "%s:%s" % (locale["predicate"], locale_jar[0])
-        if locale_name not in locales:
-            locales[locale_name] = locale_desc
+        if locale_name not in processed_locales:
+            processed_locales[locale_name] = locale_desc
 
-    return locales
+    return processed_locales
 
 
 def _get_locale_manager(err, addon, path, files, no_cache=False):
@@ -97,10 +106,10 @@ def test_xpi(err, package_contents, xpi_package):
     if "chrome.manifest" not in package_contents:
         return None
 
-    locales = _get_locales(err, xpi_package)
+    raw_locales = _list_locales(err, xpi_package)
 
     # We need at least a reference and a target.
-    num_locales = len(locales)
+    num_locales = len(raw_locales)
     if num_locales < 2:
         if num_locales == 0:
             err.notice(("testcases_l10ncompleteness",
@@ -112,6 +121,8 @@ def test_xpi(err, package_contents, xpi_package):
                        "localize.",
                        filename="chrome.manifest")
         return
+
+    locales = _get_locales(err, xpi_package, raw_locales)
 
     # Use the first locale by default
     ref_name = locales.keys()[0]
