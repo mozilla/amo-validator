@@ -60,7 +60,7 @@ DEFINITIONS = {
     "SequenceExpression":   (("expressions", ),
                              False, False, None, True, False),
     "UnaryExpression":      (("argument", ),
-                             False, False, None, True, False),
+                             False, False, actions._expr_unary, True, False),
     "BinaryExpression":     (("left", "right"),
                              False, False, actions._expr_binary, True, False),
     "AssignmentExpression": (("left", "right"),

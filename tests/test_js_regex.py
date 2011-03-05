@@ -16,3 +16,14 @@ def test_js_category_regex_fail():
     assert _do_test_raw("addCategory('JavaScript global property')").failed()
     assert _do_test_raw("addCategory('JavaScript-global-property')").failed()
 
+def test_bug_548645():
+    "Tests that banned entities are disallowed"
+
+    results =  _do_test_raw("""
+    var y = newThread;
+    var x = foo.newThread;
+    var w = foo["newThread"];
+    """)
+    print results.message_count
+    assert results.message_count == 3
+

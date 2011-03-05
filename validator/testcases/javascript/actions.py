@@ -6,6 +6,7 @@ from jstypes import *
 def trace_member(traverser, node):
     "Traces a MemberExpression and returns the appropriate object"
     
+    traverser._debug("TESTING>>%s" % node["type"])
     if node["type"] == "MemberExpression":
         # x.y or x[y]
         # x = base
@@ -21,6 +22,7 @@ def trace_member(traverser, node):
 
         if node["property"]["type"] == "Identifier":
             # y = token identifier
+            test_identifier(traverser, node["property"]["name"])
             return base.get(traverser=traverser,
                             name=node["property"]["name"])
         else:
@@ -30,6 +32,7 @@ def trace_member(traverser, node):
 
     elif node["type"] == "Identifier":
         traverser._debug("MEMBER_EXP>>ROOT:IDENTIFIER")
+        test_identifier(traverser, node["name"])
         return traverser._seek_variable(node["name"])
     else:
         traverser._debug("MEMBER_EXP>>ROOT:EXPRESSION")
@@ -38,6 +41,24 @@ def trace_member(traverser, node):
         if not isinstance(traversed, JSWrapper):
             return JSWrapper(traversed, traverser=traverser)
         return traversed
+
+def test_identifier(traverser, name):
+    "Tests whether an identifier is banned"
+    
+    import predefinedentities
+    if name in predefinedentities.BANNED_IDENTIFIERS:
+        traverser.err.error(("testcases_scripting",
+                             "create_identifier",
+                             "banned_identifier"),
+                            "Banned JavaScript Identifier",
+                            ["An identifier was used in the JavaScript that "
+                             "is not allowed due to security restrictions.",
+                             "Identifier: %s" % name],
+                            filename=traverser.filename,
+                            line=traverser.line,
+                            column=traverser.position,
+                            context=traverser.context)
+
 
 def _function(traverser, node):
     "Prevents code duplication"
@@ -81,6 +102,9 @@ def _define_function(traverser, node):
     "Makes a function happy"
     
     me = _function(traverser, node)
+    me = js_traverser.JSWrapper(value=me,
+                                traverser=traverser,
+                                callable=True)
     traverser._peek_context(2).set(node["id"]["name"], me)
     
     return True
@@ -336,6 +360,10 @@ def _ident(traverser, node):
     "Initiates an object lookup on the traverser based on an identifier token"
 
     name = node["name"]
+
+    # Ban bits like "newThread"
+    test_identifier(traverser, name)
+
     if traverser._is_local_variable(name) or \
        traverser._is_global(name):
         # This function very nicely wraps with JSWrapper for us :)
@@ -378,19 +406,20 @@ def _expr_assignment(traverser, node):
             lit_left = str(lit_left)
             lit_right = str(lit_right)
 
+        gnum = _get_as_num
         # All of the assignment operators
         operators = {"=":lambda:right,
                      "+=":lambda:lit_left + lit_right,
-                     "-=":lambda:lit_left - lit_right,
-                     "*=":lambda:lit_left * lit_right,
-                     "/=":lambda:lit_left / lit_right,
-                     "%=":lambda:lit_left % lit_right,
-                     "<<=":lambda:lit_left << lit_right,
-                     ">>=":lambda:lit_left >> lit_right,
-                     ">>>=":lambda:math.fabs(lit_left) >> lit_right,
-                     "|=":lambda:lit_left | lit_right,
-                     "^=":lambda:lit_left ^ lit_right,
-                     "&=":lambda:lit_left & lit_right}
+                     "-=":lambda:gnum(lit_left) - gnum(lit_right),
+                     "*=":lambda:gnum(lit_left) * gnum(lit_right),
+                     "/=":lambda:gnum(lit_left) / gnum(lit_right),
+                     "%=":lambda:gnum(lit_left) % gnum(lit_right),
+                     "<<=":lambda:gnum(lit_left) << gnum(lit_right),
+                     ">>=":lambda:gnum(lit_left) >> lit_right,
+                     ">>>=":lambda:math.fabs(gnum(lit_left)) >> gnum(lit_right),
+                     "|=":lambda:gnum(lit_left) | gnum(lit_right),
+                     "^=":lambda:gnum(lit_left) ^ gnum(lit_right),
+                     "&=":lambda:gnum(lit_left) & gnum(lit_right)}
         
         token = node["operator"]
         traverser._debug("ASSIGNMENT>>OPERATION:%s" % token)
@@ -415,7 +444,6 @@ def _expr_binary(traverser, node):
     
     traverser.debug_level += 1
 
-
     traverser._debug("BIN_EXP>>LEFT")
     traverser.debug_level += 1
 
@@ -423,7 +451,6 @@ def _expr_binary(traverser, node):
     left = JSWrapper(left, traverser=traverser)
 
     traverser.debug_level -= 1
-
 
     traverser._debug("BIN_EXP>>RIGHT")
     traverser.debug_level += 1
@@ -433,29 +460,34 @@ def _expr_binary(traverser, node):
 
     traverser.debug_level -= 1
     
+    left_wrap = left
     left = left.get_literal_value()
+    right_wrap = right
     right = right.get_literal_value()
 
     operator = node["operator"]
     traverser._debug("BIN_OPERATOR>>%s" % operator)
 
     type_operators = (">>", "<<", ">>>")
+    gnum = _get_as_num
     operators = {
-        "==": lambda: left == right,
+        "==": lambda: left == right or gnum(left) == gnum(right),
         "!=": lambda: left != right,
-        "===": lambda: type(left) == type(right) and left == right,
+        "===": lambda: left == right,
         "!==": lambda: not (type(left) == type(right) or left != right),
         ">": lambda: left > right,
         "<": lambda: left < right,
         "<=": lambda: left <= right,
         ">=": lambda: left >= right,
-        "<<": lambda: left << right,
-        ">>": lambda: left >> right,
-        ">>>": lambda: math.fabs(left) >> right,
+        "<<": lambda: gnum(left) << gnum(right),
+        ">>": lambda: gnum(left) >> gnum(right),
+        ">>>": lambda: math.fabs(gnum(left)) >> gnum(right),
         "+": lambda: left + right,
-        "-": lambda: _get_as_num(left) - _get_as_num(right),
-        "*": lambda: _get_as_num(left) * _get_as_num(right),
-        "/": lambda: _get_as_num(left) / _get_as_num(right),
+        "-": lambda: gnum(left) - gnum(right),
+        "*": lambda: gnum(left) * gnum(right),
+        "/": lambda: gnum(left) / gnum(right),
+        "in": lambda: right_wrap.contains(left),
+        # TODO : implement instanceof
     }
 
     traverser.debug_level -= 1
@@ -466,16 +498,49 @@ def _expr_binary(traverser, node):
        left is None or right is None):
         output = False
     elif operator in operators:
-        try:
-            traverser._debug("BIN_EXP>>OPERATION FAILED!")
-            output = operators[operator]()
-        except:
-            return JSWrapper(traverser=traverser)
+        output = operators[operator]()
     
     if not isinstance(output, JSWrapper):
         return JSWrapper(output, traverser=traverser)
     return output
 
+def _expr_unary(traverser, node):
+    "Evaluates a UnaryExpression node"
+
+    expr = traver._traverse_node(node["argument"])
+    expr_lit = expr.get_literal_value()
+    expr_num = _get_as_num(expr_lit)
+
+    operators = {"-":lambda:-1 * expr_num,
+                 "+":expr_num,
+                 "!":not expr_lit,
+                 "~":-1 * (expr_num + 1),
+                 "void":None,
+                 "typeof":_expr_unary_typeof(expr),
+                 "delete":None} # We never want to empty the context
+
+def _expr_unary_typeof(wrapper):
+    "Evaluates the type of an object"
+    
+    if wrapper.callable:
+        return "function"
+
+    value = wrapper.value
+    if value is None:
+        return "undefined"
+    elif isinstance(value, (js_traverser.JSObject,
+                            js_traverser.JSPrototype,
+                            js_traverser.JSArray)):
+        return "object"
+    elif isinstance(value, js_traverser.JSLiteral):
+        value = value.value
+
+        if isinstance(value, (int, long, float)):
+            return "number"
+        elif isinstance(value, bool):
+            return "boolean"
+        elif isinstance(value, types.StringTypes):
+            return "string"
 
 def _get_as_num(value):
     "Returns the JS numeric equivalent for a value"

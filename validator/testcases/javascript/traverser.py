@@ -3,9 +3,10 @@ import types
 
 from validator.testcases.javascript.jstypes import *
 from validator.testcases.javascript.nodedefinitions import DEFINITIONS
-from validator.testcases.javascript.predefinedentities import GLOBAL_ENTITIES
+from validator.testcases.javascript.predefinedentities import \
+               GLOBAL_ENTITIES, BANNED_IDENTIFIERS
 
-DEBUG = False
+DEBUG = True
 
 class MockBundler:
     def __init__(self):
@@ -147,10 +148,12 @@ class Traverser:
         
         self._debug("TRAVERSE>>%s" % (node["type"]))
         
+        # Extract location information if it's available
         if "loc" in node and node["loc"] is not None:
             self.line = self.start_line + int(node["loc"]["start"]["line"])
             self.position = int(node["loc"]["start"]["column"])
         
+        # Extract properties about the node that we're traversing
         (branches,
          explicitly_dynamic,
          establish_context,
@@ -158,11 +161,15 @@ class Traverser:
          returns,
          block_level) = DEFINITIONS[node["type"]]
         
+        # If we're supposed to establish a context, do it now
         if establish_context:
             self._push_context()
         elif block_level:
             self._push_block_context()
         
+        # An action allows the traverser to make intelligent decisions based
+        # on the function of the code, rather than just the content. If an
+        # action is availble, run it and store the output.
         action_result = None
         if action is not None:
             action_result = action(self, node)
@@ -175,6 +182,8 @@ class Traverser:
         # print node["type"], branches
         if action_result is None:
             self.debug_level += 1
+            # Use the node definition to determine and subsequently traverse
+            # each of the branches.
             for branch in branches:
                 if branch in node:
                     self._debug("BRANCH>>%s" % branch)
@@ -187,9 +196,12 @@ class Traverser:
                     self.debug_level -= 1
             self.debug_level -= 1
         
+        # If we defined a context, pop it.
         if establish_context or block_level:
             self._pop_context()
         
+        # If there is an action and the action returned a value, it should be
+        # returned to the node traversal that initiated this node's traversal.
         if returns:
             if not isinstance(action_result, JSWrapper):
                 return JSWrapper(action_result, traverser=self)

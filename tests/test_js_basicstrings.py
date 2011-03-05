@@ -36,3 +36,12 @@ def test_augconcat():
     print xyz_val
     assert xyz_val == "foobar"
 
+def test_typecasting():
+    "Tests that strings are treated as numbers when necessary"
+    
+    err = _do_test("tests/resources/javascript/strings_typecasting.js")
+    assert err.message_count == 0
+
+    assert _get_var(err, "x") == "44"
+    assert _get_var(err, "y") == 16
+

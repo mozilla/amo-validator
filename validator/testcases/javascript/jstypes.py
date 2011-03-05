@@ -31,7 +31,7 @@ class JSWrapper(object):
     "Wraps a JS value and handles contextual functions for it."
 
     def __init__(self, value=None, const=False, dirty=False, lazy=False,
-                 is_global=False, traverser=None):
+                 is_global=False, traverser=None, callable=False):
         
         if traverser is not None:
             traverser.debug_level += 1
@@ -53,6 +53,7 @@ class JSWrapper(object):
 
         self.dirty = dirty
         self.lazy = lazy
+        self.callable = callable
 
     def set_value(self, value, traverser=None, overwrite_const=False):
         "Assigns a value to the wrapper"
@@ -187,6 +188,22 @@ class JSWrapper(object):
             if member not in self.value.data:
                 return
             del self.value.data[member]
+
+    def contains(self, value):
+        "Serves 'in' for BinaryOperators for lists and dictionaries"
+
+        if isinstance(value, JSWrapper):
+            value = value.get_literal_value()
+        if isinstance(self.value, JSArray):
+            for val in self.value.elements:
+                if val.get_literal_value() == value:
+                    return True
+        elif isinstance(self.value, (JSObject, JSPrototype)):
+            # Dictionaries lookat keys
+            return self.value.has_var(value)
+
+        # Nothing else supports "in"
+        return False
 
     def is_literal(self):
         "Returns whether the content is a literal"
