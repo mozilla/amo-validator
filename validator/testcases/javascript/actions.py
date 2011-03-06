@@ -47,17 +47,17 @@ def test_identifier(traverser, name):
     
     import predefinedentities
     if name in predefinedentities.BANNED_IDENTIFIERS:
-        traverser.err.error(("testcases_scripting",
-                             "create_identifier",
-                             "banned_identifier"),
-                            "Banned JavaScript Identifier",
-                            ["An identifier was used in the JavaScript that "
-                             "is not allowed due to security restrictions.",
-                             "Identifier: %s" % name],
-                            filename=traverser.filename,
-                            line=traverser.line,
-                            column=traverser.position,
-                            context=traverser.context)
+        traverser.err.warning(("testcases_scripting",
+                               "create_identifier",
+                               "banned_identifier"),
+                              "Banned JavaScript Identifier",
+                              ["An identifier was used in the JavaScript that "
+                               "is not allowed due to security restrictions.",
+                               "Identifier: %s" % name],
+                              filename=traverser.filename,
+                              line=traverser.line,
+                              column=traverser.position,
+                              context=traverser.context)
 
 
 def _function(traverser, node):
@@ -498,6 +498,13 @@ def _expr_binary(traverser, node):
        left is None or right is None):
         output = False
     elif operator in operators:
+        
+        if operator == "+":
+            if left is None:
+                left = ""
+            if right is None:
+                right = ""
+        print operator, left, right
         output = operators[operator]()
     
     if not isinstance(output, JSWrapper):
@@ -507,7 +514,7 @@ def _expr_binary(traverser, node):
 def _expr_unary(traverser, node):
     "Evaluates a UnaryExpression node"
 
-    expr = traver._traverse_node(node["argument"])
+    expr = traverser._traverse_node(node["argument"])
     expr_lit = expr.get_literal_value()
     expr_num = _get_as_num(expr_lit)
 
