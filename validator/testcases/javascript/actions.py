@@ -500,11 +500,12 @@ def _expr_binary(traverser, node):
     elif operator in operators:
         
         if operator == "+":
-            if left is None:
-                left = ""
-            if right is None:
-                right = ""
-        print operator, left, right
+            if left is None: left = ""
+            if right is None: right = ""
+            if isinstance(left, types.StringTypes) or \
+               isinstance(right, types.StringTypes):
+                left = unicode(left)
+                right = unicode(right)
         output = operators[operator]()
     
     if not isinstance(output, JSWrapper):
