@@ -200,13 +200,8 @@ def _define_var(traverser, node):
                                                       prop_name),
                                          prop["value"]["properties"])
 
-                    
-
             _proc_objpattern(init_obj=init,
                              properties = declaration["id"]["properties"])
-
-            print "OP:", declaration
-
 
         else:
             var_name = declaration["id"]["name"]
