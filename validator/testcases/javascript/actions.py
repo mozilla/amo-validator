@@ -159,21 +159,55 @@ def _define_var(traverser, node):
             elif declaration["init"]["type"] == "ArrayPattern":
                 # TODO : Test to make sure len(values) == len(vars)
                 for value in declaration["init"]["elements"]:
-                    if var[0]:
+                    if vars[0]:
                         traverser._set_variable(
-                                var[0],
+                                vars[0],
                                 JSWrapper(traverser._traverse_node(value),
                                           traverser=traverser))
-                    var = var[1:] # Pop off the first value
+                    vars = vars[1:] # Pop off the first value
 
             # It's being assigned by a JSArray (presumably)
-            else:
-                pass
-                # TODO : Once JSArray is fully implemented, do this!
+            elif declaration["init"]["type"] == "ArrayExpression":
+                
+                assigner = traverser._traverse_node(declaration["init"])
+                for value in assigner.value.elements:
+                    if vars[0]:
+                        traverser._set_variable(
+                                vars[0],
+                                value)
+                    vars = vars[1:]
 
         elif declaration["id"]["type"] == "ObjectPattern":
-            # This is craziness. I don't even know how to handle this sanely.
-            pass
+            
+            init = traverser._traverse_node(declaration["init"])
+
+            def _proc_objpattern(init_obj, properties):
+                for prop in properties:
+                    # Get the name of the init obj's member
+                    if prop["key"]["type"] == "Literal":
+                        prop_name = prop["key"]["value"]
+                    elif prop["key"]["type"] == "Identifier":
+                        prop_name = prop["key"]["name"]
+                    else:
+                        continue
+
+                    if prop["value"]["type"] == "Identifier":
+                        traverser._set_variable(prop["value"]["name"],
+                                                init_obj.get(traverser,
+                                                             prop_name))
+                    elif prop["value"]["type"] == "ObjectPattern":
+                        _proc_objpattern(init_obj.get(traverser,
+                                                      prop_name),
+                                         prop["value"]["properties"])
+
+                    
+
+            _proc_objpattern(init_obj=init,
+                             properties = declaration["id"]["properties"])
+
+            print "OP:", declaration
+
+
         else:
             var_name = declaration["id"]["name"]
             traverser._debug("NAME>>%s" % var_name)
