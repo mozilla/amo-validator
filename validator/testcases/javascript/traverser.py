@@ -6,7 +6,7 @@ from validator.testcases.javascript.nodedefinitions import DEFINITIONS
 from validator.testcases.javascript.predefinedentities import \
                GLOBAL_ENTITIES, BANNED_IDENTIFIERS
 
-DEBUG = True
+DEBUG = False
 
 class MockBundler:
     def __init__(self):

@@ -1,6 +1,6 @@
 import types
 
-import traverser as js_traverser
+import spidermonkey as spidermonkey
 from jstypes import *
 
 def trace_member(traverser, node):
@@ -102,9 +102,9 @@ def _define_function(traverser, node):
     "Makes a function happy"
     
     me = _function(traverser, node)
-    me = js_traverser.JSWrapper(value=me,
-                                traverser=traverser,
-                                callable=True)
+    me = JSWrapper(value=me,
+                   traverser=traverser,
+                   callable=True)
     traverser._peek_context(2).set(node["id"]["name"], me)
     
     return True
@@ -122,7 +122,7 @@ def _define_with(traverser, node):
     "Handles `with` statements"
     
     object_ = traverser._traverse_node(node["object"])
-    if not isinstance(object_, traverser.JSObject):
+    if not isinstance(object_, JSObject):
         # If we don't get an object back (we can't deal with literals), then
         # just fall back on standard traversal.
         return False
@@ -318,8 +318,8 @@ def _call_settimeout(a,t):
     is a lambda function or a string. Strings are banned, lambda functions are
     ok. Since we can't do reliable type testing on other variables, we flag
     those, too."""
-
-    return (not a) or a[0]["type"] != "FunctionExpression"
+    
+    return a and a[0]["type"] != "FunctionExpression"
 
 def _expression(traverser, node):
     "Evaluates an expression and returns the result"
@@ -536,11 +536,9 @@ def _expr_unary_typeof(wrapper):
     value = wrapper.value
     if value is None:
         return "undefined"
-    elif isinstance(value, (js_traverser.JSObject,
-                            js_traverser.JSPrototype,
-                            js_traverser.JSArray)):
+    elif isinstance(value, (JSObject, JSPrototype, JSArray)):
         return "object"
-    elif isinstance(value, js_traverser.JSLiteral):
+    elif isinstance(value, JSLiteral):
         value = value.value
 
         if isinstance(value, (int, long, float)):
