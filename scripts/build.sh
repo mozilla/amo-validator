@@ -29,6 +29,6 @@ export SPIDERMONKEY_INSTALLATION="/usr/local/bin/tracemonkey"
 
 echo "Starting tests..." `date`
 
-nosetests --with-coverage --cover-package=validator --cover-skip=validator.outputhandlers.,validator.main,validator.constants,validator.constants_local --cover-inclusive --cover-tests
+nosetests
 
 echo 'shazam!'
