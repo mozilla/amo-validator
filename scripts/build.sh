@@ -29,6 +29,6 @@ export SPIDERMONKEY_INSTALLATION="/usr/local/bin/tracemonkey"
 
 echo "Starting tests..." `date`
 
-nosetests
+nosetests --with-xunit
 
 echo 'shazam!'
