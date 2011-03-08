@@ -56,7 +56,7 @@ def get_tree(code, err=None, filename=None, shell=None):
                        "being properly read by the Spidermonkey JS engine.",
                        str(exc)],
                       filename=filename)
-    
+
 
 class JSReflectException(Exception):
     "An exception to indicate that tokenization has failed"
@@ -125,10 +125,10 @@ def strip_weird_chars(chardata, err=None, name=""):
 
 def _get_tree(code, shell=SPIDERMONKEY_INSTALLATION):
     "Returns an AST tree of the JS passed in `code`."
-    
+
     if not code:
         return None
-    
+
     temp = tempfile.NamedTemporaryFile(mode="w+", delete=False)
     temp.write(code)
     temp.flush()
@@ -146,14 +146,14 @@ def _get_tree(code, shell=SPIDERMONKEY_INSTALLATION):
     try:
         cmd = [shell, "-e", data]
         try:
-            shell = subprocess.Popen(cmd,
-                               shell=False,
-                   stderr=subprocess.PIPE,
-                   stdout=subprocess.PIPE)
+            shell_obj = subprocess.Popen(cmd,
+                                   shell=False,
+                       stderr=subprocess.PIPE,
+                       stdout=subprocess.PIPE)
         except OSError:
             raise OSError("Spidermonkey shell could not be run.")
 
-        data, stderr = shell.communicate()
+        data, stderr = shell_obj.communicate()
         if stderr: raise RuntimeError('Error calling %r: %s' % (cmd, stderr))
 
         # Closing the temp file will delete it.
@@ -170,13 +170,15 @@ def _get_tree(code, shell=SPIDERMONKEY_INSTALLATION):
         data = unicode(data)
     except UnicodeDecodeError:
         data = unicode(filter_ascii(data))
-    
+
     parsed = json.loads(data, strict=False)
 
     if "error" in parsed and parsed["error"]:
         if parsed["error_message"][:14] == "ReferenceError":
             raise RuntimeError("Spidermonkey version too old; "
-                               "1.8pre+ required")
+                               "1.8pre+ required; error='%s'; "
+                               "spidermonkey='%s'" % (parsed["error_message"],
+                                                      shell))
         else:
             raise JSReflectException(parsed["error_message"]).line_num(
                     parsed["line_number"])
