@@ -3,6 +3,7 @@ import types
 import spidermonkey as spidermonkey
 from jstypes import *
 
+
 def trace_member(traverser, node):
     "Traces a MemberExpression and returns the appropriate object"
 
@@ -42,6 +43,7 @@ def trace_member(traverser, node):
             return JSWrapper(traversed, traverser=traverser)
         return traversed
 
+
 def test_identifier(traverser, name):
     "Tests whether an identifier is banned"
 
@@ -69,7 +71,7 @@ def _function(traverser, node):
     traverser._pop_context()
     traverser._push_context(me)
     traverser._debug("THIS_PUSH")
-    traverser.this_stack.append(me) # Allow references to "this"
+    traverser.this_stack.append(me)  # Allow references to "this"
 
     # Declare parameters in the local scope
     params = []
@@ -98,6 +100,7 @@ def _function(traverser, node):
 
     return me
 
+
 def _define_function(traverser, node):
     "Makes a function happy"
 
@@ -109,6 +112,7 @@ def _define_function(traverser, node):
 
     return True
 
+
 def _func_expr(traverser, node):
     "Represents a lambda function"
 
@@ -118,6 +122,7 @@ def _func_expr(traverser, node):
         return JSWrapper(value=results, traverser=traverser)
     return results
 
+
 def _define_with(traverser, node):
     "Handles `with` statements"
 
@@ -126,6 +131,7 @@ def _define_with(traverser, node):
        isinstance(object_.value, JSObject):
         traverser.contexts[-1] = object_.value
     return
+
 
 def _define_var(traverser, node):
     "Creates a local context variable"
@@ -162,7 +168,7 @@ def _define_var(traverser, node):
                                 vars[0],
                                 JSWrapper(traverser._traverse_node(value),
                                           traverser=traverser))
-                    vars = vars[1:] # Pop off the first value
+                    vars = vars[1:]  # Pop off the first value
 
             # It's being assigned by a JSArray (presumably)
             elif declaration["init"]["type"] == "ArrayExpression":
@@ -199,7 +205,7 @@ def _define_var(traverser, node):
                                          prop["value"]["properties"])
 
             _proc_objpattern(init_obj=init,
-                             properties = declaration["id"]["properties"])
+                             properties=declaration["id"]["properties"])
 
         else:
             var_name = declaration["id"]["name"]
@@ -212,7 +218,7 @@ def _define_var(traverser, node):
 
             if not isinstance(var_value, JSWrapper):
                 var = JSWrapper(value=var_value,
-                                const=(node["kind"]=="const"),
+                                const=(node["kind"] == "const"),
                                 traverser=traverser)
             else:
                 var = var_value
@@ -223,6 +229,7 @@ def _define_var(traverser, node):
 
     # The "Declarations" branch contains custom elements.
     return True
+
 
 def _define_obj(traverser, node):
     "Creates a local context object"
@@ -245,6 +252,7 @@ def _define_obj(traverser, node):
     var.lazy = True
     return var
 
+
 def _define_array(traverser, node):
     "Instantiates an array object"
 
@@ -254,11 +262,13 @@ def _define_array(traverser, node):
 
     return arr
 
+
 def _define_literal(traverser, node):
     "Creates a JSVariable object based on a literal"
 
     var = JSLiteral(node["value"])
     return JSWrapper(var, traverser=traverser)
+
 
 def _call_expression(traverser, node):
     args = node["arguments"]
@@ -303,7 +313,8 @@ def _call_expression(traverser, node):
                                   "The createElement() function was used to "
                                   "create a script tag in a JavaScript file. "
                                   "Add-ons are not allowed to create script "
-                                  "tags or load code dynamically from the web.",
+                                  "tags or load code dynamically from the "
+                                  "web.",
                                   traverser.filename,
                                   line=traverser.line,
                                   column=traverser.position,
@@ -320,18 +331,17 @@ def _call_expression(traverser, node):
                                    "_call_expression",
                                    "createelement_variable"),
                                   "Variable element type being created",
-                                  ["createElement or createElementNS were used "
-                                   "with a variable rather than a raw string. "
-                                   "Literal values should be used when taking "
-                                   "advantage of the element creation "
-                                   "functions.",
+                                  ["createElement or createElementNS were "
+                                   "used with a variable rather than a raw "
+                                   "string. Literal values should be used "
+                                   "when taking advantage of the element "
+                                   "creation functions.",
                                    "E.g.: createElement('foo') rather than "
                                    "createElement(el_type)"],
                                   traverser.filename,
                                   line=traverser.line,
                                   column=traverser.position,
                                   context=traverser.context)
-
 
     if member.is_global and "return" in member.value:
         return member.value["return"](wrapper=member,
@@ -340,13 +350,15 @@ def _call_expression(traverser, node):
 
     return True
 
-def _call_settimeout(a,t):
+
+def _call_settimeout(a, t):
     """Handler for setTimeout and setInterval. Should determine whether a[0]
     is a lambda function or a string. Strings are banned, lambda functions are
     ok. Since we can't do reliable type testing on other variables, we flag
     those, too."""
 
     return a and a[0]["type"] != "FunctionExpression"
+
 
 def _expression(traverser, node):
     "Evaluates an expression and returns the result"
@@ -355,6 +367,7 @@ def _expression(traverser, node):
         return JSWrapper(result, traverser=traverser)
     return result
 
+
 def _get_this(traverser, node):
     "Returns the `this` object"
 
@@ -362,6 +375,7 @@ def _get_this(traverser, node):
         return JSWrapper(traverser=traverser)
 
     return traverser.this_stack[-1]
+
 
 def _new(traverser, node):
     "Returns a new copy of a node."
@@ -383,6 +397,7 @@ def _new(traverser, node):
         elem.value["overwriteable"] = True
     return elem
 
+
 def _ident(traverser, node):
     "Initiates an object lookup on the traverser based on an identifier token"
 
@@ -403,6 +418,7 @@ def _ident(traverser, node):
     result = JSWrapper(traverser=traverser)
     traverser._set_variable(name, result)
     return result
+
 
 def _expr_assignment(traverser, node):
     "Evaluates an AssignmentExpression node."
@@ -436,18 +452,18 @@ def _expr_assignment(traverser, node):
         gleft = _get_as_num(left)
         gright = _get_as_num(right)
         # All of the assignment operators
-        operators = {"=":lambda:right,
-                     "+=":lambda:lit_left + lit_right,
-                     "-=":lambda:gleft - gright,
-                     "*=":lambda:gleft * gright,
-                     "/=":lambda:None if gright == 0 else (gleft / gright),
-                     "%=":lambda:None if gright == 0 else (gleft % gright),
-                     "<<=":lambda:gleft << gright,
-                     ">>=":lambda:gleft >> lit_right,
-                     ">>>=":lambda:math.fabs(gleft) >> gright,
-                     "|=":lambda:gleft | gright,
-                     "^=":lambda:gleft ^ gright,
-                     "&=":lambda:gleft & gright}
+        operators = {"=": lambda: right,
+                     "+=": lambda: lit_left + lit_right,
+                     "-=": lambda: gleft - gright,
+                     "*=": lambda: gleft * gright,
+                     "/=": lambda: None if gright == 0 else (gleft / gright),
+                     "%=": lambda: None if gright == 0 else (gleft % gright),
+                     "<<=": lambda: gleft << gright,
+                     ">>=": lambda: gleft >> lit_right,
+                     ">>>=": lambda: math.fabs(gleft) >> gright,
+                     "|=": lambda: gleft | gright,
+                     "^=": lambda: gleft ^ gright,
+                     "&=": lambda: gleft & gright}
 
         token = node["operator"]
         traverser._debug("ASSIGNMENT>>OPERATION:%s" % token)
@@ -466,6 +482,7 @@ def _expr_assignment(traverser, node):
     # evaluate out to 5.
     traverser.debug_level -= 1
     return right
+
 
 def _expr_binary(traverser, node):
     "Evaluates a BinaryExpression node."
@@ -529,8 +546,10 @@ def _expr_binary(traverser, node):
     elif operator in operators:
 
         if operator == "+":
-            if left is None: left = ""
-            if right is None: right = ""
+            if left is None:
+                left = ""
+            if right is None:
+                right = ""
             if isinstance(left, types.StringTypes) or \
                isinstance(right, types.StringTypes):
                 left = unicode(left)
@@ -541,6 +560,7 @@ def _expr_binary(traverser, node):
         return JSWrapper(output, traverser=traverser)
     return output
 
+
 def _expr_unary(traverser, node):
     "Evaluates a UnaryExpression node"
 
@@ -548,13 +568,14 @@ def _expr_unary(traverser, node):
     expr_lit = expr.get_literal_value()
     expr_num = _get_as_num(expr_lit)
 
-    operators = {"-":lambda:-1 * expr_num,
-                 "+":expr_num,
-                 "!":not expr_lit,
-                 "~":-1 * (expr_num + 1),
-                 "void":None,
-                 "typeof":_expr_unary_typeof(expr),
-                 "delete":None} # We never want to empty the context
+    operators = {"-": lambda: -1 * expr_num,
+                 "+": expr_num,
+                 "!": not expr_lit,
+                 "~": -1 * (expr_num + 1),
+                 "void": None,
+                 "typeof": _expr_unary_typeof(expr),
+                 "delete": None}  # We never want to empty the context
+
 
 def _expr_unary_typeof(wrapper):
     "Evaluates the type of an object"
@@ -576,6 +597,7 @@ def _expr_unary_typeof(wrapper):
             return "boolean"
         elif isinstance(value, types.StringTypes):
             return "string"
+
 
 def _get_as_num(value):
     "Returns the JS numeric equivalent for a value"

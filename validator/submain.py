@@ -20,6 +20,7 @@ types = {0: "Unknown",
 assumed_extensions = {"jar": PACKAGE_THEME,
                       "xml": PACKAGE_SEARCHPROV}
 
+
 def prepare_package(err, path, expectation=0):
     "Prepares a file-based package for validation."
 
@@ -54,6 +55,7 @@ def prepare_package(err, path, expectation=0):
 
     return output
 
+
 def test_search(err, package, expectation=0):
     "Tests the package to see if it is a search provider."
 
@@ -67,11 +69,11 @@ def test_search(err, package, expectation=0):
                             "test_search",
                             "extension"),
                            "Unexpected file extension.")
-                           
+
     # Is this a search provider?
     opensearch_results = detect_opensearch(package,
                                            listed=err.get_resource("listed"))
-    
+
     if opensearch_results["failure"]:
         # Failed OpenSearch validation
         error_mesg = "OpenSearch: %s" % opensearch_results["error"]
@@ -100,7 +102,7 @@ def test_search(err, package, expectation=0):
 
 def test_package(err, file_, name, expectation=PACKAGE_ANY):
     "Begins tests for the package."
-    
+
     # Load up a new instance of an XPI.
     package = XPIManager(file_, name)
     if not package.zf:
@@ -109,14 +111,14 @@ def test_package(err, file_, name, expectation=PACKAGE_ANY):
                           "test_package",
                           "unopenable"),
                          "The XPI could not be opened.")
-    
+
     # Test the XPI file for corruption.
     if package.test():
         return err.error(("main",
                           "test_package",
                           "corrupt"),
                          "XPI package appears to be corrupt.")
-    
+
     if package.extension in assumed_extensions:
         assumed_type = assumed_extensions[package.extension]
         # Is the user expecting a different package type?
@@ -125,16 +127,17 @@ def test_package(err, file_, name, expectation=PACKAGE_ANY):
                        "test_package",
                        "unexpected_type"),
                       "Unexpected package type (found theme)")
-                      
+
     # Cache a copy of the package contents.
     package_contents = package.get_file_data()
-    
+
     # Test the install.rdf file to see if we can get the type that way.
     has_install_rdf = "install.rdf" in package_contents
     if has_install_rdf:
         _load_install_rdf(err, package, expectation)
-    
+
     return test_inner_package(err, package_contents, package)
+
 
 def _load_install_rdf(err, package, expectation):
     # Load up the install.rdf file.
@@ -152,7 +155,7 @@ def _load_install_rdf(err, package, expectation):
                          filename="install.rdf")
 
     install_rdf = RDFParser(install_rdf_data)
-    
+
     if install_rdf.rdf is None or not install_rdf:
         return err.error(("main",
                           "test_package",
@@ -163,22 +166,22 @@ def _load_install_rdf(err, package, expectation):
     else:
         err.save_resource("has_install_rdf", True, pushable=True)
         err.save_resource("install_rdf", install_rdf, pushable=True)
-    
+
     # Load up the results of the type detection
     results = typedetection.detect_type(err,
                                         install_rdf,
                                         package)
-    
+
     if results is None:
         return err.error(("main",
                           "test_package",
                           "undeterminable_type"),
                          "Unable to determine add-on type",
-                         "The type detection algorithm could not determine the "
-                         "type of the add-on.")
+                         "The type detection algorithm could not determine "
+                         "the type of the add-on.")
     else:
         err.set_type(results)
-    
+
     # Compare the results of the low-level type detection to
     # that of the expectation and the assumption.
     if not expectation in (PACKAGE_ANY, results):
@@ -189,6 +192,7 @@ def _load_install_rdf(err, package, expectation):
                     'Type "%s" expected, found "%s")' % (
                                                     types[expectation],
                                                     types[results]))
+
 
 def populate_chrome_manifest(err, package_contents, xpi_package):
     "Loads the chrome.manifest if it's present"
@@ -201,7 +205,7 @@ def populate_chrome_manifest(err, package_contents, xpi_package):
 
 def test_inner_package(err, package_contents, xpi_package):
     "Tests a package's inner content."
-    
+
     populate_chrome_manifest(err, package_contents, xpi_package)
 
     # Iterate through each tier.
@@ -221,11 +225,11 @@ def test_inner_package(err, package_contents, xpi_package):
                 # - Package listing
                 # - A copy of the package itself
                 test_func(err, package_contents, xpi_package)
-        
+
         # Return any errors at the end of the tier if undetermined.
         if err.failed(fail_on_warnings=False) and not err.determined:
             err.unfinished = True
             return err
-            
+
     # Return the results.
     return err

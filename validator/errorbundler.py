@@ -5,14 +5,15 @@ from StringIO import StringIO
 from outputhandlers.shellcolors import OutputHandler
 from textfilter import filter_ascii
 
+
 class ErrorBundle(object):
     """This class does all sorts of cool things. It gets passed around
     from test to test and collects up all the errors like the candy man
     'separating the sorrow and collecting up all the cream.' It's
     borderline magical."""
-    
+
     def __init__(self, determined=True, listed=True):
-        
+
         self.handler = None
 
         self.errors = []
@@ -22,24 +23,24 @@ class ErrorBundle(object):
 
         self.ending_tier = 1
         self.tier = 1
-        
+
         self.metadata = {}
         self.determined = determined
-        
+
         self.subpackages = []
         self.package_stack = []
-        
+
         self.detected_type = 0
         self.resources = {}
         self.pushable_resources = {}
         self.unfinished = False
-        
+
         if listed:
             self.resources["listed"] = True
 
     def error(self, err_id, error,
-              description='', filename='', line=None, column=None, context=None,
-              tier=None):
+              description='', filename='', line=None, column=None,
+              context=None, tier=None):
         "Stores an error message for the validation process"
         self._save_message(self.errors,
                            "errors",
@@ -52,10 +53,10 @@ class ErrorBundle(object):
                             "tier": tier},
                            context=context)
         return self
-        
+
     def warning(self, err_id, warning,
-                description='', filename='', line=None, column=None, context=None,
-                tier=None):
+                description='', filename='', line=None, column=None,
+                context=None, tier=None):
         "Stores a warning message for the validation process"
         self._save_message(self.warnings,
                            "warnings",
@@ -70,8 +71,8 @@ class ErrorBundle(object):
         return self
 
     def notice(self, err_id, notice,
-               description="", filename="", line=None, column=None, context=None,
-               tier=None):
+               description="", filename="", line=None, column=None,
+               context=None, tier=None):
         "Stores an informational message about the validation"
         self._save_message(self.notices,
                            "notices",
@@ -90,12 +91,12 @@ class ErrorBundle(object):
         self.tier = tier
         if tier > self.ending_tier:
             self.ending_tier = tier
-        
+
     def _save_message(self, stack, type_, message, context=None):
         "Stores a message in the appropriate message stack."
-        
+
         uid = uuid.uuid4().hex
-        
+
         message["uid"] = uid
 
         # Get the context for the message (if there's a context available)
@@ -108,12 +109,12 @@ class ErrorBundle(object):
                                                 column=message["column"])
         else:
             message["context"] = None
-        
+
         message["message"] = filter_ascii(message["message"])
         message["description"] = filter_ascii(message["description"])
-        
+
         stack.append(message)
-        
+
         # Mark the tier that the error occurred at
         if message["tier"] is None:
             message["tier"] = self.tier
@@ -131,45 +132,45 @@ class ErrorBundle(object):
                                  "__messages": []}
                 tree[eid]["__%s" % type_] += 1
                 last_id = eid
-        
+
             tree[last_id]['__messages'].append(uid)
-        
+
     def set_type(self, type_):
         "Stores the type of addon we're scanning"
         self.detected_type = type_
-    
+
     def failed(self, fail_on_warnings=True):
         """Returns a boolean value describing whether the validation
         succeeded or not."""
-        
+
         return self.errors or (fail_on_warnings and self.warnings)
-        
+
     def get_resource(self, name):
         "Retrieves an object that has been stored by another test."
-        
+
         if name in self.resources:
             return self.resources[name]
         elif name in self.pushable_resources:
             return self.pushable_resources[name]
         else:
             return False
-        
+
     def save_resource(self, name, resource, pushable=False):
         "Saves an object such that it can be used by other tests."
-        
+
         if pushable:
             self.pushable_resources[name] = resource
         else:
             self.resources[name] = resource
-        
+
     def is_nested_package(self):
         "Returns whether the current package is within a PACKAGE_MULTI"
-        
+
         return bool(self.package_stack)
-    
+
     def push_state(self, new_file=""):
         "Saves the current error state to parse subpackages"
-        
+
         self.subpackages.append({"errors": self.errors,
                                  "warnings": self.warnings,
                                  "notices": self.notices,
@@ -177,26 +178,26 @@ class ErrorBundle(object):
                                  "message_tree": self.message_tree,
                                  "resources": self.pushable_resources,
                                  "metadata": self.metadata})
-        
+
         self.errors = []
         self.warnings = []
         self.notices = []
         self.message_tree = {}
         self.pushable_resources = {}
         self.metadata = {}
-        
+
         self.package_stack.append(new_file)
-    
+
     def pop_state(self):
         "Retrieves the last saved state and restores it."
-        
+
         # Save a copy of the current state.
         state = self.subpackages.pop()
         errors = self.errors
         warnings = self.warnings
         notices = self.notices
         # We only rebuild message_tree anyway. No need to restore.
-        
+
         # Copy the existing state back into place
         self.errors = state["errors"]
         self.warnings = state["warnings"]
@@ -205,17 +206,16 @@ class ErrorBundle(object):
         self.message_tree = state["message_tree"]
         self.pushable_resources = state["resources"]
         self.metadata = state["metadata"]
-        
+
         name = self.package_stack.pop()
-        
+
         self._merge_messages(errors, self.error, name)
         self._merge_messages(warnings, self.warning, name)
         self._merge_messages(notices, self.notice, name)
-        
-    
+
     def _merge_messages(self, messages, callback, name):
         "Merges a stack of messages into another stack of messages"
-        
+
         # Overlay the popped warnings onto the existing ones.
         for message in messages:
             trace = [name]
@@ -224,7 +224,7 @@ class ErrorBundle(object):
                 trace.extend(message["file"])
             else:
                 trace.append(message["file"])
-            
+
             # Write the errors with the file structure delimited by
             # right carets.
             callback(message["id"],
@@ -235,11 +235,10 @@ class ErrorBundle(object):
                      column=message["column"],
                      context=message["context"],
                      tier=message["tier"])
-    
-    
+
     def render_json(self):
         "Returns a JSON summary of the validation operation."
-        
+
         types = {0: "unknown",
                  1: "extension",
                  2: "theme",
@@ -249,34 +248,34 @@ class ErrorBundle(object):
         output = {"detected_type": types[self.detected_type],
                   "ending_tier": self.ending_tier,
                   "success": not self.failed(),
-                  "messages":[],
+                  "messages": [],
                   "errors": len(self.errors),
                   "warnings": len(self.warnings),
                   "notices": len(self.notices),
                   "message_tree": self.message_tree,
                   "metadata": self.metadata}
-        
+
         messages = output["messages"]
-        
+
         # Copy messages to the JSON output
         for error in self.errors:
             error["type"] = "error"
             messages.append(error)
-            
+
         for warning in self.warnings:
             warning["type"] = "warning"
             messages.append(warning)
-            
+
         for notice in self.notices:
             notice["type"] = "notice"
             messages.append(notice)
-        
+
         # Output the JSON.
         return json.dumps(output)
-    
+
     def print_summary(self, verbose=False, no_color=False):
         "Prints a summary of the validation process so far."
-        
+
         types = {0: "Unknown",
                  1: "Extension/Multi-Extension",
                  2: "Theme",
@@ -285,7 +284,7 @@ class ErrorBundle(object):
                  5: "Search Provider",
                  7: "Subpackage"}
         detected_type = types[self.detected_type]
-        
+
         buffer = StringIO()
         self.handler = OutputHandler(buffer, no_color)
 
@@ -294,10 +293,10 @@ class ErrorBundle(object):
             .write("-" * 30) \
             .write("Detected type: <<BLUE>>%s" % detected_type) \
             .write("-" * 30)
-        
+
         if self.failed():
             self.handler.write("<<BLUE>>Test failed! Errors:")
-            
+
             # Print out all the errors/warnings:
             for error in self.errors:
                 self._print_message("<<RED>>Error:<<NORMAL>>\t",
@@ -307,14 +306,13 @@ class ErrorBundle(object):
                                     warning, verbose)
         else:
             self.handler.write("<<GREEN>>All tests succeeded!")
-            
-        
+
         if self.notices:
             for notice in self.notices:
                 self._print_message(prefix="<<WHITE>>Notice:<<NORMAL>>\t",
                                     message=notice,
                                     verbose=verbose)
-        
+
         self.handler.write("\n")
         if self.unfinished:
             self.handler.write("<<RED>>Validation terminated early")
@@ -325,7 +323,7 @@ class ErrorBundle(object):
             self.handler.write("\n")
 
         return buffer.getvalue()
-       
+
     def _flatten_list(self, data):
         "Flattens nested lists into strings."
 
@@ -338,21 +336,22 @@ class ErrorBundle(object):
 
     def _print_message(self, prefix, message, verbose=True):
         "Prints a message and takes care of all sorts of nasty code"
-        
+
         # Load up the standard output.
         output = ["\n",
                   prefix,
                   message["message"],
                   "\n"]
-        
+
         # We have some extra stuff for verbose mode.
         if verbose:
             verbose_output = []
-            
+
             # Detailed problem description.
             if message["description"]:
-                verbose_output.append(self._flatten_list(message["description"]))
-            
+                verbose_output.append(
+                    self._flatten_list(message["description"]))
+
             # Show the user what tier we're on
             verbose_output.append("\tTier:\t%d" % message["tier"])
 
@@ -360,7 +359,7 @@ class ErrorBundle(object):
             files = message["file"]
             if files is not None and files != "":
                 fmsg = "\tFile:\t%s"
-                
+
                 # Nested files (subpackes) are stored in a list.
                 if type(files) is list:
                     if files[-1] == "":
@@ -368,7 +367,7 @@ class ErrorBundle(object):
                     verbose_output.append(fmsg % ' > '.join(files))
                 else:
                     verbose_output.append(fmsg % files)
-            
+
             # If there is a line number, that gets put on the end.
             if message["line"]:
                 verbose_output.append("\tLine:\t%s" % message["line"])
@@ -386,7 +385,7 @@ class ErrorBundle(object):
             # Stick it in with the standard items.
             output.append("\n")
             output.append("\n".join(verbose_output))
-        
+
         # Send the final output to the handler to be rendered.
         self.handler.write(''.join(output))
-        
+

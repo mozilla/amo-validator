@@ -14,7 +14,7 @@ import validator.testcases.l10n.properties as properties
 # The threshold that determines the number of entities that must not be
 # missing from the package.
 L10N_THRESHOLD = 0.35
-L10N_SIMILAR_THRESHOLD = 0.9 # For en_US/en_GB kind of stuff
+L10N_SIMILAR_THRESHOLD = 0.9  # For en_US/en_GB kind of stuff
 
 # Only warn about unchanged entities longer than this number of characters.
 L10N_LENGTH_THRESHOLD = 3
@@ -25,9 +25,10 @@ L10N_MIN_ENTITIES = 18
 
 LOCALE_CACHE = {}
 
+
 def _get_locales(err, xpi_package):
     "Returns a list of locales from the chrome.manifest file."
-    
+
     # Retrieve the chrome.manifest if it's cached.
     chrome = False
     if err is not None:
@@ -52,8 +53,9 @@ def _get_locales(err, xpi_package):
         locale_name = "%s:%s" % (locale["predicate"], locale_jar[0])
         if locale_name not in locales:
             locales[locale_name] = locale_desc
-    
+
     return locales
+
 
 def _get_locale_manager(err, addon, path, files, no_cache=False):
     "Returns the XPIManager object for a locale"
@@ -79,23 +81,24 @@ def _get_locale_manager(err, addon, path, files, no_cache=False):
         LOCALE_CACHE[path] = locale
     return locale
 
+
 @decorator.register_test(tier=4)
 def test_xpi(err, package_contents, xpi_package):
     """Tests an XPI (or JAR, really) for L10n completeness"""
-    
+
     # Skip over incompatible (or unnecessary) package types.
     if err.detected_type not in (PACKAGE_EXTENSION,
                                  PACKAGE_THEME) or \
        err.is_nested_package():
         # NOTE : Should we also do this with PACKAGE_MULTI?
         return None
-    
+
     # Don't even both with the test(s) if there's no chrome.manifest.
     if "chrome.manifest" not in package_contents:
         return None
-    
-    locales = _get_locales(err, xpi_package);
-    
+
+    locales = _get_locales(err, xpi_package)
+
     # We need at least a reference and a target.
     num_locales = len(locales)
     if num_locales < 2:
@@ -109,7 +112,7 @@ def test_xpi(err, package_contents, xpi_package):
                        "localize.",
                        filename="chrome.manifest")
         return
-    
+
     # Use the first locale by default
     ref_name = locales.keys()[0]
     # Try to find en-US, as this is where the majority of users is
@@ -128,7 +131,7 @@ def test_xpi(err, package_contents, xpi_package):
         # Ignore the reference locale
         if name == ref_name:
             continue
-        
+
         target_locale = _get_locale_manager(err,
                                             xpi_package,
                                             locale["path"],
@@ -136,7 +139,7 @@ def test_xpi(err, package_contents, xpi_package):
         if target_locale is None:
             continue
         split_target = locale["name"].split("-")
-        
+
         # Isolate each of the target locales' results.
         results = _compare_packages(reference_locale,
                                     target_locale,
@@ -150,16 +153,17 @@ def test_xpi(err, package_contents, xpi_package):
     # Clear the cache at the end of the test
     L10N_CACHE = {}
 
+
 @decorator.register_test(tier=4, expected_type=PACKAGE_LANGPACK)
 def test_lp_xpi(err, package_contents, xpi_package):
     "Tests a language pack for L10n completeness"
-    
+
     # Don't even both with the test(s) if there's no chrome.manifest.
     if "chrome.manifest" not in package_contents:
         return None
 
-    locales = _get_locales(err, xpi_package);
-    
+    locales = _get_locales(err, xpi_package)
+
     # Get the reference packages.
     references = []
     support_references = err.get_resource("supports")
@@ -181,7 +185,7 @@ def test_lp_xpi(err, package_contents, xpi_package):
             reference_locales = _get_locales(None, ref_xpi)
 
             references.append((ref_xpi, reference_locales))
-            
+
     # Iterate each supported reference package
     for (ref_xpi, ref_locales) in references:
         # Iterate each locale in each supported reference package
@@ -207,7 +211,7 @@ def test_lp_xpi(err, package_contents, xpi_package):
                              "Missing locale: %s" % ref_predicate],
                             filename="chrome.manifest")
                 continue
-            
+
             target_locale = corresp_locales[0]
             target_pack = _get_locale_manager(err,
                                               xpi_package,
@@ -223,61 +227,62 @@ def test_lp_xpi(err, package_contents, xpi_package):
 
             # Report the findings after each supported app's locale
             _aggregate_results(err, results, target_locale)
-    
+
     # Clear the cache at the end of the test
     LOCALE_CACHE = {}
 
+
 def _compare_packages(reference, target, ref_base="", locale_base=""):
     "Compares two L10n-compatible packages to one another."
-    
+
     ref_files = reference.get_file_data()
     tar_files = target.get_file_data()
-    
+
     results = []
     total_entities = 0
-    
+
     ref_base = ref_base.lstrip("/")
     locale_base = locale_base.lstrip("/")
-    
+
     l10n_docs = ("dtd", "properties", "xhtml", "ini", "inc")
     parsable_docs = ("dtd", "properties")
-    
+
     for name, file_data in ref_files.items():
-        
+
         entity_count = 0
-        
+
         # Skip directory entries.
-        if name.endswith("/"): # pragma: no cover
+        if name.endswith("/"):  # pragma: no cover
             continue
 
         # Ignore files not considered reference files.
         if ref_base and not name.startswith(ref_base):
             continue
-        
+
         extension = name.split(".")[-1]
         if extension not in l10n_docs:
             continue
         parsable = extension in parsable_docs
-        
+
         if parsable:
             ref_doc = _parse_l10n_doc(name,
                                       reference.read(name),
                                       no_encoding=True)
         else:
             ref_doc = ()
-        
+
         tar_name = locale_base + name[len(ref_base):]
         if tar_name not in tar_files:
             results.append({"type": "missing_files",
                             "entities": len(ref_doc),
                             "filename": tar_name})
             continue
-        
+
         if not parsable:
             continue
-        
+
         tar_doc = _parse_l10n_doc(tar_name, target.read(tar_name))
-        
+
         if not tar_doc.expected_encoding:
             results.append({"type": "unexpected_encoding",
                             "filename": tar_name,
@@ -285,22 +290,21 @@ def _compare_packages(reference, target, ref_base="", locale_base=""):
 
         missing_entities = []
         unchanged_entities = []
-        
+
         for rname, rvalue, rline in ref_doc.items:
             entity_count += 1
-            
+
             if rname not in tar_doc.entities:
                 missing_entities.append(rname)
                 continue
-            
+
             if rvalue == tar_doc.entities[rname] and \
                len(rvalue) > L10N_LENGTH_THRESHOLD and \
                not fnmatch.fnmatch(rvalue, "http*://*"):
-                
+
                 unchanged_entities.append((rname, rline))
                 continue
-            
-        
+
         if missing_entities:
             results.append({"type": "missing_entities",
                             "entities": len(missing_entities),
@@ -311,34 +315,33 @@ def _compare_packages(reference, target, ref_base="", locale_base=""):
                             "entities": len(unchanged_entities),
                             "filename": tar_name,
                             "unchanged_entities": unchanged_entities})
-        
+
         results.append({"type": "file_entity_count",
                         "filename": tar_name,
                         "entities": entity_count})
-        
+
         total_entities += entity_count
-        
-    
+
     results.append({"type": "total_entities",
                     "entities": total_entities})
     return results
-    
+
 
 def _parse_l10n_doc(name, doc, no_encoding=False):
     "Parses an L10n document."
-    
+
     extension = name.split(".")[-1].lower()
-    
+
     handlers = {"dtd": dtd.DTDParser,
                 "properties": properties.PropertiesParser}
     # These are expected encodings for the various files.
     handler_formats = ("ASCII", "UTF_8")
     if extension not in handlers:
         return None
-    
+
     wrapper = StringIO(doc)
     loc_doc = handlers[extension](wrapper)
-    
+
     # Allow the parse to specify files to skip for encoding checks
     if not no_encoding:
         encoding = fastchardet.detect(doc)["encoding"].upper()
@@ -347,20 +350,21 @@ def _parse_l10n_doc(name, doc, no_encoding=False):
 
     return loc_doc
 
+
 def _aggregate_results(err, results, locale, similar=False, base="en-US"):
     """Compiles the errors and warnings in the L10n results list into
     error bundler errors and warnings."""
-    
+
     total_entities = 0
     unchanged_entities = 0
     unchanged_entity_list = {}
     entity_count = {}
     unexpected_encodings = []
-    
+
     for ritem in results:
         if "filename" in ritem:
             rfilename = ritem["filename"]
-        
+
         rtype = ritem["type"]
         if rtype == "missing_files":
             err.warning(("testcases_l10ncompleteness",
@@ -403,7 +407,7 @@ def _aggregate_results(err, results, locale, similar=False, base="en-US"):
             unexpected_encodings.append(
                     (ritem["filename"],
                      ", ".join(ritem["expected_encoding"])))
-    
+
     agg_unchanged = []
     if not similar:
         unchanged_percentage = L10N_THRESHOLD
@@ -413,7 +417,7 @@ def _aggregate_results(err, results, locale, similar=False, base="en-US"):
         if name not in unchanged_entity_list or \
            count == 0:
             continue
-        
+
         unchanged = unchanged_entity_list[name]
         total_adjusted = max(count, L10N_MIN_ENTITIES)
         percentage = float(unchanged["count"]) / float(total_adjusted)
@@ -427,7 +431,7 @@ def _aggregate_results(err, results, locale, similar=False, base="en-US"):
                                 for e, line
                                 in unchanged["entities"]]),
                      percentage * 100))
-    
+
     if agg_unchanged:
         err.warning(("testcases_l10ncompleteness",
                      "_aggregate_results",

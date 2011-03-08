@@ -2,21 +2,22 @@ import inspect
 import json
 import types
 
+
 class JSContext(object):
     "A variable context"
-    
+
     def __init__(self, context_type):
         self._type = context_type
         self.data = {}
-    
+
     def get(self, name):
         name = str(name)
         return self.data[name] if name in self.data else None
-    
+
     def set(self, name, variable):
         name = str(name)
         self.data[name] = variable
-    
+
     def has_var(self, name):
         name = str(name)
         return name in self.data
@@ -27,12 +28,13 @@ class JSContext(object):
             output[name] = str(item)
         return json.dumps(output)
 
+
 class JSWrapper(object):
     "Wraps a JS value and handles contextual functions for it."
 
     def __init__(self, value=None, const=False, dirty=False, lazy=False,
                  is_global=False, traverser=None, callable=False):
-        
+
         if traverser is not None:
             traverser.debug_level += 1
             traverser._debug("-----New JSWrapper-----")
@@ -42,14 +44,14 @@ class JSWrapper(object):
 
         self.const = const
         self.traverser = traverser
-        self.value = None # Instantiate the placeholder value
-        self.is_global = False # Not yet......
-        
+        self.value = None  # Instantiate the placeholder value
+        self.is_global = False  # Not yet......
+
         if value is not None:
             self.set_value(value, overwrite_const=True)
-        
+
         if not self.is_global:
-            self.is_global = is_global # Globals are built seperately
+            self.is_global = is_global  # Globals are built seperately
 
         self.dirty = dirty
         self.lazy = lazy
@@ -73,7 +75,7 @@ class JSWrapper(object):
                                   line=traverser.line,
                                   column=traverser.position,
                                   context=traverser.context)
-        
+
         if value == self.value:
             return
 
@@ -94,34 +96,32 @@ class JSWrapper(object):
                                   context=traverser.context)
             return self
 
-
-
         if isinstance(value, (bool, str, int, float, unicode)):
             value = JSLiteral(value)
         # If the value being assigned is a wrapper as well, copy it in
         elif isinstance(value, JSWrapper):
             self.value = value.value
             self.lazy = value.lazy
-            self.dirty = True # This may not be necessary
+            self.dirty = True  # This may not be necessary
             self.is_global = value.is_global
             # const does not carry over on reassignment
             return self
 
         self.value = value
         return self
-    
+
     def set_value_from_expression(self, traverser, node):
         "Sets the value of the variable from a node object"
-        
+
         self.set_value(traverser._traverse_node(node),
                        traverser=traverser)
 
     def has_property(self, property):
         """Returns a boolean value representing the presence of a property"""
-        
+
         if self.value is None:
             return False
-        
+
         if self.value is JSLiteral:
             return False
         elif self.value is JSObject or \
@@ -140,10 +140,11 @@ class JSWrapper(object):
             if "value" not in value:
                 return JSWrapper(traverser=traverser)
 
-            _evaluate_lambdas = lambda node:_evaluate_lambdas(node()) if \
-                                            isinstance(node,
-                                                       types.LambdaType) else\
-                                            node
+            _evaluate_lambdas = lambda node: _evaluate_lambdas(node()) if \
+                                             isinstance(
+                                                node,
+                                                types.LambdaType) else \
+                                             node
 
             value_val = value["value"]
             value_val = _evaluate_lambdas(value_val)
@@ -156,20 +157,19 @@ class JSWrapper(object):
             else:
                 value = value_val
 
-
         if value is JSLiteral:
-            return None # This will need tweaking for properties
+            return None  # This will need tweaking for properties
         elif isinstance(value, (JSObject, JSArray)):
             output = value.get(name)
         elif isinstance(value, JSPrototype):
             output = value.get(name)
         else:
             output = None
-        
+
         if not isinstance(output, JSWrapper):
             return JSWrapper(output, traverser=traverser)
         return output
-    
+
     def del_value(self, member):
         "Deletes a member"
         if self.is_global:
@@ -211,7 +211,7 @@ class JSWrapper(object):
 
     def get_literal_value(self):
         "Returns the literal value of the wrapper"
-        
+
         if self.is_global:
             return None
         if self.value is None:
@@ -238,18 +238,19 @@ class JSWrapper(object):
                 properties[name] = wrapper.output()
             return json.dumps(properties)
         elif isinstance(self.value, JSArray):
-            return None # TODO: These aren't implemented yet!
+            return None  # TODO: These aren't implemented yet!
 
     def __str__(self):
         "Returns a textual version of the object."
         return str(self.get_literal_value())
 
+
 class JSLiteral(object):
     "Represents a literal JavaScript value"
-    
+
     def __init__(self, value=None):
         self.value = value
-    
+
     def set_value(self, value,):
         self.value = value
 
@@ -261,10 +262,11 @@ class JSLiteral(object):
         "Returns the literal value of a this literal. Heh."
         return self.value
 
+
 class JSObject(object):
     """Mimics a JS object (function) and is capable of serving as an active
     context to enable static analysis of `with` statements"""
-    
+
     def __init__(self):
         self.data = {
             "prototype": JSPrototype(),
@@ -274,7 +276,7 @@ class JSObject(object):
     def get(self, name):
         "Returns the value associated with a property name"
         return self.data[name] if name in self.data else None
-    
+
     def get_literal_value(self):
         "Objects evaluate to empty strings"
         # TODO : Maybe make this more compatible with functions
@@ -289,14 +291,15 @@ class JSObject(object):
 
     def output(self):
         return str(self.data)
-    
+
+
 class JSPrototype:
     """A lazy JavaScript object that is assumed not to contain any default
     methods"""
-    
+
     def __init__(self):
         self.data = {}
-    
+
     def get(self, name):
         "Enables static analysis of `with` statements"
         if name == "prototype":
@@ -305,7 +308,7 @@ class JSPrototype:
             return None
         else:
             return self.data[name]
-    
+
     def get_literal_value(self):
         "Same as JSObject; returns an empty string"
         return ""
@@ -313,7 +316,7 @@ class JSPrototype:
     def set(self, name, variable):
         "Helpful for `with` statements"
         self.data[name] = variable
-    
+
     def has_var(self, name):
         return name in self.data
 
@@ -324,12 +327,13 @@ class JSPrototype:
         "Simply an alias for __str__"
         return self.__str__()
 
+
 class JSArray:
     "A class that represents both a JS Array and a JS list."
-    
+
     def __init__(self):
         self.elements = []
-    
+
     def get(self, index):
         if index == "length":
             return len(self.elements)
@@ -339,7 +343,7 @@ class JSArray:
             return self.elements[int(index.strip().split()[0])]
         except (ValueError, IndexError, KeyError):
             return None
-    
+
     def get_literal_value(self):
         "Arrays return a comma-delimited version of themselves"
         # Interestingly enough, this allows for things like:

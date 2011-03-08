@@ -82,13 +82,14 @@ def prepare_code(code, err, filename):
 
     encoding = None
     try:
-        code = unicode(code) # Make sure we can get a Unicode representation
+        code = unicode(code)  # Make sure we can get a Unicode representation
         code = strip_weird_chars(code, err=err, name=filename)
     except UnicodeDecodeError:
         # If it's not an easily decodeable encoding, detect it and decode that
         code = filter_ascii(code)
 
     return code
+
 
 def strip_weird_chars(chardata, err=None, name=""):
     line_num = 1
@@ -123,6 +124,7 @@ def strip_weird_chars(chardata, err=None, name=""):
 
     return out_code.getvalue()
 
+
 def _get_tree(code, shell=SPIDERMONKEY_INSTALLATION):
     "Returns an AST tree of the JS passed in `code`."
 
@@ -154,14 +156,16 @@ def _get_tree(code, shell=SPIDERMONKEY_INSTALLATION):
             raise OSError("Spidermonkey shell could not be run.")
 
         data, stderr = shell_obj.communicate()
-        if stderr: raise RuntimeError('Error calling %r: %s' % (cmd, stderr))
+        if stderr:
+            raise RuntimeError('Error calling %r: %s' % (cmd, stderr))
 
         # Closing the temp file will delete it.
     finally:
         try:
             temp.close()
             os.unlink(temp.name)
-        except: pass
+        except:
+            pass
 
     if not data:
         raise JSReflectException("Reflection failed")

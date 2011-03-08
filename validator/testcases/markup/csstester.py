@@ -8,23 +8,24 @@ from validator.contextgenerator import ContextGenerator
 BAD_URL_PAT = "url\(['\"]?(?!(chrome:|resource:))(\/\/|(ht|f)tps?:\/\/|data:)[a-z0-9\/\-\.#]*['\"]?\)"
 BAD_URL = re.compile(BAD_URL_PAT, re.I)
 
+
 def test_css_file(err, filename, data, line_start=1):
     "Parse and test a whole CSS file."
-    
+
     tokenizer = cssutils.tokenize2.Tokenizer()
     context = ContextGenerator(data)
 
     data = "".join(c for c in data if 8 < ord(c) < 127)
 
     token_generator = tokenizer.tokenize(data)
-    
+
     try:
         _run_css_tests(err,
                        tokens=token_generator,
                        filename=filename,
                        line_start=line_start - 1,
                        context=context)
-    except: #pragma: no cover
+    except:  # pragma: no cover
         # This happens because tokenize is a generator.
         # Bravo, Mr. Bond, Bravo.
         err.warning(("testcases_markup_csstester",
@@ -35,30 +36,31 @@ def test_css_file(err, filename, data, line_start=1):
                     filename)
         #raise
         return
-        
-    
+
+
 def test_css_snippet(err, filename, data, line):
     "Parse and test a CSS nugget."
-    
+
     # Re-package to make it CSS-complete. Note the whitespace to prevent
     # the extra code from showing in the context output.
     data = "#foo{\n\n%s\n\n}" % data
 
     test_css_file(err, filename, data, line)
-    
+
+
 def _run_css_tests(err, tokens, filename, line_start=0, context=None):
     """Processes a CSS file to test it for things that could cause it
     to be harmful to the browser."""
-    
+
     last_descriptor = None
-    
+
     skip_types = ("S", "COMMENT")
-    
+
     identity_box_mods = []
     unicode_errors = []
-    
+
     while True:
-        
+
         try:
             (tok_type, value, line, position) = tokens.next()
         except UnicodeDecodeError:
@@ -69,18 +71,18 @@ def _run_css_tests(err, tokens, filename, line_start=0, context=None):
         except Exception, e:
             # Comment me out for debug!
             raise
-            
+
             print type(e), e
             print filename
             print line + line_start
             continue
-        
+
         # Save the last descriptor for reference.
         if tok_type == "IDENT":
             last_descriptor = value.lower()
-             
+
         elif tok_type == "URI":
-            
+
             # If we hit a URI after -moz-binding, we may have a
             # potential security issue.
             if last_descriptor == "-moz-binding":
@@ -98,12 +100,12 @@ def _run_css_tests(err, tokens, filename, line_start=0, context=None):
                                 filename,
                                 line=line + line_start,
                                 context=context.get_context(line))
-            
+
         elif tok_type == "HASH":
             # Search for interference with the identity box.
             if value == "#identity-box":
                 identity_box_mods.append(str(line + line_start))
-    
+
     if identity_box_mods:
         err.warning(("testcases_markup_csstester",
                     "_run_css_tests",

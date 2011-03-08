@@ -8,7 +8,11 @@ from validator.testcases.javascript.predefinedentities import \
 
 DEBUG = False
 
+
 class MockBundler:
+    """A delightful replacement for the ErrorBundler, especially while
+    performing non-unit test debugging operations"""
+
     def __init__(self):
         self.message_count = 0
         self.final_context = None
@@ -31,7 +35,7 @@ class MockBundler:
     def error(self, id, title, description, filename="",
               line=1, column=0, context=None):
         "Represents a mock error"
-        
+
         # Increment the message counter
         self.message_count += 1
 
@@ -65,7 +69,7 @@ class MockBundler:
 
 class Traverser:
     "Traverses the AST Tree and determines problems with a chunk of JS."
-    
+
     def __init__(self, err, filename, start_line=0, context=None):
         if err is not None:
             self.err = err
@@ -77,17 +81,17 @@ class Traverser:
         self.filename = filename
         self.start_line = start_line
         self.polluted = False
-        self.line = 1 # Line number
-        self.position = 0 # Column number
+        self.line = 1  # Line number
+        self.position = 0  # Column number
         self.context = context
-        
+
         # Can use the `this` object
         self.can_use_this = False
         self.this_stack = []
 
         # For debugging
         self.debug_level = 0
-    
+
     def _debug(self, data):
         "Writes a message to the console if debugging is enabled."
         if DEBUG:
@@ -106,11 +110,11 @@ class Traverser:
             self._debug("ERR>>Cannot handle node type %s" %
                             (data["type"] if "type" in data else "<unknown>"))
             return None
-        
+
         self._debug("START>>")
-        
+
         self._traverse_node(data)
-        
+
         self._debug("END>>")
 
         if self.contexts:
@@ -128,31 +132,31 @@ class Traverser:
             global_ns = self.contexts[0]
             for name in global_ns.__dict__.keys():
                 pass
-    
+
     def _can_handle_node(self, node_name):
         "Determines whether a node can be handled."
         return node_name in DEFINITIONS
-    
+
     def _traverse_node(self, node):
         "Finds a node's internal blocks and helps manage state."
-        
+
         if node is None:
             return None
-        
+
         # Handles all the E4X stuff and anything that may or may not return
         # a value.
         if "type" not in node or not self._can_handle_node(node["type"]):
             wrapper = JSWrapper(traverser=self)
             wrapper.set_value(JSObject())
             return wrapper
-        
+
         self._debug("TRAVERSE>>%s" % (node["type"]))
-        
+
         # Extract location information if it's available
         if "loc" in node and node["loc"] is not None:
             self.line = self.start_line + int(node["loc"]["start"]["line"])
             self.position = int(node["loc"]["start"]["column"])
-        
+
         # Extract properties about the node that we're traversing
         (branches,
          explicitly_dynamic,
@@ -160,13 +164,13 @@ class Traverser:
          action,
          returns,
          block_level) = DEFINITIONS[node["type"]]
-        
+
         # If we're supposed to establish a context, do it now
         if establish_context:
             self._push_context()
         elif block_level:
             self._push_block_context()
-        
+
         # An action allows the traverser to make intelligent decisions based
         # on the function of the code, rather than just the content. If an
         # action is availble, run it and store the output.
@@ -178,7 +182,7 @@ class Traverser:
                         action_result else
                         "continue",
                      node["type"]))
-        
+
         # print node["type"], branches
         if action_result is None:
             self.debug_level += 1
@@ -195,65 +199,64 @@ class Traverser:
                         self._traverse_node(b)
                     self.debug_level -= 1
             self.debug_level -= 1
-        
+
         # If we defined a context, pop it.
         if establish_context or block_level:
             self._pop_context()
-        
+
         # If there is an action and the action returned a value, it should be
         # returned to the node traversal that initiated this node's traversal.
         if returns:
             if not isinstance(action_result, JSWrapper):
                 return JSWrapper(action_result, traverser=self)
             return action_result
-    
+
     def _interpret_block(self, items):
         "Interprets a block of consecutive code"
-        
+
         for item in items:
             self._traverse_node(item)
 
         # Iterative code will never return a value.
-    
+
     def _push_block_context(self):
         "Adds a block context to the current interpretation frame"
         self.contexts.append(JSContext("block"))
-    
+
     def _push_context(self, default=None):
         "Adds a variable context to the current interpretation frame"
-        
+
         if default is None:
             default = JSContext("default")
         self.contexts.append(default)
 
         self.debug_level += 1
         self._debug("CONTEXT>>%d" % len(self.contexts))
-    
+
     def _pop_context(self):
         "Adds a variable context to the current interpretation frame"
-        
+
         # Keep the global scope on the stack.
         if len(self.contexts) == 1:
             self._debug("CONTEXT>>ROOT POP ABORTED")
             return
         popped_context = self.contexts.pop()
-        
+
         self.debug_level -= 1
         self._debug("POP_CONTEXT>>%d" % len(self.contexts))
         self._debug(popped_context)
 
-    
     def _peek_context(self, depth=1):
         """Returns the most recent context. Note that this should NOT be used
         for variable lookups."""
-        
+
         return self.contexts[len(self.contexts) - depth]
-        
+
     def _seek_variable(self, variable, depth=-1):
         "Returns the value of a variable that has been declared in a context"
-        
+
         self._debug("SEEK>>%s>>%d" % (variable, depth))
-        
+
         # Look for the variable in the local contexts first
         local_variable = self._seek_local_variable(variable, depth)
         if local_variable is not None:
@@ -268,7 +271,7 @@ class Traverser:
 
     def _is_local_variable(self, variable):
         "Returns whether a variable is defined in the current scope"
-        
+
         context_count = len(self.contexts)
         for c in range(context_count):
             context = self.contexts[context_count - c - 1]
@@ -283,7 +286,7 @@ class Traverser:
         context_count = len(self.contexts)
         for c in range(context_count):
             context = self.contexts[context_count - c - 1]
-            
+
             # If it has the variable, return it
             if context.has_var(variable):
                 self._debug("SEEK>>FOUND AT DEPTH %d" % c)
@@ -298,10 +301,10 @@ class Traverser:
             depth -= 1
             if depth == -1:
                 return JSWrapper(traverser=self)
-       
+
     def _is_global(self, name, globs=None):
         "Returns whether a name is a global entity"
-        
+
         if globs is None:
             globs = GLOBAL_ENTITIES
 
@@ -309,22 +312,22 @@ class Traverser:
 
     def _get_global(self, name, globs=None):
         "Gets a variable from the predefined variable context."
-        
+
         # Allow overriding of the global entities
         if globs is None:
             globs = GLOBAL_ENTITIES
-        
+
         self._debug("SEEK_GLOBAL>>%s" % name)
         if not self._is_global(name, globs):
             self._debug("SEEK_GLOBAL>>FAILED")
             return JSWrapper(traverser=self)
-        
+
         self._debug("SEEK_GLOBAL>>FOUND>>%s" % name)
         return self._build_global(name, globs[name])
-    
+
     def _build_global(self, name, entity):
         "Builds an object based on an entity from the predefined entity list"
-        
+
         if "dangerous" in entity:
             dang = entity["dangerous"]
             if dang and not isinstance(dang, types.LambdaType):
@@ -349,12 +352,12 @@ class Traverser:
         self._debug("BUILT_GLOBAL")
 
         return result
-    
+
     def _set_variable(self, name, value, glob=False):
         "Sets the value of a variable/object in the local or global scope."
-        
+
         self._debug("SETTING_OBJECT")
-        
+
         if name in GLOBAL_ENTITIES:
             # TODO : In the future, this should account for non-readonly
             # entities (i.e.: localStorage)
@@ -379,7 +382,7 @@ class Traverser:
                 self._debug("SETTING_OBJECT>>LOCAL>>%d" % i)
                 context.set(name, value)
                 return value
-        
+
         self._debug("SETTING_OBJECT>>LOCAL")
         self.contexts[0 if glob else -1].set(name, value)
         return value

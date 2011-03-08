@@ -17,7 +17,7 @@ def validate(path, format="json",
              listed=True,
              expectation=PACKAGE_ANY):
     """Perform validation in one easy step!
-    
+
     format : The format to output the results in
     approved_applications : Path to the list of approved application versions
     determined : Whether the validator should continue after a tier fails
@@ -37,7 +37,7 @@ def validate(path, format="json",
     validator.submain.prepare_package(bundle, path, expectation)
 
     # Write the results to the pipe
-    formats = {"json": lambda b:b.render_json()}
+    formats = {"json": lambda b: b.render_json()}
     if format is not None:
         return formats[format](bundle)
     else:

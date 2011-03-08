@@ -14,11 +14,12 @@ from validator.textfilter import *
 
 JS_ESCAPE = re.compile("\\\\+[ux]", re.I)
 
+
 def test_js_file(err, filename, data, line=0):
     "Tests a JS file by parsing and analyzing its tokens"
-    
+
     if SPIDERMONKEY_INSTALLATION is None or \
-       err.get_resource("SPIDERMONKEY") is None: # Default value is False
+       err.get_resource("SPIDERMONKEY") is None:  # Default value is False
         return
 
     before_tier = None
@@ -27,10 +28,9 @@ def test_js_file(err, filename, data, line=0):
         before_tier = err.tier
         err.set_tier(3)
 
-
     tree = get_tree(data,
                     filename=filename,
-                    shell=(err and err.get_resource("SPIDERMONKEY")) or 
+                    shell=(err and err.get_resource("SPIDERMONKEY")) or
                           SPIDERMONKEY_INSTALLATION,
                     err=err)
     if not tree:
@@ -56,23 +56,26 @@ def test_js_file(err, filename, data, line=0):
     if err is not None:
         err.set_tier(before_tier)
 
+
 def test_js_snippet(err, data, filename, line=0):
     "Process a JS snippet by passing it through to the file tester."
-    
+
     # Wrap snippets in a function to prevent the parser from freaking out
     # when return statements exist without a corresponding function.
     data = "(function(){%s\n})()" % data
 
     test_js_file(err, filename, data, line)
-    
+
+
 def _do_test(err, filename, line, context, tree):
     t = traverser.Traverser(err, filename, line, context=context)
     t.run(tree)
 
+
 def _regex_tests(err, data, filename):
 
     c = ContextGenerator(data)
-    
+
     np_warning = "Network preferences may not be modified."
 
     errors = {"globalStorage\\[.*\\].password":
@@ -101,12 +104,12 @@ def _regex_tests(err, data, filename):
                         filename=filename,
                         line=line,
                         context=c)
-    
+
     # JS category hunting; bug 635423
-    
+
     # Generate regexes for all of them. Note that they all begin with
     # "JavaScript". Capitalization matters, bro.
-    category_regexes = \
+    category_regexes = (
             map(re.compile,
                 map(lambda r: '''"%s"|'%s'|%s''' % (r, r, r.replace(' ', '-')),
                     map(lambda r: "%s%s" % ("JavaScript ", r),
@@ -117,8 +120,8 @@ def _regex_tests(err, data, filename):
                          "global static nameset",
                          "global dynamic nameset",
                          "DOM class",
-                         "DOM interface"))))
-    
+                         "DOM interface")))))
+
     for cat_regex in category_regexes:
         match = cat_regex.search(data)
 
