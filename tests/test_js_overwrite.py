@@ -37,15 +37,37 @@ def test_bug621106():
 
     err = _do_test_raw("""
     Number.prototype = "This is the new prototype";
-
     Object.prototype.test = "bar";
-
     Object = "asdf";
-
     var x = Object.prototype;
     x.test = "asdf";
     """)
     # There should be five errors.
     print err.message_count
     assert err.message_count == 5
+
+def test_with_statement():
+    "Tests that 'with' statements work as intended"
+
+    err = _do_test_raw("""
+    var x = {"foo":"bar"};
+    with(x) {
+        foo = "zap";
+    }
+    var z = x["foo"];
+    """)
+    assert not err.failed()
+
+    print _get_var(err, "z")
+    assert _get_var(err, "z") == "zap"
+
+
+    # Assert that the contets of a with statement are still evaluated even
+    # if the context object is not available.
+    err = _do_test_raw("""
+    with(foo.bar) { // These do not exist yet
+        eval("evil");
+    }
+    """)
+    assert err.failed()
 
