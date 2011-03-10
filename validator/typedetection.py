@@ -4,7 +4,7 @@ from validator.constants import *
 def detect_type(err, install_rdf=None, xpi_package=None):
     """Determines the type of add-on being validated based on
     install.rdf, file extension, and other properties."""
-    
+
     # The types in the install.rdf don't pair up 1:1 with the type
     # system that we're using for expectations and the like. This is
     # to help translate between the two.
@@ -12,34 +12,34 @@ def detect_type(err, install_rdf=None, xpi_package=None):
                         "4": PACKAGE_THEME,
                         "8": PACKAGE_LANGPACK,
                         "32": PACKAGE_MULTI}
-    
+
     # If we're missing our install.rdf file, we can try to make some
     # assumptions.
     if install_rdf is None:
         types = {"xpi": PACKAGE_DICTIONARY}
-        
+
         err.notice(("typedetection",
                     "detect_type",
                     "missing_install_rdf"),
                    "install.rdf was not found.",
                    "The type should be determined by install.rdf if present. "
                    "If it isn't, we still need to know the type.")
-        
+
         # If we know what the file type might be, return it.
         if xpi_package.extension in types:
             return types[xpi_package.extension]
         # Otherwise, we're out of luck :(
         else:
             return None
-    
-    
+
+
     # Attempt to locate the <em:type> node in the RDF doc.
     type_uri = install_rdf.uri("type")
     type_ = install_rdf.get_object(None, type_uri)
-    
+
     if type_ is not None:
         if type_ in translated_types:
-            err.save_resource("is_multipackage", True, pushable=True)
+            err.save_resource("is_multipackage", type_ == "32", pushable=True)
             # Make sure we translate back to the normalized version
             return translated_types[type_]
         else:
@@ -58,29 +58,29 @@ def detect_type(err, install_rdf=None, xpi_package=None):
                    "No <em:type> element found in install.rdf",
                    "It isn't always required, but it is the most reliable "
                    "method for determining add-on type.",
-                   "install.rdf") 
-    
+                   "install.rdf")
+
     # Dictionaries are weird too, they might not have the obligatory
     # em:type. We can assume that if they have a /dictionaries/ folder,
     # they are a dictionary because even if they aren't, dictionaries
     # have an extraordinarily strict set of rules and file filters that
     # must be passed. It's so crazy secure that it's cool if we use it
     # as kind of a fallback.
-    
+
     package_contents = xpi_package.get_file_data()
     dictionaries = [file_ for file_ in package_contents.keys() if
                     file_.startswith("dictionaries")]
     if dictionaries:
         return PACKAGE_DICTIONARY
-    
-    
+
+
     # There's no type element, so the spec says that it's either a
     # theme or an extension. At this point, we know that it isn't
     # a dictionary, language pack, or multiple extension pack.
-    
+
     extensions = {"jar": "4",
                   "xpi": "2"}
-    
+
     # If the package's extension is listed in the [tiny] extension
     # dictionary, then just return that. We'll validate against that
     # add-on type's layout later. Better to false positive than to false
@@ -89,12 +89,12 @@ def detect_type(err, install_rdf=None, xpi_package=None):
         # Make sure it gets translated back to the normalized version
         install_rdf_type = extensions[xpi_package.extension]
         return translated_types[install_rdf_type]
-    
+
 
 
 def detect_opensearch(package, listed=False):
     "Detect, parse, and validate an OpenSearch provider"
-    
+
     # Parse the file.
     try:
         srch_prov = parse(package)
@@ -104,7 +104,7 @@ def detect_opensearch(package, listed=False):
         return {"failure": True,
                 "decided": False,
                 "error": "There was an error parsing the file."}
-    
+
     # Make sure that the root element is OpenSearchDescription.
     if srch_prov.documentElement.tagName != "OpenSearchDescription":
         return {"failure": True,
@@ -143,12 +143,12 @@ def detect_opensearch(package, listed=False):
         if short_name > 16:
             return {"failure": True,
                     "error": "<ShortName> too long; must be <17 characters"}
-    
+
     # Make sure that there is exactly one Description.
     if not srch_prov.documentElement.getElementsByTagName("Description"):
         return {"failure": True,
                 "error": "Missing <Description> element"}
-    
+
     # Grab the URLs and make sure that there is at least one.
     urls = srch_prov.documentElement.getElementsByTagName("Url")
     if not urls:
@@ -179,7 +179,7 @@ def detect_opensearch(package, listed=False):
 
         if url.hasAttribute("rel") and url.attributes["rel"].value == "self":
             continue
-        
+
         if url.hasAttribute("method") and \
            url.attributes["method"].value.upper() not in ("GET", "POST"):
             return {"failure": True,
@@ -189,7 +189,7 @@ def detect_opensearch(package, listed=False):
         if not url.hasAttribute("template"):
             return {"failure": True,
                     "error": "<Url /> element missing template attribute"}
-        
+
         url_template = url.attributes["template"].value
         if url_template[:4] != "http":
             return {"failure": True,
@@ -198,7 +198,7 @@ def detect_opensearch(package, listed=False):
         # Make sure that there is a {searchTerms} placeholder in the
         # URL template.
         found_template = url_template.count("{searchTerms}") > 0
-        
+
         # If we didn't find it in a simple parse of the template=""
         # attribute, look deeper at the <Param /> elements.
         if not found_template:
@@ -210,27 +210,27 @@ def detect_opensearch(package, listed=False):
                    "value" not in attribute_keys:
                     return {"failure": True,
                             "error": "<Param /> missing attributes."}
-                
+
                 param_value = param.attributes["value"].value
                 if param_value.count("{searchTerms}"):
                     found_template = True
-                    
+
                     # Since we're in a validating spirit, continue
                     # looking for more errors and don't break
-        
+
         # If the template still hasn't been found...
         if not found_template:
             tpl = url.attributes["template"].value
             return {"failure": True,
                     "error": "The template for template '%s' is missing" % tpl}
-    
+
     # Make sure there are no updateURL elements
     if srch_prov.getElementsByTagName("updateURL"):
         return {"failure": True,
                 "error": "<updateURL> elements are banned from search"}
-    
+
     # The OpenSearch provider is valid!
     return {"failure": False,
             "error": None}
-    
-    
+
+
