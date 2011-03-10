@@ -15,37 +15,38 @@ APPROVED_APPLICATIONS = {}
 APP_VERSIONS_URL = "Please check the list of valid versions at: "\
         "https://addons.mozilla.org/en-US/firefox/pages/appversions/"
 
+
 @decorator.register_test(tier=1)
 def test_targetedapplications(err, package_contents=None,
                               xpi_package=None):
     """Tests to make sure that the targeted applications in the
     install.rdf file are legit and that any associated files (I'm
     looking at you, SeaMonkey) are where they need to be."""
-    
+
     if not err.get_resource("has_install_rdf"):
         return
-    
+
     install = err.get_resource("install_rdf")
-    
+
     # Search through the install.rdf document for the SeaMonkey
     # GUID string.
     ta_predicate = install.uri("targetApplication")
     ta_guid_predicate = install.uri("id")
     ta_min_ver = install.uri("minVersion")
     ta_max_ver = install.uri("maxVersion")
-    
-    used_targets = [];
-    
+
+    used_targets = []
+
     # Isolate all of the bnodes referring to target applications
     for target_app in install.get_objects(None, ta_predicate):
-        
+
         # Get the GUID from the target application
-        
+
         for ta_guid in install.get_objects(target_app,
                                            ta_guid_predicate):
-            
+
             used_targets.append(ta_guid)
-            
+
             found_guid = False
             for (guid, key) in [(x["guid"], y) for (y, x) in
                                     APPROVED_APPLICATIONS.items()]:
@@ -55,16 +56,16 @@ def test_targetedapplications(err, package_contents=None,
             if found_guid:
                 # Remember if the addon supports Firefox.
                 is_firefox = APPLICATIONS[ta_guid] == "firefox"
-                
+
                 # Grab the minimum and maximum version numbers.
                 min_version = install.get_object(target_app, ta_min_ver)
                 max_version = install.get_object(target_app, ta_max_ver)
-                
+
                 app_versions = APPROVED_APPLICATIONS[found_guid]["versions"]
-                
+
                 # Ensure that the version numbers are in the app's
                 # list of acceptable version numbers.
-                
+
                 app_name = APPLICATIONS[ta_guid] if \
                            ta_guid in APPLICATIONS else \
                            ta_guid
@@ -85,7 +86,7 @@ def test_targetedapplications(err, package_contents=None,
                                APP_VERSIONS_URL],
                               "install.rdf")
                     continue
-                    
+
                 try:
                     if max_version is not None:
                         max_ver_pos = app_versions.index(max_version)
@@ -102,7 +103,7 @@ def test_targetedapplications(err, package_contents=None,
                                APP_VERSIONS_URL],
                                "install.rdf")
                     continue
-                
+
                 # Now we need to check to see if the version numbers
                 # are in the right order.
                 if min_version is not None and \
@@ -120,7 +121,7 @@ def test_targetedapplications(err, package_contents=None,
                                                                   max_version)],
                                 "install.rdf")
                     continue
-                
+
                 # Test whether it's a FF4 addon
 
                 # NOTE: This should probably also be extrapolated for
@@ -131,9 +132,9 @@ def test_targetedapplications(err, package_contents=None,
                     ff4_pos = app_versions.index(FF4_MIN)
                     if max_ver_pos >= ff4_pos:
                         err.save_resource("ff4", True)
-    
+
     no_duplicate_targets = set(used_targets)
-    
+
     if len(used_targets) != len(no_duplicate_targets):
         err.warning(("testcases_targetapplication",
                      "test_targetedapplication",
@@ -144,7 +145,7 @@ def test_targetedapplications(err, package_contents=None,
                     "GUID. There should not be duplicate target applications "
                     "entries.",
                     "install.rdf")
-    
+
     # This finds the UUID of the supported applications and puts it in
     # a fun and easy-to-use format for use in other tests.
     supports = []
@@ -153,5 +154,5 @@ def test_targetedapplications(err, package_contents=None,
         if key in APPLICATIONS:
             supports.append(APPLICATIONS[key])
     err.save_resource("supports", supports)
-    
+
 

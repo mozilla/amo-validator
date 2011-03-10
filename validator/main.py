@@ -8,16 +8,17 @@ from StringIO import StringIO
 from validator.validate import validate
 from constants import *
 
+
 def main():
     "Main function. Handles delegation to other functions."
-    
-    expectations = {"any":PACKAGE_ANY,
-                    "extension":PACKAGE_EXTENSION,
-                    "theme":PACKAGE_THEME,
-                    "dictionary":PACKAGE_DICTIONARY,
-                    "languagepack":PACKAGE_LANGPACK,
-                    "search":PACKAGE_SEARCHPROV,
-                    "multi":PACKAGE_MULTI}
+
+    expectations = {"any": PACKAGE_ANY,
+                    "extension": PACKAGE_EXTENSION,
+                    "theme": PACKAGE_THEME,
+                    "dictionary": PACKAGE_DICTIONARY,
+                    "languagepack": PACKAGE_LANGPACK,
+                    "search": PACKAGE_SEARCHPROV,
+                    "multi": PACKAGE_MULTI}
 
     # Parse the arguments that
     parser = argparse.ArgumentParser(
@@ -65,7 +66,7 @@ def main():
                         and their versions""")
 
     args = parser.parse_args()
-    
+
     # We want to make sure that the output is expected. Parse out the expected
     # type for the add-on and pass it in for validation.
     if args.type not in expectations:

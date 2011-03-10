@@ -9,9 +9,10 @@ from jstypes import *
 #  arguments : A list of argument nodes; untraversed
 #  traverser : The current traverser object
 
+
 def xpcom_createInstance(wrapper, arguments, traverser):
     "Wraps the XPCOM class instantiation function."
-    
+
     if not arguments:
         return None
 
@@ -25,7 +26,6 @@ def xpcom_createInstance(wrapper, arguments, traverser):
 
     traverser._debug("(Building XPCOM...)")
 
-    
     inst = traverser._build_global("createInstance",
                                    argz.value["xpcom_map"]())
     return inst

@@ -3,13 +3,14 @@ import fnmatch
 from validator import decorator
 from validator.constants import *
 
+
 def test_unknown_file(err, filename):
     "Tests some sketchy files that require silly code."
-    
+
     # Extract the file path and the name from the filename
     path = filename.split("/")
     name = path.pop()
-    
+
     if name == "chromelist.txt":
         err.notice(("testcases_packagelayout",
                     "test_unknown_file",
@@ -19,6 +20,7 @@ def test_unknown_file(err, filename):
                    "Mozilla product." % filename,
                    filename)
         return True
+
 
 @decorator.register_test(tier=2, expected_type=PACKAGE_EXTENSION)
 def test_npapi(err, package_contents=None, xpi_package=None):
@@ -39,24 +41,25 @@ def test_npapi(err, package_contents=None, xpi_package=None):
                      "Detected the following files: %s" % ", ".join(matches)],
                     "plugins/")
 
+
 @decorator.register_test(tier=1)
 def test_blacklisted_files(err, package_contents=None, xpi_package=None):
     "Detects blacklisted files and extensions."
-    
+
     # Detect blacklisted files based on their extension.
     blacklisted_extensions = ("dll", "exe", "dylib", "so",
                               "sh", "class", "swf")
-    
+
     blacklisted_magic_numbers = (
-            (0x4d, 0x5a), # EXE/DLL
-            (0x5a, 0x4d), # Alternative for EXE/DLL
-            (0x7f, 0x45, 0x4c, 0x46), # UNIX elf
-            (0x23, 0x21), # Shebang (shell script)
-            (0xca, 0xfe, 0xba, 0xbe), # Java + Mach-O (dylib)
-            (0xca, 0xfe, 0xd0, 0x0d), # Java (packed)
-            (0xfe, 0xed, 0xfa, 0xce), # Mach-O
-            (0x46, 0x57, 0x53), # Uncompressed SWF
-            (0x43, 0x57, 0x53), # ZLIB compressed SWF
+            (0x4d, 0x5a),  # EXE/DLL
+            (0x5a, 0x4d),  # Alternative for EXE/DLL
+            (0x7f, 0x45, 0x4c, 0x46),  # UNIX elf
+            (0x23, 0x21),  # Shebang (shell script)
+            (0xca, 0xfe, 0xba, 0xbe),  # Java + Mach-O (dylib)
+            (0xca, 0xfe, 0xd0, 0x0d),  # Java (packed)
+            (0xfe, 0xed, 0xfa, 0xce),  # Mach-O
+            (0x46, 0x57, 0x53),  # Uncompressed SWF
+            (0x43, 0x57, 0x53),  # ZLIB compressed SWF
         )
 
     for name, file_ in package_contents.items():
@@ -76,7 +79,7 @@ def test_blacklisted_files(err, package_contents=None, xpi_package=None):
         # Perform a deep inspection to detect magic numbers for known binary
         # and executable file types.
         zip = xpi_package.zf.open(name)
-        bytes = tuple([ord(x) for x in zip.read(4)]) # Longest is 4 bytes
+        bytes = tuple([ord(x) for x in zip.read(4)])  # Longest is 4 bytes
         if [x for x in blacklisted_magic_numbers if bytes[0:len(x)] == x]:
             err.warning(("testcases_packagelayout",
                          "test_blacklisted_files",
@@ -86,17 +89,16 @@ def test_blacklisted_files(err, package_contents=None, xpi_package=None):
                              "(i.e.: executable data).",
                          "The file \"%s\" contains banned content" % name],
                         filename=name)
-            
 
 
 @decorator.register_test(tier=1)
 def test_layout_all(err, package_contents, xpi_package):
     "Tests the well-formedness of extensions."
-    
+
     # Subpackages don't need to be tested for install.rdf.
     if xpi_package.subpackage:
         return
-    
+
     if not err.get_resource("has_install_rdf") and \
        not err.get_resource("bad_install_rdf"):
         err.error(("testcases_packagelayout",
@@ -104,19 +106,18 @@ def test_layout_all(err, package_contents, xpi_package):
                   "missing_install_rdf"),
                   "Addon missing install.rdf.",
                   "All addons require an install.rdf file.")
-        err.reject = True
-    
+
 # Per @jorgev, this test is invalid.
 # @decorator.register_test(tier=2)
 # def test_xpcom(err, package_contents, xpi_package):
 #     "Test to make sure XPCOM is not used for FF4+"
-#     
+#
 #     if not err.get_resource("ff4"):
 #         return None
-#     
+#
 #     # Test for XPCOM incompatibility.
 #     for name, file_ in package_contents.items():
-#         
+#
 #         if name.startswith("components/"):
 #             err.warning(("testcases_packagelayout",
 #                          "test_xpcom",
@@ -133,6 +134,8 @@ def test_layout_all(err, package_contents, xpi_package):
 # This test needs to happen in tier 2. install.rdf analysis happens in tier
 # 1, which may cause this to generate false positives if it's also on tier 1
 # (bug 631340)
+
+
 @decorator.register_test(tier=2)
 def test_emunpack(err, package_contents, xpi_package):
 
@@ -142,7 +145,7 @@ def test_emunpack(err, package_contents, xpi_package):
         # Dictionaries should always be unpacked
         fails = err.detected_type == PACKAGE_DICTIONARY
         if not fails:
-            executables = ("exe","dll","so","dylib","exe","bin")
+            executables = ("exe", "dll", "so", "dylib", "exe", "bin")
             # Search for unpack-worthy files
             for file_ in package_contents:
                 if fnmatch.fnmatch(file_, "chrome/icons/default/*"):
@@ -152,7 +155,7 @@ def test_emunpack(err, package_contents, xpi_package):
                 if fnmatch.fnmatch(file_, "components/*") and \
                    [x for x in executables
                            if file_[-len(x) - 1:] == ".%s" % x]:
-                    
+
                     fails = True
                     break
 
@@ -189,12 +192,13 @@ def test_emunpack(err, package_contents, xpi_package):
                            tier=1)
                 return
 
+
 @decorator.register_test(tier=1, expected_type=3)
 def test_dictionary_layout(err, package_contents=None, xpi_package=None):
     """Ensures that dictionary packages contain the necessary
     components and that there are no other extraneous files lying
     around."""
-    
+
     # Define rules for the structure.
     mandatory_files = [
         "install.rdf",
@@ -202,16 +206,16 @@ def test_dictionary_layout(err, package_contents=None, xpi_package=None):
         "dictionaries/*.dic"]
     whitelisted_files = [
         "install.js",
-        "dictionaries/*.aff", # List again because there must >0
+        "dictionaries/*.aff",  # List again because there must >0
         "dictionaries/*.dic",
         "chrome.manifest",
         "chrome/*"]
-    whitelisted_extensions = ("txt",)    
+    whitelisted_extensions = ("txt",)
 
     test_layout(err, package_contents, mandatory_files,
                 whitelisted_files, whitelisted_extensions,
                 "dictionary")
-    
+
 
 @decorator.register_test(tier=1, expected_type=4)
 def test_langpack_layout(err, package_contents=None, xpi_package=None):
@@ -227,7 +231,7 @@ def test_langpack_layout(err, package_contents=None, xpi_package=None):
     whitelisted_files = ["chrome/*.jar"]
     whitelisted_extensions = ("manifest", "rdf", "jar", "dtd",
                               "properties", "xhtml", "css")
-    
+
     test_layout(err, package_contents, mandatory_files,
                 whitelisted_files, whitelisted_extensions,
                 "language pack")
@@ -248,21 +252,22 @@ def test_theme_layout(err, package_contents=None, xpi_package=None):
     test_layout(err, package_contents, mandatory_files,
                 whitelisted_files, None, "theme")
 
+
 def test_layout(err, package_contents, mandatory, whitelisted,
                 white_extensions=None, pack_type="Unknown Addon"):
     """Tests the layout of a package. Pass in the various types of files
     and their levels of requirement and this guy will figure out which
     files should and should not be in the package."""
-    
+
     # A shortcut to prevent excessive lookups
     fnm = fnmatch.fnmatch
 
     for file_ in package_contents:
-        
+
         if fnm(file_, "__MACOSX/*") or \
            fnm(file_, ".DS_Store"):
             continue
-        
+
         # Remove the file from the mandatory file list.
         #if file_ in mandatory_files:
         mfile_list = [mf for mf in mandatory if fnm(file_, mf)]
@@ -298,11 +303,9 @@ def test_layout(err, package_contents, mandatory, whitelisted,
                      "alternative, supported file format instead.",
                      "Detected file: %s" % file_],
                     file_)
-        err.reject = True
 
     # If there's anything left over, it means there's files missing
     if mandatory:
-        err.reject = True # Rejection worthy
         err.warning(("testcases_packagelayout",
                      "test_layout",
                      "missing_required"),
@@ -311,5 +314,4 @@ def test_layout(err, package_contents, mandatory, whitelisted,
                      "documentation for a full list of required files.",
                      "Add-ons of type '%s' require files: %s" %
                           (pack_type, ", ".join(mandatory))])
-        err.reject = True
 

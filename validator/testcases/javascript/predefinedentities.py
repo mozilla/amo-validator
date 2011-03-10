@@ -1,4 +1,5 @@
-import actions, call_definitions
+import actions
+import call_definitions
 
 # A list of identifiers and member values that may not be used.
 BANNED_IDENTIFIERS = ("newThread", )
@@ -19,17 +20,17 @@ GLOBAL_ENTITIES = {
     "document":
         {"value": {"createElement":
                        {"dangerous":
-                            lambda a,t: t(a[0]).get_literal_value()
-                                               .lower() == "script"},
+                            lambda a, t: t(a[0]).get_literal_value()
+                                                .lower() == "script"},
                    "createElementNS":
                        {"dangerous":
-                            lambda a,t: t(a[0]).get_literal_value()
-                                               .lower() == "script"}}},
-    
+                            lambda a, t: t(a[0]).get_literal_value()
+                                                .lower() == "script"}}},
+
     # The nefariuos timeout brothers!
     "setTimeout": {"dangerous": actions._call_settimeout},
     "setInterval": {"dangerous": actions._call_settimeout},
-    
+
     "encodeURI": {"readonly": True},
     "decodeURI": {"readonly": True},
     "encodeURIComponent": {"readonly": True},
@@ -40,31 +41,31 @@ GLOBAL_ENTITIES = {
     "isNaN": {"readonly": True},
     "parseFloat": {"readonly": True},
     "parseInt": {"readonly": True},
-    
+
     "eval": {"dangerous": True},
     "Function": {"dangerous": True},
     "Object": {"value": {"prototype": {"dangerous": True},
-                         "constructor": # Just an experiment for now
-                             {"value":lambda:GLOBAL_ENTITIES["Function"]}},},
+                         "constructor":  # Just an experiment for now
+                             {"value": lambda: GLOBAL_ENTITIES["Function"]}}},
     "String": {"value": {"prototype": {"dangerous": True}}},
     "Array": {"value": {"prototype": {"dangerous": True}}},
     "Number": {"value": {"prototype": {"dangerous": True}}},
     "Boolean": {"value": {"prototype": {"dangerous": True}}},
     "RegExp": {"value": {"prototype": {"dangerous": True}}},
     "Date": {"value": {"prototype": {"dangerous": True}}},
-    
+
     "Math": {"readonly": True},
-    
+
     "netscape":
         {"value": {"security":
                        {"value": {"PrivilegeManager":
                                       {"value": {"enablePrivilege":
                                                      {"dangerous": True}}}}}}},
-    
+
     "navigator":
         {"value": {"wifi": {"dangerous": True},
                    "geolocation": {"dangerous": True}}},
-    
+
     "Components":
         {"readonly": True,
          "value":
@@ -78,13 +79,15 @@ GLOBAL_ENTITIES = {
                                  {"dangerous": True},
                              "import":
                                  {"dangerous":
-                                      lambda a,t:a and \
-                                                 str(t(a[0]).get_literal_value())
-                                                            .count("ctypes.jsm")}}},
+                                      lambda a, t:
+                                        a and \
+                                        str(t(a[0]).get_literal_value())
+                                                   .count("ctypes.jsm")}}},
               "interfaces":
                   {"value": {"nsIXMLHttpRequest":
                                 {"xpcom_map":
-                                     lambda: GLOBAL_ENTITIES["XMLHttpRequest"]},
+                                     lambda:
+                                        GLOBAL_ENTITIES["XMLHttpRequest"]},
                              "nsIProcess":
                                 {"dangerous": True},
                              "nsIDOMGeoGeolocation":
@@ -98,17 +101,18 @@ GLOBAL_ENTITIES = {
 
     "XMLHttpRequest":
         {"value":
-             {"open":{"dangerous":
-                          # Ban syncrhonous XHR by making sure the third arg
-                          # is absent and false.
-                          lambda a,t:a and \
-                                     len(a) > 2 and \
-                                     not t(a[2]).get_literal_value() and \
-                                     "Synchronous HTTP requests can cause "
-                                     "serious UI performance problems, "
-                                     "especially to users with slow network "
-                                     "connections."}}},
-    
+             {"open": {"dangerous":
+                           # Ban syncrhonous XHR by making sure the third arg
+                           # is absent and false.
+                           lambda a, t:
+                               a and \
+                               len(a) > 2 and \
+                               not t(a[2]).get_literal_value() and \
+                               "Synchronous HTTP requests can cause "
+                               "serious UI performance problems, "
+                               "especially to users with slow network "
+                               "connections."}}},
+
     # Global properties are inherently read-only, though this formalizes it.
     "Infinity": {"readonly": True},
     "NaN": {"readonly": True},

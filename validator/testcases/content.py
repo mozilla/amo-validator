@@ -65,7 +65,7 @@ def test_packed_packages(err, package_contents=None, xpi_package=None):
 
         try:
             file_data = xpi_package.read(name)
-        except KeyError: # pragma: no cover
+        except KeyError:  # pragma: no cover
             pass
 
         # Skip over whitelisted hashes
@@ -124,7 +124,7 @@ def test_packed_packages(err, package_contents=None, xpi_package=None):
 
             package.close()
             err.pop_state()
-            err.set_tier(2) # Reset to the current tier
+            err.set_tier(2)  # Reset to the current tier
 
         elif data["extension"] in ("xul", "xml", "html", "xhtml"):
 
@@ -134,7 +134,6 @@ def test_packed_packages(err, package_contents=None, xpi_package=None):
                            data["extension"])
 
             processed = True
-
 
         elif data["extension"] in ("css", "js", "jsm"):
 

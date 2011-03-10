@@ -9,10 +9,11 @@ import actions
 # block_statement,
 #)
 
+
 DEFINITIONS = {
     "EmptyStatement":       ((), False, False, None, False, False),
     "DebuggerStatement":    ((), False, False, None, False, False),
-    
+
     "Program":              (("body", ), False, True, None, False, True),
     "BlockStatement":       (("body", ), False, False, None, False, True),
     "ExpressionStatement":  (("expression", ),
@@ -28,7 +29,7 @@ DEFINITIONS = {
                              False, False, None, False, True),
     "ReturnStatement":      (("argument", ),
                              False, False, None, False, False),
-    "ThrowStatement" :      (("argument", ),
+    "ThrowStatement":       (("argument", ),
                              True, False, None, False, False),
     # The TryStatements are explecitly dynamic because I have no freakin idea
     # how to do static analysis on exception handling.
@@ -42,13 +43,13 @@ DEFINITIONS = {
                              False, False, None, False, True),
     "ForInStatement":       (("left", "right", "body"),
                              False, False, None, False, True),
-    
+
     "FunctionDeclaration":  (("body", ),
                              False, True, actions._define_function,
                              False, True),
     "VariableDeclaration":  (("declarations", ),
                              False, False, actions._define_var, False, False),
-    
+
     "ThisExpression":       ((), False, False, actions._get_this, True, False),
     "ArrayExpression":      (("elements", ),
                              False, False, actions._define_array, True, False),
@@ -70,7 +71,8 @@ DEFINITIONS = {
                              False, False, None, True, False),
     "LogicalExpression":    (("left", "right"),
                              False, False, None, True, False),
-    "ConditionalExpression":(("test", "alternate", "consequent"),
+    "ConditionalExpression":
+                            (("test", "alternate", "consequent"),
                              False, False, None, True, False),
     "NewExpression":        (("constructor", "arguments"),
                              False, False, actions._new, True, False),
@@ -85,17 +87,17 @@ DEFINITIONS = {
                              False, False, None, True, False),
     "GeneratorExpression":  (("body", "filter"),
                              False, False, None, True, False),
-    
+
     "ObjectPattern":        ((), False, False, None, False, False),
     "ArrayPattern":         ((), False, False, None, False, False),
-    
+
     "SwitchCase":           (("test", "consequent"),
                              False, False, None, False, False),
     "CatchClause":          (("param", "guard", "body"),
                              True, False, None, True, False),
     "ComprehensionBlock":   (("left", "right"),
                              False, False, None, True, False),
-    
+
     "Literal":              ((), False, False, actions._define_literal,
                              True, False),
     "Identifier":           ((), False, False, actions._ident, True, False),
@@ -106,8 +108,8 @@ DEFINITIONS = {
     "LogicalOperator":      ((), False, False, None, True, False),
     "AssignmentOperator":   ((), False, False, None, True, False),
     "UpdateOperator":       ((), False, False, None, True, False)
-    
+
     # E4X? What E4X? I have no idea what you're talking about. There's no E4X
     # here. Move along now, move along.
-    
+
 }
