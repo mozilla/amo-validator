@@ -5,6 +5,7 @@ from StringIO import StringIO
 
 from validator import decorator
 from validator.xpi import XPIManager
+from validator.chromemanifest import ChromeManifest
 from validator.constants import *
 
 import validator.testcases.l10n.dtd as dtd
@@ -26,12 +27,15 @@ L10N_MIN_ENTITIES = 18
 LOCALE_CACHE = {}
 
 
-def _list_locales(err, xpi_packages):
+def _list_locales(err, xpi_package=None):
     "Returns a raw list of locales from chrome.manifest"
 
-    # Retrieve the chrome.manifest if it's cached.
-    chrome = False
-    if err is not None:
+    chrome = None
+    if xpi_package is not None:
+        # Handle a reference XPI
+        chrome = ChromeManifest(xpi_package.read("chrome.manifest"))
+    else:
+        # Handle the current XPI
         chrome = err.get_resource("chrome.manifest")
     if not chrome:
         return None
@@ -39,10 +43,10 @@ def _list_locales(err, xpi_packages):
     pack_locales = chrome.get_triples("locale")
     return list(pack_locales)
 
-def _get_locales(err, xpi_package, locales=None):
+def _get_locales(err, xpi_package=None, locales=None):
     "Returns a list of locales from the chrome.manifest file."
 
-    if not locales:
+    if locales is None:
         locales = _list_locales(err, xpi_package)
     if not locales:
         return None
@@ -52,13 +56,21 @@ def _get_locales(err, xpi_package, locales=None):
         locale_jar = locale["object"].split()
 
         location = locale_jar[-1]
-        if not location.startswith("jar:"):
-            continue
-        full_location = location[4:].split("!")
+
+        # Locales can be bundled in JARs
+        jarred = location.startswith("jar:")
+        if jarred:
+            # We just care about the JAR path
+            location = location[4:]
+            path, location = location.split("!", 2)
+
         locale_desc = {"predicate": locale["predicate"],
-                       "path": full_location[0],
-                       "target": full_location[1],
-                       "name": locale_jar[0]}
+                       "target": location,
+                       "name": locale_jar[0],
+                       "jarred": jarred}
+        if jarred:
+            locale_desc["path"] = path
+
         locale_name = "%s:%s" % (locale["predicate"], locale_jar[0])
         if locale_name not in processed_locales:
             processed_locales[locale_name] = locale_desc
@@ -66,13 +78,19 @@ def _get_locales(err, xpi_package, locales=None):
     return processed_locales
 
 
-def _get_locale_manager(err, addon, path, files, no_cache=False):
+def _get_locale_manager(err, package_contents, xpi_package, description,
+                        no_cache=False):
     "Returns the XPIManager object for a locale"
+
+    if not description["jarred"]:
+        return xpi_package
+
+    path = description["path"]
 
     if path in LOCALE_CACHE and not no_cache:
         return LOCALE_CACHE[path]
 
-    if path not in files:
+    if path not in package_contents:
         err.warning(("testcases_l10ncompleteness",
                      "_get_locale_manager",
                      "manager_absent"),
@@ -83,7 +101,7 @@ def _get_locale_manager(err, addon, path, files, no_cache=False):
                      "Missing JAR: %s" % path],
                     filename="chrome.manifest")
         return None
-    jar = StringIO(addon.read(path))
+    jar = StringIO(xpi_package.read(path))
     locale = XPIManager(jar, path)
 
     if not no_cache:
@@ -106,7 +124,7 @@ def test_xpi(err, package_contents, xpi_package):
     if "chrome.manifest" not in package_contents:
         return None
 
-    raw_locales = _list_locales(err, xpi_package)
+    raw_locales = _list_locales(err)
 
     # We need at least a reference and a target.
     num_locales = len(raw_locales)
@@ -122,7 +140,7 @@ def test_xpi(err, package_contents, xpi_package):
                        filename="chrome.manifest")
         return
 
-    locales = _get_locales(err, xpi_package, raw_locales)
+    locales = _get_locales(err, None, raw_locales)
 
     # Use the first locale by default
     ref_name = locales.keys()[0]
@@ -134,9 +152,9 @@ def test_xpi(err, package_contents, xpi_package):
 
     reference = locales[ref_name]
     reference_locale = _get_locale_manager(err,
+                                           package_contents,
                                            xpi_package,
-                                           reference["path"],
-                                           package_contents)
+                                           reference)
     # Loop through the locales and test the valid ones.
     for name, locale in locales.items():
         # Ignore the reference locale
@@ -144,9 +162,9 @@ def test_xpi(err, package_contents, xpi_package):
             continue
 
         target_locale = _get_locale_manager(err,
+                                            package_contents,
                                             xpi_package,
-                                            locale["path"],
-                                            package_contents)
+                                            locale)
         if target_locale is None:
             continue
         split_target = locale["name"].split("-")
@@ -173,7 +191,7 @@ def test_lp_xpi(err, package_contents, xpi_package):
     if "chrome.manifest" not in package_contents:
         return None
 
-    locales = _get_locales(err, xpi_package)
+    locales = _get_locales(err);
 
     # Get the reference packages.
     references = []
@@ -201,9 +219,10 @@ def test_lp_xpi(err, package_contents, xpi_package):
     for (ref_xpi, ref_locales) in references:
         # Iterate each locale in each supported reference package
         ref_pack = _get_locale_manager(err,
-                                       ref_xpi,
-                                       "en-US.jar",
                                        ref_xpi.get_file_data(),
+                                       ref_xpi,
+                                       {"path": "en-US.jar",
+                                        "jarred": True},
                                        no_cache=True)
         for ref_locale_name in ref_locales:
             ref_locale = ref_locales[ref_locale_name]
@@ -225,9 +244,9 @@ def test_lp_xpi(err, package_contents, xpi_package):
 
             target_locale = corresp_locales[0]
             target_pack = _get_locale_manager(err,
+                                              package_contents,
                                               xpi_package,
-                                              target_locale["path"],
-                                              package_contents)
+                                              target_locale)
             if target_pack is None:
                 continue
 
