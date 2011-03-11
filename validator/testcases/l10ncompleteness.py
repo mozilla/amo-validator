@@ -404,9 +404,8 @@ def _aggregate_results(err, results, locale, similar=False, base="en-US"):
                        ["Localizations must include a translated copy of each "
                         "file in the reference locale. The required files may "
                         "vary from target application to target application.",
-                        "%s missing translation file (%s)" % (locale["path"],
-                                                              rfilename)],
-                      [locale["path"]])
+                        "Missing translation file: %s" % rfilename],
+                      locale["target"])
         elif rtype == "missing_entities":
             err.warning(("testcases_l10ncompleteness",
                          "_aggregate_results",
@@ -416,11 +415,9 @@ def _aggregate_results(err, results, locale, similar=False, base="en-US"):
                          "entity from each file in the reference locale. The "
                          "required files may vary from target application to "
                          "target application.",
-                         "%s missing %s in %s" %
-                            (locale["path"],
-                             ", ".join(ritem["missing_entities"]),
-                             rfilename)],
-                        [locale["path"], rfilename])
+                         "Missing Entities: %s" %
+                             ", ".join(ritem["missing_entities"])],
+                        [locale["target"], rfilename])
         elif rtype == "unchanged_entity":
             filename = ritem["filename"]
             if not filename in unchanged_entity_list:
@@ -437,6 +434,12 @@ def _aggregate_results(err, results, locale, similar=False, base="en-US"):
             unexpected_encodings.append(
                     (ritem["filename"],
                      ", ".join(ritem["expected_encoding"])))
+
+    # Determine the locale's filename argument in advance since we'll use it
+    # for every message
+    locale_filename = [locale["target"]]
+    if locale["jarred"]:
+        locale_filename.append(locale["path"])
 
     agg_unchanged = []
     if not similar:
@@ -472,7 +475,7 @@ def _aggregate_results(err, results, locale, similar=False, base="en-US"):
                      "translations SHOULD differ from the localized text in "
                      "the reference package.",
                      agg_unchanged],
-                    [locale["path"], locale["target"]])
+                    locale_filename)
 
     if unexpected_encodings:
         # Compile all of the encoding errors into one nice warning.
@@ -489,5 +492,5 @@ def _aggregate_results(err, results, locale, similar=False, base="en-US"):
                      "\n".join(compilation),
                      "Localization files with the wrong encoding can cause "
                      "issues with locales that include non-ASCII characters."],
-                    [locale["path"], locale["target"]])
+                    locale_filename)
 
