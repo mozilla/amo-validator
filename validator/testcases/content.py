@@ -101,9 +101,12 @@ def test_packed_packages(err, package_contents=None, xpi_package=None):
                          is_subpackage else
                          PACKAGE_THEME)
             err.set_tier(1)
-            testendpoint_validator.test_inner_package(err,
-                                                      temp_contents,
-                                                      sub_xpi)
+            if is_subpackage:
+                testendpoint_validator.test_inner_package(err,
+                                                          temp_contents,
+                                                          sub_xpi)
+            else:
+                testendpoint_validator.test_package(err, package, name)
             package.close()
             err.pop_state()
             err.set_tier(2)
