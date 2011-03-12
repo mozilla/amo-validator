@@ -133,7 +133,8 @@ def test_jar_nonsubpackage():
          "chrome/bar.jar":
              "tests/resources/content/subpackage.jar"})
 
-    content.testendpoint_validator = MockTestEndpoint(("test_inner_package", ))
+    content.testendpoint_validator = MockTestEndpoint(("test_inner_package",
+                                                       "test_package"))
 
     result = content.test_packed_packages(
                                     err,
@@ -147,10 +148,10 @@ def test_jar_nonsubpackage():
     print result
     assert result == 2
     content.testendpoint_validator.assert_expectation(
-                                    "test_inner_package",
+                                    "test_package",
                                     2)
     content.testendpoint_validator.assert_expectation(
-                                    "test_inner_package",
+                                    "test_package",
                                     0,
                                     "subpackage")
 
