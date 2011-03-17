@@ -14,6 +14,99 @@ BANNED_IDENTIFIERS = ("newThread", )
 # identically to "True", except the string will be outputted when the error is
 # thrown.
 
+class interfaces:
+    nsICategoryManager = \
+        {"value":
+            {"addCategoryEntry":
+                {"dangerous":
+                    lambda a, t, e:
+                        e.get_resource("em:bootstrap") and \
+                        a and
+                        ("Bootstrapped add-ons may not create persistent "
+                         "category entries"
+                         if len(a) > 3 and t(a[3]).get_literal_value()
+                         else
+                         "Authors of bootstrapped add-ons must take care "
+                         "to cleanup any added category entries "
+                         "at shutdown")}}}
+    nsIComponentRegistrar = \
+        {"value":
+            {"autoRegister":
+                {"dangerous":
+                    lambda a, t, e:
+                        e.get_resource("em:bootstrap") and \
+                        "Bootstrapped add-ons may not register "
+                        "chrome manifest files"},
+             "registerFactory":
+                {"dangerous":
+                    lambda a, t, e:
+                        e.get_resource("em:bootstrap") and \
+                        "Authors of bootstrapped add-ons must take care "
+                        "to cleanup any component registrations "
+                        "at shutdown"}}}
+    nsIObserverService = \
+        {"value":
+            {"addObserver":
+                {"dangerous":
+                    lambda a, t, e:
+                        e.get_resource("em:bootstrap") and \
+                        "Authors of bootstrapped add-ons must take care "
+                        "to remove any added observers "
+                        "at shutdown"}}}
+    nsIResProtocolHandler = \
+        {"value":
+            {"setSubstitution":
+                {"dangerous":
+                    lambda a, t, e:
+                        e.get_resource("em:bootstrap") and \
+                        a and \
+                        len(a) > 1 and  \
+                        t(a[1]).get_literal_value() and \
+                        "Authors of bootstrapped add-ons must take care "
+                        "to cleanup any added resource substitutions "
+                        "at shutdown"}}}
+    nsIStringBundleService = \
+        {"value":
+            {"createStringBundle":
+                {"dangerous":
+                    lambda a, t, e:
+                        e.get_resource("em:bootstrap") and \
+                        "Authors of bootstrapped add-ons must take care "
+                        "to flush the string bundle cache at shutdown"},
+             "createExtensibleBundle":
+                {"dangerous":
+                    lambda a, t, e:
+                        e.get_resource("em:bootstrap") and \
+                        "Authors of bootstrapped add-ons must take care "
+                        "to flush the string bundle cache at shutdown"}}}
+    nsIStyleSheetService = \
+        {"value":
+            {"loadAndRegisterSheet":
+                {"dangerous":
+                    lambda a, t, e:
+                        e.get_resource("em:bootstrap") and \
+                        "Authors of bootstrapped add-ons must take care "
+                        "to unregister any registered stylesheets "
+                        "at shutdown"}}}
+    nsIWindowMediator = \
+        {"value":
+            {"registerNotification":
+                {"dangerous":
+                    lambda a, t, e:
+                        e.get_resource("em:bootstrap") and \
+                        "Authors of bootstrapped add-ons must take care "
+                        "to remove any added observers "
+                        "at shutdown"}}}
+    nsIWindowWatcher = \
+        {"value":
+            {"addListener":
+                {"dangerous":
+                    lambda a, t, e:
+                        e.get_resource("em:bootstrap") and \
+                        "Authors of bootstrapped add-ons must take care "
+                        "to remove any added observers "
+                        "at shutdown"}}}
+
 # GLOBAL_ENTITIES is also representative of the `window` object.
 GLOBAL_ENTITIES = {
     "window": {"value": lambda: GLOBAL_ENTITIES},
@@ -73,7 +166,9 @@ GLOBAL_ENTITIES = {
                   {"xpcom_wildcard": True,
                    "value":
                        {"createInstance":
-                           {"return": call_definitions.xpcom_createInstance}}},
+                           {"return": call_definitions.xpcom_constructor("createInstance")},
+                        "getService":
+                           {"return": call_definitions.xpcom_constructor("getService")}}},
               "utils":
                   {"value": {"evalInSandbox":
                                  {"dangerous": True},
@@ -88,6 +183,38 @@ GLOBAL_ENTITIES = {
                                 {"xpcom_map":
                                      lambda:
                                         GLOBAL_ENTITIES["XMLHttpRequest"]},
+                             "nsICategoryManager":
+                                {"xpcom_map":
+                                     lambda:
+                                        interfaces.nsICategoryManager},
+                             "nsIComponentRegistrar":
+                                {"xpcom_map":
+                                     lambda:
+                                        interfaces.nsIComponentRegistrar},
+                             "nsIObserverService":
+                                {"xpcom_map":
+                                     lambda:
+                                        interfaces.nsIObserverService},
+                             "nsIResProtocolHandler":
+                                {"xpcom_map":
+                                     lambda:
+                                        interfaces.nsIResProtocolHandler},
+                             "nsIStyleSheetService":
+                                {"xpcom_map":
+                                     lambda:
+                                        interfaces.nsIStyleSheetService},
+                             "nsIStringBundleService":
+                                {"xpcom_map":
+                                     lambda:
+                                        interfaces.nsIStringBundleService},
+                             "nsIWindowMediator":
+                                {"xpcom_map":
+                                     lambda:
+                                        interfaces.nsIWindowMediator},
+                             "nsIWindowWatcher":
+                                {"xpcom_map":
+                                     lambda:
+                                        interfaces.nsIWindowWatcher},
                              "nsIProcess":
                                 {"dangerous": True},
                              "nsIDOMGeoGeolocation":
@@ -106,8 +233,8 @@ GLOBAL_ENTITIES = {
                            # is absent and false.
                            lambda a, t:
                                a and \
-                               len(a) > 2 and \
-                               not t(a[2]).get_literal_value() and \
+                               (len(a) < 3 or
+                                not t(a[2]).get_literal_value()) and \
                                "Synchronous HTTP requests can cause "
                                "serious UI performance problems, "
                                "especially to users with slow network "
