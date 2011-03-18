@@ -46,7 +46,7 @@ def test_js_file(err, filename, data, line=0):
         try:
             _do_test(err=err, filename=filename, line=line, context=context,
                      tree=tree)
-        except:
+        except:  # pragma: no cover
             # We do this because the validator can still be damn unstable.
             pass
 

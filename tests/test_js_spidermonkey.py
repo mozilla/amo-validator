@@ -2,7 +2,37 @@ import json
 import subprocess
 from js_helper import _do_test_raw
 from validator.errorbundler import ErrorBundle
+import validator.testcases.scripting as scripting
 import validator.testcases.javascript.spidermonkey as spidermonkey
+from validator.errorbundler import ErrorBundle
+
+
+def test_scripting_disabled():
+    "Ensures that Spidermonkey is not run if it is set to be disabled"
+
+    err = ErrorBundle()
+    err.save_resource("SPIDERMONKEY", None)
+    assert scripting.test_js_file(err, "abc def", "foo bar") is None
+
+    err = ErrorBundle()
+    si = scripting.SPIDERMONKEY_INSTALLATION
+    scripting.SPIDERMONKEY_INSTALLATION = None
+
+    assert scripting.test_js_file(err, "abc def", "foo bar") is None
+
+    scripting.SPIDERMONKEY_INSTALLATION = si
+
+
+def test_scripting_snippet():
+    "Asserts that JS snippets are treated equally"
+
+    err = ErrorBundle()
+    scripting.test_js_snippet(err, "alert(1 + 1 == 2)", "bar.zap")
+    assert not err.failed()
+
+    err = ErrorBundle()
+    scripting.test_js_snippet(err, "eval('foo');", "bar.zap")
+    assert err.failed()
 
 
 def test_reflectparse_presence():
