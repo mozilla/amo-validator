@@ -27,14 +27,15 @@ def get_tree(code, err=None, filename=None, shell=None):
         return tree
     except JSReflectException as exc:
         str_exc = str(exc).strip("'\"")
-        if "SyntaxError" in str_exc:
+        if ("SyntaxError" in str_exc or
+            "ReferenceError" in str_exc):
             err.warning(("testcases_scripting",
                          "test_js_file",
                          "syntax_error"),
-                         "JavaScript Syntax Error",
-                         ["A syntax error in the JavaScript halted validation "
-                          "of that file.",
-                          "Message: %s" % str_exc[15:-1]],
+                         "JavaScript Compile-Time Error",
+                         ["A compile-time error in the JavaScript halted "
+                          "validation of that file.",
+                          "Message: %s" % str_exc.split(":", 1)[-1].strip()],
                          filename=filename,
                          line=exc.line,
                          context=ContextGenerator(code))
@@ -178,7 +179,7 @@ def _get_tree(code, shell=SPIDERMONKEY_INSTALLATION):
     parsed = json.loads(data, strict=False)
 
     if "error" in parsed and parsed["error"]:
-        if parsed["error_message"][:14] == "ReferenceError":
+        if parsed["error_message"].startswith("ReferenceError: Reflect"):
             raise RuntimeError("Spidermonkey version too old; "
                                "1.8pre+ required; error='%s'; "
                                "spidermonkey='%s'" % (parsed["error_message"],

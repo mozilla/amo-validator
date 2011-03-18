@@ -358,23 +358,6 @@ class Traverser:
 
         self._debug("SETTING_OBJECT")
 
-        if name in GLOBAL_ENTITIES:
-            # TODO : In the future, this should account for non-readonly
-            # entities (i.e.: localStorage)
-            self._debug("GLOBAL_OVERWRITE")
-            self.err.warning(("testcases_javascript_traverser",
-                              "_set_variable",
-                              "global_overwrite"),
-                             "Global Overwrite",
-                             ["A local variable was created that overwrites "
-                              "an object in the global scope.",
-                              "Entity name: %s" % name],
-                             self.filename,
-                             line=self.line,
-                             column=self.position,
-                             context=self.context)
-            return None
-
         context_count = len(self.contexts)
         for i in range(context_count):
             context = self.contexts[context_count - i - 1]
