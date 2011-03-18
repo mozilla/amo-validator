@@ -8,13 +8,13 @@ from validator.constants import *
 
 def test_chromemanifest():
     "Make sure it only accepts packs with chrome.manifest files."
-    
+
     assert l10n.test_lp_xpi(None, {}, None) is None
-    
+
 
 def test_parse_l10n():
     "Tests that the doc parser function returns the right values."
-    
+
     assert isinstance(l10n._parse_l10n_doc("foo.dtd",
                                            "<!ENTITY foo 'bar'>"),
                       DTDParser)
@@ -23,26 +23,30 @@ def test_parse_l10n():
                       PropertiesParser)
     assert l10n._parse_l10n_doc("foo.bar",
                                 "") is None
-    
+
 
 def test_results_aggregator():
     "Tests that language pack aggregation results are read properly."
-    
+
     err = ErrorBundle(None, True)
     l10n._aggregate_results(err,
                             [{"type":"missing_files",
                               "filename":"foo.bar"}],
-                            {"name":"en-US", "path":"foo.bar"})
+                            {"name": "en-US",
+                             "target": "foo.bar",
+                             "jarred": False})
     assert err.failed()
-    
+
     err = ErrorBundle(None, True)
     l10n._aggregate_results(err,
                             [{"type":"missing_entities",
                               "filename":"foo.bar",
                               "missing_entities":["asdf","ghjk"]}],
-                            {"name":"en-US", "path":"foo.bar"})
+                            {"name": "en-US",
+                             "target": "foo.bar",
+                             "jarred": False})
     assert err.failed()
-    
+
     err = ErrorBundle(None, True)
     l10n._aggregate_results(err,
                             [{"type":"unchanged_entity",
@@ -51,7 +55,9 @@ def test_results_aggregator():
                               "filename":"foo.bar"},
                               {"type":"total_entities",
                                "entities":100}],
-                            {"name":"en-US", "path":"foo.bar"})
+                            {"name": "en-US",
+                             "target": "foo.bar",
+                             "jarred": False})
     assert not err.failed()
 
     err = ErrorBundle(None, True)
@@ -65,15 +71,16 @@ def test_results_aggregator():
                               "entities":100},
                              {"type":"total_entities",
                               "entities":100}],
-                            {"name":"en-US",
-                             "path":"foo.bar",
-                             "target":"/locale/en-US/"})
+                            {"name": "en-US",
+                             "target": "foo.bar",
+                             "path": "/locale/en-US/",
+                             "jarred": True})
     assert err.failed()
-    
+
 
 def test_comparer():
     "Tests the function that compares two packages."
-    
+
     ref = XPIManager("tests/resources/l10n/langpack/reference.jar")
     ref.locale_name = "en-US"
     extra_ref = XPIManager(
@@ -92,19 +99,19 @@ def test_comparer():
     ment = XPIManager(
         "tests/resources/l10n/langpack/missing_entities.jar")
     ment.locale_name = "en-US"
-    
+
     assert _compare_packs(ref, pass_) == 3
     assert _compare_packs(extra_ref, pass_) == 3
     assert _compare_packs(ref, extra) == 3
     assert _compare_packs(ref, mfile) == 4
     assert _compare_packs(ref, mfileent) == 3
     assert _compare_packs(ref, ref) > 3
-    
+
 def _compare_packs(reference, target):
     "Does a simple comparison and prints the output"
-    
+
     comparison = l10n._compare_packages(reference, target)
-    
+
     count = 0
     for error in comparison:
         if error["type"] != "unexpected_encoding":

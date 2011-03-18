@@ -176,19 +176,18 @@ def _test_id(err, value):
 def _test_version(err, value):
     "Tests an install.rdf version number"
 
-    whitespace_pattern = re.compile("\s")
-    version_pattern = re.compile("\d+(\+|\w+)?(\.\d+(\+|\w+)?)*")
+    version_pattern = re.compile("^[-+*.\w]{,32}$")
 
     err.metadata["version"] = value
 
-    # Cannot have whitespace in the pattern.
-    if whitespace_pattern.search(value):
+    # May not be longer than 32 characters
+    if len(value) > 32:
         err.error(("testcases_installrdf",
                    "_test_version",
-                   "invalid_whitespace"),
-                  "<em:version> value cannot contain whitespace.",
-                  "In your addon's install.rdf file, version numbers cannot "
-                  "contain whitespace characters of any kind.",
+                   "too_long"),
+                  "The value of <em:version> is too long",
+                  "Values supplied for <em:version> in the install.rdf file "
+                  "must be 32 characters or less.",
                   "install.rdf")
 
     # Must be a valid version number.
@@ -198,7 +197,8 @@ def _test_version(err, value):
                    "invalid_format"),
                   "The value of <em:version> is invalid.",
                   "The values supplied for <em:version> in the install.rdf "
-                  "file is not a valid version string.",
+                  "file is not a valid version string. It can only contain "
+                  "letters, numbers, and the symbols +*.-_.",
                   "install.rdf")
 
 

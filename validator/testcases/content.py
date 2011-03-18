@@ -78,11 +78,7 @@ def test_packed_packages(err, package_contents=None, xpi_package=None):
         if data["extension"] == "jar":
             # This is either a subpackage or a nested theme.
 
-            # Whether this is a subpackage or a nested theme is
-            # determined by whether it is in the root folder or not.
-            # Subpackages are always found in a directory such as
-            # /chrome or /content.
-            is_subpackage = name.count("/") > 0
+            is_subpackage = not err.get_resource("is_multipackage")
 
             # Unpack the package and load it up.
             package = StringIO(file_data)
@@ -101,11 +97,16 @@ def test_packed_packages(err, package_contents=None, xpi_package=None):
 
             # Let the error bunder know we're in a sub-package.
             err.push_state(data["name_lower"])
-            err.set_type(PACKAGE_SUBPACKAGE)  # Subpackage
+            err.set_type(PACKAGE_SUBPACKAGE if
+                         is_subpackage else
+                         PACKAGE_THEME)
             err.set_tier(1)
-            testendpoint_validator.test_inner_package(err,
-                                                      temp_contents,
-                                                      sub_xpi)
+            if is_subpackage:
+                testendpoint_validator.test_inner_package(err,
+                                                          temp_contents,
+                                                          sub_xpi)
+            else:
+                testendpoint_validator.test_package(err, package, name)
             package.close()
             err.pop_state()
             err.set_tier(2)
