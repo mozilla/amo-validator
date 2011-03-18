@@ -1,6 +1,7 @@
 import types
 
-import spidermonkey as spidermonkey
+import spidermonkey
+import instanceactions
 from jstypes import *
 
 
@@ -298,50 +299,16 @@ def _call_expression(traverser, node):
                                   context=traverser.context)
     elif node["callee"]["type"] == "MemberExpression" and \
          node["callee"]["property"]["type"] == "Identifier":
+
+        # If we can identify the function being called on any member of any
+        # instance, we can use that to either generate an output value or test
+        # for additional conditions.
         identifier_name = node["callee"]["property"]["name"]
-        simple_args = [traverser._traverse_node(a) for a in args]
-        if (identifier_name == "createElement" and
-            simple_args and
-            str(simple_args[0].get_literal_value()).lower() == "script") or \
-           (identifier_name == "createElementNS" and
-            len(simple_args) > 1 and
-            "script" in str(simple_args[1].get_literal_value())):
-            traverser.err.warning(("testcases_javascript_actions",
-                                   "_call_expression",
-                                   "called_createelement"),
-                                  "createElement() used to create script tag",
-                                  "The createElement() function was used to "
-                                  "create a script tag in a JavaScript file. "
-                                  "Add-ons are not allowed to create script "
-                                  "tags or load code dynamically from the "
-                                  "web.",
-                                  traverser.filename,
-                                  line=traverser.line,
-                                  column=traverser.position,
-                                  context=traverser.context)
-        elif (identifier_name == "createElement" and
-              simple_args and
-              not (simple_args[0].is_literal() or
-                   isinstance(simple_args[0].get_literal_value(), str))) or \
-             (identifier_name == "createElementNS" and
-              len(simple_args) > 1 and
-              not (simple_args[1].is_literal() or
-                   isinstance(simple_args[1].get_literal_value(), str))):
-            traverser.err.warning(("testcases_javascript_actions",
-                                   "_call_expression",
-                                   "createelement_variable"),
-                                  "Variable element type being created",
-                                  ["createElement or createElementNS were "
-                                   "used with a variable rather than a raw "
-                                   "string. Literal values should be used "
-                                   "when taking advantage of the element "
-                                   "creation functions.",
-                                   "E.g.: createElement('foo') rather than "
-                                   "createElement(el_type)"],
-                                  traverser.filename,
-                                  line=traverser.line,
-                                  column=traverser.position,
-                                  context=traverser.context)
+        if identifier_name in instanceactions.INSTANCE_DEFINITIONS:
+            result = instanceactions.INSTANCE_DEFINITIONS[identifier_name](
+                        args, traverser, node)
+            return result
+
 
     if member.is_global and "return" in member.value:
         return member.value["return"](wrapper=member,
