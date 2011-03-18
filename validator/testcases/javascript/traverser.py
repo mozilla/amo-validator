@@ -62,8 +62,13 @@ class MockBundler:
                 line=1, column=0, context=None):
         self.error(id, title, description, file, line, column, context)
 
+    def notice(self, id, title, description, filename="",
+             line=1, column=0, context=None):
+        self.error(id, title, description, file, line, column, context)
+
     def info(self, id, title, description, filename="",
              line=1, column=0, context=None):
+        print "Obsolete use of 'info'"
         self.error(id, title, description, file, line, column, context)
 
 
