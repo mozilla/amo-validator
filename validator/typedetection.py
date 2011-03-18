@@ -39,6 +39,7 @@ def detect_type(err, install_rdf=None, xpi_package=None):
 
     if type_ is not None:
         if type_ in translated_types:
+            err.save_resource("is_multipackage", type_ == "32", pushable=True)
             # Make sure we translate back to the normalized version
             return translated_types[type_]
         else:
