@@ -69,9 +69,14 @@ def test_blacklisted_files(err, package_contents=None, xpi_package=None):
             err.warning(("testcases_packagelayout",
                          "test_blacklisted_files",
                          "disallowed_extension"),
-                        "Blacklisted file extension found",
-                        ["The file \"%s\" uses a blacklisted file extension." %
-                            name,
+                        "Flagged file type found",
+                        ["A file was found with a flagged file extension. "
+                         "The extension in question usually identifies binary "
+                         "components. See: "
+                         "http://addons.mozilla.org/developers/docs/policies/"
+                             "reviews#section-binary"
+                         " for more information on the binary content review "
+                         "process.",
                          "The extension %s is disallowed." % extension],
                         name)
             continue
@@ -84,10 +89,11 @@ def test_blacklisted_files(err, package_contents=None, xpi_package=None):
             err.warning(("testcases_packagelayout",
                          "test_blacklisted_files",
                          "disallowed_file_type"),
-                        "Blacklisted file type found",
-                        ["A file was found to contain blacklisted content "
-                             "(i.e.: executable data).",
-                         "The file \"%s\" contains banned content" % name],
+                        "Flagged file type found",
+                        ["A file was found to contain flagged content (i.e.: "
+                         "executable data, potentially unauthorized scripts, "
+                         "etc.).",
+                         u"The file \"%s\" contains flagged content" % name],
                         filename=name)
 
 
