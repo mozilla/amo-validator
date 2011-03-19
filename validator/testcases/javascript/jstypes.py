@@ -2,25 +2,54 @@ import inspect
 import json
 import types
 
+import instanceproperties
 
-class JSContext(object):
+
+class JSObject(object):
+    """Mimics a JS object (function) and is capable of serving as an active
+    context to enable static analysis of `with` statements"""
+
+    def __init__(self):
+        self.data = {
+            "prototype": JSPrototype(),
+            "constructor": lambda **keys: JSObject(keys["anon"])
+        }
+
+    def get(self, name):
+        "Returns the value associated with a property name"
+        name = str(name)
+        return self.data[name] if name in self.data else None
+
+    def get_literal_value(self):
+        "Objects evaluate to empty strings"
+        return "[object Object]"
+
+    def set(self, name, value, traverser=None):
+        "Sets the value of a property"
+
+        if traverser:
+            modifier = instanceproperties.get_operation("set", name)
+            if modifier:
+                modified_value = modifier(value, traverser)
+        self.data[name] = value
+
+    def has_var(self, name):
+        name = str(name)
+        return name in self.data
+
+    def output(self):
+        return str(self.data)
+
+
+class JSContext(JSObject):
     "A variable context"
 
     def __init__(self, context_type):
         self._type = context_type
         self.data = {}
 
-    def get(self, name):
-        name = str(name)
-        return self.data[name] if name in self.data else None
-
-    def set(self, name, variable):
-        name = str(name)
-        self.data[name] = variable
-
-    def has_var(self, name):
-        name = str(name)
-        return name in self.data
+    def set(self, name, value):
+        JSObject.set(self, name, value, None)
 
     def output(self):
         output = {}
@@ -33,7 +62,8 @@ class JSWrapper(object):
     "Wraps a JS value and handles contextual functions for it."
 
     def __init__(self, value=None, const=False, dirty=False, lazy=False,
-                 is_global=False, traverser=None, callable=False):
+                 is_global=False, traverser=None, callable=False,
+                 setter=None):
 
         if traverser is not None:
             traverser.debug_level += 1
@@ -46,6 +76,10 @@ class JSWrapper(object):
         self.traverser = traverser
         self.value = None  # Instantiate the placeholder value
         self.is_global = False  # Not yet......
+        self.dirty = False  # Also not yet...
+
+        # Used for predetermining set operations
+        self.setter = setter
 
         if value is not None:
             self.set_value(value, overwrite_const=True)
@@ -53,7 +87,7 @@ class JSWrapper(object):
         if not self.is_global:
             self.is_global = is_global  # Globals are built seperately
 
-        self.dirty = dirty
+        self.dirty = dirty or self.dirty
         self.lazy = lazy
         self.callable = callable
 
@@ -75,6 +109,10 @@ class JSWrapper(object):
                                   line=traverser.line,
                                   column=traverser.position,
                                   context=traverser.context)
+
+        # Process any setter/modifier
+        if self.setter:
+            value = self.setter(value, traverser) or value or None
 
         if value == self.value:
             return
@@ -102,7 +140,7 @@ class JSWrapper(object):
         elif isinstance(value, JSWrapper):
             self.value = value.value
             self.lazy = value.lazy
-            self.dirty = True  # This may not be necessary
+            self.dirty = value.dirty
             self.is_global = value.is_global
             # const does not carry over on reassignment
             return self
@@ -133,7 +171,7 @@ class JSWrapper(object):
         "Retrieves a property from the variable"
 
         if self.value is None:
-            return JSWrapper(traverser=traverser)
+            return JSWrapper(traverser=traverser, dirty=True)
 
         value = self.value
         if self.is_global:
@@ -157,17 +195,22 @@ class JSWrapper(object):
             else:
                 value = value_val
 
-        if value is JSLiteral:
-            return None  # This will need tweaking for properties
-        elif isinstance(value, (JSObject, JSArray)):
-            output = value.get(name)
-        elif isinstance(value, JSPrototype):
-            output = value.get(name)
-        else:
-            output = None
+        # Process any getters that are present for the current property.
+        modifier = instanceproperties.get_operation("get", name)
+        if modifier:
+            modifier(traverser)
+
+        output = value.get(name) if issubclass(type(value), JSObject) else None
 
         if not isinstance(output, JSWrapper):
-            return JSWrapper(output, traverser=traverser)
+            output = JSWrapper(output, traverser=traverser, dirty=output is None)
+
+        # If we can predetermine the setter for the wrapper, we can save a ton
+        # of lookbehinds in the future. This greatly simplifies the
+        # MemberExpression support.
+        setter = instanceproperties.get_operation("set", name)
+        if setter:
+            output.setter = setter
         return output
 
     def del_value(self, member):
@@ -221,79 +264,39 @@ class JSWrapper(object):
 
     def output(self):
         "Returns a readable version of the object"
-        if isinstance(self.value, JSLiteral):
-            return self.value.value
-        elif isinstance(self.value, JSPrototype):
-            return "<<PROTOTYPE>>"
-        elif isinstance(self.value, JSObject):
-            properties = {}
-            for (name, property) in self.value.data.items():
-                if property is types.LambdaType:
-                    properties[name] = "<<LAMBDA>>"
-                    continue
-                if not isinstance(property, JSWrapper):
-                    wrapper = JSWrapper(property, traverser=self.traverser)
-                else:
-                    wrapper = property
-                properties[name] = wrapper.output()
-            return json.dumps(properties)
-        elif isinstance(self.value, JSArray):
-            return None  # TODO: These aren't implemented yet!
+        if self.value is None or self.is_global:
+            return ""
+
+        return self.value.output()
 
     def __str__(self):
         "Returns a textual version of the object."
         return str(self.get_literal_value())
 
 
-class JSLiteral(object):
+class JSLiteral(JSObject):
     "Represents a literal JavaScript value"
 
     def __init__(self, value=None):
         self.value = value
+        JSObject.__init__(self)
 
-    def set_value(self, value,):
+    def set_value(self, value):
         self.value = value
 
     def __str__(self):
         "Returns a human-readable version of the variable's contents"
         return json.dumps(self.value)
 
+    def output(self):
+        return self.__str__()
+
     def get_literal_value(self):
         "Returns the literal value of a this literal. Heh."
         return self.value
 
 
-class JSObject(object):
-    """Mimics a JS object (function) and is capable of serving as an active
-    context to enable static analysis of `with` statements"""
-
-    def __init__(self):
-        self.data = {
-            "prototype": JSPrototype(),
-            "constructor": lambda **keys: JSObject(keys["anon"])
-        }
-
-    def get(self, name):
-        "Returns the value associated with a property name"
-        return self.data[name] if name in self.data else None
-
-    def get_literal_value(self):
-        "Objects evaluate to empty strings"
-        # TODO : Maybe make this more compatible with functions
-        return "[object Object]"
-
-    def set(self, name, variable):
-        "Sets the value of a property"
-        self.data[name] = variable
-
-    def has_var(self, name):
-        return name in self.data
-
-    def output(self):
-        return str(self.data)
-
-
-class JSPrototype:
+class JSPrototype(JSObject):
     """A lazy JavaScript object that is assumed not to contain any default
     methods"""
 
@@ -302,20 +305,19 @@ class JSPrototype:
 
     def get(self, name):
         "Enables static analysis of `with` statements"
-        if name == "prototype":
-            return JSPrototype()
-        elif name not in self.data:
-            return None
-        else:
-            return self.data[name]
+        name = str(name)
+        output = None
+        if name in self.data:
+            output = self.data[name]
+        elif name == "prototype":
+            prototype = JSPrototype()
+            self.data[name] = prototype
+
+        return output
 
     def get_literal_value(self):
         "Same as JSObject; returns an empty string"
         return ""
-
-    def set(self, name, variable):
-        "Helpful for `with` statements"
-        self.data[name] = variable
 
     def has_var(self, name):
         return name in self.data
@@ -323,12 +325,8 @@ class JSPrototype:
     def __str__(self):
         return "<<PROTOTYPE>>"
 
-    def output(self):
-        "Simply an alias for __str__"
-        return self.__str__()
 
-
-class JSArray:
+class JSArray(JSObject):
     "A class that represents both a JS Array and a JS list."
 
     def __init__(self):
@@ -350,4 +348,32 @@ class JSArray:
         # x = [4]
         # y = x * 3 // y = 12 since x equals "4"
         return ",".join([str(w.get_literal_value()) for w in self.elements])
+
+    def set(self, index, value, traverser=None):
+        "Follow the rules of JS for creating an array"
+
+        try:
+            index = int(index)
+            f_index = float(index)
+            # Ignore floating point indexes
+            if index != float(index):
+                return
+        except ValueError:
+            return
+
+        # JS ignores indexes less than 0
+        if index < 0:
+            return
+
+        if len(self.elements) > index:
+            self.elements[index] = JSWrapper(value=value, traverser=traverser)
+        else:
+            # Assigning to an index higher than the top of the list pads the
+            # list with nulls
+            while len(self.elements) < index:
+                self.elements.append(JSWrapper(traverser=traverser))
+            self.elements.append(JSWrapper(value=value, traverser=traverser))
+
+    def output(self):
+        return self.get_literal_value()
 
