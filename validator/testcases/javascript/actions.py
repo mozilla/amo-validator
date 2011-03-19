@@ -244,7 +244,7 @@ def _define_obj(traverser, node):
         else:
             var_name = key["name"]
         var_value = traverser._traverse_node(prop["value"])
-        var.set(var_name, var_value)
+        var.set(var_name, var_value, traverser)
 
         # TODO: Observe "kind"
 
@@ -382,7 +382,7 @@ def _ident(traverser, node):
     # If the variable doesn't exist, we're going to create a placeholder for
     # it. The placeholder can have stuff assigned to it by things that work
     # like _expr_assignment
-    result = JSWrapper(traverser=traverser)
+    result = JSWrapper(traverser=traverser, dirty=True)
     traverser._set_variable(name, result)
     return result
 
@@ -460,7 +460,9 @@ def _expr_binary(traverser, node):
     traverser.debug_level += 1
 
     left = traverser._traverse_node(node["left"])
-    left = JSWrapper(left, traverser=traverser)
+    if not isinstance(left, JSWrapper):
+        left = JSWrapper(left, traverser=traverser)
+    traverser._debug(str(left.dirty))
 
     traverser.debug_level -= 1
 
@@ -468,7 +470,14 @@ def _expr_binary(traverser, node):
     traverser.debug_level += 1
 
     right = traverser._traverse_node(node["right"])
-    right = JSWrapper(right, traverser=traverser)
+    if not isinstance(right, JSWrapper):
+        right = JSWrapper(right, traverser=traverser)
+    traverser._debug(str(right.dirty))
+
+    if left.dirty:
+        return left
+    elif right.dirty:
+        return right
 
     traverser.debug_level -= 1
 
