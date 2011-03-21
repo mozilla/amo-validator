@@ -14,8 +14,8 @@ BANNED_IDENTIFIERS = ("newThread", )
 # identically to "True", except the string will be outputted when the error is
 # thrown.
 
-class interfaces:
-    nsICategoryManager = \
+INTERFACES = {
+    "nsICategoryManager":
         {"value":
             {"addCategoryEntry":
                 {"dangerous":
@@ -28,8 +28,8 @@ class interfaces:
                          else
                          "Authors of bootstrapped add-ons must take care "
                          "to cleanup any added category entries "
-                         "at shutdown")}}}
-    nsIComponentRegistrar = \
+                         "at shutdown")}}},
+    "nsIComponentRegistrar":
         {"value":
             {"autoRegister":
                 {"dangerous":
@@ -43,8 +43,8 @@ class interfaces:
                         e.get_resource("em:bootstrap") and \
                         "Authors of bootstrapped add-ons must take care "
                         "to cleanup any component registrations "
-                        "at shutdown"}}}
-    nsIObserverService = \
+                        "at shutdown"}}},
+    "nsIObserverService":
         {"value":
             {"addObserver":
                 {"dangerous":
@@ -52,8 +52,8 @@ class interfaces:
                         e.get_resource("em:bootstrap") and \
                         "Authors of bootstrapped add-ons must take care "
                         "to remove any added observers "
-                        "at shutdown"}}}
-    nsIResProtocolHandler = \
+                        "at shutdown"}}},
+    "nsIResProtocolHandler":
         {"value":
             {"setSubstitution":
                 {"dangerous":
@@ -64,8 +64,8 @@ class interfaces:
                         t(a[1]).get_literal_value() and \
                         "Authors of bootstrapped add-ons must take care "
                         "to cleanup any added resource substitutions "
-                        "at shutdown"}}}
-    nsIStringBundleService = \
+                        "at shutdown"}}},
+    "nsIStringBundleService":
         {"value":
             {"createStringBundle":
                 {"dangerous":
@@ -78,8 +78,8 @@ class interfaces:
                     lambda a, t, e:
                         e.get_resource("em:bootstrap") and \
                         "Authors of bootstrapped add-ons must take care "
-                        "to flush the string bundle cache at shutdown"}}}
-    nsIStyleSheetService = \
+                        "to flush the string bundle cache at shutdown"}}},
+    "nsIStyleSheetService":
         {"value":
             {"loadAndRegisterSheet":
                 {"dangerous":
@@ -87,8 +87,8 @@ class interfaces:
                         e.get_resource("em:bootstrap") and \
                         "Authors of bootstrapped add-ons must take care "
                         "to unregister any registered stylesheets "
-                        "at shutdown"}}}
-    nsIWindowMediator = \
+                        "at shutdown"}}},
+    "nsIWindowMediator":
         {"value":
             {"registerNotification":
                 {"dangerous":
@@ -96,8 +96,8 @@ class interfaces:
                         e.get_resource("em:bootstrap") and \
                         "Authors of bootstrapped add-ons must take care "
                         "to remove any added observers "
-                        "at shutdown"}}}
-    nsIWindowWatcher = \
+                        "at shutdown"}}},
+    "nsIWindowWatcher":
         {"value":
             {"addListener":
                 {"dangerous":
@@ -105,7 +105,8 @@ class interfaces:
                         e.get_resource("em:bootstrap") and \
                         "Authors of bootstrapped add-ons must take care "
                         "to remove any added observers "
-                        "at shutdown"}}}
+                        "at shutdown"}}},
+    }
 
 # GLOBAL_ENTITIES is also representative of the `window` object.
 GLOBAL_ENTITIES = {
@@ -186,35 +187,35 @@ GLOBAL_ENTITIES = {
                              "nsICategoryManager":
                                 {"xpcom_map":
                                      lambda:
-                                        interfaces.nsICategoryManager},
+                                        INTERFACES["nsICategoryManager"]},
                              "nsIComponentRegistrar":
                                 {"xpcom_map":
                                      lambda:
-                                        interfaces.nsIComponentRegistrar},
+                                        INTERFACES["nsIComponentRegistrar"]},
                              "nsIObserverService":
                                 {"xpcom_map":
                                      lambda:
-                                        interfaces.nsIObserverService},
+                                        INTERFACES["nsIObserverService"]},
                              "nsIResProtocolHandler":
                                 {"xpcom_map":
                                      lambda:
-                                        interfaces.nsIResProtocolHandler},
+                                        INTERFACES["nsIResProtocolHandler"]},
                              "nsIStyleSheetService":
                                 {"xpcom_map":
                                      lambda:
-                                        interfaces.nsIStyleSheetService},
+                                        INTERFACES["nsIStyleSheetService"]},
                              "nsIStringBundleService":
                                 {"xpcom_map":
                                      lambda:
-                                        interfaces.nsIStringBundleService},
+                                        INTERFACES["nsIStringBundleService"]},
                              "nsIWindowMediator":
                                 {"xpcom_map":
                                      lambda:
-                                        interfaces.nsIWindowMediator},
+                                        INTERFACES["nsIWindowMediator"]},
                              "nsIWindowWatcher":
                                 {"xpcom_map":
                                      lambda:
-                                        interfaces.nsIWindowWatcher},
+                                        INTERFACES["nsIWindowWatcher"]},
                              "nsIProcess":
                                 {"dangerous": True},
                              "nsIDOMGeoGeolocation":

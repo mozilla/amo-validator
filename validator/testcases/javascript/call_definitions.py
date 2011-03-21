@@ -1,5 +1,7 @@
+import copy
 import types
 
+import actions
 import traverser as js_traverser
 import predefinedentities
 from jstypes import *
@@ -29,8 +31,8 @@ def xpcom_constructor(method):
         traverser._debug("(Building XPCOM...)")
 
         inst = traverser._build_global(method,
-                                       argz.value["xpcom_map"]())
+                                       copy.deepcopy(argz.value["xpcom_map"]()))
         return inst
-    definition.__name__ = "xpcom_%s" % method
+    definition.__name__ = "xpcom_%s" % str(method)
     return definition
 
