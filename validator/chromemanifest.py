@@ -47,7 +47,7 @@ class ChromeManifest(object):
             # Filter out non-matches
             if (subject and triple["subject"] != subject) or \
                (predicate and triple["predicate"] != predicate) or \
-               (object_ and triple["object"] != object_):
+               (object_ and triple["object"] != object_):  # pragma: no cover
                 continue
 
             # Return the first found.
@@ -62,8 +62,10 @@ class ChromeManifest(object):
         for triple in self.triples:
 
             # Filter out non-matches
-            if (subject and triple["subject"] != subject) or \
-               (predicate and triple["predicate"] != predicate):
+            if (subject and
+                triple["subject"] != subject) or \
+               (predicate and
+                triple["predicate"] != predicate):  # pragma: no cover
                 continue
 
             yield triple["object"]

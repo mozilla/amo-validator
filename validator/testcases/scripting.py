@@ -46,8 +46,13 @@ def test_js_file(err, filename, data, line=0):
         try:
             _do_test(err=err, filename=filename, line=line, context=context,
                      tree=tree)
-        except:
+        except:  # pragma: no cover
             # We do this because the validator can still be damn unstable.
+            # FIXME: This really needs to report an error so we know
+            # that something has failed and we may not be reporting
+            # important errors
+            import sys, traceback
+            traceback.print_exc(file=sys.stderr)
             pass
 
     _regex_tests(err, data, filename)

@@ -11,6 +11,12 @@ def test_pass():
     tc_chromemanifest.test_categories(err)
     assert not err.failed()
 
+def test_no_chromemanifest():
+    "Chrome manifest tests should not be run if there is no chrome manifest"
+    err = ErrorBundle()
+    assert tc_chromemanifest.test_categories(err) is None
+    assert not err.failed()
+
 def test_js_categories_gecko2():
     "Tests that JS categories raise problems for hyphenated values"
     c = ChromeManifest("category JavaScript-DOM-class foo bar")
@@ -19,7 +25,7 @@ def test_js_categories_gecko2():
 
     tc_chromemanifest.test_categories(err)
     assert err.failed()
-    
+
 def test_js_categories_gecko1():
     "Tests that JS categories raise problems for space-delimited values"
     c = ChromeManifest("category JavaScript global foo bar")
@@ -28,4 +34,4 @@ def test_js_categories_gecko1():
 
     tc_chromemanifest.test_categories(err)
     assert err.failed()
-    
+

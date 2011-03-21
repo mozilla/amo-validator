@@ -2,14 +2,15 @@
  addons.mozilla.org Validator
 ==============================
 
+The AMO Validator is a tool designed to scan Mozilla add-on packages for
+problems such as security vulnerabilities, exploits, spamware and badware,
+and lots of other gunk. By using a combination of various techniques and
+detection mechanisms, the validator is capable of being both efficient as well
+as thorough.
 
 -------
  Setup
 -------
-
-This validator is a proposed replacement for the current add-on
-validator available at addons.mozilla.org. It is written entirely in
-python.
 
 Prerequisites
 =============
@@ -337,7 +338,7 @@ The context attribute of messages will either be a list or null. Null contexts r
 The middle element of the context list represents the line of interest. If an element of the context list is null, that line does not exist. For instance, if an error is on the first line of a file, the context might look like:
 
 ::
-	
+
 	[
 		null,
 		"This is the line with the error",
