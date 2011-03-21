@@ -42,7 +42,7 @@ def QueryInterface(args, traverser, node):
         return
 
     from call_definitions import xpcom_constructor
-    return xpcom_constructor("QueryInterface")(
+    return xpcom_constructor("QueryInterface", True, True)(
                 wrapper=node,
                 arguments=args,
                 traverser=traverser)
