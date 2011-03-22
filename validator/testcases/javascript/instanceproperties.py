@@ -50,7 +50,8 @@ def set_innerHTML(new_value, traverser):
 def set_on_event(new_value, traverser):
     "This ensures that on* properties are not assigned string values."
 
-    if isinstance(new_value.get_literal_value(), types.StringTypes):
+    if (new_value.is_literal() and
+        isinstance(new_value.get_literal_value(), types.StringTypes)):
         traverser.err.warning(("testcases_javascript_instancetypes",
                                "set_on_event",
                                "on*_str_assignment"),
