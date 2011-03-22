@@ -21,10 +21,9 @@ INTERFACES = {
                 {"dangerous":
                     lambda a, t, e:
                         e.get_resource("em:bootstrap") and \
-                        a and
                         ("Bootstrapped add-ons may not create persistent "
                          "category entries"
-                         if len(a) > 3 and t(a[3]).get_literal_value()
+                         if a and len(a) > 3 and t(a[3]).get_literal_value()
                          else
                          "Authors of bootstrapped add-ons must take care "
                          "to cleanup any added category entries "
