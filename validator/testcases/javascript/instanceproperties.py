@@ -1,6 +1,7 @@
 import re
 import types
 
+
 def set_innerHTML(new_value, traverser):
     "Tests that values being assigned to innerHTML are not dangerous"
 

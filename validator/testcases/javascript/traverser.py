@@ -18,6 +18,7 @@ class MockBundler:
         self.final_context = None
         self.tier = 4
         self.ids = []
+        self.detected_type = 1
 
     def failed(self):
         "Returns whether messages have been reported"
