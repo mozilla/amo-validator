@@ -1,6 +1,7 @@
 import re
 import types
 
+
 def set_innerHTML(new_value, traverser):
     "Tests that values being assigned to innerHTML are not dangerous"
 
@@ -22,7 +23,16 @@ def set_innerHTML(new_value, traverser):
                                   line=traverser.line,
                                   column=traverser.position,
                                   context=traverser.context)
+        else:
+            # Everything checks out, but we still want to pass it through the
+            # markup validator. Turn off strict mode so we don't get warnings
+            # about malformed HTML.
+            from validator.testcases.markup.markuptester import MarkupParser
+            parser = MarkupParser(traverser.err, strict=False, debug=True)
+            parser.process(traverser.filename, literal_value, "xul")
+
     else:
+        # Variable assignments
         traverser.err.warning(("testcases_javascript_instancetypes",
                                "set_innerHTML",
                                "variable_assignment"),
@@ -40,7 +50,8 @@ def set_innerHTML(new_value, traverser):
 def set_on_event(new_value, traverser):
     "This ensures that on* properties are not assigned string values."
 
-    if isinstance(new_value.get_literal_value(), types.StringTypes):
+    if (new_value.is_literal() and
+        isinstance(new_value.get_literal_value(), types.StringTypes)):
         traverser.err.warning(("testcases_javascript_instancetypes",
                                "set_on_event",
                                "on*_str_assignment"),
