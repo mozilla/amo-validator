@@ -35,8 +35,6 @@ def xpcom_constructor(method, extend=False, mutate=False):
                                        copy.deepcopy(argz.value["xpcom_map"]()))
 
         if extend or mutate:
-            name = wrapper["callee"]["object"].get("name", wrapper["callee"]["object"].get("property", None))
-
             # FIXME: There should be a way to get this without
             # traversing the call chain twice.
             parent = actions.trace_member(traverser, wrapper["callee"]["object"])

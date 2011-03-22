@@ -13,7 +13,7 @@ def _test(script):
 
 def test_bootstrapped():
     "Performs a test on a JS file"
-    
+
     methods = (
         ("nsICategoryManager", "addCategoryEntry()"),
         ("nsIObserverService", "addObserver()"),

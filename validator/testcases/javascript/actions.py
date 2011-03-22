@@ -598,4 +598,3 @@ def _get_as_num(value):
     except:
         return 0
 
-
