@@ -42,6 +42,11 @@ def test_on_event():
     x.fooclick = "bar";
     """).failed()
 
+    assert not _do_test_raw("""
+    var x = foo();
+    x.onclick = function() {};
+    """).failed()
+
     assert _do_test_raw("""
     var x = foo();
     x.onclick = "bar";
