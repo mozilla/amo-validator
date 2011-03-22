@@ -69,10 +69,15 @@ def test_blacklisted_files(err, package_contents=None, xpi_package=None):
             err.warning(("testcases_packagelayout",
                          "test_blacklisted_files",
                          "disallowed_extension"),
-                        "Blacklisted file extension found",
-                        ["The file \"%s\" uses a blacklisted file extension." %
+                        "Flagged file extension found",
+                        ["The file \"%s\" has a flagged file extension." %
                             name,
-                         "The extension %s is disallowed." % extension],
+                         "The extension of this file is flagged because it "
+                         "usually identifies binary components. Please see "
+                         "http://addons.mozilla.org/developers/docs/policies/"
+                            "reviews#section-binary"
+                         " for more information on the binary content review "
+                         "process."],
                         name)
             continue
 

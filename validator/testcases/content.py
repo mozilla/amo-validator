@@ -42,9 +42,13 @@ def test_packed_packages(err, package_contents=None, xpi_package=None):
 
     processed_files = 0
 
-    hash_whitelist = [x[:-1] for x in
-                      open(os.path.join(os.path.dirname(__file__),
-                                        'whitelist_hashes.txt')).readlines()]
+    with open(os.path.join(os.path.dirname(__file__),
+              "hashes.txt")) as f:
+        hash_blacklist = [x[:-1] for x in f]
+
+    with open(os.path.join(os.path.dirname(__file__),
+              "whitelist_hashes.txt")) as f:
+        hash_whitelist = [x[:-1] for x in f]
 
     # Iterate each item in the package.
     for name, data in package_contents.items():
@@ -68,9 +72,19 @@ def test_packed_packages(err, package_contents=None, xpi_package=None):
         except KeyError:  # pragma: no cover
             pass
 
-        # Skip over whitelisted hashes
+        # Skip over whitelisted and blacklisted hashes
         hash = hashlib.sha1(file_data).hexdigest()
         if hash in hash_whitelist:
+            continue
+        elif hash in hash_blacklist:
+            err.notice(("testcases_content",
+                        "test_packed_packages",
+                        "blacklisted_js_library"),
+                       "JS Library Detected",
+                       ["JavaScript libraries are discouraged for simple "
+                        "add-ons, but are generally accepted.",
+                        "File '%s' is a known JS library" % name],
+                       name)
             continue
 
         processed = False
