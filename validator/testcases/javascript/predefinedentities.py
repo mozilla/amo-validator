@@ -9,10 +9,10 @@ BANNED_IDENTIFIERS = ("newThread", )
 # will allow the object to be referenced. If the object is called via a
 # CallExpression, "a" will contain the raw arguments values and "t" will
 # contain a reference to traverser._traverse_node(). "t" will always return a
-# JSWrapper object. The return value of the lambda function will be used as
-# the value for the "dangerous" property. Lastly, specifying a string functions
-# identically to "True", except the string will be outputted when the error is
-# thrown.
+# JSWrapper object. The optional third argument "e" will be an ErrorBundle
+# object. The return value of the lambda function will be used as the value for
+# the "dangerous" property. Lastly, specifying a string functions identically to
+# "True", except the string will be outputted when the error is thrown.
 
 INTERFACES = {
     "nsICategoryManager":
