@@ -52,6 +52,9 @@ def xpcom_constructor(method, extend=False, mutate=False):
 
             if isinstance(parent.value, dict):
                 if extend and mutate:
+                    if callable(parent.value["value"]):
+                        parent.value["value"] = copy.deepcopy(parent.value["value"]())
+
                     parent.value["value"].update(inst.value["value"])
                     return parent
 
