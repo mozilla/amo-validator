@@ -2,7 +2,7 @@ from js_helper import _do_test_raw
 
 
 def test_innerHTML():
-    "Tests that the dev can't define event handlers in innerHTML."
+    """Tests that the dev can't define event handlers in innerHTML."""
 
     assert not _do_test_raw("""
     var x = foo();
@@ -21,7 +21,7 @@ def test_innerHTML():
 
 
 def test_complex_innerHTML():
-    "Tests that innerHTML can't be assigned an HTML chunk with bad code"
+    """Tests that innerHTML can't be assigned an HTML chunk with bad code"""
 
     assert not _do_test_raw("""
     var x = foo();
@@ -35,7 +35,7 @@ def test_complex_innerHTML():
 
 
 def test_on_event():
-    "Tests that on* properties are not assigned strings."
+    """Tests that on* properties are not assigned strings."""
 
     assert not _do_test_raw("""
     var x = foo();

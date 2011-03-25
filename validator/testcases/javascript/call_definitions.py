@@ -12,10 +12,10 @@ from jstypes import *
 #  traverser : The current traverser object
 
 def xpcom_constructor(method, extend=False, mutate=False):
-    "Wraps the XPCOM class instantiation function."
+    """Returns a function which wraps an XPCOM class instantiation function."""
 
     def definition(wrapper, arguments, traverser):
-        "Wraps the XPCOM class instantiation function."
+        """Wraps an XPCOM class instantiation function."""
 
         if not arguments:
             return None
@@ -33,6 +33,7 @@ def xpcom_constructor(method, extend=False, mutate=False):
 
         inst = traverser._build_global(method,
                                        copy.deepcopy(argz.value["xpcom_map"]()))
+        inst.value["overwriteable"] = True
 
         if extend or mutate:
             # FIXME: There should be a way to get this without

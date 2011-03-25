@@ -1,7 +1,8 @@
 from js_helper import _do_test_raw
 
+
 def test_xmlhttprequest():
-    "Tests that the XPCOM XHR yields the standard XHR"
+    """Tests that the XPCOM XHR yields the standard XHR."""
 
     err = _do_test_raw("""
     // Accessing a member on Components.classes is a wildcard
@@ -16,8 +17,9 @@ def test_xmlhttprequest():
     assert "value" in req
     assert "open" in req["value"]
 
+
 def test_evalinsandbox():
-    "Tests Components.utils.evalInSandbox()"
+    """Tests that Components.utils.evalInSandbox() is treated like eval."""
 
     err = _do_test_raw("""
     var Cu = Components.utils;
@@ -37,8 +39,8 @@ def test_evalinsandbox():
     """)
     assert err.failed()
 
-def test_queryinterface():
-    "Tests the functionality of the getInterface method"
+def test_getinterface():
+    """Tests the functionality of the getInterface method"""
 
     assert _do_test_raw("""
         obj.getInterface(Components.interfaces.nsIXMLHttpRequest)
@@ -46,7 +48,7 @@ def test_queryinterface():
     """).failed()
 
 def test_queryinterface():
-    "Tests the functionality of the QueryInterface method"
+    """Tests the functionality of the QueryInterface method"""
 
     assert _do_test_raw("""
         var obj = {};
@@ -98,4 +100,13 @@ def test_queryinterface():
             obj.foo.QueryInterface(Components.interfaces.nsIXMLHttpRequest);
             obj.foo.open("GET");
         """).failed()
+
+def test_overwritability():
+    """Tests that XPCOM globals can be overwritten"""
+
+    assert not _do_test_raw("""
+    xhr = Components.classes[""].createInstance(
+        Components.interfaces.nsIXMLHttpRequest);
+    xhr = "foo";
+    """).failed()
 

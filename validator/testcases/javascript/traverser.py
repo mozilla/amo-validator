@@ -33,7 +33,7 @@ class MockBundler:
 
         return False
 
-    def error(self, id, title, description, filename="",
+    def error(self, err_id, error, description, filename="",
               line=1, column=0, context=None):
         "Represents a mock error"
 
@@ -43,8 +43,8 @@ class MockBundler:
         self.ids.append(id)
 
         print "-" * 30
-        print title
-        print "~" * len(title)
+        print error
+        print "~" * len(error)
         if isinstance(description, str):
             print description
         else:
@@ -59,9 +59,13 @@ class MockBundler:
                 print dline
         print "in %s:line %d (%d)" % (file, line, column)
 
-    def warning(self, id, title, description, filename="",
+    def warning(self, err_id, warning, description, filename="",
                 line=1, column=0, context=None):
-        self.error(id, title, description, file, line, column, context)
+        self.error(err_id, warning, description, file, line, column, context)
+
+    def notice(self, err_id, notice, description, filename="",
+             line=1, column=0, context=None):
+        self.error(err_id, notice, description, file, line, column, context)
 
     def notice(self, id, title, description, filename="",
              line=1, column=0, context=None):
@@ -70,6 +74,7 @@ class MockBundler:
     def info(self, id, title, description, filename="",
              line=1, column=0, context=None):
         print "Obsolete use of 'info'"
+        assert None
         self.error(id, title, description, file, line, column, context)
 
 

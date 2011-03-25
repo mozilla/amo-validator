@@ -1,7 +1,7 @@
 from js_helper import _do_test_raw
 
 def test_createElement():
-    "Tests that createElement calls are filtered properly"
+    """Tests that createElement calls are filtered properly"""
 
     assert not _do_test_raw("""
     var x = "foo";
@@ -21,7 +21,7 @@ def test_createElement():
 
 
 def test_createElementNS():
-    "Tests that createElementNS calls are filtered properly"
+    """Tests that createElementNS calls are filtered properly"""
 
     assert not _do_test_raw("""
     var x = "foo";
@@ -42,7 +42,7 @@ def test_createElementNS():
 
 
 def test_setAttribute():
-    "Tests that setAttribute calls are blocked successfully"
+    """Tests that setAttribute calls are blocked successfully"""
 
     assert not _do_test_raw("""
     var x = "foo";

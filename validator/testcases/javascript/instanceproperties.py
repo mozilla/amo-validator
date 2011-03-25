@@ -12,17 +12,17 @@ def set_innerHTML(new_value, traverser):
         # Test for on* attributes
         event_assignment = re.compile("<.+ on[a-z]+=")
         if event_assignment.search(literal_value.lower()):
-            traverser.err.warning(("testcases_javascript_instancetypes",
-                                   "set_innerHTML",
-                                   "event_assignment"),
-                                  "Event handler assignment via innerHTML",
-                                  "When assigning event handlers, innerHTML "
-                                  "should never be used. Rather, use a "
-                                  "proper technique, like addEventListener.",
-                                  filename=traverser.filename,
-                                  line=traverser.line,
-                                  column=traverser.position,
-                                  context=traverser.context)
+            traverser.err.warning(
+                err_id=("testcases_javascript_instancetypes", "set_innerHTML",
+                            "event_assignment"),
+                warning="Event handler assignment via innerHTML",
+                description="When assigning event handlers, innerHTML "
+                            "should never be used. Rather, use a "
+                            "proper technique, like addEventListener.",
+                filename=traverser.filename,
+                line=traverser.line,
+                column=traverser.position,
+                context=traverser.context)
         else:
             # Everything checks out, but we still want to pass it through the
             # markup validator. Turn off strict mode so we don't get warnings
@@ -33,18 +33,18 @@ def set_innerHTML(new_value, traverser):
 
     else:
         # Variable assignments
-        traverser.err.warning(("testcases_javascript_instancetypes",
-                               "set_innerHTML",
-                               "variable_assignment"),
-                              "innerHTML should not be set dynamically",
-                              "Due to both security and performance reasons, "
-                              "innerHTML should not be set using dynamic "
-                              "values. This can lead to security issues or "
-                              "fairly serious performance degredation.",
-                              filename=traverser.filename,
-                              line=traverser.line,
-                              column=traverser.position,
-                              context=traverser.context)
+        traverser.err.warning(
+            err_id=("testcases_javascript_instancetypes", "set_innerHTML",
+                        "variable_assignment"),
+            warning="innerHTML should not be set dynamically",
+            description="Due to both security and performance reasons, "
+                        "innerHTML should not be set using dynamic "
+                        "values. This can lead to security issues or "
+                        "fairly serious performance degredation.",
+            filename=traverser.filename,
+            line=traverser.line,
+            column=traverser.position,
+            context=traverser.context)
 
 
 def set_on_event(new_value, traverser):
@@ -52,18 +52,18 @@ def set_on_event(new_value, traverser):
 
     if (new_value.is_literal() and
         isinstance(new_value.get_literal_value(), types.StringTypes)):
-        traverser.err.warning(("testcases_javascript_instancetypes",
-                               "set_on_event",
-                               "on*_str_assignment"),
-                              "on* property being assigned string",
-                              "Event handlers in JavaScript should not be "
-                              "assigned by setting an on* property to a "
-                              "string of JS code. Rather, consider using "
-                              "addEventListerner.",
-                              filename=traverser.filename,
-                              line=traverser.line,
-                              column=traverser.position,
-                              context=traverser.context)
+        traverser.err.warning(
+            err_id=("testcases_javascript_instancetypes", "set_on_event",
+                        "on*_str_assignment"),
+            warning="on* property being assigned string",
+            description="Event handlers in JavaScript should not be "
+                        "assigned by setting an on* property to a "
+                        "string of JS code. Rather, consider using "
+                        "addEventListerner.",
+            filename=traverser.filename,
+            line=traverser.line,
+            column=traverser.position,
+            context=traverser.context)
 
 
 OBJECT_DEFINITIONS = {"innerHTML": {"set": set_innerHTML}}

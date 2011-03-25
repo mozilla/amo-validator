@@ -310,9 +310,7 @@ def _call_expression(traverser, node):
         identifier_name = node["callee"]["property"]["name"]
         if identifier_name in instanceactions.INSTANCE_DEFINITIONS:
             result = instanceactions.INSTANCE_DEFINITIONS[identifier_name](
-                        args,
-                        traverser,
-                        node)
+                        args, traverser, node)
             return result
 
 

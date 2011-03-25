@@ -6,8 +6,10 @@ import instanceproperties
 
 
 class JSObject(object):
-    """Mimics a JS object (function) and is capable of serving as an active
-    context to enable static analysis of `with` statements"""
+    """
+    Mimics a JS object (function) and is capable of serving as an active
+    context to enable static analysis of `with` statements
+    """
 
     def __init__(self):
         self.data = {
@@ -42,7 +44,7 @@ class JSObject(object):
 
 
 class JSContext(JSObject):
-    "A variable context"
+    """A variable context"""
 
     def __init__(self, context_type):
         self._type = context_type
@@ -59,7 +61,7 @@ class JSContext(JSObject):
 
 
 class JSWrapper(object):
-    "Wraps a JS value and handles contextual functions for it."
+    """Wraps a JS value and handles contextual functions for it."""
 
     def __init__(self, value=None, const=False, dirty=False, lazy=False,
                  is_global=False, traverser=None, callable=False,
@@ -92,7 +94,7 @@ class JSWrapper(object):
         self.callable = callable
 
     def set_value(self, value, traverser=None, overwrite_const=False):
-        "Assigns a value to the wrapper"
+        """Assigns a value to the wrapper"""
 
         # Use a global traverser if it's present.
         if traverser is None:
@@ -149,7 +151,7 @@ class JSWrapper(object):
         return self
 
     def set_value_from_expression(self, traverser, node):
-        "Sets the value of the variable from a node object"
+        """Sets the value of the variable from a node object"""
 
         self.set_value(traverser._traverse_node(node),
                        traverser=traverser)
@@ -168,7 +170,7 @@ class JSWrapper(object):
             return True
 
     def get(self, traverser, name):
-        "Retrieves a property from the variable"
+        """Retrieves a property from the variable"""
 
         if self.value is None:
             return JSWrapper(traverser=traverser, dirty=True)
@@ -214,7 +216,7 @@ class JSWrapper(object):
         return output
 
     def del_value(self, member):
-        "Deletes a member"
+        """The member `member` will be deleted from the value of the wrapper"""
         if self.is_global:
             self.traverser.err.warning(("testcases_js_jstypes",
                                         "del_value",
@@ -233,7 +235,7 @@ class JSWrapper(object):
             del self.value.data[member]
 
     def contains(self, value):
-        "Serves 'in' for BinaryOperators for lists and dictionaries"
+        """Serves 'in' for BinaryOperators for lists and dictionaries"""
 
         if isinstance(value, JSWrapper):
             value = value.get_literal_value()
@@ -249,11 +251,11 @@ class JSWrapper(object):
         return False
 
     def is_literal(self):
-        "Returns whether the content is a literal"
+        """Returns whether the content is a literal"""
         return isinstance(self.value, JSLiteral)
 
     def get_literal_value(self):
-        "Returns the literal value of the wrapper"
+        """Returns the literal value of the wrapper"""
 
         if self.is_global:
             return None
@@ -263,19 +265,19 @@ class JSWrapper(object):
         return self.value.get_literal_value()
 
     def output(self):
-        "Returns a readable version of the object"
+        """Returns a readable version of the object"""
         if self.value is None or self.is_global:
             return ""
 
         return self.value.output()
 
     def __str__(self):
-        "Returns a textual version of the object."
+        """Returns a textual version of the object."""
         return str(self.get_literal_value())
 
 
 class JSLiteral(JSObject):
-    "Represents a literal JavaScript value"
+    """Represents a literal JavaScript value."""
 
     def __init__(self, value=None):
         self.value = value
@@ -297,8 +299,10 @@ class JSLiteral(JSObject):
 
 
 class JSPrototype(JSObject):
-    """A lazy JavaScript object that is assumed not to contain any default
-    methods"""
+    """
+    A lazy JavaScript object that is assumed not to contain any default
+    methods.
+    """
 
     def __init__(self):
         self.data = {}
@@ -327,7 +331,7 @@ class JSPrototype(JSObject):
 
 
 class JSArray(JSObject):
-    "A class that represents both a JS Array and a JS list."
+    """A class that represents both a JS Array and a JS list."""
 
     def __init__(self):
         self.elements = []
@@ -343,14 +347,14 @@ class JSArray(JSObject):
             return None
 
     def get_literal_value(self):
-        "Arrays return a comma-delimited version of themselves"
+        """Arrays return a comma-delimited version of themselves"""
         # Interestingly enough, this allows for things like:
         # x = [4]
         # y = x * 3 // y = 12 since x equals "4"
         return ",".join([str(w.get_literal_value()) for w in self.elements])
 
     def set(self, index, value, traverser=None):
-        "Follow the rules of JS for creating an array"
+        """Follow the rules of JS for creating an array"""
 
         try:
             index = int(index)
