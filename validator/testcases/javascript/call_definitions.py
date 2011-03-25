@@ -28,5 +28,6 @@ def xpcom_createInstance(wrapper, arguments, traverser):
 
     inst = traverser._build_global("createInstance",
                                    argz.value["xpcom_map"]())
+    inst.value["overwritable"] = True
     return inst
 
