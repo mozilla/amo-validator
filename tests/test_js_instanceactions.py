@@ -55,3 +55,25 @@ def test_setAttribute():
     var x = "foo";
     x.setAttribute("onfoo", "bar");
     """).failed()
+
+
+def test_callexpression_argument_traversal():
+    """
+    This makes sure that unknown function calls still have their arguments
+    traversed.
+    """
+
+    assert not _do_test_raw("""
+    function foo(x){}
+    foo({"bar":function(){
+        bar();
+    }});
+    """).failed()
+
+    assert _do_test_raw("""
+    function foo(x){}
+    foo({"bar":function(){
+        eval("evil");
+    }});
+    """).failed()
+

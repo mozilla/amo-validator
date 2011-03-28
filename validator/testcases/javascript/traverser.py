@@ -150,6 +150,10 @@ class Traverser:
         if node is None:
             return None
 
+        # Simple caching to prevent retraversal
+        if "__traversal" in node:
+            return node["__traversal"]
+
         # Handles all the E4X stuff and anything that may or may not return
         # a value.
         if "type" not in node or not self._can_handle_node(node["type"]):
@@ -216,7 +220,10 @@ class Traverser:
         if returns:
             if not isinstance(action_result, JSWrapper):
                 return JSWrapper(action_result, traverser=self)
+            node["__traversal"] = action_result
             return action_result
+
+        node["__traversal"] = None
 
     def _interpret_block(self, items):
         "Interprets a block of consecutive code"

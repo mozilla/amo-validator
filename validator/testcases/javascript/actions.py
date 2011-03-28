@@ -274,6 +274,9 @@ def _define_literal(traverser, node):
 def _call_expression(traverser, node):
     args = node["arguments"]
 
+    for arg in args:
+        traverser._traverse_node(arg)
+
     member = traverser._traverse_node(node["callee"])
     if member.is_global and \
        "dangerous" in member.value and \
