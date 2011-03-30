@@ -39,10 +39,11 @@ TAG_NOT_OPENED = "Tag (%s) being closed before it is opened."
 class MarkupParser(HTMLParser):
     """Parses and inspects various markup languages"""
 
-    def __init__(self, err, debug=False):
+    def __init__(self, err, strict=True, debug=False):
         HTMLParser.__init__(self)
         self.err = err
         self.line = 0
+        self.strict = strict
         self.debug = debug
 
         self.context = None
@@ -108,7 +109,7 @@ class MarkupParser(HTMLParser):
 
             if "script" in self.xml_state or (
                self.debug and "testscript" in self.xml_state):
-                if "script_comments" in self.reported:
+                if "script_comments" in self.reported or not self.strict:
                     return
                 self.err.notice(("testcases_markup_markuptester",
                                  "_feed",
@@ -124,15 +125,17 @@ class MarkupParser(HTMLParser):
                 self.reported["script_comments"] = True
                 return
 
-            self.err.warning(("testcases_markup_markuptester",
-                              "_feed",
-                              "parse_error"),
-                             "Markup parsing error",
-                             ["There was an error parsing the markup document.",
-                              str(inst)],
-                             self.filename,
-                             line=self.line,
-                             context=self.context)
+            if self.strict:
+                self.err.warning(("testcases_markup_markuptester",
+                                  "_feed",
+                                  "parse_error"),
+                                 "Markup parsing error",
+                                 ["There was an error parsing the markup "
+                                  "document.",
+                                  str(inst)],
+                                 self.filename,
+                                 line=self.line,
+                                 context=self.context)
             self.reported["markup"] = True
 
     def handle_startendtag(self, tag, attrs):
@@ -293,7 +296,7 @@ class MarkupParser(HTMLParser):
             print tag, self.xml_state
 
         if not self.xml_state:
-            if "closing_tags" in self.reported:
+            if "closing_tags" in self.reported or not self.strict:
                 return
             self.err.warning(("testcases_markup_markuptester",
                               "handle_endtag",
@@ -345,7 +348,10 @@ class MarkupParser(HTMLParser):
 
         # If this is an XML-derived language, everything must nest
         # properly. No overlapping tags.
-        if old_state != tag and self.extension[0] == 'x':
+        if (old_state != tag and
+            self.extension[0] == 'x' and
+            not self.strict):
+
             self.err.warning(("testcases_markup_markuptester",
                               "handle_endtag",
                               "invalid_nesting"),

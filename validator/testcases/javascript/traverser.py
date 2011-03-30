@@ -18,6 +18,7 @@ class MockBundler:
         self.final_context = None
         self.tier = 4
         self.ids = []
+        self.detected_type = 1
 
     def failed(self):
         "Returns whether messages have been reported"
@@ -32,7 +33,7 @@ class MockBundler:
 
         return False
 
-    def error(self, id, title, description, filename="",
+    def error(self, err_id, error, description, filename="",
               line=1, column=0, context=None):
         "Represents a mock error"
 
@@ -42,8 +43,8 @@ class MockBundler:
         self.ids.append(id)
 
         print "-" * 30
-        print title
-        print "~" * len(title)
+        print error
+        print "~" * len(error)
         if isinstance(description, str):
             print description
         else:
@@ -58,12 +59,18 @@ class MockBundler:
                 print dline
         print "in %s:line %d (%d)" % (file, line, column)
 
-    def warning(self, id, title, description, filename="",
+    def warning(self, err_id, warning, description, filename="",
                 line=1, column=0, context=None):
-        self.error(id, title, description, file, line, column, context)
+        self.error(err_id, warning, description, file, line, column, context)
+
+    def notice(self, err_id, notice, description, filename="",
+             line=1, column=0, context=None):
+        self.error(err_id, notice, description, file, line, column, context)
 
     def info(self, id, title, description, filename="",
              line=1, column=0, context=None):
+        print "Obsolete use of 'info'"
+        assert None
         self.error(id, title, description, file, line, column, context)
 
 
@@ -143,6 +150,10 @@ class Traverser:
         if node is None:
             return None
 
+        # Simple caching to prevent retraversal
+        if "__traversal" in node:
+            return node["__traversal"]
+
         # Handles all the E4X stuff and anything that may or may not return
         # a value.
         if "type" not in node or not self._can_handle_node(node["type"]):
@@ -209,7 +220,10 @@ class Traverser:
         if returns:
             if not isinstance(action_result, JSWrapper):
                 return JSWrapper(action_result, traverser=self)
+            node["__traversal"] = action_result
             return action_result
+
+        node["__traversal"] = None
 
     def _interpret_block(self, items):
         "Interprets a block of consecutive code"
