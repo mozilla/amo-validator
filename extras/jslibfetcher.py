@@ -1,4 +1,5 @@
 import urllib
+import os
 
 def get_pattern(prefix, url_pattern, versions):
 
@@ -6,7 +7,10 @@ def get_pattern(prefix, url_pattern, versions):
         version = version
         url = url_pattern % version
         name = "%s.%s.%s" % (prefix, version, url.split("/")[-1])
-        
+
+        if os.path.exists("jslibs/%s" % name):
+            continue
+
         try:
             print url
             urllib.urlretrieve(url, "jslibs/%s" % name)
@@ -27,7 +31,7 @@ JQUERY_GCODE_VERSIONS = ("1.1.3", "1.1.3.1.pack", "1.1.3.1", "1.1.4.pack",
                          "1.2.1.min", "1.2.1.pack", "1.2.1", "1.2.2.pack",
                          "1.2.2.min", "1.2.2", "1.2.3.pack",  "1.2.4.min",
                          "1.2.4.pack", "1.2.4", "1.2.5.min", "1.2.5.pack",
-                         "1.2.5", "1.5.min", "1.5")
+                         "1.2.5", "1.5.min", "1.5", "1.5.1.min", "1.5.1")
 JQUERYUI_VERSIONS = ("1.5.2", "1.5.3", "1.6.0", "1.7.0", "1.7.1", "1.7.2",
                      "1.7.3", "1.8.0", "1.8.1", "1.8.2", "1.8.4", "1.8.5",
                      "1.8.6", "1.8.7", "1.8.8", "1.8.9")
