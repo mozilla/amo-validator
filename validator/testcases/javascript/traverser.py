@@ -40,7 +40,7 @@ class MockBundler:
         # Increment the message counter
         self.message_count += 1
 
-        self.ids.append(id)
+        self.ids.append(err_id)
 
         error = unicode(error)
 

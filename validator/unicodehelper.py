@@ -25,7 +25,7 @@ def decode(data):
 
     # Detect standard unicodes.
     for bom, encoding in UNICODES:
-        if data[:len(bom) - 1] == bom:
+        if data.startswith(bom):
             return unicode(data[len(bom):], encoding, "ignore")
 
     # Test for various common encodings.
@@ -36,5 +36,5 @@ def decode(data):
             pass
 
     # Anything else gets filtered.
-    return unicode(textfilter.filter_ascii(data))
+    return unicode(textfilter.filter_ascii(data), errors="replace")
 

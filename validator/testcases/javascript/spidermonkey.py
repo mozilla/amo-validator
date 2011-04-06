@@ -1,3 +1,4 @@
+import codecs
 import json
 import os
 import re
@@ -29,7 +30,6 @@ def get_tree(code, err=None, filename=None, shell=None):
         str_exc = str(exc).strip("'\"")
         if ("SyntaxError" in str_exc or
             "ReferenceError" in str_exc):
-            open("testfiles/foo.js", mode="w+b").write(code)
             err.warning(("testcases_scripting",
                          "test_js_file",
                          "syntax_error"),
@@ -95,7 +95,8 @@ def _get_tree(code, shell=SPIDERMONKEY_INSTALLATION):
     code = unicodehelper.decode(code)
 
     temp = tempfile.NamedTemporaryFile(mode="w+b", delete=False)
-    temp.write(code.encode("utf-8"))
+    #temp.write(codecs.BOM_UTF8)
+    temp.write(code.encode("utf_8"))
     temp.flush()
 
     data = """try{
