@@ -29,6 +29,7 @@ def get_tree(code, err=None, filename=None, shell=None):
         str_exc = str(exc).strip("'\"")
         if ("SyntaxError" in str_exc or
             "ReferenceError" in str_exc):
+            open("testfiles/foo.js", mode="w+b").write(code)
             err.warning(("testcases_scripting",
                          "test_js_file",
                          "syntax_error"),

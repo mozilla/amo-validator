@@ -42,10 +42,12 @@ class MockBundler:
 
         self.ids.append(id)
 
+        error = unicode(error)
+
         print "-" * 30
-        print error
+        print error.encode("ascii", "replace")
         print "~" * len(error)
-        if isinstance(description, str):
+        if isinstance(description, types.StringTypes):
             print description
         else:
             # Errors can have multiple lines
@@ -105,12 +107,14 @@ class Traverser:
             output = data
             if isinstance(data, JSObject) or isinstance(data, JSContext):
                 output = data.output()
-            print ". " * self.debug_level + output
+
+            output = unicode(output)
+            print ". " * self.debug_level + output.encode("ascii", "replace")
 
     def run(self, data):
         if DEBUG:
             x = open("/tmp/output.js", "w")
-            x.write(str(data))
+            x.write(unicode(data))
             x.close()
 
         if "type" not in data or not self._can_handle_node(data["type"]):
@@ -189,7 +193,7 @@ class Traverser:
         if action is not None:
             action_result = action(self, node)
             self._debug("ACTION>>%s (%s)" %
-                    ("halt>>%s" % str(action_result) if
+                    ("halt>>%s" % unicode(action_result) if
                         action_result else
                         "continue",
                      node["type"]))
@@ -350,7 +354,8 @@ class Traverser:
                                   "_build_global",
                                   "dangerous_global"),
                                  "Dangerous Global Object",
-                                 [dang if isinstance(dang, str) else
+                                 [dang if
+                                  isinstance(dang, types.StringTypes) else
                                   "A dangerous or banned global object was "
                                   "accessed by some JavaScript code.",
                                   "Accessed object: %s" % name],

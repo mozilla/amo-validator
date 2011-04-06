@@ -19,7 +19,7 @@ class JSObject(object):
 
     def get(self, name):
         "Returns the value associated with a property name"
-        name = str(name)
+        name = unicode(name)
         return self.data[name] if name in self.data else None
 
     def get_literal_value(self):
@@ -36,11 +36,11 @@ class JSObject(object):
         self.data[name] = value
 
     def has_var(self, name):
-        name = str(name)
+        name = unicode(name)
         return name in self.data
 
     def output(self):
-        return str(self.data)
+        return unicode(self.data)
 
 
 class JSContext(JSObject):
@@ -56,7 +56,7 @@ class JSContext(JSObject):
     def output(self):
         output = {}
         for (name, item) in self.data.items():
-            output[name] = str(item)
+            output[name] = unicode(item)
         return json.dumps(output)
 
 
@@ -273,7 +273,7 @@ class JSWrapper(object):
 
     def __str__(self):
         """Returns a textual version of the object."""
-        return str(self.get_literal_value())
+        return unicode(self.get_literal_value())
 
 
 class JSLiteral(JSObject):
@@ -309,7 +309,7 @@ class JSPrototype(JSObject):
 
     def get(self, name):
         "Enables static analysis of `with` statements"
-        name = str(name)
+        name = unicode(name)
         output = None
         if name in self.data:
             output = self.data[name]
@@ -351,7 +351,7 @@ class JSArray(JSObject):
         # Interestingly enough, this allows for things like:
         # x = [4]
         # y = x * 3 // y = 12 since x equals "4"
-        return ",".join([str(w.get_literal_value()) for w in self.elements])
+        return ",".join([unicode(w.get_literal_value()) for w in self.elements])
 
     def set(self, index, value, traverser=None):
         """Follow the rules of JS for creating an array"""

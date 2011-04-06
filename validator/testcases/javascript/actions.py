@@ -287,12 +287,14 @@ def _call_expression(traverser, node):
         result = dangerous(a=args, t=t)
         if result:
             # Generate a string representation of the params
-            params = ", ".join([str(t(p).get_literal_value()) for p in args])
+            params = ", ".join([unicode(t(p).get_literal_value()) for
+                                p in args])
             traverser.err.warning(("testcases_javascript_actions",
                                    "_call_expression",
                                    "called_dangerous_global"),
                                   "Global called in dangerous manner",
-                                  result if isinstance(result, str) else
+                                  result if isinstance(result,
+                                                       types.StringTypes) else
                                   "A global function was called using a set "
                                   "of dangerous parameters. These parameters "
                                   "have been disallowed.",
@@ -414,10 +416,10 @@ def _expr_assignment(traverser, node):
         if lit_right is None:
             lit_right = 0
 
-        if isinstance(lit_left, (str, unicode)) or \
-           isinstance(lit_right, (str, unicode)):
-            lit_left = str(lit_left)
-            lit_right = str(lit_right)
+        if isinstance(lit_left, types.StringTypes) or \
+           isinstance(lit_right, types.StringTypes):
+            lit_left = unicode(lit_left)
+            lit_right = unicode(lit_right)
 
         gleft = _get_as_num(left)
         gright = _get_as_num(right)
@@ -442,8 +444,8 @@ def _expr_assignment(traverser, node):
             traverser.debug_level -= 1
             return left
 
-        traverser._debug("ASSIGNMENT::LEFT>>%s" % str(left.is_global))
-        traverser._debug("ASSIGNMENT::RIGHT>>%s" % str(operators[token]()))
+        traverser._debug("ASSIGNMENT::LEFT>>%s" % unicode(left.is_global))
+        traverser._debug("ASSIGNMENT::RIGHT>>%s" % unicode(operators[token]()))
         left.set_value(operators[token](), traverser=traverser)
         traverser.debug_level -= 1
         return left
@@ -465,7 +467,7 @@ def _expr_binary(traverser, node):
     left = traverser._traverse_node(node["left"])
     if not isinstance(left, JSWrapper):
         left = JSWrapper(left, traverser=traverser)
-    traverser._debug(str(left.dirty))
+    traverser._debug(unicode(left.dirty))
 
     traverser.debug_level -= 1
 
@@ -475,7 +477,7 @@ def _expr_binary(traverser, node):
     right = traverser._traverse_node(node["right"])
     if not isinstance(right, JSWrapper):
         right = JSWrapper(right, traverser=traverser)
-    traverser._debug(str(right.dirty))
+    traverser._debug(unicode(right.dirty))
 
     if left.dirty:
         return left
@@ -585,7 +587,7 @@ def _get_as_num(value):
         return False
 
     try:
-        if isinstance(value, str):
+        if isinstance(value, types.StringTypes):
             return float(value)
         elif isinstance(value, int) or isinstance(value, float):
             return value

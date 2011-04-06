@@ -16,92 +16,92 @@ BANNED_IDENTIFIERS = ("newThread", )
 
 # GLOBAL_ENTITIES is also representative of the `window` object.
 GLOBAL_ENTITIES = {
-    "window": {"value": lambda: GLOBAL_ENTITIES},
-    "document":
-        {"value": {"createElement":
+    u"window": {"value": lambda: GLOBAL_ENTITIES},
+    u"document":
+        {"value": {u"createElement":
                        {"dangerous":
                             lambda a, t: t(a[0]).get_literal_value()
                                                 .lower() == "script"},
-                   "createElementNS":
+                   u"createElementNS":
                        {"dangerous":
                             lambda a, t: t(a[0]).get_literal_value()
                                                 .lower() == "script"}}},
 
     # The nefariuos timeout brothers!
-    "setTimeout": {"dangerous": actions._call_settimeout},
-    "setInterval": {"dangerous": actions._call_settimeout},
+    u"setTimeout": {"dangerous": actions._call_settimeout},
+    u"setInterval": {"dangerous": actions._call_settimeout},
 
-    "encodeURI": {"readonly": True},
-    "decodeURI": {"readonly": True},
-    "encodeURIComponent": {"readonly": True},
-    "decodeURIComponent": {"readonly": True},
-    "escape": {"readonly": True},
-    "unescape": {"readonly": True},
-    "isFinite": {"readonly": True},
-    "isNaN": {"readonly": True},
-    "parseFloat": {"readonly": True},
-    "parseInt": {"readonly": True},
+    u"encodeURI": {"readonly": True},
+    u"decodeURI": {"readonly": True},
+    u"encodeURIComponent": {"readonly": True},
+    u"decodeURIComponent": {"readonly": True},
+    u"escape": {"readonly": True},
+    u"unescape": {"readonly": True},
+    u"isFinite": {"readonly": True},
+    u"isNaN": {"readonly": True},
+    u"parseFloat": {"readonly": True},
+    u"parseInt": {"readonly": True},
 
-    "eval": {"dangerous": True},
-    "Function": {"dangerous": True},
-    "Object": {"value": {"prototype": {"dangerous": True},
-                         "constructor":  # Just an experiment for now
-                             {"value": lambda: GLOBAL_ENTITIES["Function"]}}},
-    "String": {"value": {"prototype": {"dangerous": True}}},
-    "Array": {"value": {"prototype": {"dangerous": True}}},
-    "Number": {"value": {"prototype": {"dangerous": True}}},
-    "Boolean": {"value": {"prototype": {"dangerous": True}}},
-    "RegExp": {"value": {"prototype": {"dangerous": True}}},
-    "Date": {"value": {"prototype": {"dangerous": True}}},
+    u"eval": {"dangerous": True},
+    u"Function": {"dangerous": True},
+    u"Object": {"value": {"prototype": {"dangerous": True},
+                          "constructor":  # Just an experiment for now
+                              {"value": lambda: GLOBAL_ENTITIES["Function"]}}},
+    u"String": {"value": {"prototype": {"dangerous": True}}},
+    u"Array": {"value": {"prototype": {"dangerous": True}}},
+    u"Number": {"value": {"prototype": {"dangerous": True}}},
+    u"Boolean": {"value": {"prototype": {"dangerous": True}}},
+    u"RegExp": {"value": {"prototype": {"dangerous": True}}},
+    u"Date": {"value": {"prototype": {"dangerous": True}}},
 
-    "Math": {"readonly": True},
+    u"Math": {"readonly": True},
 
-    "netscape":
-        {"value": {"security":
-                       {"value": {"PrivilegeManager":
-                                      {"value": {"enablePrivilege":
+    u"netscape":
+        {"value": {u"security":
+                       {"value": {u"PrivilegeManager":
+                                      {"value": {u"enablePrivilege":
                                                      {"dangerous": True}}}}}}},
 
-    "navigator":
-        {"value": {"wifi": {"dangerous": True},
-                   "geolocation": {"dangerous": True}}},
+    u"navigator":
+        {"value": {u"wifi": {"dangerous": True},
+                   u"geolocation": {"dangerous": True}}},
 
-    "Components":
+    u"Components":
         {"readonly": True,
          "value":
-             {"classes":
-                  {"xpcom_wildcard": True,
+             {u"classes":
+                  {u"xpcom_wildcard": True,
                    "value":
-                       {"createInstance":
+                       {u"createInstance":
                            {"return": call_definitions.xpcom_createInstance}}},
-              "utils":
-                  {"value": {"evalInSandbox":
+              u"utils":
+                  {"value": {u"evalInSandbox":
                                  {"dangerous": True},
-                             "import":
+                             u"import":
                                  {"dangerous":
                                       lambda a, t:
                                         a and \
-                                        str(t(a[0]).get_literal_value())
-                                                   .count("ctypes.jsm")}}},
-              "interfaces":
-                  {"value": {"nsIXMLHttpRequest":
+                                        unicode(t(a[0]).get_literal_value())
+                                            .count("ctypes.jsm")}}},
+              u"interfaces":
+                  {"value": {u"nsIXMLHttpRequest":
                                 {"xpcom_map":
                                      lambda:
                                         GLOBAL_ENTITIES["XMLHttpRequest"]},
-                             "nsIProcess":
+                             u"nsIProcess":
                                 {"dangerous": True},
-                             "nsIDOMGeoGeolocation":
+                             u"nsIDOMGeoGeolocation":
                                 {"dangerous": True},
-                             "nsIX509CertDB":
+                             u"nsIX509CertDB":
                                 {"dangerous": True},
-                             "mozIJSSubScriptLoader":
+                             u"mozIJSSubScriptLoader":
                                 {"dangerous": True}}}}},
-    "extensions": {"dangerous": True},
-    "xpcnativewrappers": {"dangerous": True},
+    u"extensions": {"dangerous": True},
+    u"xpcnativewrappers": {"dangerous": True},
 
-    "XMLHttpRequest":
+    u"XMLHttpRequest":
         {"value":
-             {"open": {"dangerous":
+             {u"open": {"dangerous":
                            # Ban syncrhonous XHR by making sure the third arg
                            # is absent and false.
                            lambda a, t:
@@ -114,7 +114,7 @@ GLOBAL_ENTITIES = {
                                "connections."}}},
 
     # Global properties are inherently read-only, though this formalizes it.
-    "Infinity": {"readonly": True},
-    "NaN": {"readonly": True},
-    "undefined": {"readonly": True},
+    u"Infinity": {"readonly": True},
+    u"NaN": {"readonly": True},
+    u"undefined": {"readonly": True},
     }
