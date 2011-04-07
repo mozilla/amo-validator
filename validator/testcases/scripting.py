@@ -139,3 +139,28 @@ def _regex_tests(err, data, filename):
                         line=line,
                         context=c)
 
+    # DOM mutation events; bug 642153
+
+    dom_mutation_regexes = map(
+        re.compile,
+        ("DOMAttrModified", "DOMAttributeNameChanged",
+         "DOMCharacterDataModified", "DOMElementNameChanged",
+         "DOMNodeInserted", "DOMNodeInsertedIntoDocument", "DOMNodeRemoved",
+         "DOMNodeRemovedFromDocument", "DOMSubtreeModified"))
+
+    for dom_regex in dom_mutation_regexes:
+        match = dom_regex.search(data)
+
+        if match:
+            line = c.get_line(match.start())
+            err.warning(
+                err_id=("testcases_scripting", "regex_tests",
+                        "dom_manipulation"),
+                warning="DOM Mutation Events Prohibited",
+                description="DOM mutation events are flagged because of their "
+                            "deprecated status, as well as their extreme "
+                            "inefficiency. Consider using a different event.",
+                filename=filename,
+                line=line,
+                context=c)
+
