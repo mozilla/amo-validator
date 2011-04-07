@@ -11,7 +11,7 @@ UNICODES = [
     (codecs.BOM_UTF16_BE, "utf-16-be"),
     ]
 
-COMMON_ENCODINGS = ("utf-8", "utf-16", "latin_1", "ascii")
+COMMON_ENCODINGS = ("utf-16", "latin_1", "ascii")
 
 def decode(data):
     """
@@ -27,6 +27,19 @@ def decode(data):
     for bom, encoding in UNICODES:
         if data.startswith(bom):
             return unicode(data[len(bom):], encoding, "ignore")
+
+    # Try straight UTF-8
+    try:
+        return unicode(data, "utf-8")
+    except:
+        pass
+
+    # Test for latin_1, because it can be matched as UTF-16
+    if all(ord(c) < 256 for c in data):
+        try:
+            return unicode(data, "latin_1")
+        except:
+            pass
 
     # Test for various common encodings.
     for encoding in COMMON_ENCODINGS:

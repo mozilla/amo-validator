@@ -8,7 +8,7 @@ import validator.testcases.scripting
 def _do_test(path):
     "Performs a test on a JS file"
     script = validator.unicodehelper.decode(open(path, "rb").read())
-    print script.encode("ascii", "backslashreplace")
+    print script.encode("ascii", "replace")
 
     err = validator.testcases.scripting.traverser.MockBundler()
     validator.testcases.scripting.test_js_file(err, path, script)
