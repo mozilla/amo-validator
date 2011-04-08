@@ -25,19 +25,6 @@ def test_xpcnativewrappers():
     content.test_xpcnativewrappers(err, {}, None)
     assert err.failed()
 
-def test_ignore_macstuff():
-    "Tests that the content manager will ignore Mac-generated files"
-
-    err = ErrorBundle()
-    result = content.test_packed_packages(err,
-                                          {"__MACOSX": None,
-                                           "__MACOSX/foo": None,
-                                           "__MACOSX/bar": None,
-                                           "__MACOSX/.DS_Store": None,
-                                           ".DS_Store": None},
-                                          None)
-    assert result == 0
-
 def test_jar_subpackage():
     "Tests JAR files that are subpackages."
 
@@ -189,9 +176,9 @@ def test_hidden_files():
     assert err.failed()
 
     err = ErrorBundle()
-    mock_package_mac = MockXPIManager({"__MACOSX/foo":
+    mock_package_mac = MockXPIManager({"dir/__MACOSX/foo":
                                           "tests/resources/content/junk.xpi"})
-    content.test_packed_packages(err, {"__MACOSX/foo":
+    content.test_packed_packages(err, {"dir/__MACOSX/foo":
                                            {"extension": "foo",
                                             "name_lower": "foo"}},
                                  mock_package_mac)
