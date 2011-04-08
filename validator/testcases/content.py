@@ -50,7 +50,17 @@ def test_packed_packages(err, package_contents=None, xpi_package=None):
     for name, data in package_contents.items():
 
         if name.startswith("__MACOSX") or \
-           name.startswith(".DS_Store"):
+           name.startswith("."):
+            err.warning(
+                err_id=("testcases_content", "test_packed_packages",
+                        "hidden_files"),
+                warning="Hidden files and folders flagged",
+                description="Hidden files and folders difficult the review "
+                            "process and can contain sensitive information "
+                            "about the system that generated the XPI. Please "
+                            "modify the packaging process so that these files "
+                            "aren't included.",
+                filename=name)
             continue
 
         if name.split("/")[-1].startswith("._"):
