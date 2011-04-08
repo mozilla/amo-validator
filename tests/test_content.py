@@ -1,6 +1,7 @@
 import os
-
 from StringIO import StringIO
+
+from js_helper import _do_test_raw
 
 import validator.xpi as xpi
 import validator.testcases.content as content
@@ -8,6 +9,7 @@ from validator.errorbundler import ErrorBundle
 from validator.chromemanifest import ChromeManifest
 from helper import _do_test
 from validator.constants import *
+
 
 def test_xpcnativewrappers():
     "Tests that xpcnativewrappers is not in the chrome.manifest"
@@ -25,9 +27,10 @@ def test_xpcnativewrappers():
     content.test_xpcnativewrappers(err, {}, None)
     assert err.failed()
 
+
 def test_ignore_macstuff():
     "Tests that the content manager will ignore Mac-generated files"
-    
+
     err = ErrorBundle()
     result = content.test_packed_packages(err,
                                           {"__MACOSX": None,
@@ -38,19 +41,20 @@ def test_ignore_macstuff():
                                           None)
     assert result == 0
 
+
 def test_jar_subpackage():
     "Tests JAR files that are subpackages."
-    
+
     err = ErrorBundle(None, True)
     mock_package = MockXPIManager(
         {"chrome/subpackage.jar":
              "tests/resources/content/subpackage.jar",
          "nonsubpackage.jar":
              "tests/resources/content/subpackage.jar"})
-                        
+
     content.testendpoint_validator = \
         MockTestEndpoint(("test_inner_package", ))
-    
+
     result = content.test_packed_packages(
                                     err,
                                     {"chrome/subpackage.jar":
@@ -70,7 +74,7 @@ def test_jar_subpackage():
                                     "test_inner_package",
                                     1,
                                     "subpackage")
-    
+
 
 def test_xpi_tiererror():
     "Tests that tiers are reset when a subpackage is encountered"
@@ -92,16 +96,17 @@ def test_xpi_tiererror():
     assert err.tier == 2
     assert all(x == 1 for x in content.testendpoint_validator.found_tiers)
 
+
 def test_xpi_nonsubpackage():
     "Tests XPI files that are not subpackages."
-    
+
     err = ErrorBundle(None, True)
     mock_package = MockXPIManager(
         {"foo.xpi":
              "tests/resources/content/subpackage.jar"})
-                        
+
     content.testendpoint_validator = MockTestEndpoint(("test_package", ))
-    
+
     result = content.test_packed_packages(
                                     err,
                                     {"foo.xpi":
@@ -117,19 +122,19 @@ def test_xpi_nonsubpackage():
                                     "test_package",
                                     0,
                                     "subpackage")
-    
+
 
 def test_markup():
     "Tests markup files in the content validator."
-    
+
     err = ErrorBundle(None, True)
     mock_package = MockXPIManager(
         {"foo.xml":
              "tests/resources/content/junk.xpi"})
-                        
+
     content.testendpoint_markup = \
         MockMarkupEndpoint(("process", ))
-    
+
     result = content.test_packed_packages(
                                     err,
                                     {"foo.xml":
@@ -145,18 +150,19 @@ def test_markup():
                                     "process",
                                     0,
                                     "subpackage")
-    
+
+
 def test_css():
     "Tests css files in the content validator."
-    
+
     err = ErrorBundle(None, True)
     mock_package = MockXPIManager(
         {"foo.css":
              "tests/resources/content/junk.xpi"})
-                        
+
     content.testendpoint_css = \
         MockTestEndpoint(("test_css_file", ))
-    
+
     result = content.test_packed_packages(
                                     err,
                                     {"foo.css":
@@ -172,20 +178,42 @@ def test_css():
                                     "test_css_file",
                                     0,
                                     "subpackage")
-    
+
+
+def test_password_in_defaults_prefs():
+    """
+    Tests that passwords aren't stored in the defaults/preferences/*.js files
+    for bug 647109.
+    """
+
+    password_js = open("tests/resources/content/password.js").read()
+    assert not _do_test_raw(password_js).failed()
+
+    err = ErrorBundle()
+    mock_package = MockXPIManager({
+        "defaults/preferences/foo.js": "tests/resources/content/password.js"})
+
+    content.test_packed_packages(err,
+                                 {"defaults/preferences/foo.js":
+                                      {"extension": "js",
+                                       "name_lower": "foo.js"}},
+                                 mock_package)
+    print err.print_summary()
+    assert err.failed()
+
 
 def test_langpack():
     "Tests a language pack in the content validator."
-    
+
     err = ErrorBundle(None, True)
     err.set_type(PACKAGE_LANGPACK)
     mock_package = MockXPIManager(
         {"foo.dtd":
              "tests/resources/content/junk.xpi"})
-                        
+
     content.testendpoint_langpack = \
         MockTestEndpoint(("test_unsafe_html", ))
-    
+
     result = content.test_packed_packages(
                                     err,
                                     {"foo.dtd":
@@ -201,18 +229,18 @@ def test_langpack():
                                     "test_unsafe_html",
                                     0,
                                     "subpackage")
-    
+
 
 def test_jar_subpackage_bad():
     "Tests JAR files that are bad subpackages."
-    
+
     err = ErrorBundle(None, True)
     mock_package = MockXPIManager({"chrome/subpackage.jar":
                             "tests/resources/content/junk.xpi"})
-                        
+
     content.testendpoint_validator = \
         MockTestEndpoint(("test_inner_package", ))
-    
+
     result = content.test_packed_packages(
                                     err,
                                     {"chrome/subpackage.jar":
@@ -222,21 +250,22 @@ def test_jar_subpackage_bad():
                                     mock_package)
     print result
     assert err.failed()
-    
+
+
 class MockTestEndpoint(object):
     """Simulates a test module and reports whether individual tests
     have been attempted on it."""
-    
+
     def __init__(self, expected, td_error=False):
         expectations = {}
         for expectation in expected:
             expectations[expectation] = {"count": 0,
                                          "subpackage": 0}
-        
+
         self.expectations = expectations
         self.td_error = td_error
         self.found_tiers = []
-        
+
     def _tier_test(self, err, package_contents, xpi):
         "A simulated test case for tier errors"
         print "Generating subpackage tier error..."
@@ -248,9 +277,9 @@ class MockTestEndpoint(object):
     def __getattribute__(self, name):
         """"Detects requests for validation tests and returns an
         object that simulates the outcome of a test."""
-        
+
         print "Requested: %s" % name
-        
+
         if name == "test_package" and self.td_error:
             return self._tier_test
 
@@ -260,10 +289,10 @@ class MockTestEndpoint(object):
                     "_tier_test",
                     "found_tiers"):
             return object.__getattribute__(self, name)
-        
+
         if name in self.expectations:
             self.expectations[name]["count"] += 1
-        
+
         if name == "test_package":
             def wrap(package, name, expectation=PACKAGE_ANY):
                 pass
@@ -271,52 +300,51 @@ class MockTestEndpoint(object):
             def wrap(err, con, pak):
                 if isinstance(pak, xpi.XPIManager) and pak.subpackage:
                     self.expectations[name]["subpackage"] += 1
-        
+
         return wrap
-        
+
     def assert_expectation(self, name, count, type_="count"):
         """Asserts that a particular test has been run a certain number
         of times"""
-        
+
         print self.expectations
         assert name in self.expectations
         print self.expectations[name][type_]
         assert self.expectations[name][type_] == count
-        
+
 
 class MockMarkupEndpoint(MockTestEndpoint):
     "Simulates the markup test module"
-    
+
     def __getattribute__(self, name):
-        
+
         if name == "MarkupParser":
             return lambda x: self
-        
+
         return MockTestEndpoint.__getattribute__(self, name)
-        
+
 
 class MockXPIManager(object):
     """Simulates an XPIManager object to make it much easier to test
     packages and their contents"""
-    
+
     def __init__(self, package_contents):
         self.contents = package_contents
-    
+
     def test(self):
         "Simulate an integrity check. Just return true."
         return True
-    
+
     def read(self, filename):
         "Simulates an unpack-to-memory operation."
-        
+
         prelim_resource = self.contents[filename]
-        
+
         if isinstance(prelim_resource, str):
-            
+
             resource = open(prelim_resource)
             data = resource.read()
             resource.close()
-        
+
             return data
-        
-    
+
