@@ -25,21 +25,9 @@ def test_xpcnativewrappers():
     content.test_xpcnativewrappers(err, {}, None)
     assert err.failed()
 
-def test_ignore_macstuff():
-    "Tests that the content manager will ignore Mac-generated files"
-
-    err = ErrorBundle()
-    result = content.test_packed_packages(err,
-                                          {"__MACOSX": None,
-                                           "__MACOSX/foo": None,
-                                           "__MACOSX/bar": None,
-                                           "__MACOSX/.DS_Store": None,
-                                           ".DS_Store": None},
-                                          None)
-    assert result == 0
 
 def test_jar_subpackage():
-    "Tests that JAR files are considered subpackages."
+    "Tests JAR files that are subpackages."
 
     err = ErrorBundle()
     err.set_type(PACKAGE_EXTENSION)
@@ -186,7 +174,7 @@ def test_markup():
 def test_css():
     "Tests css files in the content validator."
 
-    err = ErrorBundle(None, True)
+    err = ErrorBundle()
     mock_package = MockXPIManager(
         {"foo.css":
              "tests/resources/content/junk.xpi"})
@@ -209,6 +197,31 @@ def test_css():
                                     "test_css_file",
                                     0,
                                     "subpackage")
+
+
+def test_hidden_files():
+    """Tests that hidden files are reported."""
+
+    err = ErrorBundle()
+    mock_package = MockXPIManager({".hidden":
+                                       "tests/resources/content/junk.xpi"})
+
+    content.test_packed_packages(err, {".hidden":
+                                           {"extension": "bar",
+                                            "name_lower": ".hidden"}},
+                                 mock_package)
+    print err.print_summary(verbose=True)
+    assert err.failed()
+
+    err = ErrorBundle()
+    mock_package_mac = MockXPIManager({"dir/__MACOSX/foo":
+                                          "tests/resources/content/junk.xpi"})
+    content.test_packed_packages(err, {"dir/__MACOSX/foo":
+                                           {"extension": "foo",
+                                            "name_lower": "foo"}},
+                                 mock_package_mac)
+    print err.print_summary(verbose=True)
+    assert err.failed()
 
 
 def test_langpack():
@@ -355,5 +368,4 @@ class MockXPIManager(object):
             resource.close()
 
             return data
-
 

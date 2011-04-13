@@ -1,4 +1,5 @@
 import hashlib
+import re
 from StringIO import StringIO
 
 from validator import decorator
@@ -50,22 +51,25 @@ def test_packed_packages(err, package_contents=None, xpi_package=None):
               "whitelist_hashes.txt")) as f:
         hash_whitelist = [x[:-1] for x in f]
 
+    macosx_regex = re.compile("__MACOSX")
+
     # Iterate each item in the package.
     for name, data in package_contents.items():
 
-        if name.startswith("__MACOSX") or \
-           name.startswith(".DS_Store"):
+        if (macosx_regex.search(name) or
+            name.startswith(".") or
+            name.split("/")[-1].startswith(".")):
+            err.warning(
+                err_id=("testcases_content", "test_packed_packages",
+                        "hidden_files"),
+                warning="Hidden files and folders flagged",
+                description="Hidden files and folders difficult the review "
+                            "process and can contain sensitive information "
+                            "about the system that generated the XPI. Please "
+                            "modify the packaging process so that these files "
+                            "aren't included.",
+                filename=name)
             continue
-
-        if name.split("/")[-1].startswith("._"):
-            err.notice(("testcases_content",
-                        "test_packed_packages",
-                        "macintosh_junk"),
-                       "Garbage file found.",
-                       ["A junk file has been detected. It may cause problems "
-                        "with proper operation of the add-on down the road.",
-                        "It is recommended that you delete the file"],
-                       name)
 
         try:
             file_data = xpi_package.read(name)
