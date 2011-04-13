@@ -16,6 +16,12 @@ def test_js_category_regex_fail():
     assert _do_test_raw("addCategory('JavaScript global property')").failed()
     assert _do_test_raw("addCategory('JavaScript-global-property')").failed()
 
+def test_dom_mutation_fail():
+    """Test that DOM mutation events raise a warning."""
+
+    assert not _do_test_raw("foo.DOMAttr = bar;").failed()
+    assert _do_test_raw("foo.DOMAttrModified = bar;").failed()
+
 def test_bug_548645():
     "Tests that banned entities are disallowed"
 
