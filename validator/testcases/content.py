@@ -3,6 +3,7 @@ from StringIO import StringIO
 
 from validator import decorator
 from validator import submain as testendpoint_validator
+from validator import unicodehelper
 import validator.testcases.markup.markuptester as testendpoint_markup
 import validator.testcases.markup.csstester as testendpoint_css
 import validator.testcases.scripting as testendpoint_js
@@ -142,9 +143,8 @@ def test_packed_packages(err, package_contents=None, xpi_package=None):
             if not file_data:
                 continue
 
-            # Skip BOMs and the like
-            while not is_standard_ascii(file_data[0]):
-                file_data = file_data[1:]
+            # Convert the file data to unicode
+            file_data = unicodehelper.decode(file_data)
 
             if data["extension"] == "css":
                 testendpoint_css.test_css_file(err,
