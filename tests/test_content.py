@@ -1,6 +1,7 @@
 import os
-
 from StringIO import StringIO
+
+from js_helper import _do_test_raw
 
 import validator.xpi as xpi
 import validator.testcases.content as content
@@ -8,6 +9,7 @@ from validator.errorbundler import ErrorBundle
 from validator.chromemanifest import ChromeManifest
 from helper import _do_test
 from validator.constants import *
+
 
 def test_xpcnativewrappers():
     "Tests that xpcnativewrappers is not in the chrome.manifest"
@@ -224,6 +226,28 @@ def test_hidden_files():
     assert err.failed()
 
 
+def test_password_in_defaults_prefs():
+    """
+    Tests that passwords aren't stored in the defaults/preferences/*.js files
+    for bug 647109.
+    """
+
+    password_js = open("tests/resources/content/password.js").read()
+    assert not _do_test_raw(password_js).failed()
+
+    err = ErrorBundle()
+    mock_package = MockXPIManager({
+        "defaults/preferences/foo.js": "tests/resources/content/password.js"})
+
+    content.test_packed_packages(err,
+                                 {"defaults/preferences/foo.js":
+                                      {"extension": "js",
+                                       "name_lower": "foo.js"}},
+                                 mock_package)
+    print err.print_summary()
+    assert err.failed()
+
+
 def test_langpack():
     "Tests a language pack in the content validator."
 
@@ -272,6 +296,7 @@ def test_jar_subpackage_bad():
                                     mock_package)
     print result
     assert err.failed()
+
 
 class MockTestEndpoint(object):
     """Simulates a test module and reports whether individual tests

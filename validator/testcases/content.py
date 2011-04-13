@@ -1,7 +1,9 @@
+import fnmatch
 import hashlib
 import re
 from StringIO import StringIO
 
+from validator.contextgenerator import ContextGenerator
 from validator import decorator
 from validator import submain as testendpoint_validator
 import validator.testcases.markup.markuptester as testendpoint_markup
@@ -12,6 +14,8 @@ from validator.xpi import XPIManager
 from validator.constants import *
 from validator.textfilter import is_standard_ascii
 
+
+PASSWORD_REGEX = re.compile("password", re.I)
 
 @decorator.register_test(tier=1)
 def test_xpcnativewrappers(err, package_contents=None, xpi_package=None):
@@ -170,6 +174,25 @@ def test_packed_packages(err, package_contents=None, xpi_package=None):
                                                name,
                                                file_data)
             elif data["extension"] in ("js", "jsm"):
+
+                # Test for "password" in defaults/preferences files; bug 647109
+                if fnmatch.fnmatch(name, "defaults/preferences/*.js"):
+                    match = PASSWORD_REGEX.search(file_data)
+                    if match:
+                        context = ContextGenerator(file_data)
+                        err.warning(
+                            err_id=("testcases_content",
+                                    "test_packed_packages",
+                                    "password_in_js"),
+                            warning="Passwords may be stored in defaults/"
+                                    "preferences JS files",
+                            description="Storing passwords in the preferences "
+                                        "is insecure and the Login Manager "
+                                        "should be used instead.",
+                            filename=name,
+                            line=context.get_line(match.start()),
+                            context=context)
+
                 testendpoint_js.test_js_file(err,
                                              name,
                                              file_data)
