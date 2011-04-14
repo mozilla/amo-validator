@@ -110,7 +110,7 @@ def _get_tree(code, shell=SPIDERMONKEY_INSTALLATION):
     }""" % json.dumps(temp.name)
 
     try:
-        cmd = [shell, "-e", data]
+        cmd = [shell, "-e", data, "-U"]
         try:
             shell_obj = subprocess.Popen(cmd,
                                    shell=False,

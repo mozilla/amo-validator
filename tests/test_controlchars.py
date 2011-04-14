@@ -28,7 +28,8 @@ def test_controlchars_ascii_warn():
 		but remaining non ascii characters raise warnings"""
 
     errs = _do_test("tests/resources/controlchars/controlchars_ascii_warn.js")
-    assert len(errs.ids) == 1 and errs.ids[0][2] == "syntax_error"
+    assert len(errs.ids) == 1
+    assert errs.ids[0][2] == "syntax_error"
 
 def test_controlchars_utf8_ok():
     """Tests that multi-byte characters are decoded properly (utf-8)"""
@@ -41,5 +42,6 @@ def test_controlchars_utf8_warn():
 		but remaining non ascii characters raise warnings"""
 
     errs = _do_test("tests/resources/controlchars/controlchars_utf-8_warn.js")
-    assert len(errs.ids) == 1 and errs.ids[0][2] == "syntax_error"
+    assert len(errs.ids) == 1
+    assert errs.ids[0][2] == "syntax_error"
 

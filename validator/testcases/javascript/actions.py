@@ -287,8 +287,8 @@ def _call_expression(traverser, node):
         result = dangerous(a=args, t=t)
         if result:
             # Generate a string representation of the params
-            params = ", ".join([unicode(t(p).get_literal_value()) for
-                                p in args])
+            params = u", ".join([unicode(t(p).get_literal_value()) for
+                                 p in args])
             traverser.err.warning(("testcases_javascript_actions",
                                    "_call_expression",
                                    "called_dangerous_global"),

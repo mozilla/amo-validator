@@ -35,6 +35,8 @@ def decode(data):
         pass
 
     # Test for latin_1, because it can be matched as UTF-16
+    # Somewhat of a hack, but it works and is about a thousand times faster
+    # than using chardet.
     if all(ord(c) < 256 for c in data):
         try:
             return unicode(data, "latin_1")

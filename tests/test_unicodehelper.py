@@ -1,8 +1,9 @@
 # -*- coding: utf-8 -*-
+import nose
 import os
 import validator.unicodehelper as unicodehelper
 
-COMPARISON = u"täst"
+COMPARISON = "täst".decode("utf-8")
 
 def _do_test(path):
     "Performs a test on a JS file"
@@ -11,9 +12,7 @@ def _do_test(path):
     utext = unicodehelper.decode(text)
 
     print utext.encode("ascii", "backslashreplace")
-    print utext
-    print COMPARISON
-    assert utext == COMPARISON
+    nose.tools.eq_(utext, COMPARISON)
 
 def test_latin1():
     "Tests utf-8 encoding is properly decoded"
