@@ -64,7 +64,7 @@ class MockBundler:
         self.error(err_id, warning, description, file, line, column, context)
 
     def notice(self, err_id, notice, description, filename="",
-             line=1, column=0, context=None):
+               line=1, column=0, context=None):
         self.error(err_id, notice, description, file, line, column, context)
 
     def info(self, id, title, description, filename="",

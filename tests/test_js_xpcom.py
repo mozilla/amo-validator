@@ -39,6 +39,67 @@ def test_evalinsandbox():
     """)
     assert err.failed()
 
+def test_getinterface():
+    """Tests the functionality of the getInterface method"""
+
+    assert _do_test_raw("""
+        obj.getInterface(Components.interfaces.nsIXMLHttpRequest)
+           .open("GET");
+    """).failed()
+
+def test_queryinterface():
+    """Tests the functionality of the QueryInterface method"""
+
+    assert _do_test_raw("""
+        var obj = {};
+        obj.QueryInterface(Components.interfaces.nsIXMLHttpRequest);
+        obj.open("GET");
+    """).failed()
+
+    assert _do_test_raw("""
+        var obj = {};
+        obj.QueryInterface(Components.interfaces.nsIXMLHttpRequest);
+        obj.QueryInterface(Components.interfaces.nsISupports);
+        obj.open("GET");
+    """).failed()
+
+    assert _do_test_raw("""
+        var obj = {};
+        obj.QueryInterface(Components.interfaces.nsISupports);
+        obj.QueryInterface(Components.interfaces.nsIXMLHttpRequest);
+        obj.open("GET");
+    """).failed()
+
+    assert _do_test_raw("""
+        {}.QueryInterface(Components.interfaces.nsIXMLHttpRequest)
+          .open("GET");
+    """).failed()
+
+    assert _do_test_raw("""
+        {}.QueryInterface(Components.interfaces.nsIXMLHttpRequest)
+          .QueryInterface(Components.interfaces.nsISupports)
+          .open("GET");
+    """).failed()
+
+    assert _do_test_raw("""
+        {}.QueryInterface(Components.interfaces.nsISupports)
+          .QueryInterface(Components.interfaces.nsIXMLHttpRequest)
+          .open("GET");
+    """).failed()
+
+    # TODO:
+    if False:
+        assert _do_test_raw("""
+            var obj = {};
+            obj.QueryInterface(Components.interfaces.nsIXMLHttpRequest);
+            obj.open("GET");
+        """).failed()
+
+        assert _do_test_raw("""
+            var obj = { foo: {} };
+            obj.foo.QueryInterface(Components.interfaces.nsIXMLHttpRequest);
+            obj.foo.open("GET");
+        """).failed()
 
 def test_overwritability():
     """Tests that XPCOM globals can be overwritten"""

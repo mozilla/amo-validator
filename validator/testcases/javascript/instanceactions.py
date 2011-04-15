@@ -43,6 +43,36 @@ def createElementNS(args, traverser, node):
         _create_variable_element(traverser)
 
 
+def QueryInterface(args, traverser, node):
+    """Handles QueryInterface calls"""
+
+    if not args:
+        return
+
+    from call_definitions import xpcom_constructor
+    return xpcom_constructor("QueryInterface", True, True)(
+                wrapper=node,
+                arguments=args,
+                traverser=traverser)
+
+def getInterface(args, traverser, node):
+    """Handles getInterface calls"""
+
+    # This really only needs to be handled for nsIInterfaceRequestor
+    # intarfaces, but as it's fair for code to assume that that
+    # interface has already been queried and methods with this name
+    # are unlikely to behave differently, we just process it for all
+    # objects.
+
+    if not args:
+        return
+
+    from call_definitions import xpcom_constructor
+    return xpcom_constructor("getInterface")(
+                wrapper=node,
+                arguments=args,
+                traverser=traverser)
+
 def _create_script_tag(traverser):
     """Raises a warning that the dev is creating a script tag"""
     traverser.err.warning(
@@ -101,5 +131,7 @@ def setAttribute(args, traverser, node):
 
 INSTANCE_DEFINITIONS = {"createElement": createElement,
                         "createElementNS": createElementNS,
-                        "setAttribute": setAttribute}
+                        "getInterface": getInterface,
+                        "setAttribute": setAttribute,
+                        "QueryInterface": QueryInterface}
 

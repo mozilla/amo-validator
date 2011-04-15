@@ -75,6 +75,10 @@ def _test_rdf(err, install):
             value = install.get_object(predicate=pred_raw)
             err.save_resource("em:unpack", value, pushable=True)
 
+        if predicate == "bootstrap":
+            value = install.get_object(predicate=pred_raw)
+            err.save_resource("em:bootstrap", value)
+
         # Test if the predicate is banned
         if predicate in shouldnt_exist:
             err.error(("testcases_installrdf",
