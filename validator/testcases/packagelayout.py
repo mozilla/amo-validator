@@ -66,6 +66,8 @@ def test_blacklisted_files(err, package_contents=None, xpi_package=None):
         # Simple test to ensure that the extension isn't blacklisted
         extension = file_["extension"]
         if extension in blacklisted_extensions:
+            # Note that there is a binary extension in the metadata
+            err.metadata["contains_binary_extension"] = True
             err.warning(("testcases_packagelayout",
                          "test_blacklisted_files",
                          "disallowed_extension"),
@@ -81,6 +83,8 @@ def test_blacklisted_files(err, package_contents=None, xpi_package=None):
         zip = xpi_package.zf.open(name)
         bytes = tuple([ord(x) for x in zip.read(4)])  # Longest is 4 bytes
         if [x for x in blacklisted_magic_numbers if bytes[0:len(x)] == x]:
+            # Note that there is binary content in the metadata
+            err.metadata["contains_binary_content"] = True
             err.warning(("testcases_packagelayout",
                          "test_blacklisted_files",
                          "disallowed_file_type"),
