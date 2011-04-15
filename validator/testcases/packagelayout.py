@@ -168,9 +168,10 @@ def test_emunpack(err, package_contents, xpi_package):
                          "test_emunpack",
                          "should_be_true"),
                         "Add-on should set <em:unpack> to true",
-                        "The add-on meets criteria that would indicate "
-                        "performance issues if <em:unpack> is not set to true "
-                        "in the install.rdf file.",
+                        "The add-on meets criteria indicating that it will "
+                        "not work correctly in Firefox 4 and above. Set "
+                        "<em:unpack> to 'true' in the install.rdf file to fix "
+                        "this.",
                         filename="install.rdf",
                         tier=1)
             return
