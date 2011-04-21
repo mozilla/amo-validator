@@ -1,3 +1,4 @@
+import codecs
 import json
 import os
 import re
@@ -7,7 +8,7 @@ from cStringIO import StringIO
 
 from validator.constants import SPIDERMONKEY_INSTALLATION
 from validator.contextgenerator import ContextGenerator
-from validator.textfilter import *
+import validator.unicodehelper as unicodehelper
 
 JS_ESCAPE = re.compile("\\\\+[ux]", re.I)
 
@@ -81,49 +82,8 @@ def prepare_code(code, err, filename):
     # slash: a character is necessary to prevent bad identifier errors
     code = JS_ESCAPE.sub("u", code)
 
-    encoding = None
-    try:
-        code = unicode(code)  # Make sure we can get a Unicode representation
-        code = strip_weird_chars(code, err=err, name=filename)
-    except UnicodeDecodeError:
-        # If it's not an easily decodeable encoding, detect it and decode that
-        code = filter_ascii(code)
-
+    code = unicodehelper.decode(code)
     return code
-
-
-def strip_weird_chars(chardata, err=None, name=""):
-    line_num = 1
-    out_code = StringIO()
-    has_warned_ctrlchar = False
-
-    for line in chardata.split("\n"):
-
-        charpos = 0
-        for char in line:
-            if is_standard_ascii(char):
-                out_code.write(char)
-            else:
-                if not has_warned_ctrlchar and err is not None:
-                    err.warning(("testcases_scripting",
-                                 "_get_tree",
-                                 "control_char_filter"),
-                                "Invalid control character in JS file",
-                                "An invalid character (ASCII 0-31, except CR "
-                                "and LF) has been found in a JS file. These "
-                                "are considered unsafe and should be removed.",
-                                filename=name,
-                                line=line_num,
-                                column=charpos,
-                                context=ContextGenerator(chardata))
-                has_warned_ctrlchar = True
-
-            charpos += 1
-
-        out_code.write("\n")
-        line_num += 1
-
-    return out_code.getvalue()
 
 
 def _get_tree(code, shell=SPIDERMONKEY_INSTALLATION):
@@ -132,8 +92,11 @@ def _get_tree(code, shell=SPIDERMONKEY_INSTALLATION):
     if not code:
         return None
 
-    temp = tempfile.NamedTemporaryFile(mode="w+", delete=False)
-    temp.write(code)
+    code = unicodehelper.decode(code)
+
+    temp = tempfile.NamedTemporaryFile(mode="w+b", delete=False)
+    #temp.write(codecs.BOM_UTF8)
+    temp.write(code.encode("utf_8"))
     temp.flush()
 
     data = """try{
@@ -147,7 +110,7 @@ def _get_tree(code, shell=SPIDERMONKEY_INSTALLATION):
     }""" % json.dumps(temp.name)
 
     try:
-        cmd = [shell, "-e", data]
+        cmd = [shell, "-e", data, "-U"]
         try:
             shell_obj = subprocess.Popen(cmd,
                                    shell=False,
@@ -171,11 +134,7 @@ def _get_tree(code, shell=SPIDERMONKEY_INSTALLATION):
     if not data:
         raise JSReflectException("Reflection failed")
 
-    try:
-        data = unicode(data)
-    except UnicodeDecodeError:
-        data = unicode(filter_ascii(data))
-
+    data = unicodehelper.decode(data)
     parsed = json.loads(data, strict=False)
 
     if "error" in parsed and parsed["error"]:

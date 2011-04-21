@@ -1,4 +1,3 @@
-
 import re
 try:
     from HTMLParser import HTMLParser
@@ -6,6 +5,7 @@ except ImportError:  # pragma: no cover
     from html.parser import HTMLParser
 
 import validator.testcases.scripting as scripting
+import validator.unicodehelper as unicodehelper
 from validator.testcases.markup import csstester
 from validator.contextgenerator import ContextGenerator
 from validator.constants import *
@@ -51,7 +51,7 @@ class MarkupParser(HTMLParser):
         self.xml_state = []
         self.xml_buffer = []
 
-        self.reported = {}
+        self.reported = set()
 
     def process(self, filename, data, extension="xul"):
         """Processes data by splitting it into individual lines, then
@@ -61,7 +61,7 @@ class MarkupParser(HTMLParser):
         self.filename = filename
         self.extension = extension
 
-        self.reported = {}
+        self.reported = set()
 
         self.context = ContextGenerator(data)
 
@@ -100,6 +100,8 @@ class MarkupParser(HTMLParser):
 
         try:
             self.feed(line + "\n")
+        except UnicodeDecodeError:
+            raise
         except Exception as inst:
             if DEBUG:  # pragma: no cover
                 print self.xml_state, inst
@@ -107,8 +109,8 @@ class MarkupParser(HTMLParser):
             if "markup" in self.reported:
                 return
 
-            if "script" in self.xml_state or (
-               self.debug and "testscript" in self.xml_state):
+            if ("script" in self.xml_state or
+                self.debug and "testscript" in self.xml_state):
                 if "script_comments" in self.reported or not self.strict:
                     return
                 self.err.notice(("testcases_markup_markuptester",
@@ -122,7 +124,7 @@ class MarkupParser(HTMLParser):
                                 self.filename,
                                 line=self.line,
                                 context=self.context)
-                self.reported["script_comments"] = True
+                self.reported.add("script_comments")
                 return
 
             if self.strict:
@@ -136,7 +138,7 @@ class MarkupParser(HTMLParser):
                                  self.filename,
                                  line=self.line,
                                  context=self.context)
-            self.reported["markup"] = True
+            self.reported.add("markup")
 
     def handle_startendtag(self, tag, attrs):
         # Self closing tags don't have an end tag, so we want to
@@ -154,7 +156,7 @@ class MarkupParser(HTMLParser):
             self_closing = tag in SELF_CLOSING_TAGS
 
         if DEBUG:  # pragma: no cover
-            print self.xml_state, tag, self_closing
+            print "S: ", self.xml_state, tag, self_closing
 
         # A fictional tag for testing purposes.
         if tag == "xbannedxtestx":
@@ -286,17 +288,19 @@ class MarkupParser(HTMLParser):
             return
 
         self.xml_state.append(tag)
-        self.xml_buffer.append("")
+        self.xml_buffer.append(unicode(""))
 
     def handle_endtag(self, tag):
 
         tag = tag.lower()
 
         if DEBUG:  # pragma: no cover
-            print tag, self.xml_state
+            print "E: ", tag, self.xml_state
 
         if not self.xml_state:
             if "closing_tags" in self.reported or not self.strict:
+                if DEBUG:
+                    print "Unstrict; extra closing tags ------"
                 return
             self.err.warning(("testcases_markup_markuptester",
                               "handle_endtag",
@@ -307,16 +311,18 @@ class MarkupParser(HTMLParser):
                              self.filename,
                              line=self.line,
                              context=self.context)
-            self.reported["closing_tags"] = True
+            self.reported.add("closing_tags")
             if DEBUG:  # pragma: no cover
                 print "Too many closing tags ------"
             return
 
-        elif "script" in self.xml_state:
+        elif "script" in self.xml_state[:-1]:
             # If we're in a script tag, nothing else matters. Just rush
             # everything possible into the xml buffer.
 
             self._save_to_buffer("</" + tag + ">")
+            if DEBUG:
+                print "Markup as text in script ------"
             return
 
         elif tag not in self.xml_state:
@@ -344,6 +350,8 @@ class MarkupParser(HTMLParser):
         # classifies as a self-closing tag, we just recursively close
         # down to the level of the tag we're actualy closing.
         if old_state != tag and old_state in SELF_CLOSING_TAGS:
+            if DEBUG:
+                print "Self closing tag cascading down ------"
             return self.handle_endtag(tag)
 
         # If this is an XML-derived language, everything must nest
@@ -365,17 +373,20 @@ class MarkupParser(HTMLParser):
             if DEBUG:  # pragma: no cover
                 print "Invalid markup nesting ------"
 
+        data_buffer = data_buffer.strip()
+
         # Perform analysis on collected data.
-        if tag == "script":
-            scripting.test_js_snippet(self.err,
-                                      data_buffer,
-                                      self.filename,
-                                      self.line)
-        elif tag == "style":
-            csstester.test_css_file(self.err,
-                                    self.filename,
-                                    data_buffer,
-                                    self.line)
+        if data_buffer:
+            if tag == "script":
+                scripting.test_js_snippet(self.err,
+                                          data_buffer,
+                                          self.filename,
+                                          self.line)
+            elif tag == "style":
+                csstester.test_css_file(self.err,
+                                        self.filename,
+                                        data_buffer,
+                                        self.line)
 
     def handle_data(self, data):
         self._save_to_buffer(data)
@@ -412,6 +423,8 @@ class MarkupParser(HTMLParser):
         # We're not interested in data that isn't in a tag.
         if not self.xml_buffer:
             return
+
+        data = unicodehelper.decode(data)
 
         self.xml_buffer[-1] += data
 

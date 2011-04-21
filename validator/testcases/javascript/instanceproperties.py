@@ -1,10 +1,13 @@
 import re
 import types
 
+import jstypes
 
 def set_innerHTML(new_value, traverser):
     "Tests that values being assigned to innerHTML are not dangerous"
 
+    if not isinstance(new_value, jstypes.JSWrapper):
+        new_value = jstypes.JSWrapper(new_value, traverser=traverser)
     literal_value = new_value.get_literal_value()
     if isinstance(literal_value, types.StringTypes):
         # Static string assignments
@@ -16,9 +19,11 @@ def set_innerHTML(new_value, traverser):
                 err_id=("testcases_javascript_instancetypes", "set_innerHTML",
                             "event_assignment"),
                 warning="Event handler assignment via innerHTML",
-                description="When assigning event handlers, innerHTML "
-                            "should never be used. Rather, use a "
-                            "proper technique, like addEventListener.",
+                description=["When assigning event handlers, innerHTML "
+                             "should never be used. Rather, use a "
+                             "proper technique, like addEventListener.",
+                             "Event handler code: %s" %
+                                literal_value.encode("ascii", "replace")],
                 filename=traverser.filename,
                 line=traverser.line,
                 column=traverser.position,

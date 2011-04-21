@@ -3,7 +3,7 @@ import uuid
 from StringIO import StringIO
 
 from outputhandlers.shellcolors import OutputHandler
-from textfilter import filter_ascii
+import unicodehelper
 
 
 class ErrorBundle(object):
@@ -110,8 +110,8 @@ class ErrorBundle(object):
         else:
             message["context"] = None
 
-        message["message"] = filter_ascii(message["message"])
-        message["description"] = filter_ascii(message["description"])
+        message["message"] = unicodehelper.decode(message["message"])
+        message["description"] = unicodehelper.decode(message["description"])
 
         stack.append(message)
 

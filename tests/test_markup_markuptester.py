@@ -1,24 +1,26 @@
+﻿# -*- coding: utf-8 -*-
 import validator.testcases.markup.markuptester as markuptester
 from validator.errorbundler import ErrorBundle
 from validator.constants import *
 
 def _do_test(path, should_fail=False, type_=None):
+    return _do_test_raw(open(path).read(),
+                        path,
+                        should_fail,
+                        type_)
 
-    markup_file = open(path)
-    data = markup_file.read()
-    markup_file.close()
-
+def _do_test_raw(data, path, should_fail=False, type_=None):
     filename = path.split("/")[-1]
     extension = filename.split(".")[-1]
 
-    err = ErrorBundle(None, True)
+    err = ErrorBundle()
     if type_:
         err.set_type(type_)
 
     parser = markuptester.MarkupParser(err, debug=True)
     parser.process(filename, data, extension)
 
-    err.print_summary(True)
+    print err.print_summary(verbose=True)
 
     if should_fail:
         assert err.failed()
@@ -31,7 +33,7 @@ def _do_test(path, should_fail=False, type_=None):
 def test_local_url_detector():
     "Tests that local URLs can be detected."
 
-    err = ErrorBundle(None, True)
+    err = ErrorBundle()
     mp = markuptester.MarkupParser(err)
     tester = mp._is_url_local
 
@@ -135,3 +137,18 @@ def test_invalid_markup():
     result = _do_test("tests/resources/markup/markuptester/bad_script.xml",
                       False)
     assert result.notices
+
+
+def test_self_closing_scripts():
+    """Tests that self-closing script tags are not deletrious to parsing"""
+
+    _do_test_raw("""
+    <foo>
+        <script type="text/javascript"/>
+        <list_item undecodable=" _ " />
+        <list_item />
+        <list_item />
+    </foo>
+    """, "foo.js")
+
+

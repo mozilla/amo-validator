@@ -1,6 +1,5 @@
 from StringIO import StringIO
-
-import textfilter
+import unicodehelper
 
 
 class ContextGenerator:
@@ -83,6 +82,6 @@ class ContextGenerator:
                 data = "%s ..." % data[:140]
 
         data = "%s%s" % (raw_data[0:with_ws - line_length], data)
-        data = textfilter.filter_ascii(data)
+        data = unicodehelper.decode(data)
         return data
 

@@ -85,7 +85,7 @@ def main():
     # Print the output of the tests based on the requested format.
     if args.output == "text":
         print error_bundle.print_summary(verbose=args.verbose,
-                                         no_color=args.boring)
+                                         no_color=args.boring).encode("utf-8")
     elif args.output == "json":
         sys.stdout.write(error_bundle.render_json())
 

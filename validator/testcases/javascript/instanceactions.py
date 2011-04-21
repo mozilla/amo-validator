@@ -9,7 +9,7 @@ traverser
 node
     the current node being evaluated
 """
-
+import types
 from jstypes import *
 
 
@@ -21,10 +21,11 @@ def createElement(args, traverser, node):
 
     simple_args = [traverser._traverse_node(a) for a in args]
 
-    if str(simple_args[0].get_literal_value()).lower() == "script":
+    if unicode(simple_args[0].get_literal_value()).lower() == u"script":
         _create_script_tag(traverser)
     elif not (simple_args[0].is_literal() or
-              isinstance(simple_args[0].get_literal_value(), str)):
+              isinstance(simple_args[0].get_literal_value(),
+                         types.StringTypes)):
         _create_variable_element(traverser)
 
 
@@ -36,10 +37,11 @@ def createElementNS(args, traverser, node):
 
     simple_args = [traverser._traverse_node(a) for a in args]
 
-    if "script" in str(simple_args[1].get_literal_value()).lower():
+    if "script" in unicode(simple_args[1].get_literal_value()).lower():
         _create_script_tag(traverser)
     elif not (simple_args[1].is_literal() or
-              isinstance(simple_args[1].get_literal_value(), str)):
+              isinstance(simple_args[1].get_literal_value(),
+                         types.StringTypes)):
         _create_variable_element(traverser)
 
 
@@ -115,7 +117,7 @@ def setAttribute(args, traverser, node):
 
     simple_args = [traverser._traverse_node(a) for a in args]
 
-    if str(simple_args[0].get_literal_value()).lower().startswith("on"):
+    if unicode(simple_args[0].get_literal_value()).lower().startswith("on"):
         traverser.err.notice(
             err_id=("testcases_javascript_instanceactions", "setAttribute",
                         "setting_on*"),
