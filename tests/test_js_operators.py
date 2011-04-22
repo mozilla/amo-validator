@@ -60,4 +60,18 @@ def test_in_operator():
     assert _get_var(err, "a") == False
     assert _get_var(err, "b") == False
 
+def test_function_instanceof():
+    """
+    Test that Function can be used with instanceof operators without error.
+    """
+
+    assert not _do_test_raw("""
+    var x = foo();
+    print(x instanceof Function);
+    """).failed()
+
+    assert _do_test_raw("""
+    var x = foo();
+    print(x === Function);
+    """).failed()
 

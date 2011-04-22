@@ -42,9 +42,9 @@ def test_bug621106():
     var x = Object.prototype;
     x.test = "asdf";
     """)
-    # There should be five errors.
+    # There should be four errors (prototypes are only readonly)
     print err.message_count
-    assert err.message_count == 5
+    assert err.message_count == 4
 
 def test_with_statement():
     "Tests that 'with' statements work as intended"

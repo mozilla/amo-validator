@@ -137,15 +137,15 @@ GLOBAL_ENTITIES = {
 
     u"eval": {"dangerous": True},
     u"Function": {"dangerous": True},
-    u"Object": {"value": {u"prototype": {"dangerous": True},
+    u"Object": {"value": {u"prototype": {"readonly": True},
                           u"constructor":  # Just an experiment for now
                               {"value": lambda: GLOBAL_ENTITIES["Function"]}}},
-    u"String": {"value": {u"prototype": {"dangerous": True}}},
-    u"Array": {"value": {u"prototype": {"dangerous": True}}},
-    u"Number": {"value": {u"prototype": {"dangerous": True}}},
-    u"Boolean": {"value": {u"prototype": {"dangerous": True}}},
-    u"RegExp": {"value": {u"prototype": {"dangerous": True}}},
-    u"Date": {"value": {u"prototype": {"dangerous": True}}},
+    u"String": {"value": {u"prototype": {"readonly": True}}},
+    u"Array": {"value": {u"prototype": {"readonly": True}}},
+    u"Number": {"value": {u"prototype": {"readonly": True}}},
+    u"Boolean": {"value": {u"prototype": {"readonly": True}}},
+    u"RegExp": {"value": {u"prototype": {"readonly": True}}},
+    u"Date": {"value": {u"prototype": {"readonly": True}}},
 
     u"Math": {"readonly": True},
 

@@ -177,7 +177,17 @@ class JSWrapper(object):
         dirty = value is None
         if self.is_global:
             if "value" not in value:
-                return JSWrapper(traverser=traverser)
+                output = JSWrapper(traverser=traverser)
+                output.value = {}
+
+                def apply_value(name):
+                    if name in self.value:
+                        output.value[name] = self.value[name]
+
+                apply_value("dangerous")
+                apply_value("readonly")
+                output.is_global = True
+                return output
 
             _evaluate_lambdas = lambda node: _evaluate_lambdas(node()) if \
                                              isinstance(

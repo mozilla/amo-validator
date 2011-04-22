@@ -475,6 +475,10 @@ def _expr_binary(traverser, node):
 
     traverser.debug_level += 1
 
+    # Select the proper operator.
+    operator = node["operator"]
+    traverser._debug("BIN_OPERATOR>>%s" % operator)
+
     # Traverse the left half of the binary expression.
     traverser._debug("BIN_EXP>>l-value")
     traverser.debug_level += 1
@@ -490,10 +494,18 @@ def _expr_binary(traverser, node):
     traverser._debug("BIN_EXP>>r-value")
     traverser.debug_level += 1
 
-    right = traverser._traverse_node(node["right"])
-    if not isinstance(right, JSWrapper):
-        right = JSWrapper(right, traverser=traverser)
-    traverser._debug("Is dirty? %r" % right.dirty)
+    if (operator == "instanceof" and
+        node["right"]["type"] == "Identifier" and
+        node["right"]["name"] == "Function"):
+        # We make an exception for instanceof's r-value if it's a dangerous
+        # global, specifically Function.
+        return JSWrapper(True, traverser=traverser)
+    else:
+
+        right = traverser._traverse_node(node["right"])
+        if not isinstance(right, JSWrapper):
+            right = JSWrapper(right, traverser=traverser)
+        traverser._debug("Is dirty? %r" % right.dirty)
 
     # Dirty l or r values mean we can skip the expression. A dirty value
     # indicates that a lazy operation took place that introduced some
@@ -510,12 +522,6 @@ def _expr_binary(traverser, node):
     left = left.get_literal_value()
     right_wrap = right
     right = right.get_literal_value()
-
-    # Select the proper operator.
-    operator = node["operator"]
-    traverser._debug("BIN_OPERATOR>>%s" % operator)
-
-    type_operators = (">>", "<<", ">>>")
 
     # Coerce the literals to numbers for numeric operations.
     gleft = _get_as_num(left)
@@ -546,7 +552,7 @@ def _expr_binary(traverser, node):
 
     operator = node["operator"]
     output = None
-    if (operator in type_operators and
+    if (operator in (">>", "<<", ">>>") and
         ((left is None or right is None) or
          gright < 0)):
         output = False
