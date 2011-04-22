@@ -207,8 +207,12 @@ def _define_var(traverser, node):
                                                       prop_name),
                                          prop["value"]["properties"])
 
-            _proc_objpattern(init_obj=init,
-                             properties=declaration["id"]["properties"])
+            if init is not None:
+                _proc_objpattern(init_obj=init,
+                                 properties=declaration["id"]["properties"])
+            #else:
+                # FIXME : Is this even supposed to be possible?
+                # No idea why this is happening,
 
         else:
             var_name = declaration["id"]["name"]
@@ -448,6 +452,9 @@ def _expr_assignment(traverser, node):
             traverser._debug("ASSIGNMENT>>OPERATOR NOT FOUND")
             traverser.debug_level -= 1
             return left
+        elif token in ("<<=", ">>=", ">>>=") and gright < 0:
+            left.set_value(0, traverser=traverser)
+            return left
 
         traverser._debug("ASSIGNMENT::L-value global? (%s)" %
                          ("Y" if left.is_global else "N"))
@@ -539,8 +546,9 @@ def _expr_binary(traverser, node):
 
     operator = node["operator"]
     output = None
-    if operator in type_operators and (
-       left is None or right is None):
+    if (operator in type_operators and
+        ((left is None or right is None) or
+         gright < 0)):
         output = False
     elif operator in operators:
         # Concatenation can be silly, so always turn undefineds into empty

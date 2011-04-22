@@ -62,6 +62,9 @@ class JSWrapper(object):
                  is_global=False, traverser=None, callable=False,
                  setter=None):
 
+        if is_global:
+            assert not value
+
         if traverser is not None:
             traverser.debug_level += 1
             traverser._debug("-----New JSWrapper-----")
