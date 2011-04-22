@@ -8,8 +8,11 @@ def test_basic_math():
     var y = 2;
     var z = x + y;
 
-    var dbz = 1 / 0; // Should return 0, not break the world.
-    var dbz1 = 1 % 0;
+    var dbz = 1;
+    var dbz1 = 1;
+    dbz = dbz / 0;
+    dbz1 = dbz1 % 0;
+
     var dbz2 = 1;
     var dbz3 = 1;
     dbz2 /= 0;
@@ -25,10 +28,10 @@ def test_basic_math():
     assert _get_var(err, "y") == 2
     assert _get_var(err, "z") == 3
 
-    assert _get_var(err, "dbz") is None
-    assert _get_var(err, "dbz1") is None
-    assert _get_var(err, "dbz2") is None
-    assert _get_var(err, "dbz3") is None
+    assert _get_var(err, "dbz") == 0  # Spidermonkey does this.
+    assert _get_var(err, "dbz1") == 0  # ...and this.
+    assert _get_var(err, "dbz2") == 0
+    assert _get_var(err, "dbz3") == 0
 
     assert _get_var(err, "a") == 5
     assert _get_var(err, "b") == 4
@@ -50,11 +53,10 @@ def test_in_operator():
     var b = "asdf" in dict;
     """)
     assert err.message_count == 0
-    print err.final_context.output()
 
-    print _get_var(err, "x"), "<<<"
     assert _get_var(err, "x") == True
     assert _get_var(err, "y") == True
+    print _get_var(err, "a"), "<<<"
     assert _get_var(err, "a") == False
     assert _get_var(err, "b") == False
 

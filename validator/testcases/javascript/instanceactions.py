@@ -19,13 +19,11 @@ def createElement(args, traverser, node):
     if not args:
         return
 
-    simple_args = [traverser._traverse_node(a) for a in args]
+    simple_args = map(traverser._traverse_node, args)
 
     if unicode(simple_args[0].get_literal_value()).lower() == u"script":
         _create_script_tag(traverser)
-    elif not (simple_args[0].is_literal() or
-              isinstance(simple_args[0].get_literal_value(),
-                         types.StringTypes)):
+    elif not simple_args[0].is_literal():
         _create_variable_element(traverser)
 
 
@@ -35,13 +33,11 @@ def createElementNS(args, traverser, node):
     if not args or len(args) < 2:
         return
 
-    simple_args = [traverser._traverse_node(a) for a in args]
+    simple_args = map(traverser._traverse_node, args)
 
     if "script" in unicode(simple_args[1].get_literal_value()).lower():
         _create_script_tag(traverser)
-    elif not (simple_args[1].is_literal() or
-              isinstance(simple_args[1].get_literal_value(),
-                         types.StringTypes)):
+    elif not simple_args[1].is_literal():
         _create_variable_element(traverser)
 
 

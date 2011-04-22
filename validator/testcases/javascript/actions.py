@@ -1,3 +1,4 @@
+import math
 import types
 
 import spidermonkey
@@ -432,14 +433,14 @@ def _expr_assignment(traverser, node):
                      "+=": lambda: lit_left + lit_right,
                      "-=": lambda: gleft - gright,
                      "*=": lambda: gleft * gright,
-                     "/=": lambda: None if gright == 0 else (gleft / gright),
-                     "%=": lambda: None if gright == 0 else (gleft % gright),
-                     "<<=": lambda: gleft << gright,
-                     ">>=": lambda: gleft >> lit_right,
-                     ">>>=": lambda: math.fabs(gleft) >> gright,
-                     "|=": lambda: gleft | gright,
-                     "^=": lambda: gleft ^ gright,
-                     "&=": lambda: gleft & gright}
+                     "/=": lambda: 0 if gright == 0 else (gleft / gright),
+                     "%=": lambda: 0 if gright == 0 else (gleft % gright),
+                     "<<=": lambda: int(gleft) << int(gright),
+                     ">>=": lambda: int(gleft) >> int(gright),
+                     ">>>=": lambda: float(abs(int(gleft)) >> gright),
+                     "|=": lambda: int(gleft) | int(gright),
+                     "^=": lambda: int(gleft) ^ int(gright),
+                     "&=": lambda: int(gleft) & int(gright)}
 
         token = node["operator"]
         traverser._debug("ASSIGNMENT>>OPERATION:%s" % token)
@@ -448,9 +449,11 @@ def _expr_assignment(traverser, node):
             traverser.debug_level -= 1
             return left
 
-        traverser._debug("ASSIGNMENT::LEFT>>%s" % unicode(left.is_global))
-        traverser._debug("ASSIGNMENT::RIGHT>>%s" % unicode(operators[token]()))
-        left.set_value(operators[token](), traverser=traverser)
+        traverser._debug("ASSIGNMENT::L-value global? (%s)" %
+                         ("Y" if left.is_global else "N"))
+        new_value = operators[token]()
+        traverser._debug("ASSIGNMENT::New value >> %s" % new_value)
+        left.set_value(new_value, traverser=traverser)
         traverser.debug_level -= 1
         return left
 
@@ -465,24 +468,29 @@ def _expr_binary(traverser, node):
 
     traverser.debug_level += 1
 
-    traverser._debug("BIN_EXP>>LEFT")
+    # Traverse the left half of the binary expression.
+    traverser._debug("BIN_EXP>>l-value")
     traverser.debug_level += 1
 
     left = traverser._traverse_node(node["left"])
     if not isinstance(left, JSWrapper):
         left = JSWrapper(left, traverser=traverser)
-    traverser._debug(unicode(left.dirty))
+    traverser._debug("Is dirty? %r" % left.dirty)
 
     traverser.debug_level -= 1
 
-    traverser._debug("BIN_EXP>>RIGHT")
+    # Traverse the right half of the binary expression.
+    traverser._debug("BIN_EXP>>r-value")
     traverser.debug_level += 1
 
     right = traverser._traverse_node(node["right"])
     if not isinstance(right, JSWrapper):
         right = JSWrapper(right, traverser=traverser)
-    traverser._debug(unicode(right.dirty))
+    traverser._debug("Is dirty? %r" % right.dirty)
 
+    # Dirty l or r values mean we can skip the expression. A dirty value
+    # indicates that a lazy operation took place that introduced some
+    # nondeterminacy.
     if left.dirty:
         return left
     elif right.dirty:
@@ -490,17 +498,22 @@ def _expr_binary(traverser, node):
 
     traverser.debug_level -= 1
 
+    # Binary expressions are only executed on literals.
     left_wrap = left
     left = left.get_literal_value()
     right_wrap = right
     right = right.get_literal_value()
 
+    # Select the proper operator.
     operator = node["operator"]
     traverser._debug("BIN_OPERATOR>>%s" % operator)
 
     type_operators = (">>", "<<", ">>>")
+
+    # Coerce the literals to numbers for numeric operations.
     gleft = _get_as_num(left)
     gright = _get_as_num(right)
+
     operators = {
         "==": lambda: left == right or gleft == gright,
         "!=": lambda: left != right,
@@ -510,13 +523,14 @@ def _expr_binary(traverser, node):
         "<": lambda: left < right,
         "<=": lambda: left <= right,
         ">=": lambda: left >= right,
-        "<<": lambda: gleft << gright,
-        ">>": lambda: gleft >> gright,
-        ">>>": lambda: math.fabs(gleft) >> gright,
+        "<<": lambda: int(gleft) << int(gright),
+        ">>": lambda: int(gleft) >> int(gright),
+        ">>>": lambda: float(abs(int(gleft)) >> int(gright)),
         "+": lambda: left + right,
         "-": lambda: gleft - gright,
         "*": lambda: gleft * gright,
         "/": lambda: 0 if gright == 0 else (gleft / gright),
+        "%": lambda: 0 if gright == 0 else (gleft % gright),
         "in": lambda: right_wrap.contains(left),
         # TODO : implement instanceof
     }
@@ -529,7 +543,8 @@ def _expr_binary(traverser, node):
        left is None or right is None):
         output = False
     elif operator in operators:
-
+        # Concatenation can be silly, so always turn undefineds into empty
+        # strings and if there are strings, make everything strings.
         if operator == "+":
             if left is None:
                 left = ""
@@ -593,7 +608,7 @@ def _get_as_num(value):
     try:
         if isinstance(value, types.StringTypes):
             return float(value)
-        elif isinstance(value, int) or isinstance(value, float):
+        elif isinstance(value, (int, float, long)):
             return value
         else:
             return int(value)

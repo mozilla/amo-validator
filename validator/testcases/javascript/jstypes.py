@@ -13,8 +13,7 @@ class JSObject(object):
 
     def __init__(self):
         self.data = {
-            "prototype": JSPrototype(),
-            "constructor": lambda **keys: JSObject(keys["anon"])
+            u"prototype": JSPrototype()
         }
 
     def get(self, name):
@@ -40,7 +39,9 @@ class JSObject(object):
         return name in self.data
 
     def output(self):
-        return unicode(self.data)
+        return json.dumps(dict(zip(self.data.keys(),
+                                   map(lambda v:v.output(),
+                                       self.data.values()))))
 
 
 class JSContext(JSObject):
@@ -52,12 +53,6 @@ class JSContext(JSObject):
 
     def set(self, name, value):
         JSObject.set(self, name, value, None)
-
-    def output(self):
-        output = {}
-        for (name, item) in self.data.items():
-            output[name] = unicode(item)
-        return json.dumps(output)
 
 
 class JSWrapper(object):
@@ -114,6 +109,7 @@ class JSWrapper(object):
 
         # Process any setter/modifier
         if self.setter:
+            traverser._debug("Running setter on JSWrapper...");
             value = self.setter(value, traverser) or value or None
 
         if value == self.value:
@@ -136,7 +132,7 @@ class JSWrapper(object):
                                   context=traverser.context)
             return self
 
-        if isinstance(value, (bool, str, int, float, unicode)):
+        if isinstance(value, (bool, str, int, float, long, unicode)):
             value = JSLiteral(value)
         # If the value being assigned is a wrapper as well, copy it in
         elif isinstance(value, JSWrapper):
@@ -146,6 +142,8 @@ class JSWrapper(object):
             self.is_global = value.is_global
             # const does not carry over on reassignment
             return self
+        elif isinstance(value, types.LambdaType):
+            value = value()
 
         self.value = value
         return self
@@ -172,10 +170,8 @@ class JSWrapper(object):
     def get(self, traverser, name):
         """Retrieves a property from the variable"""
 
-        if self.value is None:
-            return JSWrapper(traverser=traverser, dirty=True)
-
         value = self.value
+        dirty = value is None
         if self.is_global:
             if "value" not in value:
                 return JSWrapper(traverser=traverser)
@@ -202,10 +198,17 @@ class JSWrapper(object):
         if modifier:
             modifier(traverser)
 
-        output = value.get(name) if issubclass(type(value), JSObject) else None
+        if value is not None:
+            output = (value.get(name) if
+                      issubclass(type(value), JSObject) else
+                      None)
+        else:
+            output = None
 
         if not isinstance(output, JSWrapper):
-            output = JSWrapper(output, traverser=traverser, dirty=output is None)
+            output = JSWrapper(output,
+                               traverser=traverser,
+                               dirty=output is None or dirty)
 
         # If we can predetermine the setter for the wrapper, we can save a ton
         # of lookbehinds in the future. This greatly simplifies the
@@ -258,16 +261,19 @@ class JSWrapper(object):
         """Returns the literal value of the wrapper"""
 
         if self.is_global:
-            return None
+            return ""
         if self.value is None:
-            return None
+            return ""
 
-        return self.value.get_literal_value()
+        output = self.value.get_literal_value()
+        return output if output is not None else ""
 
     def output(self):
         """Returns a readable version of the object"""
-        if self.value is None or self.is_global:
-            return ""
+        if self.value is None:
+            return "(None)"
+        elif self.is_global:
+            return "(Global)"
 
         return self.value.output()
 
@@ -288,10 +294,10 @@ class JSLiteral(JSObject):
 
     def __str__(self):
         "Returns a human-readable version of the variable's contents"
-        return json.dumps(self.value)
+        return self.output()
 
     def output(self):
-        return self.__str__()
+        return self.value
 
     def get_literal_value(self):
         "Returns the literal value of a this literal. Heh."
@@ -351,7 +357,9 @@ class JSArray(JSObject):
         # Interestingly enough, this allows for things like:
         # x = [4]
         # y = x * 3 // y = 12 since x equals "4"
-        return u",".join([unicode(w.get_literal_value()) for w in self.elements])
+        return u",".join([unicode(w.get_literal_value()) for
+                          w in self.elements if
+                          not (isinstance(w, JSWrapper) and w.value == self)])
 
     def set(self, index, value, traverser=None):
         """Follow the rules of JS for creating an array"""
@@ -379,5 +387,5 @@ class JSArray(JSObject):
             self.elements.append(JSWrapper(value=value, traverser=traverser))
 
     def output(self):
-        return self.get_literal_value()
+        return [x.output() for x in self.elements]
 

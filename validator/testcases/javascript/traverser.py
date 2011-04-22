@@ -166,6 +166,7 @@ class Traverser:
             return wrapper
 
         self._debug("TRAVERSE>>%s" % (node["type"]))
+        self.debug_level += 1
 
         # Extract location information if it's available
         if "loc" in node and node["loc"] is not None:
@@ -192,11 +193,15 @@ class Traverser:
         action_result = None
         if action is not None:
             action_result = action(self, node)
-            self._debug("ACTION>>%s (%s)" %
-                    ("halt>>%s" % unicode(action_result) if
-                        action_result else
-                        "continue",
-                     node["type"]))
+
+            if DEBUG:
+                action_debug = "continue"
+                if action_result is not None:
+                    action_debug = (action_result.output() if
+                                    isinstance(action_result, JSWrapper) else
+                                    action_result)
+                self._debug("ACTION>>%s (%s)" % (action_debug,
+                                                 node["type"]))
 
         # print node["type"], branches
         if action_result is None:
@@ -218,6 +223,8 @@ class Traverser:
         # If we defined a context, pop it.
         if establish_context or block_level:
             self._pop_context()
+
+        self.debug_level -= 1
 
         # If there is an action and the action returned a value, it should be
         # returned to the node traversal that initiated this node's traversal.

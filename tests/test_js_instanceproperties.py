@@ -14,9 +14,14 @@ def test_innerHTML():
     x.innerHTML = "<div onclick=\\"foo\\"></div>";
     """).failed()
 
+    # Test without declaration
+    assert _do_test_raw("""
+    x.innerHTML = "<div onclick=\\"foo\\"></div>";
+    """).failed()
+
     assert _do_test_raw("""
     var x = foo();
-    x.innerHTML = "x" + y + "z";
+    x.innerHTML = "x" + y;
     """).failed()
 
 
