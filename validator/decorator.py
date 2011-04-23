@@ -2,7 +2,7 @@
 TEST_TIERS = {}
 
 
-def register_test(tier=1, expected_type=None, simple=False):
+def register_test(tier=1, expected_type=None, simple=False, versions=None):
     "Registers tests for the validation flow."
 
     def wrap(function):
@@ -15,7 +15,8 @@ def register_test(tier=1, expected_type=None, simple=False):
         # Add a test object to the test's tier
         TEST_TIERS[tier].append({"test": function,
                                  "type": expected_type,
-                                 "simple": simple})
+                                 "simple": simple,
+                                 "versions": versions})
 
         # Return the function to be run
         return function
