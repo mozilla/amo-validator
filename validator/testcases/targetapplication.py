@@ -36,6 +36,7 @@ def test_targetedapplications(err, package_contents=None,
     ta_max_ver = install.uri("maxVersion")
 
     used_targets = []
+    all_supported_versions = {}
 
     # Isolate all of the bnodes referring to target applications
     for target_app in install.get_objects(None, ta_predicate):
@@ -122,6 +123,9 @@ def test_targetedapplications(err, package_contents=None,
                                 "install.rdf")
                     continue
 
+                all_supported_versions[found_guid] = \
+                    app_versions[min_ver_pos:max_ver_pos]
+
                 # Test whether it's a FF4 addon
 
                 # NOTE: This should probably also be extrapolated for
@@ -154,5 +158,6 @@ def test_targetedapplications(err, package_contents=None,
         if key in APPLICATIONS:
             supports.append(APPLICATIONS[key])
     err.save_resource("supports", supports)
+    err.save_resource("supported_versions", all_supported_versions)
 
 

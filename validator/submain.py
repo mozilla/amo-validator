@@ -211,11 +211,35 @@ def test_inner_package(err, package_contents, xpi_package):
     # Iterate through each tier.
     for tier in sorted(decorator.get_tiers()):
 
-        # Let the error bundler know what tier we're on
+        # Let the error bundler know what tier we're on.
         err.set_tier(tier)
 
-        # Iterate through each test of our detected type
+        # Iterate through each test of our detected type.
+        supported_versions = None
         for test in decorator.get_tests(tier, err.detected_type):
+            # Test whether the test is app/version specific.
+            if test["versions"] is not None:
+                # Grab the detected versions
+                if not supported_versions:
+                    supported_versions = err.get_resource("supported_versions")
+                # If there are no supported versions, the test is not
+                # applicable or is unsupported.
+                if not supported_versions:
+                    continue
+
+                found_version = False
+                for guid in test["versions"].keys():
+                    if (guid in supported_versions and
+                        any((detected_version in test["versions"][guid]) for
+                            detected_version in
+                            supported_versions[guid])):
+                        found_version = True
+                        break
+                # If none of the versions that the test supports are found,
+                # skip the test.
+                if not found_version:
+                    continue
+
             test_func = test["test"]
             if test["simple"]:
                 test_func(err)
