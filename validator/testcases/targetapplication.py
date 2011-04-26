@@ -160,4 +160,20 @@ def test_targetedapplications(err, package_contents=None,
     err.save_resource("supports", supports)
     err.save_resource("supported_versions", all_supported_versions)
 
+    if not supports:
+        err.error(
+            err_id=("testcases_targetapplication",
+                    "test_targetedapplication",
+                    "no_mozilla_support"),
+            error="No Mozilla products listed as target applications",
+            description=["None of the target applications listed in "
+                         "install.rdf are supported Mozilla products. At "
+                         "least one official Mozilla product must be "
+                         "supported for inclusion on addons.mozilla.org.",
+                         "See "
+                     "https://addons.mozilla.org/firefox/pages/appversions/"
+                         " for more information on supported target "
+                         "applications on AMO."],
+            filename="install.rdf")
+
 
