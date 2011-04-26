@@ -118,7 +118,9 @@ GLOBAL_ENTITIES = {
                    u"createElementNS":
                        {"dangerous":
                             lambda a, t: t(a[0]).get_literal_value()
-                                                .lower() == "script"}}},
+                                                .lower() == "script"},
+                   u"loadOverlay":
+                       {"dangerous": True}}},
 
     # The nefariuos timeout brothers!
     u"setTimeout": {"dangerous": actions._call_settimeout},
