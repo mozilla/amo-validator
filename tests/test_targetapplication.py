@@ -10,13 +10,14 @@ from helper import _do_test
 targetapp.APPROVED_APPLICATIONS = \
         json.load(open("validator/app_versions.json"))
 
-def _do_test_raw(rdf):
-    err = ErrorBundle()
+def _do_test_raw(rdf, listed=True):
+    err = ErrorBundle(listed=listed)
     rdf = RDFParser(StringIO(rdf.strip()))
     err.save_resource("has_install_rdf", True)
     err.save_resource("install_rdf", rdf)
 
     targetapp.test_targetedapplications(err)
+    print err.print_summary()
     return err
 
 def test_valid_targetapps():
@@ -133,7 +134,7 @@ def test_no_supported_mozilla_apps():
     </RDF>
     """).failed()
 
-    assert _do_test_raw("""
+    failure_case = """
     <?xml version="1.0"?>
     <RDF xmlns="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
          xmlns:em="http://www.mozilla.org/2004/em-rdf#">
@@ -154,5 +155,8 @@ def test_no_supported_mozilla_apps():
             </em:targetApplication>
         </Description>
     </RDF>
-    """).failed()
+    """
+
+    assert _do_test_raw(failure_case).failed()
+    assert not _do_test_raw(failure_case, listed=False).failed()
 

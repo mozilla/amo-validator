@@ -160,7 +160,7 @@ def test_targetedapplications(err, package_contents=None,
     err.save_resource("supports", supports)
     err.save_resource("supported_versions", all_supported_versions)
 
-    if not supports:
+    if not supports and err.get_resource("listed"):
         err.error(
             err_id=("testcases_targetapplication",
                     "test_targetedapplication",
