@@ -35,3 +35,20 @@ def test_js_categories_gecko1():
     tc_chromemanifest.test_categories(err)
     assert err.failed()
 
+def test_fail_resourcemodules():
+    """'resource modules' should fail validation."""
+    c = ChromeManifest("resource modules foo")
+    err = ErrorBundle()
+    err.save_resource("chrome.manifest", c)
+
+    tc_chromemanifest.test_resourcemodules(err)
+    assert err.failed()
+
+    # Fail even if it's just a prefix.
+    c = ChromeManifest("resource modulesfoo")
+    err = ErrorBundle()
+    err.save_resource("chrome.manifest", c)
+
+    tc_chromemanifest.test_resourcemodules(err)
+    assert err.failed()
+
