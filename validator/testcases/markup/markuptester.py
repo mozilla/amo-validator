@@ -35,6 +35,11 @@ SAFE_IFRAME_TYPES = ("content",
                      "content-targetable")
 TAG_NOT_OPENED = "Tag (%s) being closed before it is opened."
 
+DOM_MUTATION_HANDLERS = ("ondomattrmodified", "ondomattributenamechanged",
+     "ondomcharacterdatamodified", "ondomelementnamechanged",
+     "ondomnodeinserted", "ondomnodeinsertedintodocument", "ondomnoderemoved",
+     "ondomnoderemovedfromdocument", "ondomsubtreemodified")
+
 
 class MarkupParser(HTMLParser):
     """Parses and inspects various markup languages"""
@@ -277,6 +282,21 @@ class MarkupParser(HTMLParser):
                                            attr[1],
                                            self.line)
             elif attr_name.startswith("on"):  # JS attribute
+                # Warn about DOM mutation event handlers.
+                if attr_name in DOM_MUTATION_HANDLERS:
+                    self.err.warning(
+                        err_id=("testcases_markup_markuptester",
+                                "handle_starttag",
+                                "dom_manipulation_handler"),
+                        warning="DOM Mutation Events Prohibited",
+                        description="DOM mutation events are flagged because "
+                                    "of their deprecated status, as well as "
+                                    "their extreme inefficiency. Consider "
+                                    "using a different event.",
+                        filename=self.filename,
+                        line=self.line,
+                        context=self.context)
+
                 scripting.test_js_snippet(err=self.err,
                                           data=attr[1],
                                           filename=self.filename)
