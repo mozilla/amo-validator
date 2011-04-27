@@ -21,7 +21,7 @@ assumed_extensions = {"jar": PACKAGE_THEME,
                       "xml": PACKAGE_SEARCHPROV}
 
 
-def prepare_package(err, path, expectation=0):
+def prepare_package(err, path, expectation=0, for_appversions=None):
     "Prepares a file-based package for validation."
 
     # Test that the package actually exists. I consider this Tier 0
@@ -50,7 +50,8 @@ def prepare_package(err, path, expectation=0):
         return False
 
     package = open(path, "rb")
-    output = test_package(err, package, path, expectation)
+    output = test_package(err, package, path, expectation,
+                          for_appversions)
     package.close()
 
     return output
@@ -100,7 +101,8 @@ def test_search(err, package, expectation=0):
     return
 
 
-def test_package(err, file_, name, expectation=PACKAGE_ANY):
+def test_package(err, file_, name, expectation=PACKAGE_ANY,
+                 for_appversions=None):
     "Begins tests for the package."
 
     # Load up a new instance of an XPI.
@@ -136,7 +138,7 @@ def test_package(err, file_, name, expectation=PACKAGE_ANY):
     if has_install_rdf:
         _load_install_rdf(err, package, expectation)
 
-    return test_inner_package(err, package_contents, package)
+    return test_inner_package(err, package_contents, package, for_appversions)
 
 
 def _load_install_rdf(err, package, expectation):
@@ -203,7 +205,8 @@ def populate_chrome_manifest(err, package_contents, xpi_package):
         err.save_resource("chrome.manifest", chrome, pushable=True)
 
 
-def test_inner_package(err, package_contents, xpi_package):
+def test_inner_package(err, package_contents, xpi_package,
+                       for_appversions=None):
     "Tests a package's inner content."
 
     populate_chrome_manifest(err, package_contents, xpi_package)
@@ -228,16 +231,22 @@ def test_inner_package(err, package_contents, xpi_package):
                     continue
 
                 found_version = False
-                for guid in test["versions"].keys():
-                    if (guid in supported_versions and
-                        any((detected_version in test["versions"][guid]) for
-                            detected_version in
-                            supported_versions[guid])):
-                        found_version = True
-                        break
-                # If none of the versions that the test supports are found,
-                # skip the test.
-                if not found_version:
+                def supports_version(guid_set):
+                    for guid in guid_set.keys():
+                        if (guid in supported_versions and
+                            any((detected_version in guid_set[guid]) for
+                                detected_version in
+                                supported_versions[guid])):
+                            return True
+                    return False
+
+                # Break if the test doesn't target this add-on's target app.
+                if not supports_version(test["versions"]):
+                    continue
+
+                # Break if the caller has set target apps that aren't
+                # supported by this add-on.
+                if for_appversions and not supports_version(for_appversions):
                     continue
 
             test_func = test["test"]

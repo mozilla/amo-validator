@@ -9,7 +9,7 @@ def test_prepare_package():
     "Tests that the prepare_package function passes for valid data"
 
     tp = submain.test_package
-    submain.test_package = lambda w,x,y,z: True
+    submain.test_package = lambda w,x,y,z, for_appversions: True
 
     err = ErrorBundle(None, True)
     assert submain.prepare_package(err, "tests/resources/main/foo.xpi") == True
@@ -162,7 +162,7 @@ class MockDecorator:
 
                 yield {"test": lambda x,y,z: x.fail_tier(),
                        "simple": False,
-                       "versions" :None}
+                       "versions": None}
 
             assert tier <= self.fail_tier or self.determined
 
