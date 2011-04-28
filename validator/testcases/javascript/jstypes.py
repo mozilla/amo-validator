@@ -371,7 +371,8 @@ class JSArray(JSObject):
         # x = [4]
         # y = x * 3 // y = 12 since x equals "4"
         return u",".join([unicode(w.get_literal_value()) for
-                          w in self.elements if
+                          w in
+                          self.elements if
                           not (isinstance(w, JSWrapper) and w.value == self)])
 
     def set(self, index, value, traverser=None):
