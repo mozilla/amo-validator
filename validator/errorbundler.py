@@ -40,7 +40,7 @@ class ErrorBundle(object):
 
     def error(self, err_id, error,
               description='', filename='', line=None, column=None,
-              context=None, tier=None):
+              context=None, tier=None, for_appversions=None):
         "Stores an error message for the validation process"
         self._save_message(self.errors,
                            "errors",
@@ -50,13 +50,14 @@ class ErrorBundle(object):
                             "file": filename,
                             "line": line,
                             "column": column,
-                            "tier": tier},
+                            "tier": tier,
+                            "for_appversions": for_appversions},
                            context=context)
         return self
 
     def warning(self, err_id, warning,
                 description='', filename='', line=None, column=None,
-                context=None, tier=None):
+                context=None, tier=None, for_appversions=None):
         "Stores a warning message for the validation process"
         self._save_message(self.warnings,
                            "warnings",
@@ -66,13 +67,14 @@ class ErrorBundle(object):
                             "file": filename,
                             "line": line,
                             "column": column,
-                            "tier": tier},
+                            "tier": tier,
+                            "for_appversions": for_appversions},
                            context=context)
         return self
 
     def notice(self, err_id, notice,
                description="", filename="", line=None, column=None,
-               context=None, tier=None):
+               context=None, tier=None, for_appversions=None):
         "Stores an informational message about the validation"
         self._save_message(self.notices,
                            "notices",
@@ -82,7 +84,8 @@ class ErrorBundle(object):
                             "file": filename,
                             "line": line,
                             "column": column,
-                            "tier": tier},
+                            "tier": tier,
+                            "for_appversions": for_appversions},
                            context=context)
         return self
 
@@ -234,7 +237,8 @@ class ErrorBundle(object):
                      line=message["line"],
                      column=message["column"],
                      context=message["context"],
-                     tier=message["tier"])
+                     tier=message["tier"],
+                     for_appversions=message["for_appversions"])
 
     def render_json(self):
         "Returns a JSON summary of the validation operation."

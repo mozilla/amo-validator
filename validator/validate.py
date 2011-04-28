@@ -15,7 +15,8 @@ def validate(path, format="json",
              determined=True,
              spidermonkey=False,
              listed=True,
-             expectation=PACKAGE_ANY):
+             expectation=PACKAGE_ANY,
+             for_appversions=None):
     """Perform validation in one easy step!
 
     format : The format to output the results in
@@ -34,7 +35,8 @@ def validate(path, format="json",
     if spidermonkey != False:
         bundle.save_resource("SPIDERMONKEY", spidermonkey)
 
-    validator.submain.prepare_package(bundle, path, expectation)
+    validator.submain.prepare_package(bundle, path, expectation,
+                                      for_appversions=for_appversions)
 
     # Write the results to the pipe
     formats = {"json": lambda b: b.render_json()}
