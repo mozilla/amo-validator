@@ -166,7 +166,6 @@ class MockDecorator:
 
             assert tier <= self.fail_tier or self.determined
 
-
         self.last_tier = tier
 
         for x in range(1,10): # Ten times because we care

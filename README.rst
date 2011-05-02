@@ -38,11 +38,13 @@ Spidermonkey
 A working copy of Spidermonkey (debug or non-debug is fine) is a required. The
 version installed must include support for the Parser API. Downloading and
 installing the latest copy of Tracemonkey from http://hg.mozilla.org/ will
-include this API.
+include this API.::
 
-Documentation on getting the latest Spidermonkey source:
-
-https://developer.mozilla.org/En/SpiderMonkey/Getting_SpiderMonkey_source_code#Getting_the_latest_SpiderMonkey_source_code
+    hg clone http://hg.mozilla.org/tracemonkey/
+    cd tracemonkey/js/src
+    autoconf2.13
+    ./configure
+    make
 
 Once Spidermonkey is installed, the path to the JavaScript shell must be
 specified in the /validator/constants.py file in the

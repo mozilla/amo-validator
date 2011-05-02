@@ -8,9 +8,19 @@ def test_settimeout_fail():
     """).failed()
 
     assert _do_test_raw("""
+    window["set" + "Timeout"]("abc.def()", 1000);
+    """).failed()
+
+    assert _do_test_raw("""
     var x = "foo.bar()";
     setTimeout(x, 1000);
     """).failed()
+
+    assert _do_test_raw("""
+    var x = "foo.bar()";
+    window["set" + "Timeout"](x, 1000);
+    """).failed()
+
 
 def test_settimeout_pass():
     "Test cases in which setTimeout should be allowed"
@@ -20,6 +30,14 @@ def test_settimeout_pass():
     """).failed()
 
     assert not _do_test_raw("""
+    window["set" + "Timeout"](function(){foo.bar();}, 1000);
+    """).failed()
+
+    assert not _do_test_raw("""
     setTimeout();
+    """).failed()
+
+    assert not _do_test_raw("""
+    window["set" + "Timeout"]();
     """).failed()
 

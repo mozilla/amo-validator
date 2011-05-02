@@ -2,7 +2,7 @@ from js_helper import _do_test_raw
 
 def test_createElement():
     "Tests that createElement and createElementNS throw errors."
-    
+
     err = _do_test_raw("""
     var x = foo;
     foo.bar.whateverElement("script");
@@ -14,7 +14,7 @@ def test_createElement():
     foo.bar.createElement("scr"+"ipt");
     """)
     assert err.message_count == 1
-    
+
     # Part of bug 636835
     err = _do_test_raw("""
     var x = foo;
@@ -66,4 +66,11 @@ def test_synchronous_xhr():
     x.send(null);
     """)
     assert err.message_count
+
+def test_bug652577_loadOverlay():
+    """Make sure that loadOverlay is dangerous."""
+
+    assert _do_test_raw("""
+    document.loadOverlay();
+    """).failed()
 

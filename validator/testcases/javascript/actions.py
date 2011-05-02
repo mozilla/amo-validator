@@ -24,15 +24,20 @@ def trace_member(traverser, node):
             del base.value["xpcom_wildcard"]
             return base
 
+        identifier = None
         if node["property"]["type"] == "Identifier":
             # y = token identifier
-            test_identifier(traverser, node["property"]["name"])
-            return base.get(traverser=traverser,
-                            name=node["property"]["name"])
+            identifier = unicode(node["property"]["name"])
+            traverser._debug("MEMBER_EXP>>IDENT : %s" % identifier)
         else:
             # y = literal value
-            property = traverser._traverse_node(node["property"])
-            return property.get_literal_value()
+            identifier = unicode(
+                traverser._traverse_node(node["property"]).get_literal_value())
+            traverser._debug("MEMBER_EXP>>LITERAL : %s" % identifier)
+
+        test_identifier(traverser, identifier)
+        return base.get(traverser=traverser,
+                        name=identifier)
 
     elif node["type"] == "Identifier":
         traverser._debug("MEMBER_EXP>>ROOT:IDENTIFIER")

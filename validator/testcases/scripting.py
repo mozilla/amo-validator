@@ -93,7 +93,9 @@ def _regex_tests(err, data, filename):
               "launch\\(\\)":
                   "Use of 'launch()' is disallowed because of restrictions on "
                   "nsILocalFile. If the code does not use nsILocalFile, "
-                  "consider a different function name."}
+                  "consider a different function name.",
+              "capability\\.policy":
+                  "The preference 'capability.policy' is potentially unsafe."}
 
     for regex, message in errors.items():
         reg = re.compile(regex)
