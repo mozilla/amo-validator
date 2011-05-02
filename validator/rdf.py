@@ -8,11 +8,6 @@ class RDFParser(object):
     parses an RDF file."""
 
     def __init__(self, data, namespace=None):
-        """Open a file, attempt to parse it.
-
-        If we can parse the file, return the structure;
-        otherwise None"""
-
         # Load up and parse the file in XML format.
         graph = rdflib.Graph()
 
@@ -30,9 +25,8 @@ class RDFParser(object):
         else:
             self.rdf = graph
 
-        if namespace is None:
-            self.namespace = "http://www.mozilla.org/2004/em-rdf"
-        else:
+        self.namespace = "http://www.mozilla.org/2004/em-rdf"
+        if namespace is not None:
             self.namespace = namespace
 
         self.manifest = u"urn:mozilla:install-manifest"
