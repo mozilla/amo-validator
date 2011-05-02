@@ -1,8 +1,8 @@
 import os
 import re
 
-import validator.typedetection as typedetection
-from validator.typedetection import detect_opensearch
+from validator.typedetection import detect_type
+from validator.opensearch import detect_opensearch
 from validator.chromemanifest import ChromeManifest
 from validator.rdf import RDFParser
 from validator.xpi import XPIManager
@@ -72,33 +72,14 @@ def test_search(err, package, expectation=0):
                            "Unexpected file extension.")
 
     # Is this a search provider?
-    opensearch_results = detect_opensearch(package,
-                                           listed=err.get_resource("listed"))
+    detect_opensearch(err, package, listed=err.get_resource("listed"))
 
-    if opensearch_results["failure"]:
-        # Failed OpenSearch validation
-        error_mesg = "OpenSearch: %s" % opensearch_results["error"]
-        err.error(("main",
-                   "test_search",
-                   "general_failure"),
-                  error_mesg)
-
-        # We want this to flow back into the rest of the program if
-        # the error indicates that we're not sure whether it's an
-        # OpenSearch document or not.
-
-        if "decided" not in opensearch_results or \
-           opensearch_results["decided"]:
-            return
-
-    elif expected_search_provider:
+    if expected_search_provider and not err.failed():
         err.set_type(PACKAGE_SEARCHPROV)
         err.notice(("main",
                     "test_search",
                     "confirmed"),
                    "OpenSearch provider confirmed.")
-
-    return
 
 
 def test_package(err, file_, name, expectation=PACKAGE_ANY,
@@ -170,9 +151,7 @@ def _load_install_rdf(err, package, expectation):
         err.save_resource("install_rdf", install_rdf, pushable=True)
 
     # Load up the results of the type detection
-    results = typedetection.detect_type(err,
-                                        install_rdf,
-                                        package)
+    results = detect_type(err, install_rdf, package)
 
     if results is None:
         return err.error(("main",
