@@ -140,7 +140,7 @@ def test_invalid_markup():
 
 
 def test_self_closing_scripts():
-    """Tests that self-closing script tags are not deletrious to parsing"""
+    """Tests that self-closing script tags are not deletrious to parsing."""
 
     _do_test_raw("""
     <foo>
@@ -151,4 +151,14 @@ def test_self_closing_scripts():
     </foo>
     """, "foo.js")
 
+def test_dom_mutation():
+    """Test that DOM mutation events are warned against."""
+
+    _do_test_raw("""
+    <foo><bar onzap="" /></foo>
+    """, "foo.js")
+
+    _do_test_raw("""
+    <foo><bar ondomattrmodified="" /></foo>
+    """, "foo.js", should_fail=True)
 
