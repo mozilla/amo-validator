@@ -113,12 +113,14 @@ GLOBAL_ENTITIES = {
     u"document":
         {"value": {u"createElement":
                        {"dangerous":
-                            lambda a, t: t(a[0]).get_literal_value()
+                            lambda a, t: unicode(t(a[0]).get_literal_value())
                                                 .lower() == "script"},
                    u"createElementNS":
                        {"dangerous":
-                            lambda a, t: t(a[0]).get_literal_value()
-                                                .lower() == "script"}}},
+                            lambda a, t: unicode(t(a[0]).get_literal_value())
+                                                .lower() == "script"},
+                   u"loadOverlay":
+                       {"dangerous": True}}},
 
     # The nefariuos timeout brothers!
     u"setTimeout": {"dangerous": actions._call_settimeout},
