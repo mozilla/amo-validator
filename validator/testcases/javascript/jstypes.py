@@ -148,6 +148,9 @@ class JSWrapper(object):
         elif isinstance(value, types.LambdaType):
             value = value()
 
+        if not isinstance(value, dict):
+            self.is_global = False
+
         self.value = value
         return self
 
