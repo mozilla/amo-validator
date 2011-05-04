@@ -110,17 +110,17 @@ def test_targetedapplications(err, package_contents=None,
                 if min_version is not None and \
                    max_version is not None and \
                    min_ver_pos > max_ver_pos:
-                    err.warning(("testcases_targetapplication",
-                                 "test_targetedapplications",
-                                 "invalid_version_order"),
-                                "Invalid min/max versions",
-                                ["The version numbers provided for the "
-                                 "application in question are not in the "
-                                 "correct order. The maximum version must be "
-                                 "greater than the minimum version.",
-                                 '"%s" is not less than "%s".' % (min_version,
-                                                                  max_version)],
-                                "install.rdf")
+                    err.error(("testcases_targetapplication",
+                               "test_targetedapplications",
+                               "invalid_version_order"),
+                              "Invalid min/max versions",
+                              ["The version numbers provided for the "
+                               "application in question are not in the "
+                               "correct order. The maximum version must be "
+                               "greater than the minimum version.",
+                               '"%s" is not less than "%s".' % (min_version,
+                                                                max_version)],
+                              "install.rdf")
                     continue
 
                 all_supported_versions[found_guid] = \
