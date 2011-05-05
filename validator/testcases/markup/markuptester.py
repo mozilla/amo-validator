@@ -1,4 +1,6 @@
 import re
+import sys
+import types
 try:
     from HTMLParser import HTMLParser
 except ImportError:  # pragma: no cover
@@ -103,10 +105,18 @@ class MarkupParser(HTMLParser):
     def _feed_parser(self, line):
         "Feeds data into the parser"
 
+        line = unicodehelper.decode(line)
+
         try:
             self.feed(line + "\n")
-        except UnicodeDecodeError:
-            raise
+        except UnicodeDecodeError, exc_instance:
+            exc_class, val, traceback = sys.exc_info()
+            try:
+                line = line.decode("ascii", "ignore")
+                self.feed(line + "\n")
+            except:
+                raise exc_instance, None, traceback
+
         except Exception as inst:
             if DEBUG:  # pragma: no cover
                 print self.xml_state, inst
@@ -222,7 +232,7 @@ class MarkupParser(HTMLParser):
             # We say it's true by default to catch elements that are
             # type="chrome" without an src="" attribute.
             remote_src = True
-            if isinstance(src, str):
+            if isinstance(src, types.StringTypes):
                 remote_src = not self._is_url_local(src)
 
             if type_ and \
