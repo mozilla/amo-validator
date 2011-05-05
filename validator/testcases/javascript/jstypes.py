@@ -179,7 +179,6 @@ class JSWrapper(object):
         value = self.value
         dirty = value is None
         if self.is_global:
-            print "Getting %s" % name
             if "value" not in value:
                 output = JSWrapper(traverser=traverser)
                 output.value = {}
@@ -199,10 +198,8 @@ class JSWrapper(object):
                 else:
                     return node
 
-            print "Prelambdas:", value["value"]
             value_val = value["value"]
             value_val = _evaluate_lambdas(value_val)
-            print "Postlambdas:", value_val
 
             if isinstance(value_val, dict):
                 if name in value_val:
