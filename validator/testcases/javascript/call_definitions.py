@@ -11,7 +11,7 @@ from jstypes import *
 #  arguments : A list of argument nodes; untraversed
 #  traverser : The current traverser object
 
-def xpcom_constructor(method, extend=False, mutate=False):
+def xpcom_constructor(method, extend=False, mutate=False, pretraversed=False):
     """Returns a function which wraps an XPCOM class instantiation function."""
 
     def definition(wrapper, arguments, traverser):
@@ -22,7 +22,8 @@ def xpcom_constructor(method, extend=False, mutate=False):
 
         traverser._debug("(XPCOM Encountered)")
 
-        arguments = [traverser._traverse_node(x) for x in arguments]
+        if not pretraversed:
+            arguments = [traverser._traverse_node(x) for x in arguments]
         argz = arguments[0]
 
         if not argz.is_global or "xpcom_map" not in argz.value:

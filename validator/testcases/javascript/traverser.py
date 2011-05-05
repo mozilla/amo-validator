@@ -19,6 +19,7 @@ class MockBundler:
         self.tier = 4
         self.ids = []
         self.detected_type = 1
+        self.resources = {}
 
     def failed(self):
         "Returns whether messages have been reported"
@@ -28,10 +29,13 @@ class MockBundler:
         "Sets the tier; compatibility with ErrorBundle"
         self.tier = tier
 
-    def get_resource(self, name):
-        "Represents a resource store"
+    def save_resource(self, name, data):
+        """Saves a blob of data to be accessed later."""
+        self.resources[name] = data
 
-        return False
+    def get_resource(self, name):
+        """Retrieves a saved blob of data."""
+        return self.resources[name] if name in self.resources else False
 
     def error(self, err_id, error, description, filename="",
               line=1, column=0, context=None):

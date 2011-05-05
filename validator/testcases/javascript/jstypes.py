@@ -146,7 +146,10 @@ class JSWrapper(object):
             # const does not carry over on reassignment
             return self
         elif isinstance(value, types.LambdaType):
-            value = value()
+            value = value(t=traverser)
+
+        if not isinstance(value, dict):
+            self.is_global = False
 
         self.value = value
         return self
@@ -189,11 +192,11 @@ class JSWrapper(object):
                 output.is_global = True
                 return output
 
-            _evaluate_lambdas = lambda node: _evaluate_lambdas(node()) if \
-                                             isinstance(
-                                                node,
-                                                types.LambdaType) else \
-                                             node
+            def _evaluate_lambdas(node):
+                if isinstance(node, types.LambdaType):
+                    return _evaluate_lambdas(node(t=traverser))
+                else:
+                    return node
 
             value_val = value["value"]
             value_val = _evaluate_lambdas(value_val)

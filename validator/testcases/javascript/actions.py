@@ -17,6 +17,16 @@ def trace_member(traverser, node):
         if not isinstance(base, JSWrapper):
             base = JSWrapper(base, traverser=traverser)
 
+        if (base.is_global and
+            "value" in base.value and
+            isinstance(base.value["value"], types.LambdaType)):
+
+            traverser._debug("MEMBER_EXP>>EXPANDING GLOBAL")
+
+            l_func = base.value["value"]
+            l_result = l_func(t=traverser)
+            base = traverser._build_global("--", l_result)
+
         # If we've got an XPCOM wildcard, just return the base, minus the WC
         if base.is_global and \
                 "xpcom_wildcard" in base.value:
@@ -295,10 +305,7 @@ def _call_expression(traverser, node):
         dangerous = member.value["dangerous"]
 
         t = traverser._traverse_node
-        if 'e' in dangerous.func_code.co_varnames:
-            result = dangerous(a=args, t=t, e=traverser.err)
-        else:
-            result = dangerous(a=args, t=t)
+        result = dangerous(a=args, t=t, e=traverser.err)
         if result:
             # Generate a string representation of the params
             params = u", ".join([unicode(t(p).get_literal_value()) for
@@ -337,7 +344,7 @@ def _call_expression(traverser, node):
     return True
 
 
-def _call_settimeout(a, t):
+def _call_settimeout(a, t, e):
     """Handler for setTimeout and setInterval. Should determine whether a[0]
     is a lambda function or a string. Strings are banned, lambda functions are
     ok. Since we can't do reliable type testing on other variables, we flag

@@ -1,5 +1,6 @@
 import actions
-import call_definitions
+from call_definitions import xpcom_constructor as xpcom_const
+from jstypes import JSWrapper
 
 # A list of identifiers and member values that may not be used.
 BANNED_IDENTIFIERS = ("newThread", )
@@ -107,20 +108,59 @@ INTERFACES = {
                         "at shutdown"}}},
     }
 
+
+def build_quick_xpcom(method, interface, traverser):
+    """A shortcut to quickly build XPCOM objects on the fly."""
+    constructor = xpcom_const(method, pretraversed=True)
+    interface_obj = traverser._build_global(
+                        name=method,
+                        entity={"xpcom_map": lambda: INTERFACES[interface]})
+    object = constructor(None, [interface_obj], traverser)
+    if isinstance(object, JSWrapper):
+        object = object.value
+    return object
+
+
 # GLOBAL_ENTITIES is also representative of the `window` object.
 GLOBAL_ENTITIES = {
-    u"window": {"value": lambda: GLOBAL_ENTITIES},
+    u"window": {"value": lambda t: {"value": GLOBAL_ENTITIES}},
+    u"Cc": {"value":
+                lambda t: GLOBAL_ENTITIES["Components"]["value"]["classes"]},
+    u"Ci": {"value":
+                lambda t: GLOBAL_ENTITIES["Components"]["value"]["interfaces"]},
+
+    u"Cu": {"value":
+                lambda t: GLOBAL_ENTITIES["Components"]["value"]["utils"]},
+    u"Services":
+        {"value": {u"scriptloader": {"dangerous": True},
+                   u"wm":
+                       {"value":
+                            lambda t: build_quick_xpcom("getService",
+                                                        "nsIWindowMediator",
+                                                        t)},
+                   u"ww":
+                       {"value":
+                            lambda t: build_quick_xpcom("getService",
+                                                        "nsIWindowWatcher",
+                                                        t)}}},
+
     u"document":
         {"value": {u"createElement":
                        {"dangerous":
-                            lambda a, t: unicode(t(a[0]).get_literal_value())
+                            lambda a, t, e: unicode(t(a[0]).get_literal_value())
                                                 .lower() == "script"},
                    u"createElementNS":
                        {"dangerous":
-                            lambda a, t: unicode(t(a[0]).get_literal_value())
+                            lambda a, t, e: unicode(t(a[0]).get_literal_value())
                                                 .lower() == "script"},
                    u"loadOverlay":
-                       {"dangerous": True}}},
+                       {"dangerous":
+                            lambda a, t, e:
+                                not a or
+                                not unicode(t(a[0]).get_literal_value())
+                                        .lower()
+                                        .startswith(("chrome:",
+                                                     "resource:"))}}},
 
     # The nefariuos timeout brothers!
     u"setTimeout": {"dangerous": actions._call_settimeout},
@@ -141,7 +181,7 @@ GLOBAL_ENTITIES = {
     u"Function": {"dangerous": True},
     u"Object": {"value": {u"prototype": {"readonly": True},
                           u"constructor":  # Just an experiment for now
-                              {"value": lambda: GLOBAL_ENTITIES["Function"]}}},
+                              {"value": lambda t: GLOBAL_ENTITIES["Function"]}}},
     u"String": {"value": {u"prototype": {"readonly": True}}},
     u"Array": {"value": {u"prototype": {"readonly": True}}},
     u"Number": {"value": {u"prototype": {"readonly": True}}},
@@ -168,15 +208,15 @@ GLOBAL_ENTITIES = {
                   {"xpcom_wildcard": True,
                    "value":
                        {u"createInstance":
-                           {"return": call_definitions.xpcom_constructor("createInstance")},
+                           {"return": xpcom_const("createInstance")},
                         u"getService":
-                           {"return": call_definitions.xpcom_constructor("getService")}}},
+                           {"return": xpcom_const("getService")}}},
               "utils":
                   {"value": {u"evalInSandbox":
                                  {"dangerous": True},
                              u"import":
                                  {"dangerous":
-                                      lambda a, t:
+                                      lambda a, t, e:
                                         a and \
                                         unicode(t(a[0]).get_literal_value())
                                             .count("ctypes.jsm")}}},
@@ -233,7 +273,7 @@ GLOBAL_ENTITIES = {
              {u"open": {"dangerous":
                            # Ban syncrhonous XHR by making sure the third arg
                            # is absent and false.
-                           lambda a, t:
+                           lambda a, t, e:
                                a and \
                                (len(a) < 3 or
                                 not t(a[2]).get_literal_value()) and \
