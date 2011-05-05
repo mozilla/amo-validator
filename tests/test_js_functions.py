@@ -74,3 +74,19 @@ def test_bug652577_loadOverlay():
     document.loadOverlay();
     """).failed()
 
+    assert _do_test_raw("""
+    document.loadOverlay("foobar");
+    """).failed()
+
+    assert not _do_test_raw("""
+    document.loadOverlay("chrome:foo/bar/");
+    """).failed()
+
+    assert not _do_test_raw("""
+    document.loadOverlay("chr" + "ome:foo/bar/");
+    """).failed()
+
+    assert not _do_test_raw("""
+    document.loadOverlay("resource:foo/bar/");
+    """).failed()
+

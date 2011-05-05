@@ -154,7 +154,13 @@ GLOBAL_ENTITIES = {
                             lambda a, t, e: unicode(t(a[0]).get_literal_value())
                                                 .lower() == "script"},
                    u"loadOverlay":
-                       {"dangerous": True}}},
+                       {"dangerous":
+                            lambda a, t, e:
+                                not a or
+                                not unicode(t(a[0]).get_literal_value())
+                                        .lower()
+                                        .startswith(("chrome:",
+                                                     "resource:"))}}},
 
     # The nefariuos timeout brothers!
     u"setTimeout": {"dangerous": actions._call_settimeout},
