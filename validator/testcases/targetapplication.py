@@ -44,6 +44,7 @@ def test_targetedapplications(err, package_contents=None,
                                     APPROVED_APPLICATIONS.items()]:
                 if guid == ta_guid:
                     found_guid = key
+                    break
 
             if found_guid:
                 # Remember if the addon supports Firefox.
@@ -114,8 +115,8 @@ def test_targetedapplications(err, package_contents=None,
                                 "install.rdf")
                     continue
 
-                all_supported_versions[found_guid] = \
-                    app_versions[min_ver_pos:max_ver_pos]
+                all_supported_versions[guid] = \
+                    app_versions[min_ver_pos:max_ver_pos + 1]
 
                 # Test whether it's a FF4 addon
 
@@ -144,7 +145,7 @@ def test_targetedapplications(err, package_contents=None,
     # This finds the UUID of the supported applications and puts it in
     # a fun and easy-to-use format for use in other tests.
     supports = []
-    for target in used_targets:
+    for target in no_duplicate_targets:
         key = str(target)
         if key in APPLICATIONS:
             supports.append(APPLICATIONS[key])
