@@ -1,6 +1,7 @@
 import json
 from validator.validate import validate as validate
 from validator.errorbundler import ErrorBundle
+import validator.constants
 import validator.testcases.targetapplication as targetapp
 
 def test_validate():
@@ -38,5 +39,6 @@ def test_app_versions():
     "Tests that the validate function properly loads app_versions.json"
     validate(path="tests/resources/junk.xpi",
              approved_applications="tests/resources/test_app_versions.json")
-    assert targetapp.APPROVED_APPLICATIONS["1"]["name"] == "Foo App" 
+    print validator.constants.APPROVED_APPLICATIONS
+    assert validator.constants.APPROVED_APPLICATIONS["1"]["name"] == "Foo App"
 
