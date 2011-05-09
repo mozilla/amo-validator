@@ -40,7 +40,8 @@ class ErrorBundle(object):
 
     def error(self, err_id, error,
               description='', filename='', line=None, column=None,
-              context=None, tier=None, for_appversions=None):
+              context=None, tier=None, for_appversions=None,
+              compatibility_type=None):
         "Stores an error message for the validation process"
         self._save_message(self.errors,
                            "errors",
@@ -51,13 +52,15 @@ class ErrorBundle(object):
                             "line": line,
                             "column": column,
                             "tier": tier,
-                            "for_appversions": for_appversions},
+                            "for_appversions": for_appversions,
+                            "compatibility_type": compatibility_type},
                            context=context)
         return self
 
     def warning(self, err_id, warning,
                 description='', filename='', line=None, column=None,
-                context=None, tier=None, for_appversions=None):
+                context=None, tier=None, for_appversions=None,
+                compatibility_type=None):
         "Stores a warning message for the validation process"
         self._save_message(self.warnings,
                            "warnings",
@@ -68,13 +71,15 @@ class ErrorBundle(object):
                             "line": line,
                             "column": column,
                             "tier": tier,
-                            "for_appversions": for_appversions},
+                            "for_appversions": for_appversions,
+                            "compatibility_type": compatibility_type},
                            context=context)
         return self
 
     def notice(self, err_id, notice,
                description="", filename="", line=None, column=None,
-               context=None, tier=None, for_appversions=None):
+               context=None, tier=None, for_appversions=None,
+               compatibility_type=None):
         "Stores an informational message about the validation"
         self._save_message(self.notices,
                            "notices",
@@ -85,7 +90,8 @@ class ErrorBundle(object):
                             "line": line,
                             "column": column,
                             "tier": tier,
-                            "for_appversions": for_appversions},
+                            "for_appversions": for_appversions,
+                            "compatibility_type": compatibility_type},
                            context=context)
         return self
 

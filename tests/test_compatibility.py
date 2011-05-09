@@ -14,6 +14,7 @@ def test_compat_test():
     compatibility.firefox_5_test(err, {}, None)
     print err.notices
     assert err.notices
+    assert err.notices[0]["compatibility_type"] == "notice"
 
 
 def test_versions_after():
@@ -51,4 +52,5 @@ def test_navigator_language():
 
     compatibility.navigator_language(err, {}, None)
     assert err.failed()
+    assert err.warnings[0]["compatibility_type"] == "error"
 
