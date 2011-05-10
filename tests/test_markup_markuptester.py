@@ -43,6 +43,12 @@ def test_local_url_detector():
     assert not tester("http://foo.bar/")
     assert not tester("https://abc.def/")
 
+    assert tester(u"chrome://xyz/content/abc")
+    assert tester(u"chrome://whatever/")
+    assert tester(u"local.xul")
+    assert not tester(u"http://foo.bar/")
+    assert not tester(u"https://abc.def/")
+
 
 def test_html_file():
     "Tests a package with a valid HTML file."
@@ -126,6 +132,7 @@ def test_lp_remote():
              True,
              PACKAGE_LANGPACK)
 
+
 def test_invalid_markup():
     "Tests an markup file that is simply broken."
 
@@ -139,6 +146,11 @@ def test_invalid_markup():
     assert result.notices
 
 
+def test_bad_encoding():
+    """Test that bad encodings don't cause the parser to fail."""
+    _do_test("tests/resources/markup/encoding.txt")
+
+
 def test_self_closing_scripts():
     """Tests that self-closing script tags are not deletrious to parsing."""
 
@@ -150,6 +162,7 @@ def test_self_closing_scripts():
         <list_item />
     </foo>
     """, "foo.js")
+
 
 def test_dom_mutation():
     """Test that DOM mutation events are warned against."""
