@@ -2,6 +2,7 @@ import json
 import os
 from StringIO import StringIO
 
+import validator.constants
 import validator.loader
 import validator.submain
 import validator.testcases.targetapplication
@@ -25,11 +26,14 @@ def validate(path, format="json",
     spidermonkey : Path to the local spidermonkey installation (Default: False)
     listed : True if the add-on is destined for AMO, false if not
     expectation : The type of package that should be expected
+    for_appversions : A dict of app GUIDs referencing lists of versions.
+                      Determines which version-dependant tests should be run.
     """
 
     # Load up the target applications
     apps = json.load(open(approved_applications))
-    validator.testcases.targetapplication.APPROVED_APPLICATIONS = apps
+    validator.constants.APPROVED_APPLICATIONS.clear()
+    validator.constants.APPROVED_APPLICATIONS.update(apps)
 
     bundle = ErrorBundle(listed=listed, determined=determined)
     if spidermonkey != False:
