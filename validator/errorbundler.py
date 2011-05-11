@@ -21,6 +21,10 @@ class ErrorBundle(object):
         self.notices = []
         self.message_tree = {}
 
+        self.compat_summary = {"errors": 0,
+                               "warnings": 0,
+                               "notices": 0}
+
         self.ending_tier = 1
         self.tier = 1
 
@@ -124,10 +128,15 @@ class ErrorBundle(object):
 
         stack.append(message)
 
-        # Mark the tier that the error occurred at
+        # Mark the tier that the error occurred at.
         if message["tier"] is None:
             message["tier"] = self.tier
 
+        # Build out the compatibility summary if possible.
+        if message["compatibility_type"]:
+            self.compat_summary["%ss" % message["compatibility_type"]] += 1
+
+        # Build out the message tree entry.
         if message["id"]:
             tree = self.message_tree
             last_id = None
@@ -263,6 +272,7 @@ class ErrorBundle(object):
                   "warnings": len(self.warnings),
                   "notices": len(self.notices),
                   "message_tree": self.message_tree,
+                  "compatibility_summary": self.compat_summary,
                   "metadata": self.metadata}
 
         messages = output["messages"]
@@ -342,7 +352,7 @@ class ErrorBundle(object):
         if isinstance(data, (str, unicode)):
             return data
         elif isinstance(data, (list, tuple)):
-            return "\n".join([self._flatten_list(x) for x in data])
+            return "\n".join(self._flatten_list(x) for x in data)
 
     def _print_message(self, prefix, message, verbose=True):
         "Prints a message and takes care of all sorts of nasty code"
