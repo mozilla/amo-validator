@@ -171,3 +171,15 @@ def _regex_tests(err, data, filename):
                 line=line,
                 context=c)
 
+    # Compatibility regexes; bug 654300
+
+    navigator_language = re.compile("navigator\\.language").search(data)
+    if navigator_language:
+        line = c.get_line(navigator_language.start())
+
+        compat_references = err.get_resource("compat_references") or {}
+        if "navigator_language" not in compat_references:
+            compat_references["navigator_language"] = []
+        compat_references["navigator_language"].append((filename, line, c))
+        err.save_resource("compat_references", compat_references)
+

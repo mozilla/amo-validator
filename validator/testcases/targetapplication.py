@@ -1,16 +1,6 @@
+import validator.constants
 from validator import decorator
-from validator.constants import PACKAGE_DICTIONARY, FF4_MIN
-
-APPLICATIONS = {
-    "{ec8030f7-c20a-464f-9b0e-13a3a9e97384}": "firefox",
-    "{86c18b42-e466-45a9-ae7a-9b95ba6f5640}": "mozilla",
-    "{3550f703-e582-4d05-9a08-453d09bdfdc6}": "thunderbird",
-    "{718e30fb-e89b-41dd-9da7-e25a45638b28}": "sunbird",
-    "{92650c4d-4b8e-4d2a-b7eb-24ecf4f6b63a}": "seamonkey",
-    "{a23983c0-fd0e-11dc-95ff-0800200c9a66}": "fennec"
-}
-
-APPROVED_APPLICATIONS = {}
+from validator.constants import PACKAGE_DICTIONARY, FF4_MIN, APPLICATIONS
 
 APP_VERSIONS_URL = "Please check the list of valid versions at: "\
         "https://addons.mozilla.org/en-US/firefox/pages/appversions/"
@@ -23,10 +13,11 @@ def test_targetedapplications(err, package_contents=None,
     install.rdf file are legit and that any associated files (I'm
     looking at you, SeaMonkey) are where they need to be."""
 
-    if not err.get_resource("has_install_rdf"):
+    install = err.get_resource("install_rdf")
+    if not install:
         return
 
-    install = err.get_resource("install_rdf")
+    APPROVED_APPLICATIONS = validator.constants.APPROVED_APPLICATIONS
 
     # Search through the install.rdf document for the SeaMonkey
     # GUID string.
@@ -53,6 +44,7 @@ def test_targetedapplications(err, package_contents=None,
                                     APPROVED_APPLICATIONS.items()]:
                 if guid == ta_guid:
                     found_guid = key
+                    break
 
             if found_guid:
                 # Remember if the addon supports Firefox.
@@ -123,8 +115,8 @@ def test_targetedapplications(err, package_contents=None,
                               "install.rdf")
                     continue
 
-                all_supported_versions[found_guid] = \
-                    app_versions[min_ver_pos:max_ver_pos]
+                all_supported_versions[guid] = \
+                    app_versions[min_ver_pos:max_ver_pos + 1]
 
                 # Test whether it's a FF4 addon
 
@@ -153,7 +145,7 @@ def test_targetedapplications(err, package_contents=None,
     # This finds the UUID of the supported applications and puts it in
     # a fun and easy-to-use format for use in other tests.
     supports = []
-    for target in used_targets:
+    for target in no_duplicate_targets:
         key = str(target)
         if key in APPLICATIONS:
             supports.append(APPLICATIONS[key])

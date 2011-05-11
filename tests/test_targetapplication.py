@@ -7,8 +7,10 @@ from validator.errorbundler import ErrorBundle
 from validator.rdf import RDFParser
 from helper import _do_test
 
+
 targetapp.APPROVED_APPLICATIONS = \
         json.load(open("validator/app_versions.json"))
+
 
 def _do_test_raw(rdf, listed=True):
     err = ErrorBundle(listed=listed)
@@ -20,20 +22,27 @@ def _do_test_raw(rdf, listed=True):
     print err.print_summary()
     return err
 
-def test_valid_targetapps():
-    """Tests that the install.rdf contains only valid entries for
-    target applications."""
 
-    print targetapp.APPROVED_APPLICATIONS
+def test_valid_targetapps():
+    """
+    Tests that the install.rdf contains only valid entries for target
+    applications.
+    """
 
     results = _do_test("tests/resources/targetapplication/pass.xpi",
                        targetapp.test_targetedapplications,
                        False,
                        True)
-    print results.get_resource("supports")
     supports = results.get_resource("supports")
+    print supports
     assert "firefox" in supports and "mozilla" in supports
     assert len(supports) == 2
+
+    supported_versions = results.get_resource("supported_versions")
+    print supported_versions
+    assert (supported_versions['{ec8030f7-c20a-464f-9b0e-13a3a9e97384}'] ==
+                ['3.6', '3.6.4', '3.6.*'])
+
 
 def test_bad_min_max():
     """Tests that the lower/upper-bound version number for a
@@ -48,6 +57,7 @@ def test_bad_min_max():
              targetapp.test_targetedapplications,
              True,
              True)
+
 
 def test_bad_order():
     """Tests that the min and max versions are ordered correctly such
