@@ -1,0 +1,3 @@
+[submodule "jetpack/addon-sdk"]
+	path = jetpack/addon-sdk
+	url = git://github.com/mozilla/addon-sdk.git

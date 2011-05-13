@@ -32,6 +32,17 @@ You can install everything you need for running and testing with ::
 
 	pip install -r requirements.txt
 
+
+Submodules
+==========
+
+The validator may require some submodules to work. Make sure to run ::
+
+    git clone --recursive git://github.com/mozilla/amo-validator.git
+
+so that you get all of the goodies inside.
+
+
 Spidermonkey
 ============
 
@@ -374,4 +385,52 @@ This file should overwrite the standard nose coverage plugin at the appropriate 
 
 	~/.virtualenvs/[virtual environment]/lib/pythonX.X/site-packages/nose/plugins/cover.py
 	/usr/lib/pythonX.X/site-packages/nose/plugins/cover.py
+
+
+----------
+ Updating
+----------
+
+Some regular maintenance needs to be performed on the validator in order to
+make sure that the results are accurate.
+
+App Versions
+============
+
+A list of Mozilla `<em:targetApplication>` values is stored in the
+`validator/app_versions.json` file. This must be updated to include the latest
+application versions. This information can be found on AMO:
+
+https://addons.mozilla.org/en-US/firefox/pages/appversions/
+
+
+JS Libraries
+============
+
+A list of JS library hashes is kept to allow for whitelisting. This must be
+regenerated with each new library version. To update: ::
+
+    cd extras
+    mkdir jslibs
+    python jslibfetcher.py
+    python build_whitelist.py
+    # We keep a special hash for testing
+    echo "e96461c6c19608f528b4a3c33a032b697b999b62" >> whitelist_hashes.txt
+    mv whitelist_hashes.txt ../validator/testcases/hashes.txt
+
+To add new libraries to the mix, edit `extras/jslibfetcher.py` and add the
+version number to the appropriate tuple.
+
+
+Jetpack
+=======
+
+In order to maintain Jetpack compatibility, the whitelist hashes need to be
+regenerated with each successive Jetpack version. To rebuild the hash library,
+simply run: ::
+
+    cd jetpack
+    ./generate_jp_whitelist.sh
+
+That's it!
 
