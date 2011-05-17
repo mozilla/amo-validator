@@ -35,6 +35,11 @@ def test_validate():
     assert output.determined
     assert not output.get_resource("listed")
 
+    output = validate(path="tests/resources/packagelayout/theme.jar",
+                      overrides="foo",
+                      format=None)
+    assert output.overrides == "foo"
+
 def test_app_versions():
     "Tests that the validate function properly loads app_versions.json"
     validate(path="tests/resources/junk.xpi",

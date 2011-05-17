@@ -17,8 +17,10 @@ def validate(path, format="json",
              spidermonkey=False,
              listed=True,
              expectation=PACKAGE_ANY,
-             for_appversions=None):
-    """Perform validation in one easy step!
+             for_appversions=None,
+             overrides=None):
+    """
+    Perform validation in one easy step!
 
     format : The format to output the results in
     approved_applications : Path to the list of approved application versions
@@ -36,6 +38,8 @@ def validate(path, format="json",
     validator.constants.APPROVED_APPLICATIONS.update(apps)
 
     bundle = ErrorBundle(listed=listed, determined=determined)
+    if overrides:
+        bundle.overrides = overrides
     if spidermonkey != False:
         bundle.save_resource("SPIDERMONKEY", spidermonkey)
 
