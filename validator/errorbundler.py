@@ -36,6 +36,7 @@ class ErrorBundle(object):
 
         self.detected_type = 0
         self.resources = {}
+        self.overrides = None
         self.pushable_resources = {}
         self.unfinished = False
 

@@ -33,7 +33,6 @@ def test_targetedapplications(err, package_contents=None,
     for target_app in install.get_objects(None, ta_predicate):
 
         # Get the GUID from the target application
-
         for ta_guid in install.get_objects(target_app,
                                            ta_guid_predicate):
 
@@ -51,9 +50,23 @@ def test_targetedapplications(err, package_contents=None,
                 is_firefox = APPLICATIONS[ta_guid] == "firefox"
 
                 # Grab the minimum and maximum version numbers.
-                min_version = install.get_object(target_app, ta_min_ver)
-                max_version = install.get_object(target_app, ta_max_ver)
+                if (err.overrides and
+                    "targetapp_minVersion" in err.overrides and
+                    ta_guid in err.overrides["targetapp_minVersion"]):
+                    min_version = \
+                        err.overrides["targetapp_minVersion"][ta_guid]
+                else:
+                    min_version = install.get_object(target_app, ta_min_ver)
 
+                if (err.overrides and
+                    "targetapp_maxVersion" in err.overrides and
+                    ta_guid in err.overrides["targetapp_maxVersion"]):
+                    max_version = \
+                        err.overrides["targetapp_maxVersion"][ta_guid]
+                else:
+                    max_version = install.get_object(target_app, ta_max_ver)
+
+                # Get the approved app versions for this application.
                 app_versions = APPROVED_APPLICATIONS[found_guid]["versions"]
 
                 # Ensure that the version numbers are in the app's

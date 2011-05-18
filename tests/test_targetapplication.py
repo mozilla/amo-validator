@@ -12,8 +12,9 @@ targetapp.APPROVED_APPLICATIONS = \
         json.load(open("validator/app_versions.json"))
 
 
-def _do_test_raw(rdf, listed=True):
+def _do_test_raw(rdf, listed=True, overrides=None):
     err = ErrorBundle(listed=listed)
+    err.overrides = overrides
     rdf = RDFParser(StringIO(rdf.strip()))
     err.save_resource("has_install_rdf", True)
     err.save_resource("install_rdf", rdf)
@@ -169,4 +170,51 @@ def test_no_supported_mozilla_apps():
 
     assert _do_test_raw(failure_case).failed()
     assert not _do_test_raw(failure_case, listed=False).failed()
+
+
+def test_overrides():
+    """Test that the validate() function can override the min/max versions"""
+
+    # Make sure a failing test can be forced to pass.
+    assert not _do_test_raw("""
+    <?xml version="1.0"?>
+    <RDF xmlns="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+         xmlns:em="http://www.mozilla.org/2004/em-rdf#">
+        <Description about="urn:mozilla:install-manifest">
+            <em:targetApplication>
+                <Description> <!-- Firefox -->
+                    <em:id>{ec8030f7-c20a-464f-9b0e-13a3a9e97384}</em:id>
+                    <em:minVersion>ABCDEFG</em:minVersion>
+                    <em:maxVersion>-1.2.3.4</em:maxVersion>
+                </Description>
+            </em:targetApplication>
+        </Description>
+    </RDF>
+    """, overrides={"targetapp_minVersion":
+                        {"{ec8030f7-c20a-464f-9b0e-13a3a9e97384}": "1.5"},
+                    "targetapp_maxVersion":
+                        {"{ec8030f7-c20a-464f-9b0e-13a3a9e97384}": "3.6"}}
+            ).failed()
+
+
+    # Make sure a test can be forced to fail.
+    assert _do_test_raw("""
+    <?xml version="1.0"?>
+    <RDF xmlns="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+         xmlns:em="http://www.mozilla.org/2004/em-rdf#">
+        <Description about="urn:mozilla:install-manifest">
+            <em:targetApplication>
+                <Description> <!-- Firefox -->
+                    <em:id>{ec8030f7-c20a-464f-9b0e-13a3a9e97384}</em:id>
+                    <em:minVersion>1.5</em:minVersion>
+                    <em:maxVersion>3.6</em:maxVersion>
+                </Description>
+            </em:targetApplication>
+        </Description>
+    </RDF>
+    """, overrides={"targetapp_minVersion":
+                        {"{ec8030f7-c20a-464f-9b0e-13a3a9e97384}": "foo"},
+                    "targetapp_maxVersion":
+                        {"{ec8030f7-c20a-464f-9b0e-13a3a9e97384}": "bar"}}
+            ).failed()
 
