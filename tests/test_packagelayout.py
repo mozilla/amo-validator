@@ -26,6 +26,10 @@ def test_blacklisted_files():
                    packagelayout.test_blacklisted_files,
                    True)
     assert err.metadata["contains_binary_extension"]
+    assert err.warnings
+    assert all(m["compatibility_type"] == "error" for
+               m in
+               err.warnings)
 
 def test_blacklisted_magic_numbers():
     "Tests that blacklisted magic numbers are banned"
@@ -34,6 +38,10 @@ def test_blacklisted_magic_numbers():
                    packagelayout.test_blacklisted_files,
                    True)
     assert err.metadata["contains_binary_content"]
+    assert err.warnings
+    assert all(m["compatibility_type"] == "error" for
+               m in
+               err.warnings)
 
 
 # These functions will test the code with manually constructed packages

@@ -68,19 +68,22 @@ def test_blacklisted_files(err, package_contents=None, xpi_package=None):
         if extension in blacklisted_extensions:
             # Note that there is a binary extension in the metadata
             err.metadata["contains_binary_extension"] = True
-            err.warning(("testcases_packagelayout",
-                         "test_blacklisted_files",
-                         "disallowed_extension"),
-                        "Flagged file extension found",
-                        ["The file \"%s\" has a flagged file extension." %
-                            name,
-                         "The extension of this file is flagged because it "
-                         "usually identifies binary components. Please see "
-                         "http://addons.mozilla.org/developers/docs/policies/"
-                            "reviews#section-binary"
-                         " for more information on the binary content review "
-                         "process."],
-                        name)
+            err.warning(
+                err_id=("testcases_packagelayout",
+                        "test_blacklisted_files",
+                        "disallowed_extension"),
+                warning="Flagged file extension found",
+                description=["The file \"%s\" has a flagged file extension." %
+                                 name,
+                             "The extension of this file is flagged because "
+                             "it usually identifies binary components. Please "
+                             "see "
+                             "http://addons.mozilla.org/developers/docs/"
+                                 "policies/reviews#section-binary"
+                             " for more information on the binary content "
+                             "review process."],
+                filename=name,
+                compatibility_type="error")
             continue
 
         # Perform a deep inspection to detect magic numbers for known binary
@@ -90,15 +93,18 @@ def test_blacklisted_files(err, package_contents=None, xpi_package=None):
         if [x for x in blacklisted_magic_numbers if bytes[0:len(x)] == x]:
             # Note that there is binary content in the metadata
             err.metadata["contains_binary_content"] = True
-            err.warning(("testcases_packagelayout",
-                         "test_blacklisted_files",
-                         "disallowed_file_type"),
-                        "Flagged file type found",
-                        ["A file was found to contain flagged content (i.e.: "
-                         "executable data, potentially unauthorized scripts, "
-                         "etc.).",
-                         u"The file \"%s\" contains flagged content" % name],
-                        filename=name)
+            err.warning(
+                err_id=("testcases_packagelayout",
+                        "test_blacklisted_files",
+                        "disallowed_file_type"),
+                warning="Flagged file type found",
+                description=["A file was found to contain flagged content "
+                             "(i.e.: executable data, potentially "
+                             "unauthorized scripts, etc.).",
+                             u"The file \"%s\" contains flagged content" %
+                                 name],
+                filename=name,
+                compatibility_type="error")
 
 
 @decorator.register_test(tier=1)
