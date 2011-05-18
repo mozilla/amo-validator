@@ -33,6 +33,7 @@ def _test_rdf(err, install):
                        "version",
                        "name",
                        "targetApplication"]
+
     may_exist_once = ["about",  # For <Description> element
                       "bootstrap",
                       "optionsURL",
@@ -49,6 +50,14 @@ def _test_rdf(err, install):
                       "signature",
                       "skinnable",
                       "unpack"]  # This has other rules; CAUTION!
+
+    # Support a name requirement override.
+    if (err.overrides and
+        "ignore_name" in err.overrides and
+        err.overrides["ignore_name"]):
+        must_exist_once.remove("name")
+        may_exist_once.append("name")
+
     may_exist = ("targetApplication",
                  "localized",
                  "description",

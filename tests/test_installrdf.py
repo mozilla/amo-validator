@@ -4,10 +4,11 @@ from validator.rdf import RDFParser
 from helper import _do_test
 from validator.constants import *
 
+
 def _test_value(value, test, failure=True):
     "Tests a value against a test."
 
-    err = ErrorBundle(None, True)
+    err = ErrorBundle()
 
     test(err, value)
 
@@ -15,6 +16,7 @@ def _test_value(value, test, failure=True):
         return err.failed()
     else:
         return not err.failed()
+
 
 def test_pass_id():
     "Tests that valid IDs will be accepted."
@@ -29,6 +31,7 @@ def test_pass_id():
                 installrdf._test_id,
                 False)
 
+
 def test_fail_id():
     "Tests that invalid IDs will not be accepted."
 
@@ -36,6 +39,7 @@ def test_fail_id():
                 installrdf._test_id)
     _test_value("!@foo.bar",
                 installrdf._test_id)
+
 
 def test_pass_version():
     "Tests that valid versions will be accepted."
@@ -47,6 +51,7 @@ def test_pass_version():
                 installrdf._test_version,
                 False)
 
+
 def test_fail_version():
     "Tests that invalid versions will not be accepted."
 
@@ -54,6 +59,7 @@ def test_fail_version():
     _test_value("whatever", installrdf._test_version)
     _test_value("123456789012345678901234567890123", installrdf._test_version)
     _test_value("1.2.3%", installrdf._test_version)
+
 
 def test_pass_name():
     "Tests that valid names will be accepted."
@@ -65,25 +71,36 @@ def test_pass_name():
                 installrdf._test_name,
                 False)
 
+
 def test_fail_name():
     "Tests that invalid names will not be accepted."
 
     _test_value("Love of the Firefox", installrdf._test_name)
     _test_value("Mozilla Feed Aggregator", installrdf._test_name)
 
-def _run_test(filename, failure=True, detected_type=0, listed=True):
+
+def _run_test(filename, failure=True, detected_type=0, listed=True,
+              overrides=None):
     "Runs a test on an install.rdf file"
+
+    return _run_test_raw(open(filename).read(), failure, detected_type,
+                         listed, overrides)
+
+def _run_test_raw(data, failure=True, detected_type=0, listed=True,
+                  overrides=None):
+    "Runs a test on an install.rdf snippet"
+
+    data = data.strip()
 
     err = ErrorBundle()
     err.detected_type = detected_type
     err.save_resource("listed", listed)
-
-    data = open(filename).read()
+    err.overrides = overrides
 
     parser = RDFParser(data)
     installrdf._test_rdf(err, parser)
 
-    print err.print_summary()
+    print err.print_summary(verbose=True)
 
     if failure: # pragma: no cover
         assert err.failed() or err.notices
@@ -91,6 +108,7 @@ def _run_test(filename, failure=True, detected_type=0, listed=True):
         assert not err.failed() and not err.notices
 
     return err
+
 
 def test_has_rdf():
     "Tests that tests won't be run if there's no install.rdf"
@@ -113,11 +131,13 @@ def test_has_rdf():
 
     return err
 
+
 def test_passing():
     "Tests a passing install.rdf package."
 
     err = _run_test("tests/resources/installrdf/pass.rdf", False)
     assert not err.get_resource("unpack")
+
 
 def test_unpack():
     "Tests that the unpack variable is ."
@@ -125,11 +145,13 @@ def test_unpack():
     err = _run_test("tests/resources/installrdf/unpack.rdf", False)
     assert err.get_resource("em:unpack") == "true"
 
+
 def test_must_exist_once():
     "Tests that elements that must exist once only exist once."
 
     _run_test("tests/resources/installrdf/must_exist_once_missing.rdf")
     _run_test("tests/resources/installrdf/must_exist_once_extra.rdf")
+
 
 def test_may_exist_once():
     "Tests that elements that may exist once only exist up to once."
@@ -137,6 +159,7 @@ def test_may_exist_once():
     _run_test("tests/resources/installrdf/may_exist_once_missing.rdf",
               False)
     _run_test("tests/resources/installrdf/may_exist_once_extra.rdf")
+
 
 def test_may_exist_once_theme():
     "Tests that elements that may exist once in themes."
@@ -151,12 +174,14 @@ def test_may_exist_once_theme():
               True,
               PACKAGE_THEME)
 
+
 def test_may_exist():
     "Tests that elements that may exist once only exist up to once."
 
     _run_test("tests/resources/installrdf/may_exist_missing.rdf",
               False)
     _run_test("tests/resources/installrdf/may_exist_extra.rdf", False)
+
 
 def test_mustmay_exist():
     "Tests that elements that may exist once only exist up to once."
@@ -166,6 +191,7 @@ def test_mustmay_exist():
     _run_test("tests/resources/installrdf/mustmay_exist_extra.rdf",
               False)
 
+
 def test_shouldnt_exist():
     "Tests that elements that shouldn't exist aren't there."
 
@@ -174,9 +200,38 @@ def test_shouldnt_exist():
               listed=False,
               failure=False)
 
+
 def test_obsolete():
     "Tests that obsolete elements are reported."
 
     err = _run_test("tests/resources/installrdf/obsolete.rdf")
     assert err.notices and not err.failed()
+
+
+def test_overrides():
+    """Test that overrides will work on the install.rdf file."""
+
+    assert _run_test_raw(data="""
+<?xml version="1.0"?>
+
+<RDF xmlns="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+		xmlns:em="http://www.mozilla.org/2004/em-rdf#">
+
+	<Description about="urn:mozilla:install-manifest">
+
+	<em:id>bastatestapp1@basta.mozilla.com</em:id>
+	<em:version>1.2.3.4</em:version>
+    <!-- NOTE THAT NAME IS MISSING -->
+	<em:targetApplication>
+		<Description>
+		<em:id>{ec8030f7-c20a-464f-9b0e-13a3a9e97384}</em:id>
+		<em:minVersion>3.7a5pre</em:minVersion>
+		<em:maxVersion>0.3</em:maxVersion>
+		</Description>
+	</em:targetApplication>
+
+    </Description>
+
+</RDF>
+    """, failure=False, overrides={"ignore_name": True})
 

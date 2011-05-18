@@ -11,6 +11,11 @@ class RDFParser(object):
         # Load up and parse the file in XML format.
         graph = rdflib.Graph()
 
+        self.manifest = u"urn:mozilla:install-manifest"
+        self.namespace = "http://www.mozilla.org/2004/em-rdf"
+        if namespace is not None:
+            self.namespace = namespace
+
         # Try it!
         if not isinstance(data, StringIO):
             pseudo_file = StringIO(data)  # Wrap data in a pseudo-file
@@ -24,12 +29,6 @@ class RDFParser(object):
             return
         else:
             self.rdf = graph
-
-        self.namespace = "http://www.mozilla.org/2004/em-rdf"
-        if namespace is not None:
-            self.namespace = namespace
-
-        self.manifest = u"urn:mozilla:install-manifest"
 
     def uri(self, element, namespace=None):
         "Returns a URIRef object for use with the RDF document."
