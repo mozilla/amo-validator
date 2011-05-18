@@ -29,22 +29,6 @@ def versions_after(guid, version):
 @decorator.register_test(tier=5,
                          versions={"{ec8030f7-c20a-464f-9b0e-13a3a9e97384}":
                                        versions_after("firefox", "4.2a1pre")})
-def firefox_5_test(err, package, xpi):
-    """Output a test message when Firefox 5 is supported."""
-    err.notice(
-        err_id=("testcases_compatibility",
-                "firefox_5_test",
-                "fx5_notice"),
-        notice="Firefox 5 Compatibility Detected",
-        description="Potential compatibility for FX5 was detected.",
-        for_appversions={"{ec8030f7-c20a-464f-9b0e-13a3a9e97384}":
-                             versions_after("firefox", "4.2a1pre")},
-        compatibility_type="notice")
-
-
-@decorator.register_test(tier=5,
-                         versions={"{ec8030f7-c20a-464f-9b0e-13a3a9e97384}":
-                                       versions_after("firefox", "4.2a1pre")})
 def navigator_language(err, package, xpi):
     """Any use of `navigator.language` should be flagged."""
 
