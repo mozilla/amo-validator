@@ -233,5 +233,5 @@ def test_overrides():
     </Description>
 
 </RDF>
-    """, failure=False, overrides={"ignore_name": True})
+    """, failure=False, overrides={"ignore_empty_name": True})
 
