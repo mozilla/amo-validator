@@ -53,8 +53,8 @@ def _test_rdf(err, install):
 
     # Support a name requirement override.
     if (err.overrides and
-        "ignore_name" in err.overrides and
-        err.overrides["ignore_name"]):
+        "ignore_empty_name" in err.overrides and
+        err.overrides["ignore_empty_name"]):
         must_exist_once.remove("name")
         may_exist_once.append("name")
 
