@@ -1,6 +1,7 @@
 import fnmatch
 
-from validator import decorator
+import validator.decorator as decorator
+from validator.decorator import versions_after
 from validator.constants import *
 
 # Detect blacklisted files based on their extension.
@@ -82,8 +83,7 @@ def test_blacklisted_files(err, package_contents=None, xpi_package=None):
                                  "policies/reviews#section-binary"
                              " for more information on the binary content "
                              "review process."],
-                filename=name,
-                compatibility_type="error")
+                filename=name)
             continue
 
         # Perform a deep inspection to detect magic numbers for known binary
@@ -103,6 +103,58 @@ def test_blacklisted_files(err, package_contents=None, xpi_package=None):
                              "unauthorized scripts, etc.).",
                              u"The file \"%s\" contains flagged content" %
                                  name],
+                filename=name)
+
+
+@decorator.register_test(
+        tier=1,
+        versions={"{ec8030f7-c20a-464f-9b0e-13a3a9e97384}":
+                      versions_after("firefox", "4.2a1pre")})
+def test_compatibility_binary(err, package_contents, xpi_package):
+    """
+    Flags only binary content as being incompatible with future app releases.
+    """
+
+    description = ("Add-ons with binary components must have their "
+                   "compatibility manually adjusted. Please test your add-on "
+                   "against the new version before updating your maxVersion.")
+
+    for name, file_ in package_contents.items():
+
+        # Restrict the search to files in sensitive directories.
+        if not name.startswith(("components/", "plugins/", "platform/")):
+            continue
+
+        # Simple test to ensure that the extension isn't blacklisted
+        extension = file_["extension"]
+        if extension in ("dll", "dylib", "so", "exe"):
+            # Note that there is a binary extension in the metadata
+            err.notice(
+                err_id=("testcases_packagelayout",
+                        "test_compatibility_binary",
+                        "disallowed_extension"),
+                notice="Flagged file extension found",
+                description=["The file \"%s\" has a flagged file extension." %
+                                 name,
+                             description],
+                filename=name,
+                compatibility_type="error")
+            continue
+
+        # Test against some specific magic numbers, namely Windows executables
+        # and UNIX elf.
+        zip = xpi_package.zf.open(name)
+        bytes = tuple([ord(x) for x in zip.read(4)])  # Longest is 4 bytes
+        if [x for x in blacklisted_magic_numbers[:3] if bytes[0:len(x)] == x]:
+            # Note that there is binary content in the metadata
+            err.notice(
+                err_id=("testcases_packagelayout",
+                        "test_compatibility_binary",
+                        "disallowed_file_type"),
+                notice="Flagged file type found",
+                description=["A file (%s) was found to contain flagged binary "
+                             "content." % name,
+                             description],
                 filename=name,
                 compatibility_type="error")
 

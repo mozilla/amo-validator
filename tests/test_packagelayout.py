@@ -26,10 +26,16 @@ def test_blacklisted_files():
                    packagelayout.test_blacklisted_files,
                    True)
     assert err.metadata["contains_binary_extension"]
-    assert err.warnings
-    assert all(m["compatibility_type"] == "error" for
-               m in
-               err.warnings)
+    assert not any(count for (key, count) in err.compat_summary.items())
+
+    # Run the compatibility test on this, but it shouldn't fail or produce
+    # errors because the bianry content isn't in the appropriate directories.
+    err = _do_test("tests/resources/packagelayout/ext_blacklist.xpi",
+                   packagelayout.test_compatibility_binary,
+                   False)
+    print err.compat_summary
+    assert not err.compat_summary["errors"]
+
 
 def test_blacklisted_magic_numbers():
     "Tests that blacklisted magic numbers are banned"
@@ -38,10 +44,45 @@ def test_blacklisted_magic_numbers():
                    packagelayout.test_blacklisted_files,
                    True)
     assert err.metadata["contains_binary_content"]
-    assert err.warnings
-    assert all(m["compatibility_type"] == "error" for
-               m in
-               err.warnings)
+
+    # Same logic as above.
+    err = _do_test("tests/resources/packagelayout/magic_number.xpi",
+                   packagelayout.test_compatibility_binary,
+                   False)
+    print err.compat_summary
+    assert not err.compat_summary["errors"]
+
+
+def test_compat_binary_extensions():
+    """
+    Test that the validator will throw compatibility errors for files that
+    would otherwise require the add-on to be manually updated.
+    """
+
+    # This time when the compatibility checks are run, they should fire off
+    # compatibility errors because the files are the /components/ directory
+    # of the package.
+    err = _do_test("tests/resources/packagelayout/ext_blacklist_compat.xpi",
+                   packagelayout.test_compatibility_binary,
+                   False)
+    print err.compat_summary
+    assert err.compat_summary["errors"]
+
+
+def test_compat_binary_magic_numbers():
+    """
+    Test that the validator will throw compatibility errors for files that
+    have executable magic numbers (not including interpreted or Java files)
+    such that the developer is alerted about needing to manually update the
+    maxVersion.
+    """
+
+    # Same logic as above.
+    err = _do_test("tests/resources/packagelayout/magic_number_compat.xpi",
+                   packagelayout.test_compatibility_binary,
+                   False)
+    print err.compat_summary
+    assert err.compat_summary["errors"]
 
 
 # These functions will test the code with manually constructed packages
