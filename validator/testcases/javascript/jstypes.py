@@ -39,7 +39,7 @@ class JSObject(object):
 
     def output(self):
         return json.dumps(dict(zip(self.data.keys(),
-                                   map(lambda v:v.output(),
+                                   map(lambda v: v.output() if v else "None",
                                        self.data.values()))))
 
 
