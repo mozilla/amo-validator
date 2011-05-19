@@ -1,3 +1,6 @@
+import validator.constants
+from validator.constants import *
+
 
 TEST_TIERS = {}
 
@@ -41,3 +44,28 @@ def get_tests(tier, type_=None):
 
     # List comprehension to sort and filter and the like.
     return (test for test in ctier if test["type"] in types)
+
+
+def versions_after(guid, version):
+    """Returns all values after (and including) `version` for the app `guid`"""
+
+    app_versions = validator.constants.APPROVED_APPLICATIONS
+    app_key = None
+
+    # Support for shorthand instead of full GUIDs.
+    for app_guid, app_name in APPLICATIONS.items():
+        if app_name == guid:
+            guid = app_guid
+            break
+
+    for key in app_versions.keys():
+        if app_versions[key]["guid"] == guid:
+            app_key = key
+            break
+
+    if not app_key or version not in app_versions[app_key]["versions"]:
+        raise Exception("Bad GUID or version provided for version range")
+
+    version_pos = app_versions[app_key]["versions"].index(version)
+    return app_versions[app_key]["versions"][version_pos:]
+
