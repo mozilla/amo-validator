@@ -1,9 +1,8 @@
-import os
-
 import validator.submain as submain
 from validator.errorbundler import ErrorBundle
 from validator.chromemanifest import ChromeManifest
 from validator.constants import *
+
 
 def test_prepare_package():
     "Tests that the prepare_package function passes for valid data"
@@ -15,6 +14,7 @@ def test_prepare_package():
     assert submain.prepare_package(err, "tests/resources/main/foo.xpi") == True
     submain.test_package = tp
 
+
 def test_prepare_package_extension():
     "Tests that bad extensions get outright rejections"
 
@@ -25,6 +25,7 @@ def test_prepare_package_extension():
     assert submain.prepare_package(None, "foo/bar/test.xml") == True
     submain.test_search = ts
 
+
 def test_prepare_package_missing():
     "Tests that the prepare_package function fails when file is not found"
 
@@ -33,6 +34,7 @@ def test_prepare_package_missing():
 
     assert err.failed()
 
+
 def test_prepare_package_bad_file():
     "Tests that the prepare_package function fails for unknown files"
 
@@ -40,6 +42,7 @@ def test_prepare_package_bad_file():
     submain.prepare_package(err, "tests/resources/main/foo.bar")
 
     assert err.failed()
+
 
 def test_prepare_package_xml():
     "Tests that the prepare_package function passes with search providers"
@@ -72,6 +75,7 @@ def test_test_inner_package():
 
     assert not err.failed()
     submain.decorator = smd
+
 
 def test_test_inner_package_failtier():
     "Tests that the test_inner_package function fails at a failed tier"
@@ -123,6 +127,7 @@ def test_test_inner_package_determined():
     assert decorator.last_tier == 5
     submain.decorator = smd
 
+
 def test_test_inner_package_failtier():
     "Tests the test_inner_package function in determined mode while failing"
 
@@ -136,6 +141,7 @@ def test_test_inner_package_failtier():
     assert err.failed()
     assert decorator.last_tier == 5
     submain.decorator = smd
+
 
 class MockDecorator:
 
@@ -190,6 +196,7 @@ class MockDecorator:
         print self.fail_tier
         assert self.on_tier == self.fail_tier
 
+
 class MockErrorHandler:
 
     def __init__(self, mock_decorator, determined=False):
@@ -228,6 +235,7 @@ class MockErrorHandler:
     def failed(self, fail_on_warnings=False):
         "Simple accessor because the standard error handler has one"
         return self.has_failed
+
 
 class MockXPIPackage:
     "A class that pretends to be an add-on package"

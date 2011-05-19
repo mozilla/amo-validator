@@ -2,6 +2,7 @@ import validator.submain
 from validator import decorator
 from validator.errorbundler import ErrorBundle
 
+
 def test_version_decorators_accepted():
     """
     Test that decorators that specify versions to target accept the proper
@@ -27,6 +28,7 @@ def test_version_decorators_accepted():
     assert err.get_resource("executed")
     decorator.TEST_TIERS = tests
 
+
 def test_version_decorators_denied_guid():
     """
     Test that decorators that specify versions to target deny add-ons that do
@@ -49,6 +51,7 @@ def test_version_decorators_denied_guid():
     validator.submain.test_inner_package(err, {}, None)
     decorator.TEST_TIERS = tests
 
+
 def test_version_decorators_denied_version():
     """
     Test that decorators that specify versions to target deny add-ons that do
@@ -70,6 +73,7 @@ def test_version_decorators_denied_version():
 
     validator.submain.test_inner_package(err, {}, None)
     decorator.TEST_TIERS = tests
+
 
 def test_version_forappversions_accepted():
     """
@@ -96,6 +100,7 @@ def test_version_forappversions_accepted():
 
     assert err.get_resource("executed")
     decorator.TEST_TIERS = tests
+
 
 def test_version_forappversions_denied():
     """

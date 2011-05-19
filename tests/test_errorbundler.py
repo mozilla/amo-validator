@@ -7,8 +7,9 @@ import validator.errorbundler as errorbundler
 from validator.errorbundler import ErrorBundle
 from validator.contextgenerator import ContextGenerator
 
+
 def test_json():
-    "Tests the JSON output capability of the error bundler."
+    """Test the JSON output capability of the error bundler."""
 
     # Use the StringIO as an output buffer.
     bundle = ErrorBundle() # No color since no output
@@ -29,8 +30,9 @@ def test_json():
     assert not results["success"]
     assert results["ending_tier"] == 4
 
+
 def test_boring():
-    "Tests that boring output strips out color sequences."
+    """Test that boring output strips out color sequences."""
 
     stdout = sys.stdout
     sys.stdout = StringIO()
@@ -46,17 +48,20 @@ def test_boring():
 
     assert outbuffer.getvalue().count("<<GREEN>>") == 0
 
+
 def test_type():
-    """Tests that detected type is being stored properly in the error
-    bundle."""
+    """
+    Test that detected type is being stored properly in the error bundle.
+    """
 
     bundle = ErrorBundle()
 
     bundle.set_type(5)
     assert bundle.detected_type == 5
 
+
 def test_states():
-    """Tests that detected type is preserved, even in subpackages."""
+    """Test that detected type is preserved, even in subpackages."""
 
     # Use the StringIO as an output buffer.
     bundle = ErrorBundle()
@@ -121,8 +126,10 @@ def test_states():
 
 
 def test_file_structure():
-    """Tests the means by which file names and line numbers are stored
-    in errors, warnings, and messages."""
+    """
+    Test the means by which file names and line numbers are stored in errors,
+    warnings, and messages.
+    """
 
     # Use the StringIO as an output buffer.
     bundle = ErrorBundle(True) # No color since no output
@@ -184,7 +191,7 @@ def test_file_structure():
 
 
 def test_notice():
-    """Tests notice-related functions of the error bundler."""
+    """Test notice-related functions of the error bundler."""
 
     # Use the StringIO as an output buffer.
     bundle = ErrorBundle()
@@ -213,8 +220,10 @@ def test_notice():
 
 
 def test_notice_friendly():
-    """Tests notice-related human-friendly text output functions of the
-    error bundler."""
+    """
+    Test notice-related human-friendly text output functions of the error
+    bundler.
+    """
 
     # Use the StringIO as an output buffer.
     bundle = ErrorBundle()
@@ -227,8 +236,9 @@ def test_notice_friendly():
 
     assert output.count("foobar")
 
+
 def test_initializer():
-    "Tests that the __init__ paramaters are doing their jobs"
+    """Test that the __init__ paramaters are doing their jobs."""
 
     e = ErrorBundle()
     assert e.determined
@@ -242,8 +252,9 @@ def test_initializer():
     assert e.determined
     assert not e.get_resource("listed")
 
+
 def test_json_constructs():
-    "This tests some of the internal JSON stuff so we don't break zamboni"
+    """This tests some of the internal JSON stuff so we don't break zamboni."""
 
     e = ErrorBundle()
     e.set_type(1)
@@ -375,7 +386,9 @@ def test_json_compatibility():
 
 
 def test_pushable_resources():
-    "Tests that normal resources are preserved but pushable ones are pushed"
+    """
+    Test that normal resources are preserved but pushable ones are pushed.
+    """
 
     e = ErrorBundle()
     e.save_resource("nopush", True)
@@ -400,7 +413,7 @@ def test_pushable_resources():
 
 
 def test_forappversions():
-    """Test that app version information is passed to the JSON"""
+    """Test that app version information is passed to the JSON."""
 
     app_test_data = {"guid": ["version1", "version2"]}
 

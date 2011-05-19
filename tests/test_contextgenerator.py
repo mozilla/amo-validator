@@ -1,8 +1,8 @@
-import os
 from validator.contextgenerator import ContextGenerator
 
+
 def test_load_data():
-    "Tests that data is loaded properly into the CG."
+    """Test that data is loaded properly into the CG."""
 
     d = """abc
     def
@@ -16,8 +16,9 @@ def test_load_data():
     assert c.data[0].strip() == "abc"
     assert c.data[1].strip() == "def"
 
+
 def test_get_context():
-    "Tests that contexts are generated properly."
+    """Test that contexts are generated properly."""
 
     d = open("tests/resources/contextgenerator/data.txt").read()
     c = ContextGenerator(d)
@@ -32,7 +33,7 @@ def test_get_context():
     assert c_start[0] == None
     assert len(c_end) == 3
     assert c_end[2] == None
-    
+
     assert c_start[1] == "0123456789"
     assert c_end[0] == "9012345678"
     assert c_end[1] == ""
@@ -42,9 +43,12 @@ def test_get_context():
     assert c_mid[0] == "3456789012"
     assert c_mid[2] == "5678901234"
     print c_mid
-    
+
+
 def test_get_context_trimming():
-    "Tests that contexts are generated properly when lines are >140 characters"
+    """
+    Test that contexts are generated properly when lines are >140 characters.
+    """
 
     d = open("tests/resources/contextgenerator/longdata.txt").read()
     c = ContextGenerator(d)
@@ -58,9 +62,12 @@ def test_get_context_trimming():
     for i in range(3):
         assert len(trimmed[i]) == proper_lengths[i]
 
+
 def test_get_context_trimming_inverse():
-    """Tests that surrounding lines are trimmed properly; the error line is
-    ignored if it is less than 140 characters."""
+    """
+    Tests that surrounding lines are trimmed properly; the error line is
+    ignored if it is less than 140 characters.
+    """
 
     d = open("tests/resources/contextgenerator/longdata.txt").read()
     c = ContextGenerator(d)
@@ -73,13 +80,14 @@ def test_get_context_trimming_inverse():
     assert trimmed[0][0] != "X"
     assert trimmed[2][-1] != "X"
 
+
 def test_get_line():
-    "Tests that the context generator returns the proper line"
-    
+    """Test that the context generator returns the proper line."""
+
     d = open("tests/resources/contextgenerator/data.txt").read()
     c = ContextGenerator(d)
     print c.data
-    
+
     print c.get_line(30)
     assert c.get_line(30) == 3
     print c.get_line(11)

@@ -1,5 +1,4 @@
 from StringIO import StringIO
-
 from validator.errorbundler import ErrorBundle
 from validator.testcases.l10ncompleteness import _get_locale_manager, \
                                                  _list_locales, \
@@ -102,14 +101,15 @@ def test_get_manager():
     l10ncomp.XPIManager = xm
 
 
-
-
 class MockManager(object):
     "Represents a fake XPIManager"
 
     def __init__(self, default, path=None):
         if isinstance(default, StringIO):
             default = default.getvalue()
+        elif isinstance(default, file):
+            default = default.read()
+
         self.value = default
         self.path = path
 

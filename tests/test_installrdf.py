@@ -1,7 +1,6 @@
 import validator.testcases.installrdf as installrdf
 from validator.errorbundler import ErrorBundle
 from validator.rdf import RDFParser
-from helper import _do_test
 from validator.constants import *
 
 

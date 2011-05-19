@@ -1,13 +1,9 @@
-import os
-from StringIO import StringIO
-
 from js_helper import _do_test_raw
 
 import validator.xpi as xpi
 import validator.testcases.content as content
 from validator.errorbundler import ErrorBundle
 from validator.chromemanifest import ChromeManifest
-from helper import _do_test
 from validator.constants import *
 
 

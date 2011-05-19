@@ -3,6 +3,7 @@ import validator.testcases.compatibility as compatibility
 import validator.testcases.scripting as scripting
 from validator.errorbundler import ErrorBundle
 
+
 def test_compat_test():
     """Test that basic compatibility is supported"""
 

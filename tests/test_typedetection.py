@@ -1,5 +1,3 @@
-import os
-
 from validator.errorbundler import ErrorBundle
 from validator.rdf import RDFParser
 from validator.xpi import XPIManager
@@ -77,12 +75,14 @@ def test_langpack():
     _test_type("tests/resources/typedetection/td_langpack.xpi",
                PACKAGE_LANGPACK)
 
+
 def test_bad_emtype():
     """Tests for a bad <em:type> value."""
 
     _test_type("tests/resources/typedetection/td_bad_emtype.xpi",
                None,
                True)
+
 
 def test_strange():
     """Tests that in install.rdf-less package is listed as being a
