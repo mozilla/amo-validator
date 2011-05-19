@@ -1,4 +1,3 @@
-import inspect
 import json
 import types
 
@@ -410,5 +409,5 @@ class JSArray(JSObject):
             self.elements.append(JSWrapper(value=value, traverser=traverser))
 
     def output(self):
-        return [x.output() for x in self.elements]
+        return "[%s]" % self.get_literal_value()
 
