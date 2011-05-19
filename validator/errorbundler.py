@@ -254,7 +254,8 @@ class ErrorBundle(object):
                      column=message["column"],
                      context=message["context"],
                      tier=message["tier"],
-                     for_appversions=message["for_appversions"])
+                     for_appversions=message["for_appversions"],
+                     compatibility_type=message["compatibility_type"])
 
     def render_json(self):
         "Returns a JSON summary of the validation operation."
