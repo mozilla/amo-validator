@@ -84,6 +84,9 @@ def test_states():
     bundle.warning((), "super nested warning")
     bundle.notice((), "super nested notice")
 
+    # Test that nested compatibility messages retain their value
+    bundle.notice("comp", "Compat Test notice", compatibility_type="error")
+
     bundle.pop_state()
 
     bundle.pop_state()
@@ -93,7 +96,7 @@ def test_states():
 
     # Run some basic tests
     assert output["detected_type"] == "langpack"
-    assert len(output["messages"]) == 9
+    assert len(output["messages"]) == 10
 
     print output
 
@@ -105,7 +108,8 @@ def test_states():
                 "nested notice",
                 "super nested error",
                 "super nested warning",
-                "super nested notice"]
+                "super nested notice",
+                "Compat Test notice"]
 
     for message in output["messages"]:
         print message
@@ -114,6 +118,9 @@ def test_states():
         messages.remove(message["message"])
 
         assert message["message"].endswith(message["type"])
+
+        if message["id"] == "comp":
+            assert message["compatibility_type"] == "error"
 
     assert not messages
 
