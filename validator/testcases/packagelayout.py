@@ -107,7 +107,7 @@ def test_blacklisted_files(err, package_contents=None, xpi_package=None):
 
 
 @decorator.register_test(
-        tier=1,
+        tier=5,
         versions={"{ec8030f7-c20a-464f-9b0e-13a3a9e97384}":
                       versions_after("firefox", "4.2a1pre")})
 def test_compatibility_binary(err, package_contents, xpi_package):
