@@ -148,11 +148,13 @@ GLOBAL_ENTITIES = {
     u"document":
         {"value": {u"createElement":
                        {"dangerous":
-                            lambda a, t, e: unicode(t(a[0]).get_literal_value())
+                            lambda a, t, e: not a or
+                                            unicode(t(a[0]).get_literal_value())
                                                 .lower() == "script"},
                    u"createElementNS":
                        {"dangerous":
-                            lambda a, t, e: unicode(t(a[0]).get_literal_value())
+                            lambda a, t, e: not a or
+                                            unicode(t(a[0]).get_literal_value())
                                                 .lower() == "script"},
                    u"loadOverlay":
                        {"dangerous":
