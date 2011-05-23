@@ -3,7 +3,7 @@ from validator.constants import PACKAGE_THEME
 
 
 @decorator.register_test(tier=2, expected_type=PACKAGE_THEME)
-def test_theme_manifest(err, package_contents=None, xpi_package=None):
+def test_theme_manifest(err, xpi_package=None):
     """Tests the chrome.manifest files in the package for
     compliance with the standard theme triples."""
 

@@ -19,7 +19,7 @@ from validator.textfilter import is_standard_ascii
 PASSWORD_REGEX = re.compile("password", re.I)
 
 @decorator.register_test(tier=1)
-def test_xpcnativewrappers(err, package_contents=None, xpi_package=None):
+def test_xpcnativewrappers(err, xpi_package=None):
     """Tests the chrome.manifest file to ensure that it doesn't contain
     xpcnativewrappers objects."""
 
@@ -43,7 +43,7 @@ def test_xpcnativewrappers(err, package_contents=None, xpi_package=None):
 
 
 @decorator.register_test(tier=2)
-def test_packed_packages(err, package_contents=None, xpi_package=None):
+def test_packed_packages(err, xpi_package=None):
     "Tests XPI and JAR files for naughty content."
 
     processed_files = 0
@@ -59,7 +59,9 @@ def test_packed_packages(err, package_contents=None, xpi_package=None):
     macosx_regex = re.compile("__MACOSX")
 
     # Iterate each item in the package.
-    for name, data in package_contents.items():
+    for name in xpi_package:
+        name_lower = name.lower()
+        data = xpi_package.info(name)
 
         if (macosx_regex.search(name) or
             name.startswith(".") or
@@ -98,15 +100,17 @@ def test_packed_packages(err, package_contents=None, xpi_package=None):
 
         processed = False
         # If that item is a container file, unzip it and scan it.
-        if data["extension"] == "jar":
+        if name_lower.endswith(".jar"):
             # This is either a subpackage or a nested theme.
 
             is_subpackage = not err.get_resource("is_multipackage")
 
             # Unpack the package and load it up.
             package = StringIO(file_data)
-            sub_xpi = XPIManager(package, name, is_subpackage)
-            if not sub_xpi.zf:
+            try:
+                sub_xpi = XPIManager(package, mode="r", name=name,
+                                     subpackage=is_subpackage)
+            except:
                 err.error(("testcases_content",
                            "test_packed_packages",
                            "jar_subpackage_corrupt"),
@@ -116,52 +120,48 @@ def test_packed_packages(err, package_contents=None, xpi_package=None):
                           name)
                 continue
 
-            temp_contents = sub_xpi.get_file_data()
-
             # Let the error bunder know we're in a sub-package.
-            err.push_state(data["name_lower"])
+            err.push_state(name.lower())
             err.set_type(PACKAGE_SUBPACKAGE if
                          is_subpackage else
                          PACKAGE_THEME)
             err.set_tier(1)
             if is_subpackage:
-                testendpoint_validator.test_inner_package(err,
-                                                          temp_contents,
-                                                          sub_xpi)
+                testendpoint_validator.test_inner_package(err, sub_xpi)
             else:
                 testendpoint_validator.test_package(err, package, name)
             package.close()
             err.pop_state()
             err.set_tier(2)
 
-        elif data["extension"] == "xpi":
+        elif name_lower.endswith(".xpi"):
             # It's not a subpackage, it's a nested extension. These are
             # found in multi-extension packages.
 
             # Unpack!
             package = StringIO(file_data)
 
-            err.push_state(data["name_lower"])
+            err.push_state(name_lower)
             err.set_tier(1)
 
             # There are no expected types for packages within a multi-
             # item package.
-            testendpoint_validator.test_package(err, package, name)
+            testendpoint_validator.test_package(err, name)
 
             package.close()
             err.pop_state()
             err.set_tier(2)  # Reset to the current tier
 
-        elif data["extension"] in ("xul", "xml", "html", "xhtml"):
+        elif name_lower.endswith((".xul", ".xml", ".html", ".xhtml")):
 
             parser = testendpoint_markup.MarkupParser(err)
             parser.process(name,
                            file_data,
-                           data["extension"])
+                           xpi_package.info(name)["extension"])
 
             processed = True
 
-        elif data["extension"] in ("css", "js", "jsm"):
+        elif name_lower.endswith((".css", ".js", ".jsm")):
 
             if not file_data:
                 continue
@@ -169,11 +169,11 @@ def test_packed_packages(err, package_contents=None, xpi_package=None):
             # Convert the file data to unicode
             file_data = unicodehelper.decode(file_data)
 
-            if data["extension"] == "css":
+            if name_lower.endswith(".css"):
                 testendpoint_css.test_css_file(err,
                                                name,
                                                file_data)
-            elif data["extension"] in ("js", "jsm"):
+            elif name_lower.endswith((".js", ".jsm")):
 
                 # Test for "password" in defaults/preferences files; bug 647109
                 if fnmatch.fnmatch(name, "defaults/preferences/*.js"):

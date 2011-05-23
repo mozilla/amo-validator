@@ -2,15 +2,16 @@ import validator.submain as submain
 from validator.errorbundler import ErrorBundle
 from validator.chromemanifest import ChromeManifest
 from validator.constants import *
+from helper import MockXPI
 
 
 def test_prepare_package():
     "Tests that the prepare_package function passes for valid data"
 
     tp = submain.test_package
-    submain.test_package = lambda w,x,y,z, for_appversions: True
+    submain.test_package = lambda w, x, y, z, for_appversions: True
 
-    err = ErrorBundle(None, True)
+    err = ErrorBundle()
     assert submain.prepare_package(err, "tests/resources/main/foo.xpi") == True
     submain.test_package = tp
 
@@ -21,7 +22,7 @@ def test_prepare_package_extension():
     assert submain.prepare_package(None, "foo/bar/test.foo") == False
 
     ts = submain.test_search
-    submain.test_search = lambda x,y,z:True
+    submain.test_search = lambda x, y, z: True
     assert submain.prepare_package(None, "foo/bar/test.xml") == True
     submain.test_search = ts
 
@@ -29,7 +30,7 @@ def test_prepare_package_extension():
 def test_prepare_package_missing():
     "Tests that the prepare_package function fails when file is not found"
 
-    err = ErrorBundle(None, True)
+    err = ErrorBundle()
     submain.prepare_package(err, "foo/bar/asdf/qwerty.xyz")
 
     assert err.failed()
@@ -38,7 +39,7 @@ def test_prepare_package_missing():
 def test_prepare_package_bad_file():
     "Tests that the prepare_package function fails for unknown files"
 
-    err = ErrorBundle(None, True)
+    err = ErrorBundle()
     submain.prepare_package(err, "tests/resources/main/foo.bar")
 
     assert err.failed()
@@ -48,14 +49,14 @@ def test_prepare_package_xml():
     "Tests that the prepare_package function passes with search providers"
 
     smts = submain.test_search
-    submain.test_search = lambda err,y,z: True
+    submain.test_search = lambda err, y, z: True
 
-    err = ErrorBundle(None, True)
+    err = ErrorBundle()
     submain.prepare_package(err, "tests/resources/main/foo.xml")
 
     assert not err.failed()
 
-    submain.test_search = lambda err,y,z: err.error(("x"), "Failed")
+    submain.test_search = lambda err, y, z: err.error(("x"), "Failed")
     submain.prepare_package(err, "tests/resources/main/foo.xml")
 
     assert err.failed()
@@ -96,13 +97,14 @@ def test_populate_chrome_manifest():
     "Ensures that the chrome manifest is populated if available"
 
     err = MockErrorHandler(None)
-    package_contents = {"chrome.manifest":{"foo":"bar"}}
-    package = MockXPIPackage(package_contents)
+    package_contents = {"chrome.manifest":
+            "tests/resources/chromemanifest/chrome.manifest"}
+    package = MockXPI(package_contents)
 
-    submain.populate_chrome_manifest(err, {"foo":"bar"}, package)
+    submain.populate_chrome_manifest(err, MockXPI())
     assert not err.pushable_resources
 
-    submain.populate_chrome_manifest(err, package_contents, package)
+    submain.populate_chrome_manifest(err, package)
     assert err.pushable_resources
     assert err.pushable_resources["chrome.manifest"]
     print err.pushable_resources
@@ -166,7 +168,7 @@ class MockDecorator:
             if tier == self.fail_tier:
                 print "> Fail Tier"
 
-                yield {"test": lambda x,y,z: x.fail_tier(),
+                yield {"test": lambda x, y: x.fail_tier(),
                        "simple": False,
                        "versions": None}
 
@@ -176,11 +178,11 @@ class MockDecorator:
 
         for x in range(1,10): # Ten times because we care
             print "Yielding Complex"
-            yield {"test": lambda x,y,z: x.report(tier),
+            yield {"test": lambda x, z: x.report(tier),
                    "simple": False,
                    "versions": None}
             print "Yielding Simple"
-            yield {"test": lambda x,y=None,z=None: x.test_simple(y, z),
+            yield {"test": lambda x, z=None: x.test_simple(z),
                    "simple": True,
                    "versions": None}
 
@@ -226,36 +228,11 @@ class MockErrorHandler:
         self.has_failed = True
         self.decorator.report_fail()
 
-    def test_simple(self, y, z):
+    def test_simple(self, z):
         "Makes sure that the second two params of a simple test are respected"
-
-        assert y is None
         assert z is None
 
     def failed(self, fail_on_warnings=False):
         "Simple accessor because the standard error handler has one"
         return self.has_failed
-
-
-class MockXPIPackage:
-    "A class that pretends to be an add-on package"
-
-    def __init__(self, file_data=None):
-        self.filename = "foo.bar"
-        self.extension = "bar"
-        self.subpackage = False
-        self.zf = None
-        self.file_data = file_data
-
-    def test():
-        "We don't ever want it to be faulty"
-        return True
-
-    def get_file_data(self):
-        "Returns the pre-populated file data"
-        return self.file_data
-
-    def read(self, filename):
-        "Return the filename so we can verify we're reading the right one"
-        return filename
 

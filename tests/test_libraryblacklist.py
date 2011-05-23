@@ -12,11 +12,10 @@ def test_blacklisted_files():
     """
 
     package_data = open("tests/resources/libraryblacklist/blocked.xpi")
-    package = XPIManager(package_data, "blocked.xpi")
-    contents = package.get_file_data()
+    package = XPIManager(package_data, mode="r", name="blocked.xpi")
     err = ErrorBundle()
 
-    test_content.test_packed_packages(err, contents, package)
+    test_content.test_packed_packages(err, package)
 
     print err.print_summary()
 
@@ -28,10 +27,10 @@ def test_skip_blacklisted_file():
     """Ensure blacklisted files are skipped for processing."""
 
     package_data = open("tests/resources/libraryblacklist/errors.xpi")
-    package = XPIManager(package_data, "errors.xpi")
+    package = XPIManager(package_data, mode="r", name="errors.xpi")
     err = ErrorBundle()
 
-    test_content.test_packed_packages(err, package.get_file_data(), package)
+    test_content.test_packed_packages(err, package)
 
     print err.print_summary()
     assert err.notices

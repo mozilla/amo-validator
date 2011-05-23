@@ -1,7 +1,7 @@
 import validator.testcases.langpack as langpack
 from validator.chromemanifest import ChromeManifest
 from validator.errorbundler import ErrorBundle
-from helper import _do_test
+from helper import _do_test, MockXPI
 
 
 def test_langpack_valid():
@@ -81,7 +81,6 @@ def test_has_chrome_manifest():
     available."""
 
     assert langpack.test_langpack_manifest(ErrorBundle(),
-                                           {},
                                            None) is None
 
 
@@ -90,10 +89,10 @@ def test_valid_chrome_manifest():
 
     err = ErrorBundle()
     err.save_resource("chrome.manifest", ChromeManifest("locale foo bar"))
-    langpack.test_langpack_manifest(err, {}, None)
+    langpack.test_langpack_manifest(err, MockXPI())
     assert not err.failed()
 
     err.save_resource("chrome.manifest", ChromeManifest("foo bar asdf"))
-    langpack.test_langpack_manifest(err, {}, None)
+    langpack.test_langpack_manifest(err, MockXPI())
     assert err.failed()
 

@@ -12,7 +12,7 @@ def test_compat_test():
                       {"{ec8030f7-c20a-464f-9b0e-13a3a9e97384}":
                            ["5.0a2"]})
 
-    compatibility.firefox_5_test(err, {}, None)
+    compatibility.firefox_5_test(err, None)
     print err.notices
     assert err.notices
     assert err.notices[0]["compatibility_type"] == "notice"
@@ -51,7 +51,7 @@ def test_navigator_language():
     print err.print_summary()
     print err.get_resource("compat_references")
 
-    compatibility.navigator_language(err, {}, None)
+    compatibility.navigator_language(err, None)
     assert err.failed()
     assert err.warnings[0]["compatibility_type"] == "error"
 

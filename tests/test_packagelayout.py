@@ -1,6 +1,6 @@
 import validator.testcases.packagelayout as packagelayout
 from validator.errorbundler import ErrorBundle
-from helper import _do_test
+from helper import _do_test, MockXPI
 
 
 def test_npapi():
@@ -75,9 +75,9 @@ def _do_simulated_test(function, structure, failure=False, ff4=False):
     for item in structure:
         dict_structure[item] = True
 
-    err = ErrorBundle(None, True)
+    err = ErrorBundle()
     err.save_resource("ff4", ff4)
-    function(err, dict_structure, None)
+    function(err, structure)
 
     err.print_summary(True)
 
@@ -152,7 +152,7 @@ def test_disallowed_file():
 def test_extra_obsolete():
     """Tests that unnecessary, obsolete files are detected."""
 
-    err = ErrorBundle(None, True)
+    err = ErrorBundle()
 
     # Tests that chromelist.txt is treated (with and without slashes in
     # the path) as an obsolete file.
@@ -172,7 +172,7 @@ def test_has_installrdfs():
     assert not _do_installrdfs(packagelayout.test_layout_all)
     assert _do_installrdfs(packagelayout.test_layout_all, False)
 
-    mock_xpi_subpack = MockXPIAll(True)
+    mock_xpi_subpack = MockXPI({}, subpackage=True)
 
     # Makes sure the above test is ignored if the package is a
     # subpackage.
@@ -184,27 +184,20 @@ def test_has_installrdfs():
                                mock_xpi_subpack)
 
 
-class MockXPIAll:
-    "Simulates an XPI package manager object"
-
-    def __init__(self, subpackage=False):
-        self.subpackage = subpackage
-
-
 def _do_installrdfs(function, has_install_rdf=True, xpi=None):
     "Helps to test that install.rdf files are present"
 
-    err = ErrorBundle(None, True)
-
-    if xpi is None:
-        xpi = MockXPIAll()
+    err = ErrorBundle()
 
     if has_install_rdf:
         content = {"install.rdf" : True}
         err.save_resource("has_install_rdf", True)
     else:
         content = {}
-    function(err, content, xpi)
+
+    if xpi is None:
+        xpi = MockXPI(content)
+    function(err, xpi)
 
     return err.failed()
 

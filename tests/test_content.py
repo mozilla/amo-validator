@@ -1,3 +1,4 @@
+from helper import MockXPI
 from js_helper import _do_test_raw
 
 import validator.xpi as xpi
@@ -11,16 +12,16 @@ def test_xpcnativewrappers():
     "Tests that xpcnativewrappers is not in the chrome.manifest"
 
     err = ErrorBundle()
-    assert content.test_xpcnativewrappers(err, {}, None) is None
+    assert content.test_xpcnativewrappers(err, None) is None
 
     err.save_resource("chrome.manifest",
                       ChromeManifest("foo bar"))
-    content.test_xpcnativewrappers(err, {}, None)
+    content.test_xpcnativewrappers(err, None)
     assert not err.failed()
 
     err.save_resource("chrome.manifest",
                       ChromeManifest("xpcnativewrappers on"))
-    content.test_xpcnativewrappers(err, {}, None)
+    content.test_xpcnativewrappers(err, None)
     assert err.failed()
 
 
@@ -29,7 +30,7 @@ def test_jar_subpackage():
 
     err = ErrorBundle()
     err.set_type(PACKAGE_EXTENSION)
-    mock_package = MockXPIManager(
+    mock_package = MockXPI(
         {"chrome/subpackage.jar":
              "tests/resources/content/subpackage.jar",
          "subpackage.jar":
@@ -40,13 +41,6 @@ def test_jar_subpackage():
 
     result = content.test_packed_packages(
                                     err,
-                                    {"chrome/subpackage.jar":
-                                      {"extension": "jar",
-                                       "name_lower": "subpackage.jar"},
-                                     "subpackage.jar":
-                                      {"extension": "jar",
-                                       "name_lower": "subpackage.jar"},
-                                       },
                                     mock_package)
     print result
     assert result == 2
@@ -63,7 +57,7 @@ def test_xpi_subpackage():
 
     err = ErrorBundle()
     err.set_type(PACKAGE_EXTENSION)
-    mock_package = MockXPIManager(
+    mock_package = MockXPI(
         {"chrome/package.xpi":
              "tests/resources/content/subpackage.jar"})
 
@@ -72,8 +66,6 @@ def test_xpi_subpackage():
 
     result = content.test_packed_packages(
         err,
-        {"chrome/package.xpi": {"extension": "xpi",
-                                "name_lower": "package.xpi"}},
         mock_package)
 
     print result
@@ -91,7 +83,7 @@ def test_xpi_tiererror():
     "Tests that tiers are reset when a subpackage is encountered"
 
     err = ErrorBundle()
-    mock_package = MockXPIManager(
+    mock_package = MockXPI(
         {"foo.xpi":
              "tests/resources/content/subpackage.jar"})
     content.testendpoint_validator = MockTestEndpoint(("test_package", ),
@@ -99,9 +91,6 @@ def test_xpi_tiererror():
 
     err.set_tier(2)
     result = content.test_packed_packages(err,
-                                          {"foo.xpi":
-                                               {"extension":"xpi",
-                                                "name_lower":"foo.xpi"}},
                                           mock_package)
     assert err.errors[0]["tier"] == 1
     assert err.tier == 2
@@ -113,7 +102,7 @@ def test_jar_nonsubpackage():
     err = ErrorBundle()
     err.set_type(PACKAGE_MULTI)
     err.save_resource("is_multipackage", True)
-    mock_package = MockXPIManager(
+    mock_package = MockXPI(
         {"foo.jar":
              "tests/resources/content/subpackage.jar",
          "chrome/bar.jar":
@@ -124,12 +113,6 @@ def test_jar_nonsubpackage():
 
     result = content.test_packed_packages(
                                     err,
-                                    {"foo.jar":
-                                      {"extension": "jar",
-                                       "name_lower": "foo.jar"},
-                                     "chrome/bar.jar":
-                                      {"extension": "jar",
-                                       "name_lower": "bar.jar"}},
                                     mock_package)
     print result
     assert result == 2
@@ -146,7 +129,7 @@ def test_markup():
     "Tests markup files in the content validator."
 
     err = ErrorBundle(None, True)
-    mock_package = MockXPIManager(
+    mock_package = MockXPI(
         {"foo.xml":
              "tests/resources/content/junk.xpi"})
 
@@ -155,9 +138,6 @@ def test_markup():
 
     result = content.test_packed_packages(
                                     err,
-                                    {"foo.xml":
-                                      {"extension": "xml",
-                                       "name_lower": "foo.xml"}},
                                     mock_package)
     print result
     assert result == 1
@@ -173,7 +153,7 @@ def test_css():
     "Tests css files in the content validator."
 
     err = ErrorBundle()
-    mock_package = MockXPIManager(
+    mock_package = MockXPI(
         {"foo.css":
              "tests/resources/content/junk.xpi"})
 
@@ -182,9 +162,6 @@ def test_css():
 
     result = content.test_packed_packages(
                                     err,
-                                    {"foo.css":
-                                      {"extension": "css",
-                                       "name_lower": "foo.css"}},
                                     mock_package)
     print result
     assert result == 1
@@ -201,22 +178,18 @@ def test_hidden_files():
     """Tests that hidden files are reported."""
 
     err = ErrorBundle()
-    mock_package = MockXPIManager({".hidden":
+    mock_package = MockXPI({".hidden":
                                        "tests/resources/content/junk.xpi"})
 
-    content.test_packed_packages(err, {".hidden":
-                                           {"extension": "bar",
-                                            "name_lower": ".hidden"}},
+    content.test_packed_packages(err,
                                  mock_package)
     print err.print_summary(verbose=True)
     assert err.failed()
 
     err = ErrorBundle()
-    mock_package_mac = MockXPIManager({"dir/__MACOSX/foo":
+    mock_package_mac = MockXPI({"dir/__MACOSX/foo":
                                           "tests/resources/content/junk.xpi"})
-    content.test_packed_packages(err, {"dir/__MACOSX/foo":
-                                           {"extension": "foo",
-                                            "name_lower": "foo"}},
+    content.test_packed_packages(err,
                                  mock_package_mac)
     print err.print_summary(verbose=True)
     assert err.failed()
@@ -232,13 +205,10 @@ def test_password_in_defaults_prefs():
     assert not _do_test_raw(password_js).failed()
 
     err = ErrorBundle()
-    mock_package = MockXPIManager({
+    mock_package = MockXPI({
         "defaults/preferences/foo.js": "tests/resources/content/password.js"})
 
     content.test_packed_packages(err,
-                                 {"defaults/preferences/foo.js":
-                                      {"extension": "js",
-                                       "name_lower": "foo.js"}},
                                  mock_package)
     print err.print_summary()
     assert err.failed()
@@ -249,7 +219,7 @@ def test_langpack():
 
     err = ErrorBundle(None, True)
     err.set_type(PACKAGE_LANGPACK)
-    mock_package = MockXPIManager(
+    mock_package = MockXPI(
         {"foo.dtd":
              "tests/resources/content/junk.xpi"})
 
@@ -258,9 +228,6 @@ def test_langpack():
 
     result = content.test_packed_packages(
                                     err,
-                                    {"foo.dtd":
-                                      {"extension": "dtd",
-                                       "name_lower": "foo.dtd"}},
                                     mock_package)
     print result
     assert result == 1
@@ -277,7 +244,7 @@ def test_jar_subpackage_bad():
     "Tests JAR files that are bad subpackages."
 
     err = ErrorBundle(None, True)
-    mock_package = MockXPIManager({"chrome/subpackage.jar":
+    mock_package = MockXPI({"chrome/subpackage.jar":
                             "tests/resources/content/junk.xpi"})
 
     content.testendpoint_validator = \
@@ -285,10 +252,6 @@ def test_jar_subpackage_bad():
 
     result = content.test_packed_packages(
                                     err,
-                                    {"chrome/subpackage.jar":
-                                      {"extension": "jar",
-                                       "name_lower":
-                                           "subpackage_bad.jar"}},
                                     mock_package)
     print result
     assert err.failed()
@@ -308,7 +271,7 @@ class MockTestEndpoint(object):
         self.td_error = td_error
         self.found_tiers = []
 
-    def _tier_test(self, err, package_contents, xpi):
+    def _tier_test(self, err, xpi):
         "A simulated test case for tier errors"
         print "Generating subpackage tier error..."
         self.found_tiers.append(err.tier)
@@ -338,8 +301,11 @@ class MockTestEndpoint(object):
         if name == "test_package":
             def wrap(package, name, expectation=PACKAGE_ANY):
                 pass
+        elif name in ("test_css_file", "test_unsafe_html", "process"):
+            def wrap(err, name, file_data):
+                pass
         else:
-            def wrap(err, con, pak):
+            def wrap(err, pak):
                 if isinstance(pak, xpi.XPIManager) and pak.subpackage:
                     self.expectations[name]["subpackage"] += 1
 
@@ -364,29 +330,4 @@ class MockMarkupEndpoint(MockTestEndpoint):
             return lambda x: self
 
         return MockTestEndpoint.__getattribute__(self, name)
-
-
-class MockXPIManager(object):
-    """Simulates an XPIManager object to make it much easier to test
-    packages and their contents"""
-
-    def __init__(self, package_contents):
-        self.contents = package_contents
-
-    def test(self):
-        "Simulate an integrity check. Just return true."
-        return True
-
-    def read(self, filename):
-        "Simulates an unpack-to-memory operation."
-
-        prelim_resource = self.contents[filename]
-
-        if isinstance(prelim_resource, str):
-
-            resource = open(prelim_resource)
-            data = resource.read()
-            resource.close()
-
-            return data
 

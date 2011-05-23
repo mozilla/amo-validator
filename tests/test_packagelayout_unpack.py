@@ -1,17 +1,23 @@
 from validator.errorbundler import ErrorBundle
 from validator.constants import *
 import validator.testcases.packagelayout as packagelayout
+from helper import MockXPI
 
 
-def _do_test(unpack=False, contents=(), set_type=0, is_ff4=False):
+def _do_test(unpack=False, contents=None, set_type=0, is_ff4=False):
     "Runs the tests. Handy as hell."
+
+    if not contents:
+        contents = []
 
     err = ErrorBundle(None, True)
     if set_type:
         err.set_type(set_type)
     err.save_resource("em:unpack", unpack)
     err.save_resource("ff4", is_ff4)
-    packagelayout.test_emunpack(err, contents, None)
+    packagelayout.test_emunpack(err,
+                                MockXPI(dict(zip(contents,
+                                                 [True for c in contents]))))
     return err
 
 

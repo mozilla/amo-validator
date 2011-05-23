@@ -5,7 +5,7 @@ from validator.constants import *
 
 
 @decorator.register_test(tier=1)
-def test_install_rdf_params(err, package_contents=None, xpi_package=None):
+def test_install_rdf_params(err, xpi_package=None):
     """Tests to make sure that some of the values in install.rdf
     are not gummed up."""
 

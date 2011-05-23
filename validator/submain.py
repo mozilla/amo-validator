@@ -87,8 +87,9 @@ def test_package(err, file_, name, expectation=PACKAGE_ANY,
     "Begins tests for the package."
 
     # Load up a new instance of an XPI.
-    package = XPIManager(file_, name)
-    if not package.zf:
+    try:
+        package = XPIManager(file_, mode="r", name=name)
+    except:
         # Die on this one because the file won't open.
         return err.error(("main",
                           "test_package",
@@ -111,15 +112,12 @@ def test_package(err, file_, name, expectation=PACKAGE_ANY,
                        "unexpected_type"),
                       "Unexpected package type (found theme)")
 
-    # Cache a copy of the package contents.
-    package_contents = package.get_file_data()
-
     # Test the install.rdf file to see if we can get the type that way.
-    has_install_rdf = "install.rdf" in package_contents
+    has_install_rdf = "install.rdf" in package
     if has_install_rdf:
         _load_install_rdf(err, package, expectation)
 
-    return test_inner_package(err, package_contents, package, for_appversions)
+    return test_inner_package(err, package, for_appversions)
 
 
 def _load_install_rdf(err, package, expectation):
@@ -175,20 +173,19 @@ def _load_install_rdf(err, package, expectation):
                                                     types[results]))
 
 
-def populate_chrome_manifest(err, package_contents, xpi_package):
+def populate_chrome_manifest(err, xpi_package):
     "Loads the chrome.manifest if it's present"
 
-    if "chrome.manifest" in package_contents:
+    if "chrome.manifest" in xpi_package:
         chrome_data = xpi_package.read("chrome.manifest")
         chrome = ChromeManifest(chrome_data)
         err.save_resource("chrome.manifest", chrome, pushable=True)
 
 
-def test_inner_package(err, package_contents, xpi_package,
-                       for_appversions=None):
+def test_inner_package(err, xpi_package, for_appversions=None):
     "Tests a package's inner content."
 
-    populate_chrome_manifest(err, package_contents, xpi_package)
+    populate_chrome_manifest(err, xpi_package)
 
     # Iterate through each tier.
     for tier in sorted(decorator.get_tiers()):
@@ -236,7 +233,7 @@ def test_inner_package(err, package_contents, xpi_package,
                 # - Error Bundler
                 # - Package listing
                 # - A copy of the package itself
-                test_func(err, package_contents, xpi_package)
+                test_func(err, xpi_package)
 
         # Return any errors at the end of the tier if undetermined.
         if err.failed(fail_on_warnings=False) and not err.determined:

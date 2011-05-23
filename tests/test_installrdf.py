@@ -114,7 +114,7 @@ def test_has_rdf():
 
     err = ErrorBundle()
 
-    assert installrdf.test_install_rdf_params(err, None, None) is None
+    assert installrdf.test_install_rdf_params(err, None) is None
 
     err.detected_type = 0
     err.save_resource("install_rdf", "test")
@@ -122,7 +122,7 @@ def test_has_rdf():
     testrdf = installrdf._test_rdf
     installrdf._test_rdf = lambda x, y: y
 
-    result = installrdf.test_install_rdf_params(err, None, None)
+    result = installrdf.test_install_rdf_params(err, None)
     installrdf._test_rdf = testrdf
 
     print result

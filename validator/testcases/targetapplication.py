@@ -7,8 +7,7 @@ APP_VERSIONS_URL = "Please check the list of valid versions at: "\
 
 
 @decorator.register_test(tier=1)
-def test_targetedapplications(err, package_contents=None,
-                              xpi_package=None):
+def test_targetedapplications(err, xpi_package=None):
     """Tests to make sure that the targeted applications in the
     install.rdf file are legit and that any associated files (I'm
     looking at you, SeaMonkey) are where they need to be."""

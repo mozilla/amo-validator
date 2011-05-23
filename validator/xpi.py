@@ -1,38 +1,41 @@
 from zipfile import ZipFile
+from StringIO import StringIO
 
 
 class XPIManager(object):
-    """An XPI reader and management class. Allows fun things like
-    reading, listing, and extracting files from an XPI without you
-    needing to worry about things like zip files or IO."""
+    """
+    An XPI reader and management class. Allows fun things like reading,
+    listing, and extracting files from an XPI without you needing to
+    worry about things like zip files or IO.
+    """
 
-    def __init__(self, package, name=None, subpackage=False):
+    def __init__(self, package, mode="r", name=None, subpackage=False):
         "Create a new managed XPI package"
 
-        self.zf = None
-
-        # Try opening the XPI as a zip.
-        try:
-            zip_package = ZipFile(package)
-
-        except:
-            # Pokemon error handling here is unnecessary. If we can't open
-            # it, we can't open it. We shouldn't be the "why won't the add-on
-            # open" brigade.
-            return
+        self.zf = ZipFile(package, mode=mode)
 
         # Store away the filename for future use.
         self.filename = name or package
         self.extension = self.filename.split(".")[-1]
         self.subpackage = subpackage
 
-        # Save the reference to the XPI to memory
-        self.zf = zip_package
+        self.contents_cache = None
+
+    def __iter__(self):
+        return (name for name in self.zf.namelist())
+
+    def __contains__(self, item):
+        return item in self.zf.namelist()
+
+    def info(self, name):
+        """Get info on a single file."""
+        return self.package_contents()[name]
 
     def test(self):
-        """Tests the validity and non-corruptness of the zip.
-
-        Will return true on failure."""
+        """
+        Tests the validity and non-corruptness of the zip. Will return true on
+        failure.
+        """
 
         # This guy tests the hashes of the content.
         try:
@@ -41,8 +44,11 @@ class XPIManager(object):
         except:
             return True
 
-    def get_file_data(self):
+    def package_contents(self):
         "Returns a dictionary of file information"
+
+        if self.contents_cache:
+            return self.contents_cache
 
         # Get a list of ZipInfo objects.
         files = self.zf.infolist()
@@ -59,12 +65,28 @@ class XPIManager(object):
 
             out_files[file_.filename] = file_doc
 
+        self.contetns_cache = out_files
         return out_files
 
     def read(self, filename):
         "Reads a file from the archive and returns a string."
 
         data = self.zf.read(filename)
-
         return data
+
+    def write(self, name, data):
+        """Write a blob of data to the XPI manager."""
+
+        if isinstance(data, StringIO):
+            self.zf.writestr(name, data.getvalue())
+        else:
+            self.zf.writestr(name, data)
+
+    def write_file(self, name, path=None):
+        """Write the contents of a file from the disk to the XPI."""
+
+        if path is None:
+            path = name
+
+        self.zf.write(path, name)
 

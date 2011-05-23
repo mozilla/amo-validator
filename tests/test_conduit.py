@@ -11,7 +11,7 @@ from validator.constants import *
 def test_invalid_package_type():
     """Assert that conduit toolbars can only be extensions."""
 
-    err = ErrorBundle(None, True)
+    err = ErrorBundle()
     err.detected_type = PACKAGE_ANY
     assert conduit.test_conduittoolbar(err) is None
     err.detected_type = PACKAGE_THEME
