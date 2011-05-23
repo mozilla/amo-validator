@@ -402,7 +402,7 @@ class JSArray(JSObject):
         # x = [4]
         # y = x * 3 // y = 12 since x equals "4"
 
-        output = u",".join([unicode(w.get_literal_value()) for
+        output = u",".join([unicode(w.get_literal_value() if w else "") for
                             w in
                             self.elements if
                             not (isinstance(w, JSWrapper) and

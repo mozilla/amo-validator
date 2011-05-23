@@ -7,6 +7,7 @@ def test_jsarray_output():
     ja = jstypes.JSArray()
     ja.elements = [None, None]
     ja.output()  # Used to throw tracebacks.
+    ja.get_literal_value()  # Also used to throw tracebacks.
 
 
 def test_jsobject_output():
