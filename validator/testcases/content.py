@@ -146,7 +146,7 @@ def test_packed_packages(err, xpi_package=None):
 
             # There are no expected types for packages within a multi-
             # item package.
-            testendpoint_validator.test_package(err, name)
+            testendpoint_validator.test_package(err, package, name)
 
             package.close()
             err.pop_state()
