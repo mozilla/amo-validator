@@ -78,6 +78,9 @@ def test_packed_packages(err, xpi_package=None):
                 filename=name)
             continue
 
+        if "pretested" in data and data["pretested"]:
+            continue
+
         try:
             file_data = xpi_package.read(name)
         except KeyError:  # pragma: no cover

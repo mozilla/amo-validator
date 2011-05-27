@@ -22,6 +22,10 @@ def test_no_chromemanifest():
     assert tc_chromemanifest.test_categories(err) is None
     assert not err.failed()
 
+    err = ErrorBundle()
+    assert tc_chromemanifest.test_resourcemodules(err) is None
+    assert not err.failed()
+
 
 def test_js_categories_gecko2():
     """Test that JS categories raise problems for hyphenated values."""

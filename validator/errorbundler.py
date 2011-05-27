@@ -335,6 +335,19 @@ class ErrorBundle(object):
                                     message=notice,
                                     verbose=verbose)
 
+        if "is_jetpack" in self.metadata and verbose:
+            self.handler.write("\n")
+            self.handler.write("<<GREEN>>Jetpack add-on detected.<<NORMAL>>\n"
+                               "Identified files:")
+            for filename, data in self.metadata["jetpack_identified_files"].items():
+                self.handler.write((" %s\n" % filename) +
+                                   ("  %s : %s" % data))
+
+            self.handler.write("Unknown files:")
+            for filename in self.metadata["jetpack_unknown_files"]:
+                self.handler.write(" %s" % filename)
+
+
         self.handler.write("\n")
         if self.unfinished:
             self.handler.write("<<RED>>Validation terminated early")
