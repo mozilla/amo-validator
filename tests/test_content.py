@@ -271,7 +271,7 @@ class MockTestEndpoint(object):
         self.td_error = td_error
         self.found_tiers = []
 
-    def _tier_test(self, err, xpi):
+    def _tier_test(self, err, xpi, name):
         "A simulated test case for tier errors"
         print "Generating subpackage tier error..."
         self.found_tiers.append(err.tier)
