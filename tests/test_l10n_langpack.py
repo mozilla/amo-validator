@@ -4,12 +4,13 @@ from validator.testcases.l10n.properties import PropertiesParser
 from validator.xpi import XPIManager
 from validator.errorbundler import ErrorBundle
 from validator.constants import *
+from helper import MockXPI
 
 
 def test_chromemanifest():
     "Make sure it only accepts packs with chrome.manifest files."
 
-    assert l10n.test_lp_xpi(None, {}, None) is None
+    assert l10n.test_lp_xpi(None, MockXPI()) is None
 
 
 def test_parse_l10n():

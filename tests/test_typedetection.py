@@ -9,8 +9,8 @@ def _test_type(file_, expectation, failure=False):
     "Tests a file against the expectations"
 
     err = ErrorBundle(None, True)
-    package = XPIManager(open(file_), file_)
-    contents = package.get_file_data()
+    package = XPIManager(open(file_), mode="r", name=file_)
+    contents = package.package_contents()
 
     # We need to have an install.rdf.
     assert "install.rdf" in contents

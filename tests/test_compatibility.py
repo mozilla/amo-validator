@@ -37,7 +37,7 @@ def test_navigator_language():
     print err.print_summary()
     print err.get_resource("compat_references")
 
-    compatibility.navigator_language(err, {}, None)
+    compatibility.navigator_language(err, None)
     assert err.failed()
     assert err.warnings[0]["compatibility_type"] == "error"
 

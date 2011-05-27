@@ -70,8 +70,8 @@ def test_subpackage():
 
     err = ErrorBundle()
     err.set_type(PACKAGE_DICTIONARY)
-    assert l10n.test_xpi(err, {}, None) is None
+    assert l10n.test_xpi(err, None) is None
     err.set_type(PACKAGE_EXTENSION)
     err.push_state()
-    assert l10n.test_xpi(err, {}, None) is None
+    assert l10n.test_xpi(err, None) is None
 

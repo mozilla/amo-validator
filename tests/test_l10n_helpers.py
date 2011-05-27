@@ -4,6 +4,7 @@ from validator.testcases.l10ncompleteness import _get_locale_manager, \
                                                  _list_locales, \
                                                  _get_locales
 import validator.testcases.l10ncompleteness as l10ncomp
+from helper import MockXPI
 
 
 def test_list_locales():
@@ -47,18 +48,18 @@ def test_get_manager():
     "Tests that the proper XPI manager is returned for a locale description"
 
     # Test that jarred packages are simply returned
-    assert _get_locale_manager(None, None, "foo", {"jarred": False}) == "foo"
+    assert _get_locale_manager(None, "foo", {"jarred": False}) == "foo"
 
     # Test that cached unjarred packages are fetched from the cache
     l10ncomp.LOCALE_CACHE = {"foo": "bar"}
-    assert _get_locale_manager(None, None, None, {"jarred": True,
-                                                  "path": "foo"}) == "bar"
+    assert _get_locale_manager(None, None, {"jarred": True,
+                                            "path": "foo"}) == "bar"
 
     # Test that when a broken path is referenced, a warning is thrown
     l10ncomp.LOCALE_CACHE = {}
     err = ErrorBundle()
-    assert _get_locale_manager(err, {}, None, {"jarred": True,
-                                               "path": "foo"}) is None
+    assert _get_locale_manager(err, MockXPI(), {"jarred": True,
+                                                "path": "foo"}) is None
     assert err.failed()
     assert not l10ncomp.LOCALE_CACHE
 
@@ -72,8 +73,6 @@ def test_get_manager():
     xpi = MockManager("testcase1")
     print xpi.read("bar.jar")
     result = _get_locale_manager(err,
-                                 {"foo.jar": True,
-                                  "bar.jar": True},
                                  xpi,
                                  {"jarred": True,
                                   "path": "bar.jar"})
@@ -88,8 +87,6 @@ def test_get_manager():
     err = ErrorBundle()
     xpi = MockManager("testcase2")
     result = _get_locale_manager(err,
-                                 {"foo.jar": True,
-                                  "bar.jar": True},
                                  xpi,
                                  {"jarred": True,
                                   "path": "foo.jar"},
@@ -104,14 +101,17 @@ def test_get_manager():
 class MockManager(object):
     "Represents a fake XPIManager"
 
-    def __init__(self, default, path=None):
+    def __init__(self, default, mode="r", name=None):
         if isinstance(default, StringIO):
             default = default.getvalue()
         elif isinstance(default, file):
             default = default.read()
 
         self.value = default
-        self.path = path
+        self.path = name
+
+    def __contains__(self, name):
+        return True
 
     def read(self, filename):
         return "%s:%s" % (filename, self.value)

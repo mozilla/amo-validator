@@ -83,7 +83,7 @@ def test_has_installrdfs():
     err = ErrorBundle(None, True)
 
     # Test package to make sure has_install_rdf is set to True.
-    assert targetapp.test_targetedapplications(err, {}, None) is None
+    assert targetapp.test_targetedapplications(err, None) is None
 
 
 def test_is_ff4():

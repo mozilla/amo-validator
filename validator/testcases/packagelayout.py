@@ -40,12 +40,12 @@ def test_unknown_file(err, filename):
 
 
 @decorator.register_test(tier=2, expected_type=PACKAGE_EXTENSION)
-def test_npapi(err, package_contents=None, xpi_package=None):
+def test_npapi(err, xpi_package=None):
     "Detects NPAPI plugins in extensions and flags them"
 
     matches = [fn for
                fn in
-               package_contents if
+               xpi_package if
                fnmatch.fnmatch(fn, "plugins/*.dll")]
     if any(matches):
         err.warning(("testcases_packagelayout",
@@ -60,10 +60,11 @@ def test_npapi(err, package_contents=None, xpi_package=None):
 
 
 @decorator.register_test(tier=1)
-def test_blacklisted_files(err, package_contents=None, xpi_package=None):
+def test_blacklisted_files(err, xpi_package=None):
     "Detects blacklisted files and extensions."
 
-    for name, file_ in package_contents.items():
+    for name in xpi_package:
+        file_ = xpi_package.info(name)
         # Simple test to ensure that the extension isn't blacklisted
         extension = file_["extension"]
         if extension in blacklisted_extensions:
@@ -110,7 +111,7 @@ def test_blacklisted_files(err, package_contents=None, xpi_package=None):
         tier=5,
         versions={"{ec8030f7-c20a-464f-9b0e-13a3a9e97384}":
                       versions_after("firefox", "4.2a1pre")})
-def test_compatibility_binary(err, package_contents, xpi_package):
+def test_compatibility_binary(err, xpi_package):
     """
     Flags only binary content as being incompatible with future app releases.
     """
@@ -119,15 +120,14 @@ def test_compatibility_binary(err, package_contents, xpi_package):
                    "compatibility manually adjusted. Please test your add-on "
                    "against the new version before updating your maxVersion.")
 
-    for name, file_ in package_contents.items():
+    for name in xpi_package:
 
         # Restrict the search to files in sensitive directories.
         if not name.startswith(("components/", "plugins/", "platform/")):
             continue
 
         # Simple test to ensure that the extension isn't blacklisted
-        extension = file_["extension"]
-        if extension in ("dll", "dylib", "so", "exe"):
+        if name.endswith(("dll", "dylib", "so", "exe")):
             # Note that there is a binary extension in the metadata
             err.notice(
                 err_id=("testcases_packagelayout",
@@ -160,7 +160,7 @@ def test_compatibility_binary(err, package_contents, xpi_package):
 
 
 @decorator.register_test(tier=1)
-def test_layout_all(err, package_contents, xpi_package):
+def test_layout_all(err, xpi_package):
     "Tests the well-formedness of extensions."
 
     # Subpackages don't need to be tested for install.rdf.
@@ -175,37 +175,12 @@ def test_layout_all(err, package_contents, xpi_package):
                   "Addon missing install.rdf.",
                   "All addons require an install.rdf file.")
 
-# Per @jorgev, this test is invalid.
-# @decorator.register_test(tier=2)
-# def test_xpcom(err, package_contents, xpi_package):
-#     "Test to make sure XPCOM is not used for FF4+"
-#
-#     if not err.get_resource("ff4"):
-#         return None
-#
-#     # Test for XPCOM incompatibility.
-#     for name, file_ in package_contents.items():
-#
-#         if name.startswith("components/"):
-#             err.warning(("testcases_packagelayout",
-#                          "test_xpcom",
-#                          "incompatible_xpcom_detected"),
-#                         "XPCOM ties detected",
-#                         ["Files were found in the /components/ directory, "
-#                          "which generally indicates XPCOM references. Firefox "
-#                          "4 no longer supports XPCOM. This interface is "
-#                          "subject to change.",
-#                          'File "%s" represents XPCOM ties.' % name],
-#                         name);
-#             break
 
 # This test needs to happen in tier 2. install.rdf analysis happens in tier
 # 1, which may cause this to generate false positives if it's also on tier 1
 # (bug 631340)
-
-
 @decorator.register_test(tier=2)
-def test_emunpack(err, package_contents, xpi_package):
+def test_emunpack(err, xpi_package):
 
     if err.get_resource("em:unpack") != "true":
         # Covers bug 597255
@@ -215,7 +190,7 @@ def test_emunpack(err, package_contents, xpi_package):
         if not fails:
             executables = ("exe", "dll", "so", "dylib", "exe", "bin")
             # Search for unpack-worthy files
-            for file_ in package_contents:
+            for file_ in xpi_package:
                 if fnmatch.fnmatch(file_, "chrome/icons/default/*"):
                     fails = True
                     break
@@ -246,7 +221,7 @@ def test_emunpack(err, package_contents, xpi_package):
         if not err.get_resource("ff4"):
             return
 
-        for file_ in package_contents:
+        for file_ in xpi_package:
             if fnmatch.fnmatch(file_, "*.jar"):
                 err.notice(("testcases_packagelayout",
                             "test_emunpack",
@@ -263,7 +238,7 @@ def test_emunpack(err, package_contents, xpi_package):
 
 
 @decorator.register_test(tier=1, expected_type=3)
-def test_dictionary_layout(err, package_contents=None, xpi_package=None):
+def test_dictionary_layout(err, xpi_package=None):
     """Ensures that dictionary packages contain the necessary
     components and that there are no other extraneous files lying
     around."""
@@ -281,13 +256,13 @@ def test_dictionary_layout(err, package_contents=None, xpi_package=None):
         "chrome/*"]
     whitelisted_extensions = ("txt",)
 
-    test_layout(err, package_contents, mandatory_files,
+    test_layout(err, xpi_package, mandatory_files,
                 whitelisted_files, whitelisted_extensions,
                 "dictionary")
 
 
 @decorator.register_test(tier=1, expected_type=4)
-def test_langpack_layout(err, package_contents=None, xpi_package=None):
+def test_langpack_layout(err, xpi_package=None):
     """Ensures that language packs only contain exactly what they
     need and nothing more. Otherwise, somebody could sneak something
     sneaking into them."""
@@ -301,13 +276,13 @@ def test_langpack_layout(err, package_contents=None, xpi_package=None):
     whitelisted_extensions = ("manifest", "rdf", "jar", "dtd",
                               "properties", "xhtml", "css")
 
-    test_layout(err, package_contents, mandatory_files,
+    test_layout(err, xpi_package, mandatory_files,
                 whitelisted_files, whitelisted_extensions,
                 "language pack")
 
 
 @decorator.register_test(tier=1, expected_type=2)
-def test_theme_layout(err, package_contents=None, xpi_package=None):
+def test_theme_layout(err, xpi_package=None):
     """Ensures that themes only contain exactly what they need and
     nothing more. Otherwise, somebody could sneak something sneaking
     into them."""
@@ -318,11 +293,11 @@ def test_theme_layout(err, package_contents=None, xpi_package=None):
         "chrome.manifest"]
     whitelisted_files = ["chrome/*.jar"]
 
-    test_layout(err, package_contents, mandatory_files,
+    test_layout(err, xpi_package, mandatory_files,
                 whitelisted_files, None, "theme")
 
 
-def test_layout(err, package_contents, mandatory, whitelisted,
+def test_layout(err, xpi, mandatory, whitelisted,
                 white_extensions=None, pack_type="Unknown Addon"):
     """Tests the layout of a package. Pass in the various types of files
     and their levels of requirement and this guy will figure out which
@@ -331,7 +306,7 @@ def test_layout(err, package_contents, mandatory, whitelisted,
     # A shortcut to prevent excessive lookups
     fnm = fnmatch.fnmatch
 
-    for file_ in package_contents:
+    for file_ in xpi:
 
         if fnm(file_, "__MACOSX/*") or \
            fnm(file_, ".DS_Store"):

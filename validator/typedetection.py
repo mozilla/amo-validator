@@ -66,10 +66,8 @@ def detect_type(err, install_rdf=None, xpi_package=None):
     # must be passed. It's so crazy secure that it's cool if we use it
     # as kind of a fallback.
 
-    package_contents = xpi_package.get_file_data()
-    dictionaries = [file_ for file_ in package_contents.keys() if
-                    file_.startswith("dictionaries")]
-    if dictionaries:
+    if any(file_ for file_ in xpi_package if
+               file_.startswith("dictionaries/")):
         return PACKAGE_DICTIONARY
 
     # There's no type element, so the spec says that it's either a

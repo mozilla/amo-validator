@@ -9,7 +9,7 @@ BAD_LINK = '(href|src)=["\'](?!chrome:\/\/)(([a-z]*:)?\/\/|data:)'
 
 
 @decorator.register_test(tier=2, expected_type=PACKAGE_LANGPACK)
-def test_langpack_manifest(err, package_contents=None, xpi_package=None):
+def test_langpack_manifest(err, xpi_package=None):
     """Tests the chrome.manifest files in the package for
     compliance with the standard language pack triples."""
 

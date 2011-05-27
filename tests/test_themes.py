@@ -21,5 +21,5 @@ def test_theme_bad_chrome_manifest():
 def test_no_chrome_manifest():
     "Tests that validation is skipped if there is no chrome manifest."
 
-    assert themes.test_theme_manifest(ErrorBundle(), {}, None) is None
+    assert themes.test_theme_manifest(ErrorBundle(), None) is None
 

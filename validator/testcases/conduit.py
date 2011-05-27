@@ -5,7 +5,7 @@ from validator.constants import *
 
 
 @decorator.register_test(1)
-def test_conduittoolbar(err, package_contents=None, xpi_manager=None):
+def test_conduittoolbar(err, xpi_manager=None):
     "Find and blacklist Conduit toolbars"
 
     # Ignore non-extension types
@@ -55,7 +55,7 @@ def test_conduittoolbar(err, package_contents=None, xpi_manager=None):
     # Do some matching on the files in the package
     conduit_files = ("components/Conduit*",
                      "searchplugin/conduit*")
-    for file_ in package_contents:
+    for file_ in xpi_manager:
         for bad_file in conduit_files:
             # If there's a matching file, it's Conduit
             if fnmatch.fnmatch(file_, bad_file):
@@ -66,7 +66,7 @@ def test_conduittoolbar(err, package_contents=None, xpi_manager=None):
                                    "Conduit directory (%s) found." % bad_file)
 
     # Do some tests on the chrome.manifest file if it exists
-    if "chrome.manifest" in package_contents:
+    if "chrome.manifest" in xpi_manager:
         # Grab the chrome manifest
         chrome = err.get_resource("chrome.manifest")
 

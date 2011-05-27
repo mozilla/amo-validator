@@ -9,7 +9,7 @@ def _run_test(filename, expectation, should_fail=True):
 
     name = "tests/resources/submain/%s" % filename
     pack = open(name)
-    xpi = XPIManager(pack, name)
+    xpi = XPIManager(pack, mode="r", name=name)
     err = ErrorBundle(None, True)
 
     submain._load_install_rdf(err, xpi, expectation)

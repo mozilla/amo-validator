@@ -78,7 +78,7 @@ def _get_locales(err, xpi_package=None, locales=None):
     return processed_locales
 
 
-def _get_locale_manager(err, package_contents, xpi_package, description,
+def _get_locale_manager(err, xpi_package, description,
                         no_cache=False):
     "Returns the XPIManager object for a locale"
 
@@ -90,7 +90,7 @@ def _get_locale_manager(err, package_contents, xpi_package, description,
     if path in LOCALE_CACHE and not no_cache:
         return LOCALE_CACHE[path]
 
-    if path not in package_contents:
+    if path not in xpi_package:
         err.warning(("testcases_l10ncompleteness",
                      "_get_locale_manager",
                      "manager_absent"),
@@ -102,7 +102,7 @@ def _get_locale_manager(err, package_contents, xpi_package, description,
                     filename="chrome.manifest")
         return None
     jar = StringIO(xpi_package.read(path))
-    locale = XPIManager(jar, path)
+    locale = XPIManager(jar, mode="r", name=path)
 
     if not no_cache:
         LOCALE_CACHE[path] = locale
@@ -110,7 +110,7 @@ def _get_locale_manager(err, package_contents, xpi_package, description,
 
 
 @decorator.register_test(tier=4)
-def test_xpi(err, package_contents, xpi_package):
+def test_xpi(err, xpi_package):
     """Tests an XPI (or JAR, really) for L10n completeness"""
 
     # Skip over incompatible (or unnecessary) package types.
@@ -121,7 +121,7 @@ def test_xpi(err, package_contents, xpi_package):
         return None
 
     # Don't even both with the test(s) if there's no chrome.manifest.
-    if "chrome.manifest" not in package_contents:
+    if "chrome.manifest" not in xpi_package:
         return None
 
     raw_locales = _list_locales(err)
@@ -152,7 +152,6 @@ def test_xpi(err, package_contents, xpi_package):
 
     reference = locales[ref_name]
     reference_locale = _get_locale_manager(err,
-                                           package_contents,
                                            xpi_package,
                                            reference)
     # Loop through the locales and test the valid ones.
@@ -162,7 +161,6 @@ def test_xpi(err, package_contents, xpi_package):
             continue
 
         target_locale = _get_locale_manager(err,
-                                            package_contents,
                                             xpi_package,
                                             locale)
         if target_locale is None:
@@ -184,11 +182,11 @@ def test_xpi(err, package_contents, xpi_package):
 
 
 @decorator.register_test(tier=4, expected_type=PACKAGE_LANGPACK)
-def test_lp_xpi(err, package_contents, xpi_package):
+def test_lp_xpi(err, xpi_package):
     "Tests a language pack for L10n completeness"
 
     # Don't even both with the test(s) if there's no chrome.manifest.
-    if "chrome.manifest" not in package_contents:
+    if "chrome.manifest" not in xpi_package:
         return None
 
     locales = _get_locales(err);
@@ -219,7 +217,6 @@ def test_lp_xpi(err, package_contents, xpi_package):
     for (ref_xpi, ref_locales) in references:
         # Iterate each locale in each supported reference package
         ref_pack = _get_locale_manager(err,
-                                       ref_xpi.get_file_data(),
                                        ref_xpi,
                                        {"path": "en-US.jar",
                                         "jarred": True},
@@ -244,7 +241,6 @@ def test_lp_xpi(err, package_contents, xpi_package):
 
             target_locale = corresp_locales[0]
             target_pack = _get_locale_manager(err,
-                                              package_contents,
                                               xpi_package,
                                               target_locale)
             if target_pack is None:
@@ -265,8 +261,7 @@ def test_lp_xpi(err, package_contents, xpi_package):
 def _compare_packages(reference, target, ref_base="", locale_base=""):
     "Compares two L10n-compatible packages to one another."
 
-    ref_files = reference.get_file_data()
-    tar_files = target.get_file_data()
+    tar_files = target.package_contents()
 
     results = []
     total_entities = 0
@@ -277,7 +272,7 @@ def _compare_packages(reference, target, ref_base="", locale_base=""):
     l10n_docs = ("dtd", "properties", "xhtml", "ini", "inc")
     parsable_docs = ("dtd", "properties")
 
-    for name, file_data in ref_files.items():
+    for name in reference:
 
         entity_count = 0
 
