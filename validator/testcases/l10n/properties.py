@@ -1,3 +1,5 @@
+import types
+from StringIO import StringIO
 from validator.contextgenerator import ContextGenerator
 
 
@@ -17,10 +19,12 @@ class PropertiesParser(object):
         self.entities = {}
         self.items = []
 
-        if isinstance(dtd, str):
+        if isinstance(dtd, types.StringTypes):
             data = open(dtd).read()
-        else:
+        elif isinstance(dtd, StringIO):
             data = dtd.getvalue()
+        elif isinstance(dtd, file):
+            data = dtd.read()
 
         # Create a context!
         self.context = ContextGenerator(data)

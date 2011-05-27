@@ -1,31 +1,38 @@
 import fastchardet
 
-def test_ascii():
-    "Determines that fastchardet detects ASCII properly"
 
+def test_ascii():
+    """Determines that fastchardet detects ASCII properly."""
     assert fastchardet.detect("This is plain ASCII")["encoding"] == "ascii"
 
+
 def test_utf8():
-    "Determines that fastchardet properly detects UTF-8"
+    """Determine that fastchardet properly detects UTF-8."""
 
     assert fastchardet.detect("""\xEF\xBB\xBF
             Haldo, UTF-8
             """)["encoding"] == "utf_8"
 
+
 def test_utfn():
-    "Determines that fastchardet properly detects UTF-N"
+    """Determine that fastchardet properly detects UTF-N."""
 
     assert fastchardet.detect("""\xFF\xFE\x00\x00
             Haldo, UTF-Not 8
             """)["encoding"] == "utf_n"
 
+
 def test_unicode():
-    "For when we're silly sallies and pass unicode in"
+    """
+    Make sure that things turn out right when we're silly sallies and pass
+    unicode in.
+    """
 
     assert fastchardet.detect(unicode("foo"))["encoding"] == "unicode"
 
+
 def test_esoteric():
-    "Makes sure that fastchardet can detect other encodings"
+    """Make sure that fastchardet can detect other encodings."""
 
     a = lambda code: fastchardet.detect(code)["encoding"]
 

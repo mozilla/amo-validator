@@ -1,4 +1,5 @@
-
+import types
+from StringIO import StringIO
 from validator.contextgenerator import ContextGenerator
 
 try:
@@ -20,11 +21,13 @@ class DTDParser(object):
         self.entities = {}
         self.items = []
 
-        if isinstance(dtd, str):
-            dtd_instance = open(dtd)
-            data = dtd_instance.read()
-            dtd_instance.close()
-        else:
+        data = ""
+        if isinstance(dtd, types.StringTypes):
+            with open(dtd) as dtd_instance:
+                data = dtd_instance.read()
+        elif isinstance(dtd, file):
+            data = dtd.read()
+        elif isinstance(dtd, StringIO):
             data = dtd.getvalue()
 
         self._parse(data)

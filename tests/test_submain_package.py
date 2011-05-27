@@ -1,8 +1,7 @@
-import os
-
 import validator.submain as submain
 from validator.errorbundler import ErrorBundle
 from validator.constants import *
+
 
 def test_package_pass():
     "Tests the test_package function with simple data"
@@ -89,5 +88,4 @@ def test_package_extension_bad_expectation():
     submain.test_inner_package = tip
 
     assert err.failed()
-
 

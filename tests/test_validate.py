@@ -4,6 +4,7 @@ from validator.errorbundler import ErrorBundle
 import validator.constants
 import validator.testcases.targetapplication as targetapp
 
+
 def test_validate():
     output = validate(path="tests/resources/packagelayout/theme.jar")
     j = json.loads(output)
@@ -39,6 +40,7 @@ def test_validate():
                       overrides="foo",
                       format=None)
     assert output.overrides == "foo"
+
 
 def test_app_versions():
     "Tests that the validate function properly loads app_versions.json"

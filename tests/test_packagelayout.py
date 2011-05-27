@@ -37,6 +37,7 @@ def test_blacklisted_files():
     assert not err.compat_summary["errors"]
 
 
+
 def test_blacklisted_magic_numbers():
     "Tests that blacklisted magic numbers are banned"
 
@@ -97,6 +98,7 @@ def test_theme_passing():
              packagelayout.test_theme_layout,
              False)
 
+
 def test_extra_unimportant():
     """Tests the layout of a theme that contains an unimportant but
     extra directory."""
@@ -104,6 +106,7 @@ def test_extra_unimportant():
     _do_test("tests/resources/packagelayout/theme_extra_unimportant.jar",
              packagelayout.test_theme_layout,
              False)
+
 
 def _do_simulated_test(function, structure, failure=False, ff4=False):
     """"Performs a test on a function or set of functions without
@@ -126,6 +129,7 @@ def _do_simulated_test(function, structure, failure=False, ff4=False):
 
     return err
 
+
 def test_langpack_max():
     """Tests the package layout module out on a simulated language pack
     containing the largest number of possible elements."""
@@ -143,6 +147,7 @@ def test_langpack_max():
                         "chrome/asdf.xhtml",
                         "chrome/asdf.css"])
 
+
 def test_dict_max():
     """Tests the package layout module out on a simulated dictionary
     containing the largest number of possible elements."""
@@ -157,6 +162,7 @@ def test_dict_max():
                         "chrome.manifest",
                         "chrome/whatever.jar"])
 
+
 def test_unknown_file():
     """Tests that the unknown file detection function is working."""
 
@@ -168,6 +174,7 @@ def test_unknown_file():
                         "chrome/foo.jar",
                         "chrome.manifest",
                         "chromelist.txt"])
+
 
 def test_disallowed_file():
     """Tests that outright improper files are blocked."""
@@ -218,7 +225,6 @@ def test_has_installrdfs():
                                mock_xpi_subpack)
 
 
-
 class MockXPIAll:
     "Simulates an XPI package manager object"
 
@@ -242,5 +248,4 @@ def _do_installrdfs(function, has_install_rdf=True, xpi=None):
     function(err, content, xpi)
 
     return err.failed()
-
 

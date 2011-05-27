@@ -1,4 +1,5 @@
 import rdflib
+import types
 from rdflib import URIRef
 from StringIO import StringIO
 
@@ -17,13 +18,11 @@ class RDFParser(object):
             self.namespace = namespace
 
         # Try it!
-        if not isinstance(data, StringIO):
-            pseudo_file = StringIO(data)  # Wrap data in a pseudo-file
-        else:
-            pseudo_file = data
+        if isinstance(data, types.StringTypes):
+            data = StringIO(data)  # Wrap data in a pseudo-file
 
         try:
-            graph.parse(pseudo_file, format="xml")
+            graph.parse(data, format="xml")
         except Exception as error:
             self.rdf = None
             return

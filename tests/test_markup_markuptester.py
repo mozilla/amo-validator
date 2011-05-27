@@ -3,11 +3,13 @@ import validator.testcases.markup.markuptester as markuptester
 from validator.errorbundler import ErrorBundle
 from validator.constants import *
 
+
 def _do_test(path, should_fail=False, type_=None):
     return _do_test_raw(open(path).read(),
                         path,
                         should_fail,
                         type_)
+
 
 def _do_test_raw(data, path, should_fail=False, type_=None):
     filename = path.split("/")[-1]
@@ -55,50 +57,60 @@ def test_html_file():
 
     _do_test("tests/resources/markup/markuptester/pass.html")
 
+
 def test_xml_file():
     "Tests a package with a valid XML file."
 
     _do_test("tests/resources/markup/markuptester/pass.xml")
+
 
 def test_xul_file():
     "Tests a package with a valid XUL file."
 
     _do_test("tests/resources/markup/markuptester/pass.xul")
 
+
 def test_xml_bad_nesting():
     "Tests an XML file that has badly nested elements."
 
     _do_test("tests/resources/markup/markuptester/bad_nesting.xml", True)
+
 
 def test_has_cdata():
     "Tests that CDATA is good to go."
 
     _do_test("tests/resources/markup/markuptester/cdata.xml")
 
+
 def test_xml_overclosing():
     "Tests an XML file that has overclosed elements"
 
     _do_test("tests/resources/markup/markuptester/overclose.xml", True)
+
 
 def test_xml_extraclosing():
     "Tests an XML file that has extraclosed elements"
 
     _do_test("tests/resources/markup/markuptester/extraclose.xml", True)
 
+
 def test_html_ignore_comment():
     "Tests that HTML comment values are ignored"
 
     _do_test("tests/resources/markup/markuptester/ignore_comments.html")
+
 
 def test_html_css_style():
     "Tests that CSS within an element is passed to the CSS tester"
 
     _do_test("tests/resources/markup/markuptester/css_style.html", True)
 
+
 def test_html_css_inline():
     "Tests that inline CSS is passed to the CSS tester"
 
     _do_test("tests/resources/markup/markuptester/css_inline.html", True)
+
 
 def test_xul_evil():
     "Tests for evil kinds of scripts and iframes in XUL."
@@ -111,6 +123,7 @@ def test_xul_evil():
              "bad_iframe_remote_missing.xul",
              True)
 
+
 def test_lp_passing():
     "Tests a valid language pack file."
 
@@ -118,12 +131,14 @@ def test_lp_passing():
              False,
              PACKAGE_LANGPACK)
 
+
 def test_lp_unsafe():
     "Tests a language pack file that contains unsafe elements."
 
     _do_test("tests/resources/markup/markuptester/_langpack/lp_unsafe.html",
              True,
              PACKAGE_LANGPACK)
+
 
 def test_lp_remote():
     "Tests a language pack file that contains remote references."
@@ -163,6 +178,7 @@ def test_self_closing_scripts():
     </foo>
     """, "foo.js")
 
+
 def test_dom_mutation():
     """Test that DOM mutation events are warned against."""
 
@@ -173,6 +189,7 @@ def test_dom_mutation():
     _do_test_raw("""
     <foo><bar ondomattrmodified="" /></foo>
     """, "foo.js", should_fail=True)
+
 
 def test_dom_mutation():
     """Test that DOM mutation events are warned against."""

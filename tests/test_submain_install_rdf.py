@@ -1,10 +1,10 @@
-import os
-
 import validator.submain as submain
 from validator.errorbundler import ErrorBundle
 from validator.xpi import XPIManager
 from validator.constants import *
 
+
+# TODO: This should someday be replaced with helper._do_test
 def _run_test(filename, expectation, should_fail=True):
 
     name = "tests/resources/submain/%s" % filename
@@ -66,6 +66,7 @@ def test_load_irdf_expectation():
     _run_test("install_rdf.xpi", PACKAGE_EXTENSION, True)
     submain.detect_type = dt
 
+
 def test_doctype():
     "Asserts that install.rdf files with doctypes break validation"
 
@@ -76,6 +77,7 @@ def test_doctype():
     assert err.failed()
     assert not err.get_resource("has_install_rdf")
     assert not err.get_resource("install_rdf")
+
 
 class MockXPIManager(object):
     "Pretends to be a simple XPI manager"

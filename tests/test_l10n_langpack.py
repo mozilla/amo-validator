@@ -3,8 +3,8 @@ from validator.testcases.l10n.dtd import DTDParser
 from validator.testcases.l10n.properties import PropertiesParser
 from validator.xpi import XPIManager
 from validator.errorbundler import ErrorBundle
-from helper import _do_test
 from validator.constants import *
+
 
 def test_chromemanifest():
     "Make sure it only accepts packs with chrome.manifest files."
@@ -28,7 +28,7 @@ def test_parse_l10n():
 def test_results_aggregator():
     "Tests that language pack aggregation results are read properly."
 
-    err = ErrorBundle(None, True)
+    err = ErrorBundle()
     l10n._aggregate_results(err,
                             [{"type":"missing_files",
                               "filename":"foo.bar"}],
@@ -37,7 +37,7 @@ def test_results_aggregator():
                              "jarred": False})
     assert err.failed()
 
-    err = ErrorBundle(None, True)
+    err = ErrorBundle()
     l10n._aggregate_results(err,
                             [{"type":"missing_entities",
                               "filename":"foo.bar",
@@ -47,7 +47,7 @@ def test_results_aggregator():
                              "jarred": False})
     assert err.failed()
 
-    err = ErrorBundle(None, True)
+    err = ErrorBundle()
     l10n._aggregate_results(err,
                             [{"type":"unchanged_entity",
                               "entities":0,
@@ -60,7 +60,7 @@ def test_results_aggregator():
                              "jarred": False})
     assert not err.failed()
 
-    err = ErrorBundle(None, True)
+    err = ErrorBundle()
     l10n._aggregate_results(err,
                             [{"type":"unchanged_entity",
                               "entities":50,
@@ -106,6 +106,7 @@ def test_comparer():
     assert _compare_packs(ref, mfile) == 4
     assert _compare_packs(ref, mfileent) == 3
     assert _compare_packs(ref, ref) > 3
+
 
 def _compare_packs(reference, target):
     "Does a simple comparison and prints the output"

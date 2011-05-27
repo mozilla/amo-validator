@@ -1,5 +1,3 @@
-import os
-
 import validator.testcases.content as test_content
 from validator.errorbundler import ErrorBundle
 from validator.xpi import XPIManager

@@ -48,7 +48,7 @@ def set_innerHTML(new_value, traverser):
             description="Due to both security and performance reasons, "
                         "innerHTML should not be set using dynamic "
                         "values. This can lead to security issues or "
-                        "fairly serious performance degredation.",
+                        "fairly serious performance degradation.",
             filename=traverser.filename,
             line=traverser.line,
             column=traverser.position,

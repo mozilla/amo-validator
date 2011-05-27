@@ -1,5 +1,3 @@
-import os
-
 from StringIO import StringIO
 
 from validator.opensearch import detect_opensearch
@@ -8,14 +6,8 @@ from validator.errorbundler import ErrorBundle
 from validator.constants import *
 
 def _do_test(url, failure=True, listed=False):
-
-    xml_file = open(url)
-    data = xml_file.read()
-    wrapper = StringIO(data)
-
     err = ErrorBundle()
-
-    results = detect_opensearch(err, wrapper, listed=listed)
+    results = detect_opensearch(err, open(url), listed=listed)
 
     if results.failed():
         print results.print_summary()

@@ -1,6 +1,4 @@
 import json
-from StringIO import StringIO
-
 import validator.testcases.targetapplication as targetapp
 from validator.constants import *
 from validator.errorbundler import ErrorBundle
@@ -15,7 +13,7 @@ targetapp.APPROVED_APPLICATIONS = \
 def _do_test_raw(rdf, listed=True, overrides=None):
     err = ErrorBundle(listed=listed)
     err.overrides = overrides
-    rdf = RDFParser(StringIO(rdf.strip()))
+    rdf = RDFParser(rdf.strip())
     err.save_resource("has_install_rdf", True)
     err.save_resource("install_rdf", rdf)
 
@@ -69,6 +67,7 @@ def test_bad_order():
              True,
              True)
 
+
 def test_dup_targets():
     """Tests that there are no duplicate targetAppication elements."""
 
@@ -77,6 +76,7 @@ def test_dup_targets():
              True,
              True)
 
+
 def test_has_installrdfs():
     """Tests that install.rdf files are present."""
 
@@ -84,6 +84,7 @@ def test_has_installrdfs():
 
     # Test package to make sure has_install_rdf is set to True.
     assert targetapp.test_targetedapplications(err, {}, None) is None
+
 
 def test_is_ff4():
     """Tests a passing install.rdf package for whether it's built for
@@ -195,7 +196,6 @@ def test_overrides():
                     "targetapp_maxVersion":
                         {"{ec8030f7-c20a-464f-9b0e-13a3a9e97384}": "3.6"}}
             ).failed()
-
 
     # Make sure a test can be forced to fail.
     assert _do_test_raw("""
