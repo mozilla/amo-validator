@@ -107,6 +107,21 @@ def test_blacklisted_files(err, xpi_package=None):
                 filename=name)
 
 
+@decorator.register_test(tier=1)
+def test_godlikea(err, xpi_package):
+    """Test to make sure that the godlikea namespace is not in use."""
+
+    if "chrome/godlikea.jar" in xpi_package:
+        err.error(
+            err_id=("testcases_packagelayout",
+                    "test_godlikea"),
+            error="Banned 'godlikea' chrome namespace",
+            description="The 'godlikea' chrome namepsace is generated from a "
+                        "template and should be replaced with something "
+                        "unique to your add-on to avoid name conflicts.",
+            filename="chrome/godlikea.jar")
+
+
 @decorator.register_test(
         tier=5,
         versions={"{ec8030f7-c20a-464f-9b0e-13a3a9e97384}":

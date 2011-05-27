@@ -64,3 +64,18 @@ def test_fail_resourcemodules():
     tc_chromemanifest.test_resourcemodules(err)
     assert err.failed()
 
+
+def test_banned_content_namespaces():
+    """Test that banned content namespaces are banned."""
+
+    err = ErrorBundle()
+    c = ChromeManifest("content foo bar")
+    err.save_resource("chrome.manifest", c)
+    tc_chromemanifest.test_banned_content_namespaces(err)
+    assert not err.failed()
+
+    c = ChromeManifest("content godlikea bar")
+    err.save_resource("chrome.manifest", c)
+    tc_chromemanifest.test_banned_content_namespaces(err)
+    assert err.failed()
+

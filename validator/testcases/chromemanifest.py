@@ -4,7 +4,7 @@ from validator.chromemanifest import ChromeManifest
 
 @decorator.register_test(tier=2, simple=True)
 def test_categories(err):
-    "Tests for categories in the chrome.manifest file"
+    """Test for categories in the chrome.manifest file."""
 
     chrome = err.get_resource("chrome.manifest")
     if not chrome:
@@ -55,6 +55,33 @@ def test_resourcemodules(err):
                 description="There should not be resources in the "
                             "chrome.manifest file that are listed as "
                             "'resource modules'.",
+                filename="chrome.manifest",
+                line=triple["line"],
+                context=chrome.context)
+
+
+@decorator.register_test(tier=2, simple=True)
+def test_banned_content_namespaces(err):
+    """Flag content namespaces which have been banned."""
+
+    chrome = err.get_resource("chrome.manifest")
+    if not chrome:
+        return
+
+    banned_namespaces = {"godlikea":
+                             "The 'godlikea' namespace is generated from a "
+                             "template and should be replaced with something "
+                             "unique to your add-on to avoid name conflicts."}
+
+    for triple in chrome.triples:
+        if (triple["subject"] == "content" and
+            triple["predicate"] in banned_namespaces):
+
+            err.error(
+                err_id=("testcases_chromemanifest",
+                        "test_banned_content_namespaces"),
+                error="Banned namespace in chrome.manifest",
+                description=banned_namespaces[triple["predicate"]],
                 filename="chrome.manifest",
                 line=triple["line"],
                 context=chrome.context)
