@@ -162,7 +162,7 @@ def test_targetedapplications(err, xpi_package=None):
         if key in APPLICATIONS:
             supports.append(APPLICATIONS[key])
     err.save_resource("supports", supports)
-    err.save_resource("supported_versions", all_supported_versions)
+    err.supported_versions = all_supported_versions
 
     if not supports and err.get_resource("listed"):
         err.error(

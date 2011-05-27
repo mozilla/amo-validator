@@ -2,7 +2,6 @@ import json
 from validator.validate import validate as validate
 from validator.errorbundler import ErrorBundle
 import validator.constants
-import validator.testcases.targetapplication as targetapp
 
 
 def test_validate():
