@@ -187,6 +187,7 @@ def _regex_tests(err, data, filename):
         err.save_resource("compat_references", compat_references)
 
 
+    bugzilla = "https://bugzilla.mozilla.org/show_bug.cgi?id=%d"
 
     interfaces = {"nsIDOMDocumentTraversal": 655514,
                   "nsIDOMDocumentRange": 655513,
@@ -203,10 +204,9 @@ def _regex_tests(err, data, filename):
                         "banned_interface"),
                 notice="Unsupported interface in use",
                 description="Your add-on uses interface %s, which has been "
-                            "removed from Firefox 6. Please refer to "
-                            "https://bugzilla.mozilla.org/show_bug.cgi?id=%d "
+                            "removed from Firefox 6. Please refer to %s "
                             "for possible alternatives." % (
-                                interface, interfaces[interface]),
+                                interface, bugzilla % interfaces[interface]),
                 filename=filename,
                 line=line,
                 context=c,
@@ -214,4 +214,24 @@ def _regex_tests(err, data, filename):
                 for_appversions={'{ec8030f7-c20a-464f-9b0e-13a3a9e97384}':
                                      versions_after("firefox", "6.0a1")})
 
+    appupdatetimer = re.compile("app\\.update\\.timer")
+    aut_match = appupdatetimer.search(data)
+    if aut_match:
+        line = c.get_line(aut_match.start())
+
+        err.notice(
+            err_id=("testcases_scripting",
+                    "_regex_tests",
+                    "app.update.timer"),
+            notice="app.update.timer is incompatible with Firefox 6",
+            description="The 'app.update.timer' preferences is being replaced "
+                        "by the 'app.update.timerMinimumDelay' in Firefox 6. "
+                        "Please refer to %s for more information." % (
+                            bugzilla % 614181),
+            filename=filename,
+            line=line,
+            context=c,
+            compatibility_type="error",
+            for_appversions={'{ec8030f7-c20a-464f-9b0e-13a3a9e97384}':
+                                 versions_after("firefox", "6.0a1")})
 
