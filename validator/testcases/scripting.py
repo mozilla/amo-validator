@@ -10,6 +10,7 @@ from validator.testcases.javascript.spidermonkey import get_tree, \
                                                         JSReflectException
 from validator.constants import SPIDERMONKEY_INSTALLATION
 from validator.contextgenerator import ContextGenerator
+from validator.decorator import versions_after
 from validator.textfilter import *
 
 JS_ESCAPE = re.compile("\\\\+[ux]", re.I)
@@ -184,4 +185,33 @@ def _regex_tests(err, data, filename):
             compat_references["navigator_language"] = []
         compat_references["navigator_language"].append((filename, line, c))
         err.save_resource("compat_references", compat_references)
+
+
+
+    interfaces = {"nsIDOMDocumentTraversal": 655514,
+                  "nsIDOMDocumentRange": 655513,
+                  "IWeaveCrypto": 651596}
+    for interface in interfaces:
+        pattern = re.compile(interface)
+        match = pattern.search(data)
+        if match:
+            line = c.get_line(match.start())
+
+            err.notice(
+                err_id=("testcases_scripting",
+                        "_regex_tests",
+                        "banned_interface"),
+                notice="Unsupported interface in use",
+                description="Your add-on uses interface %s, which has been "
+                            "removed from Firefox 6. Please refer to "
+                            "https://bugzilla.mozilla.org/show_bug.cgi?id=%d "
+                            "for possible alternatives." % (
+                                interface, interfaces[interface]),
+                filename=filename,
+                line=line,
+                context=c,
+                compatibility_type="error",
+                for_appversions={'{ec8030f7-c20a-464f-9b0e-13a3a9e97384}':
+                                     versions_after("firefox", "6.0a1")})
+
 
