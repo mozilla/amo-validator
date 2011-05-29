@@ -91,6 +91,9 @@ class JSWrapper(object):
         self.lazy = lazy
         self.callable = callable
 
+        # This will be set in actions.py if needed.
+        self.global_parent = False
+
     def set_value(self, value, traverser=None, overwrite_const=False):
         """Assigns a value to the wrapper"""
 
