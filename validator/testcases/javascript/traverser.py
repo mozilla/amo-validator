@@ -83,11 +83,14 @@ class MockBundler:
 class Traverser:
     "Traverses the AST Tree and determines problems with a chunk of JS."
 
-    def __init__(self, err, filename, start_line=0, context=None):
+    def __init__(self, err, filename, start_line=0, context=None,
+                 is_jsm=False):
         if err is not None:
             self.err = err
         else:
             self.err = MockBundler()
+
+        self.is_jsm = is_jsm
 
         self.contexts = []
         self.block_contexts = []

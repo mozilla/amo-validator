@@ -73,7 +73,8 @@ def test_js_snippet(err, data, filename, line=0):
 
 
 def _do_test(err, filename, line, context, tree):
-    t = traverser.Traverser(err, filename, line, context=context)
+    t = traverser.Traverser(err, filename, line, context=context,
+                            is_jsm=filename.endswith(".jsm"))
     t.run(tree)
 
 
