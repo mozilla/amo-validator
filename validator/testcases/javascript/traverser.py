@@ -7,6 +7,7 @@ from validator.testcases.javascript.predefinedentities import \
                GLOBAL_ENTITIES, BANNED_IDENTIFIERS
 
 DEBUG = False
+IGNORE_POLLUTION = False
 
 
 class MockBundler:
@@ -141,15 +142,28 @@ class Traverser:
             if DEBUG:
                 self.err.final_context = self.contexts[0]
 
-            # This performs the namespace pollution test.
-            # {prefix, count}
+            if not IGNORE_POLLUTION:
+                # This performs the namespace pollution test.
+                global_context_size = len(self.contexts[0].data)
+                self._debug("Final context size: %d" % global_context_size)
 
-            # TODO : Make sure to respect JS modules (Bug 531311)
-
-            prefixes = []
-            global_ns = self.contexts[0]
-            for name in global_ns.__dict__.keys():
-                pass
+                if global_context_size > 3 and not self.is_jsm:
+                    self.err.warning(
+                        err_id=("testcases_javascript_traverser",
+                                "run",
+                                "namepsace_pollution"),
+                        warning="JavaScript namespace pollution",
+                        description="Your add-on contains a large number of "
+                                    "global variables, which can conflict "
+                                    "with other add-ons. For more information, "
+                                    "see "
+                                "http://blog.mozilla.com/addons/2009/01/16/"
+                                "firefox-extensions-global-namespace-pollution/"
+                                    ", or use JavaScript modules.",
+                       filename=self.filename,
+                        line=self.line,
+                        column=self.position,
+                        context=self.context)
 
     def _can_handle_node(self, node_name):
         "Determines whether a node can be handled."

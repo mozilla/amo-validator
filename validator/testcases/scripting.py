@@ -41,11 +41,11 @@ def test_js_file(err, filename, data, line=0):
     context = ContextGenerator(data)
     if traverser.DEBUG:
         _do_test(err=err, filename=filename, line=line, context=context,
-                 tree=tree)
+                 tree=tree, data=data)
     else:
         try:
             _do_test(err=err, filename=filename, line=line, context=context,
-                     tree=tree)
+                     tree=tree, data=data)
         except:  # pragma: no cover
             # We do this because the validator can still be damn unstable.
             # FIXME: This really needs to report an error so we know
@@ -72,9 +72,10 @@ def test_js_snippet(err, data, filename, line=0):
     test_js_file(err, filename, data, line)
 
 
-def _do_test(err, filename, line, context, tree):
+def _do_test(err, filename, line, context, tree, data):
     t = traverser.Traverser(err, filename, line, context=context,
-                            is_jsm=filename.endswith(".jsm"))
+                            is_jsm=(filename.endswith(".jsm") or
+                                    "EXPORTED_SYMBOLS" in data))
     t.run(tree)
 
 
