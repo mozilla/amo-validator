@@ -212,7 +212,8 @@ def _regex_tests(err, data, filename):
                 context=c,
                 compatibility_type="error",
                 for_appversions={'{ec8030f7-c20a-464f-9b0e-13a3a9e97384}':
-                                     versions_after("firefox", "6.0a1")})
+                                     versions_after("firefox", "6.0a1")},
+                tier=5)
 
     appupdatetimer = re.compile("app\\.update\\.timer")
     aut_match = appupdatetimer.search(data)
