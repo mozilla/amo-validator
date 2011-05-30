@@ -189,6 +189,8 @@ GLOBAL_ENTITIES = {
     u"RegExp": {"value": {u"prototype": {"readonly": True}}},
     u"Date": {"value": {u"prototype": {"readonly": True}}},
 
+    u"top": {"readonly": actions._readonly_top},
+
     u"Math": {"readonly": True},
 
     u"netscape":

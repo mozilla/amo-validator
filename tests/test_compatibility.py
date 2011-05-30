@@ -3,6 +3,8 @@ import validator.testcases.compatibility as compatibility
 from validator.decorator import versions_after
 from validator.testcases.markup.markuptester import MarkupParser
 import validator.testcases.scripting as scripting
+from validator.decorator import versions_after
+from js_helper import _do_real_test_raw
 from validator.errorbundler import ErrorBundle
 
 
@@ -91,4 +93,37 @@ def test_menu_item_compat():
         <bar insertbefore="something else" />
     </foo>
     """)
+
+
+def test_window_top():
+    """
+    Test that 'window.top' (a reserved global variable as of Firefox 6) is
+    flagged as incompatible.
+    """
+
+    err = _do_real_test_raw("""
+    window.top = "foo";
+    top = "bar";
+    """)
+    print err.print_summary(verbose=True)
+    assert not err.failed()
+    assert not err.notices
+
+    err = _do_real_test_raw("""
+    window.top = "foo";
+    """, versions={'{ec8030f7-c20a-464f-9b0e-13a3a9e97384}':
+                       versions_after("firefox", "6.0a1")})
+    print err.print_summary(verbose=True)
+    assert not err.failed()
+    assert err.notices
+    assert err.compat_summary["warnings"]
+
+    err = _do_real_test_raw("""
+    top = "foo";
+    """, versions={'{ec8030f7-c20a-464f-9b0e-13a3a9e97384}':
+                       versions_after("firefox", "6.0a1")})
+    print err.print_summary(verbose=True)
+    assert not err.failed()
+    assert err.notices
+    assert err.compat_summary["warnings"]
 
