@@ -127,3 +127,26 @@ def test_window_top():
     assert err.notices
     assert err.compat_summary["warnings"]
 
+
+def test_custom_addon_types():
+    """
+    Test that registering custom add-on types is flagged as being incompatible
+    with Firefox 6.
+    """
+
+    err = _do_real_test_raw("""
+    AddonManagerPrivate.registerProvider();
+    """)
+    print err.print_summary(verbose=True)
+    assert not err.failed()
+    assert not err.notices
+
+    err = _do_real_test_raw("""
+    AddonManagerPrivate.registerProvider();
+    """, versions={'{ec8030f7-c20a-464f-9b0e-13a3a9e97384}':
+                       versions_after("firefox", "6.0a1")})
+    print err.print_summary(verbose=True)
+    assert not err.failed()
+    assert err.notices
+    assert err.compat_summary["errors"]
+
