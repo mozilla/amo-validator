@@ -236,3 +236,26 @@ def _regex_tests(err, data, filename):
             for_appversions={'{ec8030f7-c20a-464f-9b0e-13a3a9e97384}':
                                  versions_after("firefox", "6.0a1")})
 
+    js_data_urls = re.compile("(javascript:|data:)")
+    jsdu_match = js_data_urls.search(data)
+    if jsdu_match:
+        line = c.get_line(jsdu_match.start())
+
+        err.notice(
+            err_id=("testcases_scripting",
+                    "_regex_tests",
+                    "javascript_data_urls"),
+            notice="javascript:/data: URIs may be incompatible with Firefox 6",
+            description="Loading 'javascript:' and 'data:' URIs through the "
+                        " location bar may no longer work as expected in "
+                        "Firefox 6. If you load these types of URIs, please "
+                        "test your add-on on the latest Firefox 6 builds, or "
+                        "refer to %s for more information." % (
+                            bugzilla % 656433),
+            filename=filename,
+            line=line,
+            context=c,
+            compatibility_type="warning",
+            for_appversions={'{ec8030f7-c20a-464f-9b0e-13a3a9e97384}':
+                                 versions_after("firefox", "6.0a1")})
+
