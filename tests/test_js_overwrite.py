@@ -1,5 +1,6 @@
 from js_helper import _do_test_raw, _get_var
 
+
 def test_new_overwrite():
     "Tests that objects created with `new` can be overwritten"
 
@@ -9,6 +10,7 @@ def test_new_overwrite():
     x = "foo";
     """)
     assert not results.message_count
+
 
 def test_redefine_new_instance():
     "Test the redefinition of an instance of a global type."
@@ -21,6 +23,7 @@ def test_redefine_new_instance():
     """)
     assert not results.message_count
 
+
 def test_property_members():
     "Tests that properties and members are treated fairly"
 
@@ -32,19 +35,27 @@ def test_property_members():
     assert _get_var(results, "y") == "bar"
     assert _get_var(results, "z") == "bar"
 
+
 def test_bug621106():
     "Tests that important objects cannot be overridden by JS"
 
-    err = _do_test_raw("""
+    assert _do_test_raw("""
     Number.prototype = "This is the new prototype";
+    """).failed()
+
+    assert _do_test_raw("""
     Object.prototype.test = "bar";
+    """).failed()
+
+    assert _do_test_raw("""
     Object = "asdf";
+    """).failed()
+
+    assert _do_test_raw("""
     var x = Object.prototype;
     x.test = "asdf";
-    """)
-    # There should be four errors (prototypes are only readonly)
-    print err.message_count
-    assert err.message_count == 4
+    """).failed()
+
 
 def test_with_statement():
     "Tests that 'with' statements work as intended"
@@ -70,4 +81,14 @@ def test_with_statement():
     }
     """)
     assert err.failed()
+
+
+def test_local_global_overwrite():
+    """Test that a global assigned to a local variable can be overwritten."""
+
+    err = _do_test_raw("""
+    foo = String.prototype;
+    foo = "bar";
+    """)
+    assert not err.failed()
 

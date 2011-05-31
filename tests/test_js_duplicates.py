@@ -1,10 +1,22 @@
-from js_helper import _do_test
+from js_helper import _do_test_raw
+
 
 def test_no_dups():
-    "Tests that errors are not duplicated."
+    """Test that errors are not duplicated."""
 
-    err = _do_test("tests/resources/javascript/dups.js")
-    assert err.message_count == 6
-    # 6 because prototypes are readonly in addition to accessing a member
-    # of a dangerous object.
+    assert _do_test_raw("""
+    eval("test");
+    """).message_count == 1
+
+    assert _do_test_raw("""
+    var x = eval();
+    """).message_count == 1
+
+    assert _do_test_raw("""
+    eval = 123;
+    """).message_count == 1
+
+    assert _do_test_raw("""
+    eval.prototype = true;
+    """).message_count == 2
 

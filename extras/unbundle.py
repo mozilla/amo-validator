@@ -8,6 +8,9 @@ from StringIO import StringIO
 source = sys.argv[1]
 target = sys.argv[2]
 
+if not target.endswith("/"):
+    target = "%s/" % target
+
 def _unbundle(path, target):
     zf = ZipFile(path, 'r')
     contents = zf.namelist()
@@ -15,9 +18,9 @@ def _unbundle(path, target):
         sp = item.split("/")
         if not sp[-1]:
             continue
-        
+
         print item, ">", target + item
-        
+
         cpath = target + "/".join(sp[:-1])
         if not os.path.exists(cpath):
             os.makedirs(cpath)
@@ -26,7 +29,7 @@ def _unbundle(path, target):
             path_item = item.split("/")
             path_item[-1] = "_" + path_item[-1]
             path = target + "/".join(path_item)
-            
+
             buff = StringIO(zf.read(item))
             _unbundle(buff, path + "/")
         else:
