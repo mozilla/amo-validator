@@ -86,11 +86,20 @@ def test_compat_binary_magic_numbers():
     assert err.compat_summary["errors"]
 
 
+def test_godlikea():
+    """Test that packages with a godlikea chrome namespaceget rejected."""
+
+    err = ErrorBundle()
+    xpi = MockXPI({"chrome/godlikea.jar": True})
+    packagelayout.test_godlikea(err, xpi)
+    assert err.failed()
+    assert err.errors
+
+
 # These functions will test the code with manually constructed packages
 # that contain valid or failing versions of the specified package. The
 # remaining tests will simply emulate this behaviour (since it was
 # successfully tested with these functions).
-
 def test_theme_passing():
     "Tests the layout of a proper theme"
 
