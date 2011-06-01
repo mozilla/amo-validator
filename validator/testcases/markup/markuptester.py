@@ -11,6 +11,7 @@ import validator.unicodehelper as unicodehelper
 from validator.testcases.markup import csstester
 from validator.contextgenerator import ContextGenerator
 from validator.constants import *
+from validator.decorator import versions_after
 
 DEBUG = False
 
@@ -66,7 +67,7 @@ class MarkupParser(HTMLParser):
         value of the line number with each line."""
 
         self.filename = filename
-        self.extension = extension
+        self.extension = extension.lower()
 
         self.reported = set()
 
@@ -310,6 +311,33 @@ class MarkupParser(HTMLParser):
                 scripting.test_js_snippet(err=self.err,
                                           data=attr[1],
                                           filename=self.filename)
+
+            elif (self.extension == "xul" and
+                  attr_name in ("insertbefore", "insertafter") and
+                  any((id in attr[1]) for id in ("menu_pageSource",
+                                                 "menu_pageinspect",
+                                                 "javascriptConsole",
+                                                 "webConsole"))):
+                self.err.notice(
+                    err_id=("testcases_markup_markuptester",
+                            "handle_starttag",
+                            "incompatible_menu_items"),
+                    notice="Menu item has been moved",
+                    description="Your add-on has an overlay that uses the "
+                                "insertbefore or insertafter attribute "
+                                "pointing to menuitems that have been moved "
+                                "to a different menu item. Your overlay items "
+                                "may appear in unexpected locations because "
+                                "of this. See "
+                        "https://bugzilla.mozilla.org/show_bug.cgi?id=653221"
+                                " for more information.",
+                    filename=self.filename,
+                    line=self.line,
+                    context=self.context,
+                    for_appversions={'{ec8030f7-c20a-464f-9b0e-13a3a9e97384}':
+                                         versions_after("firefox", "6.0a1")},
+                    compatibility_type="warning")
+
 
         # When the dev forgets their <!-- --> on a script tag, bad
         # things happen.

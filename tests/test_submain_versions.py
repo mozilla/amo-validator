@@ -1,3 +1,4 @@
+import validator.decorator
 import validator.submain
 from validator import decorator
 from validator.errorbundler import ErrorBundle
@@ -22,7 +23,7 @@ def test_version_decorators_accepted():
     """
 
     err = ErrorBundle()
-    err.save_resource("supported_versions", {"firefox": ["1.2.3"]})
+    err.supported_versions = {"firefox": ["1.2.3"]}
 
     tests = decorator.TEST_TIERS
     decorator.TEST_TIERS = {}
@@ -48,7 +49,7 @@ def test_version_decorators_denied_guid():
     """
 
     err = ErrorBundle()
-    err.save_resource("supported_versions", {"firefox": ["1.2.3"]})
+    err.supported_versions = {"firefox": ["1.2.3"]}
 
     tests = decorator.TEST_TIERS
     decorator.TEST_TIERS = {}
@@ -71,7 +72,7 @@ def test_version_decorators_denied_version():
     """
 
     err = ErrorBundle()
-    err.save_resource("supported_versions", {"firefox": ["1.2.3"]})
+    err.supported_versions = {"firefox": ["1.2.3"]}
 
     tests = decorator.TEST_TIERS
     decorator.TEST_TIERS = {}
@@ -93,7 +94,7 @@ def test_version_forappversions_accepted():
     """
 
     err = ErrorBundle()
-    err.save_resource("supported_versions", {"firefox": ["1.2.3"]})
+    err.supported_versions = {"firefox": ["1.2.3"]}
 
     tests = decorator.TEST_TIERS
     decorator.TEST_TIERS = {}
@@ -120,7 +121,7 @@ def test_version_forappversions_denied():
     """
 
     err = ErrorBundle()
-    err.save_resource("supported_versions", {"firefox": ["1.2.3"]})
+    err.supported_versions = {"firefox": ["1.2.3"]}
 
     tests = decorator.TEST_TIERS
     decorator.TEST_TIERS = {}

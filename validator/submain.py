@@ -194,36 +194,24 @@ def test_inner_package(err, xpi_package, for_appversions=None):
         err.set_tier(tier)
 
         # Iterate through each test of our detected type.
-        supported_versions = None
         for test in decorator.get_tests(tier, err.detected_type):
             # Test whether the test is app/version specific.
             if test["versions"] is not None:
-                # Grab the detected versions
-                if not supported_versions:
-                    supported_versions = err.get_resource("supported_versions")
-                # If there are no supported versions, the test is not
-                # applicable or is unsupported.
-                if not supported_versions:
+                # If the test's version requirements don't apply to the add-on,
+                # then skip the test.
+                if not err.supports_version(test["versions"]):
                     continue
 
-                found_version = False
-                def supports_version(guid_set):
-                    for guid in guid_set.keys():
-                        if (guid in supported_versions and
-                            any((detected_version in guid_set[guid]) for
-                                detected_version in
-                                supported_versions[guid])):
-                            return True
-                    return False
-
-                # Break if the test doesn't target this add-on's target app.
-                if not supports_version(test["versions"]):
+                # If the user's version requirements don't apply to the test or
+                # to the add-on, then skip the test.
+                if (for_appversions and
+                    not (err._compare_version(requirements=for_appversions,
+                                              support=test["versions"]) and
+                         err.supports_version(for_appversions))):
                     continue
 
-                # Break if the caller has set target apps that aren't
-                # supported by this add-on.
-                if for_appversions and not supports_version(for_appversions):
-                    continue
+            # Save the version requirements to the error bundler.
+            err.version_requirements = test["versions"]
 
             test_func = test["test"]
             if test["simple"]:
@@ -238,6 +226,7 @@ def test_inner_package(err, xpi_package, for_appversions=None):
         # Return any errors at the end of the tier if undetermined.
         if err.failed(fail_on_warnings=False) and not err.determined:
             err.unfinished = True
+            err.discard_unused_messages(ending_tier=tier)
             return err
 
     # Return the results.
