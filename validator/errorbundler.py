@@ -35,10 +35,16 @@ class ErrorBundle(object):
         self.package_stack = []
 
         self.detected_type = 0
+        self.unfinished = False
+
+        # TODO: Break off into resource helper
         self.resources = {}
         self.overrides = None
         self.pushable_resources = {}
-        self.unfinished = False
+
+        # TODO: Break off into version helper
+        self.supported_versions = None
+        self.version_requirements = None
 
         if listed:
             self.resources["listed"] = True
@@ -127,6 +133,19 @@ class ErrorBundle(object):
         message["message"] = unicodehelper.decode(message["message"])
         message["description"] = unicodehelper.decode(message["description"])
 
+        # Test that if for_appversions is set that we're only applying to
+        # supported add-ons. THIS IS THE LAST FILTER BEFORE THE MESSAGE IS
+        # ADDED TO THE STACK!
+        if message["for_appversions"]:
+            if not self.supports_version(message["for_appversions"]):
+                return
+        elif self.version_requirements:
+            # If there was no for_appversions but there were version
+            # requirements detailed in the decorator, use the ones from the
+            # decorator.
+            message["for_appversions"] = self.version_requirements
+
+        # Save the message to the stack.
         stack.append(message)
 
         # Mark the tier that the error occurred at.
@@ -423,4 +442,45 @@ class ErrorBundle(object):
 
         # Send the final output to the handler to be rendered.
         self.handler.write(''.join(output))
+
+    def supports_version(self, guid_set):
+        """
+        Returns whether a GUID set in for_appversions format is compatbile with
+        the current supported applications list.
+        """
+
+        # Don't let the test run if we haven't parsed install.rdf yet.
+        if self.supported_versions is None:
+            raise Exception("Early compatibility test run before install.rdf "
+                            "was parsed.")
+
+        return self._compare_version(requirements=guid_set,
+                                     support=self.supported_versions)
+
+    def _compare_version(self, requirements, support):
+        """
+        Return whether there is an intersection between a support applications
+        GUID set and a set of supported applications.
+        """
+
+        for guid in requirements:
+            # If we support any of the GUIDs in the guid_set, test if any of
+            # the provided versions for the GUID are supported.
+            if (guid in support and
+                any((detected_version in requirements[guid]) for
+                    detected_version in
+                    support[guid])):
+                return True
+
+    def discard_unused_messages(self, ending_tier):
+        """
+        Delete messages from errors, warnings, and notices whose tier is
+        greater than the ending tier.
+        """
+
+        stacks = [self.errors, self.warnings, self.notices]
+        for stack in stacks:
+            for message in stack:
+                if message["tier"] > ending_tier:
+                    stack.remove(message)
 

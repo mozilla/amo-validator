@@ -37,7 +37,7 @@ def test_valid_targetapps():
     assert "firefox" in supports and "mozilla" in supports
     assert len(supports) == 2
 
-    supported_versions = results.get_resource("supported_versions")
+    supported_versions = results.supported_versions
     print supported_versions
     assert (supported_versions['{ec8030f7-c20a-464f-9b0e-13a3a9e97384}'] ==
                 ['3.6', '3.6.4', '3.6.*'])

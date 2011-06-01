@@ -1,5 +1,7 @@
 import validator.constants
 import validator.testcases.compatibility as compatibility
+from validator.decorator import versions_after
+from validator.testcases.markup.markuptester import MarkupParser
 import validator.testcases.scripting as scripting
 from validator.errorbundler import ErrorBundle
 
@@ -40,4 +42,53 @@ def test_navigator_language():
     compatibility.navigator_language(err, None)
     assert err.failed()
     assert err.warnings[0]["compatibility_type"] == "error"
+
+
+def test_menu_item_compat():
+    """
+    Test that compatibility warnings are raised for the stuff from bug 660349.
+    """
+
+    def _run_test(data, name="foo.xul", should_fail=False):
+        def test(versions):
+            err = ErrorBundle()
+            err.supported_versions = versions
+            parser = MarkupParser(err)
+            parser.process(name,
+                           data,
+                           name.split(".")[-1])
+            print err.print_summary(verbose=True)
+            assert not err.failed()
+            return err
+
+        err = test({"{ec8030f7-c20a-464f-9b0e-13a3a9e97384}":
+                        versions_after("firefox", "6.0a1")})
+        if should_fail:
+            assert err.notices
+            assert err.compat_summary["warnings"]
+        else:
+            assert not err.notices
+
+        assert not test({}).notices
+
+    # Test that the testcase doesn't apply to non-XUL files.
+    err = _run_test("""
+    <foo>
+        <bar insertbefore="webConsole" />
+    </foo>
+    """, name="foo.xml")
+
+    # Test that a legitimate testcase will fail.
+    err = _run_test("""
+    <foo>
+        <bar insertbefore="what,webConsole,evar" />
+    </foo>
+    """, should_fail=True)
+
+    # Test that the testcase only applies to the proper attribute values.
+    err = _run_test("""
+    <foo>
+        <bar insertbefore="something else" />
+    </foo>
+    """)
 

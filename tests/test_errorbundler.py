@@ -425,12 +425,21 @@ def test_forappversions():
     app_test_data = {"guid": ["version1", "version2"]}
 
     e = ErrorBundle()
+    e.supported_versions = {"guid": ["version1"]}
     e.error(err_id=("foo", ), error="Test", for_appversions=app_test_data)
+    # This one should not apply.
+    e.error(err_id=("foo", ), error="Test",
+            for_appversions={"fooguid": ["bar", "baz"]})
+
     e.warning(err_id=("foo", ), warning="Test", for_appversions=app_test_data)
-    e.notice(err_id=("foo", ), notice="Test", for_appversions=app_test_data)
+
+    # Give one its data from the decorator
+    e.version_requirements = app_test_data
+    e.notice(err_id=("foo", ), notice="Test")
 
     j = e.render_json()
     jdata = json.loads(j)
+    assert len(jdata["messages"]) == 3
     for m in jdata["messages"]:
         assert m["for_appversions"] == app_test_data
 

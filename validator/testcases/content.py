@@ -47,6 +47,7 @@ def test_packed_packages(err, xpi_package=None):
     "Tests XPI and JAR files for naughty content."
 
     processed_files = 0
+    pretested_files = err.get_resource("pretested_files") or []
 
     with open(os.path.join(os.path.dirname(__file__),
               "hashes.txt")) as f:
@@ -61,7 +62,6 @@ def test_packed_packages(err, xpi_package=None):
     # Iterate each item in the package.
     for name in xpi_package:
         name_lower = name.lower()
-        data = xpi_package.info(name)
 
         if (macosx_regex.search(name) or
             name.startswith(".") or
@@ -78,7 +78,7 @@ def test_packed_packages(err, xpi_package=None):
                 filename=name)
             continue
 
-        if "pretested" in data and data["pretested"]:
+        if name in pretested_files:
             continue
 
         try:
