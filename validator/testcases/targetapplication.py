@@ -14,6 +14,7 @@ def test_targetedapplications(err, xpi_package=None):
 
     install = err.get_resource("install_rdf")
     if not install:
+        err.supported_versions = {}
         return
 
     APPROVED_APPLICATIONS = validator.constants.APPROVED_APPLICATIONS

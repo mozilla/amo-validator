@@ -80,10 +80,12 @@ def test_dup_targets():
 def test_has_installrdfs():
     """Tests that install.rdf files are present."""
 
-    err = ErrorBundle(None, True)
+    err = ErrorBundle()
 
     # Test package to make sure has_install_rdf is set to True.
     assert targetapp.test_targetedapplications(err, None) is None
+    # The supported versions list must be empty or other tests will fail.
+    assert err.supported_versions == {}
 
 
 def test_is_ff4():
