@@ -1,4 +1,5 @@
 import actions
+import call_definitions
 from call_definitions import xpcom_constructor as xpcom_const
 from jstypes import JSWrapper
 
@@ -189,6 +190,8 @@ GLOBAL_ENTITIES = {
     u"RegExp": {"value": {u"prototype": {"readonly": True}}},
     u"Date": {"value": {u"prototype": {"readonly": True}}},
 
+    u"top": {"readonly": actions._readonly_top},
+
     u"Math": {"readonly": True},
 
     u"netscape":
@@ -267,6 +270,10 @@ GLOBAL_ENTITIES = {
                                 {"dangerous": True}}}}},
     u"extensions": {"dangerous": True},
     u"xpcnativewrappers": {"dangerous": True},
+
+    u"AddonManagerPrivate":
+        {"value":
+            {u"registerProvider": {"return": call_definitions.amp_rp_bug660359}}},
 
     u"XMLHttpRequest":
         {"value":

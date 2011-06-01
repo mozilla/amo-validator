@@ -4,6 +4,7 @@ import types
 import spidermonkey
 import instanceactions
 import instanceproperties
+from validator.decorator import versions_after
 from jstypes import *
 
 
@@ -17,6 +18,19 @@ def _get_member_exp_property(traverser, node):
         return unicode(eval_exp.get_literal_value())
 
 
+def _expand_globals(traverser, node):
+    """Expands a global object that has a lambda value."""
+
+    if (node.is_global and
+        "value" in node.value and
+        isinstance(node.value["value"], types.LambdaType)):
+
+        result = node.value["value"](t=traverser)
+        return traverser._build_global("--", result)
+
+    return node
+
+
 def trace_member(traverser, node):
     "Traces a MemberExpression and returns the appropriate object"
 
@@ -25,15 +39,7 @@ def trace_member(traverser, node):
         # x.y or x[y]
         # x = base
         base = trace_member(traverser, node["object"])
-        if (base.is_global and
-            "value" in base.value and
-            isinstance(base.value["value"], types.LambdaType)):
-
-            traverser._debug("MEMBER_EXP>>EXPANDING GLOBAL")
-
-            l_func = base.value["value"]
-            l_result = l_func(t=traverser)
-            base = traverser._build_global("--", l_result)
+        base = _expand_globals(traverser, base)
 
         # If we've got an XPCOM wildcard, just return the base, minus the WC
         if base.is_global and \
@@ -52,7 +58,11 @@ def trace_member(traverser, node):
     elif node["type"] == "Identifier":
         traverser._debug("MEMBER_EXP>>ROOT:IDENTIFIER")
         test_identifier(traverser, node["name"])
-        return traverser._seek_variable(node["name"])
+        output = traverser._seek_variable(node["name"])
+
+        output = _expand_globals(traverser, output)
+
+        return output
     else:
         traverser._debug("MEMBER_EXP>>ROOT:EXPRESSION")
         # It's an expression, so just try your damndest.
@@ -353,6 +363,27 @@ def _call_settimeout(a, t, e):
     return a and a[0]["type"] != "FunctionExpression"
 
 
+def _readonly_top(t, r, rn):
+    """Handle the readonly callback for window.top."""
+    t.err.notice(
+        err_id=("testcases_javascript_actions",
+                "_readonly_top"),
+        notice="window.top is a reserved variable",
+        description="The 'top' global variable is reserved and cannot be "
+                    "assigned any values starting with Firefox 6. Review your "
+                    "code for any uses of the 'top' global, and refer to "
+                    "https://bugzilla.mozilla.org/show_bug.cgi?id=654137 "
+                    "for more information.",
+        filename=t.filename,
+        line=t.line,
+        column=t.position,
+        context=t.context,
+        for_appversions={'{ec8030f7-c20a-464f-9b0e-13a3a9e97384}':
+                             versions_after("firefox", "6.0a1")},
+        compatibility_type="warning",
+        tier=5)
+
+
 def _expression(traverser, node):
     "Evaluates an expression and returns the result"
     result = traverser._traverse_node(node["expression"])
@@ -427,12 +458,24 @@ def _expr_assignment(traverser, node):
     if node["operator"] == "=":
 
         global_overwrite = False
+        readonly_value = True
+
         node_left = node["left"]
         traverser._debug("ASSIGNMENT:DIRECT(%s)" % node_left["type"])
+
         if node_left["type"] == "Identifier":
             # Identifiers just need the ID name and a value to push.
             # Raise a global overwrite issue if the identifier is global.
             global_overwrite = traverser._is_global(node_left["name"])
+
+            # Get the readonly attribute and store its value if is_global
+            if global_overwrite:
+                from predefinedentities import GLOBAL_ENTITIES
+                global_dict = GLOBAL_ENTITIES[node_left["name"]]
+                readonly_value = (global_dict["readonly"] if
+                                  "readonly" in global_dict else
+                                  True)
+
             traverser._set_variable(node_left["name"], right)
         elif node_left["type"] == "MemberExpression":
             member_object = trace_member(traverser, node_left["object"])
@@ -446,17 +489,32 @@ def _expr_assignment(traverser, node):
             if setter:
                 right = setter(right, traverser) or right or None
 
-            # NoneType error protection
-            if not global_overwrite and member_object.value is None:
-                member_object.value = JSObject()
-
             # Don't do the assignment if we're facing a global.
             if not global_overwrite:
+                if member_object.value is None:
+                    member_object.value = JSObject()
+
                 member_object.value.set(member_property, right)
+
+            elif "value" in member_object.value:
+                member_object_value = _expand_globals(traverser,
+                                                      member_object).value
+                if member_property in member_object_value["value"]:
+
+                    # If it's a global and the actual member exists, test
+                    # whether it can be safely overwritten.
+                    member = member_object_value["value"][member_property]
+                    readonly_value = (member["readonly"] if
+                                      "readonly" in member else
+                                      True)
 
         traverser._debug("ASSIGNMENT:DIRECT:GLOB_OVERWRITE %s" %
                              global_overwrite)
-        if global_overwrite and not traverser.is_jsm:
+
+        if (global_overwrite and
+            not traverser.is_jsm and
+            readonly_value == True):
+
             traverser.err.warning(
                 err_id=("testcases_javascript_actions",
                         "_expr_assignment",
@@ -467,6 +525,10 @@ def _expr_assignment(traverser, node):
                 line=traverser.line,
                 column=traverser.position,
                 context=traverser.context)
+
+        if isinstance(readonly_value, types.LambdaType):
+            # The readonly attribute supports a lambda function that accepts
+            readonly_value(t=traverser, r=right, rn=node["right"])
 
         return right
 

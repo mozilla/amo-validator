@@ -5,11 +5,38 @@ import actions
 import traverser as js_traverser
 import predefinedentities
 from jstypes import *
+from validator.decorator import versions_after
 
 # Function prototypes should implement the following:
 #  wrapper : The JSWrapper instace that is being called
 #  arguments : A list of argument nodes; untraversed
 #  traverser : The current traverser object
+
+
+def amp_rp_bug660359(wrapper, arguments, traverser):
+    """
+    Flag all calls to AddonManagerPrivate.registerProvider for incompatibility
+    with Firefox 6.
+    """
+
+    traverser.err.notice(
+        err_id=("testcases_javascript_calldefinitions",
+                "amp_rp_bug660359"),
+        notice="Custom add-on types may not work properly in Firefox 6",
+        description="This add-on appears to register custom add-on types, "
+                    "which are affected and may not work properly due to "
+                    "changes made on Firefox 6. For more information, "
+                    "please refer to "
+                    "https://bugzilla.mozilla.org/show_bug.cgi?id=595848",
+        filename=traverser.filename,
+        line=traverser.line,
+        column=traverser.position,
+        context=traverser.context,
+        for_appversions={'{ec8030f7-c20a-464f-9b0e-13a3a9e97384}':
+                             versions_after("firefox", "6.0a1")},
+        compatibility_type="error",
+        tier=5)
+
 
 def xpcom_constructor(method, extend=False, mutate=False, pretraversed=False):
     """Returns a function which wraps an XPCOM class instantiation function."""
