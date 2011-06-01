@@ -3,7 +3,18 @@ import types
 
 import spidermonkey
 import instanceactions
+import instanceproperties
 from jstypes import *
+
+
+def _get_member_exp_property(traverser, node):
+    """Return the string value of a member expression's property."""
+
+    if node["property"]["type"] == "Identifier":
+        return unicode(node["property"]["name"])
+    else:
+        eval_exp = traverser._traverse_node(node["property"])
+        return unicode(eval_exp.get_literal_value())
 
 
 def trace_member(traverser, node):
@@ -14,9 +25,6 @@ def trace_member(traverser, node):
         # x.y or x[y]
         # x = base
         base = trace_member(traverser, node["object"])
-        if not isinstance(base, JSWrapper):
-            base = JSWrapper(base, traverser=traverser)
-
         if (base.is_global and
             "value" in base.value and
             isinstance(base.value["value"], types.LambdaType)):
@@ -30,22 +38,14 @@ def trace_member(traverser, node):
         # If we've got an XPCOM wildcard, just return the base, minus the WC
         if base.is_global and \
                 "xpcom_wildcard" in base.value:
+            traverser._debug("MEMBER_EXP>>XPCOM_WILDCARD")
             base.value = base.value.copy()
             del base.value["xpcom_wildcard"]
             return base
 
-        identifier = None
-        if node["property"]["type"] == "Identifier":
-            # y = token identifier
-            identifier = unicode(node["property"]["name"])
-            traverser._debug("MEMBER_EXP>>IDENT : %s" % identifier)
-        else:
-            # y = literal value
-            identifier = unicode(
-                traverser._traverse_node(node["property"]).get_literal_value())
-            traverser._debug("MEMBER_EXP>>LITERAL : %s" % identifier)
-
+        identifier = _get_member_exp_property(traverser, node)
         test_identifier(traverser, identifier)
+        traverser._debug("MEMBER_EXP>>PROPERTY: %s" % identifier)
         return base.get(traverser=traverser,
                         name=identifier)
 
@@ -399,8 +399,8 @@ def _ident(traverser, node):
     # Ban bits like "newThread"
     test_identifier(traverser, name)
 
-    if traverser._is_local_variable(name) or \
-       traverser._is_global(name):
+    if (traverser._is_local_variable(name) or
+        traverser._is_global(name)):
         # This function very nicely wraps with JSWrapper for us :)
         found = traverser._seek_variable(name)
         return found
@@ -422,6 +422,54 @@ def _expr_assignment(traverser, node):
     traverser._debug("ASSIGNMENT>>PARSING RIGHT")
     right = traverser._traverse_node(node["right"])
     right = JSWrapper(right, traverser=traverser)
+
+    # Treat direct assignment different than augmented assignment.
+    if node["operator"] == "=":
+
+        global_overwrite = False
+        node_left = node["left"]
+        traverser._debug("ASSIGNMENT:DIRECT(%s)" % node_left["type"])
+        if node_left["type"] == "Identifier":
+            # Identifiers just need the ID name and a value to push.
+            # Raise a global overwrite issue if the identifier is global.
+            global_overwrite = traverser._is_global(node_left["name"])
+            traverser._set_variable(node_left["name"], right)
+        elif node_left["type"] == "MemberExpression":
+            member_object = trace_member(traverser, node_left["object"])
+            global_overwrite = member_object.is_global
+
+            member_property = _get_member_exp_property(traverser, node_left)
+            traverser._debug("ASSIGNMENT:MEMBER_PROPERTY(%s)" % member_property)
+
+            # Make sure to perform any setter operations.
+            setter = instanceproperties.get_operation("set", member_property)
+            if setter:
+                right = setter(right, traverser) or right or None
+
+            # NoneType error protection
+            if not global_overwrite and member_object.value is None:
+                member_object.value = JSObject()
+
+            # Don't do the assignment if we're facing a global.
+            if not global_overwrite:
+                member_object.value.set(member_property, right)
+
+        traverser._debug("ASSIGNMENT:DIRECT:GLOB_OVERWRITE %s" %
+                             global_overwrite)
+        if global_overwrite and not traverser.is_jsm:
+            traverser.err.warning(
+                err_id=("testcases_javascript_actions",
+                        "_expr_assignment",
+                        "global_overwrite"),
+                warning="Global variable overwrite",
+                description="An attempt was made to overwrite a global "
+                            "variable in some JavaScript code.",
+                line=traverser.line,
+                column=traverser.position,
+                context=traverser.context)
+
+        return right
+
     lit_right = right.get_literal_value()
 
     traverser._debug("ASSIGNMENT>>PARSING LEFT")

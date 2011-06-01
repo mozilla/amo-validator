@@ -91,6 +91,9 @@ class JSWrapper(object):
         self.lazy = lazy
         self.callable = callable
 
+        # This will be set in actions.py if needed.
+        self.global_parent = False
+
     def set_value(self, value, traverser=None, overwrite_const=False):
         """Assigns a value to the wrapper"""
 
@@ -119,9 +122,12 @@ class JSWrapper(object):
             return
 
         # We want to obey the permissions of global objects
-        if self.is_global and (isinstance(self.value, dict) and
-                               ("overwriteable" not in self.value or
-                                self.value["overwriteable"] == False)):
+        if (self.is_global and
+            (not traverser or
+             not traverser.is_jsm) and
+            (isinstance(self.value, dict) and
+             ("overwriteable" not in self.value or
+              self.value["overwriteable"] == False))):
             # TODO : Write in support for "readonly":False
             traverser.err.warning(("testcases_javascript_jstypes",
                                    "JSWrapper_set_value",
