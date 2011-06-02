@@ -129,6 +129,7 @@ def test_packed_packages(err, xpi_package=None):
                          is_subpackage else
                          PACKAGE_THEME)
             err.set_tier(1)
+            supported_versions = err.supported_versions
             if is_subpackage:
                 testendpoint_validator.test_inner_package(err, sub_xpi)
             else:
@@ -136,6 +137,8 @@ def test_packed_packages(err, xpi_package=None):
             package.close()
             err.pop_state()
             err.set_tier(2)
+
+            err.supported_versions = supported_versions
 
         elif name_lower.endswith(".xpi"):
             # It's not a subpackage, it's a nested extension. These are
