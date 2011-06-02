@@ -50,6 +50,11 @@ def test_createElement():
     """)
     assert not err.message_count
 
+    # Also test an empty call (tests for tracebacks)
+    _do_test_raw("""
+    document.createElement();
+    """)
+
 def test_synchronous_xhr():
     "Tests that syncrhonous AJAX requests are marked as dangerous"
 

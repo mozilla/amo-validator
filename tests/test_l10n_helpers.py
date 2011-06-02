@@ -22,6 +22,10 @@ def test_list_locales():
 def test_get_locales():
     "Tests that the proper locale descriptions are returned for a package"
 
+    assert not (_get_locales(None,
+                             None,
+                             [{"object": "foo bar jar:nobang"}]))
+
     assert (_get_locales(None,
                          None,
                          [{"subject": "locale",

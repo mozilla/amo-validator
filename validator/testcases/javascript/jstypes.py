@@ -1,9 +1,9 @@
-import inspect
 import json
 import types
-
 import instanceproperties
 
+
+recursion_buster = []
 
 class JSObject(object):
     """
@@ -39,9 +39,25 @@ class JSObject(object):
         return name in self.data
 
     def output(self):
-        return json.dumps(dict(zip(self.data.keys(),
-                                   map(lambda v:v.output(),
-                                       self.data.values()))))
+        if self in recursion_buster:
+            return "(recursion)"
+
+        # Prevent unruly recursion with a recursion buster.
+        recursion_buster.append(self)
+
+        output_dict = {}
+        for key in self.data.keys():
+            if (isinstance(self.data[key], JSWrapper) and
+                    self.data[key].value == self):
+                output_dict[key] = "(self)"
+            elif self.data[key] is None:
+                output_dict[key] = "(None)"
+            else:
+                output_dict[key] = self.data[key].output()
+
+        # Pop from the recursion buster.
+        recursion_buster.pop()
+        return str(output_dict)
 
 
 class JSContext(JSObject):
@@ -376,13 +392,24 @@ class JSArray(JSObject):
 
     def get_literal_value(self):
         """Arrays return a comma-delimited version of themselves"""
+
+        if self in recursion_buster:
+            return "(recursion)"
+
+        recursion_buster.append(self)
+
         # Interestingly enough, this allows for things like:
         # x = [4]
         # y = x * 3 // y = 12 since x equals "4"
-        return u",".join([unicode(w.get_literal_value()) for
-                          w in
-                          self.elements if
-                          not (isinstance(w, JSWrapper) and w.value == self)])
+
+        output = u",".join([unicode(w.get_literal_value() if w else "") for
+                            w in
+                            self.elements if
+                            not (isinstance(w, JSWrapper) and
+                                w.value == self)])
+
+        recursion_buster.pop()
+        return output
 
     def set(self, index, value, traverser=None):
         """Follow the rules of JS for creating an array"""
@@ -410,5 +437,5 @@ class JSArray(JSObject):
             self.elements.append(JSWrapper(value=value, traverser=traverser))
 
     def output(self):
-        return [x.output() for x in self.elements]
+        return "[%s]" % self.get_literal_value()
 

@@ -62,7 +62,12 @@ def _get_locales(err, xpi_package=None, locales=None):
         if jarred:
             # We just care about the JAR path
             location = location[4:]
-            path, location = location.split("!", 2)
+            split_location = location.split("!", 2)
+            # Ignore malformed JAR URIs.
+            if len(split_location) < 2:
+                continue
+
+            path, location = split_location
 
         locale_desc = {"predicate": locale["predicate"],
                        "target": location,

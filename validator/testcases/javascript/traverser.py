@@ -160,10 +160,7 @@ class Traverser:
                                 "http://blog.mozilla.com/addons/2009/01/16/"
                                 "firefox-extensions-global-namespace-pollution/"
                                     ", or use JavaScript modules.",
-                       filename=self.filename,
-                        line=self.line,
-                        column=self.position,
-                        context=self.context)
+                       filename=self.filename)
 
     def _can_handle_node(self, node_name):
         "Determines whether a node can be handled."
