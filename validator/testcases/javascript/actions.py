@@ -479,7 +479,9 @@ def _expr_assignment(traverser, node):
             traverser._set_variable(node_left["name"], right)
         elif node_left["type"] == "MemberExpression":
             member_object = trace_member(traverser, node_left["object"])
-            global_overwrite = member_object.is_global
+            global_overwrite = (member_object.is_global and
+                                not ("overwriteable" in member_object.value and
+                                     member_object.value["overwriteable"]))
 
             member_property = _get_member_exp_property(traverser, node_left)
             traverser._debug("ASSIGNMENT:MEMBER_PROPERTY(%s)" % member_property)
@@ -494,7 +496,11 @@ def _expr_assignment(traverser, node):
                 if member_object.value is None:
                     member_object.value = JSObject()
 
-                member_object.value.set(member_property, right)
+                if not member_object.is_global:
+                    member_object.value.set(member_property, right)
+                else:
+                    # It's probably better to do nothing.
+                    pass
 
             elif "value" in member_object.value:
                 member_object_value = _expand_globals(traverser,

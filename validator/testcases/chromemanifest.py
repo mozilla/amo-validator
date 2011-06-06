@@ -60,7 +60,7 @@ def test_resourcemodules(err):
                 context=chrome.context)
 
 
-@decorator.register_test(tier=2, simple=True)
+@decorator.register_test(tier=3, simple=True)
 def test_banned_content_namespaces(err):
     """Flag content namespaces which have been banned."""
 

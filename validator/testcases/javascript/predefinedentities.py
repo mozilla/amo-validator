@@ -146,7 +146,10 @@ GLOBAL_ENTITIES = {
                                                         t)}}},
 
     u"document":
-        {"value": {u"createElement":
+        {"value": {u"title":
+                       {"overwriteable": True,
+                        "readonly": False},
+                   u"createElement":
                        {"dangerous":
                             lambda a, t, e: not a or
                                             unicode(t(a[0]).get_literal_value())

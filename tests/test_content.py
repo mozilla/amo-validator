@@ -30,6 +30,7 @@ def test_jar_subpackage():
 
     err = ErrorBundle()
     err.set_type(PACKAGE_EXTENSION)
+    err.supported_versions = {"foo": ["1.2.3"]}
     mock_package = MockXPI(
         {"chrome/subpackage.jar":
              "tests/resources/content/subpackage.jar",
@@ -51,6 +52,7 @@ def test_jar_subpackage():
                                     "test_inner_package",
                                     2,
                                     "subpackage")
+    assert err.supported_versions == {"foo": ["1.2.3"]}
 
 def test_xpi_subpackage():
     "XPIs should never be subpackages; only nested extensions"
