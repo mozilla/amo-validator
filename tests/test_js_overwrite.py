@@ -92,3 +92,11 @@ def test_local_global_overwrite():
     """)
     assert not err.failed()
 
+
+def test_overwrite_global():
+    """Test that an overwriteable global is overwriteable."""
+
+    assert not _do_test_raw("""
+    document.title = "This is something that isn't a global";
+    """).failed()
+

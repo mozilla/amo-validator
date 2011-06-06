@@ -8,6 +8,7 @@ from js_helper import _do_real_test_raw
 from validator.errorbundler import ErrorBundle
 
 
+# TODO: During a refactor, move this to the decorator's tests.
 def test_versions_after():
     """
     Tests that the appropriate versions after the specified versions are
@@ -37,13 +38,14 @@ def test_navigator_language():
     flagged = "alert(navigator.language);"
     scripting.test_js_snippet(err, flagged, "foo")
     assert not err.failed()
+    assert not any(err.compat_summary[k] for k in err.compat_summary)
 
     print err.print_summary()
     print err.get_resource("compat_references")
 
     compatibility.navigator_language(err, None)
-    assert err.failed()
-    assert err.warnings[0]["compatibility_type"] == "error"
+    assert not err.failed()
+    assert err.compat_summary["errors"]
 
 
 def test_menu_item_compat():
