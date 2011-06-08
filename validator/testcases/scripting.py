@@ -236,7 +236,7 @@ def _regex_tests(err, data, filename):
             for_appversions={'{ec8030f7-c20a-464f-9b0e-13a3a9e97384}':
                                  versions_after("firefox", "6.0a1")})
 
-    js_data_urls = re.compile("(javascript:|data:)")
+    js_data_urls = re.compile("\\b(javascript|data):")
     jsdu_match = js_data_urls.search(data)
     if jsdu_match:
         line = c.get_line(jsdu_match.start())

@@ -85,3 +85,10 @@ def test_incompatible_uris():
     assert not err.failed()
     assert err.compat_summary["warnings"]
 
+    err = _do_real_test_raw("""
+    var foo = "postdata:LOL NOT THE CASE";
+    """, versions={"{ec8030f7-c20a-464f-9b0e-13a3a9e97384}":
+                       versions_after("firefox", "6.0a1")})
+    assert not err.failed()
+    assert not any(err.compat_summary.values())
+
