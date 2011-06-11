@@ -158,7 +158,7 @@ def test_packed_packages(err, xpi_package=None):
             err.pop_state()
             err.set_tier(2)  # Reset to the current tier
 
-        elif name_lower.endswith((".xul", ".xml", ".html", ".xhtml")):
+        elif name_lower.endswith((".xul", ".xml", ".html", ".xhtml", ".xbl")):
 
             parser = testendpoint_markup.MarkupParser(err)
             parser.process(name,
