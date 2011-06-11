@@ -8,7 +8,7 @@ from cStringIO import StringIO
 import validator.testcases.javascript.traverser as traverser
 from validator.testcases.javascript.spidermonkey import get_tree, \
                                                         JSReflectException
-from validator.constants import SPIDERMONKEY_INSTALLATION
+from validator.constants import PACKAGE_THEME, SPIDERMONKEY_INSTALLATION
 from validator.contextgenerator import ContextGenerator
 from validator.decorator import versions_after
 from validator.textfilter import *
@@ -25,6 +25,16 @@ def test_js_file(err, filename, data, line=0):
     if SPIDERMONKEY_INSTALLATION is None or \
        err.get_resource("SPIDERMONKEY") is None:  # Default value is False
         return
+
+    if err.detected_type == PACKAGE_THEME:
+        err.warning(
+                err_id=("testcases_scripting",
+                        "test_js_file",
+                        "theme_js"),
+                warning="JS run from theme",
+                description="Themes should not contain executable code.",
+                filename=filename,
+                line=line)
 
     before_tier = None
     # Set the tier to 4 (Security Tests)
@@ -68,6 +78,9 @@ def test_js_file(err, filename, data, line=0):
 
 def test_js_snippet(err, data, filename, line=0):
     "Process a JS snippet by passing it through to the file tester."
+
+    if not data:
+        return
 
     # Wrap snippets in a function to prevent the parser from freaking out
     # when return statements exist without a corresponding function.
