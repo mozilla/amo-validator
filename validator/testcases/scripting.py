@@ -13,7 +13,10 @@ from validator.contextgenerator import ContextGenerator
 from validator.decorator import versions_after
 from validator.textfilter import *
 
+
 JS_ESCAPE = re.compile("\\\\+[ux]", re.I)
+NP_WARNING = "Network preferences may not be modified."
+EUP_WARNING = "Extension update settings may not be modified."
 
 
 def test_js_file(err, filename, data, line=0):
@@ -84,15 +87,17 @@ def _regex_tests(err, data, filename):
 
     c = ContextGenerator(data)
 
-    np_warning = "Network preferences may not be modified."
-
     errors = {"globalStorage\\[.*\\].password":
                   "Global Storage may not be used to store passwords.",
-              "network\\.http": np_warning,
-              "extensions\\.blocklist\\.url": np_warning,
-              "extensions\\.blocklist\\.level": np_warning,
-              "extensions\\.blocklist\\.interval": np_warning,
-              "general\\.useragent": np_warning,
+              "network\\.http": NP_WARNING,
+              "extensions(\\..*)?\\.update\\.url": EUP_WARNING,
+              "extensions(\\..*)?\\.update\\.enabled": EUP_WARNING,
+              "extensions(\\..*)?\\.update\\.interval": EUP_WARNING,
+              "extensions\\.blocklist\\.url": NP_WARNING,
+              "extensions\\.blocklist\\.level": NP_WARNING,
+              "extensions\\.blocklist\\.interval": NP_WARNING,
+              "extensions\\.blocklist\\.enabled": NP_WARNING,
+              "general\\.useragent": NP_WARNING,
               "launch\\(\\)":
                   "Use of 'launch()' is disallowed because of restrictions on "
                   "nsILocalFile. If the code does not use nsILocalFile, "

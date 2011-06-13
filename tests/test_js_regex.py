@@ -12,6 +12,7 @@ def test_basic_regex_fail():
     "Tests that a simple Regex match causes a warning"
 
     assert _do_test_raw("var x = 'network.http';").failed()
+    assert _do_test_raw("var x = 'extensions.foo.update.url';").failed()
 
 
 def test_js_category_regex_fail():
