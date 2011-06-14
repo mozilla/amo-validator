@@ -1,4 +1,4 @@
-from js_helper import _do_test_raw
+from js_helper import _do_test_raw, _get_var
 
 def test_createElement():
     "Tests that createElement and createElementNS throw errors."
@@ -94,4 +94,17 @@ def test_bug652577_loadOverlay():
     assert not _do_test_raw("""
     document.loadOverlay("resource:foo/bar/");
     """).failed()
+
+def test_extraneous_globals():
+    """Globals should not be registered from function parameters."""
+
+    err = _do_test_raw("""
+    var f = function(foo, bar) {
+        foo = "asdf";
+        bar = 123;
+    };
+    """)
+    assert not err.failed()
+    assert "foo" not in err.final_context.data
+    assert "bar" not in err.final_context.data
 
