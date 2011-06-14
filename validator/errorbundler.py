@@ -116,7 +116,6 @@ class ErrorBundle(object):
         "Stores a message in the appropriate message stack."
 
         uid = uuid.uuid4().hex
-
         message["uid"] = uid
 
         # Get the context for the message (if there's a context available)
@@ -430,7 +429,7 @@ class ErrorBundle(object):
 
             if "context" in message and message["context"]:
                 verbose_output.append("\tContext:")
-                verbose_output.extend([("\t>\t%s" % x
+                verbose_output.extend([("\t> %s" % x
                                         if x is not None
                                         else "\t>" + ("-" * 20))
                                        for x
@@ -441,7 +440,7 @@ class ErrorBundle(object):
             output.append("\n".join(verbose_output))
 
         # Send the final output to the handler to be rendered.
-        self.handler.write(''.join(output))
+        self.handler.write(u''.join(map(unicodehelper.decode, output)))
 
     def supports_version(self, guid_set):
         """

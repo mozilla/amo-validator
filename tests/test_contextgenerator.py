@@ -1,3 +1,4 @@
+import nose
 from validator.contextgenerator import ContextGenerator
 
 
@@ -60,7 +61,7 @@ def test_get_context_trimming():
     print [len(x) for x in trimmed]
 
     for i in range(3):
-        assert len(trimmed[i]) == proper_lengths[i]
+        nose.tools.eq_(len(trimmed[i]), proper_lengths[i])
 
 
 def test_get_context_trimming_inverse():
