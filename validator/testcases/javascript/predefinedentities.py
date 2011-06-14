@@ -298,4 +298,9 @@ GLOBAL_ENTITIES = {
     u"Infinity": {"readonly": True},
     u"NaN": {"readonly": True},
     u"undefined": {"readonly": True},
+
+    u"innerHeight": {"readonly": False},
+    u"innerWidth": {"readonly": False},
+    u"width": {"readonly": False},
+    u"height": {"readonly": False},
     }
