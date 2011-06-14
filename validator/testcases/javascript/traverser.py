@@ -153,13 +153,15 @@ class Traverser:
                                 "run",
                                 "namepsace_pollution"),
                         warning="JavaScript namespace pollution",
-                        description="Your add-on contains a large number of "
-                                    "global variables, which can conflict "
-                                    "with other add-ons. For more information, "
-                                    "see "
+                        description=["Your add-on contains a large number of "
+                                     "global variables, which can conflict "
+                                     "with other add-ons. For more "
+                                     "information, see "
                                 "http://blog.mozilla.com/addons/2009/01/16/"
                                 "firefox-extensions-global-namespace-pollution/"
-                                    ", or use JavaScript modules.",
+                                     ", or use JavaScript modules.",
+                                     "List of entities: %s" %
+                                         ", ".join(self.contexts[0].data.keys())],
                        filename=self.filename)
 
     def _can_handle_node(self, node_name):

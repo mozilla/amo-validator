@@ -19,7 +19,7 @@ NP_WARNING = "Network preferences may not be modified."
 EUP_WARNING = "Extension update settings may not be modified."
 
 
-def test_js_file(err, filename, data, line=0):
+def test_js_file(err, filename, data, line=0, context=None):
     "Tests a JS file by parsing and analyzing its tokens"
 
     if SPIDERMONKEY_INSTALLATION is None or \
@@ -52,7 +52,10 @@ def test_js_file(err, filename, data, line=0):
             err.set_tier(before_tier)
         return
 
-    context = ContextGenerator(data)
+    # Generate a context if one is not available.
+    if context is None:
+        context = ContextGenerator(data)
+
     if traverser.DEBUG:
         _do_test(err=err, filename=filename, line=line, context=context,
                  tree=tree, data=data)
@@ -76,7 +79,7 @@ def test_js_file(err, filename, data, line=0):
         err.set_tier(before_tier)
 
 
-def test_js_snippet(err, data, filename, line=0):
+def test_js_snippet(err, data, filename, line=0, context=None):
     "Process a JS snippet by passing it through to the file tester."
 
     if not data:
@@ -86,7 +89,7 @@ def test_js_snippet(err, data, filename, line=0):
     # when return statements exist without a corresponding function.
     data = "(function(){%s\n})()" % data
 
-    test_js_file(err, filename, data, line)
+    test_js_file(err, filename, data, line, context)
 
 
 def _do_test(err, filename, line, context, tree, data):
