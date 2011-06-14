@@ -1,4 +1,5 @@
 ﻿# -*- coding: utf-8 -*-
+import nose
 import validator.testcases.markup.markuptester as markuptester
 from validator.errorbundler import ErrorBundle
 from validator.constants import *
@@ -238,4 +239,23 @@ def test_dom_mutation():
     _do_test_raw("""
     <foo><bar ondomattrmodified="" /></foo>
     """, "foo.js", should_fail=True)
+
+def test_proper_line_numbers():
+    """Test that the proper line numbers are passed to test_js_snippet."""
+
+    tjs = markuptester.scripting.test_js_snippet
+    def mock_tjs(err, data, filename, line, context):
+        nose.tools.eq_(line, 2)
+        assert line < len(context.data)
+    markuptester.scripting.test_js_snippet = mock_tjs
+
+    _do_test_raw("""<foo>
+    <script>
+    // <!--
+    // Some script goes here
+    // -->
+    </script>
+    </foo>""", "foo.xul", should_fail=False)
+
+    markuptester.scripting.test_js_snippet = tjs
 
