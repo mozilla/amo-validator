@@ -108,6 +108,9 @@ def _function(traverser, node):
             params.append(param["name"])
         elif param["type"] == "ArrayPattern":
             for element in param["elements"]:
+                # Array destructuring in function prototypes? LOL!
+                if element is None or element["type"] != "Identifier":
+                    continue
                 params.append(element["name"])
 
     local_context = traverser._peek_context(1)
@@ -174,7 +177,11 @@ def _define_var(traverser, node):
 
             vars = []
             for element in declaration["id"]["elements"]:
-                if element is None:
+                # NOTE : Multi-level array destructuring sucks. Maybe implement
+                # it someday if you're bored, but it's so rarely used and it's
+                # so utterly complex, there's probably no need to ever code it
+                # up.
+                if element is None or element["type"] != "Identifier":
                     vars.append(None)
                     continue
                 vars.append(element["name"])
