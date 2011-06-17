@@ -284,11 +284,10 @@ GLOBAL_ENTITIES = {
         {"value":
              {u"open": {"dangerous":
                            # Ban syncrhonous XHR by making sure the third arg
-                           # is absent and false.
+                           # is not absent and falsey.
                            lambda a, t, e:
-                               a and \
-                               (len(a) < 3 or
-                                not t(a[2]).get_literal_value()) and \
+                               a and len(a) >= 3 and
+                               not t(a[2]).get_literal_value() and
                                "Synchronous HTTP requests can cause "
                                "serious UI performance problems, "
                                "especially to users with slow network "
