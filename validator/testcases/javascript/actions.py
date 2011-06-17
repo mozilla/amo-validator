@@ -304,9 +304,10 @@ def _define_array(traverser, node):
 
 def _define_literal(traverser, node):
     "Creates a JSVariable object based on a literal"
-
-    var = JSLiteral(node["value"])
-    return JSWrapper(var, traverser=traverser)
+    value = node["value"]
+    if isinstance(value, dict):
+        return JSWrapper(traverser=traverser)
+    return JSWrapper(JSLiteral(value), traverser=traverser)
 
 
 def _call_expression(traverser, node):
