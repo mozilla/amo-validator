@@ -1,4 +1,5 @@
 import validator.testcases.javascript.jstypes as jstypes
+from js_helper import _do_test_raw
 
 
 def test_jsarray_output():
@@ -46,4 +47,14 @@ def test_jsarray_recursion():
     print ja.get_literal_value()
     assert "(recursion)" in ja.get_literal_value()
 
+def test_jsliteral_regex():
+    """
+    Test that there aren't tracebacks from JSLiterals that perform raw binary
+    operations.
+    """
+    assert not _do_test_raw("""
+    var x = /foo/gi;
+    var y = x + " ";
+    var z = /bar/i + 0;
+    """).failed()
 
