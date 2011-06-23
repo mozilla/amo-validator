@@ -111,13 +111,10 @@ def _get_tree(code, shell=SPIDERMONKEY_INSTALLATION):
 
     try:
         cmd = [shell, "-e", data, "-U"]
-        try:
-            shell_obj = subprocess.Popen(cmd,
-                                   shell=False,
-                       stderr=subprocess.PIPE,
-                       stdout=subprocess.PIPE)
-        except OSError:
-            raise OSError("Spidermonkey shell could not be run.")
+        shell_obj = subprocess.Popen(cmd,
+                                     shell=False,
+                                     stderr=subprocess.PIPE,
+                                     stdout=subprocess.PIPE)
 
         data, stderr = shell_obj.communicate()
         if stderr:
