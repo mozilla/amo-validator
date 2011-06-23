@@ -20,7 +20,6 @@ Python Libraries:
 - argparse
 - cssutils
 - rdflib
-- chardet
 - fastchardet
 
 Python Libraries for Testing:
@@ -30,7 +29,7 @@ Python Libraries for Testing:
 
 You can install everything you need for running and testing with ::
 
-	pip install -r requirements.txt
+    pip install -r requirements.txt
 
 
 Submodules
@@ -59,7 +58,7 @@ include this API.::
 
 Once Spidermonkey is installed, the path to the JavaScript shell must be
 specified in the /validator/constants.py file in the
-`SPIDERMONKEY_INSTALLATION` variable. If this variable is set to `None`, no
+``SPIDERMONKEY_INSTALLATION`` variable. If this variable is set to ``None``, no
 JavaScript tests will be run.
 
 ---------
@@ -68,9 +67,37 @@ JavaScript tests will be run.
 
 Run the validator as follows ::
 
-	python addon-validator <path to xpi> [-t <expected type>] [-o <output type>] [-v] [--boring] [--selfhosted]
+    python addon-validator <path to xpi> [-t <expected type>] [-o <output type>] [-v] [--boring] [--selfhosted] [--determined]
 
 The path to the XPI should point to an XPI file.
+
+-t                  The type that you expect your add-on to be detected as. The
+                    list of types is listed below.
+-o                  The type of output to generate. Types are listed below.
+-v                  Enable verbose mode. Extra information will be displayed in
+                    verbose mode, namely notices (informational messages),
+                    Jetpack information if available, extra error info (like
+                    contexts, file data, etc.), and error descriptions. This
+                    only applies to ``-o text``.
+--selfhosted        Disables messages that are specific to add-ons hosted on
+                    AMO.
+--boring            Disables colorful shell output.
+--determined        Continue validating the remaining tiers of an add-on if one
+                    tier has failed. Certain high-tiered tests may
+                    inadvertently fail when this option is enabled for badly
+                    malformed add-ons.
+--target-appversion     Accepts a JSON string containing an object whose keys
+                    are GUIDs and values are lists of version strings. In the
+                    targetApplication and compatibility tests, the add-on's
+                    predefined ``<em:targetApplication>`` values will be
+                    overridden if its GUIDs match thoes from the JSON. E.g.:
+                    ``{"{ec8030f7-c20a-464f-9b0e-13a3a9e97384}": "5.*"}``
+--for-appversions   Accepts a JSON string containing an object whose keys are
+                    GUIDs and values are lists of version strings. If this
+                    list is specified, non-inlinecompatibility tests will only
+                    be run if they specifically target the applications and
+                    veresions in this parameter. E.g.:
+                    ``{"{ec8030f7-c20a-464f-9b0e-13a3a9e97384}": ["6.*"]}``
 
 
 Expected Type:
@@ -79,19 +106,19 @@ Expected Type:
 The expected type should be one of the following values:
 
 any (default)
-	Accepts any extension
+    Accepts any extension
 extension
-	Accepts only extensions
+    Accepts only extensions
 theme
-	Accepts only themes
+    Accepts only themes
 dictionary
-	Accepts only dictionaries
+    Accepts only dictionaries
 languagepack
-	Accepts only language packs
+    Accepts only language packs
 search
-	Accepts only OpenSearch XML files (unpackaged)
+    Accepts only OpenSearch XML files (unpackaged)
 multi
-	Accepts only multi-item XPI packages
+    Accepts only multi-item XPI packages
 
 Specifying an expected type will throw an error if the validator
 does not detect that particular type when scanning. All addon type
@@ -104,44 +131,9 @@ Output Type:
 The output type may be either of the following:
 
 text (default)
-	Outputs a textual summary of the addo-on analysis. Supports verbose mode.
+    Outputs a textual summary of the addo-on analysis. Supports verbose mode.
 json
-	Outputs a JSON snippet representing a full summary of the add-on analysis.
-
-
-Verbose Mode:
-=============
-
-If the "-v" flag is set, the output will include informational
-messages in addition to errors and warnings. Informational messages
-contain information about the analysis that do not invalidate the
-add-on, but are contextually relevant.
-
-Verbose mode will also output detailed descriptions of each summary
-item, as well as the file path and line number (if available).
-
-This mode is only supported by certain output types. Output types
-that do not support verbose mode will output informational messages by
-default.
-
-
-Boring Mode:
-============
-
-Boring mode, when activated, doesn't print colors to the terminal.
-
-Determined Mode:
-================
-
-With determination comes perseverance. When in determined mode, the validator
-will not stop validating after errors present themselves in a particular tier.
-Traditionally, if an error tier fails, subsequent tiers are not executed. This
-flag ensures that those tiers are indeed run.
-
-Note that enabling this option may cause issues with certain tests, as some
-higher-level tiers depend on information provided by lower tiers. This data
-may not be available as the add-on was never meant to make it to the higher
-tiers.
+    Outputs a JSON snippet representing a full summary of the add-on analysis.
 
 
 --------
@@ -151,7 +143,7 @@ tiers.
 Text Output Mode:
 =================
 
-In text output mode ("text"), output is structured in the format of one
+In ``text`` output mode, output is structured in the format of one
 message per line. The messages are prefixed by their priority level
 (i.e.: "Warning: This is the message").
 
@@ -162,100 +154,80 @@ add-on type was determined to be.
 JSON Output Mode:
 =================
 
-In JSON output mode ("json"), output is formatted as a JSON snippet
+In ``JSON`` output mode, output is formatted as a JSON snippet
 containing all messages. The format for the JSON output is that of the
 sample document below.
 
 ::
 
-	{
-		"detected_type": "extension",
-		"errors": 2,
-		"warnings": 1,
-		"notices": 1,
-		"success": false,
-		"message_tree": {
-			"type1": {
-				"function1": {
-					"test1": {
-						"__messages": ["uuid_foo", "uuid_bar"],
-						"__errors": 1,
-						"__warnings": 0,
-						"__notices": 1
-					},
-					"test2": {
-						"__messages": ["uuid_abc", "uuid_def"],
-						"__errors": 0,
-						"__warnings": 2,
-						"__notices": 0
-					},
-					"__messages": [],
-					"__errors": 1,
-					"__warnings": 2,
-					"__notices": 1
-				},
-				"__messages": [],
-				"__errors": 1,
-				"__warnings": 2,
-				"__notices": 1
-			},
-			"__messages": [],
-			"__errors": 1,
-			"__warnings": 2,
-			"__notices": 1
-		},
-		"messages": [
-			{
-				"uid": "123456789",
-				"id": ["module", "function", "error"],
-				"type": "error",
-				"message": "This is the error message text.",
-				"description": ["Description of the error message.",
-								"Additional description text"],
-				"file": "",
-				"line": 0
-			},
-			{
-				"uid": "123456789",
-				"id": ["module", "function", "error"],
-				"type": "warning",
-				"message": "This is the warning message text.",
-				"description": "Description of the warning message.",
-				"file": "testfile.xml",
-				"line": 0
-			},
-			{
-				"uid": "123456789",
-				"id": ["module", "function", "error"],
-				"type": "notice",
-				"message": "This is the informational message text.",
-				"description": "Description of the info message."
-				"file": "chrome.manifest",
-				"line": 21,
-				"column": 4,
-				"context":[
-					"locale foo bar",
-					"foo bar xyz",
-					null
-				]
-			},
-			{
-				"uid": "123456789",
-				"id": ["module", "function", "error"],
-				"type": "error",
-				"message": "test.xpi > An error was found.",
-				"description": "This error happened within a subpackage."
-				"file": [
-					"test.xpi",
-					"chrome.manifest"
-				],
-				"line": 21
-			}
-		]
-	}
+    {
+        "detected_type": "extension",
+        "errors": 2,
+        "warnings": 1,
+        "notices": 1,
+        "success": false,
+        "compatibility_summary": {
+            "errors": 1,
+            "warnings": 0,
+            "notices": 0
+        },
+        "ending_tier": 4,
+        "message_tree": {
+            "module": {
+                "function": {
+                    "error": {
+                        "__messages": ["123456789"],
+                        "__errors": 1,
+                        "__warnings": 0,
+                        "__notices": 0
+                    },
+                    "__messages": [],
+                    "__errors": 1,
+                    "__warnings": 0,
+                    "__notices": 0
+                },
+                "__messages": [],
+                "__errors": 1,
+                "__warnings": 0,
+                "__notices": 0
+            },
+            "__messages": [],
+            "__errors": 1,
+            "__warnings": 0,
+            "__notices": 0
+        },
+        "messages": [
+            {
+                "uid": "123456789",
+                "id": ["module", "function", "error"],
+                "type": "error",
+                "message": "This is the error message text.",
+                "description": ["Description of the error message.",
+                                "Additional description text"],
+                "file": ["chrome/foo.jar", "bar/zap.js"],
+                "line": 12,
+                "column": 50,
+                "context: [
+                    "   if(foo = bar())",
+                    "       an_error_is_somewhere_on_this_line.prototy.eval("whatever");",
+                    null
+                ],
+                "compatibility_type": "error",
+                "for_appversions": {
+                    "{ec8030f7-c20a-464f-9b0e-13a3a9e97384}": ["5.0a2", "6.0a1"]
+                },
+                "tier": 2
+            }
+        ],
+        "metadata": {
+            "name": "Best Add-on Evar",
+            "version": "9000",
+            "guid": "foo@bar.com"
+        }
+    }
 
 
-The `message_tree` element to the document above contains a series of
+The ``message_tree`` element to the document above contains a series of
 JavaScript objects organized into a tree structure. The key of each element in
 the tree is the the name of each successive part of the validator that
 generated a particular message or set of messages (increasing in specificity as
@@ -264,10 +236,10 @@ additional nodes which provide extra information:
 
 ::
 
-	__errors - number - The number of errors generated in this node
-	__warnings - number - The number of warnings generated in this node
-	__notices - number - The number of messages generated in this node
-	__messages - list - A list of UIDs from messages in the `messages` node
+    __errors - number - The number of errors generated in this node
+    __warnings - number - The number of warnings generated in this node
+    __notices - number - The number of messages generated in this node
+    __messages - list - A list of UIDs from messages in the `messages` node
 
 
 JSON Notes:
@@ -280,68 +252,68 @@ When a subpackage exists, an angle bracket will delimit the subpackage
 name and the message text.
 
 If no applicable file is available (i.e.: when a file is missing), the
-`file` value will be empty. If a `file` value is available within a
-subpackage, then the `file` attribute will be a list containing the
+``file`` value will be empty. If a ``file`` value is available within a
+subpackage, then the ``file`` attribute will be a list containing the
 name of the outermost subpackage's name, followed by each successive
 concentric subpackage's name, followed by the name of the file that the
 message was generated in. If no applicable file is available within a
-subpackage, the `file` attribute is identical, except the last element
-of the list in the `file` attribute is an empty string.
+subpackage, the ``file`` attribute is identical, except the last element
+of the list in the ``file`` attribute is an empty string.
 
 For instance, this tree would generate the following messages:
 
 ::
 
-	package_to_test.xpi
-		|
-		|-install.rdf
-		|-chrome.manifest
-		|-subpackage.xpi
-		|  |
-		|  |-subsubpackage.xpi
-		|	  |
-		|	  |-chrome.manifest
-		|	  |-install.rdf
-		|
-		|-subpackage.jar
-		   |
-		   |-install.rdf
+    package_to_test.xpi
+        |
+        |-install.rdf
+        |-chrome.manifest
+        |-subpackage.xpi
+        |  |
+        |  |-subsubpackage.xpi
+        |     |
+        |     |-chrome.manifest
+        |     |-install.rdf
+        |
+        |-subpackage.jar
+           |
+           |-install.rdf
 
 ::
 
-	{
-		"type": "notice",
-		"message": "<em:type> not found in install.rdf",
-		"description": " ... ",
-		"file": "install.rdf",
-		"line": 0
-	},
-	{
-		"type": "error",
-		"message": "Invalid chrome.manifest subject: override",
-		"description": " ... ",
-		"file": "chrome.manifest",
-		"line": 7
-	},
-	{
-		"type": "error",
-		"message": "subpackage.xpi > install.rdf missing from theme",
-		"description": " ... ",
-		"file": ["subpackage.xpi", ""],
-		"line": 0
-	},
-	{
-		"type": "error",
-		"message": "subpackage.xpi > subsubpackage.xpi > Invalid chrome.manifest subject: sytle",
-		"description": " ... ",
-		"file": ["subpackage.xpi", "subsubpackage.xpi", "chrome.manifest"],
-		"line": 5
-	}
+    {
+        "type": "notice",
+        "message": "<em:type> not found in install.rdf",
+        "description": " ... ",
+        "file": "install.rdf",
+        "line": 0
+    },
+    {
+        "type": "error",
+        "message": "Invalid chrome.manifest subject: override",
+        "description": " ... ",
+        "file": "chrome.manifest",
+        "line": 7
+    },
+    {
+        "type": "error",
+        "message": "subpackage.xpi > install.rdf missing from theme",
+        "description": " ... ",
+        "file": ["subpackage.xpi", ""],
+        "line": 0
+    },
+    {
+        "type": "error",
+        "message": "subpackage.xpi > subsubpackage.xpi > Invalid chrome.manifest subject: sytle",
+        "description": " ... ",
+        "file": ["subpackage.xpi", "subsubpackage.xpi", "chrome.manifest"],
+        "line": 5
+    }
 
 Line Numbers and Columns
 ~~~~~~~~~~~~~~~~~~~~~~~~
 
-Line numbers are 1-based. Column numbers are 0-based. This can be confusing from a programmatic standpoint, but makes literal sense. "Line One" would obviously refer to the first line of a file.
+Line numbers are 1-based. Column numbers are 0-based. This can be confusing from a programmatic standpoint, but makes literal sense. "Line one" would obviously refer to the first line of a file.
 
 Contexts
 ~~~~~~~~
@@ -352,13 +324,13 @@ The middle element of the context list represents the line of interest. If an el
 
 ::
 
-	[
-		null,
-		"This is the line with the error",
-		"This is the second line of the file"
-	]
+    [
+        null,
+        "This is the line with the error",
+        "This is the second line of the file"
+    ]
 
-The same rule applies for the end of a file.
+The same rule applies for the end of a file and for files with only one line.
 
 ---------
  Testing
@@ -366,25 +338,25 @@ The same rule applies for the end of a file.
 
 Unit tests can be run with ::
 
-	fab test
+    fab test
 
 or, after setting the proper python path: ::
 
-	nosetests
+    nosetests
 
 However, to turn run unit tests with code coverage, the appropriate
 command would be: ::
 
-	nosetests --with-coverage --cover-package=validator --cover-skip=validator.outputhandlers.,validator.main,validator.constants,validator.constants_local --cover-inclusive --cover-tests
+    nosetests --with-coverage --cover-package=validator --cover-skip=validator.outputhandlers.,validator.main,validator.constants,validator.constants_local --cover-inclusive --cover-tests
 
 Note that in order to use the --cover-skip nose parameter, you must install the included patch for nose's coverage.py plugin: ::
 
-	extras/cover.py
+    extras/cover.py
 
 This file should overwrite the standard nose coverage plugin at the appropriate location: ::
 
-	~/.virtualenvs/[virtual environment]/lib/pythonX.X/site-packages/nose/plugins/cover.py
-	/usr/lib/pythonX.X/site-packages/nose/plugins/cover.py
+    ~/.virtualenvs/[virtual environment]/lib/pythonX.X/site-packages/nose/plugins/cover.py
+    /usr/lib/pythonX.X/site-packages/nose/plugins/cover.py
 
 
 ----------
@@ -397,8 +369,8 @@ make sure that the results are accurate.
 App Versions
 ============
 
-A list of Mozilla `<em:targetApplication>` values is stored in the
-`validator/app_versions.json` file. This must be updated to include the latest
+A list of Mozilla ``<em:targetApplication>`` values is stored in the
+``validator/app_versions.json`` file. This must be updated to include the latest
 application versions. This information can be found on AMO:
 
 https://addons.mozilla.org/en-US/firefox/pages/appversions/
@@ -418,7 +390,7 @@ regenerated with each new library version. To update: ::
     echo "e96461c6c19608f528b4a3c33a032b697b999b62" >> whitelist_hashes.txt
     mv whitelist_hashes.txt ../validator/testcases/hashes.txt
 
-To add new libraries to the mix, edit `extras/jslibfetcher.py` and add the
+To add new libraries to the mix, edit ``extras/jslibfetcher.py`` and add the
 version number to the appropriate tuple.
 
 

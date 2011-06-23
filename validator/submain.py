@@ -219,7 +219,6 @@ def test_inner_package(err, xpi_package, for_appversions=None):
             else:
                 # Pass in:
                 # - Error Bundler
-                # - Package listing
                 # - A copy of the package itself
                 test_func(err, xpi_package)
 

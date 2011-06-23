@@ -41,8 +41,9 @@ def test_extension():
 def test_extension():
     "Tests that type detection can detect an addon of type 'extension'"
 
-    _test_type("tests/resources/typedetection/td_notype_ext.xpi",
-               PACKAGE_EXTENSION)
+    err =_test_type("tests/resources/typedetection/td_notype_ext.xpi",
+                    PACKAGE_EXTENSION)
+    assert err.notices
 
 
 def test_multipackage():
@@ -63,8 +64,9 @@ def test_theme():
 def test_dictionary():
     "Tests that type detection can detect an addon of type 'dictionary'"
 
-    _test_type("tests/resources/typedetection/td_dictionary.xpi",
-               PACKAGE_DICTIONARY)
+    err =_test_type("tests/resources/typedetection/td_dictionary.xpi",
+                    PACKAGE_DICTIONARY)
+    assert not err.notices
 
 
 def test_langpack():

@@ -439,7 +439,7 @@ def _aggregate_results(err, results, locale, similar=False, base="en-US"):
     # for every message
     locale_filename = [locale["target"]]
     if locale["jarred"]:
-        locale_filename.append(locale["path"])
+        locale_filename.append(locale["path"].lstrip("/"))
 
     agg_unchanged = []
     if not similar:

@@ -139,7 +139,8 @@ class MarkupParser(HTMLParser):
                                 "in HTML comment tags (<!-- -->)",
                                 self.filename,
                                 line=self.line,
-                                context=self.context)
+                                context=self.context,
+                                tier=2)
                 self.reported.add("script_comments")
                 return
 
@@ -148,8 +149,8 @@ class MarkupParser(HTMLParser):
                                   "_feed",
                                   "parse_error"),
                                  "Markup parsing error",
-                                 ["There was an error parsing the markup "
-                                  "document.",
+                                 ["There was an error parsing a markup "
+                                  "file.",
                                   str(inst)],
                                  self.filename,
                                  line=self.line,
@@ -236,9 +237,9 @@ class MarkupParser(HTMLParser):
             if isinstance(src, types.StringTypes):
                 remote_src = not self._is_url_local(src)
 
-            if type_ and \
-               not (type_ in SAFE_IFRAME_TYPES or
-                    not remote_src):
+            if (type_ and
+                not (type_ in SAFE_IFRAME_TYPES or
+                     not remote_src)):
                 self.err.warning(("testcases_markup_markuptester",
                                   "handle_starttag",
                                   "iframe_type_unsafe"),
@@ -249,9 +250,9 @@ class MarkupParser(HTMLParser):
                                  self.filename,
                                  line=self.line,
                                  context=self.context)
-            elif (not type_ or
-                  type_ not in SAFE_IFRAME_TYPES) and \
-                 remote_src:
+            elif ((not type_ or
+                   type_ not in SAFE_IFRAME_TYPES) and
+                  remote_src):
                 self.err.warning(("testcases_markup_markuptester",
                                   "handle_starttag",
                                   "iframe_type_unsafe"),
@@ -368,7 +369,8 @@ class MarkupParser(HTMLParser):
                              "has opening tags.",
                              self.filename,
                              line=self.line,
-                             context=self.context)
+                             context=self.context,
+                             tier=2)
             self.reported.add("closing_tags")
             if DEBUG:  # pragma: no cover
                 print "Too many closing tags ------"
@@ -396,7 +398,8 @@ class MarkupParser(HTMLParser):
                               'Tag "%s" closed before it was opened' % tag],
                              self.filename,
                              line=self.line,
-                             context=self.context)
+                             context=self.context,
+                             tier=2)
             if DEBUG:  # pragma: no cover
                 print "Tag closed before opened ------"
             return
@@ -427,7 +430,8 @@ class MarkupParser(HTMLParser):
                              "in the specified document type.",
                              self.filename,
                              line=self.line,
-                             context=self.context)
+                             context=self.context,
+                             tier=2)
             if DEBUG:  # pragma: no cover
                 print "Invalid markup nesting ------"
 

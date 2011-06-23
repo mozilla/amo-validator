@@ -50,14 +50,6 @@ def detect_type(err, install_rdf=None, xpi_package=None):
                       "32. Any other values are either invalid or deprecated.",
                       "install.rdf")
             return
-    else:
-        err.notice(("typedetection",
-                    "detect_type",
-                    "no_em:type"),
-                   "No <em:type> element found in install.rdf",
-                   "It isn't always required, but it is the most reliable "
-                   "method for determining add-on type.",
-                   "install.rdf")
 
     # Dictionaries are weird too, they might not have the obligatory
     # em:type. We can assume that if they have a /dictionaries/ folder,
@@ -69,6 +61,16 @@ def detect_type(err, install_rdf=None, xpi_package=None):
     if any(file_ for file_ in xpi_package if
                file_.startswith("dictionaries/")):
         return PACKAGE_DICTIONARY
+
+    if type_ is None:
+        err.notice(
+            err_id=("typedetection",
+                    "detect_type",
+                    "no_em:type"),
+            notice="No <em:type> element found in install.rdf",
+            description="It isn't always required, but it is the most reliable "
+                        "method for determining add-on type.",
+            filename="install.rdf")
 
     # There's no type element, so the spec says that it's either a
     # theme or an extension. At this point, we know that it isn't
