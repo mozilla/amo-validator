@@ -12,6 +12,7 @@ def test_basic_regex_fail():
     "Tests that a simple Regex match causes a warning"
 
     assert _do_test_raw("var x = 'network.http';").failed()
+    assert _do_test_raw("var x = 'extensions.foo.update.url';").failed()
 
 
 def test_js_category_regex_fail():
@@ -84,4 +85,11 @@ def test_incompatible_uris():
                        versions_after("firefox", "6.0a1")})
     assert not err.failed()
     assert err.compat_summary["warnings"]
+
+    err = _do_real_test_raw("""
+    var foo = "postdata:LOL NOT THE CASE";
+    """, versions={"{ec8030f7-c20a-464f-9b0e-13a3a9e97384}":
+                       versions_after("firefox", "6.0a1")})
+    assert not err.failed()
+    assert not any(err.compat_summary.values())
 

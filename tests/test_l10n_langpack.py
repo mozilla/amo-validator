@@ -77,6 +77,8 @@ def test_results_aggregator():
                              "path": "/locale/en-US/",
                              "jarred": True})
     assert err.failed()
+    print err.warnings
+    assert all("//" not in "".join(m["file"]) for m in err.warnings)
 
 
 def test_comparer():
