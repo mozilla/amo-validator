@@ -15,37 +15,24 @@ from validator.decorator import versions_after
 
 DEBUG = False
 
-UNSAFE_TAGS = ("script",
-               "object",
-               "embed",
-               "base")
-SELF_CLOSING_TAGS = ("area",
-                     "base",
-                     "basefont",
-                     "br",
-                     "col",
-                     "frame",
-                     "hr",
-                     "img",
-                     "input",
-                     "li",
-                     "link",
-                     "meta",
-                     "p",
-                     "param")
-SAFE_IFRAME_TYPES = ("content",
-                     "content-primary",
-                     "content-targetable")
+UNSAFE_TAGS = ("script", "object", "embed", "base", )
+UNSAFE_THEME_TAGS = ("implementation", "browser", "xul:browser", "xul:script")
+SELF_CLOSING_TAGS = ("area", "base", "basefont", "br", "col", "frame", "hr",
+                     "img", "input", "li", "link", "meta", "p", "param", )
+SAFE_IFRAME_TYPES = ("content", "content-primary", "content-targetable", )
 TAG_NOT_OPENED = "Tag (%s) being closed before it is opened."
 
-DOM_MUTATION_HANDLERS = ("ondomattrmodified", "ondomattributenamechanged",
-     "ondomcharacterdatamodified", "ondomelementnamechanged",
-     "ondomnodeinserted", "ondomnodeinsertedintodocument", "ondomnoderemoved",
-     "ondomnoderemovedfromdocument", "ondomsubtreemodified")
+DOM_MUTATION_HANDLERS = (
+        "ondomattrmodified", "ondomattributenamechanged",
+        "ondomcharacterdatamodified", "ondomelementnamechanged",
+        "ondomnodeinserted", "ondomnodeinsertedintodocument", "ondomnoderemoved",
+        "ondomnoderemovedfromdocument", "ondomsubtreemodified", )
+UNSAFE_THEME_XBL = ("constructor", "destructor", "field", "getter",
+                    "implementation", "setter", )
 
 
 class MarkupParser(HTMLParser):
-    """Parses and inspects various markup languages"""
+    """Parse and analyze the versious components of markup files."""
 
     def __init__(self, err, strict=True, debug=False):
         HTMLParser.__init__(self)
@@ -58,6 +45,7 @@ class MarkupParser(HTMLParser):
 
         self.xml_state = []
         self.xml_buffer = []
+        self.xbl = False
 
         self.reported = set()
 
@@ -158,8 +146,6 @@ class MarkupParser(HTMLParser):
             self.reported.add("markup")
 
     def handle_startendtag(self, tag, attrs):
-        # Self closing tags don't have an end tag, so we want to
-        # completely cut out the references to handle the end tag.
         self.handle_starttag(tag, attrs, True)
         self.handle_endtag(tag)
 
@@ -167,6 +153,11 @@ class MarkupParser(HTMLParser):
 
         # Normalize!
         tag = tag.lower()
+        # XUL scripts are identical to normal scripts. Treat them the same.
+        if tag == "xul:script":
+            tag = "script"
+
+        orig_tag = tag
 
         # Be extra sure it's not a self-closing tag.
         if not self_closing:
@@ -186,13 +177,51 @@ class MarkupParser(HTMLParser):
                            line=self.line,
                            context=self.context)
 
-        if self.err.detected_type == PACKAGE_LANGPACK:
+        # Test for banned XBL in themes.
+        if self.err.detected_type == PACKAGE_THEME:
 
-            if tag in UNSAFE_TAGS:
+            if tag.startswith("xbl:"):
+                self.xbl = True
+                tag = tag[4:]
+
+            # Find XBL elements.
+            if self.xbl:
+                if tag in UNSAFE_THEME_XBL:
+                    self.err.warning(
+                        err_id=("testcases_markup_markuptester",
+                                "handle_starttag",
+                                "unsafe_theme_xbl_element"),
+                        warning="Banned XBL element in theme.",
+                        description=["Certain XBL elements are disallowed in "
+                                     "themes.",
+                                     "Element: <xbl:%s>" % tag],
+                        filename=self.filename,
+                        line=self.line,
+                        context=self.context)
+
+                elif (tag == "property" and
+                      any(a[0] in (u"onset", u"onget") for a in attrs)):
+                    self.err.warning(
+                        err_id=("testcases_markup_markuptester",
+                                "handle_starttag",
+                                "theme_xbl_property"),
+                        warning="Themes are not allowed to use XBL properties",
+                        description="XBL properties cannot be used in themes.",
+                        filename=self.filename,
+                        line=self.line,
+                        context=self.context)
+
+
+        # Test for banned elements in language pack and theme markup.
+        if self.err.detected_type in (PACKAGE_LANGPACK, PACKAGE_THEME):
+
+            if (tag in UNSAFE_TAGS or
+                (self.err.detected_type == PACKAGE_THEME and
+                 tag in UNSAFE_THEME_TAGS)):
                 self.err.warning(("testcases_markup_markuptester",
                                   "handle_starttag",
-                                  "unsafe_langpack"),
-                                 "Unsafe tag in language pack",
+                                  "unsafe_langpack_theme"),
+                                 "Unsafe tag for add-on type",
                                  ["A tag in your markup has been marked as "
                                   "being potentially unsafe. Consider "
                                   "alternate means of accomplishing what the "
@@ -287,11 +316,32 @@ class MarkupParser(HTMLParser):
         # Find CSS and JS attributes and handle their values like they
         # would otherwise be handled by the standard parser flow.
         for attr in attrs:
-            attr_name = attr[0].lower()
+            attr_name, attr_value = attr[0].lower(), attr[1]
+
+            if (attr_name == "xmlns:xbl" and
+                attr_value == "http://www.mozilla.org/xbl"):
+                self.xbl = True
+
+            if (self.err.detected_type == PACKAGE_THEME and
+                attr_value.startswith(("data:", "javascript:"))):
+
+                self.err.warning(
+                        err_id=("testcases_markup_markuptester",
+                                "handle_starttag",
+                                "theme_attr_prefix"),
+                        warning="Attribute contains banned prefix",
+                        description=["A mark element's attribute contains a "
+                                     "prefix which is not allowed in themes.",
+                                     "Attribute: %s" % attr_name],
+                        filename=self.filename,
+                        line=self.line,
+                        context=self.context)
+
+
             if attr_name == "style":
                 csstester.test_css_snippet(self.err,
                                            self.filename,
-                                           attr[1],
+                                           attr_value,
                                            self.line)
             elif attr_name.startswith("on"):  # JS attribute
                 # Warn about DOM mutation event handlers.
@@ -310,8 +360,9 @@ class MarkupParser(HTMLParser):
                         context=self.context)
 
                 scripting.test_js_snippet(err=self.err,
-                                          data=attr[1],
-                                          filename=self.filename)
+                                          data=attr_value,
+                                          filename=self.filename,
+                                          line=self.line)
 
             elif (self.extension == "xul" and
                   attr_name in ("insertbefore", "insertafter") and
@@ -346,12 +397,14 @@ class MarkupParser(HTMLParser):
             self._save_to_buffer("<" + tag + self._format_args(attrs) + ">")
             return
 
-        self.xml_state.append(tag)
+        self.xml_state.append(orig_tag)
         self.xml_buffer.append(unicode(""))
 
     def handle_endtag(self, tag):
 
         tag = tag.lower()
+        if tag == "xul:script":
+            tag = "script"
 
         if DEBUG:  # pragma: no cover
             print "E: ", tag, self.xml_state

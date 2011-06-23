@@ -66,57 +66,47 @@ def test_xml_file():
 
 def test_xul_file():
     "Tests a package with a valid XUL file."
-
     _do_test("tests/resources/markup/markuptester/pass.xul")
 
 
 def test_xml_bad_nesting():
     "Tests an XML file that has badly nested elements."
-
     _do_test("tests/resources/markup/markuptester/bad_nesting.xml", True)
 
 
 def test_has_cdata():
     "Tests that CDATA is good to go."
-
     _do_test("tests/resources/markup/markuptester/cdata.xml")
 
 
 def test_xml_overclosing():
     "Tests an XML file that has overclosed elements"
-
     _do_test("tests/resources/markup/markuptester/overclose.xml", True)
 
 
 def test_xml_extraclosing():
     "Tests an XML file that has extraclosed elements"
-
     _do_test("tests/resources/markup/markuptester/extraclose.xml", True)
 
 
 def test_html_ignore_comment():
     "Tests that HTML comment values are ignored"
-
     _do_test("tests/resources/markup/markuptester/ignore_comments.html")
 
 
 def test_html_css_style():
     "Tests that CSS within an element is passed to the CSS tester"
-
     _do_test("tests/resources/markup/markuptester/css_style.html", True)
 
 
 def test_html_css_inline():
     "Tests that inline CSS is passed to the CSS tester"
-
     _do_test("tests/resources/markup/markuptester/css_inline.html", True)
 
 
 def test_xul_evil():
     "Tests for evil kinds of scripts and iframes in XUL."
-
     _do_test("tests/resources/markup/markuptester/remote_src.xul", True)
-
     _do_test("tests/resources/markup/markuptester/bad_iframe_remote.xul", True)
     _do_test("tests/resources/markup/markuptester/bad_iframe_chrome.xul", True)
     _do_test("tests/resources/markup/markuptester/"
@@ -125,27 +115,27 @@ def test_xul_evil():
 
 
 def test_lp_passing():
-    "Tests a valid language pack file."
-
+    """Test a valid language pack or theme file."""
     _do_test("tests/resources/markup/markuptester/_langpack/lp_safe.html",
-             False,
-             PACKAGE_LANGPACK)
+             False, PACKAGE_LANGPACK)
+    _do_test("tests/resources/markup/markuptester/_langpack/lp_safe.html",
+             False, PACKAGE_THEME)
 
 
 def test_lp_unsafe():
-    "Tests a language pack file that contains unsafe elements."
-
+    """Test a language pack or theme file that contains unsafe elements."""
     _do_test("tests/resources/markup/markuptester/_langpack/lp_unsafe.html",
-             True,
-             PACKAGE_LANGPACK)
+             True, PACKAGE_LANGPACK)
+    _do_test("tests/resources/markup/markuptester/_langpack/lp_unsafe.html",
+             True, PACKAGE_THEME)
 
 
 def test_lp_remote():
-    "Tests a language pack file that contains remote references."
-
+    """Test a language pack file that contains remote references."""
     _do_test("tests/resources/markup/markuptester/_langpack/lp_remote.html",
-             True,
-             PACKAGE_LANGPACK)
+             True, PACKAGE_LANGPACK)
+    _do_test("tests/resources/markup/markuptester/_langpack/lp_remote.html",
+             True, PACKAGE_THEME)
 
 
 def test_invalid_markup():
@@ -168,7 +158,6 @@ def test_bad_encoding():
 
 def test_self_closing_scripts():
     """Tests that self-closing script tags are not deletrious to parsing."""
-
     _do_test_raw("""
     <foo>
         <script type="text/javascript"/>
@@ -177,6 +166,54 @@ def test_self_closing_scripts():
         <list_item />
     </foo>
     """, "foo.js")
+
+
+def test_theme_attribute_prefixes():
+    """Test that javascript and data URIs are flagged in themes."""
+
+    _do_test_raw("""
+    <foo><bar foo="http://bar" /></foo>
+    """, "foo.js", type_=PACKAGE_THEME)
+
+    _do_test_raw("""
+    <foo><bar foo="data:bar" /></foo>
+    """, "foo.js", type_=PACKAGE_THEME, should_fail=True)
+
+    _do_test_raw("""
+    <foo><bar foo="javascript:bar" /></foo>
+    """, "foo.js", type_=PACKAGE_THEME, should_fail=True)
+
+
+def test_theme_xbl():
+    """Test that themes ban a good chunk of XBL."""
+
+    _do_test_raw("""
+    <foo><xbl:foo /></foo>
+    """, "foo.js", type_=PACKAGE_THEME)
+
+    _do_test_raw("""
+    <foo><xbl:constructor /></foo>
+    """, "foo.js", type_=PACKAGE_THEME, should_fail=True)
+
+    _do_test_raw("""
+    <foo><xbl:property /></foo>
+    """, "foo.js", type_=PACKAGE_THEME)
+
+    _do_test_raw("""
+    <foo><xbl:property onset="foo()" /></foo>
+    """, "foo.js", type_=PACKAGE_THEME, should_fail=True)
+
+    _do_test_raw("""
+    <foo xmlns:xbl="http://www.mozilla.org/xbl">
+        <property onset="" onget="" />
+    </foo>
+    """, "foo.js")
+
+    _do_test_raw("""
+    <foo xmlns:xbl="http://www.mozilla.org/xbl">
+        <property onset="" onget="" />
+    </foo>
+    """, "foo.js", type_=PACKAGE_THEME, should_fail=True)
 
 
 def test_dom_mutation():

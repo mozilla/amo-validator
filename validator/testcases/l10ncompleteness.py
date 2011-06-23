@@ -119,10 +119,8 @@ def test_xpi(err, xpi_package):
     """Tests an XPI (or JAR, really) for L10n completeness"""
 
     # Skip over incompatible (or unnecessary) package types.
-    if err.detected_type not in (PACKAGE_EXTENSION,
-                                 PACKAGE_THEME) or \
-       err.is_nested_package():
-        # NOTE : Should we also do this with PACKAGE_MULTI?
+    if (err.detected_type != PACKAGE_EXTENSION or
+        err.is_nested_package()):
         return None
 
     # Don't even both with the test(s) if there's no chrome.manifest.
