@@ -45,7 +45,7 @@ def test_getinterface():
 
     assert _do_test_raw("""
         obj.getInterface(Components.interfaces.nsIXMLHttpRequest)
-           .open("GET");
+           .open("GET", "foo", false);
     """).failed()
 
 def test_queryinterface():
@@ -54,38 +54,38 @@ def test_queryinterface():
     assert _do_test_raw("""
         var obj = {};
         obj.QueryInterface(Components.interfaces.nsIXMLHttpRequest);
-        obj.open("GET");
+        obj.open("GET", "foo", false);
     """).failed()
 
     assert _do_test_raw("""
         var obj = {};
         obj.QueryInterface(Components.interfaces.nsIXMLHttpRequest);
         obj.QueryInterface(Components.interfaces.nsISupports);
-        obj.open("GET");
+        obj.open("GET", "foo", false);
     """).failed()
 
     assert _do_test_raw("""
         var obj = {};
         obj.QueryInterface(Components.interfaces.nsISupports);
         obj.QueryInterface(Components.interfaces.nsIXMLHttpRequest);
-        obj.open("GET");
+        obj.open("GET", "foo", false);
     """).failed()
 
     assert _do_test_raw("""
         {}.QueryInterface(Components.interfaces.nsIXMLHttpRequest)
-          .open("GET");
+          .open("GET", "foo", false);
     """).failed()
 
     assert _do_test_raw("""
         {}.QueryInterface(Components.interfaces.nsIXMLHttpRequest)
           .QueryInterface(Components.interfaces.nsISupports)
-          .open("GET");
+          .open("GET", "foo", false);
     """).failed()
 
     assert _do_test_raw("""
         {}.QueryInterface(Components.interfaces.nsISupports)
           .QueryInterface(Components.interfaces.nsIXMLHttpRequest)
-          .open("GET");
+          .open("GET", "foo", false);
     """).failed()
 
     # TODO:
@@ -93,13 +93,13 @@ def test_queryinterface():
         assert _do_test_raw("""
             var obj = {};
             obj.QueryInterface(Components.interfaces.nsIXMLHttpRequest);
-            obj.open("GET");
+            obj.open("GET", "foo", false);
         """).failed()
 
         assert _do_test_raw("""
             var obj = { foo: {} };
             obj.foo.QueryInterface(Components.interfaces.nsIXMLHttpRequest);
-            obj.foo.open("GET");
+            obj.foo.open("GET", "foo", false);
         """).failed()
 
 def test_overwritability():
