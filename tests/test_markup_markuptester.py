@@ -1,4 +1,6 @@
 ﻿# -*- coding: utf-8 -*-
+from nose.tools import eq_
+
 import validator.testcases.markup.markuptester as markuptester
 from validator.errorbundler import ErrorBundle
 from validator.constants import *
@@ -238,4 +240,18 @@ def test_dom_mutation():
     _do_test_raw("""
     <foo><bar ondomattrmodified="" /></foo>
     """, "foo.js", should_fail=True)
+
+def test_proper_line_numbers():
+    """Test that the proper line numbers are passed to test_js_snippet."""
+
+    err = _do_test_raw("""<foo>
+    <script>
+    eval("OWOWOWOWOWOWOWOW");
+    </script>
+    </foo>""", "foo.xul", should_fail=True)
+
+    assert err.warnings
+    warning = err.warnings[0]
+    eq_(warning["file"], "foo.xul")
+    eq_(warning["line"], 3);
 

@@ -44,6 +44,7 @@ class MarkupParser(HTMLParser):
         self.context = None
 
         self.xml_state = []
+        self.xml_line_stack = []
         self.xml_buffer = []
         self.xbl = False
 
@@ -54,6 +55,7 @@ class MarkupParser(HTMLParser):
         incrementally feeding each line into the parser, increasing the
         value of the line number with each line."""
 
+        self.line = 0
         self.filename = filename
         self.extension = extension.lower()
 
@@ -64,6 +66,7 @@ class MarkupParser(HTMLParser):
         lines = data.split("\n")
         line_buffer = []
         force_buffer = False
+        pline = 0
         for line in lines:
             self.line += 1
 
@@ -179,7 +182,6 @@ class MarkupParser(HTMLParser):
 
         # Test for banned XBL in themes.
         if self.err.detected_type == PACKAGE_THEME:
-
             if tag.startswith("xbl:"):
                 self.xbl = True
                 tag = tag[4:]
@@ -214,7 +216,6 @@ class MarkupParser(HTMLParser):
 
         # Test for banned elements in language pack and theme markup.
         if self.err.detected_type in (PACKAGE_LANGPACK, PACKAGE_THEME):
-
             if (tag in UNSAFE_TAGS or
                 (self.err.detected_type == PACKAGE_THEME and
                  tag in UNSAFE_THEME_TAGS)):
@@ -362,7 +363,12 @@ class MarkupParser(HTMLParser):
                 scripting.test_js_snippet(err=self.err,
                                           data=attr_value,
                                           filename=self.filename,
+<<<<<<< HEAD
                                           line=self.line)
+=======
+                                          line=self.line,
+                                          context=self.context)
+>>>>>>> 292f7d0060bb6b60a68c415fbef29562f8a41a3e
 
             elif (self.extension == "xul" and
                   attr_name in ("insertbefore", "insertafter") and
@@ -398,6 +404,10 @@ class MarkupParser(HTMLParser):
             return
 
         self.xml_state.append(orig_tag)
+<<<<<<< HEAD
+=======
+        self.xml_line_stack.append(self.line)
+>>>>>>> 292f7d0060bb6b60a68c415fbef29562f8a41a3e
         self.xml_buffer.append(unicode(""))
 
     def handle_endtag(self, tag):
@@ -459,6 +469,7 @@ class MarkupParser(HTMLParser):
 
         data_buffer = self.xml_buffer.pop()
         old_state = self.xml_state.pop()
+        old_line = self.xml_line_stack.pop()
 
         # If the tag on the stack isn't what's being closed and it also
         # classifies as a self-closing tag, we just recursively close
@@ -493,15 +504,12 @@ class MarkupParser(HTMLParser):
         # Perform analysis on collected data.
         if data_buffer:
             if tag == "script":
-                scripting.test_js_snippet(self.err,
-                                          data_buffer,
-                                          self.filename,
-                                          self.line)
+                scripting.test_js_snippet(err=self.err, data=data_buffer,
+                                          filename=self.filename,
+                                          line=old_line, context=self.context)
             elif tag == "style":
-                csstester.test_css_file(self.err,
-                                        self.filename,
-                                        data_buffer,
-                                        self.line)
+                csstester.test_css_file(self.err, self.filename, data_buffer,
+                                        old_line)
 
     def handle_data(self, data):
         self._save_to_buffer(data)

@@ -108,9 +108,12 @@ def _function(traverser, node):
             params.append(param["name"])
         elif param["type"] == "ArrayPattern":
             for element in param["elements"]:
+                # Array destructuring in function prototypes? LOL!
+                if element is None or element["type"] != "Identifier":
+                    continue
                 params.append(element["name"])
 
-    local_context = traverser._peek_context(2)
+    local_context = traverser._peek_context(1)
     for param in params:
         var = JSWrapper(lazy=True, traverser=traverser)
 
@@ -174,7 +177,11 @@ def _define_var(traverser, node):
 
             vars = []
             for element in declaration["id"]["elements"]:
-                if element is None:
+                # NOTE : Multi-level array destructuring sucks. Maybe implement
+                # it someday if you're bored, but it's so rarely used and it's
+                # so utterly complex, there's probably no need to ever code it
+                # up.
+                if element is None or element["type"] != "Identifier":
                     vars.append(None)
                     continue
                 vars.append(element["name"])
@@ -297,9 +304,10 @@ def _define_array(traverser, node):
 
 def _define_literal(traverser, node):
     "Creates a JSVariable object based on a literal"
-
-    var = JSLiteral(node["value"])
-    return JSWrapper(var, traverser=traverser)
+    value = node["value"]
+    if isinstance(value, dict):
+        return JSWrapper(traverser=traverser)
+    return JSWrapper(JSLiteral(value), traverser=traverser)
 
 
 def _call_expression(traverser, node):
@@ -309,11 +317,11 @@ def _call_expression(traverser, node):
         traverser._traverse_node(arg)
 
     member = traverser._traverse_node(node["callee"])
-    if member.is_global and \
-       "dangerous" in member.value and \
-       isinstance(member.value["dangerous"], types.LambdaType):
-        dangerous = member.value["dangerous"]
+    if (member.is_global and
+        "dangerous" in member.value and
+        isinstance(member.value["dangerous"], types.LambdaType)):
 
+        dangerous = member.value["dangerous"]
         t = traverser._traverse_node
         result = dangerous(a=args, t=t, e=traverser.err)
         if result:
@@ -324,15 +332,16 @@ def _call_expression(traverser, node):
                                    "_call_expression",
                                    "called_dangerous_global"),
                                   "Global called in dangerous manner",
-                                  result if isinstance(result,
-                                                       types.StringTypes) else
+                                  result if
+                                    isinstance(result, types.StringTypes) else
                                   "A global function was called using a set "
                                   "of dangerous parameters. These parameters "
                                   "have been disallowed.",
-                                  traverser.filename,
+                                  filename=traverser.filename,
                                   line=traverser.line,
                                   column=traverser.position,
                                   context=traverser.context)
+
     elif node["callee"]["type"] == "MemberExpression" and \
          node["callee"]["property"]["type"] == "Identifier":
 
@@ -355,10 +364,12 @@ def _call_expression(traverser, node):
 
 
 def _call_settimeout(a, t, e):
-    """Handler for setTimeout and setInterval. Should determine whether a[0]
+    """
+    Handler for setTimeout and setInterval. Should determine whether a[0]
     is a lambda function or a string. Strings are banned, lambda functions are
     ok. Since we can't do reliable type testing on other variables, we flag
-    those, too."""
+    those, too.
+    """
 
     return a and a[0]["type"] != "FunctionExpression"
 
@@ -528,6 +539,7 @@ def _expr_assignment(traverser, node):
                 warning="Global variable overwrite",
                 description="An attempt was made to overwrite a global "
                             "variable in some JavaScript code.",
+                filename=traverser.filename,
                 line=traverser.line,
                 column=traverser.position,
                 context=traverser.context)

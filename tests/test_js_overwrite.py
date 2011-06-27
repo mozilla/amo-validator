@@ -85,7 +85,6 @@ def test_with_statement():
 
 def test_local_global_overwrite():
     """Test that a global assigned to a local variable can be overwritten."""
-
     err = _do_test_raw("""
     foo = String.prototype;
     foo = "bar";
@@ -95,8 +94,13 @@ def test_local_global_overwrite():
 
 def test_overwrite_global():
     """Test that an overwriteable global is overwriteable."""
-
     assert not _do_test_raw("""
     document.title = "This is something that isn't a global";
+    """).failed()
+
+def test_overwrite_readonly_false():
+    """Test that globals with readonly set to false are overwriteable."""
+    assert not _do_test_raw("""
+    window.innerHeight = 123;
     """).failed()
 
