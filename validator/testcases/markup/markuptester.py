@@ -363,12 +363,8 @@ class MarkupParser(HTMLParser):
                 scripting.test_js_snippet(err=self.err,
                                           data=attr_value,
                                           filename=self.filename,
-<<<<<<< HEAD
-                                          line=self.line)
-=======
                                           line=self.line,
                                           context=self.context)
->>>>>>> 292f7d0060bb6b60a68c415fbef29562f8a41a3e
 
             elif (self.extension == "xul" and
                   attr_name in ("insertbefore", "insertafter") and
@@ -404,10 +400,7 @@ class MarkupParser(HTMLParser):
             return
 
         self.xml_state.append(orig_tag)
-<<<<<<< HEAD
-=======
         self.xml_line_stack.append(self.line)
->>>>>>> 292f7d0060bb6b60a68c415fbef29562f8a41a3e
         self.xml_buffer.append(unicode(""))
 
     def handle_endtag(self, tag):
