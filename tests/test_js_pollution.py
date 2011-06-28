@@ -1,4 +1,4 @@
-from js_helper import _do_test_raw
+from js_helper import _do_test_raw, _do_real_test_raw
 
 
 def test_pollution():
@@ -29,4 +29,29 @@ def test_pollution_jsm():
     c = "foo";
     d = "foo";
     """, path="foo.jsm", ignore_pollution=False).failed()
+
+
+def test_pollution_jetpack_bootstrap():
+    """
+    Test that Jetpack addons and bootstrapped addons are not flagged for
+    pollution.
+    """
+
+    assert not _do_real_test_raw(
+        """
+        a = "foo";
+        b = "foo";
+        c = "foo";
+        d = "foo";
+        """, path="foo.js",
+        metadata={"is_jetpack": True}).failed()
+
+    assert not _do_real_test_raw(
+        """
+        a = "foo";
+        b = "foo";
+        c = "foo";
+        d = "foo";
+        """, path="foo.js",
+        resources={"em:bootstrap": "true"}).failed()
 
