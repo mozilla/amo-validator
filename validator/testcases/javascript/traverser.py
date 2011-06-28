@@ -21,6 +21,7 @@ class MockBundler:
         self.ids = []
         self.detected_type = 1
         self.resources = {}
+        self.metadata = {}
 
     def failed(self):
         "Returns whether messages have been reported"
