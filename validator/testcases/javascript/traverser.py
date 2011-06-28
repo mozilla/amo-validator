@@ -132,9 +132,7 @@ class Traverser:
             return None
 
         self._debug("START>>")
-
         self._traverse_node(data)
-
         self._debug("END>>")
 
         if self.contexts:
@@ -148,7 +146,9 @@ class Traverser:
                 global_context_size = len(self.contexts[0].data)
                 self._debug("Final context size: %d" % global_context_size)
 
-                if global_context_size > 3 and not self.is_jsm:
+                if (global_context_size > 3 and not self.is_jsm and
+                    not "is_jetpack" in self.err.metadata and
+                    not self.err.get_resource("em:bootstrap") == "true"):
                     self.err.warning(
                         err_id=("testcases_javascript_traverser",
                                 "run",
