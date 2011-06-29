@@ -36,7 +36,7 @@ def inspect_jetpack(err, xpi_package):
     err.metadata["is_jetpack"] = True
 
     # Test the harness-options file for the mandatory values.
-    mandatory_elements = ("sdkVersion", "manifest")
+    mandatory_elements = ("sdkVersion", "manifest", "jetpackID", "bundleID")
     missing_elements = []
     for element in mandatory_elements:
         if element not in harnessoptions:
@@ -70,10 +70,14 @@ def inspect_jetpack(err, xpi_package):
     for line in map(lambda x: x.split(), jetpack_data):
         jetpack_hash_table[line[-1]] = tuple(line[:-1])
 
+    # Prepare a place to store mentioned hashes.
+    found_hashes = set()
+
     loaded_modules = []
     tested_files = {}
     unknown_files = []
-    mandatory_module_elements = ("name", "hash", "zipname")
+    mandatory_module_elements = ("moduleName", "packageName", "requirements",
+                                 "sectionName", "docsSHA256", "jsSHA256")
 
     # Iterate each loaded module and perform a sha256 hash on the files.
     for uri, module in harnessoptions["manifest"].items():
@@ -103,9 +107,9 @@ def inspect_jetpack(err, xpi_package):
                 filename="harness-options.json")
             continue
 
-        zip_path = module["zipname"]
+        zip_path = "resources/%s" % uri[11:].replace("@", "-at-")
 
-        # Make sure that the module actually exists in the add-on.
+        # Check the zipname element if it exists.
         if zip_path not in xpi_package:
             err.warning(
                 err_id=("testcases_jetpack",
@@ -114,15 +118,14 @@ def inspect_jetpack(err, xpi_package):
                 warning="Missing Jetpack module",
                 description=["A Jetpack module listed in harness-options.json "
                              "could not be found in the add-on.",
-                             "Path: %s" % module["zipname"]],
+                             "Path: %s" % zip_path],
                 filename="harness-options.json")
             continue
 
-        blob = xpi_package.read(zip_path)
-        blob_hash = hashlib.sha256(blob).hexdigest()
+        blob_hash = hashlib.sha256(xpi_package.read(zip_path)).hexdigest()
 
-        if blob_hash != module["hash"]:
-            # Warn that the hashes don't match up.
+        # Make sure that the module's hash matches what the manifest says.
+        if blob_hash != module["jsSHA256"]:
             err.warning(
                 err_id=("testcases_jetpack",
                         "inspect_jetpack",
@@ -131,34 +134,25 @@ def inspect_jetpack(err, xpi_package):
                 description=["A file in the Jetpack add-on does not match the "
                              "corresponding hash listed in harness-options"
                              ".json.",
-                             "Module: %s" % uri,
-                             "Hashes: %s/%s" % (blob_hash, module["hash"])],
+                             "Module: %s" % zip_path,
+                             "Hashes: %s/%s" % (blob_hash, module["jsSHA256"])],
                 filename=zip_path)
-            continue
 
-        if blob_hash not in jetpack_hash_table:
-            # Warn that the hash isn't a valid jetpack hash.
-            err.warning(
-                err_id=("testcases_jetpack",
-                        "inspect_jetpack",
-                        "unknown_hash"),
-                warning="Jetpack module hash unknown",
-                description=["A file in the Jetpack add-on could not be "
-                             "identified in the Jetpack SDK checksum "
-                             "database. The file may have been tampered with.",
-                             "Module: %s" % uri,
-                             "Hash: %s" % blob_hash],
-                filename=zip_path)
+        # We aren't going to keep track of anything that isn't an official
+        # Jetpack file.
+        if module["jsSHA256"] not in jetpack_hash_table:
             continue
 
         # Keep track of all of the valid modules that were loaded.
-        loaded_modules.append(module["name"])
+        loaded_modules.append("".join([module["packageName"], "-",
+                                       module["sectionName"], "/",
+                                       module["moduleName"], ".js"]))
 
         # Save information on what was matched.
-        tested_files[zip_path] = jetpack_hash_table[blob_hash]
+        tested_files[zip_path] = jetpack_hash_table[module["jsSHA256"]]
         pretested_files.append(zip_path)
 
-    safe_files = (".jpg", ".ico", ".png", ".gif", ".ds_store")
+    safe_files = (".jpg", ".ico", ".png", ".gif")
 
     # Iterate the rest of the files in the package for testing.
     for filename in xpi_package:
@@ -169,7 +163,8 @@ def inspect_jetpack(err, xpi_package):
             continue
 
         # Skip safe files.
-        if filename.lower().endswith(safe_files):
+        if (filename.lower().endswith(safe_files) or
+            filename.lower() == ".ds_store"):
             continue
 
         blob = xpi_package.read(filename)
@@ -181,6 +176,21 @@ def inspect_jetpack(err, xpi_package):
         else:
             tested_files[filename] = jetpack_hash_table[blob_hash]
             pretested_files.append(filename)
+
+        # Mark the hashes we actually find as being present.
+        if blob_hash in found_hashes:
+            found_hashes.discard(blob_hash)
+
+    # We've got hashes left over
+    if found_hashes:
+        err.warning(
+            err_id=("testcases_jetpack", "inspect_jetpack", "extra_hashes"),
+            warning="Extra hashes registered in harness-options.",
+            description=["This Jetpack add-on registers modules in the "
+                         "harness-options.json file that do not exist in the "
+                         "package.",
+                         "Hashes: %s" % ", ".join(found_hashes)],
+            filename="harness-options.json")
 
     # Store the collected information in the output metadata.
     err.metadata["jetpack_loaded_modules"] = loaded_modules
