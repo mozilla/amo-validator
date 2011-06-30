@@ -39,26 +39,6 @@ def test_unknown_file(err, filename):
         return True
 
 
-@decorator.register_test(tier=2, expected_type=PACKAGE_EXTENSION)
-def test_npapi(err, xpi_package=None):
-    "Detects NPAPI plugins in extensions and flags them"
-
-    matches = [fn for
-               fn in
-               xpi_package if
-               fnmatch.fnmatch(fn, "plugins/*.dll")]
-    if any(matches):
-        err.warning(("testcases_packagelayout",
-                     "test_npapi",
-                     "found_dll"),
-                    "NPAPI plugin(s) detected in extension",
-                    ["NPAPI plugins are generally disallowed in extensions. "
-                     "The only approved channel for plugins is the Plugin "
-                     "Finder Service.",
-                     "Detected the following files: %s" % ", ".join(matches)],
-                    "plugins/")
-
-
 @decorator.register_test(tier=1)
 def test_blacklisted_files(err, xpi_package=None):
     "Detects blacklisted files and extensions."
