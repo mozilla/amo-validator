@@ -76,8 +76,9 @@ def test_results_aggregator():
                              "target": "foo.bar",
                              "path": "/locale/en-US/",
                              "jarred": True})
-    assert err.failed()
-    print err.warnings
+    assert not err.failed()
+    assert err.notices
+    print err.notices
     assert all("//" not in "".join(m["file"]) for m in err.warnings)
 
 
