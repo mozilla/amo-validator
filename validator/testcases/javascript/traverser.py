@@ -1,6 +1,7 @@
 import json
 import types
 
+import validator.testcases.javascript.actions as actions
 from validator.testcases.javascript.jstypes import *
 from validator.testcases.javascript.nodedefinitions import DEFINITIONS
 from validator.testcases.javascript.predefinedentities import \
@@ -392,6 +393,7 @@ class Traverser:
         # Build out the wrapper object from the global definition.
         result = JSWrapper(is_global=True, traverser=self, lazy=True)
         result.value = entity
+        result = actions._expand_globals(self, result)
 
         self._debug("BUILT_GLOBAL")
 

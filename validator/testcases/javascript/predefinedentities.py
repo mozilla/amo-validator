@@ -1,3 +1,5 @@
+import math
+
 import actions
 import call_definitions
 from call_definitions import xpcom_constructor as xpcom_const
@@ -125,6 +127,7 @@ def build_quick_xpcom(method, interface, traverser):
 # GLOBAL_ENTITIES is also representative of the `window` object.
 GLOBAL_ENTITIES = {
     u"window": {"value": lambda t: {"value": GLOBAL_ENTITIES}},
+    u"null": {"readonly": True},
     u"Cc": {"value":
                 lambda t: GLOBAL_ENTITIES["Components"]["value"]["classes"]},
     u"Ci": {"value":
@@ -184,26 +187,66 @@ GLOBAL_ENTITIES = {
     u"parseInt": {"readonly": True},
 
     u"eval": {"dangerous": True},
+
     u"Function": {"dangerous": True},
-    u"Object": {"value": {u"prototype": {"readonly": True},
-                          u"constructor":  # Just an experiment for now
-                              {"value": lambda t: GLOBAL_ENTITIES["Function"]}}},
-    u"String": {"value": {u"prototype": {"readonly": True}}},
-    u"Array": {"value": {u"prototype": {"readonly": True}}},
-    u"Number": {"value": {u"prototype": {"readonly": True}}},
-    u"Boolean": {"value": {u"prototype": {"readonly": True}}},
+    u"Object":
+        {"value":
+             {u"prototype": {"readonly": True},
+              u"constructor":  # Just an experiment for now
+                  {"value": lambda t: GLOBAL_ENTITIES["Function"]}}},
+    u"String":
+        {"value":
+             {u"prototype": {"readonly": True}},
+         "return": call_definitions.string_global},
+    u"Array":
+        {"value":
+             {u"prototype": {"readonly": True}},
+         "return": call_definitions.array_global},
+    u"Number":
+        {"value":
+             {u"prototype":
+                  {"readonly": True},
+              u"POSITIVE_INFINITY":
+                  {"value": lambda t: JSWrapper(float('inf'), traverser=t)},
+              u"NEGATIVE_INFINITY":
+                  {"value": lambda t: JSWrapper(float('-inf'), traverser=t)}},
+         "return": call_definitions.number_global},
+    u"Boolean":
+        {"value":
+             {u"prototype": {"readonly": True}},
+         "return": call_definitions.boolean_global},
     u"RegExp": {"value": {u"prototype": {"readonly": True}}},
     u"Date": {"value": {u"prototype": {"readonly": True}}},
 
-    u"top": {"readonly": actions._readonly_top},
-
-    u"Math": {"readonly": True},
+    u"Math":
+        {"value":
+             {"PI":
+                  {"value": lambda t: JSWrapper(math.pi, traverser=t)},
+              "E":
+                  {"value": lambda t: JSWrapper(math.e, traverser=t)},
+              "LN2":
+                  {"value": lambda t: JSWrapper(math.log(2), traverser=t)},
+              "LN10":
+                  {"value": lambda t: JSWrapper(math.log(10), traverser=t)},
+              "LOG2E":
+                  {"value": lambda t: JSWrapper(math.log(math.e, 2),
+                                                traverser=t)},
+              "LOG10E":
+                  {"value": lambda t: JSWrapper(math.log10(math.e),
+                                                traverser=t)},
+              "SQRT2":
+                  {"value": lambda t: JSWrapper(math.sqrt(2), traverser=t)},
+              "SQRT1_2":
+                  {"value": lambda t: JSWrapper(math.sqrt(1/2), traverser=t)}}},
 
     u"netscape":
-        {"value": {u"security":
-                       {"value": {u"PrivilegeManager":
-                                      {"value": {u"enablePrivilege":
-                                                     {"dangerous": True}}}}}}},
+        {"value":
+             {u"security":
+                  {"value":
+                       {u"PrivilegeManager":
+                            {"value":
+                                 {u"enablePrivilege":
+                                      {"dangerous": True}}}}}}},
 
     u"navigator":
         {"value": {u"wifi": {"dangerous": True},
@@ -295,7 +338,13 @@ GLOBAL_ENTITIES = {
                                "connections."}}},
 
     # Global properties are inherently read-only, though this formalizes it.
-    u"Infinity": {"readonly": True},
+    u"Infinity":
+        {"readonly": True,
+         "value":
+             lambda t:
+                 GLOBAL_ENTITIES[u"Number"]["value"][u"POSITIVE_INFINITY"]},
     u"NaN": {"readonly": True},
     u"undefined": {"readonly": True},
-    }
+    u"top": {"readonly": actions._readonly_top},
+}
+

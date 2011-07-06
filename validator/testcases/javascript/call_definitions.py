@@ -98,3 +98,39 @@ def xpcom_constructor(method, extend=False, mutate=False, pretraversed=False):
     definition.__name__ = "xpcom_%s" % str(method)
     return definition
 
+
+# Global object function definitions:
+def string_global(wrapper, arguments, traverser):
+    if not arguments:
+        return JSWrapper("", traverser=traverser)
+    arg = traverser._traverse_node(arguments[0])
+    value = str(arg.get_literal_value())
+    return JSWrapper(value, traverser=traverser)
+
+
+def array_global(wrapper, arguments, traverser):
+    output = JSArray()
+    if arguments:
+        output.elements = [traverser._traverse_node(a) for a in arguments]
+    return JSWrapper(output, traverser=traverser)
+
+
+def number_global(wrapper, arguments, traverser):
+    if not arguments:
+        return JSWrapper(0, traverser=traverser)
+    arg = traverser._traverse_node(arguments[0])
+    try:
+        value = float(arg.get_literal_value())
+    except ValueError:
+        return traverser._build_global(
+                name="NaN",
+                entity=predefinedentities.GLOBAL_ENTITIES[u"NaN"])
+    return JSWrapper(value, traverser=traverser)
+
+
+def boolean_global(wrapper, arguments, traverser):
+    if not arguments:
+        return JSWrapper(False, traverser=traverser)
+    arg = traverser._traverse_node(arguments[0])
+    return JSWrapper(bool(arg.get_literal_value()), traverser=traverser)
+
