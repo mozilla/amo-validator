@@ -102,6 +102,9 @@ def _regex_tests(err, data, filename):
 
     errors = {r"globalStorage\[.*\].password":
                   "Global Storage may not be used to store passwords.",
+              r"browser\.preferences\.instantApply":
+                  "Changing the value of instantApply can lead to UI problems "
+                  "in the browser.",
               r"network\.http": NP_WARNING,
               r"extensions(\..*)?\.update\.url": EUP_WARNING,
               r"extensions(\..*)?\.update\.enabled": EUP_WARNING,

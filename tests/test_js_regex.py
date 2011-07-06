@@ -14,6 +14,7 @@ def test_basic_regex_fail():
     assert _do_test_raw("var x = 'network.http';").failed()
     assert _do_test_raw("var x = 'extensions.foo.update.url';").failed()
     assert _do_test_raw("var x = 'network.websocket.foobar';").failed()
+    assert _do_test_raw("var x = 'browser.preferences.instantApply';").failed()
 
 
 def test_js_category_regex_fail():
