@@ -2,7 +2,7 @@ import math
 
 import actions
 import call_definitions
-from call_definitions import xpcom_constructor as xpcom_const
+from call_definitions import xpcom_constructor as xpcom_const, python_wrap
 from jstypes import JSWrapper
 
 # A list of identifiers and member values that may not be used.
@@ -127,7 +127,8 @@ def build_quick_xpcom(method, interface, traverser):
 # GLOBAL_ENTITIES is also representative of the `window` object.
 GLOBAL_ENTITIES = {
     u"window": {"value": lambda t: {"value": GLOBAL_ENTITIES}},
-    u"null": {"readonly": True},
+    u"null": {"readonly": True,
+              "literal": lambda t: JSWrapper(None, traverser=t)},
     u"Cc": {"value":
                 lambda t: GLOBAL_ENTITIES["Components"]["value"]["classes"]},
     u"Ci": {"value":
@@ -220,24 +221,63 @@ GLOBAL_ENTITIES = {
 
     u"Math":
         {"value":
-             {"PI":
+             {u"PI":
                   {"value": lambda t: JSWrapper(math.pi, traverser=t)},
-              "E":
+              u"E":
                   {"value": lambda t: JSWrapper(math.e, traverser=t)},
-              "LN2":
+              u"LN2":
                   {"value": lambda t: JSWrapper(math.log(2), traverser=t)},
-              "LN10":
+              u"LN10":
                   {"value": lambda t: JSWrapper(math.log(10), traverser=t)},
-              "LOG2E":
+              u"LOG2E":
                   {"value": lambda t: JSWrapper(math.log(math.e, 2),
                                                 traverser=t)},
-              "LOG10E":
+              u"LOG10E":
                   {"value": lambda t: JSWrapper(math.log10(math.e),
                                                 traverser=t)},
-              "SQRT2":
+              u"SQRT2":
                   {"value": lambda t: JSWrapper(math.sqrt(2), traverser=t)},
-              "SQRT1_2":
-                  {"value": lambda t: JSWrapper(math.sqrt(1/2), traverser=t)}}},
+              u"SQRT1_2":
+                  {"value": lambda t: JSWrapper(math.sqrt(1/2), traverser=t)},
+              u"abs":
+                  {"return": python_wrap(abs, [("num", 0)])},
+              u"acos":
+                  {"return": python_wrap(math.acos, [("num", 0)])},
+              u"asin":
+                  {"return": python_wrap(math.asin, [("num", 0)])},
+              u"atan":
+                  {"return": python_wrap(math.atan, [("num", 0)])},
+              u"atan2":
+                  {"return": python_wrap(math.atan2, [("num", 0),
+                                                      ("num", 1)])},
+              u"ceil":
+                  {"return": python_wrap(math.ceil, [("num", 0)])},
+              u"cos":
+                  {"return": python_wrap(math.cos, [("num", 0)])},
+              u"exp":
+                  {"return": python_wrap(math.exp, [("num", 0)])},
+              u"floor":
+                  {"return": python_wrap(math.floor, [("num", 0)])},
+              u"log":
+                  {"return": call_definitions.math_log},
+              u"max":
+                  {"return": python_wrap(max, [("num", 0)], nargs=True)},
+              u"min":
+                  {"return": python_wrap(min, [("num", 0)], nargs=True)},
+              u"pow":
+                  {"return": python_wrap(math.pow, [("num", 0),
+                                                    ("num", 0)])},
+              u"random": # Random always returns 0.5 in our fantasy land.
+                  {"return": call_definitions.math_random},
+              u"round":
+                  {"return": call_definitions.math_round},
+              u"sin":
+                  {"return": python_wrap(math.sin, [("num", 0)])},
+              u"sqrt":
+                  {"return": python_wrap(math.sqrt, [("num", 1)])},
+              u"tan":
+                  {"return": python_wrap(math.tan, [("num", 0)])},
+                  }},
 
     u"netscape":
         {"value":

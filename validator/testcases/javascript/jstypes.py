@@ -299,7 +299,10 @@ class JSWrapper(object):
         """Returns the literal value of the wrapper"""
 
         if self.is_global:
-            return "[object Object]"
+            if "literal" in self.value:
+                return self.value["literal"](self.traverser)
+            else:
+                return "[object Object]"
         if self.value is None:
             return ""
 

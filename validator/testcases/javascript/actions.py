@@ -662,9 +662,6 @@ def _expr_binary(traverser, node):
     gleft = _get_as_num(left)
     gright = _get_as_num(right)
 
-    traverser._debug("L-AS NUM: %d" % gleft)
-    traverser._debug("R-AS NUM: %d" % gright)
-
     operators = {
         "==": lambda: left == right or gleft == gright,
         "!=": lambda: left != right,
@@ -759,8 +756,7 @@ def _expr_unary_typeof(wrapper):
 def _get_as_num(value):
     """Return the JS numeric equivalent for a value."""
     if value is None:
-        # TODO: Should this be `return 0`
-        return False
+        return 0
 
     if isinstance(value, JSWrapper):
         value = value.get_literal_value()
@@ -770,7 +766,7 @@ def _get_as_num(value):
             if value.startswith("0x"):
                 return int(value, 16)
             else:
-                return int(value)
+                return float(value)
         elif isinstance(value, (int, float, long)):
             return value
         else:
