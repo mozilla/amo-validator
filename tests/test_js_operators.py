@@ -106,7 +106,8 @@ def test_unary_typeof():
         t = typeof(new Number()),
         u = typeof(new Number(0)),
         v = typeof(new Number(1)),
-        x = typeof(function() {});
+        x = typeof(function() {}),
+        y = typeof(Math.abs);
     """)
     eq_(_get_var(scope, "a"), "undefined")
     eq_(_get_var(scope, "b"), "object")
@@ -132,6 +133,7 @@ def test_unary_typeof():
     eq_(_get_var(scope, "u"), "object")
     eq_(_get_var(scope, "v"), "object")
     eq_(_get_var(scope, "x"), "function")
+    eq_(_get_var(scope, "y"), "function")
 
 
 # TODO(basta): Still working on the delete operator...should be done soon.

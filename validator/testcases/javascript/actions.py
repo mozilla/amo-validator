@@ -736,7 +736,9 @@ def _expr_unary(traverser, node):
 
 def _expr_unary_typeof(wrapper):
     """Evaluate the "typeof" value for a JSWrapper object."""
-    if wrapper.callable:
+    if (wrapper.callable or
+        (wrapper.is_global and "return" in wrapper.value and
+         "value" not in wrapper.value)):
         return "function"
 
     value = wrapper.value
