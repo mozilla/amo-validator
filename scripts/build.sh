@@ -25,6 +25,7 @@ source $VENV/bin/activate
 
 pip install -q -r requirements.txt
 
+git submodule sync -q
 git submodule update --init
 
 export SPIDERMONKEY_INSTALLATION="/usr/local/bin/tracemonkey"
