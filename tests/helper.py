@@ -38,11 +38,18 @@ def _do_test(path, test, failure=True,
     return err
 
 
+class MockZipFile:
+
+    def namelist(self):
+        return []
+
+
 class MockXPI:
 
     def __init__(self, data=None, subpackage=False):
         if not data:
             data = {}
+        self.zf = MockZipFile()
         self.data = data
         self.subpackage = subpackage
 

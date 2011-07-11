@@ -234,6 +234,30 @@ def test_has_installrdfs():
                                mock_xpi_subpack)
 
 
+class MockDupeZipFile(object):
+    """Mock a ZipFile class, simulating duplicate filename entries."""
+
+    def namelist(self):
+        return ["foo.bar", "foo.bar"]
+
+
+class MockDupeXPI(object):
+    """Mock the XPIManager class, simulating duplicate filename entries."""
+
+    def __init__(self):
+        self.zf = MockDupeZipFile()
+        self.subpackage = False
+
+
+def test_duplicate_files():
+    """Test that duplicate files in a package are caught."""
+
+    err = ErrorBundle()
+    err.save_resource("has_install_rdf", True)
+    packagelayout.test_layout_all(err, MockDupeXPI())
+    assert err.failed()
+
+
 def _do_installrdfs(function, has_install_rdf=True, xpi=None):
     "Helps to test that install.rdf files are present"
 

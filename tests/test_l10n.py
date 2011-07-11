@@ -60,9 +60,11 @@ def test_unmodified():
     unmodified from the reference locale (en-US)"""
 
     l10n.LOCALE_CACHE = {}
-    _do_test("tests/resources/l10n/l10n_unmodified.xpi",
-             l10n.test_xpi,
-             set_type=PACKAGE_EXTENSION)
+    err = _do_test("tests/resources/l10n/l10n_unmodified.xpi",
+                   l10n.test_xpi,
+                   set_type=PACKAGE_EXTENSION,
+                   failure=False)
+    assert err.notices
 
 
 def test_subpackage():

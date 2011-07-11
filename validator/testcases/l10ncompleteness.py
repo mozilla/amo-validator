@@ -464,16 +464,16 @@ def _aggregate_results(err, results, locale, similar=False, base="en-US"):
                      percentage * 100))
 
     if agg_unchanged:
-        err.warning(("testcases_l10ncompleteness",
-                     "_aggregate_results",
-                     "unchnged_entities"),
-                    "Unchanged translation entities",
-                    ["Localizations must include a translated copy of each "
-                     "entity from each file in the reference locale. These "
-                     "translations SHOULD differ from the localized text in "
-                     "the reference package.",
-                     agg_unchanged],
-                    locale_filename)
+        err.notice(("testcases_l10ncompleteness",
+                    "_aggregate_results",
+                    "unchnged_entities"),
+                   "Unchanged translation entities",
+                   ["Localizations must include a translated copy of each "
+                    "entity from each file in the reference locale. These "
+                    "translations SHOULD differ from the localized text in "
+                    "the reference package.",
+                    agg_unchanged],
+                   locale_filename)
 
     if unexpected_encodings:
         # Compile all of the encoding errors into one nice warning.
