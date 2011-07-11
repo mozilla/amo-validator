@@ -1,4 +1,6 @@
+from nose.tools import eq_
 from js_helper import _do_test, _do_test_raw, _get_var
+
 
 def test_basic_math():
     "Tests that contexts work and that basic math is executed properly"
@@ -37,6 +39,7 @@ def test_basic_math():
     assert _get_var(err, "b") == 4
     assert _get_var(err, "c") == 8
 
+
 def test_in_operator():
     "Tests the 'in' operator."
 
@@ -60,6 +63,7 @@ def test_in_operator():
     assert _get_var(err, "a") == False
     assert _get_var(err, "b") == False
 
+
 def test_function_instanceof():
     """
     Test that Function can be used with instanceof operators without error.
@@ -74,4 +78,135 @@ def test_function_instanceof():
     var x = foo();
     print(x === Function);
     """).failed()
+
+
+def test_unary_typeof():
+    """Test that the typeof operator does good."""
+
+    scope = _do_test_raw("""
+    var a = typeof(void(0)),
+        b = typeof(null),
+        c = typeof(true),
+        d = typeof(false),
+        e = typeof(new Boolean()),
+        f = typeof(new Boolean(true)),
+        g = typeof(Boolean()),
+        h = typeof(Boolean(false)),
+        i = typeof(Boolean(true)),
+        j = typeof(NaN),
+        k = typeof(Infinity),
+        l = typeof(-Infinity),
+        m = typeof(Math.PI),
+        n = typeof(0),
+        o = typeof(1),
+        p = typeof(-1),
+        q = typeof('0'),
+        r = typeof(Number()),
+        s = typeof(Number(0)),
+        t = typeof(new Number()),
+        u = typeof(new Number(0)),
+        v = typeof(new Number(1)),
+        x = typeof(function() {}),
+        y = typeof(Math.abs);
+    """)
+    eq_(_get_var(scope, "a"), "undefined")
+    eq_(_get_var(scope, "b"), "object")
+    eq_(_get_var(scope, "c"), "boolean")
+    eq_(_get_var(scope, "d"), "boolean")
+    eq_(_get_var(scope, "e"), "object")
+    eq_(_get_var(scope, "f"), "object")
+    eq_(_get_var(scope, "g"), "boolean")
+    eq_(_get_var(scope, "h"), "boolean")
+    eq_(_get_var(scope, "i"), "boolean")
+    # TODO: Implement "typeof" for predefined entities
+    # eq_(_get_var(scope, "j"), "number")
+    # eq_(_get_var(scope, "k"), "number")
+    # eq_(_get_var(scope, "l"), "number")
+    eq_(_get_var(scope, "m"), "number")
+    eq_(_get_var(scope, "n"), "number")
+    eq_(_get_var(scope, "o"), "number")
+    eq_(_get_var(scope, "p"), "number")
+    eq_(_get_var(scope, "q"), "string")
+    eq_(_get_var(scope, "r"), "number")
+    eq_(_get_var(scope, "s"), "number")
+    eq_(_get_var(scope, "t"), "object")
+    eq_(_get_var(scope, "u"), "object")
+    eq_(_get_var(scope, "v"), "object")
+    eq_(_get_var(scope, "x"), "function")
+    eq_(_get_var(scope, "y"), "function")
+
+
+# TODO(basta): Still working on the delete operator...should be done soon.
+
+#def test_delete_operator():
+#    """Test that the delete operator works correctly."""
+#
+#    # Test that array elements can be destroyed.
+#    eq_(_get_var(_do_test_raw("""
+#    var x = [1, 2, 3];
+#    delete(x[2]);
+#    var value = x.length;
+#    """), "value"), 2)
+#
+#    # Test that hte right array elements are destroyed.
+#    eq_(_get_var(_do_test_raw("""
+#    var x = [1, 2, 3];
+#    delete(x[2]);
+#    var value = x.toString();
+#    """), "value"), "1,2")
+#
+#    eq_(_get_var(_do_test_raw("""
+#    var x = "asdf";
+#    delete x;
+#    var value = x;
+#    """), "value"), None)
+#
+#    assert _do_test_raw("""
+#    delete(Math.PI);
+#    """).failed()
+
+
+def test_logical_not():
+    """Test that logical not is evaluated properly."""
+
+    scope = _do_test_raw("""
+    var a = !(null),
+        // b = !(var x),
+        c = !(void 0),
+        d = !(false),
+        e = !(true),
+        // f = !(),
+        g = !(0),
+        h = !(-0),
+        // i = !(NaN),
+        j = !(Infinity),
+        k = !(-Infinity),
+        l = !(Math.PI),
+        m = !(1),
+        n = !(-1),
+        o = !(''),
+        p = !('\\t'),
+        q = !('0'),
+        r = !('string'),
+        s = !(new String('')); // This should cover all type globals.
+    """)
+    eq_(_get_var(scope, "a"), True)
+    # eq_(_get_var(scope, "b"), True)
+    eq_(_get_var(scope, "c"), True)
+    eq_(_get_var(scope, "d"), True)
+    eq_(_get_var(scope, "e"), False)
+    # eq_(_get_var(scope, "f"), True)
+    eq_(_get_var(scope, "g"), True)
+    eq_(_get_var(scope, "h"), True)
+    # eq_(_get_var(scope, "i"), True)
+    eq_(_get_var(scope, "j"), False)
+    eq_(_get_var(scope, "k"), False)
+    eq_(_get_var(scope, "l"), False)
+    eq_(_get_var(scope, "m"), False)
+    eq_(_get_var(scope, "n"), False)
+    eq_(_get_var(scope, "o"), True)
+    eq_(_get_var(scope, "p"), False)
+    eq_(_get_var(scope, "q"), False)
+    eq_(_get_var(scope, "r"), False)
+    eq_(_get_var(scope, "s"), False)
 

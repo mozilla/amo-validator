@@ -89,23 +89,28 @@ def _regex_tests(err, data, filename):
 
     c = ContextGenerator(data)
 
-    errors = {"globalStorage\\[.*\\].password":
+    errors = {r"globalStorage\[.*\].password":
                   "Global Storage may not be used to store passwords.",
-              "network\\.http": NP_WARNING,
-              "extensions(\\..*)?\\.update\\.url": EUP_WARNING,
-              "extensions(\\..*)?\\.update\\.enabled": EUP_WARNING,
-              "extensions(\\..*)?\\.update\\.interval": EUP_WARNING,
-              "extensions\\.blocklist\\.url": NP_WARNING,
-              "extensions\\.blocklist\\.level": NP_WARNING,
-              "extensions\\.blocklist\\.interval": NP_WARNING,
-              "extensions\\.blocklist\\.enabled": NP_WARNING,
-              "general\\.useragent": NP_WARNING,
-              "launch\\(\\)":
+              r"browser\.preferences\.instantApply":
+                  "Changing the value of instantApply can lead to UI problems "
+                  "in the browser.",
+              r"network\.http": NP_WARNING,
+              r"extensions(\..*)?\.update\.url": EUP_WARNING,
+              r"extensions(\..*)?\.update\.enabled": EUP_WARNING,
+              r"extensions(\..*)?\.update\.interval": EUP_WARNING,
+              r"extensions\.blocklist\.url": NP_WARNING,
+              r"extensions\.blocklist\.level": NP_WARNING,
+              r"extensions\.blocklist\.interval": NP_WARNING,
+              r"extensions\.blocklist\.enabled": NP_WARNING,
+              r"general\.useragent": NP_WARNING,
+              r"launch\(\)":
                   "Use of 'launch()' is disallowed because of restrictions on "
                   "nsILocalFile. If the code does not use nsILocalFile, "
                   "consider a different function name.",
-              "capability\\.policy":
-                  "The preference 'capability.policy' is potentially unsafe."}
+              r"capability\.policy":
+                  "The preference 'capability.policy' is potentially unsafe.",
+              r"network\.websocket\.":
+                  "Websocket preferences should not be modified."}
 
     for regex, message in errors.items():
         reg = re.compile(regex)

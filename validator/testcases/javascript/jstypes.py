@@ -299,7 +299,10 @@ class JSWrapper(object):
         """Returns the literal value of the wrapper"""
 
         if self.is_global:
-            return ""
+            if "literal" in self.value:
+                return self.value["literal"](self.traverser)
+            else:
+                return "[object Object]"
         if self.value is None:
             return ""
 
@@ -332,7 +335,9 @@ class JSLiteral(JSObject):
 
     def __str__(self):
         "Returns a human-readable version of the variable's contents"
-        return self.output()
+        if isinstance(self.value, bool):
+            return str(self.output()).lower()
+        return str(self.output())
 
     def output(self):
         return self.value

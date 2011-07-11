@@ -1,6 +1,8 @@
+import math
+
 import actions
 import call_definitions
-from call_definitions import xpcom_constructor as xpcom_const
+from call_definitions import xpcom_constructor as xpcom_const, python_wrap
 from jstypes import JSWrapper
 
 # A list of identifiers and member values that may not be used.
@@ -125,6 +127,8 @@ def build_quick_xpcom(method, interface, traverser):
 # GLOBAL_ENTITIES is also representative of the `window` object.
 GLOBAL_ENTITIES = {
     u"window": {"value": lambda t: {"value": GLOBAL_ENTITIES}},
+    u"null": {"readonly": True,
+              "literal": lambda t: JSWrapper(None, traverser=t)},
     u"Cc": {"value":
                 lambda t: GLOBAL_ENTITIES["Components"]["value"]["classes"]},
     u"Ci": {"value":
@@ -184,26 +188,105 @@ GLOBAL_ENTITIES = {
     u"parseInt": {"readonly": True},
 
     u"eval": {"dangerous": True},
+
     u"Function": {"dangerous": True},
-    u"Object": {"value": {u"prototype": {"readonly": True},
-                          u"constructor":  # Just an experiment for now
-                              {"value": lambda t: GLOBAL_ENTITIES["Function"]}}},
-    u"String": {"value": {u"prototype": {"readonly": True}}},
-    u"Array": {"value": {u"prototype": {"readonly": True}}},
-    u"Number": {"value": {u"prototype": {"readonly": True}}},
-    u"Boolean": {"value": {u"prototype": {"readonly": True}}},
+    u"Object":
+        {"value":
+             {u"prototype": {"readonly": True},
+              u"constructor":  # Just an experiment for now
+                  {"value": lambda t: GLOBAL_ENTITIES["Function"]}}},
+    u"String":
+        {"value":
+             {u"prototype": {"readonly": True}},
+         "return": call_definitions.string_global},
+    u"Array":
+        {"value":
+             {u"prototype": {"readonly": True}},
+         "return": call_definitions.array_global},
+    u"Number":
+        {"value":
+             {u"prototype":
+                  {"readonly": True},
+              u"POSITIVE_INFINITY":
+                  {"value": lambda t: JSWrapper(float('inf'), traverser=t)},
+              u"NEGATIVE_INFINITY":
+                  {"value": lambda t: JSWrapper(float('-inf'), traverser=t)}},
+         "return": call_definitions.number_global},
+    u"Boolean":
+        {"value":
+             {u"prototype": {"readonly": True}},
+         "return": call_definitions.boolean_global},
     u"RegExp": {"value": {u"prototype": {"readonly": True}}},
     u"Date": {"value": {u"prototype": {"readonly": True}}},
 
-    u"top": {"readonly": actions._readonly_top},
-
-    u"Math": {"readonly": True},
+    u"Math":
+        {"value":
+             {u"PI":
+                  {"value": lambda t: JSWrapper(math.pi, traverser=t)},
+              u"E":
+                  {"value": lambda t: JSWrapper(math.e, traverser=t)},
+              u"LN2":
+                  {"value": lambda t: JSWrapper(math.log(2), traverser=t)},
+              u"LN10":
+                  {"value": lambda t: JSWrapper(math.log(10), traverser=t)},
+              u"LOG2E":
+                  {"value": lambda t: JSWrapper(math.log(math.e, 2),
+                                                traverser=t)},
+              u"LOG10E":
+                  {"value": lambda t: JSWrapper(math.log10(math.e),
+                                                traverser=t)},
+              u"SQRT2":
+                  {"value": lambda t: JSWrapper(math.sqrt(2), traverser=t)},
+              u"SQRT1_2":
+                  {"value": lambda t: JSWrapper(math.sqrt(1/2), traverser=t)},
+              u"abs":
+                  {"return": python_wrap(abs, [("num", 0)])},
+              u"acos":
+                  {"return": python_wrap(math.acos, [("num", 0)])},
+              u"asin":
+                  {"return": python_wrap(math.asin, [("num", 0)])},
+              u"atan":
+                  {"return": python_wrap(math.atan, [("num", 0)])},
+              u"atan2":
+                  {"return": python_wrap(math.atan2, [("num", 0),
+                                                      ("num", 1)])},
+              u"ceil":
+                  {"return": python_wrap(math.ceil, [("num", 0)])},
+              u"cos":
+                  {"return": python_wrap(math.cos, [("num", 0)])},
+              u"exp":
+                  {"return": python_wrap(math.exp, [("num", 0)])},
+              u"floor":
+                  {"return": python_wrap(math.floor, [("num", 0)])},
+              u"log":
+                  {"return": call_definitions.math_log},
+              u"max":
+                  {"return": python_wrap(max, [("num", 0)], nargs=True)},
+              u"min":
+                  {"return": python_wrap(min, [("num", 0)], nargs=True)},
+              u"pow":
+                  {"return": python_wrap(math.pow, [("num", 0),
+                                                    ("num", 0)])},
+              u"random": # Random always returns 0.5 in our fantasy land.
+                  {"return": call_definitions.math_random},
+              u"round":
+                  {"return": call_definitions.math_round},
+              u"sin":
+                  {"return": python_wrap(math.sin, [("num", 0)])},
+              u"sqrt":
+                  {"return": python_wrap(math.sqrt, [("num", 1)])},
+              u"tan":
+                  {"return": python_wrap(math.tan, [("num", 0)])},
+                  }},
 
     u"netscape":
-        {"value": {u"security":
-                       {"value": {u"PrivilegeManager":
-                                      {"value": {u"enablePrivilege":
-                                                     {"dangerous": True}}}}}}},
+        {"value":
+             {u"security":
+                  {"value":
+                       {u"PrivilegeManager":
+                            {"value":
+                                 {u"enablePrivilege":
+                                      {"dangerous": True}}}}}}},
 
     u"navigator":
         {"value": {u"wifi": {"dangerous": True},
@@ -294,7 +377,11 @@ GLOBAL_ENTITIES = {
                                "connections."}}},
 
     # Global properties are inherently read-only, though this formalizes it.
-    u"Infinity": {"readonly": True},
+    u"Infinity":
+        {"readonly": True,
+         "value":
+             lambda t:
+                 GLOBAL_ENTITIES[u"Number"]["value"][u"POSITIVE_INFINITY"]},
     u"NaN": {"readonly": True},
     u"undefined": {"readonly": True},
 
@@ -302,4 +389,6 @@ GLOBAL_ENTITIES = {
     u"innerWidth": {"readonly": False},
     u"width": {"readonly": False},
     u"height": {"readonly": False},
-    }
+    u"top": {"readonly": actions._readonly_top},
+}
+

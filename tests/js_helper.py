@@ -1,3 +1,5 @@
+from nose.tools import eq_
+
 from validator.errorbundler import ErrorBundle
 import validator.testcases.scripting
 validator.testcases.scripting.traverser.DEBUG = True
@@ -44,4 +46,17 @@ def _do_real_test_raw(script, path="foo", versions=None, detected_type=None):
 
 def _get_var(err, name):
     return err.final_context.data[name].get_literal_value()
+
+
+def _do_test_scope(script, vars):
+    """Test the final scope of a script against a set of variables."""
+    scope = _do_test_raw(script)
+    for var, value in vars.items():
+        print "Testing %s" % var
+        var_val = _get_var(scope, var)
+        if isinstance(var_val, float):
+            var_val *= 100000
+            var_val = round(var_val)
+            var_val /= 100000
+        eq_(var_val, value)
 

@@ -3,20 +3,6 @@ from validator.errorbundler import ErrorBundle
 from helper import _do_test, MockXPI
 
 
-def test_npapi():
-    "Tests that NPAPI plugins are flagged within extensions"
-
-    err = ErrorBundle()
-    # It is assumed that this only runs for extension tests; this is specified
-    # in the decorator.
-    packagelayout.test_npapi(err, {})
-    assert not err.failed()
-    packagelayout.test_npapi(err, {"plugins/foo.bar":False})
-    assert not err.failed()
-    packagelayout.test_npapi(err, {"plugins/foo.dll":False})
-    assert err.failed()
-
-
 def test_blacklisted_files():
     """Tests that the validator will throw warnings on extensions
     containing files that have extensions which are not considered

@@ -1,3 +1,4 @@
+import copy
 import math
 import types
 
@@ -15,7 +16,7 @@ def _get_member_exp_property(traverser, node):
         return unicode(node["property"]["name"])
     else:
         eval_exp = traverser._traverse_node(node["property"])
-        return unicode(eval_exp.get_literal_value())
+        return _get_as_str(eval_exp.get_literal_value())
 
 
 def _expand_globals(traverser, node):
@@ -26,7 +27,12 @@ def _expand_globals(traverser, node):
         isinstance(node.value["value"], types.LambdaType)):
 
         result = node.value["value"](t=traverser)
-        return traverser._build_global("--", result)
+        if isinstance(result, dict):
+            return traverser._build_global("--", result)
+        elif isinstance(result, JSWrapper):
+            return result
+        else:
+            return JSWrapper(result, traverser)
 
     return node
 
@@ -150,7 +156,8 @@ def _func_expr(traverser, node):
     # Collect the result as an object
     results = _function(traverser, node)
     if not isinstance(results, JSWrapper):
-        return JSWrapper(value=results, traverser=traverser)
+        results = JSWrapper(value=results, traverser=traverser)
+    results.callable = True
     return results
 
 
@@ -326,7 +333,7 @@ def _call_expression(traverser, node):
         result = dangerous(a=args, t=t, e=traverser.err)
         if result:
             # Generate a string representation of the params
-            params = u", ".join([unicode(t(p).get_literal_value()) for
+            params = u", ".join([_get_as_str(t(p).get_literal_value()) for
                                  p in args])
             traverser.err.warning(("testcases_javascript_actions",
                                    "_call_expression",
@@ -429,6 +436,8 @@ def _new(traverser, node):
     if not isinstance(elem, JSWrapper):
         elem = JSWrapper(elem, traverser=traverser)
     if elem.is_global:
+        traverser._debug("Making Overwriteable")
+        elem.value = copy.deepcopy(elem.value)
         elem.value["overwriteable"] = True
     return elem
 
@@ -493,7 +502,6 @@ def _expr_assignment(traverser, node):
             global_overwrite = (member_object.is_global and
                                 not ("overwriteable" in member_object.value and
                                      member_object.value["overwriteable"]))
-
             member_property = _get_member_exp_property(traverser, node_left)
             traverser._debug("ASSIGNMENT:MEMBER_PROPERTY(%s)" % member_property)
 
@@ -567,8 +575,8 @@ def _expr_assignment(traverser, node):
 
         if isinstance(lit_left, types.StringTypes) or \
            isinstance(lit_right, types.StringTypes):
-            lit_left = unicode(lit_left)
-            lit_right = unicode(lit_right)
+            lit_left = _get_as_str(lit_left)
+            lit_right = _get_as_str(lit_right)
 
         gleft = _get_as_num(left)
         gright = _get_as_num(right)
@@ -641,7 +649,6 @@ def _expr_binary(traverser, node):
         # global, specifically Function.
         return JSWrapper(True, traverser=traverser)
     else:
-
         right = traverser._traverse_node(node["right"])
         if not isinstance(right, JSWrapper):
             right = JSWrapper(right, traverser=traverser)
@@ -706,8 +713,8 @@ def _expr_binary(traverser, node):
                 right = ""
             if isinstance(left, types.StringTypes) or \
                isinstance(right, types.StringTypes):
-                left = unicode(left)
-                right = unicode(right)
+                left = _get_as_str(left)
+                right = _get_as_str(right)
         output = operators[operator]()
 
     if not isinstance(output, JSWrapper):
@@ -723,50 +730,79 @@ def _expr_unary(traverser, node):
     expr_num = _get_as_num(expr_lit)
 
     operators = {"-": lambda: -1 * expr_num,
-                 "+": expr_num,
-                 "!": not expr_lit,
-                 "~": -1 * (expr_num + 1),
-                 "void": None,
-                 "typeof": _expr_unary_typeof(expr),
-                 "delete": None}  # We never want to empty the context
+                 "+": lambda: expr_num,
+                 "!": lambda: not expr_lit,
+                 "~": lambda: -1 * (expr_num + 1),
+                 "void": lambda: None,
+                 "typeof": lambda: _expr_unary_typeof(expr),
+                 "delete": lambda: None}  # We never want to empty the context
+    if node["operator"] in operators:
+        output = operators[node["operator"]]()
+    else:
+        output = None
+
+    if not isinstance(output, JSWrapper):
+        output = JSWrapper(output, traverser=traverser)
+    return output
 
 
 def _expr_unary_typeof(wrapper):
-    "Evaluates the type of an object"
-
-    if wrapper.callable:
+    """Evaluate the "typeof" value for a JSWrapper object."""
+    if (wrapper.callable or
+        (wrapper.is_global and "return" in wrapper.value and
+         "value" not in wrapper.value)):
         return "function"
 
     value = wrapper.value
     if value is None:
         return "undefined"
-    elif isinstance(value, (JSObject, JSPrototype, JSArray)):
-        return "object"
     elif isinstance(value, JSLiteral):
         value = value.value
-
-        if isinstance(value, (int, long, float)):
-            return "number"
-        elif isinstance(value, bool):
+        if isinstance(value, bool):
             return "boolean"
+        elif isinstance(value, (int, long, float)):
+            return "number"
         elif isinstance(value, types.StringTypes):
             return "string"
+    return "object"
 
 
 def _get_as_num(value):
-    "Returns the JS numeric equivalent for a value"
-
+    """Return the JS numeric equivalent for a value."""
     if value is None:
-        return False
+        return 0
+
+    if isinstance(value, JSWrapper):
+        value = value.get_literal_value()
 
     try:
         if isinstance(value, types.StringTypes):
-            return float(value)
+            if value.startswith("0x"):
+                return int(value, 16)
+            else:
+                return float(value)
         elif isinstance(value, (int, float, long)):
             return value
         else:
             return int(value)
-
-    except:
+    except ValueError:
         return 0
+
+
+def _get_as_str(value):
+    """Return the JS string equivalent for a literal value."""
+    if value is None:
+        return ""
+
+    if isinstance(value, bool):
+        # .lower() because JS bools are lowercase.
+        return unicode(value).lower()
+    elif isinstance(value, (int, float, long)):
+        # Try to see if we can shave off some trailing significant figures.
+        try:
+            if int(value) == value:
+                return unicode(int(value))
+        except:
+            pass
+    return unicode(value)
 
