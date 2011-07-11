@@ -182,13 +182,25 @@ def test_layout_all(err, xpi_package):
     if xpi_package.subpackage:
         return
 
-    if not err.get_resource("has_install_rdf") and \
-       not err.get_resource("bad_install_rdf"):
+    if (not err.get_resource("has_install_rdf") and
+        not err.get_resource("bad_install_rdf")):
         err.error(("testcases_packagelayout",
                   "test_layout_all",
                   "missing_install_rdf"),
-                  "Addon missing install.rdf.",
-                  "All addons require an install.rdf file.")
+                  "Add-on missing install.rdf.",
+                  "All add-ons require an install.rdf file.")
+        return
+
+    package_namelist = list(xpi_package.zf.namelist())
+    package_nameset = set(package_namelist)
+    if len(package_namelist) != len(package_nameset):
+        err.error(
+            err_id=("testcases_packagelayout", "test_layout_all",
+                    "duplicate_entries"),
+            error="Package contains duplicate entries",
+            description="The package contains multiple entries with the same "
+                        "name. This practice has been banned. Try unzipping "
+                        "and re-zipping your add-on package and try again.")
 
 
 # This test needs to happen in tier 2. install.rdf analysis happens in tier
