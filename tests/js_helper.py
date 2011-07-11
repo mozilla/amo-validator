@@ -32,13 +32,18 @@ def _do_test_raw(script, path="foo", bootstrap=False, ignore_pollution=True,
     return err
 
 
-def _do_real_test_raw(script, path="foo", versions=None, detected_type=None):
+def _do_real_test_raw(script, path="foo", versions=None, detected_type=None,
+                      metadata=None, resources=None):
     """Perform a JS test using a non-mock bundler."""
 
     err = ErrorBundle()
     if detected_type:
         err.detected_type = detected_type
     err.supported_versions = versions or {}
+    if metadata is not None:
+        err.metadata = metadata
+    if resources is not None:
+        err.resources = resources
 
     validator.testcases.scripting.test_js_file(err, path, script, line=30)
     return err
