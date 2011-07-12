@@ -34,6 +34,7 @@ def test_navigator_language():
     """
 
     err = ErrorBundle()
+    err.supported_versions = {}
 
     flagged = "alert(navigator.language);"
     scripting.test_js_snippet(err, flagged, "foo")
