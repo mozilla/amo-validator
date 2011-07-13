@@ -6,6 +6,8 @@ from validator.decorator import versions_after
 
 NP_WARNING = "Network preferences may not be modified."
 EUP_WARNING = "Extension update settings may not be modified."
+NSINHS_LINK = ("https://developer.mozilla.org/en/XPCOM_Interface_Reference"
+               "/nsINavHistoryService")
 
 GENERIC_PATTERNS = {
     r"globalStorage\[.*\].password":
@@ -56,6 +58,10 @@ DOM_MUTATION_REGEXES = map(re.compile,
 FX6_INTERFACES = {"nsIDOMDocumentTraversal": 655514,
                   "nsIDOMDocumentRange": 655513,
                   "IWeaveCrypto": 651596}
+FX7_INTERFACES = {"nsIDOMDocumentStyle": 658904,
+                  "nsIDOMNSDocument": 658906,
+                  "nsIDOM3TypeInfo": 660539,
+                  "nsIDOM3Node": 659053}
 
 FX6_DEFINITION = {"{ec8030f7-c20a-464f-9b0e-13a3a9e97384}":
                       versions_after("firefox", "6.0a1")}
@@ -171,6 +177,26 @@ def run_regex_tests(document, err, filename, context):
 
     # Firefox 7 Compatibility
     if err.supports_version(FX7_DEFINITION):
+        for pattern, bug in FX7_INTERFACES.items():
+            _compat_test(
+                    re.compile(pattern),
+                    "Unsupported interface in use",
+                    ("Your add-on uses interface %s, which has been removed "
+                     "from Firefox 7. Please refer to %s for possible "
+                     "alternatives.") % (pattern, BUGZILLA_BUG % bug),
+                    compatibility_type="error",
+                    appversions=FX7_DEFINITION)
+
+        # nsINavHistoryObserver
+        _compat_test(
+                re.compile(r"nsINavHistoryObserver"),
+                "nsINavHistoryObserver interface has changed in Firefox 7",
+                ("The nsINavHistoryObserver interface has changed in Firefox "
+                 "7. Most function calls now required a GUID parameter, "
+                 "please refer to %s and %s for more information.") %
+                    (NSINHS_LINK, BUGZILLA_BUG % 633266),
+                compatibility_type="error",
+                appversions=FX7_DEFINITION)
         # nsIMarkupDocumentViewer_MOZILLA_2_0_BRANCH
         _compat_test(
                 re.compile(r"nsIMarkupDocumentViewer_MOZILLA_2_0_BRANCH"),

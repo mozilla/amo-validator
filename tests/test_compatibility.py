@@ -153,3 +153,67 @@ def test_custom_addon_types():
     assert err.notices
     assert err.compat_summary["errors"]
 
+
+def test_fx7_regex_xpcom():
+    """
+    Test that the obsoleted "simple" XPCOM interfaces are flagged from FX7.
+    """
+
+    err = _do_real_test_raw("""
+    var x = "nsIDOMDocumentStyle";
+    """)
+    err.print_summary(verbose=True)
+    assert not err.failed()
+    assert not err.notices
+    assert not any(err.compat_summary.values())
+
+    err = _do_real_test_raw("""
+    var x = "nsIDOMDocumentStyle";
+    """, versions={'{ec8030f7-c20a-464f-9b0e-13a3a9e97384}':
+                       versions_after("firefox", "7.0a1")})
+    err.print_summary(verbose=True)
+    assert not err.failed()
+    assert err.notices
+    assert err.compat_summary["errors"]
+
+
+def test_fx7_nsinavhistoryobserver():
+    """Test that nsINavHistoryObserver is flagged."""
+
+    err = _do_real_test_raw("""
+    var x = "nsINavHistoryObserver";
+    """)
+    err.print_summary(verbose=True)
+    assert not err.failed()
+    assert not err.notices
+    assert not any(err.compat_summary.values())
+
+    err = _do_real_test_raw("""
+    var x = "nsINavHistoryObserver";
+    """, versions={'{ec8030f7-c20a-464f-9b0e-13a3a9e97384}':
+                       versions_after("firefox", "7.0a1")})
+    err.print_summary(verbose=True)
+    assert not err.failed()
+    assert err.notices
+    assert err.compat_summary["errors"]
+
+
+def test_fx7_markupdocumentviewer():
+    """Test that nsIMarkupDocumentViewer_MOZILLA_2_0_BRANCH is flagged."""
+
+    err = _do_real_test_raw("""
+    var x = "nsIMarkupDocumentViewer_MOZILLA_2_0_BRANCH";
+    """)
+    err.print_summary(verbose=True)
+    assert not err.failed()
+    assert not err.notices
+    assert not any(err.compat_summary.values())
+
+    err = _do_real_test_raw("""
+    var x = "nsIMarkupDocumentViewer_MOZILLA_2_0_BRANCH";
+    """, versions={'{ec8030f7-c20a-464f-9b0e-13a3a9e97384}':
+                       versions_after("firefox", "7.0a1")})
+    err.print_summary(verbose=True)
+    assert not err.failed()
+    assert err.notices
+    assert err.compat_summary["warnings"]
