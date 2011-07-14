@@ -5,6 +5,7 @@ scripting.traverser.DEBUG = True
 
 def _test(script):
     err = ErrorBundle()
+    err.supported_versions = {}
     err.save_resource("em:bootstrap", "true")
     scripting.test_js_file(err, "foo", script)
 

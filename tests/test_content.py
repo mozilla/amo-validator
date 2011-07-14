@@ -207,11 +207,11 @@ def test_password_in_defaults_prefs():
     assert not _do_test_raw(password_js).failed()
 
     err = ErrorBundle()
-    mock_package = MockXPI({
-        "defaults/preferences/foo.js": "tests/resources/content/password.js"})
+    err.supported_versions = {}
+    mock_package = MockXPI({"defaults/preferences/foo.js":
+                                "tests/resources/content/password.js"})
 
-    content.test_packed_packages(err,
-                                 mock_package)
+    content.test_packed_packages(err, mock_package)
     print err.print_summary()
     assert err.failed()
 

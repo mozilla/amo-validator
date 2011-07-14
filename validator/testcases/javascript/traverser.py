@@ -40,6 +40,9 @@ class MockBundler:
         """Retrieves a saved blob of data."""
         return self.resources[name] if name in self.resources else False
 
+    def supports_version(self, version):
+        return True
+
     def error(self, err_id, error, description, filename="",
               line=1, column=0, context=None):
         "Represents a mock error"

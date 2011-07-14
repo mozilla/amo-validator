@@ -47,6 +47,18 @@ INTERFACES = {
                         "Authors of bootstrapped add-ons must take care "
                         "to cleanup any component registrations "
                         "at shutdown"}}},
+    u"nsIDOMFile":
+        {"value":
+            {u"getAsDataURL":
+                {"return": call_definitions.nsIDOMFile_deprec},
+             u"getAsBinary":
+                {"return": call_definitions.nsIDOMFile_deprec}}},
+    u"nsIJSON":
+        {"value":
+            {u"encode":
+                {"return": call_definitions.nsIJSON_deprec},
+             u"decode":
+                {"return": call_definitions.nsIJSON_deprec}}},
     u"nsIObserverService":
         {"value":
             {u"addObserver":
@@ -324,6 +336,14 @@ GLOBAL_ENTITIES = {
                                 {"xpcom_map":
                                      lambda:
                                         INTERFACES["nsIComponentRegistrar"]},
+                             u"nsIDOMFile":
+                                {"xpcom_map":
+                                     lambda:
+                                        INTERFACES["nsIDOMFile"]},
+                             u"nsIJSON":
+                                {"xpcom_map":
+                                     lambda:
+                                        INTERFACES["nsIJSON"]},
                              u"nsIObserverService":
                                 {"xpcom_map":
                                      lambda:
@@ -332,14 +352,14 @@ GLOBAL_ENTITIES = {
                                 {"xpcom_map":
                                      lambda:
                                         INTERFACES["nsIResProtocolHandler"]},
-                             u"nsIStyleSheetService":
-                                {"xpcom_map":
-                                     lambda:
-                                        INTERFACES["nsIStyleSheetService"]},
                              u"nsIStringBundleService":
                                 {"xpcom_map":
                                      lambda:
                                         INTERFACES["nsIStringBundleService"]},
+                             u"nsIStyleSheetService":
+                                {"xpcom_map":
+                                     lambda:
+                                        INTERFACES["nsIStyleSheetService"]},
                              u"nsIWindowMediator":
                                 {"xpcom_map":
                                      lambda:

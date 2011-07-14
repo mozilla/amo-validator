@@ -33,6 +33,8 @@ APPROVED_APPLICATIONS = json.loads(
 
 SPIDERMONKEY_INSTALLATION = os.environ.get("SPIDERMONKEY_INSTALLATION")
 
+BUGZILLA_BUG = "https://bugzilla.mozilla.org/show_bug.cgi?id=%d"
+
 # Graciously provided by @kumar in bug 614574
 if (not SPIDERMONKEY_INSTALLATION or
     not os.path.exists(SPIDERMONKEY_INSTALLATION)):

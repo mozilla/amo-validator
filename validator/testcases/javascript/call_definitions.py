@@ -6,6 +6,7 @@ import actions
 import traverser as js_traverser
 import predefinedentities
 from jstypes import *
+from validator.constants import BUGZILLA_BUG
 from validator.decorator import versions_after
 
 # Function prototypes should implement the following:
@@ -221,4 +222,42 @@ def math_round(wrapper, arguments, traverser):
         arg += 0.0000000000000001
     arg = round(arg)
     return JSWrapper(arg, traverser=traverser)
+
+
+def nsIDOMFile_deprec(wrapper, arguments, traverser):
+    """Throw a compatibility error about removed XPCOM methods."""
+    traverser.err.notice(
+        err_id=("testcases_javascript_calldefintiions", "nsIDOMFile",
+                "deprec"),
+        notice="Deprecated nsIDOMFile methods in use.",
+        description=("Your add-on uses methods that have been removed from "
+                     "the nsIDOMFile interface in Firefox 7. Please refer to "
+                     "%s for more information.") % (BUGZILLA_BUG % 661876),
+        filename=traverser.filename,
+        line=traverser.line,
+        column=traverser.position,
+        context=traverser.context,
+        compatibility_type="error",
+        for_appversions={'{ec8030f7-c20a-464f-9b0e-13a3a9e97384}':
+                             versions_after("firefox", "7.0a1")},
+        tier=5)
+
+
+def nsIJSON_deprec(wrapper, arguments, traverser):
+    """Throw a compatibility error about removed XPCOM methods."""
+    traverser.err.notice(
+        err_id=("testcases_javascript_calldefintiions", "nsIJSON",
+                "deprec"),
+        notice="Deprecated nsIJSON methods in use.",
+        description=("Your add-on uses methods that have been removed from "
+                     "the nsIJSON interface in Firefox 7. Please refer to "
+                     "%s for more information.") % (BUGZILLA_BUG % 645922),
+        filename=traverser.filename,
+        line=traverser.line,
+        column=traverser.position,
+        context=traverser.context,
+        compatibility_type="error",
+        for_appversions={'{ec8030f7-c20a-464f-9b0e-13a3a9e97384}':
+                             versions_after("firefox", "7.0a1")},
+        tier=5)
 
