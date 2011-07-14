@@ -1,6 +1,6 @@
 import math
 
-from js_helper import _do_test_scope
+from js_helper import _do_test_scope, _do_test_raw
 
 
 INFINITY = float('inf')
@@ -242,4 +242,15 @@ def test_min_max():
           "min_b": -1,
           "max_a": INFINITY,
           "max_b": 1})
+
+
+def test_math_infinity():
+    """Test for known tracebacks regarding math."""
+    _do_test_raw("""
+    var x = Infinity;
+    x >>= 10;
+    var y = Infinity;
+    var z = 10 >> y;
+    """)
+    # We really don't care about the output here.
 

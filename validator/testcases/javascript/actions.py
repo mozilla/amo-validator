@@ -603,6 +603,14 @@ def _expr_assignment(traverser, node):
         elif token in ("<<=", ">>=", ">>>=") and gright < 0:
             left.set_value(0, traverser=traverser)
             return left
+        elif (token in ("<<=", ">>=", ">>>=", "|=", "^=", "&=") and
+              (abs(gleft) == float('inf') or abs(gright) == float('inf'))):
+            # Don't bother handling infinity for integer-converted operations.
+            from predefinedentities import GLOBAL_ENTITIES
+            left.set_value(traverser._build_global("NaN",
+                                                   GLOBAL_ENTITIES[u"NaN"]),
+                           traverser=traverser)
+            return left
 
         traverser._debug("ASSIGNMENT::L-value global? (%s)" %
                          ("Y" if left.is_global else "N"))
@@ -715,6 +723,13 @@ def _expr_binary(traverser, node):
                isinstance(right, types.StringTypes):
                 left = _get_as_str(left)
                 right = _get_as_str(right)
+
+        # Don't even bother handling infinity if it's a numeric computation.
+        if (operator in ("<<", ">>", ">>>") and
+            (abs(gleft) == float('inf') or abs(gright) == float('inf'))):
+            from predefinedentities import GLOBAL_ENTITIES
+            return traverser._build_global("NaN", GLOBAL_ENTITIES[u"NaN"])
+
         output = operators[operator]()
 
     if not isinstance(output, JSWrapper):
@@ -798,6 +813,11 @@ def _get_as_str(value):
         # .lower() because JS bools are lowercase.
         return unicode(value).lower()
     elif isinstance(value, (int, float, long)):
+        if value == float('inf'):
+            return "Infinity"
+        elif value == float('-inf'):
+            return "-Infinity"
+
         # Try to see if we can shave off some trailing significant figures.
         try:
             if int(value) == value:
