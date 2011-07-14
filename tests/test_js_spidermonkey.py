@@ -27,10 +27,12 @@ def test_scripting_snippet():
     "Asserts that JS snippets are treated equally"
 
     err = ErrorBundle()
+    err.supported_versions = {}
     scripting.test_js_snippet(err, "alert(1 + 1 == 2)", "bar.zap")
     assert not err.failed()
 
     err = ErrorBundle()
+    err.supported_versions = {}
     scripting.test_js_snippet(err, "eval('foo');", "bar.zap")
     assert err.failed()
 

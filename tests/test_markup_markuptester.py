@@ -18,6 +18,7 @@ def _do_test_raw(data, path, should_fail=False, type_=None):
     extension = filename.split(".")[-1]
 
     err = ErrorBundle()
+    err.supported_versions = {}
     if type_:
         err.set_type(type_)
 
