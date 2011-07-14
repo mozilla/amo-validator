@@ -201,6 +201,10 @@ def math_log(wrapper, arguments, traverser):
     arg = actions._get_as_num(args[0].get_literal_value())
     if arg == 0:
         return JSWrapper(float('-inf'), traverser=traverser)
+
+    if arg < 0:
+        return JSWrapper(traverser=traverser)
+
     arg = math.log(arg)
     return JSWrapper(arg, traverser=traverser)
 

@@ -222,10 +222,12 @@ def test_log():
     _do_test_scope("""
     var a = Math.log(1),
         b = Math.log(0),
-        c = Math.log(Infinity);
+        c = Math.log(Infinity),
+        d = Math.log(-1);
     """, {"a": 0,
           "b": NEG_INFINITY,
-          "c": INFINITY})
+          "c": INFINITY,
+          "d": ''})
 
 
 def test_min_max():
