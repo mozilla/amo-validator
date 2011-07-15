@@ -200,7 +200,6 @@ class Traverser:
 
         # Extract properties about the node that we're traversing
         (branches,
-         explicitly_dynamic,
          establish_context,
          action,
          returns,
