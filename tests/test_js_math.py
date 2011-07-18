@@ -181,7 +181,9 @@ def test_round():
         e = Math.round(0.51),
         f = Math.round(-0.49),
         g = Math.round(-0.5),
-        h = Math.round(-0.51);
+        h = Math.round(-0.51),
+        i = Math.round(Infinity) == Infinity,
+        j = Math.round(-Infinity) == -Infinity;
     """, {"a": 1,
           "b": 0,
           "c": 0,
@@ -189,7 +191,9 @@ def test_round():
           "e": 1,
           "f": 0,
           "g": 0,
-          "h": -1})
+          "h": -1,
+          "i": True,
+          "j": True})
 
 
 def test_random():

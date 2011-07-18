@@ -221,6 +221,10 @@ def math_round(wrapper, arguments, traverser):
         return JSWrapper(0, traverser=traverser)
 
     arg = actions._get_as_num(args[0].get_literal_value())
+    # Prevent nasty infinity tracebacks.
+    if abs(arg) == float("inf"):
+        return args[0]
+
     # Python rounds away from zero, JS rounds "up".
     if arg < 0 and int(arg) != arg:
         arg += 0.0000000000000001
