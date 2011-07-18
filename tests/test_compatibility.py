@@ -32,12 +32,9 @@ def test_navigator_language():
     """
     Test that 'navigator.language' is flagged as potentially incompatile with FX5.
     """
-
-    err = ErrorBundle()
-    err.supported_versions = {}
-
     flagged = "alert(navigator.language);"
-    scripting.test_js_snippet(err, flagged, "foo")
+    err = _do_real_test_raw(flagged)
+
     assert not err.failed()
     assert not any(err.compat_summary[k] for k in err.compat_summary)
 

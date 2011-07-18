@@ -32,5 +32,4 @@ def test_js_banned():
     err = _do_real_test_raw("""foo();""", detected_type=PACKAGE_THEME)
     print err.print_summary(verbose=True)
     assert err.failed()
-    assert all(e["line"] for e in err.warnings)
 
