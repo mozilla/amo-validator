@@ -449,12 +449,7 @@ def _ident(traverser, node):
         found = traverser._seek_variable(name)
         return found
 
-    # If the variable doesn't exist, we're going to create a placeholder for
-    # it. The placeholder can have stuff assigned to it by things that work
-    # like _expr_assignment
-    result = JSWrapper(traverser=traverser, dirty=True)
-    traverser._set_variable(name, result)
-    return result
+    return JSWrapper(traverser=traverser, dirty=True)
 
 
 def _expr_assignment(traverser, node):

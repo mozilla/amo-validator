@@ -1,5 +1,19 @@
 from nose.tools import eq_
-from js_helper import _do_test, _do_test_raw, _do_test_scope, _get_var
+from js_helper import _do_real_test_raw, _do_test_raw, _do_test_scope, _get_var
+
+
+def test_assignment_with_pollution():
+    """
+    Access a bunch of identifiers, but do not write to them. Accessing
+    undefined globals should not create scoped objects.
+    """
+    assert not _do_real_test_raw("""
+    var x = "";
+    x = foo;
+    x = bar;
+    x = zap;
+    x = baz; // would otherwise cause pollution errors.
+    """).failed()
 
 
 def test_basic_math():
