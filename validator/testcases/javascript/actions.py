@@ -206,10 +206,9 @@ def _define_var(traverser, node):
                 # TODO : Test to make sure len(values) == len(vars)
                 for value in declaration["init"]["elements"]:
                     if vars[0]:
-                        traverser._set_variable(
-                                vars[0],
-                                JSWrapper(traverser._traverse_node(value),
-                                          traverser=traverser))
+                        traverser._set_variable(vars[0], JSWrapper(
+                                traverser._traverse_node(value),
+                                traverser=traverser))
                     vars = vars[1:]  # Pop off the first value
 
             # It's being assigned by a JSArray (presumably)
@@ -218,9 +217,7 @@ def _define_var(traverser, node):
                 assigner = traverser._traverse_node(declaration["init"])
                 for value in assigner.value.elements:
                     if vars[0]:
-                        traverser._set_variable(
-                                vars[0],
-                                value)
+                        traverser._set_variable(vars[0], value)
                     vars = vars[1:]
 
         elif declaration["id"]["type"] == "ObjectPattern":
@@ -242,16 +239,12 @@ def _define_var(traverser, node):
                                                 init_obj.get(traverser,
                                                              prop_name))
                     elif prop["value"]["type"] == "ObjectPattern":
-                        _proc_objpattern(init_obj.get(traverser,
-                                                      prop_name),
+                        _proc_objpattern(init_obj.get(traverser, prop_name),
                                          prop["value"]["properties"])
 
             if init is not None:
                 _proc_objpattern(init_obj=init,
                                  properties=declaration["id"]["properties"])
-            #else:
-                # FIXME : Is this even supposed to be possible?
-                # No idea why this is happening,
 
         else:
             var_name = declaration["id"]["name"]
@@ -496,7 +489,7 @@ def _expr_assignment(traverser, node):
                                   "readonly" in global_dict else
                                   True)
 
-            traverser._set_variable(node_left["name"], right)
+            traverser._set_variable(node_left["name"], right, glob=True)
         elif node_left["type"] == "MemberExpression":
             member_object = trace_member(traverser, node_left["object"])
             global_overwrite = (member_object.is_global and

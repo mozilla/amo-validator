@@ -409,9 +409,9 @@ class Traverser:
 
         self._debug("SETTING_OBJECT")
 
-        context_count = len(self.contexts)
-        for i in range(context_count):
-            context = self.contexts[context_count - i - 1]
+        i = 0
+        for context in reversed(self.contexts):
+            i += 1
             if context.has_var(name):
                 self._debug("SETTING_OBJECT>>LOCAL>>%d" % i)
                 context.set(name, value)

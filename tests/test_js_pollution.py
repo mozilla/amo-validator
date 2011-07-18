@@ -64,9 +64,10 @@ def test_pollution_implicit_from_fun():
 
     assert not _do_test_raw("""
     (function() {
-        a = "foo";
-        b = "foo";
-        c = "foo";
+        var a = "foo";
+        var b = "foo";
+        var c = "foo";
+        var d = "foo";
     })()
     """, ignore_pollution=False).failed()
 

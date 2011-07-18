@@ -4,6 +4,7 @@
 .DS_Store
 .coverage
 .figleaf
+*.swp
 /validator/constants_local.py
 /src
 /extras/jslibs
