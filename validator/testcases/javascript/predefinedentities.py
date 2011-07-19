@@ -32,6 +32,11 @@ INTERFACES = {
                          "Authors of bootstrapped add-ons must take care "
                          "to cleanup any added category entries "
                          "at shutdown")}}},
+    u"nsIAccessibilityRetrieval":
+        {"dangerous":
+            "Using the nsIAccessibilityRetrieval interface causes significant "
+            "performance degradation in Firefox. It should only be used in "
+            "accessibility-related add-ons."},
     u"nsIComponentRegistrar":
         {"value":
             {u"autoRegister":
@@ -328,6 +333,10 @@ GLOBAL_ENTITIES = {
                                 {"xpcom_map":
                                      lambda:
                                         GLOBAL_ENTITIES["XMLHttpRequest"]},
+                             u"nsIAccessibilityRetrieval":
+                                {"xpcom_map":
+                                     lambda:
+                                        INTERFACES["nsIAccessibilityRetrieval"]},
                              u"nsICategoryManager":
                                 {"xpcom_map":
                                      lambda:
