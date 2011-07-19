@@ -12,7 +12,7 @@ from jstypes import *
 def _get_member_exp_property(traverser, node):
     """Return the string value of a member expression's property."""
 
-    if node["property"]["type"] == "Identifier":
+    if node["property"]["type"] == "Identifier" and not node["computed"]:
         return unicode(node["property"]["name"])
     else:
         eval_exp = traverser._traverse_node(node["property"])
@@ -48,8 +48,7 @@ def trace_member(traverser, node):
         base = _expand_globals(traverser, base)
 
         # If we've got an XPCOM wildcard, just return the base, minus the WC
-        if base.is_global and \
-                "xpcom_wildcard" in base.value:
+        if base.is_global and "xpcom_wildcard" in base.value:
             traverser._debug("MEMBER_EXP>>XPCOM_WILDCARD")
             base.value = base.value.copy()
             del base.value["xpcom_wildcard"]

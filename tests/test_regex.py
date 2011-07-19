@@ -57,6 +57,24 @@ def test_bug_548645():
              len(results.notices)) == 3)
 
 
+def test_processNextEvent_banned():
+    """Test that processNextEvent is properly banned."""
+
+    assert not _do_test_raw("""
+    foo().processWhatever();
+    var x = "processNextEvent";
+    """).failed()
+
+    assert _do_test_raw("""
+    foo().processNextEvent();
+    """).failed()
+
+    assert _do_test_raw("""
+    var x = "processNextEvent";
+    foo[x]();
+    """).failed()
+
+
 def test_bug_652575():
     """Ensure that capability.policy gets flagged."""
     assert _do_test_raw("var x = 'capability.policy';").failed()

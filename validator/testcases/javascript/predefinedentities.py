@@ -6,7 +6,7 @@ from call_definitions import xpcom_constructor as xpcom_const, python_wrap
 from jstypes import JSWrapper
 
 # A list of identifiers and member values that may not be used.
-BANNED_IDENTIFIERS = ("newThread", )
+BANNED_IDENTIFIERS = ("newThread", "processNextEvent")
 
 # For "dangerous" elements, specifying True will throw an error on all
 # detected instances of the particular object. Specifying a lambda function
