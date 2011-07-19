@@ -12,7 +12,7 @@ class ErrorBundle(object):
     'separating the sorrow and collecting up all the cream.' It's
     borderline magical."""
 
-    def __init__(self, determined=True, listed=True):
+    def __init__(self, determined=True, listed=True, instant=False):
 
         self.handler = None
 
@@ -28,9 +28,6 @@ class ErrorBundle(object):
         self.ending_tier = 1
         self.tier = 1
 
-        self.metadata = {}
-        self.determined = determined
-
         self.subpackages = []
         self.package_stack = []
 
@@ -42,12 +39,15 @@ class ErrorBundle(object):
         self.overrides = None
         self.pushable_resources = {}
 
+        self.metadata = {}
+        if listed:
+            self.resources["listed"] = True
+        self.instant = instant
+        self.determined = determined
+
         # TODO: Break off into version helper
         self.supported_versions = None
         self.version_requirements = None
-
-        if listed:
-            self.resources["listed"] = True
 
     def error(self, err_id, error,
               description='', filename='', line=None, column=None,
@@ -137,6 +137,9 @@ class ErrorBundle(object):
         # ADDED TO THE STACK!
         if message["for_appversions"]:
             if not self.supports_version(message["for_appversions"]):
+                if self.instant:
+                    print "(Instant error discarded)"
+                    self._print_message(type_, message, verbose=True)
                 return
         elif self.version_requirements:
             # If there was no for_appversions but there were version
@@ -171,6 +174,10 @@ class ErrorBundle(object):
                 last_id = eid
 
             tree[last_id]['__messages'].append(uid)
+
+        # If instant mode is turned on, output the message immediately.
+        if self.instant:
+            self._print_message(type_, message, verbose=True)
 
     def set_type(self, type_):
         "Stores the type of addon we're scanning"

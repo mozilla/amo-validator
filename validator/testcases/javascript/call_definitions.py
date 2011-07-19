@@ -250,6 +250,8 @@ def nsIDOMFile_deprec(wrapper, arguments, traverser):
                              versions_after("firefox", "7.0a1")},
         tier=5)
 
+    return JSWrapper(JSObject(), traverser=traverser)
+
 
 def nsIJSON_deprec(wrapper, arguments, traverser):
     """Throw a compatibility error about removed XPCOM methods."""
@@ -268,4 +270,6 @@ def nsIJSON_deprec(wrapper, arguments, traverser):
         for_appversions={'{ec8030f7-c20a-464f-9b0e-13a3a9e97384}':
                              versions_after("firefox", "7.0a1")},
         tier=5)
+
+    return JSWrapper(JSObject(), traverser=traverser)
 

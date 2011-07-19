@@ -44,7 +44,7 @@ class MockBundler:
         return True
 
     def error(self, err_id, error, description, filename="",
-              line=1, column=0, context=None):
+              line=1, column=0, context=None, compatibility_type=None):
         "Represents a mock error"
 
         # Increment the message counter
@@ -72,18 +72,12 @@ class MockBundler:
         print "in %s:line %d (%d)" % (file, line, column)
 
     def warning(self, err_id, warning, description, filename="",
-                line=1, column=0, context=None):
+                line=1, column=0, context=None, compatibility_type=None):
         self.error(err_id, warning, description, file, line, column, context)
 
     def notice(self, err_id, notice, description, filename="",
-               line=1, column=0, context=None):
+               line=1, column=0, context=None, compatibility_type=None):
         self.error(err_id, notice, description, file, line, column, context)
-
-    def info(self, id, title, description, filename="",
-             line=1, column=0, context=None):
-        print "Obsolete use of 'info'"
-        assert None
-        self.error(id, title, description, file, line, column, context)
 
 
 class Traverser:

@@ -229,7 +229,7 @@ def test_fx7_nsIDOMFile():
     """, versions={'{ec8030f7-c20a-464f-9b0e-13a3a9e97384}':
                        versions_after("firefox", "7.0a1")})
     assert not err.failed()
-    assert err.notices
+    assert len(err.notices) == 1
     assert err.compat_summary["errors"]
 
 
@@ -252,5 +252,6 @@ def test_fx7_nsIJSON():
     """, versions={'{ec8030f7-c20a-464f-9b0e-13a3a9e97384}':
                        versions_after("firefox", "7.0a1")})
     assert not err.failed()
-    assert err.notices
+    assert len(err.notices) == 1
     assert err.compat_summary["errors"]
+
