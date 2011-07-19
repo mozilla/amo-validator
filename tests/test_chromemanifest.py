@@ -7,7 +7,7 @@ def test_open():
     chrome = open("tests/resources/chromemanifest/chrome.manifest")
     chrome_data = chrome.read()
 
-    manifest = ChromeManifest(chrome_data)
+    manifest = ChromeManifest(chrome_data, "chrome.manifest")
     assert manifest is not None
 
     assert manifest.get_value("locale", "basta")["object"] == "resource"
@@ -34,7 +34,7 @@ def test_lines():
 one bar foo
 two abc def
 #comment
-four def abc""")
+four def abc""", "chrome.manifest")
 
     assert list(c.get_triples(subject="zero"))[0]["line"] == 1
     assert list(c.get_triples(subject="one"))[0]["line"] == 2
@@ -45,7 +45,7 @@ four def abc""")
 def test_incomplete_triplets():
     """Test that incomplete triplets are ignored."""
 
-    c = ChromeManifest("foo\nbar")
+    c = ChromeManifest("foo\nbar", "chrome.manifest")
     assert not c.triples
 
 
@@ -57,7 +57,7 @@ foo bar abc
 foo bar def
 foo bam test
 oof rab cba
-""")
+""", "chrome.manifest")
 
     assert len(list(c.get_triples(subject="foo"))) == 3
     assert len(list(c.get_triples(subject="foo", predicate="bar"))) == 2

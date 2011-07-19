@@ -168,9 +168,10 @@ def _load_install_rdf(err, package, expectation):
                      "test_package",
                      "extension_type_mismatch"),
                     "Extension Type Mismatch",
-                    'Type "%s" expected, found "%s")' % (
-                                                    types[expectation],
-                                                    types[results]))
+                    ["We detected that the add-on's type does not match the "
+                     "expected type.",
+                     'Type "%s" expected, found "%s")' %
+                         (types[expectation], types[results])])
 
 
 def populate_chrome_manifest(err, xpi_package):
@@ -178,7 +179,62 @@ def populate_chrome_manifest(err, xpi_package):
 
     if "chrome.manifest" in xpi_package:
         chrome_data = xpi_package.read("chrome.manifest")
-        chrome = ChromeManifest(chrome_data)
+        chrome = ChromeManifest(chrome_data, "chrome.manifest")
+
+        chrome_recursion_buster = set()
+
+        # Handle the case of manifests linked from the manifest.
+        def get_linked_manifest(path, from_path, from_chrome, from_triple):
+
+            if path in chrome_recursion_buster:
+                err.warning(
+                    err_id=("submain", "populate_chrome_manifest",
+                            "recursion"),
+                    warning="Linked manifest recursion detected.",
+                    description="A chrome registration file links back to "
+                                "itself. This can cause a multitude of "
+                                "issues.",
+                    filename=path)
+                return
+
+            # Make sure the manifest is properly linked
+            if path not in xpi_package:
+                err.notice(
+                    err_id=("submain", "populate_chrome_manifest", "linkerr"),
+                    notice="Linked manifest could not be found.",
+                    description=["A linked manifest file could not be found "
+                                 "in the package.",
+                                 "Path: %s" % path],
+                    filename=from_path,
+                    line=from_triple["line"],
+                    context=from_chrome.context)
+                return
+
+            chrome_recursion_buster.add(path)
+
+            manifest = ChromeManifest(xpi_package.read(path), path)
+            for triple in manifest.triples:
+                yield triple
+
+                if triple["subject"] == "manifest":
+                    for subtriple in get_linked_manifest(
+                            triple["predicate"], path, manifest, triple):
+                        yield subtriple
+
+            chrome_recursion_buster.discard(path)
+
+        chrome_recursion_buster.add("chrome.manifest")
+
+        # Search for linked manifests in the base manifest.
+        for extra_manifest in chrome.get_triples(subject="manifest"):
+            # When one is found, add its triples to our own.
+            for triple in get_linked_manifest(extra_manifest["predicate"],
+                                              "chrome.manifest", chrome,
+                                              extra_manifest):
+                chrome.triples.append(triple)
+
+        chrome_recursion_buster.discard("chrome.manifest")
+
         err.save_resource("chrome.manifest", chrome, pushable=True)
 
 

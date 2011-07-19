@@ -15,12 +15,13 @@ def test_xpcnativewrappers():
     assert content.test_xpcnativewrappers(err, None) is None
 
     err.save_resource("chrome.manifest",
-                      ChromeManifest("foo bar"))
+                      ChromeManifest("foo bar", "chrome.manifest"))
     content.test_xpcnativewrappers(err, None)
     assert not err.failed()
 
     err.save_resource("chrome.manifest",
-                      ChromeManifest("xpcnativewrappers on"))
+                      ChromeManifest("xpcnativewrappers on",
+                                     "chrome.manifest"))
     content.test_xpcnativewrappers(err, None)
     assert err.failed()
 
