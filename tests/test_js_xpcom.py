@@ -19,6 +19,20 @@ def test_xmlhttprequest():
     assert "open" in req["value"]
 
 
+def test_nsiaccessibilityretrieval():
+    """Flag any uses of nsIAccessibilityRetrieval."""
+
+    assert not _do_test_raw("""
+    var c = Components.classes[""].createInstance(
+        Components.interfaces.nsIAccessibilityRetrievalWhatever);
+    """).failed()
+
+    assert _do_test_raw("""
+    var c = Components.classes[""].createInstance(
+        Components.interfaces.nsIAccessibilityRetrieval);
+    """).failed()
+
+
 def test_evalinsandbox():
     """Tests that Components.utils.evalInSandbox() is treated like eval."""
 

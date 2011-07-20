@@ -5,7 +5,7 @@ class ChromeManifest(object):
     """This class enables convenient reading and searching of
     chrome.manifest files."""
 
-    def __init__(self, data):
+    def __init__(self, data, path):
         "Reads an ntriples style chrome.manifest file"
 
         self.context = ContextGenerator(data)
@@ -34,7 +34,8 @@ class ChromeManifest(object):
             triples.append({"subject": triple[0],
                             "predicate": triple[1],
                             "object": triple[2],
-                            "line": counter})
+                            "line": counter,
+                            "filename": path})
 
         self.triples = triples
 

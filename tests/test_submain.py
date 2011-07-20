@@ -91,10 +91,10 @@ def test_test_inner_package_failtier():
     assert err.failed()
     submain.decorator = smd
 
-# Test chrome.manifest populator
 
+# Test chrome.manifest populator
 def test_populate_chrome_manifest():
-    "Ensures that the chrome manifest is populated if available"
+    """Ensure that the chrome manifest is populated if available."""
 
     err = MockErrorHandler(None)
     package_contents = {"chrome.manifest":
@@ -113,8 +113,71 @@ def test_populate_chrome_manifest():
 
     assert not err.resources
 
-# Test determined modes
 
+def test_proper_linked_manifest():
+    """Test that linked manifests are imported properly."""
+
+    err = ErrorBundle()
+    package = MockXPI({
+        "chrome.manifest": "tests/resources/submain/linkman/base1.manifest",
+        "submanifest.manifest":
+            "tests/resources/submain/linkman/base2.manifest"})
+
+    submain.populate_chrome_manifest(err, package)
+    chrome = err.get_resource("chrome.manifest")
+    assert chrome
+
+    assert not err.failed() or err.notices
+
+    # From the base file:
+    assert list(chrome.get_triples(subject="foo"))
+    # From the linked manifest:
+    assert list(chrome.get_triples(subject="zap"))
+
+
+def test_missing_manifest_link():
+    """Test that missing linked manifests are properly flagged."""
+
+    err = ErrorBundle()
+    package = MockXPI({
+        "chrome.manifest": "tests/resources/submain/linkman/base1.manifest"})
+
+    submain.populate_chrome_manifest(err, package)
+    chrome = err.get_resource("chrome.manifest")
+    assert chrome
+
+    assert not err.failed()
+    assert err.notices
+
+    # From the base file:
+    assert list(chrome.get_triples(subject="foo"))
+    # From the linked manifest:
+    assert not list(chrome.get_triples(subject="zap"))
+
+
+def test_linked_manifest_recursion():
+    """Test that recursive linked manifests are flagged properly."""
+
+    err = ErrorBundle()
+    package = MockXPI({
+        "chrome.manifest": "tests/resources/submain/linkman/base1.manifest",
+        "submanifest.manifest":
+            "tests/resources/submain/linkman/recurse.manifest"})
+
+    submain.populate_chrome_manifest(err, package)
+    chrome = err.get_resource("chrome.manifest")
+    assert chrome
+
+    assert err.failed()
+    assert not err.notices
+
+    # From the base file:
+    assert list(chrome.get_triples(subject="foo"))
+    # From the linked manifest:
+    assert not list(chrome.get_triples(subject="zap"))
+
+
+# Test determined modes
 def test_test_inner_package_determined():
     "Tests that the determined test_inner_package function works properly"
 

@@ -1,6 +1,11 @@
+import sys
+
 from nose.tools import eq_
 
+from helper import MockXPI
 from validator.errorbundler import ErrorBundle
+from validator.outputhandlers.shellcolors import OutputHandler
+import validator.testcases.content
 import validator.testcases.scripting
 validator.testcases.scripting.traverser.DEBUG = True
 
@@ -12,11 +17,13 @@ def _do_test(path):
     return _do_test_raw(script, path)
 
 
-def _do_test_raw(script, path="foo", bootstrap=False, ignore_pollution=True,
+def _do_test_raw(script, path="foo.js", bootstrap=False, ignore_pollution=True,
                  detected_type=None):
     "Performs a test on a JS file"
 
-    err = validator.testcases.scripting.traverser.MockBundler()
+    err = ErrorBundle(instant=True)
+    err.handler = OutputHandler(sys.stdout, True)
+    err.supported_versions = {}
     if bootstrap:
         err.save_resource("em:bootstrap", True)
     if detected_type:
@@ -24,7 +31,7 @@ def _do_test_raw(script, path="foo", bootstrap=False, ignore_pollution=True,
     if ignore_pollution:
         validator.testcases.scripting.traverser.IGNORE_POLLUTION = True
 
-    validator.testcases.scripting.test_js_file(err, path, script)
+    validator.testcases.content._process_file(err, MockXPI(), path, script)
     validator.testcases.scripting.traverser.IGNORE_POLLUTION = False
     if err.final_context is not None:
         print err.final_context.output()
@@ -32,7 +39,7 @@ def _do_test_raw(script, path="foo", bootstrap=False, ignore_pollution=True,
     return err
 
 
-def _do_real_test_raw(script, path="foo", versions=None, detected_type=None,
+def _do_real_test_raw(script, path="foo.js", versions=None, detected_type=None,
                       metadata=None, resources=None):
     """Perform a JS test using a non-mock bundler."""
 
@@ -45,7 +52,7 @@ def _do_real_test_raw(script, path="foo", versions=None, detected_type=None,
     if resources is not None:
         err.resources = resources
 
-    validator.testcases.scripting.test_js_file(err, path, script, line=30)
+    validator.testcases.content._process_file(err, MockXPI(), path, script)
     return err
 
 

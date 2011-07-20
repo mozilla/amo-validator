@@ -201,6 +201,10 @@ def math_log(wrapper, arguments, traverser):
     arg = actions._get_as_num(args[0].get_literal_value())
     if arg == 0:
         return JSWrapper(float('-inf'), traverser=traverser)
+
+    if arg < 0:
+        return JSWrapper(traverser=traverser)
+
     arg = math.log(arg)
     return JSWrapper(arg, traverser=traverser)
 
@@ -217,6 +221,10 @@ def math_round(wrapper, arguments, traverser):
         return JSWrapper(0, traverser=traverser)
 
     arg = actions._get_as_num(args[0].get_literal_value())
+    # Prevent nasty infinity tracebacks.
+    if abs(arg) == float("inf"):
+        return args[0]
+
     # Python rounds away from zero, JS rounds "up".
     if arg < 0 and int(arg) != arg:
         arg += 0.0000000000000001
@@ -242,6 +250,8 @@ def nsIDOMFile_deprec(wrapper, arguments, traverser):
                              versions_after("firefox", "7.0a1")},
         tier=5)
 
+    return JSWrapper(JSObject(), traverser=traverser)
+
 
 def nsIJSON_deprec(wrapper, arguments, traverser):
     """Throw a compatibility error about removed XPCOM methods."""
@@ -260,4 +270,6 @@ def nsIJSON_deprec(wrapper, arguments, traverser):
         for_appversions={'{ec8030f7-c20a-464f-9b0e-13a3a9e97384}':
                              versions_after("firefox", "7.0a1")},
         tier=5)
+
+    return JSWrapper(JSObject(), traverser=traverser)
 

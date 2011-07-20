@@ -1,4 +1,5 @@
 import json
+import sys
 import uuid
 from StringIO import StringIO
 
@@ -12,13 +13,14 @@ class ErrorBundle(object):
     'separating the sorrow and collecting up all the cream.' It's
     borderline magical."""
 
-    def __init__(self, determined=True, listed=True):
+    def __init__(self, determined=True, listed=True, instant=False):
 
         self.handler = None
 
         self.errors = []
         self.warnings = []
         self.notices = []
+        self.message_count = 0
         self.message_tree = {}
 
         self.compat_summary = {"errors": 0,
@@ -27,9 +29,6 @@ class ErrorBundle(object):
 
         self.ending_tier = 1
         self.tier = 1
-
-        self.metadata = {}
-        self.determined = determined
 
         self.subpackages = []
         self.package_stack = []
@@ -41,13 +40,17 @@ class ErrorBundle(object):
         self.resources = {}
         self.overrides = None
         self.pushable_resources = {}
+        self.final_context = None
+
+        self.metadata = {}
+        if listed:
+            self.resources["listed"] = True
+        self.instant = instant
+        self.determined = determined
 
         # TODO: Break off into version helper
         self.supported_versions = None
         self.version_requirements = None
-
-        if listed:
-            self.resources["listed"] = True
 
     def error(self, err_id, error,
               description='', filename='', line=None, column=None,
@@ -115,6 +118,8 @@ class ErrorBundle(object):
     def _save_message(self, stack, type_, message, context=None):
         "Stores a message in the appropriate message stack."
 
+        self.message_count += 1
+
         uid = uuid.uuid4().hex
         message["uid"] = uid
 
@@ -137,6 +142,9 @@ class ErrorBundle(object):
         # ADDED TO THE STACK!
         if message["for_appversions"]:
             if not self.supports_version(message["for_appversions"]):
+                if self.instant:
+                    print "(Instant error discarded)"
+                    self._print_message(type_, message, verbose=True)
                 return
         elif self.version_requirements:
             # If there was no for_appversions but there were version
@@ -172,6 +180,10 @@ class ErrorBundle(object):
 
             tree[last_id]['__messages'].append(uid)
 
+        # If instant mode is turned on, output the message immediately.
+        if self.instant:
+            self._print_message(type_, message, verbose=True)
+
     def set_type(self, type_):
         "Stores the type of addon we're scanning"
         self.detected_type = type_
@@ -180,7 +192,7 @@ class ErrorBundle(object):
         """Returns a boolean value describing whether the validation
         succeeded or not."""
 
-        return self.errors or (fail_on_warnings and self.warnings)
+        return bool(self.errors) or (fail_on_warnings and bool(self.warnings))
 
     def get_resource(self, name):
         "Retrieves an object that has been stored by another test."
