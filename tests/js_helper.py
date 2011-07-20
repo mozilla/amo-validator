@@ -1,7 +1,10 @@
+import sys
+
 from nose.tools import eq_
 
 from helper import MockXPI
 from validator.errorbundler import ErrorBundle
+from validator.outputhandlers.shellcolors import OutputHandler
 import validator.testcases.content
 import validator.testcases.scripting
 validator.testcases.scripting.traverser.DEBUG = True
@@ -18,7 +21,8 @@ def _do_test_raw(script, path="foo.js", bootstrap=False, ignore_pollution=True,
                  detected_type=None):
     "Performs a test on a JS file"
 
-    err = validator.testcases.scripting.traverser.MockBundler()
+    err = ErrorBundle(instant=True)
+    err.handler = OutputHandler(sys.stdout, True)
     err.supported_versions = {}
     if bootstrap:
         err.save_resource("em:bootstrap", True)

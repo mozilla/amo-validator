@@ -1,4 +1,5 @@
 import json
+import sys
 import uuid
 from StringIO import StringIO
 
@@ -19,6 +20,7 @@ class ErrorBundle(object):
         self.errors = []
         self.warnings = []
         self.notices = []
+        self.message_count = 0
         self.message_tree = {}
 
         self.compat_summary = {"errors": 0,
@@ -38,6 +40,7 @@ class ErrorBundle(object):
         self.resources = {}
         self.overrides = None
         self.pushable_resources = {}
+        self.final_context = None
 
         self.metadata = {}
         if listed:
@@ -115,6 +118,8 @@ class ErrorBundle(object):
     def _save_message(self, stack, type_, message, context=None):
         "Stores a message in the appropriate message stack."
 
+        self.message_count += 1
+
         uid = uuid.uuid4().hex
         message["uid"] = uid
 
@@ -187,7 +192,7 @@ class ErrorBundle(object):
         """Returns a boolean value describing whether the validation
         succeeded or not."""
 
-        return self.errors or (fail_on_warnings and self.warnings)
+        return bool(self.errors) or (fail_on_warnings and bool(self.warnings))
 
     def get_resource(self, name):
         "Retrieves an object that has been stored by another test."
