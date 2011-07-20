@@ -15,12 +15,13 @@ def test_xpcnativewrappers():
     assert content.test_xpcnativewrappers(err, None) is None
 
     err.save_resource("chrome.manifest",
-                      ChromeManifest("foo bar"))
+                      ChromeManifest("foo bar", "chrome.manifest"))
     content.test_xpcnativewrappers(err, None)
     assert not err.failed()
 
     err.save_resource("chrome.manifest",
-                      ChromeManifest("xpcnativewrappers on"))
+                      ChromeManifest("xpcnativewrappers on",
+                                     "chrome.manifest"))
     content.test_xpcnativewrappers(err, None)
     assert err.failed()
 
@@ -130,13 +131,11 @@ def test_jar_nonsubpackage():
 def test_markup():
     "Tests markup files in the content validator."
 
-    err = ErrorBundle(None, True)
-    mock_package = MockXPI(
-        {"foo.xml":
-             "tests/resources/content/junk.xpi"})
+    err = ErrorBundle()
+    err.supported_versions = {}
+    mock_package = MockXPI({"foo.xml": "tests/resources/content/junk.xpi"})
 
-    content.testendpoint_markup = \
-        MockMarkupEndpoint(("process", ))
+    content.testendpoint_markup = MockMarkupEndpoint(("process", ))
 
     result = content.test_packed_packages(
                                     err,
@@ -155,44 +154,34 @@ def test_css():
     "Tests css files in the content validator."
 
     err = ErrorBundle()
-    mock_package = MockXPI(
-        {"foo.css":
-             "tests/resources/content/junk.xpi"})
+    err.supported_versions = {}
+    mock_package = MockXPI({"foo.css": "tests/resources/content/junk.xpi"})
 
-    content.testendpoint_css = \
-        MockTestEndpoint(("test_css_file", ))
+    content.testendpoint_css = MockTestEndpoint(("test_css_file", ))
 
-    result = content.test_packed_packages(
-                                    err,
-                                    mock_package)
+    result = content.test_packed_packages(err, mock_package)
     print result
     assert result == 1
-    content.testendpoint_css.assert_expectation(
-                                    "test_css_file",
-                                    1)
-    content.testendpoint_css.assert_expectation(
-                                    "test_css_file",
-                                    0,
-                                    "subpackage")
+    content.testendpoint_css.assert_expectation("test_css_file", 1)
+    content.testendpoint_css.assert_expectation("test_css_file", 0,
+                                                "subpackage")
 
 
 def test_hidden_files():
     """Tests that hidden files are reported."""
 
     err = ErrorBundle()
-    mock_package = MockXPI({".hidden":
-                                       "tests/resources/content/junk.xpi"})
+    err.supported_versions = {}
+    mock_package = MockXPI({".hidden": "tests/resources/content/junk.xpi"})
 
-    content.test_packed_packages(err,
-                                 mock_package)
+    content.test_packed_packages(err, mock_package)
     print err.print_summary(verbose=True)
     assert err.failed()
 
     err = ErrorBundle()
     mock_package_mac = MockXPI({"dir/__MACOSX/foo":
                                           "tests/resources/content/junk.xpi"})
-    content.test_packed_packages(err,
-                                 mock_package_mac)
+    content.test_packed_packages(err, mock_package_mac)
     print err.print_summary(verbose=True)
     assert err.failed()
 
@@ -219,49 +208,40 @@ def test_password_in_defaults_prefs():
 def test_langpack():
     "Tests a language pack in the content validator."
 
-    err = ErrorBundle(None, True)
+    err = ErrorBundle()
+    err.supported_versions = {}
     err.set_type(PACKAGE_LANGPACK)
-    mock_package = MockXPI(
-        {"foo.dtd":
-             "tests/resources/content/junk.xpi"})
+    mock_package = MockXPI({"foo.dtd": "tests/resources/content/junk.xpi"})
 
-    content.testendpoint_langpack = \
-        MockTestEndpoint(("test_unsafe_html", ))
+    content.testendpoint_langpack = MockTestEndpoint(("test_unsafe_html", ))
 
-    result = content.test_packed_packages(
-                                    err,
-                                    mock_package)
+    result = content.test_packed_packages(err, mock_package)
     print result
     assert result == 1
-    content.testendpoint_langpack.assert_expectation(
-                                    "test_unsafe_html",
-                                    1)
-    content.testendpoint_langpack.assert_expectation(
-                                    "test_unsafe_html",
-                                    0,
-                                    "subpackage")
+    content.testendpoint_langpack.assert_expectation("test_unsafe_html", 1)
+    content.testendpoint_langpack.assert_expectation("test_unsafe_html", 0,
+                                                     "subpackage")
 
 
 def test_jar_subpackage_bad():
     "Tests JAR files that are bad subpackages."
 
-    err = ErrorBundle(None, True)
+    err = ErrorBundle()
     mock_package = MockXPI({"chrome/subpackage.jar":
                             "tests/resources/content/junk.xpi"})
 
-    content.testendpoint_validator = \
-        MockTestEndpoint(("test_inner_package", ))
+    content.testendpoint_validator = MockTestEndpoint(("test_inner_package", ))
 
-    result = content.test_packed_packages(
-                                    err,
-                                    mock_package)
+    result = content.test_packed_packages(err, mock_package)
     print result
     assert err.failed()
 
 
 class MockTestEndpoint(object):
-    """Simulates a test module and reports whether individual tests
-    have been attempted on it."""
+    """
+    Simulates a test module and reports whether individual tests have been
+    attempted on it.
+    """
 
     def __init__(self, expected, td_error=False):
         expectations = {}

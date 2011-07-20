@@ -55,3 +55,28 @@ def test_pollution_jetpack_bootstrap():
         """, path="foo.js",
         resources={"em:bootstrap": "true"}).failed()
 
+
+def test_pollution_implicit_from_fun():
+    """
+    Make sure that implicit variable declarations from within functions are caught.
+    Missing a var/let will implicitly declare the variable within the global scope.
+    """
+
+    assert not _do_test_raw("""
+    (function() {
+        var a = "foo";
+        var b = "foo";
+        var c = "foo";
+        var d = "foo";
+    })()
+    """, ignore_pollution=False).failed()
+
+    assert _do_test_raw("""
+    (function() {
+        a = "foo";
+        b = "foo";
+        c = "foo";
+        d = "foo";
+    })();
+    """, ignore_pollution=False).failed()
+

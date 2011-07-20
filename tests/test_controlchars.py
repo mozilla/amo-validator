@@ -1,3 +1,9 @@
+import sys
+
+from nose.tools import eq_
+
+from validator.errorbundler import ErrorBundle
+from validator.outputhandlers.shellcolors import OutputHandler
 import validator.unicodehelper
 import validator.testcases.scripting
 
@@ -7,10 +13,10 @@ def _do_test(path):
     script = validator.unicodehelper.decode(open(path, "rb").read())
     print script.encode("ascii", "replace")
 
-    err = validator.testcases.scripting.traverser.MockBundler()
+    err = ErrorBundle(instant=True)
+    err.supported_versions = {}
+    err.handler = OutputHandler(sys.stdout, False)
     validator.testcases.scripting.test_js_file(err, path, script)
-
-    print err.ids
     return err
 
 
@@ -18,7 +24,7 @@ def test_controlchars_ascii_ok():
     """Test that multi-byte characters are decoded properly (utf-8)."""
 
     errs = _do_test("tests/resources/controlchars/controlchars_ascii_ok.js")
-    assert len(errs.ids) == 0
+    assert not errs.message_count
 
 
 def test_controlchars_ascii_warn():
@@ -28,15 +34,15 @@ def test_controlchars_ascii_warn():
     """
 
     errs = _do_test("tests/resources/controlchars/controlchars_ascii_warn.js")
-    assert len(errs.ids) == 1
-    assert errs.ids[0][2] == "syntax_error"
+    eq_(errs.message_count, 1)
+    eq_(errs.warnings[0]["id"][2], "syntax_error")
 
 
 def test_controlchars_utf8_ok():
     """Test that multi-byte characters are decoded properly (utf-8)."""
 
     errs = _do_test("tests/resources/controlchars/controlchars_utf-8_ok.js")
-    assert len(errs.ids) == 0
+    assert not errs.message_count
 
 
 def test_controlchars_utf8_warn():
@@ -46,6 +52,6 @@ def test_controlchars_utf8_warn():
     """
 
     errs = _do_test("tests/resources/controlchars/controlchars_utf-8_warn.js")
-    assert len(errs.ids) == 1
-    assert errs.ids[0][2] == "syntax_error"
+    eq_(errs.message_count, 1)
+    eq_(errs.warnings[0]["id"][2], "syntax_error")
 

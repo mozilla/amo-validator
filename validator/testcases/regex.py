@@ -1,6 +1,7 @@
 import re
 
 from validator.constants import BUGZILLA_BUG
+from validator.contextgenerator import ContextGenerator
 from validator.decorator import versions_after
 
 
@@ -13,7 +14,7 @@ GENERIC_PATTERNS = {
     r"globalStorage\[.*\].password":
         "Global Storage may not be used to store passwords.",
     r"browser\.preferences\.instantApply":
-        "Changing the value of instantApply can leat to UI problems in the "
+        "Changing the value of instantApply can lead to UI problems in the "
         "browser.",
     r"network\.http": NP_WARNING,
     r"network\.websocket": "Websocket preferences should not be modified.",
@@ -69,8 +70,11 @@ FX7_DEFINITION = {"{ec8030f7-c20a-464f-9b0e-13a3a9e97384}":
                       versions_after("firefox", "7.0a1")}
 
 
-def run_regex_tests(document, err, filename, context):
+def run_regex_tests(document, err, filename, context=None):
     """Run all of the regex-based JS tests."""
+
+    if context is None:
+        context = ContextGenerator(document)
 
     def _generic_test(pattern, title, message):
         """Run a single regex test."""

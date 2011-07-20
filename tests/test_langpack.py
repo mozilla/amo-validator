@@ -88,11 +88,11 @@ def test_valid_chrome_manifest():
     "Chrome manifests must only contain certain elements"
 
     err = ErrorBundle()
-    err.save_resource("chrome.manifest", ChromeManifest("locale foo bar"))
+    err.save_resource("chrome.manifest", ChromeManifest("locale foo bar", ""))
     langpack.test_langpack_manifest(err, MockXPI())
     assert not err.failed()
 
-    err.save_resource("chrome.manifest", ChromeManifest("foo bar asdf"))
+    err.save_resource("chrome.manifest", ChromeManifest("foo bar asdf", ""))
     langpack.test_langpack_manifest(err, MockXPI())
     assert err.failed()
 

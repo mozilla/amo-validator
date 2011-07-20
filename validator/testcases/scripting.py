@@ -7,7 +7,6 @@ import validator.testcases.javascript.traverser as traverser
 from validator.testcases.javascript.spidermonkey import get_tree, \
                                                         JSReflectException
 from validator.constants import PACKAGE_THEME, SPIDERMONKEY_INSTALLATION
-from validator.testcases.javascript.regex import run_regex_tests
 from validator.contextgenerator import ContextGenerator
 from validator.textfilter import *
 
@@ -56,7 +55,6 @@ def test_js_file(err, filename, data, line=0, context=None):
                             is_jsm=filename.endswith(".jsm") or
                                    "EXPORTED_SYMBOLS" in data)
     t.run(tree)
-    run_regex_tests(data, err, filename, context)
 
     # Reset the tier so we don't break the world
     if err is not None:

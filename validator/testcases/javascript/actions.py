@@ -12,7 +12,7 @@ from jstypes import *
 def _get_member_exp_property(traverser, node):
     """Return the string value of a member expression's property."""
 
-    if node["property"]["type"] == "Identifier":
+    if node["property"]["type"] == "Identifier" and not node["computed"]:
         return unicode(node["property"]["name"])
     else:
         eval_exp = traverser._traverse_node(node["property"])
@@ -48,8 +48,7 @@ def trace_member(traverser, node):
         base = _expand_globals(traverser, base)
 
         # If we've got an XPCOM wildcard, just return the base, minus the WC
-        if base.is_global and \
-                "xpcom_wildcard" in base.value:
+        if base.is_global and "xpcom_wildcard" in base.value:
             traverser._debug("MEMBER_EXP>>XPCOM_WILDCARD")
             base.value = base.value.copy()
             del base.value["xpcom_wildcard"]
@@ -206,10 +205,9 @@ def _define_var(traverser, node):
                 # TODO : Test to make sure len(values) == len(vars)
                 for value in declaration["init"]["elements"]:
                     if vars[0]:
-                        traverser._set_variable(
-                                vars[0],
-                                JSWrapper(traverser._traverse_node(value),
-                                          traverser=traverser))
+                        traverser._set_variable(vars[0], JSWrapper(
+                                traverser._traverse_node(value),
+                                traverser=traverser))
                     vars = vars[1:]  # Pop off the first value
 
             # It's being assigned by a JSArray (presumably)
@@ -218,9 +216,7 @@ def _define_var(traverser, node):
                 assigner = traverser._traverse_node(declaration["init"])
                 for value in assigner.value.elements:
                     if vars[0]:
-                        traverser._set_variable(
-                                vars[0],
-                                value)
+                        traverser._set_variable(vars[0], value)
                     vars = vars[1:]
 
         elif declaration["id"]["type"] == "ObjectPattern":
@@ -242,16 +238,12 @@ def _define_var(traverser, node):
                                                 init_obj.get(traverser,
                                                              prop_name))
                     elif prop["value"]["type"] == "ObjectPattern":
-                        _proc_objpattern(init_obj.get(traverser,
-                                                      prop_name),
+                        _proc_objpattern(init_obj.get(traverser, prop_name),
                                          prop["value"]["properties"])
 
             if init is not None:
                 _proc_objpattern(init_obj=init,
                                  properties=declaration["id"]["properties"])
-            #else:
-                # FIXME : Is this even supposed to be possible?
-                # No idea why this is happening,
 
         else:
             var_name = declaration["id"]["name"]
@@ -456,12 +448,7 @@ def _ident(traverser, node):
         found = traverser._seek_variable(name)
         return found
 
-    # If the variable doesn't exist, we're going to create a placeholder for
-    # it. The placeholder can have stuff assigned to it by things that work
-    # like _expr_assignment
-    result = JSWrapper(traverser=traverser, dirty=True)
-    traverser._set_variable(name, result)
-    return result
+    return JSWrapper(traverser=traverser, dirty=True)
 
 
 def _expr_assignment(traverser, node):
@@ -496,7 +483,7 @@ def _expr_assignment(traverser, node):
                                   "readonly" in global_dict else
                                   True)
 
-            traverser._set_variable(node_left["name"], right)
+            traverser._set_variable(node_left["name"], right, glob=True)
         elif node_left["type"] == "MemberExpression":
             member_object = trace_member(traverser, node_left["object"])
             global_overwrite = (member_object.is_global and
@@ -602,6 +589,14 @@ def _expr_assignment(traverser, node):
             return left
         elif token in ("<<=", ">>=", ">>>=") and gright < 0:
             left.set_value(0, traverser=traverser)
+            return left
+        elif (token in ("<<=", ">>=", ">>>=", "|=", "^=", "&=") and
+              (abs(gleft) == float('inf') or abs(gright) == float('inf'))):
+            # Don't bother handling infinity for integer-converted operations.
+            from predefinedentities import GLOBAL_ENTITIES
+            left.set_value(traverser._build_global("NaN",
+                                                   GLOBAL_ENTITIES[u"NaN"]),
+                           traverser=traverser)
             return left
 
         traverser._debug("ASSIGNMENT::L-value global? (%s)" %
@@ -715,6 +710,13 @@ def _expr_binary(traverser, node):
                isinstance(right, types.StringTypes):
                 left = _get_as_str(left)
                 right = _get_as_str(right)
+
+        # Don't even bother handling infinity if it's a numeric computation.
+        if (operator in ("<<", ">>", ">>>") and
+            (abs(gleft) == float('inf') or abs(gright) == float('inf'))):
+            from predefinedentities import GLOBAL_ENTITIES
+            return traverser._build_global("NaN", GLOBAL_ENTITIES[u"NaN"])
+
         output = operators[operator]()
 
     if not isinstance(output, JSWrapper):
@@ -798,6 +800,11 @@ def _get_as_str(value):
         # .lower() because JS bools are lowercase.
         return unicode(value).lower()
     elif isinstance(value, (int, float, long)):
+        if value == float('inf'):
+            return "Infinity"
+        elif value == float('-inf'):
+            return "-Infinity"
+
         # Try to see if we can shave off some trailing significant figures.
         try:
             if int(value) == value:

@@ -1,6 +1,6 @@
 import math
 
-from js_helper import _do_test_scope
+from js_helper import _do_test_scope, _do_test_raw
 
 
 INFINITY = float('inf')
@@ -181,7 +181,9 @@ def test_round():
         e = Math.round(0.51),
         f = Math.round(-0.49),
         g = Math.round(-0.5),
-        h = Math.round(-0.51);
+        h = Math.round(-0.51),
+        i = Math.round(Infinity) == Infinity,
+        j = Math.round(-Infinity) == -Infinity;
     """, {"a": 1,
           "b": 0,
           "c": 0,
@@ -189,7 +191,9 @@ def test_round():
           "e": 1,
           "f": 0,
           "g": 0,
-          "h": -1})
+          "h": -1,
+          "i": True,
+          "j": True})
 
 
 def test_random():
@@ -222,10 +226,12 @@ def test_log():
     _do_test_scope("""
     var a = Math.log(1),
         b = Math.log(0),
-        c = Math.log(Infinity);
+        c = Math.log(Infinity),
+        d = Math.log(-1);
     """, {"a": 0,
           "b": NEG_INFINITY,
-          "c": INFINITY})
+          "c": INFINITY,
+          "d": ''})
 
 
 def test_min_max():
@@ -240,4 +246,15 @@ def test_min_max():
           "min_b": -1,
           "max_a": INFINITY,
           "max_b": 1})
+
+
+def test_math_infinity():
+    """Test for known tracebacks regarding math."""
+    _do_test_raw("""
+    var x = Infinity;
+    x >>= 10;
+    var y = Infinity;
+    var z = 10 >> y;
+    """)
+    # We really don't care about the output here.
 

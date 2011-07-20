@@ -67,7 +67,7 @@ def set_on_event(new_value, traverser):
             description="Event handlers in JavaScript should not be "
                         "assigned by setting an on* property to a "
                         "string of JS code. Rather, consider using "
-                        "addEventListerner.",
+                        "addEventListener.",
             filename=traverser.filename,
             line=traverser.line,
             column=traverser.position,

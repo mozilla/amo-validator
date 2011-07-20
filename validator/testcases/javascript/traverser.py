@@ -11,91 +11,12 @@ DEBUG = False
 IGNORE_POLLUTION = False
 
 
-class MockBundler:
-    """A delightful replacement for the ErrorBundler, especially while
-    performing non-unit test debugging operations"""
-
-    def __init__(self):
-        self.message_count = 0
-        self.final_context = None
-        self.tier = 4
-        self.ids = []
-        self.detected_type = 1
-        self.resources = {}
-        self.metadata = {}
-
-    def failed(self):
-        "Returns whether messages have been reported"
-        return bool(self.message_count)
-
-    def set_tier(self, tier):
-        "Sets the tier; compatibility with ErrorBundle"
-        self.tier = tier
-
-    def save_resource(self, name, data):
-        """Saves a blob of data to be accessed later."""
-        self.resources[name] = data
-
-    def get_resource(self, name):
-        """Retrieves a saved blob of data."""
-        return self.resources[name] if name in self.resources else False
-
-    def supports_version(self, version):
-        return True
-
-    def error(self, err_id, error, description, filename="",
-              line=1, column=0, context=None):
-        "Represents a mock error"
-
-        # Increment the message counter
-        self.message_count += 1
-
-        self.ids.append(err_id)
-
-        error = unicode(error)
-
-        print "-" * 30
-        print error.encode("ascii", "replace")
-        print "~" * len(error)
-        if isinstance(description, types.StringTypes):
-            print description
-        else:
-            # Errors can have multiple lines
-            for dline in description:
-                # Each line can have multiple lines :(
-                dline = dline.replace("\n", " ")
-                while dline.count("  "):
-                    # Strip out extraneous whitespace!
-                    dline = dline.replace("  ", " ")
-
-                print dline
-        print "in %s:line %d (%d)" % (file, line, column)
-
-    def warning(self, err_id, warning, description, filename="",
-                line=1, column=0, context=None):
-        self.error(err_id, warning, description, file, line, column, context)
-
-    def notice(self, err_id, notice, description, filename="",
-               line=1, column=0, context=None):
-        self.error(err_id, notice, description, file, line, column, context)
-
-    def info(self, id, title, description, filename="",
-             line=1, column=0, context=None):
-        print "Obsolete use of 'info'"
-        assert None
-        self.error(id, title, description, file, line, column, context)
-
-
 class Traverser:
     "Traverses the AST Tree and determines problems with a chunk of JS."
 
     def __init__(self, err, filename, start_line=0, context=None,
                  is_jsm=False):
-        if err is not None:
-            self.err = err
-        else:
-            self.err = MockBundler()
-
+        self.err = err
         self.is_jsm = is_jsm
 
         self.contexts = []
@@ -200,7 +121,6 @@ class Traverser:
 
         # Extract properties about the node that we're traversing
         (branches,
-         explicitly_dynamic,
          establish_context,
          action,
          returns,
@@ -410,9 +330,9 @@ class Traverser:
 
         self._debug("SETTING_OBJECT")
 
-        context_count = len(self.contexts)
-        for i in range(context_count):
-            context = self.contexts[context_count - i - 1]
+        i = 0
+        for context in reversed(self.contexts):
+            i += 1
             if context.has_var(name):
                 self._debug("SETTING_OBJECT>>LOCAL>>%d" % i)
                 context.set(name, value)

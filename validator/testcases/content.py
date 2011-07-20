@@ -3,6 +3,7 @@ import hashlib
 import re
 from StringIO import StringIO
 
+from regex import run_regex_tests
 from validator.contextgenerator import ContextGenerator
 from validator import decorator
 from validator import submain as testendpoint_validator
@@ -17,6 +18,7 @@ from validator.textfilter import is_standard_ascii
 
 
 PASSWORD_REGEX = re.compile("password", re.I)
+OSX_REGEX = re.compile("__MACOSX")
 
 @decorator.register_test(tier=1)
 def test_xpcnativewrappers(err, xpi_package=None):
@@ -57,13 +59,9 @@ def test_packed_packages(err, xpi_package=None):
               "whitelist_hashes.txt")) as f:
         hash_whitelist = [x[:-1] for x in f]
 
-    macosx_regex = re.compile("__MACOSX")
-
     # Iterate each item in the package.
     for name in xpi_package:
-        name_lower = name.lower()
-
-        if (macosx_regex.search(name) or
+        if (OSX_REGEX.search(name) or
             name.startswith(".") or
             name.split("/")[-1].startswith(".")):
             err.warning(
@@ -101,116 +99,123 @@ def test_packed_packages(err, xpi_package=None):
                        name)
             continue
 
-        processed = False
-        # If that item is a container file, unzip it and scan it.
-        if name_lower.endswith(".jar"):
-            # This is either a subpackage or a nested theme.
+        # Process the file.
+        processed = _process_file(err, xpi_package, name, file_data)
+        if processed is None:
+            continue
 
-            is_subpackage = not err.get_resource("is_multipackage")
-
-            # Unpack the package and load it up.
-            package = StringIO(file_data)
-            try:
-                sub_xpi = XPIManager(package, mode="r", name=name,
-                                     subpackage=is_subpackage)
-            except:
-                err.error(("testcases_content",
-                           "test_packed_packages",
-                           "jar_subpackage_corrupt"),
-                          "Subpackage corrupt.",
-                          "The subpackage could not be opened due to issues "
-                          "with corruption. Ensure that the file is valid.",
-                          name)
-                continue
-
-            # Let the error bunder know we're in a sub-package.
-            err.push_state(name.lower())
-            err.set_type(PACKAGE_SUBPACKAGE if
-                         is_subpackage else
-                         PACKAGE_THEME)
-            err.set_tier(1)
-            supported_versions = err.supported_versions
-            if is_subpackage:
-                testendpoint_validator.test_inner_package(err, sub_xpi)
-            else:
-                testendpoint_validator.test_package(err, package, name)
-            package.close()
-            err.pop_state()
-            err.set_tier(2)
-
-            err.supported_versions = supported_versions
-
-        elif name_lower.endswith(".xpi"):
-            # It's not a subpackage, it's a nested extension. These are
-            # found in multi-extension packages.
-
-            # Unpack!
-            package = StringIO(file_data)
-
-            err.push_state(name_lower)
-            err.set_tier(1)
-
-            # There are no expected types for packages within a multi-
-            # item package.
-            testendpoint_validator.test_package(err, package, name)
-
-            package.close()
-            err.pop_state()
-            err.set_tier(2)  # Reset to the current tier
-
-        elif name_lower.endswith((".xul", ".xml", ".html", ".xhtml", ".xbl")):
-
-            parser = testendpoint_markup.MarkupParser(err)
-            parser.process(name,
-                           file_data,
-                           xpi_package.info(name)["extension"])
-
-            processed = True
-
-        elif name_lower.endswith((".css", ".js", ".jsm")):
-
-            if not file_data:
-                continue
-
-            # Convert the file data to unicode
-            file_data = unicodehelper.decode(file_data)
-
-            if name_lower.endswith(".css"):
-                testendpoint_css.test_css_file(err,
-                                               name,
-                                               file_data)
-            elif name_lower.endswith((".js", ".jsm")):
-
-                # Test for "password" in defaults/preferences files; bug 647109
-                if fnmatch.fnmatch(name, "defaults/preferences/*.js"):
-                    match = PASSWORD_REGEX.search(file_data)
-                    if match:
-                        context = ContextGenerator(file_data)
-                        err.warning(
-                            err_id=("testcases_content",
-                                    "test_packed_packages",
-                                    "password_in_js"),
-                            warning="Passwords may be stored in defaults/"
-                                    "preferences JS files",
-                            description="Storing passwords in the preferences "
-                                        "is insecure and the Login Manager "
-                                        "should be used instead.",
-                            filename=name,
-                            line=context.get_line(match.start()),
-                            context=context)
-
-                testendpoint_js.test_js_file(err,
-                                             name,
-                                             file_data)
         # This is tested in test_langpack.py
         if err.detected_type == PACKAGE_LANGPACK and not processed:
-
-            testendpoint_langpack.test_unsafe_html(err,
-                                                   name,
-                                                   file_data)
+            testendpoint_langpack.test_unsafe_html(err, name, file_data)
 
         # This aids in creating unit tests.
         processed_files += 1
 
     return processed_files
+
+
+def _process_file(err, xpi_package, name, file_data):
+    """Process a single file's content tests."""
+    name_lower = name.lower()
+
+    # If that item is a container file, unzip it and scan it.
+    if name_lower.endswith(".jar"):
+        # This is either a subpackage or a nested theme.
+        is_subpackage = not err.get_resource("is_multipackage")
+        # Unpack the package and load it up.
+        package = StringIO(file_data)
+        try:
+            sub_xpi = XPIManager(package, mode="r", name=name,
+                                 subpackage=is_subpackage)
+        except:
+            err.error(("testcases_content",
+                       "test_packed_packages",
+                       "jar_subpackage_corrupt"),
+                      "Subpackage corrupt.",
+                      "The subpackage could not be opened due to issues "
+                      "with corruption. Ensure that the file is valid.",
+                      name)
+            return None
+
+        # Let the error bunder know we're in a sub-package.
+        err.push_state(name.lower())
+        err.set_type(PACKAGE_SUBPACKAGE if
+                     is_subpackage else
+                     PACKAGE_THEME)
+        err.set_tier(1)
+        supported_versions = err.supported_versions
+
+        if is_subpackage:
+            testendpoint_validator.test_inner_package(err, sub_xpi)
+        else:
+            testendpoint_validator.test_package(err, package, name)
+
+        package.close()
+        err.pop_state()
+        err.set_tier(2)
+
+        err.supported_versions = supported_versions
+
+    elif name_lower.endswith(".xpi"):
+        # It's not a subpackage, it's a nested extension. These are
+        # found in multi-extension packages.
+
+        # Unpack!
+        package = StringIO(file_data)
+
+        err.push_state(name_lower)
+        err.set_tier(1)
+
+        # There are no expected types for packages within a multi-
+        # item package.
+        testendpoint_validator.test_package(err, package, name)
+
+        package.close()
+        err.pop_state()
+        err.set_tier(2)  # Reset to the current tier
+
+    elif name_lower.endswith((".xul", ".xml", ".html", ".xhtml", ".xbl")):
+
+        parser = testendpoint_markup.MarkupParser(err)
+        parser.process(name, file_data,
+                       xpi_package.info(name)["extension"])
+
+        run_regex_tests(file_data, err, name)
+        return True
+
+    elif name_lower.endswith((".css", ".js", ".jsm")):
+
+        if not file_data:
+            return None
+
+        # Convert the file data to unicode
+        file_data = unicodehelper.decode(file_data)
+
+        if name_lower.endswith(".css"):
+            testendpoint_css.test_css_file(err, name, file_data)
+
+        elif name_lower.endswith((".js", ".jsm")):
+            # Test for "password" in defaults/preferences files; bug 647109
+            if fnmatch.fnmatch(name, "defaults/preferences/*.js"):
+                match = PASSWORD_REGEX.search(file_data)
+                if match:
+                    context = ContextGenerator(file_data)
+                    err.warning(
+                        err_id=("testcases_content",
+                                "test_packed_packages",
+                                "password_in_js"),
+                        warning="Passwords may be stored in defaults/"
+                                "preferences JS files",
+                        description="Storing passwords in the preferences "
+                                    "is insecure and the Login Manager "
+                                    "should be used instead.",
+                        filename=name,
+                        line=context.get_line(match.start()),
+                        context=context)
+
+            testendpoint_js.test_js_file(err, name, file_data)
+
+        run_regex_tests(file_data, err, name)
+
+    return False
 
