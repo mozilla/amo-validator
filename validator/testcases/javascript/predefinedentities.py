@@ -52,12 +52,6 @@ INTERFACES = {
                         "Authors of bootstrapped add-ons must take care "
                         "to cleanup any component registrations "
                         "at shutdown"}}},
-    u"nsIDOMFile":
-        {"value":
-            {u"getAsDataURL":
-                {"return": call_definitions.nsIDOMFile_deprec},
-             u"getAsBinary":
-                {"return": call_definitions.nsIDOMFile_deprec}}},
     u"nsIJSON":
         {"value":
             {u"encode":
@@ -345,10 +339,6 @@ GLOBAL_ENTITIES = {
                                 {"xpcom_map":
                                      lambda:
                                         INTERFACES["nsIComponentRegistrar"]},
-                             u"nsIDOMFile":
-                                {"xpcom_map":
-                                     lambda:
-                                        INTERFACES["nsIDOMFile"]},
                              u"nsIJSON":
                                 {"xpcom_map":
                                      lambda:

@@ -232,6 +232,15 @@ def test_fx7_nsIDOMFile():
     assert len(err.notices) == 1
     assert err.compat_summary["errors"]
 
+    err = _do_real_test_raw("""
+    var x = document.getElementById("whatever");
+    x.getAsDataURL();
+    """, versions={'{ec8030f7-c20a-464f-9b0e-13a3a9e97384}':
+                       versions_after("firefox", "7.0a1")})
+    assert not err.failed()
+    assert len(err.notices) == 1
+    assert err.compat_summary["errors"]
+
 
 def test_fx7_nsIJSON():
     """Test that nsIJSON methods are flagged."""

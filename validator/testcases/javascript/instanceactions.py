@@ -10,6 +10,7 @@ node
     the current node being evaluated
 """
 import types
+
 from jstypes import *
 
 
@@ -127,9 +128,17 @@ def setAttribute(args, traverser, node):
             context=traverser.context)
 
 
+def nsIDOMFile_deprec(args, traverser, node):
+    """A wrapper for call_definitions.nsIDOMFile_deprec."""
+    from call_definitions import nsIDOMFile_deprec as cd_nsIDOMFile_deprec
+    cd_nsIDOMFile_deprec(None, [], traverser)
+
+
 INSTANCE_DEFINITIONS = {"createElement": createElement,
                         "createElementNS": createElementNS,
                         "getInterface": getInterface,
                         "setAttribute": setAttribute,
-                        "QueryInterface": QueryInterface}
+                        "QueryInterface": QueryInterface,
+                        "getAsBinary": nsIDOMFile_deprec,
+                        "getAsDataURL": nsIDOMFile_deprec}
 
