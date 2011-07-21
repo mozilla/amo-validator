@@ -32,16 +32,17 @@ def test_navigator_language():
     """
     Test that 'navigator.language' is flagged as potentially incompatile with FX5.
     """
-    flagged = "alert(navigator.language);"
-    err = _do_real_test_raw(flagged)
 
+    err = _do_real_test_raw("""
+    alert(navigator.language);
+    """)
     assert not err.failed()
-    assert not any(err.compat_summary[k] for k in err.compat_summary)
+    assert not any(err.compat_summary.values())
 
-    print err.print_summary()
-    print err.get_resource("compat_references")
-
-    compatibility.navigator_language(err, None)
+    err = _do_real_test_raw("""
+    alert(navigator.language);
+    """, versions={'{ec8030f7-c20a-464f-9b0e-13a3a9e97384}':
+                    versions_after("firefox", "5.0")})
     assert not err.failed()
     assert err.compat_summary["errors"]
 

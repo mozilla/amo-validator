@@ -64,6 +64,10 @@ FX7_INTERFACES = {"nsIDOMDocumentStyle": 658904,
                   "nsIDOM3TypeInfo": 660539,
                   "nsIDOM3Node": 659053}
 
+FX4_DEFINITION = {"{ec8030f7-c20a-464f-9b0e-13a3a9e97384}":
+                      versions_after("firefox", "3.7a1pre")}
+FX5_DEFINITION = {"{ec8030f7-c20a-464f-9b0e-13a3a9e97384}":
+                      versions_after("firefox", "5.0a2")}
 FX6_DEFINITION = {"{ec8030f7-c20a-464f-9b0e-13a3a9e97384}":
                       versions_after("firefox", "6.0a1")}
 FX7_DEFINITION = {"{ec8030f7-c20a-464f-9b0e-13a3a9e97384}":
@@ -133,17 +137,17 @@ def run_regex_tests(document, err, filename, context=None, is_js=False):
                 "inefficiency. Consider using a different event.")
 
     # Firefox 5 Compatibility
-    # TODO(basta): Refactor this away.
-    navigator_language = re.compile("navigator\\.language").search(document)
-    if navigator_language:
-        line = context.get_line(navigator_language.start())
-
-        compat_references = err.get_resource("compat_references") or {}
-        if "navigator_language" not in compat_references:
-            compat_references["navigator_language"] = []
-        compat_references["navigator_language"].append(
-                (filename, line, context))
-        err.save_resource("compat_references", compat_references)
+    if err.supports_version(FX5_DEFINITION):
+        _compat_test(
+                re.compile(r"navigator\.language"),
+                "navigator.language may not behave as expected",
+                ("JavaScript code was found that references "
+                 "navigator.language, which will no longer indicate "
+                 "the language of Firefox's UI. To maintain existing "
+                 "functionality, general.useragent.locale should be "
+                 "used in place of `navigator.language`."),
+                compatibility_type="error",
+                appversions=FX5_DEFINITION)
 
     # Firefox 6 Compatibility
     if err.supports_version(FX6_DEFINITION):
