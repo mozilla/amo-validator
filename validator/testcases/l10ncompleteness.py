@@ -96,6 +96,7 @@ def _get_locale_manager(err, xpi_package, description,
         return LOCALE_CACHE[path]
 
     if path not in xpi_package:
+        # TODO: Pass the filename of the triple's manifest.
         err.warning(("testcases_l10ncompleteness",
                      "_get_locale_manager",
                      "manager_absent"),
@@ -133,6 +134,7 @@ def test_xpi(err, xpi_package):
     num_locales = len(raw_locales)
     if num_locales < 2:
         if num_locales == 0:
+            # TODO: Pass the filename of the triple's manifest.
             err.notice(("testcases_l10ncompleteness",
                         "test_xpi",
                         "no_locales"),

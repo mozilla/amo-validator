@@ -190,11 +190,14 @@ def _process_file(err, xpi_package, name, file_data):
 
         # Convert the file data to unicode
         file_data = unicodehelper.decode(file_data)
+        is_js = False
 
         if name_lower.endswith(".css"):
             testendpoint_css.test_css_file(err, name, file_data)
 
         elif name_lower.endswith((".js", ".jsm")):
+            is_js = True
+
             # Test for "password" in defaults/preferences files; bug 647109
             if fnmatch.fnmatch(name, "defaults/preferences/*.js"):
                 match = PASSWORD_REGEX.search(file_data)
@@ -215,7 +218,7 @@ def _process_file(err, xpi_package, name, file_data):
 
             testendpoint_js.test_js_file(err, name, file_data)
 
-        run_regex_tests(file_data, err, name)
+        run_regex_tests(file_data, err, name, is_js=is_js)
 
     return False
 
