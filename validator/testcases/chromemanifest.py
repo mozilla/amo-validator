@@ -31,7 +31,7 @@ def test_categories(err):
                         "Add-on should not add JavaScript categories",
                         "Add-ons should not specify categories which define "
                         "properties on JavaScript globals.",
-                        filename="chrome.manifest",
+                        filename=triple["filename"],
                         line=triple["line"],
                         context=chrome.context)
 
@@ -55,7 +55,7 @@ def test_resourcemodules(err):
                 description="There should not be resources in the "
                             "chrome.manifest file that are listed as "
                             "'resource modules'.",
-                filename="chrome.manifest",
+                filename=triple["filename"],
                 line=triple["line"],
                 context=chrome.context)
 
@@ -68,10 +68,10 @@ def test_banned_content_namespaces(err):
     if not chrome:
         return
 
-    banned_namespaces = {"godlikea":
-                             "The 'godlikea' namespace is generated from a "
-                             "template and should be replaced with something "
-                             "unique to your add-on to avoid name conflicts."}
+    banned_namespaces = {
+            "godlikea": "The 'godlikea' namespace is generated from a "
+                        "template and should be replaced with something "
+                        "unique to your add-on to avoid name conflicts."}
 
     for triple in chrome.triples:
         if (triple["subject"] == "content" and
@@ -82,7 +82,7 @@ def test_banned_content_namespaces(err):
                         "test_banned_content_namespaces"),
                 error="Banned namespace in chrome.manifest",
                 description=banned_namespaces[triple["predicate"]],
-                filename="chrome.manifest",
+                filename=triple["filename"],
                 line=triple["line"],
                 context=chrome.context)
 

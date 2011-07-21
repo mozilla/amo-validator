@@ -31,7 +31,7 @@ def test_langpack_manifest(err, xpi_package=None):
                          "'locale' or 'override'. Other values are not "
                          "allowed.",
                          "Invalid subject: %s" % subject],
-                        "chrome.manifest",
+                        filename=triple["filename"],
                         line=triple["line"],
                         context=chrome.context)
 
@@ -48,7 +48,7 @@ def test_langpack_manifest(err, xpi_package=None):
                              "invalid_override"),
                             "Invalid chrome.manifest object/predicate.",
                             "'override' entry does not match '%s'" % pattern,
-                            "chrome.manifest",
+                            filename=triple["filename"],
                             line=triple["line"],
                             context=chrome.context)
 
