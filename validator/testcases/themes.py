@@ -25,7 +25,7 @@ def test_theme_manifest(err, xpi_package=None):
                          "have 'skin' and 'style' items. Other types of items "
                          "are disallowed for security reasons.",
                          "Invalid subject: %s" % subject],
-                        "chrome.manifest",
+                        filename=triple["filename"],
                         line=triple["line"],
                         context=chrome.context)
 
