@@ -70,7 +70,7 @@ FX7_DEFINITION = {"{ec8030f7-c20a-464f-9b0e-13a3a9e97384}":
                       versions_after("firefox", "7.0a1")}
 
 
-def run_regex_tests(document, err, filename, context=None):
+def run_regex_tests(document, err, filename, context=None, is_js=False):
     """Run all of the regex-based JS tests."""
 
     if context is None:
@@ -114,14 +114,15 @@ def run_regex_tests(document, err, filename, context=None):
                 "Potentially unsafe JS in use.",
                 message)
 
-    for pattern in CATEGORY_REGEXES:
-        _generic_test(
-                pattern,
-                "Potential JavaScript category registration",
-                "Add-ons should not register JavaScript categories. It "
-                "appears that a JavaScript category was registered via a "
-                "script to attach properties to JavaScript globals. This is "
-                "not allowed.")
+    if is_js:
+        for pattern in CATEGORY_REGEXES:
+            _generic_test(
+                    pattern,
+                    "Potential JavaScript category registration",
+                    "Add-ons should not register JavaScript categories. It "
+                    "appears that a JavaScript category was registered via a "
+                    "script to attach properties to JavaScript globals. This "
+                    "is not allowed.")
 
     for pattern in DOM_MUTATION_REGEXES:
         _generic_test(
@@ -166,18 +167,20 @@ def run_regex_tests(document, err, filename, context=None):
                      (BUGZILLA_BUG % 614181),
                 compatibility_type="error",
                 appversions=FX6_DEFINITION)
-        # javascript/data: URI usage in the address bar
-        _compat_test(
-                re.compile(r"\b(javascript|data):"),
-                "javascript:/data: URIs may be incompatible with Firefox 6",
-                ("Loading 'javascript:' and 'data:' URIs through the location "
-                 "bar may no longer work as expected in Firefox 6. If you "
-                 "load these types of URIs, please test your add-on on the "
-                 "latest Firefox 6 builds, or refer to %s for more "
-                 "information.") %
-                     (BUGZILLA_BUG % 656433),
-                compatibility_type="warning",
-                appversions=FX6_DEFINITION)
+        if is_js:
+            # javascript/data: URI usage in the address bar
+            _compat_test(
+                    re.compile(r"\b(javascript|data):"),
+                    "javascript:/data: URIs may be incompatible with Firefox "
+                    "6.",
+                    ("Loading 'javascript:' and 'data:' URIs through the "
+                     "location bar may no longer work as expected in Firefox "
+                     "6. If you load these types of URIs, please test your "
+                     "add-on on the latest Firefox 6 builds, or refer to %s "
+                     "for more information.") %
+                         (BUGZILLA_BUG % 656433),
+                    compatibility_type="warning",
+                    appversions=FX6_DEFINITION)
 
     # Firefox 7 Compatibility
     if err.supports_version(FX7_DEFINITION):
