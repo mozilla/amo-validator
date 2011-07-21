@@ -1,5 +1,4 @@
 import validator.constants
-import validator.testcases.compatibility as compatibility
 from validator.decorator import versions_after
 from validator.testcases.markup.markuptester import MarkupParser
 import validator.testcases.scripting as scripting
@@ -21,8 +20,8 @@ def test_versions_after():
                           "versions": map(str, range(10))}}
     validator.constants.APPROVED_APPLICATIONS = new_versions
 
-    assert compatibility.versions_after("foo", "8") == ["8", "9"]
-    assert compatibility.versions_after("foo", "5") == ["5", "6", "7", "8",
+    assert versions_after("foo", "8") == ["8", "9"]
+    assert versions_after("foo", "5") == ["5", "6", "7", "8",
                                                         "9"]
 
     validator.constants.APPROVED_APPLICATIONS = av
