@@ -32,6 +32,7 @@ def test_version_range_before():
     eq_(version_range("foo", "5", "6", app_versions=new_versions), ["5"])
     eq_(version_range("foo", "8", "50", app_versions=new_versions), ["8", "9"])
 
+
 def test_navigator_language():
     """
     Test that 'navigator.language' is flagged as potentially incompatile with FX5.
@@ -267,5 +268,5 @@ def test_fx7_nsIJSON():
                        version_range("firefox", "7.0a1")})
     assert not err.failed()
     assert len(err.notices) == 1
-    assert err.compat_summary["errors"]
+    assert err.compat_summary["warnings"]
 
