@@ -33,7 +33,8 @@ def _list_locales(err, xpi_package=None):
     chrome = None
     if xpi_package is not None:
         # Handle a reference XPI
-        chrome = ChromeManifest(xpi_package.read("chrome.manifest"))
+        chrome = ChromeManifest(xpi_package.read("chrome.manifest"),
+                                "chrome.manifest")
     else:
         # Handle the current XPI
         chrome = err.get_resource("chrome.manifest")
