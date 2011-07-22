@@ -1,6 +1,6 @@
 from helper import MockXPI
 from js_helper import _do_real_test_raw as _do_test_raw
-from validator.decorator import versions_after
+from validator.decorator import version_range
 from validator.errorbundler import ErrorBundle
 import validator.testcases.content
 import validator.testcases.regex as regex_tests
@@ -92,7 +92,7 @@ def test_app_update_timer():
     err = _do_test_raw("""
     var f = app.update.timer;
     """, versions={"{ec8030f7-c20a-464f-9b0e-13a3a9e97384}":
-                       versions_after("firefox", "6.0a1")})
+                       version_range("firefox", "6.0a1")})
     assert not err.failed()
     assert err.compat_summary["errors"]
 
@@ -101,7 +101,7 @@ def test_incompatible_uris():
     """Flag instances of javascript:/data: in compatibility."""
 
     fx6 = {"{ec8030f7-c20a-464f-9b0e-13a3a9e97384}":
-               versions_after("firefox", "6.0a1")}
+               version_range("firefox", "6.0a1")}
 
     err = _do_test_raw("""
     var f = "javascript:foo();";

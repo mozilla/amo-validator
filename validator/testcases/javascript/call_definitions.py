@@ -7,7 +7,7 @@ import traverser as js_traverser
 import predefinedentities
 from jstypes import *
 from validator.constants import BUGZILLA_BUG
-from validator.decorator import versions_after
+from validator.decorator import version_range
 
 # Function prototypes should implement the following:
 #  wrapper : The JSWrapper instace that is being called
@@ -35,7 +35,7 @@ def amp_rp_bug660359(wrapper, arguments, traverser):
         column=traverser.position,
         context=traverser.context,
         for_appversions={'{ec8030f7-c20a-464f-9b0e-13a3a9e97384}':
-                             versions_after("firefox", "6.0a1")},
+                             version_range("firefox", "6.0a1", "7.0a1")},
         compatibility_type="error",
         tier=5)
 
@@ -247,7 +247,7 @@ def nsIDOMFile_deprec(wrapper, arguments, traverser):
         context=traverser.context,
         compatibility_type="error",
         for_appversions={'{ec8030f7-c20a-464f-9b0e-13a3a9e97384}':
-                             versions_after("firefox", "7.0a1")},
+                             version_range("firefox", "7.0a1", "8.0a1")},
         tier=5)
 
     return JSWrapper(JSObject(), traverser=traverser)
@@ -268,7 +268,7 @@ def nsIJSON_deprec(wrapper, arguments, traverser):
         context=traverser.context,
         compatibility_type="error",
         for_appversions={'{ec8030f7-c20a-464f-9b0e-13a3a9e97384}':
-                             versions_after("firefox", "7.0a1")},
+                             version_range("firefox", "7.0a1", "8.0a1")},
         tier=5)
 
     return JSWrapper(JSObject(), traverser=traverser)

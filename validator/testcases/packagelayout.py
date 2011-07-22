@@ -1,7 +1,7 @@
 import fnmatch
 
 import validator.decorator as decorator
-from validator.decorator import versions_after
+from validator.decorator import version_range
 from validator.constants import *
 
 # Detect blacklisted files based on their extension.
@@ -105,7 +105,7 @@ def test_godlikea(err, xpi_package):
 @decorator.register_test(
         tier=5,
         versions={"{ec8030f7-c20a-464f-9b0e-13a3a9e97384}":
-                      versions_after("firefox", "4.2a1pre")})
+                      version_range("firefox", "4.2a1pre", "6.0a1")})
 def test_compatibility_binary(err, xpi_package):
     """
     Flags only binary content as being incompatible with future app releases.
