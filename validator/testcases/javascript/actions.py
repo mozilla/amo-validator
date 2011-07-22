@@ -5,7 +5,7 @@ import types
 import spidermonkey
 import instanceactions
 import instanceproperties
-from validator.decorator import versions_after
+from validator.decorator import version_range
 from jstypes import *
 
 
@@ -389,7 +389,7 @@ def _readonly_top(t, r, rn):
         column=t.position,
         context=t.context,
         for_appversions={'{ec8030f7-c20a-464f-9b0e-13a3a9e97384}':
-                             versions_after("firefox", "6.0a1")},
+                             version_range("firefox", "6.0a1", "7.0a1")},
         compatibility_type="warning",
         tier=5)
 

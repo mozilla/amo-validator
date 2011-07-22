@@ -46,10 +46,11 @@ def get_tests(tier, type_=None):
     return (test for test in ctier if test["type"] in types)
 
 
-def versions_after(guid, version):
+def version_range(guid, version, before=None, app_versions=None):
     """Returns all values after (and including) `version` for the app `guid`"""
 
-    app_versions = validator.constants.APPROVED_APPLICATIONS
+    if app_versions is None:
+        app_versions = validator.constants.APPROVED_APPLICATIONS
     app_key = None
 
     # Support for shorthand instead of full GUIDs.
@@ -66,6 +67,10 @@ def versions_after(guid, version):
     if not app_key or version not in app_versions[app_key]["versions"]:
         raise Exception("Bad GUID or version provided for version range")
 
-    version_pos = app_versions[app_key]["versions"].index(version)
-    return app_versions[app_key]["versions"][version_pos:]
+    all_versions = app_versions[app_key]["versions"]
+    version_pos = all_versions.index(version)
+    before_pos = None
+    if before is not None and before in all_versions:
+        before_pos = all_versions.index(before)
+    return all_versions[version_pos:before_pos]
 

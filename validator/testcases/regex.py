@@ -2,7 +2,7 @@ import re
 
 from validator.constants import BUGZILLA_BUG
 from validator.contextgenerator import ContextGenerator
-from validator.decorator import versions_after
+from validator.decorator import version_range
 
 
 NP_WARNING = "Network preferences may not be modified."
@@ -65,13 +65,13 @@ FX7_INTERFACES = {"nsIDOMDocumentStyle": 658904,
                   "nsIDOM3Node": 659053}
 
 FX4_DEFINITION = {"{ec8030f7-c20a-464f-9b0e-13a3a9e97384}":
-                      versions_after("firefox", "3.7a1pre")}
+                      version_range("firefox", "3.7a1pre", "5.0a2")}
 FX5_DEFINITION = {"{ec8030f7-c20a-464f-9b0e-13a3a9e97384}":
-                      versions_after("firefox", "5.0a2")}
+                      version_range("firefox", "5.0a2", "6.0a1")}
 FX6_DEFINITION = {"{ec8030f7-c20a-464f-9b0e-13a3a9e97384}":
-                      versions_after("firefox", "6.0a1")}
+                      version_range("firefox", "6.0a1", "7.0a1")}
 FX7_DEFINITION = {"{ec8030f7-c20a-464f-9b0e-13a3a9e97384}":
-                      versions_after("firefox", "7.0a1")}
+                      version_range("firefox", "7.0a1", "8.0a1")}
 
 
 def run_regex_tests(document, err, filename, context=None, is_js=False):

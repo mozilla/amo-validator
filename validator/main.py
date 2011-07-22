@@ -64,11 +64,19 @@ def main():
                         default="validator/app_versions.json",
                         help="""A JSON file containing acceptable applications
                         and their versions""")
-    parser.add_argument("--target-appversion",
+    parser.add_argument("--target-maxversion",
                         help="""JSON string to override the package's
                         targetapp_maxVersion for validation. The JSON object
                         should be a dict of versions keyed by application
                         GUID. For example, setting a package's max Firefox
+                        version to 5.*:
+                        {"{ec8030f7-c20a-464f-9b0e-13a3a9e97384}": "5.*"}
+                        """)
+    parser.add_argument("--target-minversion",
+                        help="""JSON string to override the package's
+                        targetapp_minVersion for validation. The JSON object
+                        should be a dict of versions keyed by application
+                        GUID. For example, setting a package's min Firefox
                         version to 5.*:
                         {"{ec8030f7-c20a-464f-9b0e-13a3a9e97384}": "5.*"}
                         """)
@@ -91,10 +99,12 @@ def main():
                 args.type
         sys.exit(1)
 
-    overrides = None
-    if args.target_appversion:
-       overrides = {'targetapp_maxVersion':
-                            json.loads(args.target_appversion)}
+    overrides = {}
+    if args.target_minversion:
+       overrides['targetapp_minVersion'] = json.loads(args.target_minversion)
+    if args.target_maxversion:
+       overrides['targetapp_maxVersion'] = json.loads(args.target_maxversion)
+
     for_appversions = None
     if args.for_appversions:
         for_appversions = json.loads(args.for_appversions)

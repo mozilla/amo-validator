@@ -1,31 +1,36 @@
+from nose.tools import eq_
+
 import validator.constants
-from validator.decorator import versions_after
+from validator.decorator import version_range
 from validator.testcases.markup.markuptester import MarkupParser
 import validator.testcases.scripting as scripting
-from validator.decorator import versions_after
+from validator.decorator import version_range
 from js_helper import _do_real_test_raw
 from validator.errorbundler import ErrorBundle
 
 
 # TODO: During a refactor, move this to the decorator's tests.
-def test_versions_after():
+def test_version_range():
     """
     Tests that the appropriate versions after the specified versions are
     returned.
     """
 
-    av = validator.constants.APPROVED_APPLICATIONS
+    new_versions = {"1": {"guid": "foo",
+                          "versions": map(str, range(10))}}
+    eq_(version_range("foo", "8", app_versions=new_versions), ["8", "9"])
+    eq_(version_range("foo", "5", app_versions=new_versions),
+            ["5", "6", "7", "8", "9"])
+
+
+def test_version_range_before():
+    """Test the `before` parameter of version_range."""
 
     new_versions = {"1": {"guid": "foo",
                           "versions": map(str, range(10))}}
-    validator.constants.APPROVED_APPLICATIONS = new_versions
 
-    assert versions_after("foo", "8") == ["8", "9"]
-    assert versions_after("foo", "5") == ["5", "6", "7", "8",
-                                                        "9"]
-
-    validator.constants.APPROVED_APPLICATIONS = av
-
+    eq_(version_range("foo", "5", "6", app_versions=new_versions), ["5"])
+    eq_(version_range("foo", "8", "50", app_versions=new_versions), ["8", "9"])
 
 def test_navigator_language():
     """
@@ -41,7 +46,7 @@ def test_navigator_language():
     err = _do_real_test_raw("""
     alert(navigator.language);
     """, versions={'{ec8030f7-c20a-464f-9b0e-13a3a9e97384}':
-                    versions_after("firefox", "5.0")})
+                    version_range("firefox", "5.0")})
     assert not err.failed()
     assert err.compat_summary["errors"]
 
@@ -64,7 +69,7 @@ def test_menu_item_compat():
             return err
 
         err = test({"{ec8030f7-c20a-464f-9b0e-13a3a9e97384}":
-                        versions_after("firefox", "6.0a1")})
+                        version_range("firefox", "6.0a1")})
         if should_fail:
             assert err.notices
             assert err.compat_summary["warnings"]
@@ -112,7 +117,7 @@ def test_window_top():
     err = _do_real_test_raw("""
     window.top = "foo";
     """, versions={'{ec8030f7-c20a-464f-9b0e-13a3a9e97384}':
-                       versions_after("firefox", "6.0a1")})
+                       version_range("firefox", "6.0a1")})
     print err.print_summary(verbose=True)
     assert not err.failed()
     assert err.notices
@@ -121,7 +126,7 @@ def test_window_top():
     err = _do_real_test_raw("""
     top = "foo";
     """, versions={'{ec8030f7-c20a-464f-9b0e-13a3a9e97384}':
-                       versions_after("firefox", "6.0a1")})
+                       version_range("firefox", "6.0a1")})
     print err.print_summary(verbose=True)
     assert not err.failed()
     assert err.notices
@@ -144,7 +149,7 @@ def test_custom_addon_types():
     err = _do_real_test_raw("""
     AddonManagerPrivate.registerProvider();
     """, versions={'{ec8030f7-c20a-464f-9b0e-13a3a9e97384}':
-                       versions_after("firefox", "6.0a1")})
+                       version_range("firefox", "6.0a1")})
     print err.print_summary(verbose=True)
     assert not err.failed()
     assert err.notices
@@ -166,7 +171,7 @@ def test_fx7_regex_xpcom():
     err = _do_real_test_raw("""
     var x = "nsIDOMDocumentStyle";
     """, versions={'{ec8030f7-c20a-464f-9b0e-13a3a9e97384}':
-                       versions_after("firefox", "7.0a1")})
+                       version_range("firefox", "7.0a1")})
     assert not err.failed()
     assert err.notices
     assert err.compat_summary["errors"]
@@ -185,7 +190,7 @@ def test_fx7_nsinavhistoryobserver():
     err = _do_real_test_raw("""
     var x = "nsINavHistoryObserver";
     """, versions={'{ec8030f7-c20a-464f-9b0e-13a3a9e97384}':
-                       versions_after("firefox", "7.0a1")})
+                       version_range("firefox", "7.0a1")})
     assert not err.failed()
     assert err.notices
     assert err.compat_summary["errors"]
@@ -204,7 +209,7 @@ def test_fx7_markupdocumentviewer():
     err = _do_real_test_raw("""
     var x = "nsIMarkupDocumentViewer_MOZILLA_2_0_BRANCH";
     """, versions={'{ec8030f7-c20a-464f-9b0e-13a3a9e97384}':
-                       versions_after("firefox", "7.0a1")})
+                       version_range("firefox", "7.0a1")})
     assert not err.failed()
     assert err.notices
     assert err.compat_summary["warnings"]
@@ -227,7 +232,7 @@ def test_fx7_nsIDOMFile():
         Components.interfaces.nsIDOMFile);
     x.getAsDataURL();
     """, versions={'{ec8030f7-c20a-464f-9b0e-13a3a9e97384}':
-                       versions_after("firefox", "7.0a1")})
+                       version_range("firefox", "7.0a1")})
     assert not err.failed()
     assert len(err.notices) == 1
     assert err.compat_summary["errors"]
@@ -236,7 +241,7 @@ def test_fx7_nsIDOMFile():
     var x = document.getElementById("whatever");
     x.getAsDataURL();
     """, versions={'{ec8030f7-c20a-464f-9b0e-13a3a9e97384}':
-                       versions_after("firefox", "7.0a1")})
+                       version_range("firefox", "7.0a1")})
     assert not err.failed()
     assert len(err.notices) == 1
     assert err.compat_summary["errors"]
@@ -259,7 +264,7 @@ def test_fx7_nsIJSON():
         Components.interfaces.nsIJSON);
     x.encode();
     """, versions={'{ec8030f7-c20a-464f-9b0e-13a3a9e97384}':
-                       versions_after("firefox", "7.0a1")})
+                       version_range("firefox", "7.0a1")})
     assert not err.failed()
     assert len(err.notices) == 1
     assert err.compat_summary["errors"]
