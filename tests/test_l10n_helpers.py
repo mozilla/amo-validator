@@ -18,6 +18,11 @@ def test_list_locales():
                                     ("locale", "abc", "def")]))
     assert len(_list_locales(err)) == 2
 
+    err = ErrorBundle()
+    result = _list_locales(err, MockXPI(
+        {"chrome.manifest": "tests/resources/chromemanifest/chrome.manifest"}))
+    assert result
+
 
 def test_get_locales():
     "Tests that the proper locale descriptions are returned for a package"
