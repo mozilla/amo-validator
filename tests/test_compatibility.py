@@ -267,5 +267,5 @@ def test_fx7_nsIJSON():
                        version_range("firefox", "7.0a1")})
     assert not err.failed()
     assert len(err.notices) == 1
-    assert err.compat_summary["errors"]
+    assert err.compat_summary["warnings"]
 

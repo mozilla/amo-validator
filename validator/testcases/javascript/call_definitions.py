@@ -259,14 +259,17 @@ def nsIJSON_deprec(wrapper, arguments, traverser):
         err_id=("testcases_javascript_calldefintiions", "nsIJSON",
                 "deprec"),
         notice="Deprecated nsIJSON methods in use.",
-        description=("Your add-on uses methods that have been removed from "
-                     "the nsIJSON interface in Firefox 7. Please refer to "
-                     "%s for more information.") % (BUGZILLA_BUG % 645922),
+        description=("The encode and decode methods in nsIJSON have been "
+                     "deprecated in Firefox 7. You can use the methods in the "
+                     "global JSON object instead. See %s for more "
+                     "information.") %
+                         "https://developer.mozilla.org/En/Using_native_JSON",
+                    #"%s for more information.") % (BUGZILLA_BUG % 645922),
         filename=traverser.filename,
         line=traverser.line,
         column=traverser.position,
         context=traverser.context,
-        compatibility_type="error",
+        compatibility_type="warning",
         for_appversions={'{ec8030f7-c20a-464f-9b0e-13a3a9e97384}':
                              version_range("firefox", "7.0a1", "8.0a1")},
         tier=5)
