@@ -82,6 +82,38 @@ def test_has_cdata():
     _do_test("tests/resources/markup/markuptester/cdata.xml")
 
 
+def test_cdata_properly():
+    """CDATA should be treated as text and be ignored by the parser."""
+
+    err = _do_test_raw("""<foo>
+    <script type="text/x-jquery-tmpl">
+    <![CDATA[
+    <button><p><span><foo>
+    </bar></zap>
+    <selfclosing />
+    <><><><""><!><
+    ]]>
+    </script>
+    </foo>""", "foo.xul", should_fail=False)
+
+    err = _do_test_raw("""<foo>
+    <![CDATA[
+    <button><p><span><foo>
+    </bar></zap>
+    <selfclosing />
+    <><><><""><!><
+    ]]>
+    </foo>""", "foo.xul", should_fail=False)
+
+    err = _do_test_raw("""
+    <![CDATA[
+    <button><p><span><foo>
+    </bar></zap>
+    <selfclosing />
+    <><><><""><!><
+    ]]>""", "foo.xul", should_fail=False)
+
+
 def test_xml_overclosing():
     "Tests an XML file that has overclosed elements"
     _do_test("tests/resources/markup/markuptester/overclose.xml", True)
@@ -185,6 +217,16 @@ def test_theme_attribute_prefixes():
     _do_test_raw("""
     <foo><bar foo="javascript:bar" /></foo>
     """, "foo.js", type_=PACKAGE_THEME, should_fail=True)
+
+
+def test_theme_xbl():
+    """Test that markup within script tags does not raise errors."""
+
+    # Borrowed from http://bugs.python.org/file22767/hp_fix.diff
+    _do_test_raw("""
+    <script> <a href="" /> <p> <span></span> </p> </script>
+    <script> foo = "</scr" + "ipt>"; </script>
+    """, "foo.js", type_=PACKAGE_THEME)
 
 
 def test_theme_xbl():
