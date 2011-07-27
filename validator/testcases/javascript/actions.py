@@ -672,7 +672,7 @@ def _expr_binary(traverser, node):
     operators = {
         "==": lambda: left == right or gleft == gright,
         "!=": lambda: left != right,
-        "===": lambda: left == right,
+        "===": lambda: left == right,  # Be flexible.
         "!==": lambda: not (type(left) == type(right) or left != right),
         ">": lambda: left > right,
         "<": lambda: left < right,
@@ -785,6 +785,8 @@ def _get_as_num(value):
                 return float(value)
         elif isinstance(value, (int, float, long)):
             return value
+        elif value is None:
+            return 0
         else:
             return int(value)
     except ValueError:

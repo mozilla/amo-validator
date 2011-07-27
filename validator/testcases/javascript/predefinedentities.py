@@ -1,6 +1,7 @@
 import math
 
 import actions
+from actions import _get_as_str
 import call_definitions
 from call_definitions import xpcom_constructor as xpcom_const, python_wrap
 from jstypes import JSWrapper
@@ -166,19 +167,21 @@ GLOBAL_ENTITIES = {
                         "readonly": False},
                    u"createElement":
                        {"dangerous":
-                            lambda a, t, e: not a or
-                                            unicode(t(a[0]).get_literal_value())
+                            lambda a, t, e:
+                                not a or
+                                _get_as_str(t(a[0]).get_literal_value())
                                                 .lower() == "script"},
                    u"createElementNS":
                        {"dangerous":
-                            lambda a, t, e: not a or
-                                            unicode(t(a[0]).get_literal_value())
+                            lambda a, t, e:
+                                not a or
+                                _get_as_str(t(a[0]).get_literal_value())
                                                 .lower() == "script"},
                    u"loadOverlay":
                        {"dangerous":
                             lambda a, t, e:
                                 not a or
-                                not unicode(t(a[0]).get_literal_value())
+                                not _get_as_str(t(a[0]).get_literal_value())
                                         .lower()
                                         .startswith(("chrome:",
                                                      "resource:"))}}},
@@ -319,8 +322,8 @@ GLOBAL_ENTITIES = {
                              u"import":
                                  {"dangerous":
                                       lambda a, t, e:
-                                        a and \
-                                        unicode(t(a[0]).get_literal_value())
+                                        a and
+                                        _get_as_str(t(a[0]).get_literal_value())
                                             .count("ctypes.jsm")}}},
               u"interfaces":
                   {"value": {u"nsIXMLHttpRequest":

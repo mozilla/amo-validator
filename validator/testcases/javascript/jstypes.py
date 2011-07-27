@@ -188,11 +188,10 @@ class JSWrapper(object):
         if self.value is None:
             return False
 
-        if self.value is JSLiteral:
+        if isinstance(self.value, JSLiteral):
             return False
-        elif self.value is JSObject or \
-             self.value is JSPrototype:
-            # JSPrototype and JSObject always has a value
+        elif isinstance(self.value, (JSObject, JSPrototype)):
+            # JSPrototype and JSObject always have a value
             return True
 
     def get(self, traverser, name):
@@ -304,10 +303,10 @@ class JSWrapper(object):
             else:
                 return "[object Object]"
         if self.value is None:
-            return ""
+            return None
 
         output = self.value.get_literal_value()
-        return output if output is not None else ""
+        return output
 
     def output(self):
         """Returns a readable version of the object"""
