@@ -12,6 +12,7 @@ PACKAGE_LANGPACK = 4
 PACKAGE_SEARCHPROV = 5
 PACKAGE_MULTI = 1  # A multi extension is an extension
 PACKAGE_SUBPACKAGE = 7
+PACKAGE_WEBAPP = 8
 
 # The "earliest" version number for Firefox 4
 FF4_MIN = "3.7a1pre"
@@ -34,6 +35,8 @@ APPROVED_APPLICATIONS = json.loads(
 SPIDERMONKEY_INSTALLATION = os.environ.get("SPIDERMONKEY_INSTALLATION")
 
 BUGZILLA_BUG = "https://bugzilla.mozilla.org/show_bug.cgi?id=%d"
+
+URL_REGEX = r"https?://[a-z0-9\.]+(/[a-z0-9\-\._~:/?#\[\]@!$&'\(\)\*\+,;=%]*)?"
 
 # Graciously provided by @kumar in bug 614574
 if (not SPIDERMONKEY_INSTALLATION or
