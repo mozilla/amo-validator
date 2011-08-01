@@ -37,14 +37,14 @@ def _expand_globals(traverser, node):
     return node
 
 
-def trace_member(traverser, node):
+def trace_member(traverser, node, instantiate=False):
     "Traces a MemberExpression and returns the appropriate object"
 
     traverser._debug("TESTING>>%s" % node["type"])
     if node["type"] == "MemberExpression":
         # x.y or x[y]
         # x = base
-        base = trace_member(traverser, node["object"])
+        base = trace_member(traverser, node["object"], instantiate)
         base = _expand_globals(traverser, base)
 
         # If we've got an XPCOM wildcard, just return the base, minus the WC
@@ -56,14 +56,23 @@ def trace_member(traverser, node):
 
         identifier = _get_member_exp_property(traverser, node)
         test_identifier(traverser, identifier)
+
         traverser._debug("MEMBER_EXP>>PROPERTY: %s" % identifier)
         return base.get(traverser=traverser,
+                        instantiate=instantiate,
                         name=identifier)
-
     elif node["type"] == "Identifier":
         traverser._debug("MEMBER_EXP>>ROOT:IDENTIFIER")
         test_identifier(traverser, node["name"])
-        output = traverser._seek_variable(node["name"])
+
+        # If we're supposed to instantiate the object and it doesn't already
+        # exist, instantitate the object.
+        if (instantiate and not (traverser._is_local_variable(node["name"]) or
+                                 traverser._is_global(node["name"]))):
+            output = JSWrapper(JSObject(), traverser=traverser)
+            traverser.contexts[0].set(node["name"], output)
+        else:
+            output = traverser._seek_variable(node["name"])
 
         output = _expand_globals(traverser, output)
 
@@ -485,17 +494,14 @@ def _expr_assignment(traverser, node):
 
             traverser._set_variable(node_left["name"], right, glob=True)
         elif node_left["type"] == "MemberExpression":
-            member_object = trace_member(traverser, node_left["object"])
+            member_object = trace_member(traverser, node_left["object"],
+                                         instantiate=True)
             global_overwrite = (member_object.is_global and
                                 not ("overwriteable" in member_object.value and
                                      member_object.value["overwriteable"]))
             member_property = _get_member_exp_property(traverser, node_left)
             traverser._debug("ASSIGNMENT:MEMBER_PROPERTY(%s)" % member_property)
-
-            # Make sure to perform any setter operations.
-            setter = instanceproperties.get_operation("set", member_property)
-            if setter:
-                right = setter(right, traverser) or right or None
+            traverser._debug("ASSIGNMENT:GLOB_OV::%s" % global_overwrite)
 
             # Don't do the assignment if we're facing a global.
             if not global_overwrite:
@@ -503,7 +509,7 @@ def _expr_assignment(traverser, node):
                     member_object.value = JSObject()
 
                 if not member_object.is_global:
-                    member_object.value.set(member_property, right)
+                    member_object.value.set(member_property, right, traverser)
                 else:
                     # It's probably better to do nothing.
                     pass
