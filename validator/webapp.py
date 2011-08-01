@@ -33,7 +33,8 @@ def detect_webapp(err, package):
 
     # Parse the file.
     try:
-        webapp = json.loads(package)
+        with open(package, mode="r") as f:
+            webapp = json.load(f)
     except:
         return err.error(
             err_id=("webapp",
