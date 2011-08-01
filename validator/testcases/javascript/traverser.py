@@ -1,3 +1,4 @@
+import copy
 import json
 import types
 
@@ -9,6 +10,7 @@ from validator.testcases.javascript.predefinedentities import \
 
 DEBUG = False
 IGNORE_POLLUTION = False
+POLLUTION_EXCEPTIONS = set(["Cc", "Ci", "Cu", ])
 
 
 class Traverser:
@@ -68,7 +70,12 @@ class Traverser:
 
             if not IGNORE_POLLUTION:
                 # This performs the namespace pollution test.
-                global_context_size = len(self.contexts[0].data)
+                final_globals = copy.deepcopy(self.contexts[0].data)
+                for global_name in self.contexts[0].data:
+                    if global_name in POLLUTION_EXCEPTIONS:
+                        del final_globals[global_name]
+
+                global_context_size = len(final_globals)
                 self._debug("Final context size: %d" % global_context_size)
 
                 if (global_context_size > 3 and not self.is_jsm and

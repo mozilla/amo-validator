@@ -154,14 +154,16 @@ def build_quick_xpcom(method, interface, traverser):
 # GLOBAL_ENTITIES is also representative of the `window` object.
 GLOBAL_ENTITIES = {
     u"window": {"value": lambda t: {"value": GLOBAL_ENTITIES}},
-    u"null": {"readonly": True,
-              "literal": lambda t: JSWrapper(None, traverser=t)},
-    u"Cc": {"value":
+    u"null": {"literal": lambda t: JSWrapper(None, traverser=t)},
+    u"Cc": {"readonly": False,
+            "value":
                 lambda t: GLOBAL_ENTITIES["Components"]["value"]["classes"]},
-    u"Ci": {"value":
+    u"Ci": {"readonly": False,
+            "value":
                 lambda t: GLOBAL_ENTITIES["Components"]["value"]["interfaces"]},
 
-    u"Cu": {"value":
+    u"Cu": {"readonly": False,
+            "value":
                 lambda t: GLOBAL_ENTITIES["Components"]["value"]["utils"]},
     u"Services":
         {"value": {u"scriptloader": {"dangerous": True},
@@ -178,7 +180,7 @@ GLOBAL_ENTITIES = {
 
     u"document":
         {"value": {u"title":
-                       {"overwriteable": True,
+                       {"overwritable": True,
                         "readonly": False},
                    u"createElement":
                        {"dangerous":
