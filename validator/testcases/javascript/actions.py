@@ -85,10 +85,8 @@ def test_identifier(traverser, name):
         traverser.err.warning(("testcases_scripting",
                                "create_identifier",
                                "banned_identifier"),
-                              "Banned JavaScript Identifier",
-                              ["An identifier was used in the JavaScript that "
-                               "is not allowed due to security restrictions.",
-                               "Identifier: %s" % name],
+                              "Banned or deprecated JavaScript Identifier",
+                              predefinedentities.BANNED_IDENTIFIERS[name],
                               filename=traverser.filename,
                               line=traverser.line,
                               column=traverser.position,
