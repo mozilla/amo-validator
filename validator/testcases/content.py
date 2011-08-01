@@ -18,7 +18,8 @@ from validator.textfilter import is_standard_ascii
 
 
 PASSWORD_REGEX = re.compile("password", re.I)
-OSX_REGEX = re.compile("__MACOSX")
+FLAGGED_FILES = set([".DS_Store", "Thumbs.db"])
+FLAGGED_EXTENSIONS = (".orig", ".old", "~", )
 
 @decorator.register_test(tier=1)
 def test_xpcnativewrappers(err, xpi_package=None):
@@ -61,8 +62,7 @@ def test_packed_packages(err, xpi_package=None):
 
     # Iterate each item in the package.
     for name in xpi_package:
-        if (OSX_REGEX.search(name) or
-            name.startswith(".") or
+        if ("__MACOSX" in name or
             name.split("/")[-1].startswith(".")):
             err.warning(
                 err_id=("testcases_content", "test_packed_packages",
@@ -73,6 +73,17 @@ def test_packed_packages(err, xpi_package=None):
                             "about the system that generated the XPI. Please "
                             "modify the packaging process so that these files "
                             "aren't included.",
+                filename=name)
+            continue
+        elif (name.endswith(FLAGGED_EXTENSIONS) or
+              name in FLAGGED_FILES):
+            err.warning(
+                err_id=("testcases_content", "test_packaged_packages",
+                        "flagged_files"),
+                warning="Flagged filename found",
+                description="Files were found that are either unnecessary "
+                            "or have been included unintentionally. They "
+                            "should be removed.",
                 filename=name)
             continue
 
