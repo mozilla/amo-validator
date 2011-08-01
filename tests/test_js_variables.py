@@ -1,4 +1,6 @@
+from nose.tools import eq_
 from js_helper import _do_test_raw, _get_var
+
 
 def test_multiple_assignments():
     "Tests that multiple variables can be assigned in one sitting"
@@ -11,6 +13,7 @@ def test_multiple_assignments():
     assert _get_var(results, "y") == 2
     assert _get_var(results, "z") == 3
 
+
 def test_arraypattern_assignment():
     "Tests that array patterns can be used to assign variables"
 
@@ -21,6 +24,7 @@ def test_arraypattern_assignment():
     assert _get_var(results, "x") == 1
     assert _get_var(results, "y") == 2
     assert _get_var(results, "z") == 3
+
 
 def test_objectpattern_assignment():
     "Tests that ObjectPatterns are respected"
@@ -47,5 +51,21 @@ def test_objectpattern_assignment():
     assert not results.failed()
     assert _get_var(results, "x") == 1
     assert _get_var(results, "y") == 4
-    
+
+
+def test_lazy_object_member_assgt():
+    """
+    Test that members of lazy objects can be assigned, even if the lazy object
+    hasn't yet been created.
+    """
+
+    results = _do_test_raw("""
+    foo.bar = "asdf";
+    zap.fizz.buzz = 123;
+    var a = foo.bar,
+        b = zap.fizz.buzz;
+    """)
+    assert not results.failed()
+    eq_(_get_var(results, "a"), "asdf")
+    eq_(_get_var(results, "b"), 123)
 

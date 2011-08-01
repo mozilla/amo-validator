@@ -334,7 +334,8 @@ class ErrorBundle(object):
                  3: "Dictionary",
                  4: "Language Pack",
                  5: "Search Provider",
-                 7: "Subpackage"}
+                 7: "Subpackage",
+                 8: "Webapp"}
         detected_type = types[self.detected_type]
 
         buffer = StringIO()

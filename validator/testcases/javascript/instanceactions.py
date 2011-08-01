@@ -11,6 +11,7 @@ node
 """
 import types
 
+import actions
 from jstypes import *
 
 
@@ -22,7 +23,8 @@ def createElement(args, traverser, node):
 
     simple_args = map(traverser._traverse_node, args)
 
-    if unicode(simple_args[0].get_literal_value()).lower() == u"script":
+    first_as_str = actions._get_as_str(simple_args[0].get_literal_value())
+    if first_as_str.lower() == u"script":
         _create_script_tag(traverser)
     elif not simple_args[0].is_literal():
         _create_variable_element(traverser)
@@ -36,7 +38,8 @@ def createElementNS(args, traverser, node):
 
     simple_args = map(traverser._traverse_node, args)
 
-    if "script" in unicode(simple_args[1].get_literal_value()).lower():
+    second_as_str = actions._get_as_str(simple_args[1].get_literal_value())
+    if "script" in second_as_str.lower():
         _create_script_tag(traverser)
     elif not simple_args[1].is_literal():
         _create_variable_element(traverser)
@@ -114,7 +117,8 @@ def setAttribute(args, traverser, node):
 
     simple_args = [traverser._traverse_node(a) for a in args]
 
-    if unicode(simple_args[0].get_literal_value()).lower().startswith("on"):
+    first_as_str = actions._get_as_str(simple_args[0].get_literal_value())
+    if first_as_str.lower().startswith("on"):
         traverser.err.notice(
             err_id=("testcases_javascript_instanceactions", "setAttribute",
                         "setting_on*"),

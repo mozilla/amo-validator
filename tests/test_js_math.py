@@ -231,7 +231,7 @@ def test_log():
     """, {"a": 0,
           "b": NEG_INFINITY,
           "c": INFINITY,
-          "d": ''})
+          "d": None})
 
 
 def test_min_max():

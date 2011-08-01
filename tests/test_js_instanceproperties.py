@@ -57,3 +57,13 @@ def test_on_event():
     x.onclick = "bar";
     """).failed()
 
+
+def test_on_event_null():
+    """Null should not trigger on* events."""
+
+    assert not _do_test_raw("""
+    var x = foo(),
+        y = null;
+    x.onclick = y;
+    """).failed()
+
