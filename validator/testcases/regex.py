@@ -1,3 +1,4 @@
+import fnmatch
 import re
 
 from validator.constants import BUGZILLA_BUG
@@ -48,6 +49,8 @@ CATEGORY_REGEXES = (
                      "global dynamic nameset",
                      "DOM class",
                      "DOM interface")))))
+
+PASSWORD_REGEX = re.compile("password", re.I)
 
 # DOM mutation events; bug 642153
 DOM_MUTATION_REGEXES = map(re.compile,
@@ -127,6 +130,13 @@ def run_regex_tests(document, err, filename, context=None, is_js=False):
                     "appears that a JavaScript category was registered via a "
                     "script to attach properties to JavaScript globals. This "
                     "is not allowed.")
+
+        if fnmatch.fnmatch(filename, "defaults/preferences/*.js"):
+            _generic_test(
+                PASSWORD_REGEX,
+                "Passwords may be stored in /defaults/preferences JS files.",
+                "Storing passwords in the preferences is insecure and the "
+                "Login Manager should be used instead.")
 
     for pattern in DOM_MUTATION_REGEXES:
         _generic_test(

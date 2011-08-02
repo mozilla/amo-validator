@@ -17,9 +17,9 @@ from validator.constants import *
 from validator.textfilter import is_standard_ascii
 
 
-PASSWORD_REGEX = re.compile("password", re.I)
 FLAGGED_FILES = set([".DS_Store", "Thumbs.db"])
 FLAGGED_EXTENSIONS = (".orig", ".old", "~", )
+OSX_REGEX = re.compile("__MACOSX")
 
 @decorator.register_test(tier=1)
 def test_xpcnativewrappers(err, xpi_package=None):
@@ -208,25 +208,6 @@ def _process_file(err, xpi_package, name, file_data):
 
         elif name_lower.endswith((".js", ".jsm")):
             is_js = True
-
-            # Test for "password" in defaults/preferences files; bug 647109
-            if fnmatch.fnmatch(name, "defaults/preferences/*.js"):
-                match = PASSWORD_REGEX.search(file_data)
-                if match:
-                    context = ContextGenerator(file_data)
-                    err.warning(
-                        err_id=("testcases_content",
-                                "test_packed_packages",
-                                "password_in_js"),
-                        warning="Passwords may be stored in defaults/"
-                                "preferences JS files",
-                        description="Storing passwords in the preferences "
-                                    "is insecure and the Login Manager "
-                                    "should be used instead.",
-                        filename=name,
-                        line=context.get_line(match.start()),
-                        context=context)
-
             testendpoint_js.test_js_file(err, name, file_data)
 
         run_regex_tests(file_data, err, name, is_js=is_js)
