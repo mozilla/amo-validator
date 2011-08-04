@@ -8,7 +8,7 @@ recursion_buster = []
 class JSObject(object):
     """
     Mimics a JS object (function) and is capable of serving as an active
-    context to enable static analysis of `with` statements
+    context to enable static analysis of `with` statements.
     """
 
     def __init__(self):
@@ -16,10 +16,16 @@ class JSObject(object):
             u"prototype": JSPrototype()
         }
 
-    def get(self, name):
+    def get(self, name, instantiate=False, traverser=None):
         "Returns the value associated with a property name"
         name = unicode(name)
-        return self.data[name] if name in self.data else None
+        if name in self.data:
+            return self.data[name]
+        elif instantiate:
+            output = JSWrapper(JSObject(), traverser=traverser)
+            self.set(name, output, traverser=traverser)
+            return output
+        return None
 
     def get_literal_value(self):
         "Objects evaluate to empty strings"
@@ -188,14 +194,13 @@ class JSWrapper(object):
         if self.value is None:
             return False
 
-        if self.value is JSLiteral:
+        if isinstance(self.value, JSLiteral):
             return False
-        elif self.value is JSObject or \
-             self.value is JSPrototype:
-            # JSPrototype and JSObject always has a value
+        elif isinstance(self.value, (JSObject, JSPrototype)):
+            # JSPrototype and JSObject always have a value
             return True
 
-    def get(self, traverser, name):
+    def get(self, traverser, name, instantiate=False):
         """Retrieves a property from the variable"""
 
         value = self.value
@@ -236,10 +241,9 @@ class JSWrapper(object):
         if modifier:
             modifier(traverser)
 
-        if value is not None:
-            output = (value.get(name) if
-                      issubclass(type(value), JSObject) else
-                      None)
+        if value is not None and issubclass(type(value), JSObject):
+            output = value.get(name, instantiate=instantiate,
+                               traverser=traverser)
         else:
             output = None
 
@@ -304,10 +308,10 @@ class JSWrapper(object):
             else:
                 return "[object Object]"
         if self.value is None:
-            return ""
+            return None
 
         output = self.value.get_literal_value()
-        return output if output is not None else ""
+        return output
 
     def output(self):
         """Returns a readable version of the object"""

@@ -106,7 +106,7 @@ def string_global(wrapper, arguments, traverser):
     if not arguments:
         return JSWrapper("", traverser=traverser)
     arg = traverser._traverse_node(arguments[0])
-    value = str(arg.get_literal_value())
+    value = actions._get_as_str(arg.get_literal_value())
     return JSWrapper(value, traverser=traverser)
 
 

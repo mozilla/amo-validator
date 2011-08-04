@@ -1,6 +1,8 @@
 # -*- coding: utf-8 -*-
 import copy
 import json
+import os
+import tempfile
 
 from nose.tools import eq_
 
@@ -18,6 +20,18 @@ def test_test_path():
     eq_(validator.webapp.test_path("http://asdf/"), False)
     eq_(validator.webapp.test_path("data:asdf"), False)
     eq_(validator.webapp.test_path("data:asdf", True), True)
+
+
+def _detect(err, data):
+    """Run the webapp tests on the file."""
+    with tempfile.NamedTemporaryFile(delete=False) as t:
+        if isinstance(data, str):
+            t.write(data)
+        else:
+            t.write(json.dumps(data))
+        name = t.name
+    validator.webapp.detect_webapp(err, name)
+    os.unlink(name)
 
 
 def _get_json():
@@ -66,7 +80,7 @@ def test_webapp_pass():
     """Test that a bland webapp file throws no errors."""
 
     err = ErrorBundle()
-    validator.webapp.detect_webapp(err, json.dumps(_get_json()))
+    _detect(err, _get_json())
     print err.print_summary(verbose=True)
     assert not err.failed()
 
@@ -75,7 +89,7 @@ def test_webapp_fail_parse():
     """Test that invalid JSON is reported."""
 
     err = ErrorBundle()
-    validator.webapp.detect_webapp(err, "}{")
+    _detect(err, "}{")
     assert err.failed()
 
 
@@ -85,7 +99,7 @@ def test_webapp_missing_required():
     err = ErrorBundle()
     data = _get_json()
     del data["name"]
-    validator.webapp.detect_webapp(err, json.dumps(data))
+    _detect(err, data)
     assert err.failed()
 
 
@@ -95,7 +109,7 @@ def test_webapp_invalid_name():
     err = ErrorBundle()
     data = _get_json()
     data["name"] = ["foo", "bar"]
-    validator.webapp.detect_webapp(err, json.dumps(data))
+    _detect(err, data)
     assert err.failed()
 
 
@@ -105,7 +119,7 @@ def test_webapp_maxlengths():
     err = ErrorBundle()
     data = _get_json()
     data["name"] = "%" * 129
-    validator.webapp.detect_webapp(err, json.dumps(data))
+    _detect(err, data)
     assert err.failed()
 
 
@@ -115,7 +129,7 @@ def test_webapp_invalid_keys():
     err = ErrorBundle()
     data = _get_json()
     data["foobar"] = "hello"
-    validator.webapp.detect_webapp(err, json.dumps(data))
+    _detect(err, data)
     assert err.failed()
 
 
@@ -123,7 +137,7 @@ def test_webapp_warn_extra_keys():
     err = ErrorBundle()
     data = _get_json()
     data["locales"]["es"]["foo"] = "hello"
-    validator.webapp.detect_webapp(err, json.dumps(data))
+    _detect(err, data)
     assert err.failed()
 
 
@@ -133,7 +147,7 @@ def test_webapp_icons_not_dict():
     err = ErrorBundle()
     data = _get_json()
     data["icons"] = ["data:foo/bar.png"]
-    validator.webapp.detect_webapp(err, json.dumps(data))
+    _detect(err, data)
     assert err.failed()
 
 
@@ -143,7 +157,7 @@ def test_webapp_icons_data_url():
     err = ErrorBundle()
     data = _get_json()
     data["icons"]["asdf"] = "data:foo/bar.png"
-    validator.webapp.detect_webapp(err, json.dumps(data))
+    _detect(err, data)
     assert err.failed()
 
 
@@ -153,7 +167,7 @@ def test_webapp_icons_relative_url():
     err = ErrorBundle()
     data = _get_json()
     data["icons"]["128"] = "foo/bar"
-    validator.webapp.detect_webapp(err, json.dumps(data))
+    _detect(err, data)
     assert err.failed()
 
 
@@ -163,7 +177,7 @@ def test_webapp_icons_absolute_url():
     err = ErrorBundle()
     data = _get_json()
     data["icons"]["128"] = "/foo/bar"
-    validator.webapp.detect_webapp(err, json.dumps(data))
+    _detect(err, data)
     assert not err.failed()
 
 
@@ -174,7 +188,7 @@ def test_webapp_no_locales():
     data = _get_json()
     del data["default_locale"]
     del data["locales"]
-    validator.webapp.detect_webapp(err, json.dumps(data))
+    _detect(err, data)
     assert not err.failed()
 
 
@@ -184,7 +198,7 @@ def test_webapp_no_default_locale():
     err = ErrorBundle()
     data = _get_json()
     del data["default_locale"]
-    validator.webapp.detect_webapp(err, json.dumps(data))
+    _detect(err, data)
     print err.print_summary(verbose=True)
     assert err.failed()
 
@@ -196,13 +210,13 @@ def test_webapp_invalid_locale_keys():
     data = _get_json()
     # Banned locale element.
     data["locales"]["es"]["default_locale"] = "foo"
-    validator.webapp.detect_webapp(err, json.dumps(data))
+    _detect(err, data)
     assert err.failed()
 
     err = ErrorBundle()
     data = _get_json()
     del data["locales"]["es"]["name"]
-    validator.webapp.detect_webapp(err, json.dumps(data))
+    _detect(err, data)
     assert not err.failed()
 
 
@@ -212,7 +226,7 @@ def test_webapp_installs_allowed_from_not_list():
     err = ErrorBundle()
     data = _get_json()
     data["installs_allowed_from"] = "foobar"
-    validator.webapp.detect_webapp(err, json.dumps(data))
+    _detect(err, data)
     assert err.failed()
 
 
@@ -222,7 +236,7 @@ def test_webapp_bad_installs_allowed_from_path():
     err = ErrorBundle()
     data = _get_json()
     data["installs_allowed_from"].append("foo/bar")
-    validator.webapp.detect_webapp(err, json.dumps(data))
+    _detect(err, data)
     assert err.failed()
 
 
@@ -232,7 +246,7 @@ def test_webapp_launch_path_not_string():
     err = ErrorBundle()
     data = _get_json()
     data["launch_path"] = [123]
-    validator.webapp.detect_webapp(err, json.dumps(data))
+    _detect(err, data)
     assert err.failed()
 
 
@@ -242,7 +256,7 @@ def test_webapp_bad_launch_path():
     err = ErrorBundle()
     data = _get_json()
     data["launch_path"] = "data:asdf"
-    validator.webapp.detect_webapp(err, json.dumps(data))
+    _detect(err, data)
     assert err.failed()
 
 
@@ -252,7 +266,7 @@ def test_webapp_widget_not_dict():
     err = ErrorBundle()
     data = _get_json()
     data["widget"] = "foo"
-    validator.webapp.detect_webapp(err, json.dumps(data))
+    _detect(err, data)
     assert err.failed()
 
 
@@ -262,7 +276,7 @@ def test_webapp_bad_widget_path():
     err = ErrorBundle()
     data = _get_json()
     data["widget"]["path"] = "data:asdf"
-    validator.webapp.detect_webapp(err, json.dumps(data))
+    _detect(err, data)
     assert err.failed()
 
 
@@ -272,7 +286,7 @@ def test_webapp_bad_widget_size():
     err = ErrorBundle()
     data = _get_json()
     data["widget"]["height"] = 100000
-    validator.webapp.detect_webapp(err, json.dumps(data))
+    _detect(err, data)
     assert err.failed()
 
 
@@ -282,7 +296,7 @@ def test_webapp_bad_widget_keys():
     err = ErrorBundle()
     data = _get_json()
     data["widget"]["extra"] = "foo"
-    validator.webapp.detect_webapp(err, json.dumps(data))
+    _detect(err, data)
     assert err.failed()
 
 
@@ -292,7 +306,7 @@ def test_webapp_bad_widget_missing():
     err = ErrorBundle()
     data = _get_json()
     del data["widget"]["path"]
-    validator.webapp.detect_webapp(err, json.dumps(data))
+    _detect(err, data)
     assert err.failed()
 
 
@@ -302,7 +316,7 @@ def test_webapp_dev_not_dict():
     err = ErrorBundle()
     data = _get_json()
     data["developer"]["developer"] = "foo"
-    validator.webapp.detect_webapp(err, json.dumps(data))
+    _detect(err, data)
     assert err.failed()
 
 
@@ -312,7 +326,7 @@ def test_webapp_bad_dev_keys():
     err = ErrorBundle()
     data = _get_json()
     del data["developer"]["name"]
-    validator.webapp.detect_webapp(err, json.dumps(data))
+    _detect(err, data)
     assert err.failed()
 
 
@@ -322,6 +336,6 @@ def test_webapp_bad_dev_url():
     err = ErrorBundle()
     data = _get_json()
     data["developer"]["url"] = "foo"
-    validator.webapp.detect_webapp(err, json.dumps(data))
+    _detect(err, data)
     assert err.failed()
 

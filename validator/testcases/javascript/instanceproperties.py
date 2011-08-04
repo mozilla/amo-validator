@@ -57,7 +57,6 @@ def set_innerHTML(new_value, traverser):
 
 def set_on_event(new_value, traverser):
     "This ensures that on* properties are not assigned string values."
-
     if (new_value.is_literal() and
         isinstance(new_value.get_literal_value(), types.StringTypes)):
         traverser.err.warning(
