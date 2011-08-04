@@ -66,6 +66,14 @@ INTERFACES = {
                 {"return": call_definitions.nsIJSON_deprec},
              u"decode":
                 {"return": call_definitions.nsIJSON_deprec}}},
+    u"nsIImapMailFolderSink":
+        {"value":
+            {u"setUrlState":
+                {"return": call_definitions.nsIImapMailFolderSink_changed}}},
+    u"nsIImapProtocol":
+        {"value":
+            {u"NotifyHdrsToDownload":
+                {"return": call_definitions.nsIImapProtocol_removed}}},
     u"nsIObserverService":
         {"value":
             {u"addObserver":
@@ -353,6 +361,14 @@ GLOBAL_ENTITIES = {
                                 {"xpcom_map":
                                      lambda:
                                         INTERFACES["nsIJSON"]},
+                             u"nsIImapMailFolderSink":
+                                {"xpcom_map":
+                                     lambda:
+                                        INTERFACES["nsIImapMailFolderSink"]},
+                             u"nsIImapProtocol":
+                                {"xpcom_map":
+                                     lambda:
+                                        INTERFACES["nsIImapProtocol"]},
                              u"nsIObserverService":
                                 {"xpcom_map":
                                      lambda:

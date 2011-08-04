@@ -35,7 +35,9 @@ def amp_rp_bug660359(wrapper, arguments, traverser):
         column=traverser.position,
         context=traverser.context,
         for_appversions={'{ec8030f7-c20a-464f-9b0e-13a3a9e97384}':
-                             version_range("firefox", "6.0a1", "7.0a1")},
+                             version_range("firefox", "6.0a1", "7.0a1"),
+                         '{3550f703-e582-4d05-9a08-453d09bdfdc6}':
+                             version_range("thunderbird", "6.0a1", "7.0a1"),},
         compatibility_type="error",
         tier=5)
 
@@ -235,7 +237,7 @@ def math_round(wrapper, arguments, traverser):
 def nsIDOMFile_deprec(wrapper, arguments, traverser):
     """Throw a compatibility error about removed XPCOM methods."""
     traverser.err.notice(
-        err_id=("testcases_javascript_calldefintiions", "nsIDOMFile",
+        err_id=("testcases_javascript_calldefinitions", "nsIDOMFile",
                 "deprec"),
         notice="Deprecated nsIDOMFile methods in use.",
         description=("Your add-on uses methods that have been removed from "
@@ -247,7 +249,9 @@ def nsIDOMFile_deprec(wrapper, arguments, traverser):
         context=traverser.context,
         compatibility_type="error",
         for_appversions={'{ec8030f7-c20a-464f-9b0e-13a3a9e97384}':
-                             version_range("firefox", "7.0a1", "8.0a1")},
+                             version_range("firefox", "7.0a1", "8.0a1"),
+                         '{3550f703-e582-4d05-9a08-453d09bdfdc6}':
+                             version_range("thunderbird", "7.0a1", "8.0a1"),},
         tier=5)
 
     return JSWrapper(JSObject(), traverser=traverser)
@@ -256,7 +260,7 @@ def nsIDOMFile_deprec(wrapper, arguments, traverser):
 def nsIJSON_deprec(wrapper, arguments, traverser):
     """Throw a compatibility error about removed XPCOM methods."""
     traverser.err.notice(
-        err_id=("testcases_javascript_calldefintiions", "nsIJSON",
+        err_id=("testcases_javascript_calldefinitions", "nsIJSON",
                 "deprec"),
         notice="Deprecated nsIJSON methods in use.",
         description=("The encode and decode methods in nsIJSON have been "
@@ -271,7 +275,51 @@ def nsIJSON_deprec(wrapper, arguments, traverser):
         context=traverser.context,
         compatibility_type="warning",
         for_appversions={'{ec8030f7-c20a-464f-9b0e-13a3a9e97384}':
-                             version_range("firefox", "7.0a1", "8.0a1")},
+                             version_range("firefox", "7.0a1", "8.0a1"),
+                         '{3550f703-e582-4d05-9a08-453d09bdfdc6}':
+                             version_range("thunderbird", "7.0a1", "8.0a1"),},
+        tier=5)
+
+    return JSWrapper(JSObject(), traverser=traverser)
+    
+def nsIImapMailFolderSink_changed(wrapper, arguments, traverser):
+    """Flag calls to nsIImapMailFolderSink for possible incompatibility with Thunderbird 6"""
+    traverser.err.notice(
+        err_id=("testcases_javascript_calldefinitions", "nsIImapMailFolderSink"),
+        notice="Modified nsIImapMailFolderSink method in use.",
+        description="This add-on appears to use nsIImapMailFolderSink.setUrlState, "
+                    "which may no longer work correctly due to  "
+                    "changes made in Thunderbird 6. For more information, "
+                    "please refer to "
+                    "https://bugzilla.mozilla.org/show_bug.cgi?id=464126",
+        filename=traverser.filename,
+        line=traverser.line,
+        column=traverser.position,
+        context=traverser.context,
+        compatibility_type="error",
+        for_appversions={'{3550f703-e582-4d05-9a08-453d09bdfdc6}':
+                             version_range("thunderbird", "6.0a1", "8.0a1")},
+        tier=5)
+
+    return JSWrapper(JSObject(), traverser=traverser)
+
+def nsIImapProtocol_removed(wrapper, arguments, traverser):
+    """Flag calls to nsIImapProtocol for incompatibility with Thunderbird 6"""
+    traverser.err.notice(
+        err_id=("testcases_javascript_calldefinitions", "nsIImapProtocol"),
+        notice="Removed nsIImapProtocol method in use.",
+        description="This add-on appears to use nsIImapProtocol.NotifyHdrsToDownload, "
+                    "which may no longer work correctly due to  "
+                    "changes made in Thunderbird 6. For more information, "
+                    "please refer to "
+                    "https://bugzilla.mozilla.org/show_bug.cgi?id=464126",
+        filename=traverser.filename,
+        line=traverser.line,
+        column=traverser.position,
+        context=traverser.context,
+        compatibility_type="error",
+        for_appversions={'{3550f703-e582-4d05-9a08-453d09bdfdc6}':
+                             version_range("thunderbird", "6.0a1", "8.0a1")},
         tier=5)
 
     return JSWrapper(JSObject(), traverser=traverser)
