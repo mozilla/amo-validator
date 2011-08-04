@@ -6,6 +6,7 @@ import tempfile
 
 from nose.tools import eq_
 
+import validator.constants
 from validator.errorbundler import ErrorBundle
 import validator.webapp
 
@@ -24,6 +25,8 @@ def test_test_path():
 
 def _detect(err, data):
     """Run the webapp tests on the file."""
+
+    err.detected_type = validator.constants.PACKAGE_WEBAPP
     with tempfile.NamedTemporaryFile(delete=False) as t:
         if isinstance(data, str):
             t.write(data)
@@ -31,6 +34,8 @@ def _detect(err, data):
             t.write(json.dumps(data))
         name = t.name
     validator.webapp.detect_webapp(err, name)
+    err.print_summary(verbose=True)
+    err.render_json()
     os.unlink(name)
 
 
