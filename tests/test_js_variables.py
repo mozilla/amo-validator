@@ -69,3 +69,17 @@ def test_lazy_object_member_assgt():
     eq_(_get_var(results, "a"), "asdf")
     eq_(_get_var(results, "b"), 123)
 
+
+def test_prototype_array_instantiation():
+    """
+    Test that JSPrototypes and JSArrays handle deep instantiation properly.
+    """
+
+    results = _do_test_raw("""
+    var x = {};
+    x.prototype.foo.bar = "asdf";
+    var y = [];
+    y.a.b.c.d = 123;
+    """)
+    # Don't care about the output, just testing for tracebacks.
+

@@ -360,7 +360,7 @@ class JSPrototype(JSObject):
     def __init__(self):
         self.data = {}
 
-    def get(self, name):
+    def get(self, name, instantiate=False, traverser=None):
         "Enables static analysis of `with` statements"
         name = unicode(name)
         output = None
@@ -369,6 +369,9 @@ class JSPrototype(JSObject):
         elif name == "prototype":
             prototype = JSPrototype()
             self.data[name] = prototype
+        elif instantiate:
+            output = JSWrapper(JSObject(), traverser=traverser)
+            self.data[name] = output
 
         return output
 
@@ -389,9 +392,11 @@ class JSArray(JSObject):
     def __init__(self):
         self.elements = []
 
-    def get(self, index):
+    def get(self, index, instantiate=False, traverser=None):
         if index == "length":
             return len(self.elements)
+
+        # TODO: Make this work how JS arrays actually work.
 
         # Courtesy of Ian Bicking: http://bit.ly/hxv6qt
         try:
