@@ -258,7 +258,12 @@ def populate_chrome_manifest(err, xpi_package):
 
         chrome_recursion_buster.discard("chrome.manifest")
 
+        # Create a reference so we can get the chrome manifest later, but make
+        # it pushable so we don't run chrome manifests in JAR files.
         err.save_resource("chrome.manifest", chrome, pushable=True)
+        # Create a non-pushable reference for tests that need to access the
+        # chrome manifest from within JAR files.
+        err.save_resource("chrome.manifest_nopush", chrome, pushable=False)
 
 
 def test_inner_package(err, xpi_package, for_appversions=None):
