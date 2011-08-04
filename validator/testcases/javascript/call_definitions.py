@@ -123,7 +123,7 @@ def number_global(wrapper, arguments, traverser):
     arg = traverser._traverse_node(arguments[0])
     try:
         value = float(arg.get_literal_value())
-    except ValueError:
+    except (ValueError, TypeError):
         return traverser._build_global(
                 name="NaN",
                 entity=predefinedentities.GLOBAL_ENTITIES[u"NaN"])
