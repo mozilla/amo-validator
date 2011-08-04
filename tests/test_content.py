@@ -170,20 +170,20 @@ def test_css():
 def test_hidden_files():
     """Tests that hidden files are reported."""
 
-    err = ErrorBundle()
-    err.supported_versions = {}
-    mock_package = MockXPI({".hidden": "tests/resources/content/junk.xpi"})
+    def test_structure(structure):
+        err = ErrorBundle()
+        err.supported_versions = {}
+        mock_package = MockXPI(structure)
+        content.test_packed_packages(err, mock_package)
+        print err.print_summary(verbose=True)
+        assert err.failed()
 
-    content.test_packed_packages(err, mock_package)
-    print err.print_summary(verbose=True)
-    assert err.failed()
-
-    err = ErrorBundle()
-    mock_package_mac = MockXPI({"dir/__MACOSX/foo":
-                                          "tests/resources/content/junk.xpi"})
-    content.test_packed_packages(err, mock_package_mac)
-    print err.print_summary(verbose=True)
-    assert err.failed()
+    for structure in ({".hidden": "tests/resources/content/junk.xpi"},
+                      {"dir/__MACOSX/foo": "tests/resources/content/junk.xpi"},
+                      {"dir/.foo.swp": "tests/resources/content/junk.xpi"},
+                      {"dir/file.old": "tests/resources/content/junk.xpi"},
+                      {"dir/file.xul~": "tests/resources/content/junk.xpi"}):
+        yield test_structure, structure
 
 
 def test_password_in_defaults_prefs():
