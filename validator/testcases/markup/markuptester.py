@@ -49,8 +49,9 @@ class MarkupParser(htmlparser.HTMLParser):
         self.xbl = False
 
         self.reported = set()
+        self.found_scripts = set()  # A set of script URLs in the doc.
 
-        # Added as a monkeypatch for Python issue 670664
+        # Added as a patch for various Python HTMLParser issues.
         self.cdata_tag = None
 
     def process(self, filename, data, extension="xul"):
@@ -169,14 +170,15 @@ class MarkupParser(htmlparser.HTMLParser):
 
         # A fictional tag for testing purposes.
         if tag == "xbannedxtestx":
-            self.err.error(("testcases_markup_markuptester",
-                            "handle_starttag",
-                            "banned_element"),
-                           "Banned element",
-                           "A banned element was detected",
-                           self.filename,
-                           line=self.line,
-                           context=self.context)
+            self.err.error(
+                err_id=("testcases_markup_markuptester",
+                        "handle_starttag",
+                        "banned_element"),
+                error="Banned markup element",
+                description="A banned markup element was found.",
+                filename=self.filename,
+                line=self.line,
+                context=self.context)
 
         # Test for banned XBL in themes.
         if self.err.detected_type == PACKAGE_THEME:
@@ -217,18 +219,19 @@ class MarkupParser(htmlparser.HTMLParser):
             if (tag in UNSAFE_TAGS or
                 (self.err.detected_type == PACKAGE_THEME and
                  tag in UNSAFE_THEME_TAGS)):
-                self.err.warning(("testcases_markup_markuptester",
-                                  "handle_starttag",
-                                  "unsafe_langpack_theme"),
-                                 "Unsafe tag for add-on type",
-                                 ["A tag in your markup has been marked as "
-                                  "being potentially unsafe. Consider "
-                                  "alternate means of accomplishing what the "
-                                  "code executed by this tag performs.",
-                                  'Tag "%s" is disallowed.' % tag],
-                                 self.filename,
-                                 line=self.line,
-                                 context=self.context)
+                self.err.warning(
+                    err_id=("testcases_markup_markuptester",
+                            "handle_starttag",
+                            "unsafe_langpack_theme"),
+                    warning="Unsafe tag for add-on type",
+                    description=["A tag in your markup has been marked as "
+                                 "being potentially unsafe. Consider "
+                                 "alternate means of accomplishing what the "
+                                 "code executed by this tag performs.",
+                                 'Tag "%s" is disallowed.' % tag],
+                    filename=self.filename,
+                    line=self.line,
+                    context=self.context)
                 if DEBUG:  # pragma: no cover
                     print "Unsafe Tag ------"
 
@@ -245,7 +248,6 @@ class MarkupParser(htmlparser.HTMLParser):
                                      self.filename,
                                      line=self.line,
                                      context=self.context)
-                    self.err.reject = True
 
         if tag in ("iframe", "browser") and self.extension == "xul":
             # Bork if XUL iframe has no type attribute
@@ -300,17 +302,23 @@ class MarkupParser(htmlparser.HTMLParser):
             for attr in attrs:
                 if attr[0].lower() == "src":
                     src = attr[1].lower()
+                    break
 
-            if src and not self._is_url_local(src):
-                self.err.warning(("testcases_markup_markuptester",
-                                  "handle_starttag",
-                                  "banned_remote_scripts"),
-                                 "Scripts must not be remote in XUL",
-                                 "In XUL, <script> tags must not be referenced "
-                                 "to script files that are hosted remotely.",
-                                 self.filename,
-                                 line=self.line,
-                                 context=self.context)
+            if src:
+                if not self._is_url_local(src):
+                    self.err.warning(
+                        err_id=("testcases_markup_markuptester",
+                                "handle_starttag",
+                                "banned_remote_scripts"),
+                        warning="Scripts must not be remote in XUL",
+                        description="In XUL, <script> tags must not be "
+                                    "referenced to script files that are "
+                                    "hosted remotely.",
+                        filename=self.filename,
+                        line=self.line,
+                        context=self.context)
+                else:
+                    self.found_scripts.add(src)
 
         # Find CSS and JS attributes and handle their values like they
         # would otherwise be handled by the standard parser flow.
