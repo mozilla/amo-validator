@@ -1,3 +1,5 @@
+from nose.tools import eq_
+
 from js_helper import _do_test_raw, _get_var
 
 def test_createElement():
@@ -107,4 +109,26 @@ def test_extraneous_globals():
     assert not err.failed()
     assert "foo" not in err.final_context.data
     assert "bar" not in err.final_context.data
+
+
+def test_number_global_conversions():
+    """Test that the Number global constructor functions properly."""
+    err = _do_test_raw("""
+    var a = Number(),
+        b = Number(123),
+        c = Number(123.123),
+        d = Number("123"),
+        e = Number("123.456"),
+        f = Number("foo"),
+        g = Number(null),
+        nan = window.NaN;
+    """)
+    assert not err.failed()
+    eq_(_get_var(err, "a"), 0)
+    eq_(_get_var(err, "b"), 123)
+    eq_(_get_var(err, "c"), 123.123)
+    eq_(_get_var(err, "d"), 123)
+    eq_(_get_var(err, "e"), 123.456)
+    eq_(_get_var(err, "f"), _get_var(err, "nan"))
+    eq_(_get_var(err, "g"), _get_var(err, "nan"))
 
