@@ -295,7 +295,8 @@ class ErrorBundle(object):
                  2: "theme",
                  3: "dictionary",
                  4: "langpack",
-                 5: "search"}
+                 5: "search",
+                 8: "webapp"}
         output = {"detected_type": types[self.detected_type],
                   "ending_tier": self.ending_tier,
                   "success": not self.failed(),
