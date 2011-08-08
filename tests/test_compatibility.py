@@ -269,4 +269,50 @@ def test_fx7_nsIJSON():
     assert not err.failed()
     assert len(err.notices) == 1
     assert err.compat_summary["warnings"]
+    
+
+def test_tb6_nsIImapMailFolderSink():
+    """Test that nsIImapMailFolderSink.setUrlState is flagged."""
+
+    err = _do_real_test_raw("""
+    var x = Components.classes["foo"].createInstance(
+        Components.interfaces.nsIImapMailFolderSink);
+    x.setUrlState();
+    """)
+    assert not err.failed()
+    assert not err.notices
+    assert not any(err.compat_summary.values())
+
+    err = _do_real_test_raw("""
+    var x = Components.classes["foo"].createInstance(
+        Components.interfaces.nsIImapMailFolderSink);
+    x.setUrlState();
+    """, versions={'{3550f703-e582-4d05-9a08-453d09bdfdc6}':
+                       version_range("thunderbird", "6.0a1")})
+    assert not err.failed()
+    assert len(err.notices) == 1
+    assert err.compat_summary["errors"]
+
+    
+def test_tb6_nsIImapProtocol():
+    """Test that nsIImapProtocol.NotifyHdrsToDownload is flagged."""
+
+    err = _do_real_test_raw("""
+    var x = Components.classes["foo"].createInstance(
+        Components.interfaces.nsIImapProtocol);
+    x.NotifyHdrsToDownload();
+    """)
+    assert not err.failed()
+    assert not err.notices
+    assert not any(err.compat_summary.values())
+
+    err = _do_real_test_raw("""
+    var x = Components.classes["foo"].createInstance(
+        Components.interfaces.nsIImapProtocol);
+    x.NotifyHdrsToDownload();
+    """, versions={'{3550f703-e582-4d05-9a08-453d09bdfdc6}':
+                       version_range("thunderbird", "6.0a1")})
+    assert not err.failed()
+    assert len(err.notices) == 1
+    assert err.compat_summary["errors"]
 
