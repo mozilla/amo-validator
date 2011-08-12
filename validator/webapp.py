@@ -58,6 +58,16 @@ def test_webapp(err, webapp, current_valid_keys, required=True):
                         "required element that has not been found or is "
                         "invalid.")
 
+    # If the add-on is listed, make sure we test for installs_allowed_from.
+    if (err.get_resource("listed") and required and
+        "installs_allowed_from" not in webapp):
+        err.error(
+            err_id=("webapp", "detect", "iaf_missing_listed"),
+            error="Webapp: Missing 'installs_allowed_from' property",
+            description="In order to submit a webapp to %s, "
+                        "'installs_allowed_from' must exist and must contain "
+                        "%s." % (WEBAPP_AMO_URL, WEBAPP_AMO_URL))
+
     for key in webapp:
         if key not in current_valid_keys:
             err.error(
@@ -148,13 +158,25 @@ def test_webapp(err, webapp, current_valid_keys, required=True):
                 continue
 
             for url in webapp[key]:
-                if not URL_REGEX_COMPILED.match(url):
+                if url != "*" and not URL_REGEX_COMPILED.match(url):
                     err.error(
                         err_id=("webapp", "detect", "bad_iaf_url"),
                         error="Webapp: 'installs_allowed_from'' URL invalid.",
                         description=["A URL from 'installs_allowed_from' is "
                                      "invalid.",
                                      "Bad URL: %s" % url])
+
+            if (WEBAPP_AMO_URL not in webapp[key] and
+                "*" not in webapp[key] and
+                err.get_resource("listed")):
+                err.error(
+                    err_id=("webapp", "detect", "iaf_no_amo"),
+                    error="Webapp: Webapps must list AMO for inclusion.",
+                    description="To be included on %s, a webapp needs to "
+                                "include %s as an element in the "
+                                "'installs_allowed_from' property." %
+                                    (WEBAPP_AMO_URL, WEBAPP_AMO_URL))
+
         elif key == "launch_path":
             if not isinstance(webapp[key], types.StringTypes):
                 err.error(
@@ -211,7 +233,7 @@ def test_webapp(err, webapp, current_valid_keys, required=True):
                                      "invalid.",
                                      "Invalid path: %s" % webapp[key]["path"]])
                 elif widget_key in ("height", "width", ):
-                    if not (10 < webapp[key][widget_key] < 1000):
+                    if not (10 <= int(webapp[key][widget_key]) <= 1000):
                         err.error(
                             err_id=("webapp", "detect", "widget_size"),
                             error="Webapp: Widget size invalid.",
