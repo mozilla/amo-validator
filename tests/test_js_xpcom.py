@@ -19,17 +19,17 @@ def test_xmlhttprequest():
     assert "open" in req["value"]
 
 
-def test_nsiaccessibilityretrieval():
-    """Flag any uses of nsIAccessibilityRetrieval."""
+def test_nsiaccessibleretrieval():
+    """Flag any uses of nsIAccessibleRetrieval."""
 
     assert not _do_test_raw("""
     var c = Components.classes[""].createInstance(
-        Components.interfaces.nsIAccessibilityRetrievalWhatever);
+        Components.interfaces.nsIAccessibleRetrievalWhatever);
     """).failed()
 
     assert _do_test_raw("""
     var c = Components.classes[""].createInstance(
-        Components.interfaces.nsIAccessibilityRetrieval);
+        Components.interfaces.nsIAccessibleRetrieval);
     """).failed()
 
 
