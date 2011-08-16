@@ -65,7 +65,7 @@ class XPIManager(object):
 
             out_files[file_.filename] = file_doc
 
-        self.contetns_cache = out_files
+        self.contents_cache = out_files
         return out_files
 
     def read(self, filename):
