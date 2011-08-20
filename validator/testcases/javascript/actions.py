@@ -435,9 +435,9 @@ def _new(traverser, node):
     if not isinstance(elem, JSWrapper):
         elem = JSWrapper(elem, traverser=traverser)
     if elem.is_global:
-        traverser._debug("Making Overwriteable")
+        traverser._debug("Making overwritable")
         elem.value = copy.deepcopy(elem.value)
-        elem.value["overwriteable"] = True
+        elem.value["overwritable"] = True
     return elem
 
 
@@ -495,8 +495,8 @@ def _expr_assignment(traverser, node):
             member_object = trace_member(traverser, node_left["object"],
                                          instantiate=True)
             global_overwrite = (member_object.is_global and
-                                not ("overwriteable" in member_object.value and
-                                     member_object.value["overwriteable"]))
+                                not ("overwritable" in member_object.value and
+                                     member_object.value["overwritable"]))
             member_property = _get_member_exp_property(traverser, node_left)
             traverser._debug("ASSIGNMENT:MEMBER_PROPERTY(%s)" % member_property)
             traverser._debug("ASSIGNMENT:GLOB_OV::%s" % global_overwrite)

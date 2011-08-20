@@ -1,4 +1,6 @@
+import copy
 import json
+import re
 import types
 
 import validator.testcases.javascript.actions as actions
@@ -9,6 +11,8 @@ from validator.testcases.javascript.predefinedentities import \
 
 DEBUG = False
 IGNORE_POLLUTION = False
+POLLUTION_COMPONENTS_PATH = re.compile(r"/?components/.*\.jsm?")
+POLLUTION_EXCEPTIONS = set(["Cc", "Ci", "Cu", ])
 
 
 class Traverser:
@@ -66,9 +70,18 @@ class Traverser:
             if DEBUG:
                 self.err.final_context = self.contexts[0]
 
-            if not IGNORE_POLLUTION:
+            if self.pollutable:
+                # Ignore anything in the components/ directory
+                if POLLUTION_COMPONENTS_PATH.match(self.filename):
+                    return
+
                 # This performs the namespace pollution test.
-                global_context_size = len(self.contexts[0].data)
+                final_globals = copy.deepcopy(self.contexts[0].data)
+                for global_name in self.contexts[0].data:
+                    if global_name in POLLUTION_EXCEPTIONS:
+                        del final_globals[global_name]
+
+                global_context_size = len(final_globals)
                 self._debug("Final context size: %d" % global_context_size)
 
                 if (global_context_size > 3 and not self.is_jsm and

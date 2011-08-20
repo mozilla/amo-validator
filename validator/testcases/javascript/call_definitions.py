@@ -65,7 +65,7 @@ def xpcom_constructor(method, extend=False, mutate=False, pretraversed=False):
 
         inst = traverser._build_global(method,
                                        copy.deepcopy(argz.value["xpcom_map"]()))
-        inst.value["overwriteable"] = True
+        inst.value["overwritable"] = True
 
         if extend or mutate:
             # FIXME: There should be a way to get this without

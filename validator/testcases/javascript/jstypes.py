@@ -148,8 +148,8 @@ class JSWrapper(object):
             (not traverser or
              not traverser.is_jsm) and
             (isinstance(self.value, dict) and
-             ("overwriteable" not in self.value or
-              self.value["overwriteable"] == False))):
+             ("overwritable" not in self.value or
+              self.value["overwritable"] == False))):
             # TODO : Write in support for "readonly":False
             traverser.err.warning(("testcases_javascript_jstypes",
                                    "JSWrapper_set_value",
