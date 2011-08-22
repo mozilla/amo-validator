@@ -1,0 +1,6 @@
+<xul>
+    <script type="text/javascript" />
+    <script type="text/javascript" src="foo.js" />
+    <script type="text/javascript" src="/bar.js" />
+    <script type="text/javascript" src="chrome://asdf/foo.js" />
+</xul>

@@ -66,17 +66,28 @@ def test_fail_resourcemodules():
     assert err.failed()
 
 
-def test_banned_content_namespaces():
+def test_content_instructions():
     """Test that banned content namespaces are banned."""
 
     err = ErrorBundle()
     c = ChromeManifest("content foo bar", "chrome.manifest")
     err.save_resource("chrome.manifest", c)
-    tc_chromemanifest.test_banned_content_namespaces(err)
+    tc_chromemanifest.test_content_instructions(err)
     assert not err.failed()
 
     c = ChromeManifest("content godlikea bar", "chrome.manifest")
     err.save_resource("chrome.manifest", c)
-    tc_chromemanifest.test_banned_content_namespaces(err)
+    tc_chromemanifest.test_content_instructions(err)
     assert err.failed()
+
+
+def test_content_instructions_trailing_slash():
+    """Test that trailing slashes are necessary for content instructions."""
+
+    err = ErrorBundle()
+    c = ChromeManifest("content namespace /uri/goes/here", "chrome.manifest")
+    err.save_resource("chrome.manifest", c)
+    tc_chromemanifest.test_content_instructions(err)
+    assert not err.failed()
+    assert err.notices
 

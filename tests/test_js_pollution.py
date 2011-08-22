@@ -31,6 +31,32 @@ def test_pollution_jsm():
     """, path="foo.jsm", ignore_pollution=False).failed()
 
 
+def test_pollution_components():
+    """
+    Test that the components/ directory is ignored for pollution.
+    """
+
+    assert not _do_test_raw("""
+    a = "foo";
+    b = "foo";
+    c = "foo";
+    d = "foo";
+    """, path="components/foo.jsm", ignore_pollution=False).failed()
+
+
+def test_pollution_exceptions():
+    """
+    Make sure that JSM files don't have to worry about namespace pollution.
+    """
+
+    assert not _do_test_raw("""
+    Cc = "foo";
+    Ci = "foo";
+    Cu = "foo";
+    d = "foo";
+    """, path="foo.js", ignore_pollution=False).failed()
+
+
 def test_pollution_jetpack_bootstrap():
     """
     Test that Jetpack addons and bootstrapped addons are not flagged for

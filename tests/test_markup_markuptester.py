@@ -298,3 +298,24 @@ def test_proper_line_numbers():
     eq_(warning["file"], "foo.xul")
     eq_(warning["line"], 3);
 
+
+def test_script_scraping():
+    """Test that the scripts in a document are collected properly."""
+
+    err = ErrorBundle()
+    err.supported_versions = {}
+    parser = markuptester.MarkupParser(err, debug=True)
+    parser.process("foo.xul", """
+    <doc>
+    <!-- One to be ignored -->
+    <script type="text/javascript"></script>
+    <script src="/relative.js"></script>
+    <script src="chrome://namespace/absolute.js"></script>
+    <script src="very_relative.js"></script>
+    </doc>
+    """, "xul")
+
+    eq_(parser.found_scripts,
+        set(["/relative.js", "chrome://namespace/absolute.js",
+             "very_relative.js"]))
+
