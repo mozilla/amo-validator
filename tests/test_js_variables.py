@@ -83,3 +83,12 @@ def test_prototype_array_instantiation():
     """)
     # Don't care about the output, just testing for tracebacks.
 
+
+def test_this_tracebacks():
+    """Test to make sure `this` doesn't generate tracebacks."""
+
+    results = _do_test_raw("""
+    var x = this;
+    """);
+    # The output is irrelevant for now.
+

@@ -423,7 +423,7 @@ def _get_this(traverser, node):
     "Returns the `this` object"
     if not traverser.this_stack:
         from predefinedentities import GLOBAL_ENTITIES
-        return traverser._build_global(GLOBAL_ENTITIES[u"window"])
+        return traverser._build_global("window", GLOBAL_ENTITIES[u"window"])
     return traverser.this_stack[-1]
 
 
