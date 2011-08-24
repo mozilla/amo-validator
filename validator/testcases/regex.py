@@ -66,6 +66,8 @@ FX7_INTERFACES = {"nsIDOMDocumentStyle": 658904,
                   "nsIDOMNSDocument": 658906,
                   "nsIDOM3TypeInfo": 660539,
                   "nsIDOM3Node": 659053}
+FX8_INTERFACES = {"nsISelection2": 672536,
+                  "nsISelection3": 672536}
 
 FX4_DEFINITION = {"{ec8030f7-c20a-464f-9b0e-13a3a9e97384}":
                       version_range("firefox", "3.7a1pre", "5.0a2")}
@@ -75,6 +77,8 @@ FX6_DEFINITION = {"{ec8030f7-c20a-464f-9b0e-13a3a9e97384}":
                       version_range("firefox", "6.0a1", "7.0a1")}
 FX7_DEFINITION = {"{ec8030f7-c20a-464f-9b0e-13a3a9e97384}":
                       version_range("firefox", "7.0a1", "8.0a1")}
+FX8_DEFINITION = {"{ec8030f7-c20a-464f-9b0e-13a3a9e97384}":
+                      version_range("firefox", "8.0a1", "9.0a1")}
 
 
 def run_regex_tests(document, err, filename, context=None, is_js=False):
@@ -229,4 +233,42 @@ def run_regex_tests(document, err, filename, context=None, is_js=False):
                      (BUGZILLA_BUG % 617539),
                 compatibility_type="warning",
                 appversions=FX7_DEFINITION)
+
+    # Firefox 8 Compatibility
+    if err.supports_version(FX8_DEFINITION):
+        for pattern, bug in FX8_INTERFACES.items():
+            _compat_test(
+                    re.compile(pattern),
+                    "Removed, deprecated, or unsupported interface in use.",
+                    ("The nsISelection2 and nsISelection3 interfaces have "
+                     "been removed in Firefox 8. You can use the nsISelection "
+                     "interface instead. See %s for more details.") %
+                        (BUGZILLA_BUG % bug),
+                    compatibility_type="error",
+                    appversions=FX8_DEFINITION)
+
+        # nsIDOMWindowInternal
+        NSIDWI_MDN = ("https://developer.mozilla.org/en/"
+                          "XPCOM_Interface_Reference/nsIDOMWindow")
+        _compat_test(
+                re.compile(r"nsIDOMWindowInternal"),
+                "nsIDOMWindowInternal has been deprecated in Firefox 8.",
+                ("The nsIDOMWindowInternal interface has been deprecated in "
+                 "Firefox 8. You can use the nsIDOMWindow interface instead. "
+                 "See %s for more information.") % NSIDWI_MDN,
+                compatibility_type="warning",
+                appversions=FX8_DEFINITION)
+
+        # ISO8601DateUtils
+        # TODO(basta): Make this a string test instead once they're invented.
+        ISO8601_MDC = ("https://developer.mozilla.org/en/JavaScript/Reference/"
+                           "Global_Objects/Date")
+        _compat_test(
+                re.compile(r"ISO8601DateUtils"),
+                "ISO8601DateUtils.jsm was removed in Firefox 8.",
+                ("The ISO8601DateUtils object is no longer available in "
+                 "Firefox 8. You can use the normal Date object instead. See "
+                 "%s for more information.") % ISO8601_MDC,
+                compatibility_type="error",
+                appversions=FX8_DEFINITION)
 

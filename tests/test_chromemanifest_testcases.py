@@ -91,3 +91,11 @@ def test_content_instructions_trailing_slash():
     assert not err.failed()
     assert err.notices
 
+    err = ErrorBundle()
+    c = ChromeManifest("content namespace /uri/goes/here/ flag=true",
+                       "chrome.manifest")
+    err.save_resource("chrome.manifest", c)
+    tc_chromemanifest.test_content_instructions(err)
+    assert not err.failed()
+    assert not err.notices
+

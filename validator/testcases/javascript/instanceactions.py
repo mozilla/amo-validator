@@ -9,13 +9,14 @@ traverser
 node
     the current node being evaluated
 """
+
 import types
 
 import actions
 from jstypes import *
 
 
-def createElement(args, traverser, node):
+def createElement(args, traverser, node, wrapper):
     """Handles createElement calls"""
 
     if not args:
@@ -30,7 +31,7 @@ def createElement(args, traverser, node):
         _create_variable_element(traverser)
 
 
-def createElementNS(args, traverser, node):
+def createElementNS(args, traverser, node, wrapper):
     """Handles createElementNS calls"""
 
     if not args or len(args) < 2:
@@ -45,7 +46,7 @@ def createElementNS(args, traverser, node):
         _create_variable_element(traverser)
 
 
-def QueryInterface(args, traverser, node):
+def QueryInterface(args, traverser, node, wrapper):
     """Handles QueryInterface calls"""
 
     if not args:
@@ -57,7 +58,7 @@ def QueryInterface(args, traverser, node):
                 arguments=args,
                 traverser=traverser)
 
-def getInterface(args, traverser, node):
+def getInterface(args, traverser, node, wrapper):
     """Handles getInterface calls"""
 
     # This really only needs to be handled for nsIInterfaceRequestor
@@ -109,7 +110,7 @@ def _create_variable_element(traverser):
         context=traverser.context)
 
 
-def setAttribute(args, traverser, node):
+def setAttribute(args, traverser, node, wrapper):
     """This ensures that setAttribute calls don't set on* attributes"""
 
     if not args:
@@ -132,7 +133,7 @@ def setAttribute(args, traverser, node):
             context=traverser.context)
 
 
-def nsIDOMFile_deprec(args, traverser, node):
+def nsIDOMFile_deprec(args, traverser, node, wrapper):
     """A wrapper for call_definitions.nsIDOMFile_deprec."""
     from call_definitions import nsIDOMFile_deprec as cd_nsIDOMFile_deprec
     cd_nsIDOMFile_deprec(None, [], traverser)
