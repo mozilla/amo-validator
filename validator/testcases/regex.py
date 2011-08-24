@@ -247,3 +247,15 @@ def run_regex_tests(document, err, filename, context=None, is_js=False):
                     compatibility_type="error",
                     appversions=FX8_DEFINITION)
 
+        # nsIDOMWindowInternal
+        NSIDWI_MDN = ("https://developer.mozilla.org/en/"
+                          "XPCOM_Interface_Reference/nsIDOMWindow")
+        _compat_test(
+                re.compile(r"nsIDOMWindowInternal"),
+                "nsIDOMWindowInternal has been deprecated in Firefox 8.",
+                ("The nsIDOMWindowInternal interface has been deprecated in "
+                 "Firefox 8. You can use the nsIDOMWindow interface instead. "
+                 "See %s for more information.") % NSIDWI_MDN,
+                compatibility_type="warning",
+                appversions=FX8_DEFINITION)
+
