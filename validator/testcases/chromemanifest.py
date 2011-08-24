@@ -85,7 +85,7 @@ def test_content_instructions(err):
                 filename=triple["filename"],
                 line=triple["line"],
                 context=chrome.context)
-        elif not triple["object"].endswith("/"):
+        elif not triple["object"].split()[0].endswith("/"):
             err.notice(
                 err_id=("testcases_chromemanifest",
                         "test_content_instructions", "trailing"),

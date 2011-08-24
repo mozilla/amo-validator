@@ -16,15 +16,10 @@ BANNED_IDENTIFIERS = {
                          "instead wherever possible",
 }
 
-# For "dangerous" elements, specifying True will throw an error on all
-# detected instances of the particular object. Specifying a lambda function
-# will allow the object to be referenced. If the object is called via a
-# CallExpression, "a" will contain the raw arguments values and "t" will
-# contain a reference to traverser._traverse_node(). "t" will always return a
-# JSWrapper object. The optional third argument "e" will be an ErrorBundle
-# object. The return value of the lambda function will be used as the value for
-# the "dangerous" property. Lastly, specifying a string functions identically to
-# "True", except the string will be outputted when the error is thrown.
+# See https://github.com/mattbasta/amo-validator/wiki/JS-Predefined-Entities
+# for details on entity properties.
+
+CONTENT_DOCUMENT = None
 
 INTERFACES = {
     u"nsICategoryManager":
@@ -179,29 +174,32 @@ GLOBAL_ENTITIES = {
                                                         t)}}},
 
     u"document":
-        {"value": {u"title":
-                       {"overwritable": True,
-                        "readonly": False},
-                   u"createElement":
-                       {"dangerous":
-                            lambda a, t, e:
-                                not a or
-                                _get_as_str(t(a[0]).get_literal_value())
-                                                .lower() == "script"},
-                   u"createElementNS":
-                       {"dangerous":
-                            lambda a, t, e:
-                                not a or
-                                _get_as_str(t(a[0]).get_literal_value())
-                                                .lower() == "script"},
-                   u"loadOverlay":
-                       {"dangerous":
-                            lambda a, t, e:
-                                not a or
-                                not _get_as_str(t(a[0]).get_literal_value())
-                                        .lower()
-                                        .startswith(("chrome:",
-                                                     "resource:"))}}},
+        {"value":
+             {u"title":
+                  {"overwriteable": True,
+                   "readonly": False},
+              u"defaultView":
+                  {"value": lambda t: {"value": GLOBAL_ENTITIES}},
+              u"createElement":
+                  {"dangerous":
+                       lambda a, t, e:
+                           not a or
+                           unicode(t(a[0]).get_literal_value()).lower() ==
+                               "script"},
+              u"createElementNS":
+                  {"dangerous":
+                       lambda a, t, e:
+                           not a or
+                           unicode(t(a[0]).get_literal_value()).lower() ==
+                               "script"},
+              u"getSelection":
+                  {"return": call_definitions.document_getSelection},
+              u"loadOverlay":
+                  {"dangerous":
+                       lambda a, t, e:
+                           not a or
+                           not unicode(t(a[0]).get_literal_value()).lower()
+                               .startswith(("chrome:", "resource:"))}}},
 
     # The nefariuos timeout brothers!
     u"setTimeout": {"dangerous": actions._call_settimeout},
@@ -412,16 +410,16 @@ GLOBAL_ENTITIES = {
 
     u"XMLHttpRequest":
         {"value":
-             {u"open": {"dangerous":
-                           # Ban syncrhonous XHR by making sure the third arg
-                           # is not absent and falsey.
-                           lambda a, t, e:
-                               a and len(a) >= 3 and
-                               not t(a[2]).get_literal_value() and
-                               "Synchronous HTTP requests can cause "
-                               "serious UI performance problems, "
-                               "especially to users with slow network "
-                               "connections."}}},
+             {u"open":
+                  {"dangerous":
+                       # Ban syncrhonous XHR by making sure the third arg
+                       # is absent and false.
+                       lambda a, t, e:
+                           a and len(a) >= 3 and
+                           not t(a[2]).get_literal_value() and
+                           "Synchronous HTTP requests can cause serious UI "
+                           "performance problems, especially to users with "
+                           "slow network connections."}}},
 
     # Global properties are inherently read-only, though this formalizes it.
     u"Infinity":
@@ -437,5 +435,29 @@ GLOBAL_ENTITIES = {
     u"width": {"readonly": False},
     u"height": {"readonly": False},
     u"top": {"readonly": actions._readonly_top},
+
+    u"content":
+        {"context": "content",
+         "value":
+             {u"document":
+                  {"value": lambda t: GLOBAL_ENTITIES[u"document"]}}},
+    u"contentWindow":
+        {"context": "content",
+         "value":
+             lambda t: {"value": GLOBAL_ENTITIES}},
+    u"_content": {"value": lambda t: GLOBAL_ENTITIES[u"content"]},
+    u"gBrowser":
+        {"value":
+             {u"contentDocument":
+                  {"context": "content",
+                   "value": lambda t: CONTENT_DOCUMENT},
+              u"contentWindow":
+                  {"value":
+                       lambda t: {"value": GLOBAL_ENTITIES}}}},
+    u"opener":
+        {"value":
+             lambda t: {"value": GLOBAL_ENTITIES}}
 }
+
+CONTENT_DOCUMENT = GLOBAL_ENTITIES[u"content"]["value"][u"document"]
 

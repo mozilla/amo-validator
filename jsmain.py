@@ -7,6 +7,7 @@ from validator.errorbundler import ErrorBundle
 from validator.outputhandlers.shellcolors import OutputHandler
 import validator.testcases.scripting as scripting
 import validator.testcases.javascript.traverser
+from validator.testcases.javascript.predefinedentities import GLOBAL_ENTITIES
 import validator.testcases.javascript.spidermonkey as spidermonkey
 validator.testcases.javascript.traverser.DEBUG = True
 
@@ -23,6 +24,31 @@ if __name__ == '__main__':
     else:
         trav = validator.testcases.javascript.traverser.Traverser(err, "stdin")
         trav._push_context()
+
+        def do_inspect(wrapper, arguments, traverser):
+            print "~" * 50
+            for arg in arguments:
+                if arg["type"] == "Identifier":
+                    print 'Identifier: "%s"' % arg["name"]
+                else:
+                    print arg["type"]
+
+                a = traverser._traverse_node(arg)
+                print a.output()
+
+                if a.is_global:
+                    print a.value
+                print "Context: %s" % a.context
+                print "<"
+            print "~" * 50
+
+        def do_exit(wrapper, arguments, traverser):
+            print "Goodbye!"
+            sys.exit()
+
+        GLOBAL_ENTITIES[u"inspect"] = {"return": do_inspect}
+        GLOBAL_ENTITIES[u"exit"] = {"return": do_exit}
+
         while True:
             line = sys.stdin.readline()
 

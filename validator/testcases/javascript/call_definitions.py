@@ -281,7 +281,7 @@ def nsIJSON_deprec(wrapper, arguments, traverser):
         tier=5)
 
     return JSWrapper(JSObject(), traverser=traverser)
-    
+
 def nsIImapMailFolderSink_changed(wrapper, arguments, traverser):
     """Flag calls to nsIImapMailFolderSink for possible incompatibility with Thunderbird 6"""
     traverser.err.notice(
@@ -322,5 +322,30 @@ def nsIImapProtocol_removed(wrapper, arguments, traverser):
                              version_range("thunderbird", "6.0a1", "8.0a1")},
         tier=5)
 
+    return JSWrapper(JSObject(), traverser=traverser)
+
+
+def document_getSelection(wrapper, arguments, traverser):
+    """Flag Firefox 8 calls to document.getSelection()."""
+
+    MDN_ARTICLE = "https://developer.mozilla.org/En/Window.getSelection"
+
+    traverser.err.notice(
+        err_id=("testcases_javascript_calldefinitions", "document_getSel"),
+        notice="document.getSelection()'s return type has changed.",
+        description="The return type of document.getSelection() has changed "
+                    "in Firefox 8. This function is deprecated, and you "
+                    "should be using window.getSelection() instead. See "
+                    "%s for more information." % MDN_ARTICLE,
+        filename=traverser.filename,
+        line=traverser.line,
+        column=traverser.position,
+        context=traverser.context,
+        compatibility_type="error",
+        for_appversions={'{ec8030f7-c20a-464f-9b0e-13a3a9e97384}':
+                             version_range("firefox", "8.0a1", "9.0a1")},
+        tier=5)
+
+    # The new spec returns an object.
     return JSWrapper(JSObject(), traverser=traverser)
 

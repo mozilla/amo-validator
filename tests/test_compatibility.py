@@ -269,7 +269,53 @@ def test_fx7_nsIJSON():
     assert not err.failed()
     assert len(err.notices) == 1
     assert err.compat_summary["warnings"]
-    
+
+
+def test_fx8_compat():
+    """Test that FX8 compatibility tests are run."""
+
+    err = _do_real_test_raw("""
+    var x = "nsISelection2";
+    """)
+    assert not err.failed()
+    assert not err.notices
+
+    err = _do_real_test_raw("""
+    var x = "nsISelection2";
+    """, versions={'{ec8030f7-c20a-464f-9b0e-13a3a9e97384}':
+                       version_range("firefox", "8.0a1")})
+    assert not err.failed()
+    assert err.notices
+    assert err.compat_summary["errors"]
+
+    err = _do_real_test_raw("""
+    var x = "nsIDOMWindowInternal";
+    """)
+    assert not err.failed()
+    assert not err.notices
+
+    err = _do_real_test_raw("""
+    var x = "nsIDOMWindowInternal";
+    """, versions={'{ec8030f7-c20a-464f-9b0e-13a3a9e97384}':
+                       version_range("firefox", "8.0a1")})
+    assert not err.failed()
+    assert err.notices
+    assert err.compat_summary["warnings"]
+
+    err = _do_real_test_raw("""
+    var x = "ISO8601DateUtils";
+    """)
+    assert not err.failed()
+    assert not err.notices
+
+    err = _do_real_test_raw("""
+    var x = "ISO8601DateUtils";
+    """, versions={'{ec8030f7-c20a-464f-9b0e-13a3a9e97384}':
+                       version_range("firefox", "8.0a1")})
+    assert not err.failed()
+    assert err.notices
+    assert err.compat_summary["errors"]
+
 
 def test_tb6_nsIImapMailFolderSink():
     """Test that nsIImapMailFolderSink.setUrlState is flagged."""
@@ -293,7 +339,7 @@ def test_tb6_nsIImapMailFolderSink():
     assert len(err.notices) == 1
     assert err.compat_summary["errors"]
 
-    
+
 def test_tb6_nsIImapProtocol():
     """Test that nsIImapProtocol.NotifyHdrsToDownload is flagged."""
 
@@ -312,6 +358,25 @@ def test_tb6_nsIImapProtocol():
     x.NotifyHdrsToDownload();
     """, versions={'{3550f703-e582-4d05-9a08-453d09bdfdc6}':
                        version_range("thunderbird", "6.0a1")})
+    assert not err.failed()
+    assert len(err.notices) == 1
+    assert err.compat_summary["errors"]
+
+
+def test_flag_getSelection():
+    """Test that document.getSelection is flagged in FX8."""
+
+    err = _do_real_test_raw("""
+    var x = document.getSelection();
+    """)
+    assert not err.failed()
+    assert not err.notices
+    assert not any(err.compat_summary.values())
+
+    err = _do_real_test_raw("""
+    var x = document.getSelection();
+    """, versions={'{ec8030f7-c20a-464f-9b0e-13a3a9e97384}':
+                       version_range("firefox", "8.0a1", "9.0a1")})
     assert not err.failed()
     assert len(err.notices) == 1
     assert err.compat_summary["errors"]

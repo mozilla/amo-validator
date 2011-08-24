@@ -28,11 +28,21 @@ def _expand_globals(traverser, node):
 
         result = node.value["value"](t=traverser)
         if isinstance(result, dict):
-            return traverser._build_global("--", result)
+            output = traverser._build_global("--", result)
         elif isinstance(result, JSWrapper):
-            return result
+            output = result
         else:
-            return JSWrapper(result, traverser)
+            output = JSWrapper(result, traverser)
+
+        # Set the node context.
+        if "context" in node.value:
+            traverser._debug("CONTEXT>>%s" % node.value["context"])
+            output.context = node.value["context"]
+        else:
+            traverser._debug("CONTEXT>>INHERITED")
+            output.context = node.context
+
+        return output
 
     return node
 
@@ -47,20 +57,25 @@ def trace_member(traverser, node, instantiate=False):
         base = trace_member(traverser, node["object"], instantiate)
         base = _expand_globals(traverser, base)
 
-        # If we've got an XPCOM wildcard, just return the base, minus the WC
-        if base.is_global and "xpcom_wildcard" in base.value:
-            traverser._debug("MEMBER_EXP>>XPCOM_WILDCARD")
-            base.value = base.value.copy()
-            del base.value["xpcom_wildcard"]
-            return base
+        # Handle the various global entity properties.
+        if base.is_global:
+            # If we've got an XPCOM wildcard, return a copy of the entity.
+            if "xpcom_wildcard" in base.value:
+                traverser._debug("MEMBER_EXP>>XPCOM_WILDCARD")
+                base.value = base.value.copy()
+                del base.value["xpcom_wildcard"]
+                return base
 
         identifier = _get_member_exp_property(traverser, node)
         test_identifier(traverser, identifier)
 
         traverser._debug("MEMBER_EXP>>PROPERTY: %s" % identifier)
-        return base.get(traverser=traverser,
-                        instantiate=instantiate,
-                        name=identifier)
+        output = base.get(traverser=traverser,
+                          instantiate=instantiate,
+                          name=identifier)
+        output.context = base.context
+        return output
+
     elif node["type"] == "Identifier":
         traverser._debug("MEMBER_EXP>>ROOT:IDENTIFIER")
         test_identifier(traverser, node["name"])
@@ -318,9 +333,7 @@ def _define_literal(traverser, node):
 
 def _call_expression(traverser, node):
     args = node["arguments"]
-
-    for arg in args:
-        traverser._traverse_node(arg)
+    map(traverser._traverse_node, args)
 
     member = traverser._traverse_node(node["callee"])
     if (member.is_global and
@@ -357,15 +370,12 @@ def _call_expression(traverser, node):
         identifier_name = node["callee"]["property"]["name"]
         if identifier_name in instanceactions.INSTANCE_DEFINITIONS:
             result = instanceactions.INSTANCE_DEFINITIONS[identifier_name](
-                        args, traverser, node)
+                        args, traverser, node, wrapper=member)
             return result
 
-
     if member.is_global and "return" in member.value:
-        return member.value["return"](wrapper=member,
-                                      arguments=args,
+        return member.value["return"](wrapper=member, arguments=args,
                                       traverser=traverser)
-
     return True
 
 
@@ -411,10 +421,9 @@ def _expression(traverser, node):
 
 def _get_this(traverser, node):
     "Returns the `this` object"
-
     if not traverser.this_stack:
-        return JSWrapper(traverser=traverser)
-
+        from predefinedentities import GLOBAL_ENTITIES
+        return traverser._build_global(GLOBAL_ENTITIES[u"window"])
     return traverser.this_stack[-1]
 
 

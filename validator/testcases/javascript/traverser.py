@@ -285,28 +285,19 @@ class Traverser:
             if depth == -1:
                 return JSWrapper(traverser=self)
 
-    def _is_global(self, name, globs=None):
+    def _is_global(self, name):
         "Returns whether a name is a global entity"
+        return name in GLOBAL_ENTITIES
 
-        if globs is None:
-            globs = GLOBAL_ENTITIES
-
-        return name in globs
-
-    def _get_global(self, name, globs=None):
+    def _get_global(self, name):
         "Gets a variable from the predefined variable context."
-
-        # Allow overriding of the global entities
-        if globs is None:
-            globs = GLOBAL_ENTITIES
-
         self._debug("SEEK_GLOBAL>>%s" % name)
-        if not self._is_global(name, globs):
+        if not self._is_global(name):
             self._debug("SEEK_GLOBAL>>FAILED")
             return JSWrapper(traverser=self)
 
         self._debug("SEEK_GLOBAL>>FOUND>>%s" % name)
-        return self._build_global(name, globs[name])
+        return self._build_global(name, GLOBAL_ENTITIES[name])
 
     def _build_global(self, name, entity):
         "Builds an object based on an entity from the predefined entity list"
@@ -333,6 +324,9 @@ class Traverser:
         result = JSWrapper(is_global=True, traverser=self, lazy=True)
         result.value = entity
         result = actions._expand_globals(self, result)
+
+        if "context" in entity:
+            result.context = entity["context"]
 
         self._debug("BUILT_GLOBAL")
 
