@@ -302,6 +302,20 @@ def test_fx8_compat():
     assert err.notices
     assert err.compat_summary["warnings"]
 
+    err = _do_real_test_raw("""
+    var x = "ISO8601DateUtils";
+    """)
+    assert not err.failed()
+    assert not err.notices
+
+    err = _do_real_test_raw("""
+    var x = "ISO8601DateUtils";
+    """, versions={'{ec8030f7-c20a-464f-9b0e-13a3a9e97384}':
+                       version_range("firefox", "8.0a1")})
+    assert not err.failed()
+    assert err.notices
+    assert err.compat_summary["errors"]
+
 
 def test_tb6_nsIImapMailFolderSink():
     """Test that nsIImapMailFolderSink.setUrlState is flagged."""

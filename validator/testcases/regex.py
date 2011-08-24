@@ -259,3 +259,16 @@ def run_regex_tests(document, err, filename, context=None, is_js=False):
                 compatibility_type="warning",
                 appversions=FX8_DEFINITION)
 
+        # ISO8601DateUtils
+        # TODO(basta): Make this a string test instead once they're invented.
+        ISO8601_MDC = ("https://developer.mozilla.org/en/JavaScript/Reference/"
+                           "Global_Objects/Date")
+        _compat_test(
+                re.compile(r"ISO8601DateUtils"),
+                "ISO8601DateUtils.jsm was removed in Firefox 8.",
+                ("The ISO8601DateUtils object is no longer available in "
+                 "Firefox 8. You can use the normal Date object instead. See "
+                 "%s for more information.") % ISO8601_MDC,
+                compatibility_type="error",
+                appversions=FX8_DEFINITION)
+
