@@ -106,15 +106,12 @@ def test_populate_chrome_manifest():
 
     submain.populate_chrome_manifest(err, package)
     assert err.pushable_resources
-    assert "chrome.manifest" in err.pushable_resources
+    assert err.pushable_resources["chrome.manifest"]
     print err.pushable_resources
     assert isinstance(err.pushable_resources["chrome.manifest"],
                       ChromeManifest)
 
-    assert err.resources
-    assert "chrome.manifest_nopush" in err.resources
-    print err.resources
-    assert isinstance(err.resources["chrome.manifest_nopush"], ChromeManifest)
+    assert not err.resources
 
 
 def test_proper_linked_manifest():

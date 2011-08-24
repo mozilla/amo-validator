@@ -28,9 +28,11 @@ def _do_test_raw(script, path="foo.js", bootstrap=False, ignore_pollution=True,
         err.save_resource("em:bootstrap", True)
     if detected_type:
         err.detected_type = detected_type
+    if ignore_pollution:
+        validator.testcases.scripting.traverser.IGNORE_POLLUTION = True
 
-    validator.testcases.content._process_file(
-            err, MockXPI(), path, script, path.lower(), not ignore_pollution)
+    validator.testcases.content._process_file(err, MockXPI(), path, script)
+    validator.testcases.scripting.traverser.IGNORE_POLLUTION = False
     if err.final_context is not None:
         print err.final_context.output()
 
@@ -50,8 +52,7 @@ def _do_real_test_raw(script, path="foo.js", versions=None, detected_type=None,
     if resources is not None:
         err.resources = resources
 
-    validator.testcases.content._process_file(err, MockXPI(), path, script,
-                                              path.lower())
+    validator.testcases.content._process_file(err, MockXPI(), path, script)
     return err
 
 

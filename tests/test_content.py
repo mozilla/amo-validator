@@ -1,5 +1,3 @@
-from nose.tools import eq_
-
 from helper import MockXPI
 from js_helper import _do_test_raw
 
@@ -137,7 +135,6 @@ def test_markup():
     err.supported_versions = {}
     mock_package = MockXPI({"foo.xml": "tests/resources/content/junk.xpi"})
 
-    tem = content.testendpoint_markup
     content.testendpoint_markup = MockMarkupEndpoint(("process", ))
 
     result = content.test_packed_packages(
@@ -152,8 +149,6 @@ def test_markup():
                                     "process",
                                     0,
                                     "subpackage")
-
-    content.testendpoint_markup = tem
 
 def test_css():
     "Tests css files in the content validator."
@@ -205,8 +200,7 @@ def test_password_in_defaults_prefs():
     mock_package = MockXPI({"defaults/preferences/foo.js":
                                 "tests/resources/content/password.js"})
 
-    content._process_file(err, mock_package, "defaults/preferences/foo.js",
-                          password_js, "foo.js")
+    content.test_packed_packages(err, mock_package)
     print err.print_summary()
     assert err.failed()
 
@@ -241,17 +235,6 @@ def test_jar_subpackage_bad():
     result = content.test_packed_packages(err, mock_package)
     print result
     assert err.failed()
-
-
-def test_make_script_absolute():
-    """Test that _make_script_absolute() works properly."""
-
-    msa = content._make_script_absolute
-    eq_(msa("chrome://a/b.xul", "chrome://foo/bar.js"), "chrome://foo/bar.js")
-    eq_(msa("chrome://a/b.xul", "/foo.js"), "chrome://a/foo.js")
-    eq_(msa("chrome://a/b/c.xul", "/foo/bar.js"), "chrome://a/foo/bar.js")
-    eq_(msa("chrome://a/b/c.xul", "foo.js"), "chrome://a/b/foo.js")
-    eq_(msa("chrome://a/b/c.xul", "foo/bar.js"), "chrome://a/b/foo/bar.js")
 
 
 class MockTestEndpoint(object):

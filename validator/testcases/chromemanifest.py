@@ -2,8 +2,6 @@ from validator import decorator
 from validator.chromemanifest import ChromeManifest
 
 
-MANIFEST_URI = "https://developer.mozilla.org/en/XUL_Tutorial/Manifest_Files"
-
 @decorator.register_test(tier=2, simple=True)
 def test_categories(err):
     """Test for categories in the chrome.manifest file."""
@@ -63,8 +61,8 @@ def test_resourcemodules(err):
 
 
 @decorator.register_test(tier=3, simple=True)
-def test_content_instructions(err):
-    """Flag content instructions which are not valid."""
+def test_banned_content_namespaces(err):
+    """Flag content namespaces which have been banned."""
 
     chrome = err.get_resource("chrome.manifest")
     if not chrome:
@@ -75,24 +73,15 @@ def test_content_instructions(err):
                         "template and should be replaced with something "
                         "unique to your add-on to avoid name conflicts."}
 
-    for triple in chrome.get_triples(subject="content"):
-        if triple["predicate"] in banned_namespaces:
+    for triple in chrome.triples:
+        if (triple["subject"] == "content" and
+            triple["predicate"] in banned_namespaces):
+
             err.error(
                 err_id=("testcases_chromemanifest",
-                        "test_content_instructions", "godlikea"),
+                        "test_banned_content_namespaces"),
                 error="Banned namespace in chrome.manifest",
                 description=banned_namespaces[triple["predicate"]],
-                filename=triple["filename"],
-                line=triple["line"],
-                context=chrome.context)
-        elif not triple["object"].endswith("/"):
-            err.notice(
-                err_id=("testcases_chromemanifest",
-                        "test_content_instructions", "trailing"),
-                notice="Content instruction URIs must end with trailing slash",
-                description="Chrome manifest content instructions must have a "
-                            "trailing slash on their URI. For more "
-                            "information, see %s." % MANIFEST_URI,
                 filename=triple["filename"],
                 line=triple["line"],
                 context=chrome.context)

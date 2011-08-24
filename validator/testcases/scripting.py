@@ -14,7 +14,7 @@ from validator.textfilter import *
 JS_ESCAPE = re.compile(r"\\+[ux]", re.I)
 
 
-def test_js_file(err, filename, data, line=0, context=None, pollutable=False):
+def test_js_file(err, filename, data, line=0, context=None):
     "Tests a JS file by parsing and analyzing its tokens"
 
     if SPIDERMONKEY_INSTALLATION is None or \
@@ -54,7 +54,6 @@ def test_js_file(err, filename, data, line=0, context=None, pollutable=False):
     t = traverser.Traverser(err, filename, line, context=context,
                             is_jsm=filename.endswith(".jsm") or
                                    "EXPORTED_SYMBOLS" in data)
-    t.pollutable = pollutable
     t.run(tree)
 
     # Reset the tier so we don't break the world
@@ -72,6 +71,5 @@ def test_js_snippet(err, data, filename, line=0, context=None):
     # when return statements exist without a corresponding function.
     data = "(function(){%s\n})()" % data
 
-    # NOTE: pollutable is set to True...for now
-    test_js_file(err, filename, data, line, context, pollutable=True)
+    test_js_file(err, filename, data, line, context)
 

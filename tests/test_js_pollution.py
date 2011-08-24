@@ -31,19 +31,6 @@ def test_pollution_jsm():
     """, path="foo.jsm", ignore_pollution=False).failed()
 
 
-def test_pollution_components():
-    """
-    Test that the components/ directory is ignored for pollution.
-    """
-
-    assert not _do_test_raw("""
-    a = "foo";
-    b = "foo";
-    c = "foo";
-    d = "foo";
-    """, path="components/foo.jsm", ignore_pollution=False).failed()
-
-
 def test_pollution_exceptions():
     """
     Make sure that JSM files don't have to worry about namespace pollution.
