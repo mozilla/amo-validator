@@ -82,7 +82,7 @@ class JSWrapper(object):
 
     def __init__(self, value=None, const=False, dirty=False, lazy=False,
                  is_global=False, traverser=None, callable=False,
-                 setter=None):
+                 setter=None, context="chrome"):
 
         if is_global:
             assert not value
@@ -99,6 +99,7 @@ class JSWrapper(object):
         self.value = None  # Instantiate the placeholder value
         self.is_global = False  # Not yet......
         self.dirty = False  # Also not yet...
+        self.context = context
 
         # Used for predetermining set operations
         self.setter = setter
@@ -145,12 +146,10 @@ class JSWrapper(object):
 
         # We want to obey the permissions of global objects
         if (self.is_global and
-            (not traverser or
-             not traverser.is_jsm) and
+            (not traverser or not traverser.is_jsm) and
             (isinstance(self.value, dict) and
              ("overwritable" not in self.value or
               self.value["overwritable"] == False))):
-            # TODO : Write in support for "readonly":False
             traverser.err.warning(("testcases_javascript_jstypes",
                                    "JSWrapper_set_value",
                                    "global_overwrite"),
@@ -171,6 +170,7 @@ class JSWrapper(object):
             self.lazy = value.lazy
             self.dirty = value.dirty
             self.is_global = value.is_global
+            self.context = value.context
             # const does not carry over on reassignment
             return self
         elif isinstance(value, types.LambdaType):
@@ -178,45 +178,36 @@ class JSWrapper(object):
 
         if not isinstance(value, dict):
             self.is_global = False
+        elif "context" in value:
+            self.context = value["context"]
 
         self.value = value
         return self
 
-    def set_value_from_expression(self, traverser, node):
-        """Sets the value of the variable from a node object"""
-
-        self.set_value(traverser._traverse_node(node),
-                       traverser=traverser)
-
     def has_property(self, property):
         """Returns a boolean value representing the presence of a property"""
-
-        if self.value is None:
-            return False
-
         if isinstance(self.value, JSLiteral):
             return False
-        elif isinstance(self.value, (JSObject, JSPrototype)):
-            # JSPrototype and JSObject always have a value
-            return True
+        return isinstance(self.value, JSObject)
 
     def get(self, traverser, name, instantiate=False):
         """Retrieves a property from the variable"""
 
         value = self.value
         dirty = value is None
+        context = self.context
         if self.is_global:
             if "value" not in value:
-                output = JSWrapper(traverser=traverser)
+                output = JSWrapper(JSObject(), traverser=traverser)
                 output.value = {}
 
                 def apply_value(name):
                     if name in self.value:
                         output.value[name] = self.value[name]
 
-                apply_value("dangerous")
-                apply_value("readonly")
+                map(apply_value, ("dangerous", "readonly", "context"))
                 output.is_global = True
+                output.context = self.context
                 return output
 
             def _evaluate_lambdas(node):
@@ -231,8 +222,11 @@ class JSWrapper(object):
             if isinstance(value_val, dict):
                 if name in value_val:
                     value_val = _evaluate_lambdas(value_val[name])
-                    return traverser._build_global(name=name,
-                                                   entity=value_val)
+                    output = traverser._build_global(name=name,
+                                                     entity=value_val)
+                    if "context" not in value_val:
+                        output.context = self.context
+                    return output
             else:
                 value = value_val
 
@@ -251,6 +245,8 @@ class JSWrapper(object):
             output = JSWrapper(output,
                                traverser=traverser,
                                dirty=output is None or dirty)
+
+        output.context = context
 
         # If we can predetermine the setter for the wrapper, we can save a ton
         # of lookbehinds in the future. This greatly simplifies the
