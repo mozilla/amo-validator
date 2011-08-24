@@ -194,6 +194,8 @@ GLOBAL_ENTITIES = {
                                 not a or
                                 _get_as_str(t(a[0]).get_literal_value())
                                                 .lower() == "script"},
+                   u"getSelection":
+                       {"return": call_definitions.document_getSelection},
                    u"loadOverlay":
                        {"dangerous":
                             lambda a, t, e:
