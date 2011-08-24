@@ -177,6 +177,14 @@ def test_fx7_regex_xpcom():
     assert err.notices
     assert err.compat_summary["errors"]
 
+    err = _do_real_test_raw("""
+    var x = "nsISelection2";
+    """, versions={'{ec8030f7-c20a-464f-9b0e-13a3a9e97384}':
+                       version_range("firefox", "8.0a1")})
+    assert not err.failed()
+    assert err.notices
+    assert err.compat_summary["errors"]
+
 
 def test_fx7_nsinavhistoryobserver():
     """Test that nsINavHistoryObserver is flagged."""
