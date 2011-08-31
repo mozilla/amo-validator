@@ -4,6 +4,9 @@ from validator import decorator
 from validator.constants import *
 
 
+OPTIONS_TYPE_VALUES = ("1", "2", "3")
+
+
 @decorator.register_test(tier=1)
 def test_install_rdf_params(err, xpi_package=None):
     """Tests to make sure that some of the values in install.rdf
@@ -41,6 +44,7 @@ def _test_rdf(err, install):
                       "iconURL",
                       "homepageURL",
                       "creator",
+                      "optionsType",
                       "type",
                       "updateInfoURL",
                       "updateKey",
@@ -132,6 +136,20 @@ def _test_rdf(err, install):
 
         # Do the same for may_exist_once.
         if predicate in may_exist_once:
+
+            object_value = install.get_object(top_id, pred_raw)
+
+            if (predicate == "optionsType" and
+                str(object_value) not in OPTIONS_TYPE_VALUES):
+                err.warning(
+                    err_id=("testcases_installrdf", "_test_rdf",
+                            "optionsType"),
+                    warning="<em:optionsType> has bad value.",
+                    description=["The value of <em:optionsType> must be either "
+                                 "%s." % ", ".join(OPTIONS_TYPE_VALUES),
+                                 "Value found: %s" % object_value],
+                    filename="install.rdf")
+
             may_exist_once.remove(predicate)
             continue
 

@@ -234,3 +234,59 @@ def test_overrides():
 </RDF>
     """, failure=False, overrides={"ignore_empty_name": True})
 
+
+def test_optionsType():
+    """Test that the optionsType element works."""
+
+    assert _run_test_raw(data="""
+<?xml version="1.0"?>
+<RDF xmlns="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+		xmlns:em="http://www.mozilla.org/2004/em-rdf#">
+	<Description about="urn:mozilla:install-manifest">
+
+	<em:id>bastatestapp1@basta.mozilla.com</em:id>
+	<em:version>1.2.3.4</em:version>
+    <em:name>foo bar</em:name>
+	<em:targetApplication>
+		<Description>
+		<em:id>{ec8030f7-c20a-464f-9b0e-13a3a9e97384}</em:id>
+		<em:minVersion>3.7a5pre</em:minVersion>
+		<em:maxVersion>0.3</em:maxVersion>
+		</Description>
+	</em:targetApplication>
+
+    <em:optionsType>2</em:optionsType>
+
+    </Description>
+
+</RDF>
+    """, failure=False)
+
+
+def test_optionsType_fail():
+    """Test that the optionsType element fails with an invalid value."""
+
+    assert _run_test_raw(data="""
+<?xml version="1.0"?>
+<RDF xmlns="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+		xmlns:em="http://www.mozilla.org/2004/em-rdf#">
+	<Description about="urn:mozilla:install-manifest">
+
+	<em:id>bastatestapp1@basta.mozilla.com</em:id>
+	<em:version>1.2.3.4</em:version>
+    <em:name>foo bar</em:name>
+	<em:targetApplication>
+		<Description>
+		<em:id>{ec8030f7-c20a-464f-9b0e-13a3a9e97384}</em:id>
+		<em:minVersion>3.7a5pre</em:minVersion>
+		<em:maxVersion>0.3</em:maxVersion>
+		</Description>
+	</em:targetApplication>
+
+    <em:optionsType>5</em:optionsType>
+
+    </Description>
+
+</RDF>
+    """, failure=True)
+
