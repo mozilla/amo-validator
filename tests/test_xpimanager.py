@@ -1,5 +1,8 @@
 import zipfile
 from zipfile import ZipFile
+
+from nose.tools import eq_
+
 from validator.xpi import XPIManager
 
 
@@ -11,8 +14,13 @@ def test_open():
 
 def test_get_list():
     "Test that the manager can read the file listing"
+
     z = XPIManager("tests/resources/xpi/install_rdf_only.xpi")
+    assert not z.contents_cache
     assert z.package_contents()
+    assert z.contents_cache  # Spelling check!
+    z.contents_cache = "foo"
+    eq_(z.package_contents(), "foo")
 
 
 def test_valid_name():
