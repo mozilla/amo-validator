@@ -34,6 +34,7 @@ APPROVED_APPLICATIONS = json.loads(
 
 SPIDERMONKEY_INSTALLATION = os.environ.get("SPIDERMONKEY_INSTALLATION")
 
+WEBAPP_AMO_URL = "https://addons.mozilla.org"
 BUGZILLA_BUG = "https://bugzilla.mozilla.org/show_bug.cgi?id=%d"
 
 URL_REGEX = r"https?://[a-z0-9\.]+(/[a-z0-9\-\._~:/?#\[\]@!$&'\(\)\*\+,;=%]*)?"
