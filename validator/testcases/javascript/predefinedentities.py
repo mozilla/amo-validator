@@ -69,6 +69,10 @@ INTERFACES = {
         {"value":
             {u"NotifyHdrsToDownload":
                 {"return": call_definitions.nsIImapProtocol_removed}}},
+    u"nsIMsgThread":
+        {"value":
+            {u"GetChildAt":
+                {"return": call_definitions.nsIMsgThread_removed}}},
     u"nsIObserverService":
         {"value":
             {u"addObserver":
@@ -204,7 +208,15 @@ GLOBAL_ENTITIES = {
     # The nefariuos timeout brothers!
     u"setTimeout": {"dangerous": actions._call_settimeout},
     u"setInterval": {"dangerous": actions._call_settimeout},
-
+    
+    # mail Attachment API Functions 
+    u"createNewAttachmentInfo": {"return": call_definitions.mail_attachment_api},
+    u"saveAttachment": {"return": call_definitions.mail_attachment_api},
+    u"attachmentIsEmpty": {"return": call_definitions.mail_attachment_api},
+    u"openAttachment": {"return": call_definitions.mail_attachment_api},
+    u"detachAttachment": {"return": call_definitions.mail_attachment_api},
+    u"cloneAttachment": {"return": call_definitions.mail_attachment_api},
+        
     u"encodeURI": {"readonly": True},
     u"decodeURI": {"readonly": True},
     u"encodeURIComponent": {"readonly": True},
@@ -369,6 +381,10 @@ GLOBAL_ENTITIES = {
                                 {"xpcom_map":
                                      lambda:
                                         INTERFACES["nsIImapProtocol"]},
+                             u"nsIMsgThread":
+                                {"xpcom_map":
+                                     lambda:
+                                        INTERFACES["nsIMsgThread"]},
                              u"nsIObserverService":
                                 {"xpcom_map":
                                      lambda:
