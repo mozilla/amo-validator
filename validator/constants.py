@@ -37,8 +37,6 @@ SPIDERMONKEY_INSTALLATION = os.environ.get("SPIDERMONKEY_INSTALLATION")
 WEBAPP_AMO_URL = "https://addons.mozilla.org"
 BUGZILLA_BUG = "https://bugzilla.mozilla.org/show_bug.cgi?id=%d"
 
-URL_REGEX = r"https?://[a-z0-9\.]+(/[a-z0-9\-\._~:/?#\[\]@!$&'\(\)\*\+,;=%]*)?"
-
 # Graciously provided by @kumar in bug 614574
 if (not SPIDERMONKEY_INSTALLATION or
     not os.path.exists(SPIDERMONKEY_INSTALLATION)):
