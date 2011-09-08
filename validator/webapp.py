@@ -9,7 +9,7 @@ MAX_LENGTHS = {"name": 128,
                "description": 1024}
 VALID_KEYS = set(["name", "description", "launch_path", "icons", "developer",
                   "locales", "default_locale", "installs_allowed_from",
-                  "version", "widget", ])
+                  "version", "widget", "services", "experimental"])
 INVALID_LOCALE_KEYS = set(["locales", "default_locale",
                            "installs_allowed_from", ])
 DEVELOPER_KEYS = set(["name", "url", ])
