@@ -349,3 +349,48 @@ def document_getSelection(wrapper, arguments, traverser):
     # The new spec returns an object.
     return JSWrapper(JSObject(), traverser=traverser)
 
+
+def nsIMsgThread_removed(wrapper, arguments, traverser):
+    """Flag calls to nsIMsgThread for incompatibility with Thunderbird 7"""
+    traverser.err.notice(
+        err_id=("testcases_javascript_calldefinitions", "nsIMsgThread"),
+        notice="Removed nsIMsgThread method in use.",
+        description="This add-on appears to use nsIMsgThread.GetChildAt, "
+                    "which may no longer work correctly due to  "
+                    "changes made in Thunderbird 7. For more information, "
+                    "please refer to "
+                    "https://bugzilla.mozilla.org/show_bug.cgi?id=617839",
+        filename=traverser.filename,
+        line=traverser.line,
+        column=traverser.position,
+        context=traverser.context,
+        compatibility_type="error",
+        for_appversions={'{3550f703-e582-4d05-9a08-453d09bdfdc6}':
+                             version_range("thunderbird", "7.0a1", "8.0a1")},
+        tier=5)
+
+    return JSWrapper(JSObject(), traverser=traverser)
+
+
+def mail_attachment_api(wrapper, arguments, traverser):
+    """Flag calls to the global attachment functions for incompatibility with Thunderbird 7"""
+    traverser.err.notice(
+        err_id=("testcases_javascript_calldefinitions", "AttachmentAPI"),
+        notice="Removed attachment API function in use.",
+        description="This add-on appears to use a global attachment function, one of: "
+                    "attachmentIsEmpty, cloneAttachment, createNewAttachmentInfo "
+                    "detachAttachment, openAttachment or saveAttachment, "
+                    "which were removed in Thunderbird 7. For more information, "
+                    "please refer to "
+                    "https://bugzilla.mozilla.org/show_bug.cgi?id=657856",
+        filename=traverser.filename,
+        line=traverser.line,
+        column=traverser.position,
+        context=traverser.context,
+        compatibility_type="error",
+        for_appversions={'{3550f703-e582-4d05-9a08-453d09bdfdc6}':
+                             version_range("thunderbird", "7.0a1", "8.0a1")},
+        tier=5)
+
+    return JSWrapper(JSObject(), traverser=traverser)
+

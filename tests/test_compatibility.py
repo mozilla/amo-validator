@@ -380,4 +380,74 @@ def test_flag_getSelection():
     assert not err.failed()
     assert len(err.notices) == 1
     assert err.compat_summary["errors"]
+    
+    
+def test_tb7_nsIMsgThread():
+    """Test that nsIMsgThread.GetChildAt is flagged."""
+
+    err = _do_real_test_raw("""
+    var x = Components.classes["foo"].createInstance(
+        Components.interfaces.nsIMsgThread);
+    x.GetChildAt();
+    """)
+    assert not err.failed()
+    assert not err.notices
+    assert not any(err.compat_summary.values())
+
+    err = _do_real_test_raw("""
+    var x = Components.classes["foo"].createInstance(
+        Components.interfaces.nsIMsgThread);
+    x.GetChildAt();
+    """, versions={'{3550f703-e582-4d05-9a08-453d09bdfdc6}':
+                       version_range("thunderbird", "7.0a1")})
+    assert not err.failed()
+    assert len(err.notices) == 1
+    assert err.compat_summary["errors"]
+
+    
+def test_tb7_mail_attachment_api():
+    """Test that the old mail attachment global functions are flagged."""
+
+    err = _do_real_test_raw("""
+    createNewAttachmentInfo();
+    saveAttachment();
+    attachmentIsEmpty();
+    openAttachment();
+    detachAttachment();
+    cloneAttachment();
+    """)
+    assert not err.failed()
+    assert not err.notices
+    assert not any(err.compat_summary.values())
+
+    err = _do_real_test_raw("""
+    createNewAttachmentInfo();
+    saveAttachment();
+    attachmentIsEmpty();
+    openAttachment();
+    detachAttachment();
+    cloneAttachment();
+    """, versions={'{3550f703-e582-4d05-9a08-453d09bdfdc6}':
+                       version_range("thunderbird", "7.0a1")})
+    assert not err.failed()
+    assert len(err.notices) == 6
+    assert err.compat_summary["errors"]
+
+
+def test_tb7_dictUtils_removal():
+    """Test that dictUtils.js imports are flagged"""
+
+    err = _do_real_test_raw("""
+    var x = 'Components.utils.import("resource:///modules/dictUtils.js");';
+    """)
+    assert not err.failed()
+    assert not err.notices
+
+    err = _do_real_test_raw("""
+    var x = 'Components.utils.import("resource:///modules/dictUtils.js");';
+    """, versions={'{3550f703-e582-4d05-9a08-453d09bdfdc6}':
+                       version_range("thunderbird", "7.0a1")})
+    assert not err.failed()
+    assert err.notices
+    assert err.compat_summary["errors"]    
 
