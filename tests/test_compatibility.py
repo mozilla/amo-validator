@@ -449,5 +449,36 @@ def test_tb7_dictUtils_removal():
                        version_range("thunderbird", "7.0a1")})
     assert not err.failed()
     assert err.notices
-    assert err.compat_summary["errors"]    
+    assert err.compat_summary["errors"]
+    
+def test_tb7_deRDF_addressbook():
+    """Test that addressbook rdf sources are flagged"""
+
+    err = _do_real_test_raw("""
+    var x = 'datasources="rdf:addressdirectory" ref="moz-abdirectory://"';
+    """)
+    assert not err.failed()
+    assert not err.notices
+
+    err = _do_real_test_raw("""
+    var x = 'datasources="rdf:addressdirectory" ref="moz-abdirectory://"';
+    """, versions={'{3550f703-e582-4d05-9a08-453d09bdfdc6}':
+                       version_range("thunderbird", "7.0a1")})
+    assert not err.failed()
+    assert err.notices
+    assert err.compat_summary["errors"]
+    
+    err = _do_real_test_raw("""
+    var x = 'GetResource(SomeText)    .  QueryInterface(6inTestxnsIAbDirectory);';
+    """)
+    assert not err.failed()
+    assert not err.notices
+    
+    err = _do_real_test_raw("""
+    var x = "GetResource(SomeText)  .  QueryInterface(Some8678StuffnsIAbDirectory)";
+    """, versions={'{3550f703-e582-4d05-9a08-453d09bdfdc6}':
+                       version_range("thunderbird", "7.0a1")})
+    assert not err.failed()
+    assert err.notices
+    assert err.compat_summary["errors"]
 

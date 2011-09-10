@@ -76,7 +76,9 @@ FX5_DEFINITION = {"{ec8030f7-c20a-464f-9b0e-13a3a9e97384}":
 FX6_DEFINITION = {"{ec8030f7-c20a-464f-9b0e-13a3a9e97384}":
                       version_range("firefox", "6.0a1", "7.0a1")}
 FX7_DEFINITION = {"{ec8030f7-c20a-464f-9b0e-13a3a9e97384}":
-                      version_range("firefox", "7.0a1", "8.0a1")}
+                      version_range("firefox", "7.0a1", "8.0a1"),
+                  "{3550f703-e582-4d05-9a08-453d09bdfdc6}":
+                      version_range("thunderbird", "7.0a1", "8.0a1")}
 FX8_DEFINITION = {"{ec8030f7-c20a-464f-9b0e-13a3a9e97384}":
                       version_range("firefox", "8.0a1", "9.0a1")}
                       
@@ -275,7 +277,7 @@ def run_regex_tests(document, err, filename, context=None, is_js=False):
                 compatibility_type="error",
                 appversions=FX8_DEFINITION)
                 
-    # Thunderbird 7 Compatibility            
+    # Thunderbird 7 Compatibility rdf:addressdirectory           
     if err.supports_version(TB7_DEFINITION):    
         # dictUtils.js removal   
         _compat_test(
@@ -283,6 +285,27 @@ def run_regex_tests(document, err, filename, context=None, is_js=False):
                 "dictUtils.js was removed in Thunderbird 7.",
                 ("The dictUtils.js file is no longer available in "
                  "Thunderbird 7. You can use Dict.jsm instead. See"
+                 "%s for more information.") % (BUGZILLA_BUG % 621213),
+                compatibility_type="error",
+                appversions=TB7_DEFINITION)
+        # de-RDF the addressbook
+        _compat_test(
+                re.compile(r"rdf:addressdirectory"),
+                "The address book does not use RDF in Thunderbird 7.",
+                ("The address book was changed to use a look up table in "
+                 "Thunderbird 7. See "
+                 "https://developer.mozilla.org/en/Thunderbird_7_for_developers and "
+                 "%s for more information.") % (BUGZILLA_BUG % 621213),
+                compatibility_type="error",
+                appversions=TB7_DEFINITION)
+        # Second test for de-RDFing the addressbook
+        # r"GetResource(.*?)\s*\.\s*QueryInterface(.*?nsIAbDirectory);"
+        _compat_test(
+                re.compile(r"GetResource\(.*?\)\s*\.\s*QueryInterface\(.*?nsIAbDirectory\)"),
+                "The address book does not use RDF in Thunderbird 7.",
+                ("The address book was changed to use a look up table in "
+                 "Thunderbird 7. See "
+                 "https://developer.mozilla.org/en/Thunderbird_7_for_developers and "
                  "%s for more information.") % (BUGZILLA_BUG % 621213),
                 compatibility_type="error",
                 appversions=TB7_DEFINITION)
