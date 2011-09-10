@@ -16,6 +16,20 @@ BANNED_IDENTIFIERS = {
                          "instead wherever possible",
 }
 
+BANNED_PREF_BRANCHES = [
+    u"extensions.alwaysUnpack",
+    u"extensions.blocklist.",
+    u"extensions.bootstrappedAddons",
+    u"extensions.checkCompatibility",
+    u"extensions.dss.",
+    u"extensions.getAddons.",
+    u"extensions.getMoreThemesURL",
+    u"extensions.installCache",
+    u"extensions.lastAppVersion",
+    u"extensions.pendingOperations",
+    u"extensions.update.",
+]
+
 # See https://github.com/mattbasta/amo-validator/wiki/JS-Predefined-Entities
 # for details on entity properties.
 
@@ -472,7 +486,11 @@ GLOBAL_ENTITIES = {
                        lambda t: {"value": GLOBAL_ENTITIES}}}},
     u"opener":
         {"value":
-             lambda t: {"value": GLOBAL_ENTITIES}}
+             lambda t: {"value": GLOBAL_ENTITIES}},
+
+    # Preference creation in pref defaults files
+    u"pref": {"dangerous": actions._call_create_pref},
+    u"user_pref": {"dangerous": actions._call_create_pref},
 }
 
 CONTENT_DOCUMENT = GLOBAL_ENTITIES[u"content"]["value"][u"document"]
