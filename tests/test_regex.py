@@ -14,7 +14,7 @@ def test_valid():
 def test_basic_regex_fail():
     "Tests that a simple Regex match causes a warning"
 
-    assert _do_test_raw("var x = 'network.http';").failed()
+    assert _do_test_raw("var x = 'network.http.';").failed()
     assert _do_test_raw("var x = 'extensions.foo.update.url';").failed()
     assert _do_test_raw("var x = 'network.websocket.foobar';").failed()
     assert _do_test_raw("var x = 'browser.preferences.instantApply';").failed()
@@ -76,7 +76,7 @@ def test_processNextEvent_banned():
 
 def test_bug_652575():
     """Ensure that capability.policy gets flagged."""
-    assert _do_test_raw("var x = 'capability.policy';").failed()
+    assert _do_test_raw("var x = 'capability.policy.';").failed()
 
 
 def test_app_update_timer():

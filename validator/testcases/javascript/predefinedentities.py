@@ -17,6 +17,8 @@ BANNED_IDENTIFIERS = {
 }
 
 BANNED_PREF_BRANCHES = [
+    u"browser.preferences.instantApply",
+    u"capability.policy.",
     u"extensions.alwaysUnpack",
     u"extensions.blocklist.",
     u"extensions.bootstrappedAddons",
@@ -28,6 +30,13 @@ BANNED_PREF_BRANCHES = [
     u"extensions.lastAppVersion",
     u"extensions.pendingOperations",
     u"extensions.update.",
+    u"general.useragent.",
+    u"network.http.",
+    u"network.websocket.",
+]
+
+BANNED_PREF_REGEXPS = [
+    r"extensions\..*\.update\.(url|enabled|interval)",
 ]
 
 # See https://github.com/mattbasta/amo-validator/wiki/JS-Predefined-Entities

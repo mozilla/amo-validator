@@ -1,5 +1,6 @@
 import copy
 import math
+import re
 import types
 
 import spidermonkey
@@ -426,11 +427,16 @@ def _call_create_pref(a, t, e):
 
     value = str(t(a[0]).get_literal_value())
 
-    from predefinedentities import BANNED_PREF_BRANCHES
+    from predefinedentities import BANNED_PREF_BRANCHES, BANNED_PREF_REGEXPS
     for banned in BANNED_PREF_BRANCHES:
         if value.startswith(banned):
-            return ("Extensions should not alter preferences in '%s' "
+            return ("Extensions should not alter preferences in the '%s' "
                     "preference branch" % banned)
+
+    for banned in BANNED_PREF_REGEXPS:
+        if re.match(banned, value):
+            return ("Extensions should not alter preferences matching /%s/"
+                        % banned)
 
     if not value.startswith("extensions.") or value.rindex(".") < len("extensions."):
         return ("Extensions should not alter preferences outside of the "
