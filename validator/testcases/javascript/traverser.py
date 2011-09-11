@@ -309,11 +309,12 @@ class Traverser:
                 self.err.warning(("testcases_javascript_traverser",
                                   "_build_global",
                                   "dangerous_global"),
-                                 "Dangerous Global Object",
+                                 "Flagged Global Object",
                                  [dang if
                                   isinstance(dang, types.StringTypes) else
-                                  "A dangerous or banned global object was "
-                                  "accessed by some JavaScript code.",
+                                  "A potentially dangerous or banned global "
+                                  "object was accessed by some JavaScript "
+                                  "code.",
                                   "Accessed object: %s" % name],
                                  self.filename,
                                  line=self.line,
