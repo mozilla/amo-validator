@@ -309,16 +309,18 @@ class Traverser:
                 self.err.warning(("testcases_javascript_traverser",
                                   "_build_global",
                                   "dangerous_global"),
-                                 "Dangerous Global Object",
+                                 "Illegal or deprecated access to the '%s' global" % name,
                                  [dang if
-                                  isinstance(dang, types.StringTypes) else
-                                  "A dangerous or banned global object was "
-                                  "accessed by some JavaScript code.",
-                                  "Accessed object: %s" % name],
+                                  isinstance(dang, (types.StringTypes, list, tuple)) else
+                                  "Access to the '%s' property is deprecated "
+                                  "for security or other reasons." % name],
                                  self.filename,
                                  line=self.line,
                                  column=self.position,
                                  context=self.context)
+
+        if "name" not in entity:
+            entity["name"] = name
 
         # Build out the wrapper object from the global definition.
         result = JSWrapper(is_global=True, traverser=self, lazy=True)

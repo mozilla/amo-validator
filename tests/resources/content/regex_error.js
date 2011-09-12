@@ -1,1 +1,1 @@
-var foo = "network.http";
+var foo = "network.http.";

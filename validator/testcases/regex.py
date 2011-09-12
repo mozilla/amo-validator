@@ -14,25 +14,10 @@ NSINHS_LINK = ("https://developer.mozilla.org/en/XPCOM_Interface_Reference"
 GENERIC_PATTERNS = {
     r"globalStorage\[.*\].password":
         "Global Storage may not be used to store passwords.",
-    r"browser\.preferences\.instantApply":
-        "Changing the value of instantApply can lead to UI problems in the "
-        "browser.",
-    r"network\.http": NP_WARNING,
-    r"network\.websocket": "Websocket preferences should not be modified.",
-    r"extensions(\..*)?\.update\.url": EUP_WARNING,
-    r"extensions(\..*)?\.update\.enabled": EUP_WARNING,
-    r"extensions(\..*)?\.update\.interval": EUP_WARNING,
-    r"extensions\.blocklist\.url": NP_WARNING,
-    r"extensions\.blocklist\.level": NP_WARNING,
-    r"extensions\.blocklist\.interval": NP_WARNING,
-    r"extensions\.blocklist\.enabled": NP_WARNING,
-    r"general\.useragent": NP_WARNING,
     r"launch\(\)":
         "Use of 'launch()' is disallowed because of restrictions on "
         "nsILocalFile. If the code does not use nsILocalFile, consider a "
-        "different function name.",
-    r"capability\.policy":
-        "The preference 'capability.policy' is potentially unsafe."}
+        "different function name."}
 
 # JS category hunting; bug 635423
 # Generate regexes for all of them. Note that they all begin with
@@ -106,6 +91,20 @@ def run_regex_tests(document, err, filename, context=None, is_js=False):
                 line=line,
                 context=context)
 
+    def _substring_test(pattern, title, message):
+        """Run a single substringest."""
+        index = document.find(pattern)
+        if ~index:
+            line = context.get_line(index)
+            err.warning(
+                err_id=("testcases_javascript_regex", "generic",
+                        "_generic_test"),
+                warning=title,
+                description=message,
+                filename=filename,
+                line=line,
+                context=context)
+
     def _compat_test(pattern, title, message, compatibility_type=None,
                      appversions=None):
         """Run a single regex test and return a compatibility message."""
@@ -123,6 +122,22 @@ def run_regex_tests(document, err, filename, context=None, is_js=False):
                 compatibility_type=compatibility_type,
                 for_appversions=appversions,
                 tier=5)
+
+    if not filename.startswith("defaults/preferences/"):
+        from javascript.predefinedentities import BANNED_PREF_BRANCHES, BANNED_PREF_REGEXPS
+        for pattern in BANNED_PREF_REGEXPS:
+            _generic_test(
+                re.compile("[\"']" + pattern),
+                "Potentially unsafe preference branch referenced",
+                "Extensions should not alter preferences matching /%s/"
+                    % pattern)
+
+        for branch in BANNED_PREF_BRANCHES:
+            _substring_test(
+                branch,
+                "Potentially unsafe preference branch referenced",
+                "Extensions should not alter preferences in the '%s' "
+                "preference branch" % branch)
 
     for pattern, message in GENERIC_PATTERNS.items():
         _generic_test(
