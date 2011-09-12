@@ -205,7 +205,7 @@ class JSWrapper(object):
                     if name in self.value:
                         output.value[name] = self.value[name]
 
-                map(apply_value, ("dangerous", "readonly", "context"))
+                map(apply_value, ("dangerous", "readonly", "context", "name"))
                 output.is_global = True
                 output.context = self.context
                 return output

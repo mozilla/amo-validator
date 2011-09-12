@@ -1,5 +1,6 @@
 import copy
 import math
+import re
 import types
 
 import spidermonkey
@@ -336,6 +337,23 @@ def _call_expression(traverser, node):
     map(traverser._traverse_node, args)
 
     member = traverser._traverse_node(node["callee"])
+
+    if (traverser.filename.startswith("defaults/preferences/") and
+        ("name" not in node["callee"] or
+         node["callee"]["name"] not in (u"pref", u"user_pref"))):
+
+        traverser.err.warning(("testcases_javascript_actions",
+                               "_call_expression",
+                               "complex_prefs_defaults_code"),
+                              "Complex code should not appear in preference defaults files",
+                              "Calls to functions other than 'pref' and 'user_pref' should "
+                              "not appear in defaults/preferences/ files.",
+                              filename=traverser.filename,
+                              line=traverser.line,
+                              column=traverser.position,
+                              context=traverser.context)
+
+
     if (member.is_global and
         "dangerous" in member.value and
         isinstance(member.value["dangerous"], types.LambdaType)):
@@ -343,19 +361,20 @@ def _call_expression(traverser, node):
         dangerous = member.value["dangerous"]
         t = traverser._traverse_node
         result = dangerous(a=args, t=t, e=traverser.err)
-        if result:
+        if result and "name" in member.value:
             # Generate a string representation of the params
             params = u", ".join([_get_as_str(t(p).get_literal_value()) for
                                  p in args])
             traverser.err.warning(("testcases_javascript_actions",
                                    "_call_expression",
                                    "called_dangerous_global"),
-                                  "Global called in dangerous manner",
+                                  "'%(name)s' function called in potentially dangerous manner"
+                                    % member.value,
                                   result if
-                                    isinstance(result, types.StringTypes) else
-                                  "A global function was called using a set "
-                                  "of dangerous parameters. These parameters "
-                                  "have been disallowed.",
+                                    isinstance(result, (types.StringTypes, list, tuple)) else
+                                  "The global %(name)s function was called using a set "
+                                  "of dangerous parameters. %(name)s calls of this nature "
+                                  "are deprecated." % member.value,
                                   filename=traverser.filename,
                                   line=traverser.line,
                                   column=traverser.position,
@@ -387,7 +406,44 @@ def _call_settimeout(a, t, e):
     those, too.
     """
 
-    return a and a[0]["type"] != "FunctionExpression"
+    if a and a[0]["type"] != "FunctionExpression":
+        return ("In order to prevent vulnerabilities, the setTimeout "
+                "and setInterval functions should be called only with "
+                "function expressions as their first argument.",
+                "Variables referencing function names are acceptable "
+                "but deprecated as they are not amenable to static "
+                "source validation.")
+
+
+def _call_create_pref(a, t, e):
+    """
+    Handler for pref() and user_pref() calls in defaults/preferences/*.js files
+    to ensure that they don't touch preferences outside of the "extensions."
+    branch.
+    """
+
+    if not t.im_self.filename.startswith("defaults/preferences/") or len(a) == 0:
+        return
+
+    value = str(t(a[0]).get_literal_value())
+
+    from predefinedentities import BANNED_PREF_BRANCHES, BANNED_PREF_REGEXPS
+    for banned in BANNED_PREF_BRANCHES:
+        if value.startswith(banned):
+            return ("Extensions should not alter preferences in the '%s' "
+                    "preference branch" % banned)
+
+    for banned in BANNED_PREF_REGEXPS:
+        if re.match(banned, value):
+            return ("Extensions should not alter preferences matching /%s/"
+                        % banned)
+
+    if not value.startswith("extensions.") or value.rindex(".") < len("extensions."):
+        return ("Extensions should not alter preferences outside of the "
+                "'extensions.' preference branch. Please make sure that "
+                "all of your extension's preferences are prefixed with "
+                "'extensions.add-on-name.', where 'add-on-name' is a "
+                "distinct string unique to and indicative of your add-on.")
 
 
 def _readonly_top(t, r, rn):
