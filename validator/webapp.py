@@ -1,6 +1,7 @@
 import json
 import re
 import types
+import urlparse
 
 from validator.constants import *
 
@@ -15,7 +16,27 @@ INVALID_LOCALE_KEYS = set(["locales", "default_locale",
 DEVELOPER_KEYS = set(["name", "url", ])
 WIDGET_KEYS = set(["height", "width", "path", ])
 
-URL_REGEX_COMPILED = re.compile(URL_REGEX)
+
+def _test_url(url, can_be_asterisk=False):
+    """Test a URL to make sure it's usable within a webapp."""
+
+    if can_be_asterisk and url == "*":
+        return True
+
+    try:
+        # Parse the URL and test to make sure mandatory components are present.
+        parsed_url = urlparse.urlparse(url)
+        if not parsed_url.scheme or not parsed_url.netloc:
+            return False
+
+        # Make sure the URL is using HTTP[S]
+        if parsed_url.scheme.lower() not in ("http", "https", ):
+            return False
+
+    except ValueError:
+        return False
+
+    return True
 
 
 def test_path(path, can_be_data=False):
@@ -118,7 +139,7 @@ def test_webapp(err, webapp, current_valid_keys, required=True):
                                      ", ".join(absent_keys)])
 
             if ("url" in keys and
-                not URL_REGEX_COMPILED.match(webapp[key]["url"])):
+                not _test_url(webapp[key]["url"])):
                 err.error(
                     err_id=("webapp", "detect", "bad_dev_url"),
                     error="Webapp: Developer URL is not valid.",
@@ -158,7 +179,7 @@ def test_webapp(err, webapp, current_valid_keys, required=True):
                 continue
 
             for url in webapp[key]:
-                if url != "*" and not URL_REGEX_COMPILED.match(url):
+                if not _test_url(url, can_be_asterisk=True):
                     err.error(
                         err_id=("webapp", "detect", "bad_iaf_url"),
                         error="Webapp: 'installs_allowed_from'' URL invalid.",
