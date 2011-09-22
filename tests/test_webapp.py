@@ -59,7 +59,8 @@ def _get_json():
             "url": "http://mozillalabs.com"
         },
         "installs_allowed_from": [
-            "https://appstore.mozillalabs.com"
+            "https://appstore.mozillalabs.com",
+            "HTTP://mozilla.com/AppStore"
         ],
         "launch_path": "/index.html",
         "locales": {
