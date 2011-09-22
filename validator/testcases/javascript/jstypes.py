@@ -327,8 +327,8 @@ class JSLiteral(JSObject):
     """Represents a literal JavaScript value."""
 
     def __init__(self, value=None):
+        super(JSLiteral, self).__init__()
         self.value = value
-        JSObject.__init__(self)
 
     def set_value(self, value):
         self.value = value
@@ -386,6 +386,7 @@ class JSArray(JSObject):
     """A class that represents both a JS Array and a JS list."""
 
     def __init__(self):
+        super(JSArray, self).__init__()
         self.elements = []
 
     def get(self, index, instantiate=False, traverser=None):
