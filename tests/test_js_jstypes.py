@@ -47,6 +47,7 @@ def test_jsarray_recursion():
     print ja.get_literal_value()
     assert "(recursion)" in ja.get_literal_value()
 
+
 def test_jsliteral_regex():
     """
     Test that there aren't tracebacks from JSLiterals that perform raw binary
@@ -58,3 +59,15 @@ def test_jsliteral_regex():
     var z = /bar/i + 0;
     """).failed()
 
+
+def test_jsarray_contsructor():
+    """
+    Test for tracebacks that were caused by JSArray not calling it's parent's
+    constructor.
+    """
+    assert not _do_test_raw("""
+    var x = [];
+    x.foo = "bar";
+    x["zap"] = "foo";
+    baz("zap" in x);
+    """).failed()
