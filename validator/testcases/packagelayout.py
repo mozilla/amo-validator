@@ -105,9 +105,9 @@ def test_godlikea(err, xpi_package):
 @decorator.register_test(
         tier=5,
         versions={"{ec8030f7-c20a-464f-9b0e-13a3a9e97384}":
-                      version_range("firefox", "4.2a1pre", "6.0a1"),
+                      version_range("firefox", "4.2a1pre"),
                   "{3550f703-e582-4d05-9a08-453d09bdfdc6}":
-                      version_range("thunderbird", "3.3a4pre", "7.0a1"),})              
+                      version_range("thunderbird", "3.3a4pre"),})              
 def test_compatibility_binary(err, xpi_package):
     """
     Flags only binary content as being incompatible with future app releases.
