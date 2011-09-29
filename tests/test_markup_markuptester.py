@@ -96,6 +96,25 @@ def test_cdata_properly():
     </script>
     </foo>""", "foo.xul", should_fail=False)
 
+    # Test that there are no problems if the CDATA element starts or ends on
+    # the same line as the parent tag.
+    err = _do_test_raw("""<foo>
+    <script><![CDATA[
+    <button><p><span><foo>
+    </bar></zap>
+    <selfclosing />
+    <><><><""><!><
+    ]]></script>
+    </foo>""", "foo.xul", should_fail=False)
+
+    # Test that there are no problems if multiple CDATA elements open and
+    # close on the same line.
+    err = _do_test_raw("""<foo>
+    <foo><![CDATA[</bar></foo>]]></foo><![CDATA[
+    <![CDATA[ <-- Should be ignored since we're buffering.</bar><zap>
+    ]]>
+    </foo>""", "foo.xul", should_fail=False)
+
     err = _do_test_raw("""<foo>
     <![CDATA[
     <button><p><span><foo>
