@@ -2,12 +2,10 @@ from validator.contextgenerator import ContextGenerator
 
 
 class ChromeManifest(object):
-    """This class enables convenient reading and searching of
+    """This class enables convenient parsing and iteration of
     chrome.manifest files."""
 
     def __init__(self, data, path):
-        "Reads an ntriples style chrome.manifest file"
-
         self.context = ContextGenerator(data)
         self.lines = data.split("\n")
 
@@ -106,6 +104,8 @@ class ChromeManifest(object):
         # Look through each of the listed packages and paths.
         for path in content_paths:
             chrome_name = path["predicate"]
+            if not path["object"]:
+                continue
             path_location = path["object"].strip().split()[0]
 
             # Handle jarred paths differently.
@@ -147,6 +147,18 @@ class ChromeManifest(object):
         chrome_path = "chrome://%s" % self._url_chunk_join(chrome_path + "/")
 
         for overlay in self.get_triples(subject="overlay"):
+            if not overlay["object"]:
+                error_bundle.error(
+                    err_id=("chromemanifest", "get_applicable_overalys",
+                            "object"),
+                    error="Overlay instruction missing a property.",
+                    description="When overlays are registered in a chrome "
+                                "manifest file, they require a namespace and "
+                                "a chrome URL at minimum.",
+                    filename=overlay["filename"],
+                    line=overlay["line"],
+                    context=self.context)  #TODO(basta): Update this!
+                continue
             overlay_url = overlay["object"].split()[0]
             if overlay_url.startswith(chrome_path):
                 overlay_relative_path = overlay_url[len(chrome_path):]
@@ -175,6 +187,8 @@ class ChromeManifest(object):
         content_paths = self.get_triples(subject="content")
         for content_path in content_paths:
             chrome_name = content_path["predicate"]
+            if not content_path["object"]:
+                continue
             path_location = content_path["object"].split()[0]
 
             if path_location.startswith("jar:"):
