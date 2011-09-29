@@ -1,6 +1,7 @@
 from nose.tools import eq_
 
 from validator.chromemanifest import ChromeManifest
+from validator.errorbundler import ErrorBundle
 
 
 def test_open():
@@ -126,6 +127,30 @@ def test_reverse_lookup():
         "chrome://ns4/subdir2/x.js")
     eq_(c.reverse_lookup(MockPackStack(["zap.jar"]), "/x.js"),
         "chrome://ns3/altdir1/x.js")
+
+
+def test_overlay_object():
+    """Test that overlay instructions have all its properties."""
+
+    err = ErrorBundle()
+    c = ChromeManifest("""
+    content namespace /foo/bar
+    overlay namespace /uri/goes/here
+    """, "chrome.manifest")
+    err.save_resource("chrome.manifest", c)
+    c.get_applicable_overlays(err)
+    assert not err.failed()
+    assert not err.notices
+
+    err = ErrorBundle()
+    c = ChromeManifest("""
+    content namespace /foo/bar
+    overlay /uri/goes/here
+    """, "chrome.manifest")
+    err.save_resource("chrome.manifest", c)
+    c.get_applicable_overlays(err)
+    assert err.failed()
+    assert not err.notices
 
 
 class MockPackStack(object):
