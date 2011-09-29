@@ -68,33 +68,46 @@ class MarkupParser(htmlparser.HTMLParser):
         self.context = ContextGenerator(data)
 
         lines = data.split("\n")
-        force_buffer = False
+
+        buffering = False
         pline = 0
         for line in lines:
             self.line += 1
 
             search_line = line
             while True:
-                # CDATA elements are gross. Pass the whole entity as one chunk
-                if "<![CDATA[" in search_line and not force_buffer:
+                # If a CDATA element is found, push it and its contents to the
+                # buffer. Push everything previous to it to the parser.
+                if "<![CDATA[" in search_line and not buffering:
+                    # Find the CDATA element.
                     cdatapos = search_line.find("<![CDATA[")
-                    post_cdata = search_line[cdatapos:]
 
-                    if "]]>" in post_cdata:
-                        search_line = post_cdata[post_cdata.find("]]>") + 3:]
-                        continue
-                    force_buffer = True
-                elif "]]>" in search_line and force_buffer:
-                    force_buffer = False
+                    # If the element isn't at the start of the line, pass
+                    # everything before it to the parser.
+                    if cdatapos:
+                        self._feed_parser(search_line[:cdatapos])
+                    # Collect the rest of the line to send it to the buffer.
+                    search_line = search_line[cdatapos:]
+                    buffering = True
+                    continue
+
+                elif "]]>" in search_line and buffering:
+                    # If we find the end element on the line being scanned,
+                    # buffer everything up to the end of it, and let the rest
+                    # of the line pass through for further processing.
+                    end_cdatapos = search_line.find("]]>") + 3
+                    self._save_to_buffer(search_line[:end_cdatapos])
+                    search_line = search_line[end_cdatapos:]
+                    buffering = False
                 break
 
-            if force_buffer:
-                self._save_to_buffer(line + "\n")
+            if buffering:
+                self._save_to_buffer(search_line + "\n")
             else:
-                self._feed_parser(line)
+                self._feed_parser(search_line)
 
     def _feed_parser(self, line):
-        "Feeds data into the parser"
+        """Feed incoming data into the underlying HTMLParser."""
 
         line = unicodehelper.decode(line)
 
