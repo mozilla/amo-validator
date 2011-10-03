@@ -92,6 +92,12 @@ INTERFACES = {
         {"value":
             {u"NotifyHdrsToDownload":
                 {"return": call_definitions.nsIImapProtocol_removed}}},
+    u"nsIMsgSearchScopeTerm":
+        {"value":
+            {u"mailFile":
+                {"return": call_definitions.nsIMsgSearchScopeTerm_removed},
+             u"inputStream":
+                {"return": call_definitions.nsIMsgSearchScopeTerm_removed}}},
     u"nsIMsgThread":
         {"value":
             {u"GetChildAt":
@@ -404,6 +410,10 @@ GLOBAL_ENTITIES = {
                                 {"xpcom_map":
                                      lambda:
                                         INTERFACES["nsIImapProtocol"]},
+                             u"nsIMsgSearchScopeTerm":
+                                {"xpcom_map":
+                                     lambda:
+                                        INTERFACES["nsIMsgSearchScopeTerm"]},
                              u"nsIMsgThread":
                                 {"xpcom_map":
                                      lambda:
