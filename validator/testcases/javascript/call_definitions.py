@@ -343,7 +343,9 @@ def document_getSelection(wrapper, arguments, traverser):
         context=traverser.context,
         compatibility_type="error",
         for_appversions={'{ec8030f7-c20a-464f-9b0e-13a3a9e97384}':
-                             version_range("firefox", "8.0a1", "9.0a1")},
+                             version_range("firefox", "8.0a1", "9.0a1"),
+                         '{3550f703-e582-4d05-9a08-453d09bdfdc6}':
+                             version_range("thunderbird", "8.0a1", "9.0a1"),},
         tier=5)
 
     # The new spec returns an object.
@@ -390,6 +392,28 @@ def mail_attachment_api(wrapper, arguments, traverser):
         compatibility_type="error",
         for_appversions={'{3550f703-e582-4d05-9a08-453d09bdfdc6}':
                              version_range("thunderbird", "7.0a1", "8.0a1")},
+        tier=5)
+
+    return JSWrapper(JSObject(), traverser=traverser)
+
+
+def nsIMsgSearchScopeTerm_removed(wrapper, arguments, traverser):
+    """Flag calls to nsIMsgSearchScopeTerm methods for incompatibility with Thunderbird 8"""
+    traverser.err.notice(
+        err_id=("testcases_javascript_calldefinitions", "nsIMsgSearchScopeTerm"),
+        notice="Removed nsIMsgSearchScopeTerm method in use.",
+        description="This add-on appears to use nsIMsgSearchScopeTerm.mailFile or, "
+                    "nsIMsgSearchScopeTerm.inputStream, both of which have been removed"
+                    "as part of changes made in Thunderbird 8. For more information, "
+                    "please refer to "
+                    "https://bugzilla.mozilla.org/show_bug.cgi?id=668700",
+        filename=traverser.filename,
+        line=traverser.line,
+        column=traverser.position,
+        context=traverser.context,
+        compatibility_type="error",
+        for_appversions={'{3550f703-e582-4d05-9a08-453d09bdfdc6}':
+                             version_range("thunderbird", "8.0a1", "9.0a1")},
         tier=5)
 
     return JSWrapper(JSObject(), traverser=traverser)
