@@ -482,3 +482,28 @@ def test_tb7_deRDF_addressbook():
     assert err.notices
     assert err.compat_summary["errors"]
 
+
+def test_tb8_nsIMsgSearchScopeTerm():
+    """Test that nsIMsgSearchScopeTerm.mailFile & inputStream are flagged."""
+
+    err = _do_real_test_raw("""
+    var x = Components.classes["foo"].createInstance(
+        Components.interfaces.nsIMsgSearchScopeTerm);
+    x.mailFile();
+    x.inputStream();
+    """)
+    assert not err.failed()
+    assert not err.notices
+    assert not any(err.compat_summary.values())
+
+    err = _do_real_test_raw("""
+    var x = Components.classes["foo"].createInstance(
+        Components.interfaces.nsIMsgSearchScopeTerm);
+    x.mailFile();
+    x.inputStream();
+    """, versions={'{3550f703-e582-4d05-9a08-453d09bdfdc6}':
+                       version_range("thunderbird", "8.0a1")})
+    assert not err.failed()
+    assert len(err.notices) == 2
+    assert err.compat_summary["errors"]
+
