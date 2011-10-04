@@ -2,6 +2,12 @@ from zipfile import ZipFile
 from StringIO import StringIO
 
 
+def to_utf8(s):
+    if isinstance(s, unicode):
+        s = s.encode('utf-8')
+    return s
+
+
 class XPIManager(object):
     """
     An XPI reader and management class. Allows fun things like reading,
@@ -76,11 +82,10 @@ class XPIManager(object):
 
     def write(self, name, data):
         """Write a blob of data to the XPI manager."""
-
         if isinstance(data, StringIO):
             self.zf.writestr(name, data.getvalue())
         else:
-            self.zf.writestr(name, data)
+            self.zf.writestr(name, to_utf8(data))
 
     def write_file(self, name, path=None):
         """Write the contents of a file from the disk to the XPI."""
@@ -89,4 +94,3 @@ class XPIManager(object):
             path = name
 
         self.zf.write(path, name)
-
