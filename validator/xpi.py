@@ -80,7 +80,7 @@ class XPIManager(object):
         if isinstance(data, StringIO):
             self.zf.writestr(name, data.getvalue())
         else:
-            self.zf.writestr(name, data)
+            self.zf.writestr(name, data.encode('utf-8'))
 
     def write_file(self, name, path=None):
         """Write the contents of a file from the disk to the XPI."""
@@ -89,4 +89,3 @@ class XPIManager(object):
             path = name
 
         self.zf.write(path, name)
-
