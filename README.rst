@@ -56,10 +56,15 @@ include this API.::
     ./configure
     make
 
-Once Spidermonkey is installed, the path to the JavaScript shell must be
-specified in the /validator/constants.py file in the
-``SPIDERMONKEY_INSTALLATION`` variable. If this variable is set to ``None``, no
-JavaScript tests will be run.
+HINT: if you're using `brew`_ on Mac OS X you can get autoconf2.13 with this::
+
+    brew install https://gist.github.com/raw/765545/c87a75f2cf9e26c153970522e227f1c1cf63fb81/autoconf213.rb
+
+Once Spidermonkey is installed, make sure the ``js`` excutable is on
+``$PATH``. If so, you're good. Otherwise you can set a custom path to the js
+executable as ``$SPIDERMONKEY_INSTALLATION`` in your environment.
+
+.. _`brew`: http://mxcl.github.com/homebrew/
 
 ---------
  Running
