@@ -1,6 +1,7 @@
+from nose.tools import eq_
+
 from js_helper import _do_test_raw, _do_real_test_raw
-from validator.errorbundler import ErrorBundle
-import validator.testcases.scripting
+
 
 def test_xmlhttprequest():
     """Tests that the XPCOM XHR yields the standard XHR."""
@@ -22,15 +23,17 @@ def test_xmlhttprequest():
 def test_nsiaccessibleretrieval():
     """Flag any uses of nsIAccessibleRetrieval."""
 
-    assert not _do_test_raw("""
+    err = _do_test_raw("""
     var c = Components.classes[""].createInstance(
         Components.interfaces.nsIAccessibleRetrievalWhatever);
-    """).failed()
+    """)
+    eq_(len(err.warnings), 1)
 
-    assert _do_test_raw("""
+    err = _do_test_raw("""
     var c = Components.classes[""].createInstance(
         Components.interfaces.nsIAccessibleRetrieval);
-    """).failed()
+    """)
+    eq_(len(err.warnings), 2)
 
 
 def test_evalinsandbox():
@@ -123,7 +126,7 @@ def test_overwritability():
     xhr = Components.classes[""].createInstance(
         Components.interfaces.nsIXMLHttpRequest);
     xhr = "foo";
-    """).failed()
+    """).failed(fail_on_warnings=False)
 
 
 def test_banned_interfaces():
@@ -133,18 +136,18 @@ def test_banned_interfaces():
     Components.classes[""].createInstance(
         Components.interfaces.nsIDOMDocumentTraversal);
     """)
-    assert not err.failed()
     print err.print_summary(verbose=True)
     print err.compat_summary
+    assert not err.failed(fail_on_warnings=False)
     assert not any(err.compat_summary.values())
 
     err = _do_real_test_raw("""
     Components.classes[""].createInstance(
         Components.interfaces.nsIDOMDocumentTraversal);
     """, versions={"{ec8030f7-c20a-464f-9b0e-13a3a9e97384}": ["6.0a1"]})
-    assert not err.failed()
     print err.print_summary(verbose=True)
     print err.compat_summary
+    assert not err.failed(fail_on_warnings=False)
     assert err.compat_summary["errors"]
 
 
@@ -170,20 +173,38 @@ def test_xpcom_shortcut_cu():
 def test_xpcom_shortcut_ci():
     """Test the Components.interfaces shortcut."""
 
-    _test_when_bootstrapped("""
+    err = _do_test_raw("""
     var item = Components.classes["@mozilla.org/windowmediator;1"]
                          .getService(Ci.nsIWindowMediator);
     item.registerNotification();
-    """)
+    """, bootstrap=True)
+    eq_(len(err.warnings), 2)
+
+    err = _do_test_raw("""
+    var item = Components.classes["@mozilla.org/windowmediator;1"]
+                         .getService(Ci.nsIWindowMediator);
+    item.registerNotification();
+    """, bootstrap=False)
+    eq_(len(err.warnings), 1)
+
 
 def test_xpcom_shortcut_cc():
     """Test the Components.classes shortcut."""
 
-    _test_when_bootstrapped("""
+    err = _do_test_raw("""
     var item = Cc["@mozilla.org/windowmediator;1"]
                    .getService(Components.interfaces.nsIWindowMediator);
     item.registerNotification();
-    """)
+    """, bootstrap=True)
+    eq_(len(err.warnings), 2)
+
+    err = _do_test_raw("""
+    var item = Cc["@mozilla.org/windowmediator;1"]
+                   .getService(Components.interfaces.nsIWindowMediator);
+    item.registerNotification();
+    """, bootstrap=False)
+    eq_(len(err.warnings), 1)
+
 
 def test_xpcom_shortcut_services_scriptloader():
     """Test that Services.scriptloader throws an error."""

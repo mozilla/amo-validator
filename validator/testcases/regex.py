@@ -37,6 +37,18 @@ CATEGORY_REGEXES = (
 
 PASSWORD_REGEX = re.compile("password", re.I)
 
+CHROME_PATTERNS = (
+    (r"(?<![\'\"])require\s*\(\s*[\'\"]chrome[\'\"]\s*\)",
+        'Usage of non-SDK interface',
+        "This SDK-based add-on uses interfaces that aren't part of the SDK."),
+    # See https://bugzilla.mozilla.org/show_bug.cgi?id=636145
+    (r"Components\.(classes|interfaces)",
+        'Use of deprecated globals',
+        'The use of global `Components` is deprecated. To use chrome authority'
+        ' use `require("chrome")` instead.'),
+)
+
+
 # DOM mutation events; bug 642153
 DOM_MUTATION_REGEXES = map(re.compile,
         ("DOMAttrModified", "DOMAttributeNameChanged",
@@ -145,6 +157,9 @@ def run_regex_tests(document, err, filename, context=None, is_js=False):
                 re.compile(pattern),
                 "Potentially unsafe JS in use.",
                 message)
+
+    for pattern, title, message in CHROME_PATTERNS:
+        _generic_test(re.compile(pattern), title, message)
 
     if is_js:
         for pattern in CATEGORY_REGEXES:

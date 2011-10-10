@@ -224,7 +224,7 @@ def test_fx7_nsIDOMFile():
         Components.interfaces.nsIDOMFile);
     x.getAsBinary();
     """)
-    assert not err.failed()
+    assert not err.failed(fail_on_warnings=False)
     assert not err.notices
     assert not any(err.compat_summary.values())
 
@@ -234,7 +234,7 @@ def test_fx7_nsIDOMFile():
     x.getAsDataURL();
     """, versions={'{ec8030f7-c20a-464f-9b0e-13a3a9e97384}':
                        version_range("firefox", "7.0a1")})
-    assert not err.failed()
+    assert not err.failed(fail_on_warnings=False)
     assert len(err.notices) == 1
     assert err.compat_summary["errors"]
 
@@ -256,7 +256,7 @@ def test_fx7_nsIJSON():
         Components.interfaces.nsIJSON);
     x.encode();
     """)
-    assert not err.failed()
+    assert not err.failed(fail_on_warnings=False)
     assert not err.notices
     assert not any(err.compat_summary.values())
 
@@ -266,7 +266,7 @@ def test_fx7_nsIJSON():
     x.encode();
     """, versions={'{ec8030f7-c20a-464f-9b0e-13a3a9e97384}':
                        version_range("firefox", "7.0a1")})
-    assert not err.failed()
+    assert not err.failed(fail_on_warnings=False)
     assert len(err.notices) == 1
     assert err.compat_summary["warnings"]
 
@@ -325,7 +325,7 @@ def test_tb6_nsIImapMailFolderSink():
         Components.interfaces.nsIImapMailFolderSink);
     x.setUrlState();
     """)
-    assert not err.failed()
+    assert not err.failed(fail_on_warnings=False)
     assert not err.notices
     assert not any(err.compat_summary.values())
 
@@ -335,7 +335,7 @@ def test_tb6_nsIImapMailFolderSink():
     x.setUrlState();
     """, versions={'{3550f703-e582-4d05-9a08-453d09bdfdc6}':
                        version_range("thunderbird", "6.0a1")})
-    assert not err.failed()
+    assert not err.failed(fail_on_warnings=False)
     assert len(err.notices) == 1
     assert err.compat_summary["errors"]
 
@@ -348,7 +348,7 @@ def test_tb6_nsIImapProtocol():
         Components.interfaces.nsIImapProtocol);
     x.NotifyHdrsToDownload();
     """)
-    assert not err.failed()
+    assert not err.failed(fail_on_warnings=False)
     assert not err.notices
     assert not any(err.compat_summary.values())
 
@@ -358,7 +358,7 @@ def test_tb6_nsIImapProtocol():
     x.NotifyHdrsToDownload();
     """, versions={'{3550f703-e582-4d05-9a08-453d09bdfdc6}':
                        version_range("thunderbird", "6.0a1")})
-    assert not err.failed()
+    assert not err.failed(fail_on_warnings=False)
     assert len(err.notices) == 1
     assert err.compat_summary["errors"]
 
@@ -390,7 +390,7 @@ def test_tb7_nsIMsgThread():
         Components.interfaces.nsIMsgThread);
     x.GetChildAt();
     """)
-    assert not err.failed()
+    assert not err.failed(fail_on_warnings=False)
     assert not err.notices
     assert not any(err.compat_summary.values())
 
@@ -400,7 +400,7 @@ def test_tb7_nsIMsgThread():
     x.GetChildAt();
     """, versions={'{3550f703-e582-4d05-9a08-453d09bdfdc6}':
                        version_range("thunderbird", "7.0a1")})
-    assert not err.failed()
+    assert not err.failed(fail_on_warnings=False)
     assert len(err.notices) == 1
     assert err.compat_summary["errors"]
 
@@ -492,7 +492,7 @@ def test_tb8_nsIMsgSearchScopeTerm():
     x.mailFile();
     x.inputStream();
     """)
-    assert not err.failed()
+    assert not err.failed(fail_on_warnings=False)
     assert not err.notices
     assert not any(err.compat_summary.values())
 
@@ -503,7 +503,7 @@ def test_tb8_nsIMsgSearchScopeTerm():
     x.inputStream();
     """, versions={'{3550f703-e582-4d05-9a08-453d09bdfdc6}':
                        version_range("thunderbird", "8.0a1")})
-    assert not err.failed()
+    assert not err.failed(fail_on_warnings=False)
     assert len(err.notices) == 2
     assert err.compat_summary["errors"]
 
