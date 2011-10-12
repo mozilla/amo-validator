@@ -35,7 +35,8 @@ def test_version_range_before():
 
 def test_navigator_language():
     """
-    Test that 'navigator.language' is flagged as potentially incompatile with FX5.
+    Test that 'navigator.language' is flagged as potentially
+    incompatible with FX5.
     """
 
     err = _do_real_test_raw("""
@@ -315,6 +316,26 @@ def test_fx8_compat():
     assert not err.failed()
     assert err.notices
     assert err.compat_summary["errors"]
+
+
+def futureCompatWarning(code, version):
+    err = _do_real_test_raw(code)
+    assert not err.failed()
+    assert not any(err.compat_summary.values())
+
+    err = _do_real_test_raw(
+        code,
+        versions={'{ec8030f7-c20a-464f-9b0e-13a3a9e97384}':
+                      version_range("firefox", version)})
+    assert not err.failed()
+    assert err.compat_summary["warnings"]
+
+
+def test_fx9_navigator_taintEnabled():
+    """
+    'navigator.taintEnabled' is flagged as incompatible with FX9.
+    """
+    futureCompatWarning('alert(navigator.taintEnabled);', '9.0a1')
 
 
 def test_tb6_nsIImapMailFolderSink():

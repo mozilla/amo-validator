@@ -146,4 +146,3 @@ INSTANCE_DEFINITIONS = {"createElement": createElement,
                         "QueryInterface": QueryInterface,
                         "getAsBinary": nsIDOMFile_deprec,
                         "getAsDataURL": nsIDOMFile_deprec}
-

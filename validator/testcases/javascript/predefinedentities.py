@@ -513,4 +513,3 @@ GLOBAL_ENTITIES = {
 }
 
 CONTENT_DOCUMENT = GLOBAL_ENTITIES[u"content"]["value"][u"document"]
-
