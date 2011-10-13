@@ -338,6 +338,16 @@ def test_fx9_navigator_taintEnabled():
     futureCompatWarning('alert(navigator.taintEnabled);', '9.0a1')
 
 
+def test_fx9_691569():
+    """
+    baseURIObject, nodePrincipal, documentURIObject are flagged as
+    unavailable in non-chrome contexts in FX9.
+    """
+    futureCompatWarning('alert(document.documentURIObject);', '9.0a1')
+    futureCompatWarning('alert(document.nodePrincipal);', '9.0a1')
+    futureCompatWarning('alert(document.baseURIObject);', '9.0a1')
+
+
 def test_tb6_nsIImapMailFolderSink():
     """Test that nsIImapMailFolderSink.setUrlState is flagged."""
 

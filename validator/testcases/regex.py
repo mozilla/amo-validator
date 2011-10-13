@@ -323,6 +323,31 @@ def run_regex_tests(document, err, filename, context=None, is_js=False):
                  "information, please see %s.") % TAINTENABLED_BUG,
                 compatibility_type="warning",
                 appversions=FX9_DEFINITION)
+        XRAYPROPS_BUG = BUGZILLA_BUG % 660233
+        _compat_test(
+            re.compile(r"\.nodePrincipal"),
+            ("nodePrincipal only available in chrome context"),
+            ("The nodePrincipal property is no longer accessible from "
+             "untrusted scripts. For more information, please see %s."
+             ) % XRAYPROPS_BUG,
+            compatibility_type="warning",
+            appversions=FX9_DEFINITION)
+        _compat_test(
+            re.compile(r"\.documentURIObject"),
+            ("documentURIObject only available in chrome context"),
+            ("The documentURIObject property is no longer accessible from "
+             "untrusted scripts. For more information, please see %s."
+             ) % XRAYPROPS_BUG,
+            compatibility_type="warning",
+            appversions=FX9_DEFINITION)
+        _compat_test(
+            re.compile(r"\.baseURIObject"),
+            ("baseURIObject only available in chrome context"),
+            ("The baseURIObject property is no longer accessible from "
+             "untrusted scripts. For more information, please see %s."
+             ) % XRAYPROPS_BUG,
+            compatibility_type="warning",
+            appversions=FX9_DEFINITION)
 
     # Thunderbird 7 Compatibility rdf:addressdirectory
     if err.supports_version(TB7_DEFINITION):
