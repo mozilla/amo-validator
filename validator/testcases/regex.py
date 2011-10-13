@@ -312,7 +312,7 @@ def run_regex_tests(document, err, filename, context=None, is_js=False):
 
     # Firefox 9 Compatibility
     if err.supports_version(FX9_DEFINITION):
-        TAINTENABLED_BUG = "https://bugzilla.mozilla.org/show_bug.cgi?id=679971"
+        TAINTENABLED_BUG = BUGZILLA_BUG % 679971
         _compat_test(
                 re.compile(r"navigator\.taintEnabled"),
                 "navigator.taintEnabled was removed in Firefox 9.",
@@ -346,6 +346,14 @@ def run_regex_tests(document, err, filename, context=None, is_js=False):
             ("The baseURIObject property is no longer accessible from "
              "untrusted scripts. For more information, please see %s."
              ) % XRAYPROPS_BUG,
+            compatibility_type="warning",
+            appversions=FX9_DEFINITION)
+        _compat_test(
+            re.compile(r"nsIGlobalHistory3"),
+            "nsIGlobalHistory3 was removed in Firefox 9",
+            ("The nsIGlobalHistory3 interface has been removed from Firefox."
+             " For more information, please see %s."
+             ) % (BUGZILLA_BUG % 568971),
             compatibility_type="warning",
             appversions=FX9_DEFINITION)
 

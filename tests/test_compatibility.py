@@ -348,6 +348,15 @@ def test_fx9_691569():
     futureCompatWarning('alert(document.baseURIObject);', '9.0a1')
 
 
+def test_fx9_nsIGlobalHistory3():
+    """
+    nsIGlobalHistory3 is flagged as incompatible in Firefox 9.
+    """
+    futureCompatWarning(
+        'var x = "nsIGlobalHistory3";',
+        '9.0a1')
+
+
 def test_tb6_nsIImapMailFolderSink():
     """Test that nsIImapMailFolderSink.setUrlState is flagged."""
 
