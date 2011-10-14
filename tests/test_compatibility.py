@@ -413,6 +413,61 @@ def test_fx9_nsIURL_param():
         '9.0a1')
 
 
+def test_fx9_nsIBrowserHistory_removePages():
+    """
+    nsIBrowserHistory.removePages() takes 2 arguments instead of 3 in
+    Firefox 9.
+    """
+    futureCompatError(
+        """
+        var browserHistory = Components.classes[
+                                 "@mozilla.org/browser/global-history;2"]
+                             .getService(
+                                 Components.interfaces.nsIBrowserHistory);
+        browserHistory.removePages(uriList, uriList.length, false);
+        """,
+        '9.0a1')
+
+    err = _do_real_test_raw(
+        """
+        var browserHistory = Components.classes[
+                                 "@mozilla.org/browser/global-history;2"]
+                             .getService(
+                                 Components.interfaces.nsIBrowserHistory);
+        browserHistory.removePages(uriList, uriList.length);
+        """,
+        versions={'{ec8030f7-c20a-464f-9b0e-13a3a9e97384}':
+                      version_range("firefox", "9.0a1")})
+    assert not err.failed(fail_on_warnings=False)
+    assert not err.compat_summary["errors"]
+
+
+def test_fx9_nsIBrowserHistory_register():
+    """
+    nsIBrowserHistory.registerOpenPage() and
+    nsIBrowserHistory.unregisterOpenPage() no longer exist in
+    Firefox 9.
+    """
+    futureCompatError(
+        """
+        var browserHistory = Components.classes[
+                                 "@mozilla.org/browser/global-history;2"]
+                             .getService(
+                                 Components.interfaces.nsIBrowserHistory);
+        alert(browserHistory.registerOpenPage);
+        """,
+        '9.0a1')
+    futureCompatError(
+        """
+        var browserHistory = Components.classes[
+                                 "@mozilla.org/browser/global-history;2"]
+                             .getService(
+                                 Components.interfaces.nsIBrowserHistory);
+        alert(browserHistory.unregisterOpenPage);
+        """,
+        '9.0a1')
+
+
 def test_tb6_nsIImapMailFolderSink():
     """Test that nsIImapMailFolderSink.setUrlState is flagged."""
 

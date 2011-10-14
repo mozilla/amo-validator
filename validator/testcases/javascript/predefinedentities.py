@@ -174,6 +174,17 @@ INTERFACES = {
         {"value":
              {u"param":
                   {"value": call_definitions.url_param_bug691588}}},
+    u"nsIBrowserHistory":
+        {"value":
+             {u"removePages":
+                  {"return": call_definitions.browserhistory_removepages},
+              u"registerOpenPage":
+                  {"value": call_definitions.browserhistory_registeropenpage},
+              u"unregisterOpenPage":
+                  {"value":
+                       call_definitions.browserhistory_unregisteropenpage},
+              }
+         },
     }
 
 
@@ -453,6 +464,9 @@ GLOBAL_ENTITIES = {
                                      lambda: INTERFACES["nsIURLParser"]},
                              u"nsIURL":
                                 {"xpcom_map": lambda: INTERFACES["nsIURL"]},
+                             u"nsIBrowserHistory":
+                                 {"xpcom_map":
+                                     lambda: INTERFACES["nsIBrowserHistory"]},
                              u"nsIWindowWatcher":
                                 {"xpcom_map":
                                      lambda:

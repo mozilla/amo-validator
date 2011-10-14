@@ -79,6 +79,58 @@ def url_param_bug691588(t):
         tier=5)
 
 
+def browserhistory_removepages(wrapper, arguments, traverser):
+    """
+    nsIBrowserHistory.removePages takes 2 args in FX9 instead of 3.
+    """
+    if len(arguments) > 2:
+        traverser.err.error(
+            ("testcases_javascript_call_definititions",
+             "fx9_compat",
+             "browserhistory_removepages"),
+            ("nsIBrowser.removePages' signature has changed in Firefox 9."
+             " See %s for more information.") % (BUGZILLA_BUG % 681420),
+            for_appversions=FX9_DEFINITION,
+            filename=traverser.filename, line=traverser.line,
+            column=traverser.position, context=traverser.context,
+            compatibility_type="error",
+            tier=5)
+
+
+def browserhistory_registeropenpage(t):
+    """
+    nsIBrowser.registerOpenPage is gone in Firefox 9.
+    """
+    t.err.error(
+        ("testcases_javascript_call_definititions",
+         "fx9_compat",
+         "browserhistory_registeropenpage"),
+        ("nsIBrowser.registerOpenPage has been removed in Firefox 9."
+         " See %s for more information.") % (BUGZILLA_BUG % 681420),
+        for_appversions=FX9_DEFINITION,
+        filename=t.filename, line=t.line,
+        column=t.position, context=t.context,
+        compatibility_type="error",
+        tier=5)
+
+
+def browserhistory_unregisteropenpage(t):
+    """
+    nsIBrowser.unregisterOpenPage is gone in Firefox 9.
+    """
+    t.err.error(
+        ("testcases_javascript_call_definititions",
+         "fx9_compat",
+         "browserhistory_unregisteropenpage"),
+        ("nsIBrowser.unregisterOpenPage has been removed in Firefox 9."
+         " See %s for more information.") % (BUGZILLA_BUG % 681420),
+        for_appversions=FX9_DEFINITION,
+        filename=t.filename, line=t.line,
+        column=t.position, context=t.context,
+        compatibility_type="error",
+        tier=5)
+
+
 def xpcom_constructor(method, extend=False, mutate=False, pretraversed=False):
     """Returns a function which wraps an XPCOM class instantiation function."""
 
