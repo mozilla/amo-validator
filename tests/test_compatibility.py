@@ -512,6 +512,25 @@ def test_fx9_nsIEditor_updateDefaultDictionary():
     assert not err.compat_summary["errors"]
 
 
+def test_fx9_geo_prefs():
+    """
+    The 'geo.wifi.uri' and 'geo.wifi.protocol' prefs aren't set in
+    Firefox 9; referring to them produces a compatibility error.
+    """
+    futureCompatError("""
+    var Application = Components.classes["@mozilla.org/fuel/application;1"]
+                      .getService(Components.interfaces.fuelIApplication);
+    this._uri = Application.prefs.get('geo.wifi.uri');
+    """,
+    '9.0a1')
+    futureCompatError("""
+    var Application = Components.classes["@mozilla.org/fuel/application;1"]
+                      .getService(Components.interfaces.fuelIApplication);
+    this._protocol = Application.prefs.get('geo.wifi.protocol');
+    """,
+    '9.0a1')
+
+
 def test_tb6_nsIImapMailFolderSink():
     """Test that nsIImapMailFolderSink.setUrlState is flagged."""
 

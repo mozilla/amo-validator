@@ -121,15 +121,15 @@ def run_regex_tests(document, err, filename, context=None, is_js=False):
                 context=context)
 
     def _compat_test(pattern, title, message, compatibility_type=None,
-                     appversions=None):
+                     appversions=None, logFunc=err.notice):
         """Run a single regex test and return a compatibility message."""
         match = pattern.search(document)
         if match:
             line = context.get_line(match.start())
-            err.notice(
-                err_id=("testcases_javascript_regex", "generic",
-                        "_compat_test"),
-                notice=title,
+            logFunc(
+                ("testcases_javascript_regex", "generic",
+                 "_compat_test"),
+                title,
                 description=message,
                 filename=filename,
                 line=line,
@@ -356,6 +356,22 @@ def run_regex_tests(document, err, filename, context=None, is_js=False):
              ) % (BUGZILLA_BUG % 568971),
             compatibility_type="warning",
             appversions=FX9_DEFINITION)
+        _compat_test(
+            re.compile(r"geo\.wifi\.uri"),
+            "The preference 'geo.wifi.uri' was removed in Firefox 9",
+            ("The geo.wifi.* preferences are no longer in use. See %s for "
+             "more information.") % (BUGZILLA_BUG % 689252),
+            compatibility_type="error",
+            appversions=FX9_DEFINITION,
+            logFunc=err.error)
+        _compat_test(
+            re.compile(r"geo\.wifi\.protocol"),
+            "The preference 'geo.wifi.uri' was removed in Firefox 9",
+            ("The geo.wifi.* preferences are no longer in use. See %s for "
+             "more information.") % (BUGZILLA_BUG % 689252),
+            compatibility_type="error",
+            appversions=FX9_DEFINITION,
+            logFunc=err.error)
 
     # Thunderbird 7 Compatibility rdf:addressdirectory
     if err.supports_version(TB7_DEFINITION):
