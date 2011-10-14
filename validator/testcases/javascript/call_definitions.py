@@ -8,6 +8,8 @@ import predefinedentities
 from jstypes import *
 from validator.constants import BUGZILLA_BUG
 from validator.decorator import version_range
+#TODO(ashort): Move FX*_DEFINITION etc definitions into common module
+from validator.testcases.regex import FX9_DEFINITION
 
 # Function prototypes should implement the following:
 #  wrapper : The JSWrapper instace that is being called
@@ -40,6 +42,129 @@ def amp_rp_bug660359(wrapper, arguments, traverser):
                              version_range("thunderbird", "6.0a1", "7.0a1"),},
         compatibility_type="error",
         tier=5)
+
+
+def urlparser_parsepath_bug691588(wrapper, arguments, traverser):
+    """
+    nsIURLParser.parsePath doesn't take paramPos/paramLen in FX9.
+    """
+    if len(arguments) > 8:
+        traverser.err.error(
+            ("testcases_javascript_call_definititions",
+             "fx9_compat",
+             "urlparser_691588"),
+            ("nsIURLParser.parsePath's signature has changed in Firefox 9."
+             " See %s for more information.") % (BUGZILLA_BUG % 665706),
+            for_appversions=FX9_DEFINITION,
+            filename=traverser.filename, line=traverser.line,
+            column=traverser.position, context=traverser.context,
+            compatibility_type="error",
+            tier=5)
+
+
+def url_param_bug691588(t):
+    """
+    nsIURL.param is gone in FX9.
+    """
+    t.err.error(
+        ("testcases_javascript_call_definititions",
+         "fx9_compat",
+         "urlparser_691588"),
+        ("nsIURL.param has been removed in Firefox 9."
+         " See %s for more information.") % (BUGZILLA_BUG % 665706),
+        for_appversions=FX9_DEFINITION,
+        filename=t.filename, line=t.line,
+        column=t.position, context=t.context,
+        compatibility_type="error",
+        tier=5)
+
+
+def browserhistory_removepages(wrapper, arguments, traverser):
+    """
+    nsIBrowserHistory.removePages takes 2 args in FX9 instead of 3.
+    """
+    if len(arguments) > 2:
+        traverser.err.error(
+            ("testcases_javascript_call_definititions",
+             "fx9_compat",
+             "browserhistory_removepages"),
+            ("nsIBrowser.removePages' signature has changed in Firefox 9."
+             " See %s for more information.") % (BUGZILLA_BUG % 681420),
+            for_appversions=FX9_DEFINITION,
+            filename=traverser.filename, line=traverser.line,
+            column=traverser.position, context=traverser.context,
+            compatibility_type="error",
+            tier=5)
+
+
+def browserhistory_registeropenpage(t):
+    """
+    nsIBrowser.registerOpenPage is gone in Firefox 9.
+    """
+    t.err.error(
+        ("testcases_javascript_call_definititions",
+         "fx9_compat",
+         "browserhistory_registeropenpage"),
+        ("nsIBrowser.registerOpenPage has been removed in Firefox 9."
+         " See %s for more information.") % (BUGZILLA_BUG % 681420),
+        for_appversions=FX9_DEFINITION,
+        filename=t.filename, line=t.line,
+        column=t.position, context=t.context,
+        compatibility_type="error",
+        tier=5)
+
+
+def browserhistory_unregisteropenpage(t):
+    """
+    nsIBrowser.unregisterOpenPage is gone in Firefox 9.
+    """
+    t.err.error(
+        ("testcases_javascript_call_definititions",
+         "fx9_compat",
+         "browserhistory_unregisteropenpage"),
+        ("nsIBrowser.unregisterOpenPage has been removed in Firefox 9."
+         " See %s for more information.") % (BUGZILLA_BUG % 681420),
+        for_appversions=FX9_DEFINITION,
+        filename=t.filename, line=t.line,
+        column=t.position, context=t.context,
+        compatibility_type="error",
+        tier=5)
+
+
+def spellcheck_savedefaultdictionary(t):
+    """
+    nsIEditorSpellCheck.saveDefaultDictionary is gone in Firefox 9.
+    """
+    t.err.error(
+        ("testcases_javascript_call_definititions",
+         "fx9_compat",
+         "spellcheck_savedefaultdictionary"),
+        ("nsIEditorSpellCheck.saveDefaultDictionary has been removed in"
+         " Firefox 9. See %s for more information.") % (BUGZILLA_BUG % 678842),
+        for_appversions=FX9_DEFINITION,
+        filename=t.filename, line=t.line,
+        column=t.position, context=t.context,
+        compatibility_type="error",
+        tier=5)
+
+
+def spellcheck_updatecurrentdictionary(wrapper, arguments, traverser):
+    """
+    nsIEditorSpellCheck.UpdateCurrentDictionary takes no args in Firefox 9.
+    """
+    if len(arguments) > 0:
+        traverser.err.error(
+            ("testcases_javascript_call_definititions",
+             "fx9_compat",
+             "spellcheck_updatecurrentdictionary"),
+            ("nsIEditorSpellCheck.UpdateCurrentDictionary takes no arguments "
+             "in Firefox 9. See %s for more information."
+             ) % (BUGZILLA_BUG % 678842),
+            for_appversions=FX9_DEFINITION,
+            filename=traverser.filename, line=traverser.line,
+            column=traverser.position, context=traverser.context,
+            compatibility_type="error",
+            tier=5)
 
 
 def xpcom_constructor(method, extend=False, mutate=False, pretraversed=False):

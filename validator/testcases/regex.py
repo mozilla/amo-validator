@@ -80,6 +80,8 @@ FX8_DEFINITION = {"{ec8030f7-c20a-464f-9b0e-13a3a9e97384}":
                       version_range("firefox", "8.0a1", "9.0a1"),
                   "{3550f703-e582-4d05-9a08-453d09bdfdc6}":
                       version_range("thunderbird", "8.0a1", "9.0a1")}
+FX9_DEFINITION = {"{ec8030f7-c20a-464f-9b0e-13a3a9e97384}":
+                      version_range("firefox", "9.0a1", "10.0a1")}
 TB7_DEFINITION = {"{3550f703-e582-4d05-9a08-453d09bdfdc6}":
                       version_range("thunderbird", "7.0a1", "8.0a1")}
 
@@ -119,15 +121,15 @@ def run_regex_tests(document, err, filename, context=None, is_js=False):
                 context=context)
 
     def _compat_test(pattern, title, message, compatibility_type=None,
-                     appversions=None):
+                     appversions=None, logFunc=err.notice):
         """Run a single regex test and return a compatibility message."""
         match = pattern.search(document)
         if match:
             line = context.get_line(match.start())
-            err.notice(
-                err_id=("testcases_javascript_regex", "generic",
-                        "_compat_test"),
-                notice=title,
+            logFunc(
+                ("testcases_javascript_regex", "generic",
+                 "_compat_test"),
+                title,
                 description=message,
                 filename=filename,
                 line=line,
@@ -307,6 +309,69 @@ def run_regex_tests(document, err, filename, context=None, is_js=False):
                  "%s for more information.") % ISO8601_MDC,
                 compatibility_type="error",
                 appversions=FX8_DEFINITION)
+
+    # Firefox 9 Compatibility
+    if err.supports_version(FX9_DEFINITION):
+        TAINTENABLED_BUG = BUGZILLA_BUG % 679971
+        _compat_test(
+                re.compile(r"navigator\.taintEnabled"),
+                "navigator.taintEnabled was removed in Firefox 9.",
+                ("The taintEnabled function is no longer available in"
+                 " Firefox 9. Since this function was only used for "
+                 "browser detection and this doesn't belong in extension"
+                 " code, you should remove it if possible. For more "
+                 "information, please see %s.") % TAINTENABLED_BUG,
+                compatibility_type="warning",
+                appversions=FX9_DEFINITION)
+        XRAYPROPS_BUG = BUGZILLA_BUG % 660233
+        _compat_test(
+            re.compile(r"\.nodePrincipal"),
+            ("nodePrincipal only available in chrome context"),
+            ("The nodePrincipal property is no longer accessible from "
+             "untrusted scripts. For more information, please see %s."
+             ) % XRAYPROPS_BUG,
+            compatibility_type="warning",
+            appversions=FX9_DEFINITION)
+        _compat_test(
+            re.compile(r"\.documentURIObject"),
+            ("documentURIObject only available in chrome context"),
+            ("The documentURIObject property is no longer accessible from "
+             "untrusted scripts. For more information, please see %s."
+             ) % XRAYPROPS_BUG,
+            compatibility_type="warning",
+            appversions=FX9_DEFINITION)
+        _compat_test(
+            re.compile(r"\.baseURIObject"),
+            ("baseURIObject only available in chrome context"),
+            ("The baseURIObject property is no longer accessible from "
+             "untrusted scripts. For more information, please see %s."
+             ) % XRAYPROPS_BUG,
+            compatibility_type="warning",
+            appversions=FX9_DEFINITION)
+        _compat_test(
+            re.compile(r"nsIGlobalHistory3"),
+            "nsIGlobalHistory3 was removed in Firefox 9",
+            ("The nsIGlobalHistory3 interface has been removed from Firefox."
+             " For more information, please see %s."
+             ) % (BUGZILLA_BUG % 568971),
+            compatibility_type="warning",
+            appversions=FX9_DEFINITION)
+        _compat_test(
+            re.compile(r"geo\.wifi\.uri"),
+            "The preference 'geo.wifi.uri' was removed in Firefox 9",
+            ("The geo.wifi.* preferences are no longer in use. See %s for "
+             "more information.") % (BUGZILLA_BUG % 689252),
+            compatibility_type="error",
+            appversions=FX9_DEFINITION,
+            logFunc=err.error)
+        _compat_test(
+            re.compile(r"geo\.wifi\.protocol"),
+            "The preference 'geo.wifi.uri' was removed in Firefox 9",
+            ("The geo.wifi.* preferences are no longer in use. See %s for "
+             "more information.") % (BUGZILLA_BUG % 689252),
+            compatibility_type="error",
+            appversions=FX9_DEFINITION,
+            logFunc=err.error)
 
     # Thunderbird 7 Compatibility rdf:addressdirectory
     if err.supports_version(TB7_DEFINITION):

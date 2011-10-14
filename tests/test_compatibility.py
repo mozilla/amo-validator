@@ -35,7 +35,8 @@ def test_version_range_before():
 
 def test_navigator_language():
     """
-    Test that 'navigator.language' is flagged as potentially incompatile with FX5.
+    Test that 'navigator.language' is flagged as potentially
+    incompatible with FX5.
     """
 
     err = _do_real_test_raw("""
@@ -315,6 +316,219 @@ def test_fx8_compat():
     assert not err.failed()
     assert err.notices
     assert err.compat_summary["errors"]
+
+
+def futureCompatWarning(code, version):
+    err = _do_real_test_raw(code)
+    assert not err.failed()
+    assert not any(err.compat_summary.values())
+
+    err = _do_real_test_raw(
+        code,
+        versions={'{ec8030f7-c20a-464f-9b0e-13a3a9e97384}':
+                      version_range("firefox", version)})
+    assert not err.failed()
+    assert err.compat_summary["warnings"]
+
+
+def futureCompatError(code, version):
+    err = _do_real_test_raw(code)
+    assert not err.failed(fail_on_warnings=False)
+    assert not any(err.compat_summary.values())
+
+    err = _do_real_test_raw(
+        code,
+        versions={'{ec8030f7-c20a-464f-9b0e-13a3a9e97384}':
+                      version_range("firefox", version)})
+    assert err.failed(fail_on_warnings=False)
+    assert err.compat_summary["errors"]
+
+
+def test_fx9_navigator_taintEnabled():
+    """
+    'navigator.taintEnabled' is flagged as incompatible with FX9.
+    """
+    futureCompatWarning('alert(navigator.taintEnabled);', '9.0a1')
+
+
+def test_fx9_691569():
+    """
+    baseURIObject, nodePrincipal, documentURIObject are flagged as
+    unavailable in non-chrome contexts in FX9.
+    """
+    futureCompatWarning('alert(document.documentURIObject);', '9.0a1')
+    futureCompatWarning('alert(document.nodePrincipal);', '9.0a1')
+    futureCompatWarning('alert(document.baseURIObject);', '9.0a1')
+
+
+def test_fx9_nsIGlobalHistory3():
+    """
+    nsIGlobalHistory3 is flagged as incompatible in Firefox 9.
+    """
+    futureCompatWarning(
+        'var x = "nsIGlobalHistory3";',
+        '9.0a1')
+
+
+def test_fx9_nsIURLParser_parsePath():
+    """
+    nsIURLParser.parsePath takes 8 args instead of 10 now.
+    """
+    futureCompatError(
+        """
+        var URLi = Components.classes["@mozilla.org/network/url-parser;1?auth=maybe"].
+                       createInstance(Components.interfaces.nsIURLParser);
+        var filepathPos = {}, filepathLen = {}, paramPos = {}, paramLen = {},
+            queryPos = {}, queryLen = {}, refPos = {}, refLen = {};
+        URLi.parsePath(urlObj.path, -1, filepathPos, filepathLen, paramPos,
+                       paramLen, queryPos, queryLen, refPos, refLen);
+        """,
+        '9.0a1')
+
+    err = _do_real_test_raw(
+        """
+        var URLi = Components.classes["@mozilla.org/network/url-parser;1?auth=maybe"].
+                       createInstance(Components.interfaces.nsIURLParser);
+        var filepathPos = {}, filepathLen = {}, queryPos = {}, queryLen = {},
+            refPos = {}, refLen = {};
+        URLi.parsePath(urlObj.path, -1, filepathPos, filepathLen, queryPos,
+                       queryLen, refPos, refLen);
+        """,
+        versions={'{ec8030f7-c20a-464f-9b0e-13a3a9e97384}':
+                      version_range("firefox", "9.0a1")})
+    assert not err.failed(fail_on_warnings=False)
+    assert not err.compat_summary["errors"]
+
+
+def test_fx9_nsIURL_param():
+    """
+    nsIURL.param no longer exists in Firefox 9.
+    """
+    futureCompatError(
+        """
+        var myURI = {};
+        var myURL = myURI.QueryInterface(Components.interfaces.nsIURL);
+        alert(myURL.param);
+        """,
+        '9.0a1')
+
+
+def test_fx9_nsIBrowserHistory_removePages():
+    """
+    nsIBrowserHistory.removePages() takes 2 arguments instead of 3 in
+    Firefox 9.
+    """
+    futureCompatError(
+        """
+        var browserHistory = Components.classes[
+                                 "@mozilla.org/browser/global-history;2"]
+                             .getService(
+                                 Components.interfaces.nsIBrowserHistory);
+        browserHistory.removePages(uriList, uriList.length, false);
+        """,
+        '9.0a1')
+
+    err = _do_real_test_raw(
+        """
+        var browserHistory = Components.classes[
+                                 "@mozilla.org/browser/global-history;2"]
+                             .getService(
+                                 Components.interfaces.nsIBrowserHistory);
+        browserHistory.removePages(uriList, uriList.length);
+        """,
+        versions={'{ec8030f7-c20a-464f-9b0e-13a3a9e97384}':
+                      version_range("firefox", "9.0a1")})
+    assert not err.failed(fail_on_warnings=False)
+    assert not err.compat_summary["errors"]
+
+
+def test_fx9_nsIBrowserHistory_register():
+    """
+    nsIBrowserHistory.registerOpenPage() and
+    nsIBrowserHistory.unregisterOpenPage() no longer exist in
+    Firefox 9.
+    """
+    futureCompatError(
+        """
+        var browserHistory = Components.classes[
+                                 "@mozilla.org/browser/global-history;2"]
+                             .getService(
+                                 Components.interfaces.nsIBrowserHistory);
+        alert(browserHistory.registerOpenPage);
+        """,
+        '9.0a1')
+    futureCompatError(
+        """
+        var browserHistory = Components.classes[
+                                 "@mozilla.org/browser/global-history;2"]
+                             .getService(
+                                 Components.interfaces.nsIBrowserHistory);
+        alert(browserHistory.unregisterOpenPage);
+        """,
+        '9.0a1')
+
+
+def test_fx9_nsIEditor_saveDefaultDictionary():
+    """
+    nsIEditorSpellCheck.saveDefaultDictionary is gone in Firefox 9.
+    """
+    futureCompatError(
+        """
+        var spellChecker = Components.classes[
+                               '@mozilla.org/editor/editorspellchecker;1']
+                           .createInstance(
+                               Components.interfaces.nsIEditorSpellCheck);
+        alert(spellChecker.saveDefaultDictionary);
+        """,
+        '9.0a1')
+
+
+def test_fx9_nsIEditor_updateDefaultDictionary():
+    """
+    nsIEditorSpellCheck.UpdateDefaultDictionary takes no arguments in
+    Firefox 9.
+    """
+    futureCompatError(
+        """
+        var spellChecker = Components.classes[
+                               '@mozilla.org/editor/editorspellchecker;1']
+                           .createInstance(
+                               Components.interfaces.nsIEditorSpellCheck);
+        spellChecker.UpdateCurrentDictionary(null);
+        """,
+        '9.0a1')
+
+    err = _do_real_test_raw(
+        """
+        var spellChecker = Components.classes[
+                               '@mozilla.org/editor/editorspellchecker;1']
+                           .createInstance(
+                               Components.interfaces.nsIEditorSpellCheck);
+        spellChecker.UpdateCurrentDictionary();
+        """,
+        versions={'{ec8030f7-c20a-464f-9b0e-13a3a9e97384}':
+                      version_range("firefox", "9.0a1")})
+    assert not err.failed(fail_on_warnings=False)
+    assert not err.compat_summary["errors"]
+
+
+def test_fx9_geo_prefs():
+    """
+    The 'geo.wifi.uri' and 'geo.wifi.protocol' prefs aren't set in
+    Firefox 9; referring to them produces a compatibility error.
+    """
+    futureCompatError("""
+    var Application = Components.classes["@mozilla.org/fuel/application;1"]
+                      .getService(Components.interfaces.fuelIApplication);
+    this._uri = Application.prefs.get('geo.wifi.uri');
+    """,
+    '9.0a1')
+    futureCompatError("""
+    var Application = Components.classes["@mozilla.org/fuel/application;1"]
+                      .getService(Components.interfaces.fuelIApplication);
+    this._protocol = Application.prefs.get('geo.wifi.protocol');
+    """,
+    '9.0a1')
 
 
 def test_tb6_nsIImapMailFolderSink():

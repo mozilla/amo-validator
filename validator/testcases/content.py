@@ -128,6 +128,7 @@ def test_packed_packages(err, xpi_package=None):
             continue
 
         # Process the file.
+        processed = False
         name_lower = name.lower()
         if name_lower.endswith((".js", ".jsm")):
             # Add the scripts to a list to be processed later.

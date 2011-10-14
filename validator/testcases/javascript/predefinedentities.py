@@ -2,8 +2,9 @@ import math
 
 import actions
 from actions import _get_as_str
-import call_definitions
-from call_definitions import xpcom_constructor as xpcom_const, python_wrap
+from validator.testcases.javascript import call_definitions
+from validator.testcases.javascript.call_definitions import (
+    xpcom_constructor as xpcom_const, python_wrap)
 from jstypes import JSWrapper
 
 # A list of identifiers and member values that may not be used.
@@ -43,6 +44,7 @@ BANNED_PREF_REGEXPS = [
 # for details on entity properties.
 
 CONTENT_DOCUMENT = None
+
 
 INTERFACES = {
     u"nsICategoryManager":
@@ -164,6 +166,33 @@ INTERFACES = {
                         "Authors of bootstrapped add-ons must take care "
                         "to remove any added observers "
                         "at shutdown"}}},
+    u"nsIURLParser":
+        {"value":
+             {u"parsePath":
+                  {"return": call_definitions.urlparser_parsepath_bug691588}}},
+    u"nsIURL":
+        {"value":
+             {u"param":
+                  {"value": call_definitions.url_param_bug691588}}},
+    u"nsIBrowserHistory":
+        {"value":
+             {u"removePages":
+                  {"return": call_definitions.browserhistory_removepages},
+              u"registerOpenPage":
+                  {"value": call_definitions.browserhistory_registeropenpage},
+              u"unregisterOpenPage":
+                  {"value":
+                       call_definitions.browserhistory_unregisteropenpage},
+              }
+         },
+    u"nsIEditorSpellCheck":
+        {"value":
+             {u"UpdateCurrentDictionary":
+                  {"return":
+                       call_definitions.spellcheck_updatecurrentdictionary},
+              u"saveDefaultDictionary":
+                  {"value":
+                       call_definitions.spellcheck_savedefaultdictionary}}}
     }
 
 
@@ -438,6 +467,18 @@ GLOBAL_ENTITIES = {
                                 {"xpcom_map":
                                      lambda:
                                         INTERFACES["nsIWindowMediator"]},
+                             u"nsIURLParser":
+                                {"xpcom_map":
+                                     lambda: INTERFACES["nsIURLParser"]},
+                             u"nsIURL":
+                                {"xpcom_map": lambda: INTERFACES["nsIURL"]},
+                             u"nsIBrowserHistory":
+                                 {"xpcom_map":
+                                     lambda: INTERFACES["nsIBrowserHistory"]},
+                             u"nsIEditorSpellCheck":
+                                 {"xpcom_map":
+                                     lambda:
+                                        INTERFACES["nsIEditorSpellCheck"]},
                              u"nsIWindowWatcher":
                                 {"xpcom_map":
                                      lambda:
@@ -513,4 +554,3 @@ GLOBAL_ENTITIES = {
 }
 
 CONTENT_DOCUMENT = GLOBAL_ENTITIES[u"content"]["value"][u"document"]
-
