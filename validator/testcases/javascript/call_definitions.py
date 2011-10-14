@@ -8,6 +8,8 @@ import predefinedentities
 from jstypes import *
 from validator.constants import BUGZILLA_BUG
 from validator.decorator import version_range
+#TODO(ashort): Move FX*_DEFINITION etc definitions into common module
+from validator.testcases.regex import FX9_DEFINITION
 
 # Function prototypes should implement the following:
 #  wrapper : The JSWrapper instace that is being called
@@ -38,6 +40,41 @@ def amp_rp_bug660359(wrapper, arguments, traverser):
                              version_range("firefox", "6.0a1", "7.0a1"),
                          '{3550f703-e582-4d05-9a08-453d09bdfdc6}':
                              version_range("thunderbird", "6.0a1", "7.0a1"),},
+        compatibility_type="error",
+        tier=5)
+
+
+def urlparser_parsepath_bug691588(wrapper, arguments, traverser):
+    """
+    nsIURLParser.parsePath doesn't take paramPos/paramLen in FX9.
+    """
+    if len(arguments) > 8:
+        traverser.err.error(
+            ("testcases_javascript_call_definititions",
+             "fx9_compat",
+             "urlparser_691588"),
+            ("nsIURLParser.parsePath's signature has changed in Firefox 9."
+             " See %s for more information.") % (BUGZILLA_BUG % 665706),
+            for_appversions=FX9_DEFINITION,
+            filename=traverser.filename, line=traverser.line,
+            column=traverser.position, context=traverser.context,
+            compatibility_type="error",
+            tier=5)
+
+
+def url_param_bug691588(t):
+    """
+    nsIURL.param is gone in FX9.
+    """
+    t.err.error(
+        ("testcases_javascript_call_definititions",
+         "fx9_compat",
+         "urlparser_691588"),
+        ("nsIURL.param has been removed in Firefox 9."
+         " See %s for more information.") % (BUGZILLA_BUG % 665706),
+        for_appversions=FX9_DEFINITION,
+        filename=t.filename, line=t.line,
+        column=t.position, context=t.context,
         compatibility_type="error",
         tier=5)
 

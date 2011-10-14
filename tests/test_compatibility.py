@@ -331,6 +331,19 @@ def futureCompatWarning(code, version):
     assert err.compat_summary["warnings"]
 
 
+def futureCompatError(code, version):
+    err = _do_real_test_raw(code)
+    assert not err.failed(fail_on_warnings=False)
+    assert not any(err.compat_summary.values())
+
+    err = _do_real_test_raw(
+        code,
+        versions={'{ec8030f7-c20a-464f-9b0e-13a3a9e97384}':
+                      version_range("firefox", version)})
+    assert err.failed(fail_on_warnings=False)
+    assert err.compat_summary["errors"]
+
+
 def test_fx9_navigator_taintEnabled():
     """
     'navigator.taintEnabled' is flagged as incompatible with FX9.
@@ -354,6 +367,49 @@ def test_fx9_nsIGlobalHistory3():
     """
     futureCompatWarning(
         'var x = "nsIGlobalHistory3";',
+        '9.0a1')
+
+
+def test_fx9_nsIURLParser_parsePath():
+    """
+    nsIURLParser.parsePath takes 8 args instead of 10 now.
+    """
+    futureCompatError(
+        """
+        var URLi = Components.classes["@mozilla.org/network/url-parser;1?auth=maybe"].
+                       createInstance(Components.interfaces.nsIURLParser);
+        var filepathPos = {}, filepathLen = {}, paramPos = {}, paramLen = {},
+            queryPos = {}, queryLen = {}, refPos = {}, refLen = {};
+        URLi.parsePath(urlObj.path, -1, filepathPos, filepathLen, paramPos,
+                       paramLen, queryPos, queryLen, refPos, refLen);
+        """,
+        '9.0a1')
+
+    err = _do_real_test_raw(
+        """
+        var URLi = Components.classes["@mozilla.org/network/url-parser;1?auth=maybe"].
+                       createInstance(Components.interfaces.nsIURLParser);
+        var filepathPos = {}, filepathLen = {}, queryPos = {}, queryLen = {},
+            refPos = {}, refLen = {};
+        URLi.parsePath(urlObj.path, -1, filepathPos, filepathLen, queryPos,
+                       queryLen, refPos, refLen);
+        """,
+        versions={'{ec8030f7-c20a-464f-9b0e-13a3a9e97384}':
+                      version_range("firefox", "9.0a1")})
+    assert not err.failed(fail_on_warnings=False)
+    assert not err.compat_summary["errors"]
+
+
+def test_fx9_nsIURL_param():
+    """
+    nsIURL.param no longer exists in Firefox 9.
+    """
+    futureCompatError(
+        """
+        var myURI = {};
+        var myURL = myURI.QueryInterface(Components.interfaces.nsIURL);
+        alert(myURL.param);
+        """,
         '9.0a1')
 
 
