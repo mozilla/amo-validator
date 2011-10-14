@@ -131,6 +131,42 @@ def browserhistory_unregisteropenpage(t):
         tier=5)
 
 
+def spellcheck_savedefaultdictionary(t):
+    """
+    nsIEditorSpellCheck.saveDefaultDictionary is gone in Firefox 9.
+    """
+    t.err.error(
+        ("testcases_javascript_call_definititions",
+         "fx9_compat",
+         "spellcheck_savedefaultdictionary"),
+        ("nsIEditorSpellCheck.saveDefaultDictionary has been removed in"
+         " Firefox 9. See %s for more information.") % (BUGZILLA_BUG % 678842),
+        for_appversions=FX9_DEFINITION,
+        filename=t.filename, line=t.line,
+        column=t.position, context=t.context,
+        compatibility_type="error",
+        tier=5)
+
+
+def spellcheck_updatecurrentdictionary(wrapper, arguments, traverser):
+    """
+    nsIEditorSpellCheck.UpdateCurrentDictionary takes no args in Firefox 9.
+    """
+    if len(arguments) > 0:
+        traverser.err.error(
+            ("testcases_javascript_call_definititions",
+             "fx9_compat",
+             "spellcheck_updatecurrentdictionary"),
+            ("nsIEditorSpellCheck.UpdateCurrentDictionary takes no arguments "
+             "in Firefox 9. See %s for more information."
+             ) % (BUGZILLA_BUG % 678842),
+            for_appversions=FX9_DEFINITION,
+            filename=traverser.filename, line=traverser.line,
+            column=traverser.position, context=traverser.context,
+            compatibility_type="error",
+            tier=5)
+
+
 def xpcom_constructor(method, extend=False, mutate=False, pretraversed=False):
     """Returns a function which wraps an XPCOM class instantiation function."""
 

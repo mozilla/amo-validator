@@ -185,6 +185,14 @@ INTERFACES = {
                        call_definitions.browserhistory_unregisteropenpage},
               }
          },
+    u"nsIEditorSpellCheck":
+        {"value":
+             {u"UpdateCurrentDictionary":
+                  {"return":
+                       call_definitions.spellcheck_updatecurrentdictionary},
+              u"saveDefaultDictionary":
+                  {"value":
+                       call_definitions.spellcheck_savedefaultdictionary}}}
     }
 
 
@@ -467,6 +475,10 @@ GLOBAL_ENTITIES = {
                              u"nsIBrowserHistory":
                                  {"xpcom_map":
                                      lambda: INTERFACES["nsIBrowserHistory"]},
+                             u"nsIEditorSpellCheck":
+                                 {"xpcom_map":
+                                     lambda:
+                                        INTERFACES["nsIEditorSpellCheck"]},
                              u"nsIWindowWatcher":
                                 {"xpcom_map":
                                      lambda:

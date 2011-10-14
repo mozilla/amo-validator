@@ -468,6 +468,50 @@ def test_fx9_nsIBrowserHistory_register():
         '9.0a1')
 
 
+def test_fx9_nsIEditor_saveDefaultDictionary():
+    """
+    nsIEditorSpellCheck.saveDefaultDictionary is gone in Firefox 9.
+    """
+    futureCompatError(
+        """
+        var spellChecker = Components.classes[
+                               '@mozilla.org/editor/editorspellchecker;1']
+                           .createInstance(
+                               Components.interfaces.nsIEditorSpellCheck);
+        alert(spellChecker.saveDefaultDictionary);
+        """,
+        '9.0a1')
+
+
+def test_fx9_nsIEditor_updateDefaultDictionary():
+    """
+    nsIEditorSpellCheck.UpdateDefaultDictionary takes no arguments in
+    Firefox 9.
+    """
+    futureCompatError(
+        """
+        var spellChecker = Components.classes[
+                               '@mozilla.org/editor/editorspellchecker;1']
+                           .createInstance(
+                               Components.interfaces.nsIEditorSpellCheck);
+        spellChecker.UpdateCurrentDictionary(null);
+        """,
+        '9.0a1')
+
+    err = _do_real_test_raw(
+        """
+        var spellChecker = Components.classes[
+                               '@mozilla.org/editor/editorspellchecker;1']
+                           .createInstance(
+                               Components.interfaces.nsIEditorSpellCheck);
+        spellChecker.UpdateCurrentDictionary();
+        """,
+        versions={'{ec8030f7-c20a-464f-9b0e-13a3a9e97384}':
+                      version_range("firefox", "9.0a1")})
+    assert not err.failed(fail_on_warnings=False)
+    assert not err.compat_summary["errors"]
+
+
 def test_tb6_nsIImapMailFolderSink():
     """Test that nsIImapMailFolderSink.setUrlState is flagged."""
 
