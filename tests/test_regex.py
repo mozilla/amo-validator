@@ -139,11 +139,3 @@ def test_chrome_usage():
     err = _do_test_raw("""var {Cc, Ci} = require("chrome")""")
     assert 'non-SDK interface' in err.warnings[0]['message'], (
         'Unexpected: %s', err.warnings[0]['message'])
-
-    err = _do_test_raw("""var Cc = Components.classes""")
-    assert 'deprecated globals' in err.warnings[0]['message'], (
-        'Unexpected: %s', err.warnings[0]['message'])
-
-    err = _do_test_raw("""var Cc = Components.interfaces""")
-    assert 'deprecated globals' in err.warnings[0]['message'], (
-        'Unexpected: %s', err.warnings[0]['message'])
