@@ -41,11 +41,6 @@ CHROME_PATTERNS = (
     (r"(?<![\'\"])require\s*\(\s*[\'\"]chrome[\'\"]\s*\)",
         'Usage of non-SDK interface',
         "This SDK-based add-on uses interfaces that aren't part of the SDK."),
-    # See https://bugzilla.mozilla.org/show_bug.cgi?id=636145
-    (r"Components\.(classes|interfaces)",
-        'Use of deprecated globals',
-        'The use of global `Components` is deprecated. To use chrome authority'
-        ' use `require("chrome")` instead.'),
 )
 
 

@@ -27,13 +27,13 @@ def test_nsiaccessibleretrieval():
     var c = Components.classes[""].createInstance(
         Components.interfaces.nsIAccessibleRetrievalWhatever);
     """)
-    eq_(len(err.warnings), 1)
+    eq_(len(err.warnings), 0)
 
     err = _do_test_raw("""
     var c = Components.classes[""].createInstance(
         Components.interfaces.nsIAccessibleRetrieval);
     """)
-    eq_(len(err.warnings), 2)
+    eq_(len(err.warnings), 1)
 
 
 def test_evalinsandbox():
@@ -178,14 +178,14 @@ def test_xpcom_shortcut_ci():
                          .getService(Ci.nsIWindowMediator);
     item.registerNotification();
     """, bootstrap=True)
-    eq_(len(err.warnings), 2)
+    eq_(len(err.warnings), 1)
 
     err = _do_test_raw("""
     var item = Components.classes["@mozilla.org/windowmediator;1"]
                          .getService(Ci.nsIWindowMediator);
     item.registerNotification();
     """, bootstrap=False)
-    eq_(len(err.warnings), 1)
+    eq_(len(err.warnings), 0)
 
 
 def test_xpcom_shortcut_cc():
@@ -196,14 +196,14 @@ def test_xpcom_shortcut_cc():
                    .getService(Components.interfaces.nsIWindowMediator);
     item.registerNotification();
     """, bootstrap=True)
-    eq_(len(err.warnings), 2)
+    eq_(len(err.warnings), 1)
 
     err = _do_test_raw("""
     var item = Cc["@mozilla.org/windowmediator;1"]
                    .getService(Components.interfaces.nsIWindowMediator);
     item.registerNotification();
     """, bootstrap=False)
-    eq_(len(err.warnings), 1)
+    eq_(len(err.warnings), 0)
 
 
 def test_xpcom_shortcut_services_scriptloader():
