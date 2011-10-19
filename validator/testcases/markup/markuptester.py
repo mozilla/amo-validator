@@ -11,6 +11,7 @@ import validator.unicodehelper as unicodehelper
 from validator.testcases.markup import csstester
 from validator.contextgenerator import ContextGenerator
 from validator.constants import *
+from validator.compat import FX6_DEFINITION
 from validator.decorator import version_range
 
 DEBUG = False
@@ -407,9 +408,7 @@ class MarkupParser(htmlparser.HTMLParser):
                     filename=self.filename,
                     line=self.line,
                     context=self.context,
-                    for_appversions={
-                        "{ec8030f7-c20a-464f-9b0e-13a3a9e97384}":
-                            version_range("firefox", "6.0a1", "7.0a1")},
+                    for_appversions=FX6_DEFINITION,
                     compatibility_type="warning")
 
 
