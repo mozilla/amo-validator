@@ -102,7 +102,7 @@ def test_webapp(err, package, expectation=0):
         err.notice(("main",
                     "test_webapp",
                     "confirmed"),
-                   "Web App confirmed.")
+                   "App confirmed.")
 
 
 def test_package(err, file_, name, expectation=PACKAGE_ANY,
