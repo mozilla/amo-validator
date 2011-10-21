@@ -531,3 +531,46 @@ def nsIMsgSearchScopeTerm_removed(wrapper, arguments, traverser):
 
     return JSWrapper(JSObject(), traverser=traverser)
 
+
+def gComposeBundle_removed(wrapper, arguments, traverser):
+    """Flag uses of gComposeBundle for incompatibility with Thunderbird 9"""
+    traverser.err.notice(
+        err_id=("testcases_javascript_calldefinitions", "gComposeBundle"),
+        notice="Removed gComposeBundle global variable in use.",
+        description="This add-on appears to use gComposeBundle which has been removed "
+                    "as part of changes made in Thunderbird 9. For more information, "
+                    "please refer to "
+                    "https://bugzilla.mozilla.org/show_bug.cgi?id=670639",
+        filename=traverser.filename,
+        line=traverser.line,
+        column=traverser.position,
+        context=traverser.context,
+        compatibility_type="error",
+        for_appversions={'{3550f703-e582-4d05-9a08-453d09bdfdc6}':
+                             version_range("thunderbird", "9.0a1", "10.0a1")},
+        tier=5)
+
+    return JSWrapper(JSObject(), traverser=traverser)
+
+
+def TB9FocusFunctions_removed(wrapper, arguments, traverser):
+    """Flag calls to WhichPaneHasFocus and FocusOnFirstAttachment for incompatibility with Thunderbird 9"""
+    traverser.err.notice(
+        err_id=("testcases_javascript_calldefinitions", "WhichPaneHasFocus"),
+        notice="Removed WhichPaneHasFocus or FocusOnFirstAttachment function in use.",
+        description="This add-on appears to use WhichPaneHasFocus or FocusOnFirstAttachment"
+                    "which have been removed "
+                    "as part of changes made in Thunderbird 9. For more information, "
+                    "please refer to "
+                    "https://bugzilla.mozilla.org/show_bug.cgi?id=581932",
+        filename=traverser.filename,
+        line=traverser.line,
+        column=traverser.position,
+        context=traverser.context,
+        compatibility_type="error",
+        for_appversions={'{3550f703-e582-4d05-9a08-453d09bdfdc6}':
+                             version_range("thunderbird", "9.0a1", "10.0a1")},
+        tier=5)
+
+    return JSWrapper(JSObject(), traverser=traverser)
+

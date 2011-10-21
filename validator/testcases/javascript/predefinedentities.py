@@ -274,6 +274,10 @@ GLOBAL_ENTITIES = {
     u"openAttachment": {"return": call_definitions.mail_attachment_api},
     u"detachAttachment": {"return": call_definitions.mail_attachment_api},
     u"cloneAttachment": {"return": call_definitions.mail_attachment_api},
+    u"FocusOnFirstAttachment": {"return": call_definitions.TB9FocusFunctions_removed},
+    
+    u"gComposeBundle": {"return": call_definitions.gComposeBundle_removed},    
+    u"WhichPaneHasFocus": {"return": call_definitions.TB9FocusFunctions_removed},
         
     u"encodeURI": {"readonly": True},
     u"decodeURI": {"readonly": True},
