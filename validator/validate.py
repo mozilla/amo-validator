@@ -37,12 +37,9 @@ def validate(path, format="json",
     validator.constants.APPROVED_APPLICATIONS.clear()
     validator.constants.APPROVED_APPLICATIONS.update(apps)
 
-    bundle = ErrorBundle(listed=listed, determined=determined)
-    if overrides:
-        bundle.overrides = overrides
-    if spidermonkey != False:
-        bundle.save_resource("SPIDERMONKEY", spidermonkey)
-
+    bundle = ErrorBundle(listed=listed, determined=determined,
+                         overrides=overrides, spidermonkey=spidermonkey,
+                         for_appversions=for_appversions)
     validator.submain.prepare_package(bundle, path, expectation,
                                       for_appversions=for_appversions)
 

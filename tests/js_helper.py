@@ -41,10 +41,9 @@ def _do_real_test_raw(script, path="foo.js", versions=None, detected_type=None,
                       metadata=None, resources=None):
     """Perform a JS test using a non-mock bundler."""
 
-    err = ErrorBundle()
+    err = ErrorBundle(for_appversions=versions or {})
     if detected_type:
         err.detected_type = detected_type
-    err.supported_versions = versions or {}
     if metadata is not None:
         err.metadata = metadata
     if resources is not None:

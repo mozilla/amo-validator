@@ -11,9 +11,28 @@ class ErrorBundle(object):
     """This class does all sorts of cool things. It gets passed around
     from test to test and collects up all the errors like the candy man
     'separating the sorrow and collecting up all the cream.' It's
-    borderline magical."""
+    borderline magical.
 
-    def __init__(self, determined=True, listed=True, instant=False):
+    Keyword Arguments
+
+    **determined**
+        Whether the validator should continue after a tier fails
+    **listed**
+        True if the add-on is destined for AMO, false if not
+    **instant**
+        Who knows what this does
+    **overrides**
+        dict of install.rdf values to override. Possible keys:
+        targetapp_minVersion, targetapp_maxVersion
+    **spidermonkey**
+        Optional path to the local spidermonkey installation
+    **for_appversions**
+        A dict of app GUIDs referencing lists of versions. Determines which
+        version-dependant tests should be run.
+    """
+
+    def __init__(self, determined=True, listed=True, instant=False,
+                 overrides=None, spidermonkey=None, for_appversions=None):
 
         self.handler = None
 
@@ -51,6 +70,13 @@ class ErrorBundle(object):
         # TODO: Break off into version helper
         self.supported_versions = None
         self.version_requirements = None
+
+        if overrides:
+            self.overrides = overrides
+        if spidermonkey:
+            self.save_resource("SPIDERMONKEY", spidermonkey)
+        if for_appversions is not None:
+            self.supported_versions = for_appversions
 
     def error(self, err_id, error,
               description='', filename='', line=None, column=None,
