@@ -273,7 +273,8 @@ def _process_file(err, xpi_package, name, file_data, name_lower,
                      PACKAGE_THEME)
         err.set_tier(1)
         supported_versions = (err.supported_versions.copy()
-                              if err.supported_versions else None)
+                              if err.supported_versions
+                              else err.supported_versions)
 
         if is_subpackage:
             testendpoint_validator.test_inner_package(err, sub_xpi)
