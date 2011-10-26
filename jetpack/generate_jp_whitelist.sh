@@ -12,3 +12,4 @@ do
         python ../make_hash.py $f $tagname >> ../../validator/testcases/jetpack_data.txt
     done
 done
+git co master
