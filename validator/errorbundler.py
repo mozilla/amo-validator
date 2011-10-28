@@ -68,15 +68,14 @@ class ErrorBundle(object):
         self.determined = determined
 
         # TODO: Break off into version helper
-        self.supported_versions = None
         self.version_requirements = None
 
         if overrides:
             self.overrides = overrides
         if spidermonkey:
             self.save_resource("SPIDERMONKEY", spidermonkey)
-        if for_appversions is not None:
-            self.supported_versions = for_appversions
+
+        self.supported_versions = self.for_appversions = for_appversions
 
     def error(self, err_id, error,
               description='', filename='', line=None, column=None,

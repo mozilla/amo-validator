@@ -1,4 +1,7 @@
+from nose.tools import eq_
+
 import validator.testcases.content as test_content
+from validator.compat import FX9_DEFINITION
 from validator.errorbundler import ErrorBundle
 from validator.xpi import XPIManager
 from validator.rdf import RDFParser
@@ -36,3 +39,14 @@ def test_skip_blacklisted_file():
     assert err.notices
     assert not err.failed()
 
+
+def test_validate_libs_in_compat_mode():
+    xpi = "tests/resources/libraryblacklist/addon_with_mootools.xpi"
+    with open(xpi) as data:
+        package = XPIManager(data, mode="r", name="addon_with_mootools.xpi")
+        err = ErrorBundle(for_appversions=FX9_DEFINITION)
+        test_content.test_packed_packages(err, package)
+    assert err.get_resource("scripts"), (
+                    "expected mootools scripts to be marked for proessing")
+    eq_(err.get_resource("scripts")[0]["scripts"],
+        set(["content/mootools.js"]))

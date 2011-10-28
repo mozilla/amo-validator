@@ -111,21 +111,24 @@ def test_packed_packages(err, xpi_package=None):
         except KeyError:  # pragma: no cover
             pass
 
-        # Skip over whitelisted and blacklisted hashes
-        hash = hashlib.sha1(file_data).hexdigest()
-        if hash in hash_whitelist:
-            continue
-        elif hash in hash_blacklist:
-            err.notice(
-                err_id=("testcases_content",
-                        "test_packed_packages",
-                        "blacklisted_js_library"),
-                notice="JS Library Detected",
-                description=["JavaScript libraries are discouraged for simple "
-                             "add-ons, but are generally accepted.",
-                             "File '%s' is a known JS library" % name],
-                filename=name)
-            continue
+        if not err.for_appversions:
+            # Skip over whitelisted and blacklisted hashes
+            # unless we are checking for compatibility.
+            hash = hashlib.sha1(file_data).hexdigest()
+            if hash in hash_whitelist:
+                continue
+            elif hash in hash_blacklist:
+                err.notice(
+                    err_id=("testcases_content",
+                            "test_packed_packages",
+                            "blacklisted_js_library"),
+                    notice="JS Library Detected",
+                    description=["JavaScript libraries are discouraged for "
+                                 "simple add-ons, but are generally "
+                                 "accepted.",
+                                 "File %r is a known JS library" % name],
+                    filename=name)
+                continue
 
         # Process the file.
         processed = False
