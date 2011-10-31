@@ -318,14 +318,22 @@ For instance, this tree would generate the following messages:
 Line Numbers and Columns
 ~~~~~~~~~~~~~~~~~~~~~~~~
 
-Line numbers are 1-based. Column numbers are 0-based. This can be confusing from a programmatic standpoint, but makes literal sense. "Line one" would obviously refer to the first line of a file.
+Line numbers are 1-based. Column numbers are 0-based. This can be
+confusing from a programmatic standpoint, but makes literal sense. "Line
+one" would obviously refer to the first line of a file.
 
 Contexts
 ~~~~~~~~
 
-The context attribute of messages will either be a list or null. Null contexts represent the validator's inability to determine surrounding code. As a list, there will always be three elements. Each element represents a line surrounding the message's location.
+The context attribute of messages will either be a list or null. Null
+contexts represent the validator's inability to determine surrounding
+code. As a list, there will always be three elements. Each element
+represents a line surrounding the message's location.
 
-The middle element of the context list represents the line of interest. If an element of the context list is null, that line does not exist. For instance, if an error is on the first line of a file, the context might look like:
+The middle element of the context list represents the line of interest. If
+an element of the context list is null, that line does not exist. For
+instance, if an error is on the first line of a file, the context might
+look like:
 
 ::
 
@@ -354,11 +362,13 @@ command would be: ::
 
     nosetests --with-coverage --cover-package=validator --cover-skip=validator.outputhandlers.,validator.main,validator.constants,validator.constants_local --cover-inclusive --cover-tests
 
-Note that in order to use the --cover-skip nose parameter, you must install the included patch for nose's coverage.py plugin: ::
+Note that in order to use the --cover-skip nose parameter, you must
+install the included patch for nose's coverage.py plugin: ::
 
     extras/cover.py
 
-This file should overwrite the standard nose coverage plugin at the appropriate location: ::
+This file should overwrite the standard nose coverage plugin at the
+appropriate location: ::
 
     ~/.virtualenvs/[virtual environment]/lib/pythonX.X/site-packages/nose/plugins/cover.py
     /usr/lib/pythonX.X/site-packages/nose/plugins/cover.py
