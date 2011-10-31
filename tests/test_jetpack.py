@@ -1,3 +1,5 @@
+from nose.tools import eq_
+
 import hashlib
 import json
 import nose
@@ -35,7 +37,7 @@ def test_not_jetpack():
     assert not err.errors
     assert not err.warnings
     assert not err.notices
-    assert not err.metadata
+    eq_(err.metadata.get('is_jetpack', False), False)
 
 
 def test_bad_harnessoptions():

@@ -70,7 +70,7 @@ def run_regex_tests(document, err, filename, context=None, is_js=False):
     if context is None:
         context = ContextGenerator(document)
 
-    def _generic_test(pattern, title, message):
+    def _generic_test(pattern, title, message, metadata={}):
         """Run a single regex test."""
         match = pattern.search(document)
         if match:
@@ -83,6 +83,8 @@ def run_regex_tests(document, err, filename, context=None, is_js=False):
                 filename=filename,
                 line=line,
                 context=context)
+            if metadata:
+                err.metadata.update(metadata)
 
     def _substring_test(pattern, title, message):
         """Run a single substringest."""
@@ -139,7 +141,8 @@ def run_regex_tests(document, err, filename, context=None, is_js=False):
                 message)
 
     for pattern, title, message in CHROME_PATTERNS:
-        _generic_test(re.compile(pattern), title, message)
+        _generic_test(re.compile(pattern), title, message,
+                      {'requires_chrome': True})
 
     if is_js:
         for pattern in CATEGORY_REGEXES:

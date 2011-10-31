@@ -61,7 +61,9 @@ class ErrorBundle(object):
         self.pushable_resources = {}
         self.final_context = None
 
-        self.metadata = {}
+        self.metadata = {
+            'requires_chrome': False,
+        }
         if listed:
             self.resources["listed"] = True
         self.instant = instant

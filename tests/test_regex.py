@@ -1,3 +1,5 @@
+from nose.tools import eq_
+
 from helper import MockXPI
 from js_helper import _do_real_test_raw as _do_test_raw
 from validator.decorator import version_range
@@ -136,6 +138,12 @@ def test_incompatible_uris():
 
 def test_chrome_usage():
 
+    err = _do_test_raw("""var foo = require("bar");""")
+    eq_(err.metadata['requires_chrome'], False)
+
     err = _do_test_raw("""var {Cc, Ci} = require("chrome")""")
     assert 'non-SDK interface' in err.warnings[0]['message'], (
         'Unexpected: %s', err.warnings[0]['message'])
+    assert 'requires_chrome' in err.metadata, (
+        'Unexpected: "requires_chrome" should be in metadata')
+    eq_(err.metadata['requires_chrome'], True)
