@@ -34,7 +34,7 @@ APPROVED_APPLICATIONS = json.loads(
 
 SPIDERMONKEY_INSTALLATION = os.environ.get("SPIDERMONKEY_INSTALLATION")
 
-WEBAPP_AMO_URL = "https://addons.mozilla.org"
+WEBAPP_AMO_URL = "https://apps-preview.mozilla.org"
 BUGZILLA_BUG = "https://bugzilla.mozilla.org/show_bug.cgi?id=%d"
 
 # Graciously provided by @kumar in bug 614574

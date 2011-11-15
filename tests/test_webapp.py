@@ -269,7 +269,7 @@ def test_webapp_no_amo_installs_allowed_from():
     assert err.failed()
 
     err = ErrorBundle(listed=True)
-    data["installs_allowed_from"].append("https://addons.mozilla.org")
+    data["installs_allowed_from"].append(validator.constants.WEBAPP_AMO_URL)
     _detect(err, data)
     assert not err.failed()
 
