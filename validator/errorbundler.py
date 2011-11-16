@@ -363,7 +363,7 @@ class ErrorBundle(object):
                  4: "Language Pack",
                  5: "Search Provider",
                  7: "Subpackage",
-                 8: "Webapp"}
+                 8: "App"}
         detected_type = types[self.detected_type]
 
         buffer = StringIO()

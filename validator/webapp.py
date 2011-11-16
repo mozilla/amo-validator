@@ -61,7 +61,7 @@ def detect_webapp(err, package):
             err_id=("webapp",
                     "detect_webapp",
                     "parse_error"),
-            error="Webapp: JSON Parse Error",
+            error="App: JSON Parse Error",
             description="The webapp extension could not be parsed due to a "
                         "syntax error in the JSON.")
 
@@ -74,7 +74,7 @@ def test_webapp(err, webapp, current_valid_keys, required=True):
          not isinstance(webapp["name"], types.StringTypes)) and required):
         err.error(
             err_id=("webapp", "detect", "name_missing"),
-            error="Webapp: Missing 'name' property",
+            error="App: Missing 'name' property",
             description="The 'name' value in the webapp manifest is a "
                         "required element that has not been found or is "
                         "invalid.")
@@ -84,7 +84,7 @@ def test_webapp(err, webapp, current_valid_keys, required=True):
         "installs_allowed_from" not in webapp):
         err.error(
             err_id=("webapp", "detect", "iaf_missing_listed"),
-            error="Webapp: Missing 'installs_allowed_from' property",
+            error="App: Missing 'installs_allowed_from' property",
             description="In order to submit a webapp to %s, "
                         "'installs_allowed_from' must exist and must contain "
                         "%s." % (WEBAPP_AMO_URL, WEBAPP_AMO_URL))
@@ -93,7 +93,7 @@ def test_webapp(err, webapp, current_valid_keys, required=True):
         if key not in current_valid_keys:
             err.error(
                 err_id=("webapp", "detect", "invalid_key"),
-                error="Webapp: Unknown property found.",
+                error="App: Unknown property found.",
                 description=["An unknown property was found in the webapp "
                              "manifest.",
                              "Found property: %s" % key])
@@ -103,7 +103,7 @@ def test_webapp(err, webapp, current_valid_keys, required=True):
         if key in MAX_LENGTHS and MAX_LENGTHS[key] < len(webapp[key]):
             err.error(
                 err_id=("webapp", "detect", "too_long"),
-                error="Webapp: key value too long",
+                error="App: key value too long",
                 description=["A key in the manifest has a value that is too "
                              "long.",
                              ("The max length of '%s' is %d. Your '%s' is %d "
@@ -114,7 +114,7 @@ def test_webapp(err, webapp, current_valid_keys, required=True):
             if not isinstance(webapp[key], dict):
                 err.error(
                     err_id=("webapp", "detect", "dev_dict"),
-                    error="Webapp: 'developer' property is not an object.",
+                    error="App: 'developer' property is not an object.",
                     description="The 'developer' property must be an object.")
                 continue
 
@@ -124,7 +124,7 @@ def test_webapp(err, webapp, current_valid_keys, required=True):
             if extra_keys:
                 err.warning(
                     err_id=("webapp", "detect", "extra_dev"),
-                    warning="Webapp: Extra keys in 'developer'.",
+                    warning="App: Extra keys in 'developer'.",
                     description=["The 'developer' key contains extra keys "
                                  "that could not be identified.",
                                  "Extra keys: %s" %
@@ -132,7 +132,7 @@ def test_webapp(err, webapp, current_valid_keys, required=True):
             if absent_keys and required:
                 err.error(
                     err_id=("webapp", "detect", "absent_dev"),
-                    error="Webapp: Missing keys in 'developer'.",
+                    error="App: Missing keys in 'developer'.",
                     description=["The 'developer' key is missing certain "
                                  "children.",
                                  "Missing keys: %s" %
@@ -142,14 +142,14 @@ def test_webapp(err, webapp, current_valid_keys, required=True):
                 not _test_url(webapp[key]["url"])):
                 err.error(
                     err_id=("webapp", "detect", "bad_dev_url"),
-                    error="Webapp: Developer URL is not valid.",
+                    error="App: Developer URL is not valid.",
                     description=["The developer URL key is not valid.",
                                  "Bad URL: %s" % webapp[key]["url"]])
         elif key == "icons":
             if not isinstance(webapp[key], dict):
                 err.error(
                     err_id=("webapp", "detect", "icons_not_list"),
-                    error="Webapp: 'icons' property not an object.",
+                    error="App: 'icons' property not an object.",
                     description="The 'icons' property is not an object, "
                                 "though it should be.")
                 continue
@@ -158,14 +158,14 @@ def test_webapp(err, webapp, current_valid_keys, required=True):
                 if not size.isdigit():
                     err.error(
                         err_id=("webapp", "detect", "size_not_num"),
-                        error="Webapp: Icon size not number.",
+                        error="App: Icon size not number.",
                         description=["Icon sizes (keys) must be natural "
                                      "numbers.",
                                      "Invalid size: %s" % size])
                 if not test_path(webapp[key][size], can_be_data=True):
                     err.error(
                         err_id=("webapp", "detect", "invalid_icon"),
-                        error="Webapp: Icon path invalid",
+                        error="App: Icon path invalid",
                         description=["The path for an icon is invalid.",
                                      "Icon size: %s" % size,
                                      "Path: %s" % webapp[key][size]])
@@ -173,7 +173,7 @@ def test_webapp(err, webapp, current_valid_keys, required=True):
             if not isinstance(webapp[key], list):
                 err.error(
                     err_id=("webapp", "detect", "bad_iaf_type"),
-                    error="Webapp: 'installs_allowed_from' must be a list",
+                    error="App: 'installs_allowed_from' must be a list",
                     description="The value of 'installs_allowed_from' in the "
                                 "manifest must be an array of values.")
                 continue
@@ -182,7 +182,7 @@ def test_webapp(err, webapp, current_valid_keys, required=True):
                 if not _test_url(url, can_be_asterisk=True):
                     err.error(
                         err_id=("webapp", "detect", "bad_iaf_url"),
-                        error="Webapp: 'installs_allowed_from'' URL invalid.",
+                        error="Apps: 'installs_allowed_from'' URL invalid.",
                         description=["A URL from 'installs_allowed_from' is "
                                      "invalid.",
                                      "Bad URL: %s" % url])
@@ -203,7 +203,7 @@ def test_webapp(err, webapp, current_valid_keys, required=True):
             if not isinstance(webapp[key], types.StringTypes):
                 err.error(
                     err_id=("webapp", "detect", "launch_path_not_str"),
-                    error="Webapp: 'launch_path' property not string.",
+                    error="App: 'launch_path' property not string.",
                     description="The 'launch_path' property of the manifest "
                                 "must be a string.")
                 continue
@@ -211,7 +211,7 @@ def test_webapp(err, webapp, current_valid_keys, required=True):
             if not test_path(webapp[key]):
                 err.error(
                     err_id=("webapp", "detect", "launch_path"),
-                    error="Webapp: 'launch_path' not a valid path",
+                    error="App: 'launch_path' not a valid path",
                     description=["The 'launch_path' element is not a valid "
                                  "path.",
                                  "Bad path: %s" % webapp[key]])
@@ -219,7 +219,7 @@ def test_webapp(err, webapp, current_valid_keys, required=True):
             if "default_locale" not in webapp:
                 err.error(
                     err_id=("webapp", "detect", "default_locale"),
-                    error="Webapp: No default locale set",
+                    error="App: No default locale set",
                     description="When locales are available, 'default_locale' "
                                 "must also be present.")
 
@@ -234,7 +234,7 @@ def test_webapp(err, webapp, current_valid_keys, required=True):
             if not isinstance(webapp[key], dict):
                 err.error(
                     err_id=("webapp", "detect", "widget_is_dict"),
-                    error="Webapp: 'widget' property is not an object.",
+                    error="App: 'widget' property is not an object.",
                     description="The 'widget' property must be an object.")
                 continue
 
@@ -242,7 +242,7 @@ def test_webapp(err, webapp, current_valid_keys, required=True):
                 if widget_key not in WIDGET_KEYS:
                     err.error(
                         err_id=("webapp", "detect", "widget_keys"),
-                        error="Webapp: Unknown property found in 'widget'.",
+                        error="App: Unknown property found in 'widget'.",
                         description=["An unknown key was found in the widget "
                                      "property.",
                                      "Property: %s" % widget_key])
@@ -250,7 +250,7 @@ def test_webapp(err, webapp, current_valid_keys, required=True):
                       not test_path(webapp[key]["path"])):
                     err.error(
                         err_id=("webapp", "detect", "widget_path"),
-                        error="Webapp: Widget 'path' invalid.",
+                        error="App: Widget 'path' invalid.",
                         description=["The specified widget path key is "
                                      "invalid.",
                                      "Invalid path: %s" % webapp[key]["path"]])
@@ -258,7 +258,7 @@ def test_webapp(err, webapp, current_valid_keys, required=True):
                     if not (10 <= int(webapp[key][widget_key]) <= 1000):
                         err.error(
                             err_id=("webapp", "detect", "widget_size"),
-                            error="Webapp: Widget size invalid.",
+                            error="App: Widget size invalid.",
                             description="The 'height' or 'width' of the "
                                         "webapp's widget is invalid.")
 
@@ -266,7 +266,7 @@ def test_webapp(err, webapp, current_valid_keys, required=True):
                 if widget_key not in webapp[key]:
                     err.error(
                         err_id=("webapp", "detect", "widget_mand_keys"),
-                        error="Webapp: Required widget elements missing",
+                        error="App: Required widget elements missing",
                         description=["Keys that belong in the 'widget' key "
                                      "are missing.",
                                      "Key: %s" % widget_key])
