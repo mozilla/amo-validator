@@ -223,7 +223,8 @@ def test_packed_scripts(err, xpi_package):
 
         # Set the error bundle's package state to what it was when we first
         # encountered the script file during the content tests.
-        err.package_stack = script_bundle["state"]
+        for archive in script_bundle["state"]:
+            err.push_state(archive)
 
         for script in script_bundle["scripts"]:
             file_data = unicodehelper.decode(package.read(script))
@@ -241,9 +242,8 @@ def test_packed_scripts(err, xpi_package):
                 testendpoint_js.test_js_file(err, script, file_data)
             run_regex_tests(file_data, err, script, is_js=True)
 
-    # We only run this testcase if the package stack is empty, return it to its
-    # original state.
-    err.package_stack = []
+        for i in range(len(script_bundle["state"])):
+            err.pop_state()
 
 
 def _process_file(err, xpi_package, name, file_data, name_lower,
