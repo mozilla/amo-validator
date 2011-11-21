@@ -110,6 +110,9 @@ def test_packed_scripts_pollution():
     assert err.warnings
     assert not err.errors
 
+    eq_(err.warnings[0]["file"],
+        ['subpackage.jar', 'subsubpackage', 'foo/bar.js'])
+
 
 def test_packed_scripts_no_pollution():
     """
@@ -139,4 +142,5 @@ def test_packed_scripts_no_pollution():
     eq_(err.package_stack, [])
 
     assert not err.failed()
+
 

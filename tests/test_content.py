@@ -89,8 +89,7 @@ def test_xpi_tiererror():
 
     err = ErrorBundle()
     mock_package = MockXPI(
-        {"foo.xpi":
-             "tests/resources/content/subpackage.jar"})
+        {"foo.xpi": "tests/resources/content/subpackage.jar"})
     content.testendpoint_validator = MockTestEndpoint(("test_package", ),
                                                       td_error=True)
 
