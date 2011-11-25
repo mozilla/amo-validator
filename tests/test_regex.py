@@ -136,6 +136,12 @@ def test_incompatible_uris():
     assert not err.failed()
     assert not any(err.compat_summary.values())
 
+    err = _do_test_raw("""
+    var foo = { data: "LOL NOT THE CASE" };
+    """, versions=fx6)
+    assert not err.failed()
+    assert not any(err.compat_summary.values())
+
 def test_chrome_usage():
 
     err = _do_test_raw("""var foo = require("bar");""")

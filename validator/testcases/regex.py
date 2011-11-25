@@ -207,7 +207,7 @@ def run_regex_tests(document, err, filename, context=None, is_js=False):
         if is_js:
             # javascript/data: URI usage in the address bar
             _compat_test(
-                    re.compile(r"\b(javascript|data):"),
+                    re.compile(r"['\"](javascript|data):"),
                     "javascript:/data: URIs may be incompatible with Firefox "
                     "6.",
                     ("Loading 'javascript:' and 'data:' URIs through the "
