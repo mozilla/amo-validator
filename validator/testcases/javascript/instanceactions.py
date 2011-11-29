@@ -12,6 +12,8 @@ node
 
 import types
 
+from validator.compat import FX10_DEFINITION
+from validator.constants import BUGZILLA_BUG
 import actions
 from jstypes import *
 
@@ -139,10 +141,28 @@ def nsIDOMFile_deprec(args, traverser, node, wrapper):
     cd_nsIDOMFile_deprec(None, [], traverser)
 
 
+def isSameNode(args, traverser, node, wrapper):
+    """Raise an error when an add-on uses node.isSameNode(foo)."""
+    traverser.err.error(
+        err_id=("testcases_javascript_instanceactions", "isSameNode"),
+        error="isSameNode function has been removed in Gecko 10.",
+        description='The "isSameNode" function has been removed. You can use '
+                    'the == operator as an alternative. See %s for more '
+                    'information.' % BUGZILLA_BUG % 687400,
+        filename=traverser.filename,
+        line=traverser.line,
+        column=traverser.position,
+        context=traverser.context,
+        for_appversions=FX10_DEFINITION,
+        compatibility_type="error",
+        tier=5)
+
+
 INSTANCE_DEFINITIONS = {"createElement": createElement,
                         "createElementNS": createElementNS,
-                        "getInterface": getInterface,
-                        "setAttribute": setAttribute,
-                        "QueryInterface": QueryInterface,
                         "getAsBinary": nsIDOMFile_deprec,
-                        "getAsDataURL": nsIDOMFile_deprec}
+                        "getAsDataURL": nsIDOMFile_deprec,
+                        "getInterface": getInterface,
+                        "isSameNode": isSameNode,
+                        "QueryInterface": QueryInterface,
+                        "setAttribute": setAttribute}
