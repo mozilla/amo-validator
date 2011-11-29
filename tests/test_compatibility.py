@@ -752,6 +752,11 @@ def test_isSameNode():
     futureCompatError("alert(x.isSameNode(foo));", "10.0")
 
 
+def test_replaceWholeText():
+    """Test that replaceWholeText is dead in FX10."""
+    futureCompatError("alert(x.replaceWholeText());", "10.0")
+
+
 def test_isElementContentWhitespace():
     """Test that isElementContentWhitespace is dead in FX10."""
     futureCompatError("alert(x.isElementContentWhitespace);", "10.0")

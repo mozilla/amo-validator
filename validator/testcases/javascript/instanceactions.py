@@ -158,6 +158,22 @@ def isSameNode(args, traverser, node, wrapper):
         tier=5)
 
 
+def replaceWholeText(args, traverser, node, wrapper):
+    """Raise an error when an add-on uses node.replaceWholeText(foo)."""
+    traverser.err.error(
+        err_id=("testcases_javascript_instanceactions", "replaceWholeText"),
+        error="replaceWholeText function has been removed in Gecko 10.",
+        description='The "replaceWholeText" function has been removed. See '
+                    '%s for more information.' % BUGZILLA_BUG % 683482,
+        filename=traverser.filename,
+        line=traverser.line,
+        column=traverser.position,
+        context=traverser.context,
+        for_appversions=FX10_DEFINITION,
+        compatibility_type="error",
+        tier=5)
+
+
 INSTANCE_DEFINITIONS = {"createElement": createElement,
                         "createElementNS": createElementNS,
                         "getAsBinary": nsIDOMFile_deprec,
@@ -165,4 +181,5 @@ INSTANCE_DEFINITIONS = {"createElement": createElement,
                         "getInterface": getInterface,
                         "isSameNode": isSameNode,
                         "QueryInterface": QueryInterface,
+                        "replaceWholeText": replaceWholeText,
                         "setAttribute": setAttribute}
