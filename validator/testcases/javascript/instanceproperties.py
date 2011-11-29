@@ -1,6 +1,8 @@
 import re
 import types
 
+from validator.compat import FX10_DEFINITION
+from validator.constants import BUGZILLA_BUG
 import jstypes
 
 def set_innerHTML(new_value, traverser):
@@ -61,7 +63,7 @@ def set_on_event(new_value, traverser):
         isinstance(new_value.get_literal_value(), types.StringTypes)):
         traverser.err.warning(
             err_id=("testcases_javascript_instancetypes", "set_on_event",
-                        "on*_str_assignment"),
+                    "on*_str_assignment"),
             warning="on* property being assigned string",
             description="Event handlers in JavaScript should not be "
                         "assigned by setting an on* property to a "
@@ -73,7 +75,25 @@ def set_on_event(new_value, traverser):
             context=traverser.context)
 
 
-OBJECT_DEFINITIONS = {"innerHTML": {"set": set_innerHTML}}
+def get_isElementContentWhitespace(traverser):
+    traverser.err.error(
+        err_id=("testcases_javascript_instanceproperties", "get_iECW"),
+        error="isElementContentWhitespace property removed in Gecko 10.",
+        description='The "isElementContentWhitespace" property has been '
+                    'removed. See %s for more information.' %
+                        (BUGZILLA_BUG % 687422),
+        filename=traverser.filename,
+        line=traverser.line,
+        column=traverser.position,
+        context=traverser.context,
+        for_appversions=FX10_DEFINITION,
+        compatibility_type="error",
+        tier=5)
+
+
+OBJECT_DEFINITIONS = {"innerHTML": {"set": set_innerHTML},
+                      "isElementContentWhitespace":
+                          {"get": get_isElementContentWhitespace}}
 
 
 def get_operation(mode, property):
