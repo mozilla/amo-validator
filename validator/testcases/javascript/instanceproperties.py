@@ -91,9 +91,34 @@ def get_isElementContentWhitespace(traverser):
         tier=5)
 
 
+def _get_xml(name):
+    """Handle all of the xml* compatibility problems introduced in Gecko 10."""
+    bugs = {"xmlEncoding": 687426,
+            "xmlStandalone": 693154,
+            "xmlVersion": 693162}
+    def wrapper(traverser):
+        traverser.err.error(
+            err_id=("testcases_javascript_instanceproperties", "_get_xml",
+                    name),
+            error="%s has been removed in Gecko 10" % name,
+            description='The "%s" property has been removed. See %s for more '
+                        'information.' % (name, BUGZILLA_BUG % bugs[name]),
+            filename=traverser.filename,
+            line=traverser.line,
+            column=traverser.position,
+            context=traverser.context,
+            for_appversions=FX10_DEFINITION,
+            compatibility_type="error",
+            tier=5)
+    return {"get": wrapper}
+
+
 OBJECT_DEFINITIONS = {"innerHTML": {"set": set_innerHTML},
                       "isElementContentWhitespace":
-                          {"get": get_isElementContentWhitespace}}
+                          {"get": get_isElementContentWhitespace},
+                      "xmlEncoding": _get_xml("xmlEncoding"),
+                      "xmlStandalone": _get_xml("xmlStandalone"),
+                      "xmlVersion": _get_xml("xmlVersion"),}
 
 
 def get_operation(mode, property):

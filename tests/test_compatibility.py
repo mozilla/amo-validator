@@ -765,9 +765,21 @@ def test_isElementContentWhitespace():
 def test_xml_document_properties():
     """
     Test that the xmlEncoding, xmlVersion, and xmlStandalone objects are dead
-    in Gecko 10.
+    for the document object in Gecko 10.
     """
     futureCompatError("alert(document.xmlEncoding);", "10.0")
     futureCompatError("alert(document.xmlVersion);", "10.0")
     futureCompatError("alert(document.xmlStandalone);", "10.0")
+    # Test that the object translates properly.
+    futureCompatError("alert(content.document.xmlEncoding);", "10.0")
+
+
+def test_xml_properties():
+    """
+    Test that the xmlEncoding, xmlVersion, and xmlStandalone objects are dead
+    in Gecko 10.
+    """
+    futureCompatError("alert(foo.xmlEncoding);", "10.0")
+    futureCompatError("alert(foo.xmlVersion);", "10.0")
+    futureCompatError("alert(foo.xmlStandalone);", "10.0")
 
