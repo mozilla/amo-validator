@@ -761,3 +761,13 @@ def test_isElementContentWhitespace():
     """Test that isElementContentWhitespace is dead in FX10."""
     futureCompatError("alert(x.isElementContentWhitespace);", "10.0")
 
+
+def test_xml_document_properties():
+    """
+    Test that the xmlEncoding, xmlVersion, and xmlStandalone objects are dead
+    in Gecko 10.
+    """
+    futureCompatError("alert(document.xmlEncoding);", "10.0")
+    futureCompatError("alert(document.xmlVersion);", "10.0")
+    futureCompatError("alert(document.xmlStandalone);", "10.0")
+

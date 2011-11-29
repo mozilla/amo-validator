@@ -2,9 +2,9 @@ import math
 
 import actions
 from actions import _get_as_str
-from validator.testcases.javascript import call_definitions
-from validator.testcases.javascript.call_definitions import (
-    xpcom_constructor as xpcom_const, python_wrap)
+import call_definitions
+from call_definitions import xpcom_constructor as xpcom_const, python_wrap
+from entity_values import entity
 from jstypes import JSWrapper
 
 # A list of identifiers and member values that may not be used.
@@ -261,13 +261,16 @@ GLOBAL_ENTITIES = {
                        lambda a, t, e:
                            not a or
                            not unicode(t(a[0]).get_literal_value()).lower()
-                               .startswith(("chrome:", "resource:"))}}},
+                               .startswith(("chrome:", "resource:"))},
+              u"xmlEncoding": entity("document.xmlEncoding"),
+              u"xmlVersion": entity("document.xmlVersion"),
+              u"xmlStandalone": entity("document.xmlStandalone")}},
 
     # The nefariuos timeout brothers!
     u"setTimeout": {"dangerous": actions._call_settimeout},
     u"setInterval": {"dangerous": actions._call_settimeout},
-    
-    # mail Attachment API Functions 
+
+    # mail Attachment API Functions
     u"createNewAttachmentInfo": {"return": call_definitions.mail_attachment_api},
     u"saveAttachment": {"return": call_definitions.mail_attachment_api},
     u"attachmentIsEmpty": {"return": call_definitions.mail_attachment_api},
@@ -275,10 +278,10 @@ GLOBAL_ENTITIES = {
     u"detachAttachment": {"return": call_definitions.mail_attachment_api},
     u"cloneAttachment": {"return": call_definitions.mail_attachment_api},
     u"FocusOnFirstAttachment": {"return": call_definitions.TB9FocusFunctions_removed},
-    
-    u"gComposeBundle": {"return": call_definitions.gComposeBundle_removed},    
+
+    u"gComposeBundle": {"return": call_definitions.gComposeBundle_removed},
     u"WhichPaneHasFocus": {"return": call_definitions.TB9FocusFunctions_removed},
-        
+
     u"encodeURI": {"readonly": True},
     u"decodeURI": {"readonly": True},
     u"encodeURIComponent": {"readonly": True},
