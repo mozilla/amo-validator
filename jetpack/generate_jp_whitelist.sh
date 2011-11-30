@@ -12,4 +12,5 @@ do
         python ../make_hash.py $f $tagname >> ../../validator/testcases/jetpack_data.txt
     done
 done
-git co master
+git checkout master
+git pull origin master
