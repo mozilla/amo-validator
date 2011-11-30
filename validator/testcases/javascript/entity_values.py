@@ -18,8 +18,10 @@ def entity(name, result=None):
         output = ENTITIES[name](traverser=t)
         if result is not None:
             return result
+        elif output is not None:
+            return output
         else:
-            return output if output is not None else {}
+            return {"value": {}}
     return {"value": return_wrap}
 
 
@@ -62,6 +64,24 @@ def xmlStandalone(traverser):
         error="xmlStandalone removed in Gecko 10.",
         description='The "xmlStandalone" property has been removed. See %s for '
                     'more information.' % BUGZILLA_BUG % 687426,
+        filename=traverser.filename,
+        line=traverser.line,
+        column=traverser.position,
+        context=traverser.context,
+        for_appversions=FX10_DEFINITION,
+        compatibility_type="error",
+        tier=5)
+
+
+@register_entity("nsIDOMNSHTMLElement")
+def nsIDOMNSHTMLElement(traverser):
+    traverser.err.error(
+        err_id=("testcases_javascript_entity_values",
+                "nsIDOMNSHTMLFrameElement"),
+        error="nsIDOMNSHTMLElement interface removed in Gecko 10.",
+        description='The "nsIDOMNSHTMLElement" interface has been removed. '
+                    'You can use nsIDOMHTMLFrameElement instead. See %s for '
+                    'more information.' % BUGZILLA_BUG % 684821,
         filename=traverser.filename,
         line=traverser.line,
         column=traverser.position,

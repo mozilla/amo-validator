@@ -80,6 +80,7 @@ INTERFACES = {
                         "Authors of bootstrapped add-ons must take care "
                         "to cleanup any component registrations "
                         "at shutdown"}}},
+    u"nsIDOMNSHTMLElement": entity("nsIDOMNSHTMLElement"),
     u"nsIDOMNSHTMLFrameElement": entity("nsIDOMNSHTMLFrameElement"),
     u"nsIJSON":
         {"value":
@@ -435,6 +436,10 @@ GLOBAL_ENTITIES = {
                                 {"xpcom_map":
                                      lambda:
                                         INTERFACES["nsIComponentRegistrar"]},
+                             u"nsIDOMNSHTMLElement":
+                                {"xpcom_map":
+                                     lambda:
+                                        INTERFACES["nsIDOMNSHTMLElement"]},
                              u"nsIDOMNSHTMLFrameElement":
                                 {"xpcom_map":
                                      lambda:

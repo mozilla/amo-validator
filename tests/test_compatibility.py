@@ -790,3 +790,10 @@ def test_nsIDOMNSHTMLFrameElement():
                        createInstance(Components.interfaces.nsIDOMNSHTMLFrameElement);
         """, '10.0')
 
+
+def test_nsIDOMNSHTMLElement():
+    futureCompatError("""
+        var URLi = Components.classes["foo"].
+                       createInstance(Components.interfaces.nsIDOMNSHTMLElement);
+        """, '10.0')
+
