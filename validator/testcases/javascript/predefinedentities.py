@@ -178,7 +178,8 @@ INTERFACES = {
                   {"value": call_definitions.url_param_bug691588}}},
     u"nsIBrowserHistory":
         {"value":
-             {u"removePages":
+             {u"lastPageVisited": entity("nsIBrowserHistory.lastPageVisited"),
+              u"removePages":
                   {"return": call_definitions.browserhistory_removepages},
               u"registerOpenPage":
                   {"value": call_definitions.browserhistory_registeropenpage},

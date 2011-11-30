@@ -108,3 +108,21 @@ def nsIDOMNSHTMLFrameElement(traverser):
         compatibility_type="error",
         tier=5)
 
+
+@register_entity("nsIBrowserHistory.lastPageVisited")
+def nsIBrowserHistory(traverser):
+    traverser.err.error(
+        err_id=("testcases_javascript_entity_values",
+                "nsIBrowserHistory_lastPageVisited"),
+        error="lastPageVisited property has been removed in Gecko 10.",
+        description='The "lastPageVisited" property has been removed. See %s '
+                    'for more information.' % BUGZILLA_BUG % 691524,
+        filename=traverser.filename,
+        line=traverser.line,
+        column=traverser.position,
+        context=traverser.context,
+        for_appversions=FX10_DEFINITION,
+        compatibility_type="error",
+        tier=5)
+
+

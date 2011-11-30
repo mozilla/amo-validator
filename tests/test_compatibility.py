@@ -797,3 +797,11 @@ def test_nsIDOMNSHTMLElement():
                        createInstance(Components.interfaces.nsIDOMNSHTMLElement);
         """, '10.0')
 
+
+def test_nsIBrowserHistory_lastPageVisited():
+    futureCompatError("""
+        var BH = Components.classes["foo"].
+                       createInstance(Components.interfaces.nsIBrowserHistory);
+        alert(BH.lastPageVisited);
+        """, '10.0')
+
