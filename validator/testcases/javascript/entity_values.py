@@ -19,7 +19,7 @@ def entity(name, result=None):
         if result is not None:
             return result
         else:
-            return output
+            return output if output is not None else {}
     return {"value": return_wrap}
 
 
@@ -70,4 +70,21 @@ def xmlStandalone(traverser):
         compatibility_type="error",
         tier=5)
 
+
+@register_entity("nsIDOMNSHTMLFrameElement")
+def nsIDOMNSHTMLFrameElement(traverser):
+    traverser.err.error(
+        err_id=("testcases_javascript_entity_values",
+                "nsIDOMNSHTMLFrameElement"),
+        error="nsIDOMNSHTMLFrameElement interface removed in Gecko 10.",
+        description='The "nsIDOMNSHTMLFrameElement" interface has been '
+                    'removed. You can use nsIDOMHTMLFrameElement instead. See '
+                    '%s for more information.' % BUGZILLA_BUG % 677085,
+        filename=traverser.filename,
+        line=traverser.line,
+        column=traverser.position,
+        context=traverser.context,
+        for_appversions=FX10_DEFINITION,
+        compatibility_type="error",
+        tier=5)
 

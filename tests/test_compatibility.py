@@ -783,3 +783,10 @@ def test_xml_properties():
     futureCompatError("alert(foo.xmlVersion);", "10.0")
     futureCompatError("alert(foo.xmlStandalone);", "10.0")
 
+
+def test_nsIDOMNSHTMLFrameElement():
+    futureCompatError("""
+        var URLi = Components.classes["foo"].
+                       createInstance(Components.interfaces.nsIDOMNSHTMLFrameElement);
+        """, '10.0')
+
