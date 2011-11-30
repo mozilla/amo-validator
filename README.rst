@@ -400,7 +400,7 @@ regenerated with each new library version. To update: ::
     cd extras
     mkdir jslibs
     python jslibfetcher.py
-    python build_whitelist.py
+    python build_whitelist.py jslibs/
     # We keep a special hash for testing
     echo "e96461c6c19608f528b4a3c33a032b697b999b62" >> whitelist_hashes.txt
     mv whitelist_hashes.txt ../validator/testcases/hashes.txt
