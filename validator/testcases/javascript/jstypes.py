@@ -12,20 +12,22 @@ class JSObject(object):
     """
 
     def __init__(self):
-        self.data = {
-            u"prototype": JSPrototype()
-        }
+        self.data = {u"prototype": JSPrototype()}
 
     def get(self, name, instantiate=False, traverser=None):
         "Returns the value associated with a property name"
         name = unicode(name)
+        output = None
         if name in self.data:
-            return self.data[name]
+            output = self.data[name]
         elif instantiate:
             output = JSWrapper(JSObject(), traverser=traverser)
             self.set(name, output, traverser=traverser)
-            return output
-        return None
+        if traverser:
+            modifier = instanceproperties.get_operation("get", name)
+            if modifier:
+                modifier(traverser)
+        return output
 
     def get_literal_value(self):
         "Objects evaluate to empty strings"
@@ -38,6 +40,8 @@ class JSObject(object):
             modifier = instanceproperties.get_operation("set", name)
             if modifier:
                 modified_value = modifier(value, traverser)
+                if modified_value is not None:
+                    value = modified_value
         self.data[name] = value
 
     def has_var(self, name):
@@ -393,13 +397,11 @@ class JSArray(JSObject):
         if index == "length":
             return len(self.elements)
 
-        # TODO: Make this work how JS arrays actually work.
-
         # Courtesy of Ian Bicking: http://bit.ly/hxv6qt
         try:
             return self.elements[int(index.strip().split()[0])]
         except (ValueError, IndexError, KeyError):
-            return None
+            return super(JSArray, self).get(index, instantiate, traverser)
 
     def get_literal_value(self):
         """Arrays return a comma-delimited version of themselves"""

@@ -594,8 +594,8 @@ def test_flag_getSelection():
     assert not err.failed()
     assert len(err.notices) == 1
     assert err.compat_summary["errors"]
-    
-    
+
+
 def test_tb7_nsIMsgThread():
     """Test that nsIMsgThread.GetChildAt is flagged."""
 
@@ -618,7 +618,7 @@ def test_tb7_nsIMsgThread():
     assert len(err.notices) == 1
     assert err.compat_summary["errors"]
 
-    
+
 def test_tb7_mail_attachment_api():
     """Test that the old mail attachment global functions are flagged."""
 
@@ -664,7 +664,7 @@ def test_tb7_dictUtils_removal():
     assert not err.failed()
     assert err.notices
     assert err.compat_summary["errors"]
-    
+
 def test_tb7_deRDF_addressbook():
     """Test that addressbook rdf sources are flagged"""
 
@@ -681,13 +681,13 @@ def test_tb7_deRDF_addressbook():
     assert not err.failed()
     assert err.notices
     assert err.compat_summary["errors"]
-    
+
     err = _do_real_test_raw("""
     var x = 'GetResource(SomeText)    .  QueryInterface(6inTestxnsIAbDirectory);';
     """)
     assert not err.failed()
     assert not err.notices
-    
+
     err = _do_real_test_raw("""
     var x = "GetResource(SomeText)  .  QueryInterface(Some8678StuffnsIAbDirectory)";
     """, versions={'{3550f703-e582-4d05-9a08-453d09bdfdc6}':
@@ -721,6 +721,7 @@ def test_tb8_nsIMsgSearchScopeTerm():
     assert len(err.notices) == 2
     assert err.compat_summary["errors"]
 
+
 def test_tb9_compatibility():
     """Test that gComposeBundle, FocusOnFirstAttachment, WhichPaneHasFocus are flagged."""
 
@@ -744,4 +745,63 @@ def test_tb9_compatibility():
     assert not err.failed(fail_on_warnings=False)
     assert len(err.notices) == 3
     assert err.compat_summary["errors"]
+
+
+def test_isSameNode():
+    """Test that isSameNode is dead in FX10."""
+    futureCompatError("alert(x.isSameNode(foo));", "10.0")
+
+
+def test_replaceWholeText():
+    """Test that replaceWholeText is dead in FX10."""
+    futureCompatError("alert(x.replaceWholeText());", "10.0")
+
+
+def test_isElementContentWhitespace():
+    """Test that isElementContentWhitespace is dead in FX10."""
+    futureCompatError("alert(x.isElementContentWhitespace);", "10.0")
+
+
+def test_xml_document_properties():
+    """
+    Test that the xmlEncoding, xmlVersion, and xmlStandalone objects are dead
+    for the document object in Gecko 10.
+    """
+    futureCompatError("alert(document.xmlEncoding);", "10.0")
+    futureCompatError("alert(document.xmlVersion);", "10.0")
+    futureCompatError("alert(document.xmlStandalone);", "10.0")
+    # Test that the object translates properly.
+    futureCompatError("alert(content.document.xmlEncoding);", "10.0")
+
+
+def test_xml_properties():
+    """
+    Test that the xmlEncoding, xmlVersion, and xmlStandalone objects are dead
+    in Gecko 10.
+    """
+    futureCompatError("alert(foo.xmlEncoding);", "10.0")
+    futureCompatError("alert(foo.xmlVersion);", "10.0")
+    futureCompatError("alert(foo.xmlStandalone);", "10.0")
+
+
+def test_nsIDOMNSHTMLFrameElement():
+    futureCompatError("""
+        var URLi = Components.classes["foo"].
+                       createInstance(Components.interfaces.nsIDOMNSHTMLFrameElement);
+        """, '10.0')
+
+
+def test_nsIDOMNSHTMLElement():
+    futureCompatError("""
+        var URLi = Components.classes["foo"].
+                       createInstance(Components.interfaces.nsIDOMNSHTMLElement);
+        """, '10.0')
+
+
+def test_nsIBrowserHistory_lastPageVisited():
+    futureCompatError("""
+        var BH = Components.classes["foo"].
+                       createInstance(Components.interfaces.nsIBrowserHistory);
+        alert(BH.lastPageVisited);
+        """, '10.0')
 
