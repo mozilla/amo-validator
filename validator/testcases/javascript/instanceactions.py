@@ -147,7 +147,7 @@ def isSameNode(args, traverser, node, wrapper):
         err_id=("testcases_javascript_instanceactions", "isSameNode"),
         error="isSameNode function has been removed in Gecko 10.",
         description='The "isSameNode" function has been removed. You can use '
-                    'the == operator as an alternative. See %s for more '
+                    'the === operator as an alternative. See %s for more '
                     'information.' % BUGZILLA_BUG % 687400,
         filename=traverser.filename,
         line=traverser.line,
