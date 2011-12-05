@@ -24,24 +24,13 @@ assumed_extensions = {"jar": PACKAGE_THEME,
                       "xml": PACKAGE_SEARCHPROV}
 
 log = logging.getLogger()
-validation_timeout = 45  # seconds
-
-
-def timeout_handler(signum, frame):
-    msg = 'validation timed out after %s seconds' % validation_timeout
-    log.error(msg)
-    raise RuntimeError(msg)
-
-
-signal.signal(signal.SIGALRM, timeout_handler)
 
 
 def prepare_package(err, path, expectation=0, for_appversions=None,
                     timeout=None):
     "Prepares a file-based package for validation."
-    global validation_timeout
-    if timeout:
-        validation_timeout = timeout
+    if not timeout:
+        timeout = 30  # seconds
 
     # Test that the package actually exists. I consider this Tier 0
     # since we may not even be dealing with a real file.
@@ -71,11 +60,23 @@ def prepare_package(err, path, expectation=0, for_appversions=None,
         return False
 
     package = open(path, "rb")
+    completed_validation = False
 
-    signal.setitimer(signal.ITIMER_REAL, validation_timeout)
+    def timeout_handler(signum, frame):
+        if completed_validation:
+            # There is no need for a timeout. This might be the result of
+            # sequential validators, like in the test suite.
+            return
+        msg = 'validation timed out after %s seconds' % timeout
+        log.error(msg)
+        raise RuntimeError(msg)
+
+    signal.signal(signal.SIGALRM, timeout_handler)
+    signal.setitimer(signal.ITIMER_REAL, timeout)
     output = test_package(err, package, path, expectation,
                           for_appversions)
     package.close()
+    completed_validation = True
 
     return output
 
