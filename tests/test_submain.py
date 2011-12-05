@@ -1,3 +1,7 @@
+import time
+
+from nose.tools import raises
+
 import validator.submain as submain
 from validator.errorbundler import ErrorBundle
 from validator.chromemanifest import ChromeManifest
@@ -14,6 +18,20 @@ def test_prepare_package():
     err = ErrorBundle()
     assert submain.prepare_package(err, "tests/resources/main/foo.xpi") == True
     submain.test_package = tp
+
+
+@raises(RuntimeError)
+def test_validation_timeout():
+    tp = submain.test_package
+    def slow(*args, **kw):
+        time.sleep(1)
+    submain.test_package = slow
+    try:
+        err = ErrorBundle()
+        submain.prepare_package(err, "tests/resources/main/foo.xpi",
+                                timeout=0.1)
+    finally:
+        submain.test_package = tp
 
 
 def test_prepare_package_extension():
