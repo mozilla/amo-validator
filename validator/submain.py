@@ -24,7 +24,7 @@ assumed_extensions = {"jar": PACKAGE_THEME,
                       "xml": PACKAGE_SEARCHPROV}
 
 log = logging.getLogger()
-validation_timeout = 15  # seconds
+validation_timeout = 45  # seconds
 
 
 def timeout_handler(signum, frame):
