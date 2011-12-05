@@ -18,7 +18,8 @@ def validate(path, format="json",
              listed=True,
              expectation=PACKAGE_ANY,
              for_appversions=None,
-             overrides=None):
+             overrides=None,
+             timeout=None):
     """
     Perform validation in one easy step!
 
@@ -30,6 +31,7 @@ def validate(path, format="json",
     expectation : The type of package that should be expected
     for_appversions : A dict of app GUIDs referencing lists of versions.
                       Determines which version-dependant tests should be run.
+    timeout: Number of seconds before aborting addon validation.
     """
 
     # Load up the target applications
@@ -41,7 +43,8 @@ def validate(path, format="json",
                          overrides=overrides, spidermonkey=spidermonkey,
                          for_appversions=for_appversions)
     validator.submain.prepare_package(bundle, path, expectation,
-                                      for_appversions=for_appversions)
+                                      for_appversions=for_appversions,
+                                      timeout=timeout)
 
     # Write the results to the pipe
     formats = {"json": lambda b: b.render_json()}

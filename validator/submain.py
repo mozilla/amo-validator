@@ -1,5 +1,7 @@
+import logging
 import os
 import re
+import signal
 
 from validator.typedetection import detect_type
 from validator.opensearch import detect_opensearch
@@ -21,9 +23,25 @@ types = {0: "Unknown",
 assumed_extensions = {"jar": PACKAGE_THEME,
                       "xml": PACKAGE_SEARCHPROV}
 
+log = logging.getLogger()
+validation_timeout = 15  # seconds
 
-def prepare_package(err, path, expectation=0, for_appversions=None):
+
+def timeout_handler(signum, frame):
+    msg = 'validation timed out after %s seconds' % validation_timeout
+    log.error(msg)
+    raise RuntimeError(msg)
+
+
+signal.signal(signal.SIGALRM, timeout_handler)
+
+
+def prepare_package(err, path, expectation=0, for_appversions=None,
+                    timeout=None):
     "Prepares a file-based package for validation."
+    global validation_timeout
+    if timeout:
+        validation_timeout = timeout
 
     # Test that the package actually exists. I consider this Tier 0
     # since we may not even be dealing with a real file.
@@ -53,6 +71,8 @@ def prepare_package(err, path, expectation=0, for_appversions=None):
         return False
 
     package = open(path, "rb")
+
+    signal.setitimer(signal.ITIMER_REAL, validation_timeout)
     output = test_package(err, package, path, expectation,
                           for_appversions)
     package.close()
