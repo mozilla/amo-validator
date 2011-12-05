@@ -28,9 +28,12 @@ log = logging.getLogger()
 
 def prepare_package(err, path, expectation=0, for_appversions=None,
                     timeout=None):
-    "Prepares a file-based package for validation."
+    """Prepares a file-based package for validation.
+
+    timeout is the number of seconds before validation is aborted.
+    """
     if not timeout:
-        timeout = 30  # seconds
+        timeout = 60  # seconds
 
     # Test that the package actually exists. I consider this Tier 0
     # since we may not even be dealing with a real file.
@@ -60,10 +63,10 @@ def prepare_package(err, path, expectation=0, for_appversions=None,
         return False
 
     package = open(path, "rb")
-    completed_validation = False
+    validation_state = {'complete': False}
 
     def timeout_handler(signum, frame):
-        if completed_validation:
+        if validation_state['complete']:
             # There is no need for a timeout. This might be the result of
             # sequential validators, like in the test suite.
             return
@@ -76,7 +79,7 @@ def prepare_package(err, path, expectation=0, for_appversions=None,
     output = test_package(err, package, path, expectation,
                           for_appversions)
     package.close()
-    completed_validation = True
+    validation_state['complete'] = True
 
     return output
 
