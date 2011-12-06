@@ -192,7 +192,7 @@ def test_webapp(err, webapp, current_valid_keys, required=True):
                 err.get_resource("listed")):
                 err.error(
                     err_id=("webapp", "detect", "iaf_no_amo"),
-                    error=("Apps: App must allow installs from Firefox Market"
+                    error=("Apps: App must allow installs from Marketplace"
                            " for inclusion."),
                     description="To be included on %s, a webapp needs to "
                                 "include %s as an element in the "
