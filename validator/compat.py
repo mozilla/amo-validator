@@ -41,3 +41,5 @@ FX10_DEFINITION = {"{ec8030f7-c20a-464f-9b0e-13a3a9e97384}":
 
 TB7_DEFINITION = {"{3550f703-e582-4d05-9a08-453d09bdfdc6}":
                       version_range("thunderbird", "7.0a1", "8.0a1")}
+TB10_DEFINITION = {"{3550f703-e582-4d05-9a08-453d09bdfdc6}":
+                      version_range("thunderbird", "10.0a1", "11.0a1")}

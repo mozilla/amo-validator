@@ -805,3 +805,35 @@ def test_nsIBrowserHistory_lastPageVisited():
         alert(BH.lastPageVisited);
         """, '10.0')
 
+
+def test_tb10_compatibility():
+    """
+    Test that MsgDeleteMessageFromMessageWindow, goToggleSplitter, 
+    AddMessageComposeOfflineObserver, and RemoveMessageComposeOfflineObserver are flagged.
+    """
+
+    err = _do_real_test_raw("""
+    var x = "";
+    x = MsgDeleteMessageFromMessageWindow();
+    goToggleSplitter();
+    AddMessageComposeOfflineObserver();
+    RemoveMessageComposeOfflineObserver();
+    x = gDownloadManagerStrings.get();
+    """)
+    assert not err.failed(fail_on_warnings=False)
+    assert not err.notices
+    assert not any(err.compat_summary.values())
+
+    err = _do_real_test_raw("""
+    var x = "";
+    x = MsgDeleteMessageFromMessageWindow();
+    goToggleSplitter();
+    AddMessageComposeOfflineObserver();
+    RemoveMessageComposeOfflineObserver();
+    x = gDownloadManagerStrings.get();
+    """, versions={'{3550f703-e582-4d05-9a08-453d09bdfdc6}':
+                       version_range("thunderbird", "10.0a1")})
+    assert not err.failed(fail_on_warnings=False)
+    assert len(err.notices) == 5
+    assert err.compat_summary["errors"]
+

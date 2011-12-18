@@ -284,6 +284,12 @@ GLOBAL_ENTITIES = {
 
     u"gComposeBundle": {"return": call_definitions.gComposeBundle_removed},
     u"WhichPaneHasFocus": {"return": call_definitions.TB9FocusFunctions_removed},
+    
+    # Thunderbird 10 global functions changed/removed
+    u"MsgDeleteMessageFromMessageWindow": {"return": call_definitions.TB10Function_removed},
+    u"goToggleSplitter": {"return": call_definitions.TB10Function_removed},
+    u"AddMessageComposeOfflineObserver": {"return": call_definitions.TB10Function_renamed},
+    u"RemoveMessageComposeOfflineObserver": {"return": call_definitions.TB10Function_renamed}, 
 
     u"encodeURI": {"readonly": True},
     u"decodeURI": {"readonly": True},

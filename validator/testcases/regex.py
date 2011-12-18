@@ -4,7 +4,7 @@ import re
 from validator.constants import BUGZILLA_BUG
 from validator.compat import (FX4_DEFINITION, FX5_DEFINITION, FX6_DEFINITION,
                               FX7_DEFINITION, FX8_DEFINITION, FX9_DEFINITION,
-                              TB7_DEFINITION)
+                              TB7_DEFINITION, TB10_DEFINITION)
 from validator.contextgenerator import ContextGenerator
 
 
@@ -386,4 +386,23 @@ def run_regex_tests(document, err, filename, context=None, is_js=False):
                  "%s for more information.") % (BUGZILLA_BUG % 621213),
                 compatibility_type="error",
                 appversions=TB7_DEFINITION)
+
+    # Thunderbird 10 Compatibility
+    if err.supports_version(TB10_DEFINITION):
+        # gDownloadManagerStrings removal
+        _compat_test(
+                re.compile(r"gDownloadManagerStrings"),
+                "gDownloadManagerStrings was removed in Thunderbird 7.",
+                ("This global is no longer available in "
+                 "Thunderbird 10. See %s for more information.") % (BUGZILLA_BUG % 700220),
+                compatibility_type="error",
+                appversions=TB10_DEFINITION)
+        # nsTryToClose.js removal
+        _compat_test(
+                re.compile(r"nsTryToClose.js"),
+                "nsTryToClose.js was removed in Thunderbird 10.",
+                ("The nsTryToClose.js file is no longer available in "
+                 "Thunderbird 10. See %s for more information.") % (BUGZILLA_BUG % 539997),
+                compatibility_type="error",
+                appversions=TB10_DEFINITION)
 
