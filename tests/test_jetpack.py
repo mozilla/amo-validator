@@ -63,8 +63,8 @@ def test_pass_jetpack():
     with open("jetpack/addon-sdk/python-lib/cuddlefish/"
                   "app-extension/bootstrap.js") as bootstrap_file:
         bootstrap = bootstrap_file.read()
-    with open("jetpack/addon-sdk/python-lib/cuddlefish/"
-                  "app-extension/components/harness.js") as harness_file:
+    with open("jetpack/addon-sdk/packages/test-harness/lib/"
+                  "harness.js") as harness_file:
         harness = harness_file.read()
 
     err = _do_test(MockXPI({"bootstrap.js": bootstrap,
@@ -92,8 +92,8 @@ def test_missing_elements():
     with open("jetpack/addon-sdk/python-lib/cuddlefish/"
                   "app-extension/bootstrap.js") as bootstrap_file:
         bootstrap = bootstrap_file.read()
-    with open("jetpack/addon-sdk/python-lib/cuddlefish/"
-                  "app-extension/components/harness.js") as harness_file:
+    with open("jetpack/addon-sdk/packages/test-harness/lib/"
+                  "harness.js") as harness_file:
         harness = harness_file.read()
 
     err = _do_test(MockXPI({"bootstrap.js": bootstrap,
@@ -114,8 +114,8 @@ def test_skip_safe_files():
     with open("jetpack/addon-sdk/python-lib/cuddlefish/"
                   "app-extension/bootstrap.js") as bootstrap_file:
         bootstrap = bootstrap_file.read()
-    with open("jetpack/addon-sdk/python-lib/cuddlefish/"
-                  "app-extension/components/harness.js") as harness_file:
+    with open("jetpack/addon-sdk/packages/test-harness/lib/"
+                  "harness.js") as harness_file:
         harness = harness_file.read()
 
     err = _do_test(MockXPI({"bootstrap.js": bootstrap,
@@ -151,8 +151,8 @@ def test_pass_manifest_elements():
                      "jsSHA256": bootstrap_hash,
                      "docsSHA256": bootstrap_hash}}}
 
-    with open("jetpack/addon-sdk/python-lib/cuddlefish/"
-                  "app-extension/components/harness.js") as harness_file:
+    with open("jetpack/addon-sdk/packages/test-harness/lib/"
+                  "harness.js") as harness_file:
         harness = harness_file.read()
 
     err = _do_test(MockXPI({"bootstrap.js": bootstrap,
@@ -193,8 +193,8 @@ def test_bad_resource():
                      "jsSHA256": bootstrap_hash,
                      "docsSHA256": bootstrap_hash}}}
 
-    with open("jetpack/addon-sdk/python-lib/cuddlefish/"
-                  "app-extension/components/harness.js") as harness_file:
+    with open("jetpack/addon-sdk/packages/test-harness/lib/"
+                  "harness.js") as harness_file:
         harness = harness_file.read()
 
     err = _do_test(MockXPI({"bootstrap.js": bootstrap,
@@ -226,8 +226,8 @@ def test_missing_manifest_elements():
                      "jsSHA256": bootstrap_hash,
                      "docsSHA256": bootstrap_hash}}}
 
-    with open("jetpack/addon-sdk/python-lib/cuddlefish/"
-                  "app-extension/components/harness.js") as harness_file:
+    with open("jetpack/addon-sdk/packages/test-harness/lib/"
+                  "harness.js") as harness_file:
         harness = harness_file.read()
 
     err = _do_test(MockXPI({"bootstrap.js": bootstrap,
@@ -260,8 +260,8 @@ def test_mismatched_hash():
     with open("jetpack/addon-sdk/python-lib/cuddlefish/"
                   "app-extension/bootstrap.js") as bootstrap_file:
         bootstrap = bootstrap_file.read()
-    with open("jetpack/addon-sdk/python-lib/cuddlefish/"
-                  "app-extension/components/harness.js") as harness_file:
+    with open("jetpack/addon-sdk/packages/test-harness/lib/"
+                  "harness.js") as harness_file:
         harness = harness_file.read()
 
     err = _do_test(MockXPI({"bootstrap.js": bootstrap,
@@ -299,8 +299,8 @@ def test_mismatched_db_hash():
                      "jsSHA256": bootstrap_hash,
                      "docsSHA256": bootstrap_hash}}}
 
-    with open("jetpack/addon-sdk/python-lib/cuddlefish/"
-                  "app-extension/components/harness.js") as harness_file:
+    with open("jetpack/addon-sdk/packages/test-harness/lib/"
+                  "harness.js") as harness_file:
         harness = harness_file.read()
 
     err = _do_test(MockXPI({"bootstrap.js": bootstrap,
