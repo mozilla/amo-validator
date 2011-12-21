@@ -26,6 +26,15 @@ assumed_extensions = {"jar": PACKAGE_THEME,
 log = logging.getLogger()
 
 
+class ValidationTimeout(Exception):
+
+    def __init__(self, timeout):
+        self.timeout = timeout
+
+    def __str__(self):
+        return "Validation timeout after %d seconds" % self.timeout
+
+
 def prepare_package(err, path, expectation=0, for_appversions=None,
                     timeout=None):
     """Prepares a file-based package for validation.
@@ -70,9 +79,9 @@ def prepare_package(err, path, expectation=0, for_appversions=None,
             # There is no need for a timeout. This might be the result of
             # sequential validators, like in the test suite.
             return
-        msg = 'validation timed out after %s seconds' % timeout
-        log.error(msg)
-        raise RuntimeError(msg)
+        ex = ValidationTimeout(timeout)
+        log.error("%s; Package: %s" % (str(ex), path))
+        raise ex
 
     signal.signal(signal.SIGALRM, timeout_handler)
     signal.setitimer(signal.ITIMER_REAL, timeout)
@@ -164,7 +173,19 @@ def test_package(err, file_, name, expectation=PACKAGE_ANY,
     if has_install_rdf:
         _load_install_rdf(err, package, expectation)
 
-    return test_inner_package(err, package, for_appversions)
+    try:
+        output = test_inner_package(err, package, for_appversions)
+    except ValidationTimeout as ex:
+        err.error(
+                err_id=("main", "test_package", "timeout"),
+                error="Validation timed out",
+                description=["The validation process took too long to "
+                             "complete. Contact an addons.mozilla.org editor "
+                             "for more information.",
+                             str(ex)])
+        output = None
+
+    return output
 
 
 def _load_install_rdf(err, package, expectation):
