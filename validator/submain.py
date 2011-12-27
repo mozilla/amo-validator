@@ -31,6 +31,7 @@ def prepare_package(err, path, expectation=0, for_appversions=None,
     """Prepares a file-based package for validation.
 
     timeout is the number of seconds before validation is aborted.
+    If timeout is -1 then no timeout checking code will run.
     """
     if not timeout:
         timeout = 60  # seconds
@@ -74,8 +75,9 @@ def prepare_package(err, path, expectation=0, for_appversions=None,
         log.error(msg)
         raise RuntimeError(msg)
 
-    signal.signal(signal.SIGALRM, timeout_handler)
-    signal.setitimer(signal.ITIMER_REAL, timeout)
+    if timeout != -1:
+        signal.signal(signal.SIGALRM, timeout_handler)
+        signal.setitimer(signal.ITIMER_REAL, timeout)
     output = test_package(err, package, path, expectation,
                           for_appversions)
     package.close()
