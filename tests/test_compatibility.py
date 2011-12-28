@@ -333,14 +333,15 @@ def futureCompatWarning(code, version):
 
 def futureCompatError(code, version):
     err = _do_real_test_raw(code)
-    assert not err.failed(fail_on_warnings=False)
+    assert not err.failed()
     assert not any(err.compat_summary.values())
 
     err = _do_real_test_raw(
         code,
         versions={'{ec8030f7-c20a-464f-9b0e-13a3a9e97384}':
                       version_range("firefox", version)})
-    assert err.failed(fail_on_warnings=False)
+    print err.print_summary()
+    assert err.failed()
     assert err.compat_summary["errors"]
 
 
@@ -518,17 +519,15 @@ def test_fx9_geo_prefs():
     Firefox 9; referring to them produces a compatibility error.
     """
     futureCompatError("""
-    var Application = Components.classes["@mozilla.org/fuel/application;1"]
+    var app = Components.classes["@mozilla.org/fuel/application;1"]
                       .getService(Components.interfaces.fuelIApplication);
-    this._uri = Application.prefs.get('geo.wifi.uri');
-    """,
-    '9.0a1')
+    var _uri = app.prefs.get('geo.wifi.uri');
+    """, '9.0a1')
     futureCompatError("""
-    var Application = Components.classes["@mozilla.org/fuel/application;1"]
+    var app = Components.classes["@mozilla.org/fuel/application;1"]
                       .getService(Components.interfaces.fuelIApplication);
-    this._protocol = Application.prefs.get('geo.wifi.protocol');
-    """,
-    '9.0a1')
+    var _protocol = app.prefs.get('geo.wifi.protocol');
+    """, '9.0a1')
 
 
 def test_tb6_nsIImapMailFolderSink():
@@ -808,7 +807,7 @@ def test_nsIBrowserHistory_lastPageVisited():
 
 def test_tb10_compatibility():
     """
-    Test that MsgDeleteMessageFromMessageWindow, goToggleSplitter, 
+    Test that MsgDeleteMessageFromMessageWindow, goToggleSplitter,
     AddMessageComposeOfflineObserver, and RemoveMessageComposeOfflineObserver are flagged.
     """
 

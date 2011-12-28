@@ -100,15 +100,14 @@ def run_regex_tests(document, err, filename, context=None, is_js=False):
                 line=line,
                 context=context)
 
-    def _compat_test(pattern, title, message, compatibility_type=None,
+    def _compat_test(pattern, title, message, compatibility_type,
                      appversions=None, logFunc=err.notice):
         """Run a single regex test and return a compatibility message."""
         match = pattern.search(document)
         if match:
             line = context.get_line(match.start())
             logFunc(
-                ("testcases_javascript_regex", "generic",
-                 "_compat_test"),
+                ("testcases_javascript_regex", "generic", "_compat_test"),
                 title,
                 description=message,
                 filename=filename,
@@ -119,7 +118,8 @@ def run_regex_tests(document, err, filename, context=None, is_js=False):
                 tier=5)
 
     if not filename.startswith("defaults/preferences/"):
-        from javascript.predefinedentities import BANNED_PREF_BRANCHES, BANNED_PREF_REGEXPS
+        from javascript.predefinedentities import (BANNED_PREF_BRANCHES,
+                                                   BANNED_PREF_REGEXPS)
         for pattern in BANNED_PREF_REGEXPS:
             _generic_test(
                 re.compile("[\"']" + pattern),
@@ -337,22 +337,27 @@ def run_regex_tests(document, err, filename, context=None, is_js=False):
              ) % (BUGZILLA_BUG % 568971),
             compatibility_type="warning",
             appversions=FX9_DEFINITION)
+
+        # geo.wifi.* warnings
+        geo_wifi_description = (
+                "The geo.wifi.* preferences are no longer created by default "
+                "in Gecko 9. Reading them without testing for their presence "
+                "can result in unexpected errors. See %s for more "
+                "information." % BUGZILLA_BUG % 689252)
         _compat_test(
             re.compile(r"geo\.wifi\.uri"),
             "The preference 'geo.wifi.uri' was removed in Firefox 9",
-            ("The geo.wifi.* preferences are no longer in use. See %s for "
-             "more information.") % (BUGZILLA_BUG % 689252),
+            geo_wifi_description,
             compatibility_type="error",
             appversions=FX9_DEFINITION,
-            logFunc=err.error)
+            logFunc=err.warning)
         _compat_test(
             re.compile(r"geo\.wifi\.protocol"),
-            "The preference 'geo.wifi.uri' was removed in Firefox 9",
-            ("The geo.wifi.* preferences are no longer in use. See %s for "
-             "more information.") % (BUGZILLA_BUG % 689252),
+            "The preference 'geo.wifi.protocol' was removed in Firefox 9",
+            geo_wifi_description,
             compatibility_type="error",
             appversions=FX9_DEFINITION,
-            logFunc=err.error)
+            logFunc=err.warning)
 
     # Thunderbird 7 Compatibility rdf:addressdirectory
     if err.supports_version(TB7_DEFINITION):

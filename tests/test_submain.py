@@ -20,18 +20,17 @@ def test_prepare_package():
     submain.test_package = tp
 
 
-@raises(RuntimeError)
 def test_validation_timeout():
-    tp = submain.test_package
+    tp = submain.test_inner_package
     def slow(*args, **kw):
         time.sleep(1)
-    submain.test_package = slow
-    try:
-        err = ErrorBundle()
-        submain.prepare_package(err, "tests/resources/main/foo.xpi",
-                                timeout=0.1)
-    finally:
-        submain.test_package = tp
+    submain.test_inner_package = slow
+    err = ErrorBundle()
+    submain.prepare_package(err, "tests/resources/main/foo.xpi",
+                            timeout=0.1)
+    submain.test_inner_package = tp
+
+    assert len(err.errors) == 1
 
 
 def test_prepare_package_extension():
