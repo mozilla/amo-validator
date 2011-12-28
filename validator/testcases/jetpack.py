@@ -13,7 +13,6 @@ def inspect_jetpack(err, xpi_package):
     """
 
     jetpack_triggers = ("bootstrap.js",
-                        "components/harness.js",
                         "harness-options.json")
 
     # Make sure this is a Jetpack add-on.

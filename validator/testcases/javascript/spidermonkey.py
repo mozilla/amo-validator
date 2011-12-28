@@ -1,5 +1,5 @@
 import codecs
-import json
+import simplejson as json
 import os
 import re
 import subprocess

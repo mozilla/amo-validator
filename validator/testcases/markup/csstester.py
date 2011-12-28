@@ -1,5 +1,4 @@
 import re
-import json
 import fnmatch
 import cssutils
 
