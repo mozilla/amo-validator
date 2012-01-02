@@ -31,6 +31,8 @@ DOM_MUTATION_HANDLERS = (
 UNSAFE_THEME_XBL = ("constructor", "destructor", "field", "getter",
                     "implementation", "setter", )
 
+GENERIC_IDS = ("string-bundle", "strings", )
+
 
 class MarkupParser(htmlparser.HTMLParser):
     """Parse and analyze the versious components of markup files."""
@@ -388,10 +390,10 @@ class MarkupParser(htmlparser.HTMLParser):
 
             elif (self.extension == "xul" and
                   attr_name in ("insertbefore", "insertafter") and
-                  any((id in attr[1]) for id in ("menu_pageSource",
-                                                 "menu_pageinspect",
-                                                 "javascriptConsole",
-                                                 "webConsole"))):
+                  any((id in attr_value) for id in ("menu_pageSource",
+                                                    "menu_pageinspect",
+                                                    "javascriptConsole",
+                                                    "webConsole"))):
                 self.err.notice(
                     err_id=("testcases_markup_markuptester",
                             "handle_starttag",
@@ -411,6 +413,21 @@ class MarkupParser(htmlparser.HTMLParser):
                     for_appversions=FX6_DEFINITION,
                     compatibility_type="warning")
 
+
+            # Test for generic IDs
+            if attr_name == "id" and attr_value in GENERIC_IDS:
+                self.err.warning(
+                    err_id=("testcases_markup_markuptester",
+                            "handle_starttag", "generic_ids"),
+                    warning="Overlay contains generically-named IDs",
+                    description="An overlay is using a generically-named ID "
+                                "that could cause compatibility problems with "
+                                "other add-ons. Add-ons must namespace all IDs "
+                                "in the overlay, in the same way that "
+                                "JavaScript objects must be namespaced.",
+                    filename=self.filename,
+                    line=self.line,
+                    context=self.context)
 
         # When the dev forgets their <!-- --> on a script tag, bad
         # things happen.
