@@ -109,7 +109,7 @@ def test_godlikea(err, xpi_package):
                   "{a23983c0-fd0e-11dc-95ff-0800200c9a66}":
                       version_range("fennec", "4.0"),
                   "{3550f703-e582-4d05-9a08-453d09bdfdc6}":
-                      version_range("thunderbird", "3.3a4pre"),})              
+                      version_range("thunderbird", "3.3a4pre"),})
 def test_compatibility_binary(err, xpi_package):
     """
     Flags only binary content as being incompatible with future app releases.
@@ -281,7 +281,6 @@ def test_langpack_layout(err, xpi_package=None):
     # Define rules for the structure.
     mandatory_files = [
         "install.rdf",
-        "chrome/*.jar",
         "chrome.manifest"]
     whitelisted_files = ["chrome/*.jar"]
     whitelisted_extensions = ("manifest", "rdf", "jar", "dtd",
