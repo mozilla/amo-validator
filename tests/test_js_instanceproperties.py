@@ -25,6 +25,30 @@ def test_innerHTML():
     """).failed()
 
 
+def test_innerAdjacentHTML():
+    """Test that innerAdjacentHTML works the same as innerHTML."""
+
+    assert not _do_test_raw("""
+    var x = foo();
+    x.innerAdjacentHTML = "<div></div>";
+    """).failed()
+
+    assert _do_test_raw("""
+    var x = foo();
+    x.innerAdjacentHTML = "<div onclick=\\"foo\\"></div>";
+    """).failed()
+
+    # Test without declaration
+    assert _do_test_raw("""
+    x.innerAdjacentHTML = "<div onclick=\\"foo\\"></div>";
+    """).failed()
+
+    assert _do_test_raw("""
+    var x = foo();
+    x.innerAdjacentHTML = "x" + y;
+    """).failed()
+
+
 def test_complex_innerHTML():
     """Tests that innerHTML can't be assigned an HTML chunk with bad code"""
 
