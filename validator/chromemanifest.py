@@ -34,7 +34,8 @@ class ChromeManifest(object):
                             "predicate": triple[1],
                             "object": triple[2],
                             "line": counter,
-                            "filename": path})
+                            "filename": path,
+                            "context": self.context})
 
         self.triples = triples
 

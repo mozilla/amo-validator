@@ -33,7 +33,7 @@ def test_langpack_manifest(err, xpi_package=None):
                          "Invalid subject: %s" % subject],
                         filename=triple["filename"],
                         line=triple["line"],
-                        context=chrome.context)
+                        context=triple["context"])
 
         if subject == "override":
             object_ = triple["object"]
@@ -50,7 +50,7 @@ def test_langpack_manifest(err, xpi_package=None):
                             "'override' entry does not match '%s'" % pattern,
                             filename=triple["filename"],
                             line=triple["line"],
-                            context=chrome.context)
+                            context=triple["context"])
 
 
 # This function is called by content.py
