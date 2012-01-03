@@ -21,15 +21,15 @@ def test_langpack_manifest(err, xpi_package=None):
     for triple in chrome.triples:
         subject = triple["subject"]
         # Test to make sure that the triple's subject is valid
-        if subject not in ("locale", "override"):
+        if subject not in ("locale", "override", "manifest"):
             err.warning(("testcases_langpack",
                          "test_langpack_manifest",
                          "invalid_subject"),
                         "Invalid chrome.manifest subject",
                         ["chrome.manifest files in language packs are only "
                          "allowed to contain items that are prefixed with "
-                         "'locale' or 'override'. Other values are not "
-                         "allowed.",
+                         "'locale', 'manifest', or 'override'. Other values "
+                         "are not allowed.",
                          "Invalid subject: %s" % subject],
                         filename=triple["filename"],
                         line=triple["line"],

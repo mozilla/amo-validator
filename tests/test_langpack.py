@@ -20,6 +20,14 @@ def test_langpack_bad_subject():
              langpack.test_langpack_manifest)
 
 
+def test_langpack_bad_nested_subject():
+    """
+    Test that when a subject in a sub-manifest is not valid, it gets reported.
+    """
+    _do_test("tests/resources/langpack/nested.xpi",
+             langpack.test_langpack_manifest)
+
+
 def test_langpack_bad_uri_pred():
     """Tests that a language pack has an invalid URI specified for its
     'override' predicates."""
