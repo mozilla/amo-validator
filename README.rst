@@ -421,3 +421,14 @@ simply run: ::
 
 That's it!
 
+
+Language Packs
+==============
+
+With every version of every app that's released, the language pack references
+need to be updated. It is usually easiest to extract them from the OS X .app
+packages, though they can likely be obtained elsewhere.
+
+These reference files need to be placed in the ``validator/testcases/langpacks``
+directory.
+
