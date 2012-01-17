@@ -125,6 +125,7 @@ def test_compatibility_binary(err, xpi_package):
 
     for triple in chrome.triples:
         if triple["subject"] == "binary-component":
+            err.metadata["binary_components"] = True
             err.notice(
                 err_id=("testcases_packagelayout",
                         "test_compatibility_binary",

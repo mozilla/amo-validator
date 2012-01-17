@@ -38,6 +38,7 @@ def test_blacklisted_magic_numbers():
                    False)
     print err.compat_summary
     assert not err.compat_summary["errors"]
+    assert "binary_components" not in err.metadata
 
 
 def test_compat_binary_extensions():
@@ -54,6 +55,7 @@ def test_compat_binary_extensions():
                    False)
     print err.compat_summary
     assert err.compat_summary["errors"]
+    assert err.metadata["binary_components"]
 
 
 def test_godlikea():
