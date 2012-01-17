@@ -38,6 +38,9 @@ CATEGORY_REGEXES = (
                      "DOM interface")))))
 
 PASSWORD_REGEX = re.compile("password", re.I)
+PROTOTYPE_REGEX = re.compile(r"(String|Object|Number|Date|RegExp|Function|"
+                             r"Boolean|Array|Iterator)\.prototype"
+                             r"(\.[a-zA-Z0-9]+|\[.+\]) =", re.I)
 
 CHROME_PATTERNS = (
     (r"(?<![\'\"])require\s*\(\s*[\'\"]chrome[\'\"]\s*\)",
@@ -160,6 +163,17 @@ def run_regex_tests(document, err, filename, context=None, is_js=False):
                 "Passwords may be stored in /defaults/preferences JS files.",
                 "Storing passwords in the preferences is insecure and the "
                 "Login Manager should be used instead.")
+
+        is_jsm = filename.endswith(".jsm") or "EXPORTED_SYMBOLS" in document
+
+        if not is_jsm:
+            # Have a non-static/dynamic test for prototype extension.
+            _generic_test(
+                    PROTOTYPE_REGEX,
+                    "JS Prototype extension",
+                    "It appears that an extension of a built-in JS type was "
+                    "made. This is not allowed for security and compatibility "
+                    "reasons.")
 
     for pattern in DOM_MUTATION_REGEXES:
         _generic_test(
