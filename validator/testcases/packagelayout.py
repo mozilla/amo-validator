@@ -109,7 +109,7 @@ def test_godlikea(err, xpi_package):
                   "{a23983c0-fd0e-11dc-95ff-0800200c9a66}":
                       version_range("fennec", "4.0"),
                   "{3550f703-e582-4d05-9a08-453d09bdfdc6}":
-                      version_range("thunderbird", "3.3a4pre"),})              
+                      version_range("thunderbird", "3.3a4pre"),})
 def test_compatibility_binary(err, xpi_package):
     """
     Flags only binary content as being incompatible with future app releases.
@@ -119,42 +119,21 @@ def test_compatibility_binary(err, xpi_package):
                    "compatibility manually adjusted. Please test your add-on "
                    "against the new version before updating your maxVersion.")
 
-    for name in xpi_package:
+    chrome = err.get_resource("chrome.manifest")
+    if not chrome:
+        return
 
-        # Restrict the search to files in sensitive directories.
-        if not name.startswith(("components/", "plugins/", "platform/")):
-            continue
-
-        # Simple test to ensure that the extension isn't blacklisted
-        if name.endswith(("dll", "dylib", "so", "exe")):
-            # Note that there is a binary extension in the metadata
-            err.notice(
-                err_id=("testcases_packagelayout",
-                        "test_compatibility_binary",
-                        "disallowed_extension"),
-                notice="Flagged file extension found",
-                description=["The file \"%s\" has a flagged file extension." %
-                                 name,
-                             description],
-                filename=name,
-                compatibility_type="error")
-            continue
-
-        # Test against some specific magic numbers, namely Windows executables
-        # and UNIX elf.
-        zip = xpi_package.zf.open(name)
-        bytes = tuple([ord(x) for x in zip.read(4)])  # Longest is 4 bytes
-        if [x for x in blacklisted_magic_numbers[:3] if bytes[0:len(x)] == x]:
-            # Note that there is binary content in the metadata
+    for triple in chrome.triples:
+        if triple["subject"] == "binary-component":
             err.notice(
                 err_id=("testcases_packagelayout",
                         "test_compatibility_binary",
                         "disallowed_file_type"),
                 notice="Flagged file type found",
-                description=["A file (%s) was found to contain flagged binary "
-                             "content." % name,
+                description=["A file (%s) was registered as a binary "
+                             "component." % triple["predicate"],
                              description],
-                filename=name,
+                filename=triple["predicate"],
                 compatibility_type="error")
 
 

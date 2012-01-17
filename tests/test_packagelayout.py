@@ -56,22 +56,6 @@ def test_compat_binary_extensions():
     assert err.compat_summary["errors"]
 
 
-def test_compat_binary_magic_numbers():
-    """
-    Test that the validator will throw compatibility errors for files that
-    have executable magic numbers (not including interpreted or Java files)
-    such that the developer is alerted about needing to manually update the
-    maxVersion.
-    """
-
-    # Same logic as above.
-    err = _do_test("tests/resources/packagelayout/magic_number_compat.xpi",
-                   packagelayout.test_compatibility_binary,
-                   False)
-    print err.compat_summary
-    assert err.compat_summary["errors"]
-
-
 def test_godlikea():
     """Test that packages with a godlikea chrome namespaceget rejected."""
 
