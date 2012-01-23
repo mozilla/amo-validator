@@ -142,6 +142,7 @@ def test_incompatible_uris():
     assert not err.failed()
     assert not any(err.compat_summary.values())
 
+
 def test_chrome_usage():
 
     err = _do_test_raw("""var foo = require("bar");""")
@@ -153,3 +154,11 @@ def test_chrome_usage():
     assert 'requires_chrome' in err.metadata, (
         'Unexpected: "requires_chrome" should be in metadata')
     eq_(err.metadata['requires_chrome'], True)
+
+
+def test_preference_extension_regex():
+    """Test that preference extension regexes pick up the proper strings."""
+
+    assert not _do_test_raw('"chrome://mozapps/skin/extensions/update1.png"').failed()
+    assert _do_test_raw('"foo.extensions.update.bar"').failed()
+

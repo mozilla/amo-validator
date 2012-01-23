@@ -132,7 +132,7 @@ def run_regex_tests(document, err, filename, context=None, is_js=False):
 
         for branch in BANNED_PREF_BRANCHES:
             _substring_test(
-                branch,
+                branch.replace(r".", r"\."),
                 "Potentially unsafe preference branch referenced",
                 "Extensions should not alter preferences in the '%s' "
                 "preference branch" % branch)
