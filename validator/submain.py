@@ -114,10 +114,6 @@ def test_search(err, package, expectation=0):
 
     if expected_search_provider and not err.failed():
         err.set_type(PACKAGE_SEARCHPROV)
-        err.notice(("main",
-                    "test_search",
-                    "confirmed"),
-                   "OpenSearch provider confirmed.")
 
 
 def test_webapp(err, package, expectation=0):
@@ -134,10 +130,6 @@ def test_webapp(err, package, expectation=0):
 
     if expected_webapp and not err.failed():
         err.set_type(PACKAGE_WEBAPP)
-        err.notice(("main",
-                    "test_webapp",
-                    "confirmed"),
-                   "App confirmed.")
 
 
 def test_package(err, file_, name, expectation=PACKAGE_ANY,
