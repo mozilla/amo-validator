@@ -565,7 +565,9 @@ GLOBAL_ENTITIES = {
                    "value": lambda t: CONTENT_DOCUMENT},
               u"contentWindow":
                   {"value":
-                       lambda t: {"value": GLOBAL_ENTITIES}}}},
+                       lambda t: {"value": GLOBAL_ENTITIES}},
+              u"selectedTab":
+                  {"readonly": False}}},
     u"opener":
         {"value":
              lambda t: {"value": GLOBAL_ENTITIES}},

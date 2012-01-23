@@ -108,9 +108,17 @@ def test_overwrite_global():
     document.title = "This is something that isn't a global";
     """).failed()
 
+
 def test_overwrite_readonly_false():
     """Test that globals with readonly set to false are overwritable."""
     assert not _do_test_raw("""
     window.innerHeight = 123;
+    """).failed()
+
+
+def test_overwrite_selectedTab():
+    """Test that gBrowser.selectedTab is overwriteable."""
+    assert not _do_test_raw("""
+    gBrowser.selectedTab = 123;
     """).failed()
 
