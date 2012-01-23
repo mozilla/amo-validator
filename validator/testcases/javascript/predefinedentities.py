@@ -65,6 +65,10 @@ INTERFACES = {
             "Using the nsIAccessibleRetrieval interface causes significant "
             "performance degradation in Firefox. It should only be used in "
             "accessibility-related add-ons."},
+    u"nsIBrowserSearchService":
+        {"value":
+            {u"currentEngine": {"readonly": True},
+             u"defaultEngine": {"readonly": True}}},
     u"nsIComponentRegistrar":
         {"value":
             {u"autoRegister":
@@ -435,6 +439,10 @@ GLOBAL_ENTITIES = {
                                 {"xpcom_map":
                                      lambda:
                                         INTERFACES["nsIAccessibleRetrieval"]},
+                             u"nsIBrowserSearchService":
+                                {"xpcom_map":
+                                     lambda:
+                                        INTERFACES["nsIBrowserSearchService"]},
                              u"nsICategoryManager":
                                 {"xpcom_map":
                                      lambda:

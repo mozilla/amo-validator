@@ -227,3 +227,29 @@ def test_xpcom_shortcut_services_ww():
     Services.ww.addListener();
     """)
 
+
+def test_xpcom_nsibrowsersearchservice():
+    """
+    Test that currentEngine/defaultEngine are flagged when they are
+    overwritten.
+    """
+
+    assert not _do_test_raw("""
+    var foo = Cc["@mozilla.org/browser/search-service;1"]
+                   .getService(Components.interfaces.nsIBrowserSearchService);
+    alert(foo.currentEngine);
+    foo.bar = true;
+    """).failed()
+
+    assert not _do_test_raw("""
+    var foo = Cc["@mozilla.org/browser/search-service;1"]
+                   .getService(Components.interfaces.nsIBrowserSearchService);
+    foo.currentEngine = 123;
+    """).failed()
+
+    assert not _do_test_raw("""
+    var foo = Cc["@mozilla.org/browser/search-service;1"]
+                   .getService(Components.interfaces.nsIBrowserSearchService);
+    foo.defaultEngine = 123;
+    """).failed()
+
