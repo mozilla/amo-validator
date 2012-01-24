@@ -108,6 +108,8 @@ def test_godlikea(err, xpi_package):
                       version_range("firefox", "4.2a1pre"),
                   "{a23983c0-fd0e-11dc-95ff-0800200c9a66}":
                       version_range("fennec", "4.0"),
+                  "{aa3c5121-dab2-40e2-81ca-7ea25febc110}":
+                      version_range("android", "11.0a1"),
                   "{3550f703-e582-4d05-9a08-453d09bdfdc6}":
                       version_range("thunderbird", "3.3a4pre"),})
 def test_compatibility_binary(err, xpi_package):
