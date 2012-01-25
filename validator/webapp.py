@@ -79,16 +79,6 @@ def test_webapp(err, webapp, current_valid_keys, required=True):
                         "required element that has not been found or is "
                         "invalid.")
 
-    # If the add-on is listed, make sure we test for installs_allowed_from.
-    if (err.get_resource("listed") and required and
-        "installs_allowed_from" not in webapp):
-        err.error(
-            err_id=("webapp", "detect", "iaf_missing_listed"),
-            error="App: Missing 'installs_allowed_from' property",
-            description="In order to submit a webapp to %s, "
-                        "'installs_allowed_from' must exist and must contain "
-                        "%s." % (WEBAPP_AMO_URL, WEBAPP_AMO_URL))
-
     for key in webapp:
         if key not in current_valid_keys:
             err.error(
