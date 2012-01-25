@@ -129,6 +129,19 @@ def test_langpack_max():
                         "chrome/asdf.css"])
 
 
+def test_langpack_sans_jars():
+    """
+    Test that language packs don't require JAR files to be present in the
+    chrome/ directory.
+    """
+
+    _do_simulated_test(
+            packagelayout.test_langpack_layout,
+            ["install.rdf", "chrome.manifest",  # Required files
+             "foo.manifest", "bar.rdf", "abc.dtd", "def.jar",  # Allowed files
+             "chrome/foo.properties", "chrome/foo.xhtml", "chrome/foo.css"])
+
+
 def test_dict_max():
     """Tests the package layout module out on a simulated dictionary
     containing the largest number of possible elements."""

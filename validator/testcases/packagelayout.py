@@ -263,7 +263,6 @@ def test_langpack_layout(err, xpi_package=None):
     # Define rules for the structure.
     mandatory_files = [
         "install.rdf",
-        "chrome/*.jar",
         "chrome.manifest"]
     whitelisted_files = ["chrome/*.jar"]
     whitelisted_extensions = ("manifest", "rdf", "jar", "dtd",
