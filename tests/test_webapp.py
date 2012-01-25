@@ -226,20 +226,6 @@ def test_webapp_invalid_locale_keys():
     assert not err.failed()
 
 
-def test_webapp_installs_allowed_from_missing_listed():
-    """Test that installs_allowed_from is present when listed.."""
-
-    err = ErrorBundle(listed=False)
-    data = _get_json()
-    del data["installs_allowed_from"]
-    _detect(err, data)
-    assert not err.failed()
-
-    err = ErrorBundle(listed=True)
-    _detect(err, data)
-    assert err.failed()
-
-
 def test_webapp_installs_allowed_from_not_list():
     """Test that the installs_allowed_from path is a list."""
 
