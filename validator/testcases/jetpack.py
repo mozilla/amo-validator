@@ -1,8 +1,13 @@
 import hashlib
 import json
 import os
+
 import validator.decorator as decorator
 from validator.constants import PACKAGE_EXTENSION
+from content import FLAGGED_FILES
+
+
+SAFE_FILES = (".jpg", ".ico", ".png", ".gif", ".txt")
 
 
 @decorator.register_test(tier=1, expected_type=PACKAGE_EXTENSION)
@@ -12,8 +17,7 @@ def inspect_jetpack(err, xpi_package):
     ensure that none of the Jetpack libraries have been tampered with.
     """
 
-    jetpack_triggers = ("bootstrap.js",
-                        "harness-options.json")
+    jetpack_triggers = ("bootstrap.js", "harness-options.json")
 
     # Make sure this is a Jetpack add-on.
     if not all(trigger in xpi_package for trigger in jetpack_triggers):
@@ -35,7 +39,7 @@ def inspect_jetpack(err, xpi_package):
     err.metadata["is_jetpack"] = True
 
     # Test the harness-options file for the mandatory values.
-    mandatory_elements = ("sdkVersion", "manifest", "jetpackID", "bundleID")
+    mandatory_elements = ("sdkVersion", "manifest", "jetpackID")
     missing_elements = []
     for element in mandatory_elements:
         if element not in harnessoptions:
@@ -55,7 +59,11 @@ def inspect_jetpack(err, xpi_package):
         return
 
     # Save the SDK version information to the metadata.
-    err.metadata["jetpack_sdk_version"] = harnessoptions["sdkVersion"]
+    sdk_version = harnessoptions["sdkVersion"]
+    err.metadata["jetpack_sdk_version"] = sdk_version
+
+    # If we don't have a list of pretested files already, save a blank list.
+    # Otherwise, use the existing list.
     pretested_files = err.get_resource("pretested_files")
     if not pretested_files:
         err.save_resource("pretested_files", [])
@@ -66,7 +74,7 @@ def inspect_jetpack(err, xpi_package):
                                      "jetpack_data.txt"))
     # Parse the jetpack data into something useful.
     jetpack_hash_table = {}
-    for line in map(lambda x: x.split(), jetpack_data):
+    for line in [x.split() for x in jetpack_data]:
         jetpack_hash_table[line[-1]] = tuple(line[:-1])
 
     # Prepare a place to store mentioned hashes.
@@ -82,14 +90,15 @@ def inspect_jetpack(err, xpi_package):
     for uri, module in harnessoptions["manifest"].items():
 
         # Make sure the module is a resource:// URL
-        if not uri.startswith("resource://"):
+        if uri.startswith(("http://", "https://", "ftp://")):
             err.warning(
                 err_id=("testcases_jetpack",
                         "inspect_jetpack",
                         "irregular_module_location"),
                 warning="Irregular Jetpack module location",
-                description="A Jetpack module is referenced with a non-"
-                            "resource URI.",
+                description=["A Jetpack module is referenced with a remote "
+                             "URI.",
+                             "Referenced URI: %s" % uri],
                 filename="harness-options.json")
             continue
 
@@ -106,7 +115,10 @@ def inspect_jetpack(err, xpi_package):
                 filename="harness-options.json")
             continue
 
-        zip_path = "resources/%s" % uri[11:].replace("@", "-at-")
+        # Strip off the resource:// if it exists
+        if uri.startswith("resource://"):
+            uri = uri[11:]
+        zip_path = "resources/%s" % uri.replace("@", "-at-")
 
         # Check the zipname element if it exists.
         if zip_path not in xpi_package:
@@ -151,8 +163,6 @@ def inspect_jetpack(err, xpi_package):
         tested_files[zip_path] = jetpack_hash_table[module["jsSHA256"]]
         pretested_files.append(zip_path)
 
-    safe_files = (".jpg", ".ico", ".png", ".gif")
-
     # Iterate the rest of the files in the package for testing.
     for filename in xpi_package:
 
@@ -162,8 +172,8 @@ def inspect_jetpack(err, xpi_package):
             continue
 
         # Skip safe files.
-        if (filename.lower().endswith(safe_files) or
-            filename.lower() == ".ds_store"):
+        if (filename.lower().endswith(SAFE_FILES) or
+            filename in FLAGGED_FILES):
             continue
 
         blob = xpi_package.read(filename)

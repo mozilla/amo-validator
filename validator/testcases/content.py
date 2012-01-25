@@ -17,7 +17,7 @@ from validator.constants import *
 
 
 FLAGGED_FILES = set([".DS_Store", "Thumbs.db"])
-FLAGGED_EXTENSIONS = (".orig", ".old", "~", )
+FLAGGED_EXTENSIONS = set([".orig", ".old", "~"])
 OSX_REGEX = re.compile("__MACOSX")
 
 @decorator.register_test(tier=1)
@@ -87,7 +87,7 @@ def test_packed_packages(err, xpi_package=None):
                             "aren't included.",
                 filename=name)
             continue
-        elif (name.endswith(FLAGGED_EXTENSIONS) or
+        elif (any(name.endswith(ext) for ext in FLAGGED_EXTENSIONS) or
               name in FLAGGED_FILES):
             err.warning(
                 err_id=("testcases_content", "test_packaged_packages",
