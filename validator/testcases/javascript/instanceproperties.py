@@ -114,6 +114,7 @@ def _get_xml(name):
 
 
 OBJECT_DEFINITIONS = {"innerHTML": {"set": set_innerHTML},
+                      "innerAdjacentHTML": {"set": set_innerHTML},
                       "isElementContentWhitespace":
                           {"get": get_isElementContentWhitespace},
                       "xmlEncoding": _get_xml("xmlEncoding"),
