@@ -442,10 +442,12 @@ class JSArray(JSObject):
         if len(self.elements) > index:
             self.elements[index] = JSWrapper(value=value, traverser=traverser)
         else:
+            # Max out the array size at 100000
+            index = min(index, 100000)
             # Assigning to an index higher than the top of the list pads the
             # list with nulls
             while len(self.elements) < index:
-                self.elements.append(JSWrapper(traverser=traverser))
+                self.elements.append(None)
             self.elements.append(JSWrapper(value=value, traverser=traverser))
 
     def output(self):
