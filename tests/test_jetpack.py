@@ -56,7 +56,6 @@ def test_pass_jetpack():
     """Test that a minimalistic Jetpack setup will pass."""
 
     harnessoptions = {"sdkVersion": "foo",
-                      "bundleID": "",
                       "jetpackID": "",
                       "manifest": {}}
 
@@ -89,7 +88,6 @@ def test_missing_elements():
     """Test that missing elements in harness-options will fail."""
 
     harnessoptions = {"sdkVersion": "foo",
-                      "bundleID": "",
                       "jetpackID": ""}
 
     with open("jetpack/addon-sdk/python-lib/cuddlefish/"
@@ -106,7 +104,6 @@ def test_skip_safe_files():
     """Test that missing elements in harness-options will fail."""
 
     harnessoptions = {"sdkVersion": "foo",
-                      "bundleID": "",
                       "jetpackID": "",
                       "manifest": {}}
 
@@ -135,10 +132,9 @@ def test_pass_manifest_elements():
 
     harnessoptions = {
             "jetpackID": "foobar",
-            "bundleID": "",
             "sdkVersion": "foo",
             "manifest": {
-                "resource://bootstrap.js":
+                "bootstrap.js":
                     {"requirements": {},
                      "packageName": "addon-kit",
                      "sectionName": "lib",
@@ -162,6 +158,34 @@ def test_pass_manifest_elements():
     assert not err.metadata["jetpack_unknown_files"]
 
 
+def test_ok_resource():
+    """Test that resource:// URIs aren't flagged."""
+
+    with open("jetpack/addon-sdk/python-lib/cuddlefish/"
+                  "app-extension/bootstrap.js") as bootstrap_file:
+        bootstrap = bootstrap_file.read()
+        bootstrap_hash = hashlib.sha256(bootstrap).hexdigest()
+
+    harnessoptions = {
+            "jetpackID": "foobar",
+            "sdkVersion": "foo",
+            "manifest": {
+                "resource://bootstrap.js":
+                    {"requirements": {},
+                     "packageName": "addon-kit",
+                     "sectionName": "lib",
+                     "moduleName": "drawing",
+                     "jsSHA256": bootstrap_hash,
+                     "docsSHA256": bootstrap_hash}}}
+
+    err = _do_test(MockXPI({"bootstrap.js": bootstrap,
+                            "resources/bootstrap.js": bootstrap,
+                            "harness-options.json":
+                                json.dumps(harnessoptions)}))
+    print err.print_summary(verbose=True)
+    assert not err.failed()
+
+
 def test_bad_resource():
     """Test for failure on non-resource:// modules."""
 
@@ -173,7 +197,6 @@ def test_bad_resource():
     harnessoptions = {
             "sdkVersion": "foo",
             "jetpackID": "foobar",
-            "bundleID": "",
             "manifest":
                 {"http://foo.com/bar/bootstrap.js":
                     {"requirements": {},
@@ -202,7 +225,6 @@ def test_missing_manifest_elements():
     harnessoptions = {
             "sdkVersion": "foo",
             "jetpackID": "foobar",
-            "bundleID": "",
             "manifest":
                 {"resource://bootstrap.js":
                     {"requirements": {},
@@ -228,7 +250,6 @@ def test_mismatched_hash():
     harnessoptions = {
             "sdkVersion": "foo",
             "jetpackID": "foobar",
-            "bundleID": "",
             "manifest":
                 {"resource://bootstrap.js":
                     {"requirements": {},
@@ -265,7 +286,6 @@ def test_mismatched_db_hash():
     harnessoptions = {
             "sdkVersion": "foo",
             "jetpackID": "foobar",
-            "bundleID": "",
             "manifest":
                 {"resource://bootstrap.js":
                     {"requirements": {},
