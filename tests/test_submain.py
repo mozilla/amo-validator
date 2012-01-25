@@ -1,6 +1,6 @@
 import time
 
-from nose.tools import raises
+from nose.tools import eq_, raises
 
 import validator.submain as submain
 from validator.errorbundler import ErrorBundle
@@ -152,7 +152,10 @@ def test_proper_linked_manifest():
     # From the base file:
     assert list(chrome.get_triples(subject="foo"))
     # From the linked manifest:
-    assert list(chrome.get_triples(subject="zap"))
+    zaps = list(chrome.get_triples(subject="zap"))
+    assert zaps
+    eq_(zaps[0]["filename"], "submanifest.manifest")
+    eq_(zaps[0]["context"].data, ["zap baz", ""])
 
 
 def test_missing_manifest_link():

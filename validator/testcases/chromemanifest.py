@@ -35,7 +35,7 @@ def test_categories(err):
                         "properties on JavaScript globals.",
                         filename=triple["filename"],
                         line=triple["line"],
-                        context=chrome.context)
+                        context=triple["context"])
 
 
 @decorator.register_test(tier=2, simple=True)
@@ -59,7 +59,7 @@ def test_resourcemodules(err):
                             "'resource modules'.",
                 filename=triple["filename"],
                 line=triple["line"],
-                context=chrome.context)
+                context=triple["context"])
 
 
 @decorator.register_test(tier=3, simple=True)
@@ -84,7 +84,7 @@ def test_content_instructions(err):
                 description=banned_namespaces[triple["predicate"]],
                 filename=triple["filename"],
                 line=triple["line"],
-                context=chrome.context)
+                context=triple["context"])
         elif not triple["object"].split()[0].endswith("/"):
             err.notice(
                 err_id=("testcases_chromemanifest",
@@ -95,5 +95,5 @@ def test_content_instructions(err):
                             "information, see %s." % MANIFEST_URI,
                 filename=triple["filename"],
                 line=triple["line"],
-                context=chrome.context)
+                context=triple["context"])
 

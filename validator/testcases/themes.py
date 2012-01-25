@@ -27,5 +27,5 @@ def test_theme_manifest(err, xpi_package=None):
                          "Invalid subject: %s" % subject],
                         filename=triple["filename"],
                         line=triple["line"],
-                        context=chrome.context)
+                        context=triple["context"])
 
