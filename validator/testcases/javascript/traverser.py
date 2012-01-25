@@ -132,11 +132,8 @@ class Traverser:
             self.position = int(node["loc"]["start"]["column"])
 
         # Extract properties about the node that we're traversing
-        (branches,
-         establish_context,
-         action,
-         returns,
-         block_level) = DEFINITIONS[node["type"]]
+        (branches, establish_context, action, returns,
+             block_level) = DEFINITIONS[node["type"]]
 
         # If we're supposed to establish a context, do it now
         if establish_context:
