@@ -39,9 +39,9 @@ def test_xpcnativewrappers(err, xpi_package=None):
                         "xpcnativewrappers not allowed in chrome.manifest",
                         "chrome.manifest files are not allowed to contain "
                         "xpcnativewrappers directives.",
-                        "chrome.manifest",
+                        filename=triple["filename"],
                         line=triple["line"],
-                        context=chrome.context)
+                        context=triple["context"])
 
 
 @decorator.register_test(tier=2)
