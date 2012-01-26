@@ -347,12 +347,22 @@ def test_webapp_bad_widget_missing():
     assert err.failed()
 
 
+def test_webapp_dev_missing():
+    """Test that the developer property can be absent."""
+
+    err = ErrorBundle(listed=False)
+    data = _get_json()
+    del data["developer"]
+    _detect(err, data)
+    assert not err.failed()
+
+
 def test_webapp_dev_not_dict():
     """Test that the developer property must be a dict"""
 
     err = ErrorBundle(listed=False)
     data = _get_json()
-    data["developer"]["developer"] = "foo"
+    data["developer"] = "foo"
     _detect(err, data)
     assert err.failed()
 
