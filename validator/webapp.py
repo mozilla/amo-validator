@@ -4,6 +4,7 @@ import types
 import urlparse
 
 from validator.constants import *
+from unicodehelper import decode
 
 
 MAX_LENGTHS = {"name": 128,
@@ -55,8 +56,10 @@ def detect_webapp(err, package):
     # Parse the file.
     try:
         with open(package, mode="r") as f:
-            webapp = json.load(f)
-    except:
+            data = f.read()
+            u_data = decode(data)
+            webapp = json.loads(u_data)
+    except ValueError:
         return err.error(
             err_id=("webapp",
                     "detect_webapp",
