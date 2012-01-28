@@ -34,8 +34,6 @@ def _detect(err, data):
             t.write(json.dumps(data))
         name = t.name
     validator.webapp.detect_webapp(err, name)
-    err.print_summary(verbose=True)
-    err.render_json()
     os.unlink(name)
 
 
@@ -88,6 +86,16 @@ def test_webapp_pass():
     err = ErrorBundle(listed=False)
     _detect(err, _get_json())
     print err.print_summary(verbose=True)
+    assert not err.failed()
+
+
+def test_webapp_bom():
+    """Test that a plain webapp with a BOM won't throw errors."""
+
+    err = ErrorBundle(listed=False)
+    err.detected_type = validator.constants.PACKAGE_WEBAPP
+    validator.webapp.detect_webapp(
+            err, "tests/resources/unicodehelper/utf8_webapp.json")
     assert not err.failed()
 
 
