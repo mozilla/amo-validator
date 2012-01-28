@@ -109,7 +109,6 @@ def test_webapp(err, webapp, current_valid_keys, required=True):
                 continue
 
             keys = set(webapp[key].keys())
-            absent_keys = DEVELOPER_KEYS - keys
             extra_keys = keys - DEVELOPER_KEYS
             if extra_keys:
                 err.warning(
@@ -119,14 +118,11 @@ def test_webapp(err, webapp, current_valid_keys, required=True):
                                  "that could not be identified.",
                                  "Extra keys: %s" %
                                      ", ".join(extra_keys)])
-            if absent_keys and required:
+            if "name" not in keys and required:
                 err.error(
                     err_id=("webapp", "detect", "absent_dev"),
-                    error="App: Missing keys in 'developer'.",
-                    description=["The 'developer' key is missing certain "
-                                 "children.",
-                                 "Missing keys: %s" %
-                                     ", ".join(absent_keys)])
+                    error="App: Missing 'name' in 'developer'.",
+                    description=["The 'developer' key is missing a name."])
 
             if ("url" in keys and
                 not _test_url(webapp[key]["url"])):
