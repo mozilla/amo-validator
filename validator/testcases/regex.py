@@ -4,7 +4,7 @@ import re
 from validator.constants import BUGZILLA_BUG
 from validator.compat import (FX4_DEFINITION, FX5_DEFINITION, FX6_DEFINITION,
                               FX7_DEFINITION, FX8_DEFINITION, FX9_DEFINITION,
-                              TB7_DEFINITION, TB10_DEFINITION)
+                              FX11_DEFINITION, TB7_DEFINITION, TB10_DEFINITION)
 from validator.contextgenerator import ContextGenerator
 
 
@@ -372,6 +372,26 @@ def run_regex_tests(document, err, filename, context=None, is_js=False):
             compatibility_type="error",
             appversions=FX9_DEFINITION,
             logFunc=err.warning)
+
+    # Firefox 11 Compatibility
+    if err.supports_version(FX11_DEFINITION):
+        # omni.jar renamed
+        for instance in re.finditer(r"omni\.jar", document):
+            err.warning(
+                err_id=("testcases_regex", "regex_regex_tests", "omni.jar"),
+                warning="'omni.jar' renamed to 'omni.ja'",
+                description="This add-on references omni.jar, which was "
+                            "renamed to omni.ja. You should avoid referencing "
+                            "this file directly, and at least update this "
+                            "reference for any versions that support Firefox "
+                            "11 and above. See %s for more information." %
+                                BUGZILLA_BUG % 701875,
+                filename=filename,
+                line=context.get_line(instance.start()),
+                context=context,
+                for_appversions=FX11_DEFINITION,
+                compatibility_type="error",
+                tier=5)
 
     # Thunderbird 7 Compatibility rdf:addressdirectory
     if err.supports_version(TB7_DEFINITION):
