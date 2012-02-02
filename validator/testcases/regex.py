@@ -65,6 +65,7 @@ FX7_INTERFACES = {"nsIDOMDocumentStyle": 658904,
                   "nsIDOM3Node": 659053}
 FX8_INTERFACES = {"nsISelection2": 672536,
                   "nsISelection3": 672536}
+FX11_INTERFACES = {"nsICharsetResolver": 700490}
 
 
 def run_regex_tests(document, err, filename, context=None, is_js=False):
@@ -206,7 +207,8 @@ def run_regex_tests(document, err, filename, context=None, is_js=False):
                      "from Firefox 6. Please refer to %s for possible "
                      "alternatives.") % (pattern, BUGZILLA_BUG % bug),
                     compatibility_type="error",
-                    appversions=FX6_DEFINITION)
+                    appversions=FX6_DEFINITION,
+                    logFunc=err.warning)
 
         # app.update.timer
         _compat_test(
@@ -243,7 +245,8 @@ def run_regex_tests(document, err, filename, context=None, is_js=False):
                      "from Firefox 7. Please refer to %s for possible "
                      "alternatives.") % (pattern, BUGZILLA_BUG % bug),
                     compatibility_type="error",
-                    appversions=FX7_DEFINITION)
+                    appversions=FX7_DEFINITION,
+                    logFunc=err.warning)
 
         # nsINavHistoryObserver
         _compat_test(
@@ -278,7 +281,8 @@ def run_regex_tests(document, err, filename, context=None, is_js=False):
                      "interface instead. See %s for more details.") %
                         (BUGZILLA_BUG % bug),
                     compatibility_type="error",
-                    appversions=FX8_DEFINITION)
+                    appversions=FX8_DEFINITION,
+                    logFunc=err.warning)
 
         # nsIDOMWindowInternal
         NSIDWI_MDN = ("https://developer.mozilla.org/en/"
@@ -303,7 +307,8 @@ def run_regex_tests(document, err, filename, context=None, is_js=False):
                  "Firefox 8. You can use the normal Date object instead. See "
                  "%s for more information.") % ISO8601_MDC,
                 compatibility_type="error",
-                appversions=FX8_DEFINITION)
+                appversions=FX8_DEFINITION,
+                logFunc=err.warning)
 
     # Firefox 9 Compatibility
     if err.supports_version(FX9_DEFINITION):
@@ -317,7 +322,8 @@ def run_regex_tests(document, err, filename, context=None, is_js=False):
                  " code, you should remove it if possible. For more "
                  "information, please see %s.") % TAINTENABLED_BUG,
                 compatibility_type="warning",
-                appversions=FX9_DEFINITION)
+                appversions=FX9_DEFINITION,
+                logFunc=err.warning)
         XRAYPROPS_BUG = BUGZILLA_BUG % 660233
         _compat_test(
             re.compile(r"\.nodePrincipal"),
@@ -350,7 +356,8 @@ def run_regex_tests(document, err, filename, context=None, is_js=False):
              " For more information, please see %s."
              ) % (BUGZILLA_BUG % 568971),
             compatibility_type="warning",
-            appversions=FX9_DEFINITION)
+            appversions=FX9_DEFINITION,
+            logFunc=err.warning)
 
         # geo.wifi.* warnings
         geo_wifi_description = (
@@ -375,6 +382,17 @@ def run_regex_tests(document, err, filename, context=None, is_js=False):
 
     # Firefox 11 Compatibility
     if err.supports_version(FX11_DEFINITION):
+        for pattern, bug in FX11_INTERFACES.items():
+            _compat_test(
+                    re.compile(pattern),
+                    "Unsupported interface in use",
+                    "Your add-on uses interface %s, which has been removed "
+                    "from Firefox 11. Please refer to %s for possible "
+                    "alternatives." % (pattern, BUGZILLA_BUG % bug),
+                    compatibility_type="error",
+                    appversions=FX11_DEFINITION,
+                    logFunc=err.warning)
+
         # omni.jar renamed
         for instance in re.finditer(r"omni\.jar", document):
             err.warning(
@@ -403,7 +421,8 @@ def run_regex_tests(document, err, filename, context=None, is_js=False):
                  "Thunderbird 7. You can use Dict.jsm instead. See"
                  "%s for more information.") % (BUGZILLA_BUG % 621213),
                 compatibility_type="error",
-                appversions=TB7_DEFINITION)
+                appversions=TB7_DEFINITION,
+                logFunc=err.warning)
         # de-RDF the addressbook
         _compat_test(
                 re.compile(r"rdf:addressdirectory"),
@@ -435,7 +454,8 @@ def run_regex_tests(document, err, filename, context=None, is_js=False):
                 ("This global is no longer available in "
                  "Thunderbird 10. See %s for more information.") % (BUGZILLA_BUG % 700220),
                 compatibility_type="error",
-                appversions=TB10_DEFINITION)
+                appversions=TB10_DEFINITION,
+                logFunc=err.warning)
         # nsTryToClose.js removal
         _compat_test(
                 re.compile(r"nsTryToClose.js"),
@@ -443,5 +463,6 @@ def run_regex_tests(document, err, filename, context=None, is_js=False):
                 ("The nsTryToClose.js file is no longer available in "
                  "Thunderbird 10. See %s for more information.") % (BUGZILLA_BUG % 539997),
                 compatibility_type="error",
-                appversions=TB10_DEFINITION)
+                appversions=TB10_DEFINITION,
+                logFunc=err.warning)
 

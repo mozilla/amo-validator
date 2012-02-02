@@ -174,8 +174,8 @@ def test_fx7_regex_xpcom():
     var x = "nsIDOMDocumentStyle";
     """, versions={'{ec8030f7-c20a-464f-9b0e-13a3a9e97384}':
                        version_range("firefox", "7.0a1")})
-    assert not err.failed()
-    assert err.notices
+    assert err.failed()
+    assert len(err.warnings) == 1
     assert err.compat_summary["errors"]
 
 
@@ -285,8 +285,8 @@ def test_fx8_compat():
     var x = "nsISelection2";
     """, versions={'{ec8030f7-c20a-464f-9b0e-13a3a9e97384}':
                        version_range("firefox", "8.0a1")})
-    assert not err.failed()
-    assert err.notices
+    assert err.failed()
+    assert err.warnings
     assert err.compat_summary["errors"]
 
     err = _do_real_test_raw("""
@@ -313,12 +313,12 @@ def test_fx8_compat():
     var x = "ISO8601DateUtils";
     """, versions={'{ec8030f7-c20a-464f-9b0e-13a3a9e97384}':
                        version_range("firefox", "8.0a1")})
-    assert not err.failed()
-    assert err.notices
+    assert err.failed()
+    assert err.warnings
     assert err.compat_summary["errors"]
 
 
-def futureCompatWarning(code, version):
+def futureCompatWarning(code, version, fails=True):
     err = _do_real_test_raw(code)
     assert not err.failed()
     assert not any(err.compat_summary.values())
@@ -327,7 +327,11 @@ def futureCompatWarning(code, version):
         code,
         versions={'{ec8030f7-c20a-464f-9b0e-13a3a9e97384}':
                       version_range("firefox", version)})
-    assert not err.failed()
+    if fails:
+        assert err.failed()
+    else:
+        assert not err.failed()
+        assert err.notices
     assert err.compat_summary["warnings"]
 
 
@@ -357,18 +361,19 @@ def test_fx9_691569():
     baseURIObject, nodePrincipal, documentURIObject are flagged as
     unavailable in non-chrome contexts in FX9.
     """
-    futureCompatWarning('alert(document.documentURIObject);', '9.0a1')
-    futureCompatWarning('alert(document.nodePrincipal);', '9.0a1')
-    futureCompatWarning('alert(document.baseURIObject);', '9.0a1')
+    futureCompatWarning('alert(document.documentURIObject);', '9.0a1',
+                        fails=False)
+    futureCompatWarning('alert(document.nodePrincipal);', '9.0a1',
+                        fails=False)
+    futureCompatWarning('alert(document.baseURIObject);', '9.0a1',
+                        fails=False)
 
 
 def test_fx9_nsIGlobalHistory3():
     """
     nsIGlobalHistory3 is flagged as incompatible in Firefox 9.
     """
-    futureCompatWarning(
-        'var x = "nsIGlobalHistory3";',
-        '9.0a1')
+    futureCompatWarning('var x = "nsIGlobalHistory3";', "9.0a1")
 
 
 def test_fx9_nsIURLParser_parsePath():
@@ -654,14 +659,14 @@ def test_tb7_dictUtils_removal():
     var x = 'Components.utils.import("resource:///modules/dictUtils.js");';
     """)
     assert not err.failed()
-    assert not err.notices
+    assert not err.warnings
 
     err = _do_real_test_raw("""
     var x = 'Components.utils.import("resource:///modules/dictUtils.js");';
     """, versions={'{3550f703-e582-4d05-9a08-453d09bdfdc6}':
                        version_range("thunderbird", "7.0a1")})
-    assert not err.failed()
-    assert err.notices
+    assert err.failed()
+    assert err.warnings
     assert err.compat_summary["errors"]
 
 def test_tb7_deRDF_addressbook():
@@ -821,7 +826,7 @@ def test_tb10_compatibility():
     x = gDownloadManagerStrings.get();
     """)
     assert not err.failed(fail_on_warnings=False)
-    assert not err.notices
+    assert not err.warnings
     assert not any(err.compat_summary.values())
 
     err = _do_real_test_raw("""
@@ -833,8 +838,27 @@ def test_tb10_compatibility():
     x = gDownloadManagerStrings.get();
     """, versions={'{3550f703-e582-4d05-9a08-453d09bdfdc6}':
                        version_range("thunderbird", "10.0a1")})
-    assert not err.failed(fail_on_warnings=False)
-    assert len(err.notices) == 5
+    assert err.failed()
+    assert len(err.warnings) == 1
+    assert len(err.notices) == 4
+    assert err.compat_summary["errors"]
+
+
+def test_fx11_compatibility():
+    """Test that changes in FX11 are flagged."""
+
+    err = _do_real_test_raw("""
+    var x = "nsICharsetResolver";
+    """)
+    assert not err.failed()
+    assert not err.warnings
+
+    err = _do_real_test_raw("""
+    var x = "nsICharsetResolver";
+    """, versions={'{ec8030f7-c20a-464f-9b0e-13a3a9e97384}':
+                       version_range("firefox", "11.0a1")})
+    assert err.failed()
+    assert err.warnings
     assert err.compat_summary["errors"]
 
 
