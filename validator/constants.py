@@ -38,6 +38,9 @@ SPIDERMONKEY_INSTALLATION = os.environ.get("SPIDERMONKEY_INSTALLATION")
 WEBAPP_AMO_URL = "https://apps-preview.mozilla.org"
 BUGZILLA_BUG = "https://bugzilla.mozilla.org/show_bug.cgi?id=%d"
 
+JETPACK_URI_URL = "https://wiki.mozilla.org/Labs/Jetpack/Release_Notes/" \
+                      "1.4#Known_Issues"
+
 # Graciously provided by @kumar in bug 614574
 if (not SPIDERMONKEY_INSTALLATION or
     not os.path.exists(SPIDERMONKEY_INSTALLATION)):

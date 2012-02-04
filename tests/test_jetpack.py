@@ -3,6 +3,9 @@ from nose.tools import eq_
 import hashlib
 import json
 import nose
+
+from js_helper import _do_real_test_raw as _js_test
+from validator.testcases.markup.markuptester import MarkupParser
 import validator.testcases.jetpack as jetpack
 from validator.errorbundler import ErrorBundle
 
@@ -310,4 +313,43 @@ def test_mismatched_db_hash():
     nose.tools.eq_(err.metadata["jetpack_unknown_files"],
                    ["bootstrap.js",
                     "resources/bootstrap.js"])
+
+
+def test_absolute_uris_in_js():
+    """
+    Test that a warning is thrown for absolute URIs within JS files.
+    """
+
+    bad_js = 'alert("resource://foo-data/bar/zap.png");'
+    assert not _js_test(bad_js).failed()
+    err =_js_test(bad_js, jetpack=True)
+    assert err.failed()
+    assert err.compat_summary["errors"]
+
+    # Test that literals are inspected even if they're the result of an
+    # operation.
+    bad_js = 'alert("resou" + "rce://foo-" + "data/bar/zap.png");'
+    assert not _js_test(bad_js).failed()
+    err =_js_test(bad_js, jetpack=True)
+    assert err.failed()
+    assert err.compat_summary["errors"]
+
+
+def test_absolute_uris_in_markup():
+    """
+    Test that a warning is thrown for absolute URIs within markup files.
+    """
+
+    err = ErrorBundle()
+    bad_html = '<foo><bar src="resource://foo-data/bar/zap.png" /></foo>'
+
+    parser = MarkupParser(err)
+    parser.process("foo.html", bad_html, "html")
+    assert not err.failed()
+
+    err.metadata["is_jetpack"] = True
+    parser = MarkupParser(err)
+    parser.process("foo.html", bad_html, "html")
+    assert err.failed()
+    assert err.compat_summary["errors"]
 
