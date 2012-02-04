@@ -45,26 +45,40 @@ so that you get all of the goodies inside.
 Spidermonkey
 ============
 
-A working copy of Spidermonkey (debug or non-debug is fine) is a required. The
-version installed must include support for the Parser API. Downloading and
-installing the latest copy of Tracemonkey from http://hg.mozilla.org/ will
-include this API.::
+A working copy of Spidermonkey (debug or non-debug is fine) is required. The
+version installed must include support for the Parser API. At the time of this
+writing the version of Spidermonkey included with major package managers does
+not yet include the Parser API.
 
-    hg clone http://hg.mozilla.org/tracemonkey/
-    cd tracemonkey/js/src
+How do you know if your js binary has the Parser API? Run this::
+
+    js -e 'Reflect;'
+
+There should be no error output.
+
+The best way to make sure you install the right Spidermonkey is to `clone`_ the
+mozilla-central repo or `download the tip`_ (which is faster). Then build it
+from source like this::
+
+    cd mozilla-central
+    cd js/src
     autoconf2.13
     ./configure
     make
+    sudo cp dist/bin/js /usr/local/bin/js
 
-HINT: if you're using `brew`_ on Mac OS X you can get autoconf2.13 with this::
+You must use autoconf at *exactly* 2.13 or else it won't work. If you're using
+`brew`_ on Mac OS X you can get autoconf2.13 with this::
 
     brew install https://gist.github.com/raw/765545/c87a75f2cf9e26c153970522e227f1c1cf63fb81/autoconf213.rb
 
-Once Spidermonkey is installed, make sure the ``js`` excutable is on
-``$PATH``. If so, you're good. Otherwise you can set a custom path to the js
-executable as ``$SPIDERMONKEY_INSTALLATION`` in your environment.
+If you don't want to put the ``js`` executable in your ``$PATH`` or you want it
+in a custom path, you can define it as ``$SPIDERMONKEY_INSTALLATION`` in
+your environment.
 
 .. _`brew`: http://mxcl.github.com/homebrew/
+.. _`clone`: http://hg.mozilla.org/mozilla-central/
+.. _`download the tip`: http://hg.mozilla.org/mozilla-central/archive/tip.tar.bz2
 
 ---------
  Running
