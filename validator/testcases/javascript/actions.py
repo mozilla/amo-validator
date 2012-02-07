@@ -315,21 +315,22 @@ def _define_obj(traverser, node):
 
 
 def _define_array(traverser, node):
-    "Instantiates an array object"
-
+    """Instantiate an array object from the parse tree."""
     arr = JSArray()
-    for elem in node["elements"]:
-        arr.elements.append(traverser._traverse_node(elem))
-
+    arr.elements = map(traverser._traverse_node, node["elements"])
     return arr
 
 
 def _define_literal(traverser, node):
-    "Creates a JSVariable object based on a literal"
+    """
+    Convert a literal node in the parse tree to its corresponding
+    interpreted value.
+    """
     value = node["value"]
     if isinstance(value, dict):
         return JSWrapper(traverser=traverser)
-    return JSWrapper(JSLiteral(value), traverser=traverser)
+    return JSWrapper(value if value is not None else JSLiteral(None),
+                     traverser=traverser)
 
 
 def _call_expression(traverser, node):
@@ -342,16 +343,18 @@ def _call_expression(traverser, node):
         ("name" not in node["callee"] or
          node["callee"]["name"] not in (u"pref", u"user_pref"))):
 
-        traverser.err.warning(("testcases_javascript_actions",
-                               "_call_expression",
-                               "complex_prefs_defaults_code"),
-                              "Complex code should not appear in preference defaults files",
-                              "Calls to functions other than 'pref' and 'user_pref' should "
-                              "not appear in defaults/preferences/ files.",
-                              filename=traverser.filename,
-                              line=traverser.line,
-                              column=traverser.position,
-                              context=traverser.context)
+        traverser.err.warning(
+            err_id=("testcases_javascript_actions",
+                    "_call_expression",
+                    "complex_prefs_defaults_code"),
+            warning="Complex code should not appear in preference defaults "
+                    "files",
+            description="Calls to functions other than 'pref' and 'user_pref' "
+                        "should not appear in defaults/preferences/ files.",
+            filename=traverser.filename,
+            line=traverser.line,
+            column=traverser.position,
+            context=traverser.context)
 
 
     if (member.is_global and

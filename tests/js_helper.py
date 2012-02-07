@@ -18,10 +18,13 @@ def _do_test(path):
 
 
 def _do_test_raw(script, path="foo.js", bootstrap=False, ignore_pollution=True,
-                 detected_type=None):
+                 detected_type=None, jetpack=False):
     "Performs a test on a JS file"
 
     err = ErrorBundle(instant=True)
+    if jetpack:
+        err.metadata["is_jetpack"] = True
+
     err.handler = OutputHandler(sys.stdout, True)
     err.supported_versions = {}
     if bootstrap:
@@ -38,7 +41,7 @@ def _do_test_raw(script, path="foo.js", bootstrap=False, ignore_pollution=True,
 
 
 def _do_real_test_raw(script, path="foo.js", versions=None, detected_type=None,
-                      metadata=None, resources=None):
+                      metadata=None, resources=None, jetpack=False):
     """Perform a JS test using a non-mock bundler."""
 
     err = ErrorBundle(for_appversions=versions or {})
@@ -48,6 +51,8 @@ def _do_real_test_raw(script, path="foo.js", versions=None, detected_type=None,
         err.metadata = metadata
     if resources is not None:
         err.resources = resources
+    if jetpack:
+        err.metadata["is_jetpack"] = True
 
     validator.testcases.content._process_file(err, MockXPI(), path, script,
                                               path.lower())

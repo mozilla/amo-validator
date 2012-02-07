@@ -40,6 +40,7 @@ class MarkupParser(htmlparser.HTMLParser):
     def __init__(self, err, strict=True, debug=False):
         htmlparser.HTMLParser.__init__(self)
         self.err = err
+        self.is_jetpack = "is_jetpack" in err.metadata  # Cache this value.
         self.line = 0
         self.strict = strict
         self.debug = debug
@@ -345,6 +346,23 @@ class MarkupParser(htmlparser.HTMLParser):
                 attr_value == "http://www.mozilla.org/xbl"):
                 self.xbl = True
 
+            # Test that an absolute URI isn't referenced in Jetpack 1.4.
+            if (self.is_jetpack and
+                attr_value.startswith("resource://") and
+                "-data/" in attr_value):
+                self.err.warning(
+                        err_id=("testcases_markup_markuptester",
+                                "handle_starttag", "jetpack_abs_uri"),
+                        warning="Absolute URI referenced in Jetpack 1.4",
+                        description=["As of Jetpack 1.4, absolute URIs are no "
+                                     "longer allowed within add-ons.",
+                                     "See %s for more information." %
+                                         JETPACK_URI_URL],
+                        filename=self.filename,
+                        line=self.line,
+                        context=self.context,
+                        compatibility_type="error")
+
             if (self.err.detected_type == PACKAGE_THEME and
                 attr_value.startswith(("data:", "javascript:"))):
 
@@ -359,7 +377,6 @@ class MarkupParser(htmlparser.HTMLParser):
                         filename=self.filename,
                         line=self.line,
                         context=self.context)
-
 
             if attr_name == "style":
                 csstester.test_css_snippet(self.err,
