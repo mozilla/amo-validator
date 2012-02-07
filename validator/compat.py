@@ -40,6 +40,14 @@ FX10_DEFINITION = {"{ec8030f7-c20a-464f-9b0e-13a3a9e97384}":
                        version_range("android", "10.0a1", "11.0a1"),
                    "{3550f703-e582-4d05-9a08-453d09bdfdc6}":
                        version_range("thunderbird", "10.0a1", "11.0a1")}
+FX11_DEFINITION = {"{ec8030f7-c20a-464f-9b0e-13a3a9e97384}":
+                       version_range("firefox", "11.0a1", "12.0a1"),
+                   "{a23983c0-fd0e-11dc-95ff-0800200c9a66}":
+                       version_range("fennec", "11.0a1", "12.0a1"),
+                   "{aa3c5121-dab2-40e2-81ca-7ea25febc110}":
+                       version_range("android", "11.0a1", "12.0a1"),
+                   "{3550f703-e582-4d05-9a08-453d09bdfdc6}":
+                       version_range("thunderbird", "11.0a1", "12.0a1")}
 
 TB7_DEFINITION = {"{3550f703-e582-4d05-9a08-453d09bdfdc6}":
                       version_range("thunderbird", "7.0a1", "8.0a1")}

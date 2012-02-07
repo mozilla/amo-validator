@@ -808,7 +808,8 @@ def test_nsIBrowserHistory_lastPageVisited():
 def test_tb10_compatibility():
     """
     Test that MsgDeleteMessageFromMessageWindow, goToggleSplitter,
-    AddMessageComposeOfflineObserver, and RemoveMessageComposeOfflineObserver are flagged.
+    AddMessageComposeOfflineObserver, and RemoveMessageComposeOfflineObserver
+    are flagged.
     """
 
     err = _do_real_test_raw("""
@@ -834,5 +835,25 @@ def test_tb10_compatibility():
                        version_range("thunderbird", "10.0a1")})
     assert not err.failed(fail_on_warnings=False)
     assert len(err.notices) == 5
+    assert err.compat_summary["errors"]
+
+
+def test_fx11_omni_jar():
+    """
+    Test that in Firefox 11, omni.jar is flagged as having been renamed.
+    """
+    err = _do_real_test_raw("""
+    var x = "omni.jar";
+    """)
+    assert not err.failed(fail_on_warnings=False)
+    assert not err.warnings
+    assert not any(err.compat_summary.values())
+
+    err = _do_real_test_raw("""
+    var x = "omni.jar";
+    """, versions={'{ec8030f7-c20a-464f-9b0e-13a3a9e97384}':
+                       version_range("firefox", "11.0a1")})
+    assert not err.failed(fail_on_warnings=False)
+    assert err.warnings
     assert err.compat_summary["errors"]
 
