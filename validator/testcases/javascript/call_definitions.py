@@ -8,7 +8,7 @@ import predefinedentities
 from jstypes import *
 from validator.constants import BUGZILLA_BUG
 from validator.compat import (FX6_DEFINITION, FX7_DEFINITION, FX8_DEFINITION,
-                              FX9_DEFINITION)
+                              FX9_DEFINITION, FX11_DEFINITION)
 from validator.decorator import version_range
 
 # Function prototypes should implement the following:
@@ -555,7 +555,7 @@ def gComposeBundle_removed(wrapper, arguments, traverser):
 
 def TB9FocusFunctions_removed(wrapper, arguments, traverser):
     """
-    Flag calls to WhichPaneHasFocus and FocusOnFirstAttachment 
+    Flag calls to WhichPaneHasFocus and FocusOnFirstAttachment
     for incompatibility with Thunderbird 9
     """
     traverser.err.notice(
@@ -601,11 +601,11 @@ def TB10Function_removed(wrapper, arguments, traverser):
         tier=5)
 
     return JSWrapper(JSObject(), traverser=traverser)
-    
-    
+
+
 def TB10Function_renamed(wrapper, arguments, traverser):
     """
-    Flag calls to AddMessageComposeOfflineObserver and 
+    Flag calls to AddMessageComposeOfflineObserver and
     RemoveMessageComposeOfflineObserver for incompatibility with Thunderbird 10
     """
     traverser.err.notice(
@@ -657,9 +657,10 @@ def nsIComm4xProfile_removed(wrapper, arguments, traverser):
     traverser.err.notice(
         err_id=("testcases_javascript_calldefinitions", "nsIComm4xProfile"),
         notice="Removed nsIComm4xProfile interface in use.",
-        description="This add-on appears to use nsIComm4xProfile which was removed"
-                    "as part of changes made in Thunderbird 11. For more information, "
-                    "please refer to https://bugzilla.mozilla.org/show_bug.cgi?id=689437",
+        description="This add-on appears to use nsIComm4xProfile which was "
+                    "removed as part of changes made in Thunderbird 11. For "
+                    "more information, please refer to %s." %
+                        BUGZILLA_BUG % 689437,
         filename=traverser.filename,
         line=traverser.line,
         column=traverser.position,
@@ -674,14 +675,17 @@ def nsIComm4xProfile_removed(wrapper, arguments, traverser):
 
 def nsIMailtoUrl_changed(wrapper, arguments, traverser):
     """
-    Flag calls to nsIMailtoUrl.GetMessageContents for incompatibility with Thunderbird 11
+    Flag calls to nsIMailtoUrl.GetMessageContents for incompatibility with
+    Thunderbird 11.
     """
     traverser.err.notice(
         err_id=("testcases_javascript_calldefinitions", "nsIMsgQuote"),
         notice="Altered nsIMsgQuote.quoteMessage function in use.",
-        description="This add-on appears to use nsIMailtoUrl.GetMessageContents which was changed to"
-                    "nsIMailtoUrl.getMessageContents (lower case g) as part of Thunderbird 11." 
-                    "For more information, please refer to https://bugzilla.mozilla.org/show_bug.cgi?id=711980",
+        description="This add-on appears to use nsIMailtoUrl."
+                    "GetMessageContents which was changed to"
+                    "nsIMailtoUrl.getMessageContents (lower case g) as part "
+                    "of Thunderbird 11. For more information, please refer to "
+                    "%s." % BUGZILLA_BUG % 711980,
         filename=traverser.filename,
         line=traverser.line,
         column=traverser.position,
@@ -692,4 +696,30 @@ def nsIMailtoUrl_changed(wrapper, arguments, traverser):
         tier=5)
 
     return JSWrapper(JSObject(), traverser=traverser)
+
+
+def requestAnimationFrame(wrapper, arguments, traverser):
+    """
+    As of FX11, requestAnimationFrame should be called with at least one
+    parameter.
+    """
+    if not arguments:
+        print "Filing warning"
+        traverser.err.warning(
+            err_id=("testcases_js_actions", "requestAnimationFrame",
+                    "no_args"),
+            warning="requestAnimationFrame now requires one parameter",
+            description="The requestAnimationFrame function now requires one "
+                        "parameter and can't be called without any arguments. "
+                        "See %s for more information." % BUGZILLA_BUG % 704171,
+            filename=traverser.filename,
+            line=traverser.line,
+            column=traverser.position,
+            context=traverser.context,
+            compatibility_type="error",
+            for_appversions=FX11_DEFINITION,
+            tier=5)
+        print traverser.err.warnings
+
+    return None
 

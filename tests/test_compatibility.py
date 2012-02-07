@@ -912,3 +912,22 @@ def test_tb11_compatibility():
     assert len(err.notices) == 2
     assert err.compat_summary["errors"]
 
+
+def test_requestAnimationFrame():
+    """
+    Test that requestAnimationFrame requires at least one parameter.
+    """
+
+    err = _do_real_test_raw("""
+    requestAnimationFrame(foo);
+    """, versions={'{ec8030f7-c20a-464f-9b0e-13a3a9e97384}':
+                       version_range("firefox", "11.0a1")})
+    assert not err.failed()
+
+    err = _do_real_test_raw("""
+    requestAnimationFrame();
+    """, versions={'{ec8030f7-c20a-464f-9b0e-13a3a9e97384}':
+                       version_range("firefox", "11.0a1")})
+    assert err.failed()
+    assert err.compat_summary["errors"]
+
