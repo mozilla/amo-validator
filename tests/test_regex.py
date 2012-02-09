@@ -20,6 +20,7 @@ def test_basic_regex_fail():
     assert _do_test_raw("var x = 'extensions.foo.update.url';").failed()
     assert _do_test_raw("var x = 'network.websocket.foobar';").failed()
     assert _do_test_raw("var x = 'browser.preferences.instantApply';").failed()
+    assert _do_test_raw("var x = 'nglayout.debug.disable_xul_cache';").failed()
 
     err = ErrorBundle()
     err.supported_versions = {}
