@@ -2,6 +2,7 @@ import sys
 
 from nose.tools import eq_
 
+import helper
 from helper import MockXPI
 from validator.errorbundler import ErrorBundle
 from validator.outputhandlers.shellcolors import OutputHandler
@@ -74,4 +75,53 @@ def _do_test_scope(script, vars):
             var_val = round(var_val)
             var_val /= 100000
         eq_(var_val, value)
+
+
+class TestCase(helper.TestCase):
+    def setUp(self):
+        self.file_path = "foo.js"
+        self.final_context = None
+        super(TestCase, self).setUp()
+
+    def run_script_from_file(self, path):
+        """
+        Run the standard set of JS engine tests on a script found at the
+        location in `path`.
+        """
+        with open(path) as script_file:
+            return self.run_script(script_file.read())
+
+    def run_script(self, script, expose_pollution=False):
+        """
+        Run the standard set of JS engine tests on the script passed via
+        `script`.
+        """
+        if self.err is None:
+            self.setup_err()
+        self.err.supported_versions = {}
+
+        validator.testcases.content._process_file(self.err, MockXPI(),
+                                                  self.file_path, script,
+                                                  self.file_path.lower(),
+                                                  expose_pollution)
+        if self.err.final_context is not None:
+            print self.err.final_context.output()
+            self.final_context = self.err.final_context
+
+    def get_var(self, name):
+        """
+        Return the value of a variable from the final script context.
+        """
+        try:
+            return self.final_context.data[name].get_literal_value()
+        except KeyError:
+            raise ("Test seeking variable (%s) not found in final context." %
+                       name)
+
+    def assert_var_eq(self, name, value):
+        """
+        Assert that the value of a variable from the final script context
+        contains the value specified.
+        """
+        self.assertEqual(self.get_var(name), value)
 
