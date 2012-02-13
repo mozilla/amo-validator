@@ -4,7 +4,8 @@ import re
 from validator.constants import BUGZILLA_BUG
 from validator.compat import (FX4_DEFINITION, FX5_DEFINITION, FX6_DEFINITION,
                               FX7_DEFINITION, FX8_DEFINITION, FX9_DEFINITION,
-                              FX11_DEFINITION, TB7_DEFINITION, TB10_DEFINITION)
+                              FX11_DEFINITION, TB7_DEFINITION, TB10_DEFINITION,
+                              TB11_DEFINITION)
 from validator.contextgenerator import ContextGenerator
 
 
@@ -67,7 +68,31 @@ FX8_INTERFACES = {"nsISelection2": 672536,
                   "nsISelection3": 672536}
 FX11_INTERFACES = {"nsICharsetResolver": 700490}
 
-
+TB11_STRINGS = {"newToolbarCmd\.label": 694027, 
+                "newToolbarCmd\.tooltip": 694027,
+                "openToolbarCmd\.label": 694027,
+                "openToolbarCmd\.tooltip": 694027,
+                "saveToolbarCmd\.tooltip": 694027,
+                "publishToolbarCmd\.tooltip": 694027,
+                "messengerWindow\.title": 701671,
+                "folderContextSearchMessages\.label": 652555,
+                "folderContextSearchMessages\.accesskey": 652555,
+                "importFromSeamonkey2\.label": 689437,
+                "importFromSeamonkey2\.accesskey": 689437,
+                "comm4xMailImportMsgs\.properties": 689437,
+                "specialFolderDeletionErr": 39121,
+                "sourceNameSeamonkey": 689437,
+                "sourceNameOExpress": 689437,
+                "sourceNameOutlook": 689437,
+                "failedDuplicateAccount": 709020}
+                
+TB11_JS = {"onViewToolbarCommand": 644169, 
+                "nsContextMenu": 680192,
+                "MailMigrator\.migrateMail": 712395,
+                "AddUrlAttachment": 708982,
+                "makeFeedObject": 705504,
+                "deleteFeed": 705504}
+                  
 def run_regex_tests(document, err, filename, context=None, is_js=False):
     """Run all of the regex-based JS tests."""
 
@@ -450,7 +475,7 @@ def run_regex_tests(document, err, filename, context=None, is_js=False):
         # gDownloadManagerStrings removal
         _compat_test(
                 re.compile(r"gDownloadManagerStrings"),
-                "gDownloadManagerStrings was removed in Thunderbird 7.",
+                "gDownloadManagerStrings was removed in Thunderbird 10.",
                 ("This global is no longer available in "
                  "Thunderbird 10. See %s for more information.") % (BUGZILLA_BUG % 700220),
                 compatibility_type="error",
@@ -465,4 +490,37 @@ def run_regex_tests(document, err, filename, context=None, is_js=False):
                 compatibility_type="error",
                 appversions=TB10_DEFINITION,
                 logFunc=err.warning)
+
+    # Thunderbird 11 Compatibility
+    if err.supports_version(TB11_DEFINITION):
+        # specialFoldersDeletionAllowed removal
+        _compat_test(
+                re.compile(r"specialFoldersDeletionAllowed"),
+                "specialFoldersDeletionAllowed was removed in Thunderbird 11.",
+                ("This global is no longer available in "
+                 "Thunderbird 11. See %s for more information.") % (BUGZILLA_BUG % 39121),
+                compatibility_type="error",
+                appversions=TB11_DEFINITION,
+                logFunc=err.notice)
+
+        for pattern, bug in TB11_STRINGS.items():
+            _compat_test(
+                    re.compile(pattern),
+                    "Removed, renamed, or changed strings in use",
+                    "Your add-on uses string %s, which has been changed or removed "
+                    "from Thunderbird 11. Please refer to %s for possible "
+                    "alternatives." % (pattern, BUGZILLA_BUG % bug),
+                    compatibility_type="error",
+                    appversions=TB11_DEFINITION,
+                    logFunc=err.warning)
+        for pattern, bug in TB11_JS.items():
+            _compat_test(
+                    re.compile(pattern),
+                    "Removed, renamed, or changed javascript in use",
+                    "Your add-on uses the javascript method or class %s, which has been "
+                    "changed or removed from Thunderbird 11. Please refer to %s for possible "
+                    "alternatives." % (pattern, BUGZILLA_BUG % bug),
+                    compatibility_type="error",
+                    appversions=TB11_DEFINITION,
+                    logFunc=err.notice)
 

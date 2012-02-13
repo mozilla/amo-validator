@@ -4,6 +4,7 @@ from helper import MockXPI
 from js_helper import _do_real_test_raw as _do_test_raw
 from validator.decorator import version_range
 from validator.errorbundler import ErrorBundle
+from validator.compat import TB11_DEFINITION
 import validator.testcases.content
 import validator.testcases.regex as regex_tests
 
@@ -161,4 +162,17 @@ def test_preference_extension_regex():
 
     assert not _do_test_raw('"chrome://mozapps/skin/extensions/update1.png"').failed()
     assert _do_test_raw('"foo.extensions.update.bar"').failed()
+
+
+def test_tb11_strings():
+    """Flag changed or removed strings in add-on code"""
+
+    err = _do_test_raw("""
+    var f = "newToolbarCmd.tooltip";
+    var x = "onViewToolbarCommand";
+    """, versions=TB11_DEFINITION)
+    assert err.failed()
+    assert err.warnings
+    assert err.notices
+    assert err.compat_summary["errors"]
 

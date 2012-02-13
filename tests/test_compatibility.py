@@ -881,3 +881,34 @@ def test_fx11_omni_jar():
     assert err.warnings
     assert err.compat_summary["errors"]
 
+
+def test_tb11_compatibility():
+    """
+    Test that the changed/removed interfaces for Thunderbird 11 are flagged.
+    """
+
+    err = _do_real_test_raw("""
+    var x = Components.classes["foo"].createInstance(
+        Components.interfaces.nsIMsgQuote);
+    x.quoteMessage();
+    var y = Components.classes["foo"].createInstance(
+        Components.interfaces.nsIMailtoUrl);
+    y.GetMessageContents();
+    """)
+    assert not err.failed(fail_on_warnings=False)
+    assert not err.warnings
+    assert not any(err.compat_summary.values())
+
+    err = _do_real_test_raw("""
+    var x = Components.classes["foo"].createInstance(
+        Components.interfaces.nsIMsgQuote);
+    x.quoteMessage();
+    var y = Components.classes["foo"].createInstance(
+        Components.interfaces.nsIMailtoUrl);
+    y.GetMessageContents();
+    """, versions={'{3550f703-e582-4d05-9a08-453d09bdfdc6}':
+                       version_range("thunderbird", "11.0a1")})
+    assert err.failed
+    assert len(err.notices) == 2
+    assert err.compat_summary["errors"]
+

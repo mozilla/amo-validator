@@ -627,3 +627,69 @@ def TB10Function_renamed(wrapper, arguments, traverser):
 
     return JSWrapper(JSObject(), traverser=traverser)
 
+
+def nsIMsgQuote_changed(wrapper, arguments, traverser):
+    """
+    Flag calls to nsIMsgQuote.quoteMessage for incompatibility with Thunderbird 11
+    """
+    traverser.err.notice(
+        err_id=("testcases_javascript_calldefinitions", "nsIMsgQuote"),
+        notice="Altered nsIMsgQuote.quoteMessage function in use.",
+        description="This add-on appears to use nsIMsgQuote.quoteMessage which had the argument aOrigHdr"
+                    "added as part of changes made in Thunderbird 11. For more information, "
+                    "please refer to https://bugzilla.mozilla.org/show_bug.cgi?id=351109",
+        filename=traverser.filename,
+        line=traverser.line,
+        column=traverser.position,
+        context=traverser.context,
+        compatibility_type="error",
+        for_appversions={'{3550f703-e582-4d05-9a08-453d09bdfdc6}':
+                             version_range("thunderbird", "11.0a1", "12.0a1")},
+        tier=5)
+
+    return JSWrapper(JSObject(), traverser=traverser)
+
+
+def nsIComm4xProfile_removed(wrapper, arguments, traverser):
+    """
+    Flag use of nsIComm4xProfile for incompatibility with Thunderbird 11
+    """
+    traverser.err.notice(
+        err_id=("testcases_javascript_calldefinitions", "nsIComm4xProfile"),
+        notice="Removed nsIComm4xProfile interface in use.",
+        description="This add-on appears to use nsIComm4xProfile which was removed"
+                    "as part of changes made in Thunderbird 11. For more information, "
+                    "please refer to https://bugzilla.mozilla.org/show_bug.cgi?id=689437",
+        filename=traverser.filename,
+        line=traverser.line,
+        column=traverser.position,
+        context=traverser.context,
+        compatibility_type="error",
+        for_appversions={'{3550f703-e582-4d05-9a08-453d09bdfdc6}':
+                             version_range("thunderbird", "11.0a1", "12.0a1")},
+        tier=5)
+
+    return JSWrapper(JSObject(), traverser=traverser)
+
+
+def nsIMailtoUrl_changed(wrapper, arguments, traverser):
+    """
+    Flag calls to nsIMailtoUrl.GetMessageContents for incompatibility with Thunderbird 11
+    """
+    traverser.err.notice(
+        err_id=("testcases_javascript_calldefinitions", "nsIMsgQuote"),
+        notice="Altered nsIMsgQuote.quoteMessage function in use.",
+        description="This add-on appears to use nsIMailtoUrl.GetMessageContents which was changed to"
+                    "nsIMailtoUrl.getMessageContents (lower case g) as part of Thunderbird 11." 
+                    "For more information, please refer to https://bugzilla.mozilla.org/show_bug.cgi?id=711980",
+        filename=traverser.filename,
+        line=traverser.line,
+        column=traverser.position,
+        context=traverser.context,
+        compatibility_type="error",
+        for_appversions={'{3550f703-e582-4d05-9a08-453d09bdfdc6}':
+                             version_range("thunderbird", "11.0a1", "12.0a1")},
+        tier=5)
+
+    return JSWrapper(JSObject(), traverser=traverser)
+

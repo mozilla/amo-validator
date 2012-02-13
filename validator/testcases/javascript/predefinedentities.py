@@ -69,6 +69,9 @@ INTERFACES = {
         {"value":
             {u"currentEngine": {"readonly": True},
              u"defaultEngine": {"readonly": True}}},
+                
+    u"nsIComm4xProfile":
+        {"return": call_definitions.nsIComm4xProfile_removed},
     u"nsIComponentRegistrar":
         {"value":
             {u"autoRegister":
@@ -100,6 +103,14 @@ INTERFACES = {
         {"value":
             {u"NotifyHdrsToDownload":
                 {"return": call_definitions.nsIImapProtocol_removed}}},
+    u"nsIMailtoUrl":
+        {"value":
+            {u"GetMessageContents":
+                {"return": call_definitions.nsIMailtoUrl_changed}}},                    
+    u"nsIMsgQuote":
+        {"value":
+            {u"quoteMessage":
+                {"return": call_definitions.nsIMsgQuote_changed}}},
     u"nsIMsgSearchScopeTerm":
         {"value":
             {u"mailFile":
@@ -447,6 +458,10 @@ GLOBAL_ENTITIES = {
                                 {"xpcom_map":
                                      lambda:
                                         INTERFACES["nsICategoryManager"]},
+                             u"nsIComm4xProfile":
+                                {"xpcom_map":
+                                     lambda:
+                                        INTERFACES["nsIComm4xProfile"]},
                              u"nsIComponentRegistrar":
                                 {"xpcom_map":
                                      lambda:
@@ -471,6 +486,14 @@ GLOBAL_ENTITIES = {
                                 {"xpcom_map":
                                      lambda:
                                         INTERFACES["nsIImapProtocol"]},
+                             u"nsIMailtoUrl":
+                                {"xpcom_map":
+                                     lambda:
+                                        INTERFACES["nsIMailtoUrl"]}, 
+                             u"nsIMsgQuote":
+                                {"xpcom_map":
+                                     lambda:
+                                        INTERFACES["nsIMsgQuote"]}, 
                              u"nsIMsgSearchScopeTerm":
                                 {"xpcom_map":
                                      lambda:
