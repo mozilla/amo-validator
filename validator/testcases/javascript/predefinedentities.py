@@ -34,6 +34,7 @@ BANNED_PREF_BRANCHES = [
     u"general.useragent.",
     u"network.http.",
     u"network.websocket.",
+    u"nglayout.debug.disable_xul_cache",
 ]
 
 BANNED_PREF_REGEXPS = [
