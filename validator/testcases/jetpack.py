@@ -62,6 +62,17 @@ def inspect_jetpack(err, xpi_package):
     sdk_version = harnessoptions["sdkVersion"]
     err.metadata["jetpack_sdk_version"] = sdk_version
 
+    # Check that the version number isn't a redacted version.
+    if sdk_version in ("1.4", "1.4.1", "1.4.2", ):
+        err.error(
+            err_id=("testcases_jetpack", "inspect_jetpack",
+                    "redacted_version"),
+            error="Unsupported version of Add-on SDK",
+            description="Versions 1.4, 1.4.1, and 1.4.2 of the add-on SDK may "
+                        "cause issues with data loss in some modules. You "
+                        "should upgrade the SDK to at least 1.4.3 in order to "
+                        "avoid these issues.")
+
     # If we don't have a list of pretested files already, save a blank list.
     # Otherwise, use the existing list.
     pretested_files = err.get_resource("pretested_files")
