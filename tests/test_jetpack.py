@@ -353,3 +353,23 @@ def test_absolute_uris_in_markup():
     assert err.failed()
     assert err.compat_summary["errors"]
 
+
+def test_bad_sdkversion():
+    """Test that a redacted SDK version is not used."""
+
+    harnessoptions = {"sdkVersion": "1.4",
+                      "jetpackID": "",
+                      "manifest": {}}
+
+    with open("jetpack/addon-sdk/python-lib/cuddlefish/"
+                  "app-extension/bootstrap.js") as bootstrap_file:
+        bootstrap = bootstrap_file.read()
+    with open("jetpack/addon-sdk/packages/test-harness/lib/"
+                  "harness.js") as harness_file:
+        harness = harness_file.read()
+    err = _do_test(MockXPI({"bootstrap.js": bootstrap,
+                            "components/harness.js": harness,
+                            "harness-options.json":
+                                json.dumps(harnessoptions)}))
+    assert err.failed() and err.errors
+
