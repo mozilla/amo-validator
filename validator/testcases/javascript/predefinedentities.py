@@ -289,6 +289,9 @@ GLOBAL_ENTITIES = {
     u"setTimeout": {"dangerous": actions._call_settimeout},
     u"setInterval": {"dangerous": actions._call_settimeout},
 
+    u"requestAnimationFrame": {"return":
+                                   call_definitions.requestAnimationFrame},
+
     # mail Attachment API Functions
     u"createNewAttachmentInfo": {"return": call_definitions.mail_attachment_api},
     u"saveAttachment": {"return": call_definitions.mail_attachment_api},

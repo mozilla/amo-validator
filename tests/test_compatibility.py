@@ -912,3 +912,20 @@ def test_tb11_compatibility():
     assert len(err.notices) == 2
     assert err.compat_summary["errors"]
 
+
+def test_requestAnimationFrame():
+    """
+    Test that requestAnimationFrame requires at least one parameter.
+    """
+
+    err = _do_real_test_raw("""
+    requestAnimationFrame(foo);
+    """)
+    assert not err.failed()
+
+    err = _do_real_test_raw("""
+    requestAnimationFrame();
+    """)
+    assert err.failed()
+    assert err.compat_summary["errors"]
+
