@@ -262,13 +262,17 @@ def test_webapp_no_amo_installs_allowed_from():
     _detect(err, data)
     assert err.failed()
 
-    err = ErrorBundle(listed=True)
-    data["installs_allowed_from"].append(validator.constants.WEBAPP_AMO_URL)
-    _detect(err, data)
-    assert not err.failed()
+    # Test that each of the AMO urls is accpetable.
+    for amo_url in validator.constants.WEBAPP_AMO_URLS:
+        err = ErrorBundle(listed=True)
+        data["installs_allowed_from"].append(amo_url)
+        _detect(err, data)
+        assert not err.failed()
+
+        # Reset for the next URL or the wildcard.
+        data = _get_json()
 
     err = ErrorBundle(listed=True)
-    data = _get_json()
     data["installs_allowed_from"].append("*")
     _detect(err, data)
     assert not err.failed()
