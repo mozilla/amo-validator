@@ -176,17 +176,17 @@ def test_webapp(err, webapp, current_valid_keys, required=True):
                                      "invalid.",
                                      "Bad URL: %s" % url])
 
-            if (WEBAPP_AMO_URL not in webapp[key] and
-                "*" not in webapp[key] and
-                err.get_resource("listed")):
+            if (not any(url in webapp[key] for url in WEBAPP_AMO_URLS) and
+                "*" not in webapp[key] and err.get_resource("listed")):
                 err.error(
                     err_id=("webapp", "detect", "iaf_no_amo"),
                     error=("Apps: App must allow installs from Marketplace"
                            " for inclusion."),
                     description="To be included on %s, a webapp needs to "
-                                "include %s as an element in the "
-                                "'installs_allowed_from' property." %
-                                    (WEBAPP_AMO_URL, WEBAPP_AMO_URL))
+                                "include %s or '*' (wildcard) as an element in "
+                                "the 'installs_allowed_from' property." %
+                                    (DEFAULT_WEBAPP_AMO_URL,
+                                     DEFAULT_WEBAPP_AMO_URL))
 
         elif key == "launch_path":
             if not isinstance(webapp[key], types.StringTypes):
