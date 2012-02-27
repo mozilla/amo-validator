@@ -79,6 +79,20 @@ def test_prepare_package_xml():
     assert err.failed()
     submain.test_search = smts
 
+
+def test_prepare_package_webapp():
+    _orig = submain.test_webapp
+    calls = {'x': 0}
+    submain.test_webapp = lambda err, y, z: calls.update(x=1)
+    try:
+        err = ErrorBundle()
+        submain.prepare_package(err, "tests/resources/main/mozball.webapp",
+                                expectation=PACKAGE_WEBAPP)
+        assert not err.failed()
+        assert calls['x'] == 1, "test_webapp() was not called"
+    finally:
+        submain.test_webapp = _orig
+
 # Test the function of the decorator iterator
 
 def test_test_inner_package():

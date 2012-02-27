@@ -60,7 +60,7 @@ def prepare_package(err, path, expectation=0, for_appversions=None,
 
     if package_extension == ".xml":
         return test_search(err, path, expectation)
-    elif package_extension in (".json", ".webapp", ):
+    elif expectation == PACKAGE_WEBAPP:
         return test_webapp(err, path, expectation)
 
     # Test that the package is an XPI.
