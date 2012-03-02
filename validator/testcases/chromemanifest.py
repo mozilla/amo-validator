@@ -76,6 +76,18 @@ def test_content_instructions(err):
                         "unique to your add-on to avoid name conflicts."}
 
     for triple in chrome.get_triples(subject="content"):
+        if not triple["predicate"] or not triple["object"]:
+            err.warning(
+                err_id=("testcases_chromemanifest",
+                        "test_content_instructions", "missing_triplicates"),
+                warning="`content` instruction missing information",
+                description="All content instructions must have a package "
+                            "name and a URI to the files it describes.",
+                filename=triple["filename"],
+                line=triple["line"],
+                context=triple["context"])
+            continue
+
         if triple["predicate"] in banned_namespaces:
             err.error(
                 err_id=("testcases_chromemanifest",
@@ -85,7 +97,8 @@ def test_content_instructions(err):
                 filename=triple["filename"],
                 line=triple["line"],
                 context=triple["context"])
-        elif not triple["object"].split()[0].endswith("/"):
+        elif (triple["object"] != "" and
+              not triple["object"].split()[0].endswith("/")):
             err.notice(
                 err_id=("testcases_chromemanifest",
                         "test_content_instructions", "trailing"),
