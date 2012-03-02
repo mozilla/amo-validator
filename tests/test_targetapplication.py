@@ -77,15 +77,46 @@ def test_dup_targets():
              True)
 
 
-def test_has_installrdfs():
-    """Tests that install.rdf files are present."""
+def test_missing_installrdfs_are_handled():
+    """
+    Tests that install.rdf files are present and supported_versions is set to
+    an empty dict if an install.rdf is not found.
+    """
 
     err = ErrorBundle()
+
+    # This is the default, but I'm specifying it for clarity of purpose.
+    err.supported_versions = None
 
     # Test package to make sure has_install_rdf is set to True.
     assert targetapp.test_targetedapplications(err, None) is None
     # The supported versions list must be empty or other tests will fail.
     assert err.supported_versions == {}
+
+
+def test_supported_versions_not_overwritten():
+    """
+    Test that supported_versions is not overwritten in subpackages (JARs) when
+    install.rdf files are tested for. This could otherwise happen because the
+    targetApplication tests previously gave an empty dict to supported_versions
+    in order to ensure a valid state when testing for version support.
+
+    If the supported_versions field in an error bundle is None, it represents
+    that the list of targeted applications has not been parsed yet. Setting it
+    to an empty dict prevents exceptions later on by stating that no supported
+    versions are available. If this didn't happen, it would be assumed that
+    compatibility (version-dependent) tests were reached before the install.rdf
+    was parsed. That would indicate that the validation process has encountered
+    an error elsewhere.
+    """
+
+    err = ErrorBundle()
+    orig_value = err.supported_versions = {"foo": ["bar"]}
+
+    # Test package to make sure has_install_rdf is set to True.
+    assert targetapp.test_targetedapplications(err, None) is None
+    # The supported versions list must match what was specified
+    assert err.supported_versions is orig_value
 
 
 def test_is_ff4():
