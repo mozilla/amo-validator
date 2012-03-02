@@ -18,7 +18,8 @@ def main():
                     "dictionary": PACKAGE_DICTIONARY,
                     "languagepack": PACKAGE_LANGPACK,
                     "search": PACKAGE_SEARCHPROV,
-                    "multi": PACKAGE_MULTI}
+                    "multi": PACKAGE_MULTI,
+                    "webapp": PACKAGE_WEBAPP}
 
     # Parse the arguments that
     parser = argparse.ArgumentParser(
@@ -116,7 +117,8 @@ def main():
                             determined=args.determined,
                             listed=not args.selfhosted,
                             overrides=overrides,
-                            for_appversions=for_appversions)
+                            for_appversions=for_appversions,
+                            expectation=expectation)
 
     # Print the output of the tests based on the requested format.
     if args.output == "text":
