@@ -81,6 +81,16 @@ def test_content_instructions():
     assert err.failed()
 
 
+def test_content_missing_information():
+    """Test that incomplete information in a content instruction fails."""
+
+    err = ErrorBundle()
+    c = ChromeManifest("content foo", "chrome.manifest")
+    err.save_resource("chrome.manifest", c)
+    tc_chromemanifest.test_content_instructions(err)
+    assert err.failed()
+
+
 def test_content_instructions_trailing_slash():
     """Test that trailing slashes are necessary for content instructions."""
 
