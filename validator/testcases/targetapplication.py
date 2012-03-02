@@ -14,7 +14,8 @@ def test_targetedapplications(err, xpi_package=None):
 
     install = err.get_resource("install_rdf")
     if not install:
-        err.supported_versions = {}
+        if err.supported_versions is None:
+            err.supported_versions = {}
         return
 
     APPROVED_APPLICATIONS = validator.constants.APPROVED_APPLICATIONS
@@ -163,6 +164,7 @@ def test_targetedapplications(err, xpi_package=None):
         if key in APPLICATIONS:
             supports.append(APPLICATIONS[key])
     err.save_resource("supports", supports)
+
     if not err.supported_versions:  # if not set for compatibility
         err.supported_versions = all_supported_versions
 
