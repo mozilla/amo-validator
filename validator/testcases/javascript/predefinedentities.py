@@ -615,6 +615,12 @@ GLOBAL_ENTITIES = {
     # Preference creation in pref defaults files
     u"pref": {"dangerous": actions._call_create_pref},
     u"user_pref": {"dangerous": actions._call_create_pref},
+
+    u"unsafeWindow": {"dangerous": "The use of unsafeWindow is insecure and "
+                                   "should be avoided whenever possible. "
+                                   "Consider using a different API if it is "
+                                   "available in order to achieve similar "
+                                   "functionality."},
 }
 
 CONTENT_DOCUMENT = GLOBAL_ENTITIES[u"content"]["value"][u"document"]
