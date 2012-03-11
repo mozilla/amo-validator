@@ -373,7 +373,7 @@ def nsIDOMFile_deprec(wrapper, arguments, traverser):
         for_appversions=FX7_DEFINITION,
         tier=5)
 
-    return JSWrapper(JSObject(), traverser=traverser)
+    return JSWrapper(JSObject(), traverser=traverser, dirty=True)
 
 
 def nsIJSON_deprec(wrapper, arguments, traverser):
@@ -396,7 +396,7 @@ def nsIJSON_deprec(wrapper, arguments, traverser):
         for_appversions=FX7_DEFINITION,
         tier=5)
 
-    return JSWrapper(JSObject(), traverser=traverser)
+    return JSWrapper(JSObject(), traverser=traverser, dirty=True)
 
 def nsIImapMailFolderSink_changed(wrapper, arguments, traverser):
     """Flag calls to nsIImapMailFolderSink for possible incompatibility with Thunderbird 6"""
@@ -417,7 +417,7 @@ def nsIImapMailFolderSink_changed(wrapper, arguments, traverser):
                              version_range("thunderbird", "6.0a1", "8.0a1")},
         tier=5)
 
-    return JSWrapper(JSObject(), traverser=traverser)
+    return JSWrapper(JSObject(), traverser=traverser, dirty=True)
 
 def nsIImapProtocol_removed(wrapper, arguments, traverser):
     """Flag calls to nsIImapProtocol for incompatibility with Thunderbird 6"""
@@ -438,7 +438,7 @@ def nsIImapProtocol_removed(wrapper, arguments, traverser):
                              version_range("thunderbird", "6.0a1", "8.0a1")},
         tier=5)
 
-    return JSWrapper(JSObject(), traverser=traverser)
+    return JSWrapper(JSObject(), traverser=traverser, dirty=True)
 
 
 def document_getSelection(wrapper, arguments, traverser):
@@ -462,7 +462,7 @@ def document_getSelection(wrapper, arguments, traverser):
         tier=5)
 
     # The new spec returns an object.
-    return JSWrapper(JSObject(), traverser=traverser)
+    return JSWrapper(JSObject(), traverser=traverser, dirty=True)
 
 
 def nsIMsgThread_removed(wrapper, arguments, traverser):
@@ -484,7 +484,7 @@ def nsIMsgThread_removed(wrapper, arguments, traverser):
                              version_range("thunderbird", "7.0a1", "8.0a1")},
         tier=5)
 
-    return JSWrapper(JSObject(), traverser=traverser)
+    return JSWrapper(JSObject(), traverser=traverser, dirty=True)
 
 
 def mail_attachment_api(wrapper, arguments, traverser):
@@ -507,7 +507,7 @@ def mail_attachment_api(wrapper, arguments, traverser):
                              version_range("thunderbird", "7.0a1", "8.0a1")},
         tier=5)
 
-    return JSWrapper(JSObject(), traverser=traverser)
+    return JSWrapper(JSObject(), traverser=traverser, dirty=True)
 
 
 def nsIMsgSearchScopeTerm_removed(wrapper, arguments, traverser):
@@ -529,7 +529,7 @@ def nsIMsgSearchScopeTerm_removed(wrapper, arguments, traverser):
                              version_range("thunderbird", "8.0a1", "9.0a1")},
         tier=5)
 
-    return JSWrapper(JSObject(), traverser=traverser)
+    return JSWrapper(JSObject(), traverser=traverser, dirty=True)
 
 
 def gComposeBundle_removed(wrapper, arguments, traverser):
@@ -550,7 +550,7 @@ def gComposeBundle_removed(wrapper, arguments, traverser):
                              version_range("thunderbird", "9.0a1", "10.0a1")},
         tier=5)
 
-    return JSWrapper(JSObject(), traverser=traverser)
+    return JSWrapper(JSObject(), traverser=traverser, dirty=True)
 
 
 def TB9FocusFunctions_removed(wrapper, arguments, traverser):
@@ -575,7 +575,7 @@ def TB9FocusFunctions_removed(wrapper, arguments, traverser):
                              version_range("thunderbird", "9.0a1", "10.0a1")},
         tier=5)
 
-    return JSWrapper(JSObject(), traverser=traverser)
+    return JSWrapper(JSObject(), traverser=traverser, dirty=True)
 
 
 def TB10Function_removed(wrapper, arguments, traverser):
@@ -600,7 +600,7 @@ def TB10Function_removed(wrapper, arguments, traverser):
                              version_range("thunderbird", "10.0a1", "11.0a1")},
         tier=5)
 
-    return JSWrapper(JSObject(), traverser=traverser)
+    return JSWrapper(JSObject(), traverser=traverser, dirty=True)
 
 
 def TB10Function_renamed(wrapper, arguments, traverser):
@@ -625,7 +625,7 @@ def TB10Function_renamed(wrapper, arguments, traverser):
                              version_range("thunderbird", "10.0a1", "11.0a1")},
         tier=5)
 
-    return JSWrapper(JSObject(), traverser=traverser)
+    return JSWrapper(JSObject(), traverser=traverser, dirty=True)
 
 
 def nsIMsgQuote_changed(wrapper, arguments, traverser):
@@ -647,7 +647,7 @@ def nsIMsgQuote_changed(wrapper, arguments, traverser):
                              version_range("thunderbird", "11.0a1", "12.0a1")},
         tier=5)
 
-    return JSWrapper(JSObject(), traverser=traverser)
+    return JSWrapper(JSObject(), traverser=traverser, dirty=True)
 
 
 def nsIComm4xProfile_removed(wrapper, arguments, traverser):
@@ -670,7 +670,7 @@ def nsIComm4xProfile_removed(wrapper, arguments, traverser):
                              version_range("thunderbird", "11.0a1", "12.0a1")},
         tier=5)
 
-    return JSWrapper(JSObject(), traverser=traverser)
+    return JSWrapper(JSObject(), traverser=traverser, dirty=True)
 
 
 def nsIMailtoUrl_changed(wrapper, arguments, traverser):
@@ -695,7 +695,7 @@ def nsIMailtoUrl_changed(wrapper, arguments, traverser):
                              version_range("thunderbird", "11.0a1", "12.0a1")},
         tier=5)
 
-    return JSWrapper(JSObject(), traverser=traverser)
+    return JSWrapper(JSObject(), traverser=traverser, dirty=True)
 
 
 def requestAnimationFrame(wrapper, arguments, traverser):
@@ -703,23 +703,50 @@ def requestAnimationFrame(wrapper, arguments, traverser):
     As of FX11, requestAnimationFrame should be called with at least one
     parameter.
     """
-    if not arguments:
-        print "Filing warning"
-        traverser.err.warning(
-            err_id=("testcases_js_actions", "requestAnimationFrame",
-                    "no_args"),
-            warning="requestAnimationFrame now requires one parameter",
-            description="The requestAnimationFrame function now requires one "
-                        "parameter and can't be called without any arguments. "
-                        "See %s for more information." % BUGZILLA_BUG % 704171,
-            filename=traverser.filename,
-            line=traverser.line,
-            column=traverser.position,
-            context=traverser.context,
-            compatibility_type="error",
-            for_appversions=FX11_DEFINITION,
-            tier=5)
-        print traverser.err.warnings
+    if arguments:
+        return
 
-    return None
+    traverser.err.warning(
+        err_id=("testcases_js_actions", "requestAnimationFrame", "no_args"),
+        warning="requestAnimationFrame now requires one parameter",
+        description="The requestAnimationFrame function now requires one "
+                    "parameter and can't be called without any arguments. "
+                    "See %s for more information." % BUGZILLA_BUG % 704171,
+        filename=traverser.filename,
+        line=traverser.line,
+        column=traverser.position,
+        context=traverser.context,
+        compatibility_type="error",
+        for_appversions=FX11_DEFINITION,
+        tier=5)
+
+
+def js_wrap(wrapper, arguments, traverser):
+    """Return the wrapped variant of an unwrapped JSObject."""
+    if not arguments:
+        traverser._debug("WRAP:NO ARGS")
+        return
+
+    traverser._debug("WRAPPING OBJECT")
+    obj = traverser._traverse_node(arguments[0])
+    if obj.value is None:
+        traverser._debug("WRAPPING OBJECT>>NOTHING TO WRAP")
+        return JSWrapper(JSObject(), traverser=traverser)
+    obj.value.is_unwrapped = False
+    return obj
+
+
+def js_unwrap(wrapper, arguments, traverser):
+    """Return the unwrapped variant of an unwrapped JSObject."""
+    if not arguments:
+        traverser._debug("UNWRAP:NO ARGS")
+        return
+
+    traverser._debug("UNWRAPPING OBJECT")
+    obj = traverser._traverse_node(arguments[0])
+    if obj.value is None:
+        traverser._debug("UNWRAPPING OBJECT>>NOTHING TO UNWRAP")
+        return JSWrapper(JSObject(unwrapped=True), traverser=traverser)
+    obj.value.is_unwrapped = True
+    return obj
 

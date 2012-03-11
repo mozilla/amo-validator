@@ -70,7 +70,7 @@ INTERFACES = {
         {"value":
             {u"currentEngine": {"readonly": True},
              u"defaultEngine": {"readonly": True}}},
-                
+
     u"nsIComm4xProfile":
         {"return": call_definitions.nsIComm4xProfile_removed},
     u"nsIComponentRegistrar":
@@ -107,7 +107,7 @@ INTERFACES = {
     u"nsIMailtoUrl":
         {"value":
             {u"GetMessageContents":
-                {"return": call_definitions.nsIMailtoUrl_changed}}},                    
+                {"return": call_definitions.nsIMailtoUrl_changed}}},
     u"nsIMsgQuote":
         {"value":
             {u"quoteMessage":
@@ -493,11 +493,11 @@ GLOBAL_ENTITIES = {
                              u"nsIMailtoUrl":
                                 {"xpcom_map":
                                      lambda:
-                                        INTERFACES["nsIMailtoUrl"]}, 
+                                        INTERFACES["nsIMailtoUrl"]},
                              u"nsIMsgQuote":
                                 {"xpcom_map":
                                      lambda:
-                                        INTERFACES["nsIMsgQuote"]}, 
+                                        INTERFACES["nsIMsgQuote"]},
                              u"nsIMsgSearchScopeTerm":
                                 {"xpcom_map":
                                      lambda:
@@ -570,8 +570,7 @@ GLOBAL_ENTITIES = {
 
     # Global properties are inherently read-only, though this formalizes it.
     u"Infinity":
-        {"readonly": True,
-         "value":
+        {"value":
              lambda t:
                  GLOBAL_ENTITIES[u"Number"]["value"][u"POSITIVE_INFINITY"]},
     u"NaN": {"readonly": True},
@@ -606,6 +605,12 @@ GLOBAL_ENTITIES = {
     u"opener":
         {"value":
              lambda t: {"value": GLOBAL_ENTITIES}},
+
+    u"XPCNativeWrapper":
+        {"value":
+             {u"unwrap":
+                  {"return": call_definitions.js_unwrap}},
+         "return": call_definitions.js_wrap},
 
     # Preference creation in pref defaults files
     u"pref": {"dangerous": actions._call_create_pref},
