@@ -147,15 +147,24 @@ def test_incompatible_uris():
 
 def test_chrome_usage():
 
-    err = _do_test_raw("""var foo = require("bar");""")
-    eq_(err.metadata['requires_chrome'], False)
+    def base_case():
+        err = _do_test_raw("""var foo = require("bar");""")
+        eq_(err.metadata['requires_chrome'], False)
+    yield base_case
 
-    err = _do_test_raw("""var {Cc, Ci} = require("chrome")""")
-    assert 'non-SDK interface' in err.warnings[0]['message'], (
-        'Unexpected: %s', err.warnings[0]['message'])
-    assert 'requires_chrome' in err.metadata, (
-        'Unexpected: "requires_chrome" should be in metadata')
-    eq_(err.metadata['requires_chrome'], True)
+    interfaces = ["chrome", "window-utils", "observer-service"]
+
+    def interface_cases(interface):
+        err = _do_test_raw("""var {cc, ci} = require("%s")""" % interface)
+        print err.print_summary(verbose=True)
+        assert ('non-SDK interface' in err.warnings[0]['message'],
+            'unexpected: %s' % err.warnings[0]['message'])
+        assert ('requires_chrome' in err.metadata,
+            'unexpected: "requires_chrome" should be in metadata')
+        eq_(err.metadata['requires_chrome'], True)
+
+    for case in interfaces:
+        yield lambda: interface_cases(case)
 
 
 def test_preference_extension_regex():
