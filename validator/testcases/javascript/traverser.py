@@ -38,6 +38,10 @@ class Traverser:
         # For debugging
         self.debug_level = 0
 
+        # If we're not debugging, don't waste more cycles than we need to.
+        if not DEBUG:
+            self._debug = lambda x: None
+
     def _debug(self, data):
         "Writes a message to the console if debugging is enabled."
         if DEBUG:
@@ -53,11 +57,6 @@ class Traverser:
             x = open("/tmp/output.js", "w")
             x.write(unicode(data))
             x.close()
-
-        if "type" not in data or not self._can_handle_node(data["type"]):
-            self._debug("ERR>>Cannot handle node type %s" %
-                            (data["type"] if "type" in data else "<unknown>"))
-            return None
 
         self._debug("START>>")
         self._traverse_node(data)
@@ -102,10 +101,6 @@ class Traverser:
                                          ", ".join(self.contexts[0].data.keys())],
                        filename=self.filename)
 
-    def _can_handle_node(self, node_name):
-        "Determines whether a node can be handled."
-        return node_name in DEFINITIONS
-
     def _traverse_node(self, node):
         "Finds a node's internal blocks and helps manage state."
 
@@ -118,7 +113,7 @@ class Traverser:
 
         # Handles all the E4X stuff and anything that may or may not return
         # a value.
-        if "type" not in node or not self._can_handle_node(node["type"]):
+        if "type" not in node or node["type"] not in DEFINITIONS:
             wrapper = JSWrapper(traverser=self)
             wrapper.set_value(JSObject())
             return wrapper
@@ -168,7 +163,7 @@ class Traverser:
                     self.debug_level += 1
                     b = node[branch]
                     if isinstance(b, list):
-                        self._interpret_block(b)
+                        map(self._traverse_node, b)
                     else:
                         self._traverse_node(b)
                     self.debug_level -= 1
@@ -189,14 +184,6 @@ class Traverser:
             return action_result
 
         node["__traversal"] = None
-
-    def _interpret_block(self, items):
-        "Interprets a block of consecutive code"
-
-        for item in items:
-            self._traverse_node(item)
-
-        # Iterative code will never return a value.
 
     def _push_block_context(self):
         "Adds a block context to the current interpretation frame"
