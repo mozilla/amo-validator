@@ -700,10 +700,15 @@ def _expr_binary(traverser, node):
     traverser._debug("BIN_EXP>>l-value")
     traverser.debug_level += 1
 
-    left = traverser._traverse_node(node["left"])
-    if not isinstance(left, JSWrapper):
-        left = JSWrapper(left, traverser=traverser)
-    traverser._debug("Is dirty? %r" % left.dirty)
+    if (node["left"]["type"] == "BinaryExpression" and
+        "__traversal" not in node["left"]):
+        # Process the left branch of the binary expression directly. This keeps
+        # the recursion cap in line and speeds up processing of large chains
+        # of binary expressions.
+        left = _expr_binary(traverser, node["left"])
+        node["left"]["__traversal"] = left
+    else:
+        left = traverser._traverse_node(node["left"])
 
     traverser.debug_level -= 1
 
@@ -719,8 +724,6 @@ def _expr_binary(traverser, node):
         return JSWrapper(True, traverser=traverser)
     else:
         right = traverser._traverse_node(node["right"])
-        if not isinstance(right, JSWrapper):
-            right = JSWrapper(right, traverser=traverser)
         traverser._debug("Is dirty? %r" % right.dirty)
 
     # Dirty l or r values mean we can skip the expression. A dirty value
