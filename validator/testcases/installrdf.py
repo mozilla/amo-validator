@@ -30,8 +30,8 @@ def _test_rdf(err, install):
     else:
         shouldnt_exist = ("updateURL",
                           "updateKey",
-                          "hidden")
-    obsolete = ("file", "skin")
+                          "hidden", )
+    obsolete = ("file", "skin", "requires", )
     must_exist_once = ["id",
                        "version",
                        "name",
@@ -42,6 +42,7 @@ def _test_rdf(err, install):
                       "optionsURL",
                       "aboutURL",
                       "iconURL",
+                      "icon64URL",
                       "homepageURL",
                       "creator",
                       "optionsType",
@@ -53,6 +54,7 @@ def _test_rdf(err, install):
                       "updateHash",
                       "signature",
                       "skinnable",
+                      "strictCompatibility",
                       "unpack"]  # This has other rules; CAUTION!
 
     # Support a name requirement override.
@@ -70,8 +72,7 @@ def _test_rdf(err, install):
                  "contributor",
                  "targetPlatform",
                  "requires",
-                 "developer",
-                 "icon64URL")
+                 "developer",)
 
     if err.detected_type == PACKAGE_THEME or \
           (err.subpackages and
