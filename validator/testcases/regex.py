@@ -44,7 +44,9 @@ PROTOTYPE_REGEX = re.compile(r"(String|Object|Number|Date|RegExp|Function|"
                              r"(\.[a-zA-Z0-9]+|\[.+\]) =", re.I)
 
 CHROME_PATTERNS = (
-    (r"(?<![\'\"])require\s*\(\s*[\'\"]chrome[\'\"]\s*\)",
+    (r"(?<![\'\"])require\s*\(\s*[\'\"]"
+     r"(chrome|window-utils|observer-service)"
+     r"[\'\"]\s*\)",
         'Usage of non-SDK interface',
         "This SDK-based add-on uses interfaces that aren't part of the SDK."),
 )
@@ -68,7 +70,7 @@ FX8_INTERFACES = {"nsISelection2": 672536,
                   "nsISelection3": 672536}
 FX11_INTERFACES = {"nsICharsetResolver": 700490}
 
-TB11_STRINGS = {"newToolbarCmd\.label": 694027, 
+TB11_STRINGS = {"newToolbarCmd\.label": 694027,
                 "newToolbarCmd\.tooltip": 694027,
                 "openToolbarCmd\.label": 694027,
                 "openToolbarCmd\.tooltip": 694027,
@@ -85,14 +87,14 @@ TB11_STRINGS = {"newToolbarCmd\.label": 694027,
                 "sourceNameOExpress": 689437,
                 "sourceNameOutlook": 689437,
                 "failedDuplicateAccount": 709020}
-                
-TB11_JS = {"onViewToolbarCommand": 644169, 
+
+TB11_JS = {"onViewToolbarCommand": 644169,
                 "nsContextMenu": 680192,
                 "MailMigrator\.migrateMail": 712395,
                 "AddUrlAttachment": 708982,
                 "makeFeedObject": 705504,
                 "deleteFeed": 705504}
-                  
+
 def run_regex_tests(document, err, filename, context=None, is_js=False):
     """Run all of the regex-based JS tests."""
 
