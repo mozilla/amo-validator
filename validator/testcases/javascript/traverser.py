@@ -59,7 +59,12 @@ class Traverser:
             x.close()
 
         self._debug("START>>")
-        self._traverse_node(data)
+        try:
+            self._traverse_node(data)
+        except Exception:
+            print "Exception in JS traversal; %s (%d;%d)" % (
+                      self.filename, self.line, self.position)
+            raise
         self._debug("END>>")
 
         if self.contexts:
