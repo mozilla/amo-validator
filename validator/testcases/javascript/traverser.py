@@ -111,12 +111,10 @@ class Traverser:
         if "__traversal" in node:
             return node["__traversal"]
 
-        # Handles all the E4X stuff and anything that may or may not return
-        # a value.
-        if "type" not in node or node["type"] not in DEFINITIONS:
-            wrapper = JSWrapper(traverser=self)
-            wrapper.set_value(JSObject())
-            return wrapper
+        if isinstance(node, (str, unicode)):
+            return JSWrapper(JSLiteral(node), traverser=self)
+        elif "type" not in node or node["type"] not in DEFINITIONS:
+            return JSWrapper(JSObject(), traverser=self, dirty=True)
 
         self._debug("TRAVERSE>>%s" % (node["type"]))
         self.debug_level += 1
