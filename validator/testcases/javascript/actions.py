@@ -328,7 +328,7 @@ def _define_literal(traverser, node):
     """
     value = node["value"]
     if isinstance(value, dict):
-        return JSWrapper(traverser=traverser)
+        return JSWrapper(JSObject(), traverser=traverser, dirty=True)
     return JSWrapper(value if value is not None else JSLiteral(None),
                      traverser=traverser)
 
@@ -525,7 +525,7 @@ def _ident(traverser, node):
         found = traverser._seek_variable(name)
         return found
 
-    return JSWrapper(traverser=traverser, dirty=True)
+    return JSWrapper(JSObject(), traverser=traverser, dirty=True)
 
 
 def _expr_assignment(traverser, node):

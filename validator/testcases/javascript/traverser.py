@@ -256,7 +256,7 @@ class Traverser:
             # If it has the variable, return it
             if context.has_var(variable):
                 self._debug("SEEK>>FOUND AT DEPTH %d" % c)
-                var = context.get(variable)
+                var = context.get(variable, traverser=self)
                 if not isinstance(var, JSWrapper):
                     return JSWrapper(var, traverser=self)
                 return var
@@ -266,7 +266,7 @@ class Traverser:
             # end the search.
             depth -= 1
             if depth == -1:
-                return JSWrapper(traverser=self)
+                return JSWrapper(JSObject(), traverser=self)
 
     def _is_global(self, name):
         "Returns whether a name is a global entity"
@@ -277,7 +277,8 @@ class Traverser:
         self._debug("SEEK_GLOBAL>>%s" % name)
         if not self._is_global(name):
             self._debug("SEEK_GLOBAL>>FAILED")
-            return JSWrapper(traverser=self)
+            # If we can't find a variable, we always return a dummy object.
+            return JSWrapper(JSObject(), traverser=self)
 
         self._debug("SEEK_GLOBAL>>FOUND>>%s" % name)
         return self._build_global(name, GLOBAL_ENTITIES[name])
