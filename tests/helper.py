@@ -83,15 +83,17 @@ class TestCase(unittest.TestCase):
         the presence of warnings is tested just like with_errors)
         """
         assert self.err.failed(fail_on_warnings=with_warnings or
-                                                with_warnings is None)
+                                                with_warnings is None), \
+                "Test did not fail; failure was expected."
+
         if with_errors:
-            assert self.err.errors
+            assert self.err.errors, "Errors were expected."
         elif self.err.errors:
             raise "Tests found unexpected errors: %s" % self.err.print_summary()
 
         if with_warnings is not None:
             if with_warnings:
-                assert self.err.warnings
+                assert self.err.warnings, "Warnings were expected."
             elif self.err.warnings:
                 raise ("Tests found unexpected warnings: %s" %
                            self.err.print_summary())
@@ -100,23 +102,25 @@ class TestCase(unittest.TestCase):
         """
         Assert that notices have been generated during the validation process.
         """
-        assert self.err.notices
+        assert self.err.notices, "Notices were expected."
 
     def assert_passes(self, warnings_pass=False):
         """
         Assert that no errors have been raised. If warnings_pass is True, also
         assert that there are no warnings.
         """
-        assert not self.failed(fail_on_warnings=not warnings_pass)
+        assert not self.failed(fail_on_warnings=not warnings_pass), \
+                ("Test was intended to pass%s, but it did not." %
+                     (" with warnings" if warnings_pass else ""))
 
     def assert_silent(self):
         """
         Assert that no messages (errors, warnings, or notices) have been
         raised.
         """
-        assert not self.err.errors
-        assert not self.err.warnings
-        assert not self.err.notices
+        assert not self.err.errors, 'Got these: %s' % self.err.errors
+        assert not self.err.warnings, 'Got these: %s' % self.err.warnings
+        assert not self.err.notices, 'Got these: %s' % self.err.notices
 
     def assert_got_errid(self, errid):
         """
@@ -124,7 +128,8 @@ class TestCase(unittest.TestCase):
         the validation process.
         """
         assert any(msg["id"] == errid for msg in
-                   (self.err.errors + self.err.warnings + self.err.notices))
+                   (self.err.errors + self.err.warnings + self.err.notices)), \
+                "%s was expected, but it was not found." % errid
 
 
 class MockZipFile:

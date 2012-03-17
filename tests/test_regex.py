@@ -56,8 +56,8 @@ def test_bug_548645():
     var w = foo["newThread"];
     """)
     print results.print_summary(verbose=True)
-    assert ((len(results.errors) + len(results.warnings) +
-             len(results.notices)) == 3)
+    assert (len(results.errors) + len(results.warnings) +
+            len(results.notices)) == 3
 
 
 def test_processNextEvent_banned():
@@ -157,10 +157,12 @@ def test_chrome_usage():
     def interface_cases(interface):
         err = _do_test_raw("""var {cc, ci} = require("%s")""" % interface)
         print err.print_summary(verbose=True)
-        assert ('non-SDK interface' in err.warnings[0]['message'],
-            'unexpected: %s' % err.warnings[0]['message'])
-        assert ('requires_chrome' in err.metadata,
-            'unexpected: "requires_chrome" should be in metadata')
+
+        first_message = err.warnings[0]['message']
+        assert 'non-SDK interface' in first_message, ('unexpected: %s' %
+                                                          first_message)
+        assert 'requires_chrome' in err.metadata, \
+                'unexpected: "requires_chrome" should be in metadata'
         eq_(err.metadata['requires_chrome'], True)
 
     for case in interfaces:

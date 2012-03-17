@@ -19,6 +19,9 @@ def _unbundle(path, target):
         if not sp[-1]:
             continue
 
+        if "__MACOSX" in item:
+            continue
+
         print item, ">", target + item
 
         cpath = target + "/".join(sp[:-1])
