@@ -11,13 +11,22 @@ class JSObject(object):
     context to enable static analysis of `with` statements.
     """
 
-    def __init__(self):
+    def __init__(self, unwrapped=False):
         self.data = {u"prototype": JSPrototype()}
+        self.is_unwrapped = unwrapped
 
     def get(self, name, instantiate=False, traverser=None):
         "Returns the value associated with a property name"
         name = unicode(name)
         output = None
+
+        if name == "wrappedJSObject":
+            if traverser:
+                traverser._debug("Requested unwrapped JS object...")
+            clone = JSObject(unwrapped=True)
+            clone.data = self.data
+            return JSWrapper(clone, traverser=traverser)
+
         if name in self.data:
             output = self.data[name]
         elif instantiate:
@@ -42,6 +51,21 @@ class JSObject(object):
                 modified_value = modifier(value, traverser)
                 if modified_value is not None:
                     value = modified_value
+
+            if self.is_unwrapped:
+                traverser.err.warning(
+                    err_id=("testcases_javascript_jstypes", "JSObject_set",
+                            "unwrapped_js_object"),
+                    warning="Assignment of unwrapped JS Object's properties.",
+                    description="Improper use of unwrapped JS objects can "
+                                "result in serious security vulnerabilities. "
+                                "Please reconsider your use of unwrapped "
+                                "JS objects.",
+                    filename=traverser.filename,
+                    line=traverser.line,
+                    column=traverser.position,
+                    context=traverser.context)
+
         self.data[name] = value
 
     def has_var(self, name):
@@ -67,15 +91,21 @@ class JSObject(object):
 
         # Pop from the recursion buster.
         recursion_buster.pop()
-        return str(output_dict)
+
+        output = []
+        if self.is_unwrapped:
+            output.append("<unwrapped>: ")
+        output.append(str(output_dict))
+        return "".join(output)
 
 
 class JSContext(JSObject):
     """A variable context"""
 
-    def __init__(self, context_type):
+    def __init__(self, context_type, unwrapped=False):
         self._type = context_type
         self.data = {}
+        self.is_unwrapped = False  # Contexts cannot be unwrapped.
 
     def set(self, name, value):
         JSObject.set(self, name, value, None)
@@ -364,8 +394,8 @@ class JSWrapper(object):
 class JSLiteral(JSObject):
     """Represents a literal JavaScript value."""
 
-    def __init__(self, value=None):
-        super(JSLiteral, self).__init__()
+    def __init__(self, value=None, unwrapped=False):
+        super(JSLiteral, self).__init__(unwrapped=unwrapped)
         self.value = value
 
     def set_value(self, value):
@@ -391,40 +421,28 @@ class JSPrototype(JSObject):
     methods.
     """
 
-    def __init__(self):
+    def __init__(self, unwrapped=False):
+        self.is_unwrapped = unwrapped
         self.data = {}
 
     def get(self, name, instantiate=False, traverser=None):
         "Enables static analysis of `with` statements"
         name = unicode(name)
-        output = None
-        if name in self.data:
-            output = self.data[name]
-        elif name == "prototype":
+        output = super(JSPrototype, self).get(name, instantiate, traverser)
+        if output is not None:
+            return output
+        if name == "prototype":
             prototype = JSPrototype()
             self.data[name] = prototype
-        elif instantiate:
-            output = JSWrapper(JSObject(), traverser=traverser)
-            self.data[name] = output
 
         return output
-
-    def get_literal_value(self):
-        "Same as JSObject; returns an empty string"
-        return ""
-
-    def has_var(self, name):
-        return name in self.data
-
-    def __str__(self):
-        return "<<PROTOTYPE>>"
 
 
 class JSArray(JSObject):
     """A class that represents both a JS Array and a JS list."""
 
-    def __init__(self):
-        super(JSArray, self).__init__()
+    def __init__(self, unwrapped=False):
+        super(JSArray, self).__init__(unwrapped=unwrapped)
         self.elements = []
 
     def get(self, index, instantiate=False, traverser=None):
@@ -438,7 +456,7 @@ class JSArray(JSObject):
             return super(JSArray, self).get(index, instantiate, traverser)
 
     def get_literal_value(self):
-        """Arrays return a comma-delimited version of themselves"""
+        """Arrays return a comma-delimited version of themselves."""
 
         if self in recursion_buster:
             return "(recursion)"
