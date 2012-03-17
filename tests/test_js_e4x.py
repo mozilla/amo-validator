@@ -52,3 +52,11 @@ class TestE4X(TestCase):
         """)
         self.assert_silent()
 
+    def test_xmlattributeselector(self):
+        """Test that XMLAttributeSelectors don't throw tracebacks."""
+        self.run_script("""
+        var x = <foo zip="zap"><bar /></foo>;
+        var y = x.@zip;
+        """)
+        self.assert_silent()
+
