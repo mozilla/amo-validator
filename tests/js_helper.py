@@ -78,6 +78,8 @@ def _do_test_scope(script, vars):
 
 
 class TestCase(helper.TestCase):
+    """A TestCase object with specialized functions for JS testing."""
+
     def setUp(self):
         self.file_path = "foo.js"
         self.final_context = None

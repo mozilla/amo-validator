@@ -100,10 +100,11 @@ DEFINITIONS = {
     "XMLDefaultDeclaration": node(branches=("namespace", )),
     "XMLQualifiedIdentifier": node(branches=("left", "right")),
     "XMLFunctionQualifiedIdentifier": node(branches=("right", )),
-    "XMLAttributeSelector": node(branches=("attribute", )),
-    "XMLFilterExpression": node(branches=("left", "right")),
 
-    "XMLElement": node(branches=("contents", )),
+    "XMLAttributeSelector": node(branches=("attribute", ), returns=True),
+    "XMLFilterExpression": node(branches=("left", "right"), returns=True),
+
+    "XMLElement": node(branches=("contents", ), returns=True),
     "XMLList": node(branches=("contents", )),
     "XMLStartTag": node(branches=("contents", )),
     "XMLEndTag": node(branches=("contents", )),
