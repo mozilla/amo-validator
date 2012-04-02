@@ -110,10 +110,10 @@ class Traverser:
         "Finds a node's internal blocks and helps manage state."
 
         if node is None:
-            return None
+            return JSWrapper(JSObject(), traverser=self, dirty=True)
 
         # Simple caching to prevent retraversal
-        if "__traversal" in node:
+        if "__traversal" in node and node["__traversal"] is not None:
             return node["__traversal"]
 
         if isinstance(node, (str, unicode)):
@@ -187,6 +187,7 @@ class Traverser:
             return action_result
 
         node["__traversal"] = None
+        return JSWrapper(JSObject(), traverser=self, dirty=True)
 
     def _push_block_context(self):
         "Adds a block context to the current interpretation frame"
