@@ -4,8 +4,8 @@ import re
 from validator.constants import BUGZILLA_BUG
 from validator.compat import (FX4_DEFINITION, FX5_DEFINITION, FX6_DEFINITION,
                               FX7_DEFINITION, FX8_DEFINITION, FX9_DEFINITION,
-                              FX11_DEFINITION, TB7_DEFINITION, TB10_DEFINITION,
-                              TB11_DEFINITION)
+                              FX11_DEFINITION, FX12_DEFINITION, TB7_DEFINITION,
+                              TB10_DEFINITION, TB11_DEFINITION)
 from validator.contextgenerator import ContextGenerator
 
 
@@ -70,6 +70,17 @@ FX7_INTERFACES = {"nsIDOMDocumentStyle": 658904,
 FX8_INTERFACES = {"nsISelection2": 672536,
                   "nsISelection3": 672536}
 FX11_INTERFACES = {"nsICharsetResolver": 700490}
+FX12_INTERFACES = {"nsIProxyObjectManager":
+                       (675221,
+                        "This add-on uses nsIProxyObjectManager, which was "
+                        "removed in Gecko 12."),
+                   "documentCharsetInfo": 713825,
+                   "nsIJetpack(Service)?":
+                       (711838,
+                        "This add-on uses the Jetpack service, which was "
+                        "deprecated long ago and is no longer included in "
+                        "Gecko 12. Please update your add-on to use a more "
+                        "recent version of the Add-ons SDK.")}
 
 TB11_STRINGS = {"newToolbarCmd\.label": 694027,
                 "newToolbarCmd\.tooltip": 694027,
@@ -436,6 +447,41 @@ def run_regex_tests(document, err, filename, context=None, is_js=False):
                 line=context.get_line(instance.start()),
                 context=context,
                 for_appversions=FX11_DEFINITION,
+                compatibility_type="error",
+                tier=5)
+
+    # Firefox 12 Compatibility
+    if err.supports_version(FX12_DEFINITION):
+        for pattern, bug in FX12_INTERFACES.items():
+            if isinstance(bug, tuple):
+                bug, message = bug
+            else:
+                message = ("Your add-on uses interface %s, which has been "
+                           "removed from Gecko 12.") % pattern
+
+            message = "%s See %s for more infomration." % (message,
+                                                           BUGZILLA_BUG % bug)
+            _compat_test(
+                    re.compile(pattern),
+                    "Unsupported interface in use",
+                    message,
+                    compatibility_type="error",
+                    appversions=FX12_DEFINITION,
+                    logFunc=err.warning)
+
+        # Test for `chromemargin` (bug 735876)
+        for instance in re.finditer(r"chromemargin", document):
+            err.notice(
+                err_id=("testcases_regex", "regex_regex_tests", "chromemargin"),
+                notice="`chromemargin` attribute changed in Gecko 12",
+                description="This add-on uses the chromemargin attribute, "
+                            "which after Gecko 12 will not work in the same "
+                            "way  with values other than 0 or -1. Please see "
+                            "%s for more information." % BUGZILLA_BUG % 735876,
+                filename=filename,
+                line=context.get_line(instance.start()),
+                context=context,
+                for_appversions=FX12_DEFINITION,
                 compatibility_type="error",
                 tier=5)
 
