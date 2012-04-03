@@ -13,6 +13,7 @@ NP_WARNING = "Network preferences may not be modified."
 EUP_WARNING = "Extension update settings may not be modified."
 NSINHS_LINK = ("https://developer.mozilla.org/en/XPCOM_Interface_Reference"
                "/nsINavHistoryService")
+TB7_LINK = "https://developer.mozilla.org/en/Thunderbird_7_for_developers"
 
 GENERIC_PATTERNS = {
     r"globalStorage\[.*\].password":
@@ -444,9 +445,9 @@ def run_regex_tests(document, err, filename, context=None, is_js=False):
         _compat_test(
                 re.compile(r"resource:///modules/dictUtils.js"),
                 "dictUtils.js was removed in Thunderbird 7.",
-                ("The dictUtils.js file is no longer available in "
-                 "Thunderbird 7. You can use Dict.jsm instead. See"
-                 "%s for more information.") % (BUGZILLA_BUG % 621213),
+                "The dictUtils.js file is no longer available in "
+                "Thunderbird 7. You can use Dict.jsm instead. See"
+                "%s for more information." % BUGZILLA_BUG % 621213,
                 compatibility_type="error",
                 appversions=TB7_DEFINITION,
                 logFunc=err.warning)
@@ -454,21 +455,20 @@ def run_regex_tests(document, err, filename, context=None, is_js=False):
         _compat_test(
                 re.compile(r"rdf:addressdirectory"),
                 "The address book does not use RDF in Thunderbird 7.",
-                ("The address book was changed to use a look up table in "
-                 "Thunderbird 7. See "
-                 "https://developer.mozilla.org/en/Thunderbird_7_for_developers and "
-                 "%s for more information.") % (BUGZILLA_BUG % 621213),
+                "The address book was changed to use a look up table in "
+                "Thunderbird 7. See %s and %s for more information." %
+                    (TB7_LINK, BUGZILLA_BUG % 621213),
                 compatibility_type="error",
                 appversions=TB7_DEFINITION)
         # Second test for de-RDFing the addressbook
         # r"GetResource(.*?)\s*\.\s*QueryInterface(.*?nsIAbDirectory);"
         _compat_test(
-                re.compile(r"GetResource\(.*?\)\s*\.\s*QueryInterface\(.*?nsIAbDirectory\)"),
+                re.compile(r"GetResource\(.*?\)\s*\.\s*"
+                           r"QueryInterface\(.*?nsIAbDirectory\)"),
                 "The address book does not use RDF in Thunderbird 7.",
-                ("The address book was changed to use a look up table in "
-                 "Thunderbird 7. See "
-                 "https://developer.mozilla.org/en/Thunderbird_7_for_developers and "
-                 "%s for more information.") % (BUGZILLA_BUG % 621213),
+                "The address book was changed to use a look up table in "
+                "Thunderbird 7. See %s and %s for more information." %
+                    (TB7_LINK, BUGZILLA_BUG % 621213),
                 compatibility_type="error",
                 appversions=TB7_DEFINITION)
 
@@ -478,8 +478,9 @@ def run_regex_tests(document, err, filename, context=None, is_js=False):
         _compat_test(
                 re.compile(r"gDownloadManagerStrings"),
                 "gDownloadManagerStrings was removed in Thunderbird 10.",
-                ("This global is no longer available in "
-                 "Thunderbird 10. See %s for more information.") % (BUGZILLA_BUG % 700220),
+                "This global is no longer available in "
+                "Thunderbird 10. See %s for more information." %
+                    BUGZILLA_BUG % 700220,
                 compatibility_type="error",
                 appversions=TB10_DEFINITION,
                 logFunc=err.warning)
@@ -487,8 +488,9 @@ def run_regex_tests(document, err, filename, context=None, is_js=False):
         _compat_test(
                 re.compile(r"nsTryToClose.js"),
                 "nsTryToClose.js was removed in Thunderbird 10.",
-                ("The nsTryToClose.js file is no longer available in "
-                 "Thunderbird 10. See %s for more information.") % (BUGZILLA_BUG % 539997),
+                "The nsTryToClose.js file is no longer available in "
+                "Thunderbird 10. See %s for more information." %
+                    BUGZILLA_BUG % 539997,
                 compatibility_type="error",
                 appversions=TB10_DEFINITION,
                 logFunc=err.warning)
@@ -499,8 +501,9 @@ def run_regex_tests(document, err, filename, context=None, is_js=False):
         _compat_test(
                 re.compile(r"specialFoldersDeletionAllowed"),
                 "specialFoldersDeletionAllowed was removed in Thunderbird 11.",
-                ("This global is no longer available in "
-                 "Thunderbird 11. See %s for more information.") % (BUGZILLA_BUG % 39121),
+                "This global is no longer available in "
+                "Thunderbird 11. See %s for more information." %
+                    BUGZILLA_BUG % 39121,
                 compatibility_type="error",
                 appversions=TB11_DEFINITION,
                 logFunc=err.notice)
@@ -509,9 +512,9 @@ def run_regex_tests(document, err, filename, context=None, is_js=False):
             _compat_test(
                     re.compile(pattern),
                     "Removed, renamed, or changed strings in use",
-                    "Your add-on uses string %s, which has been changed or removed "
-                    "from Thunderbird 11. Please refer to %s for possible "
-                    "alternatives." % (pattern, BUGZILLA_BUG % bug),
+                    "Your add-on uses string %s, which has been changed or "
+                    "removed from Thunderbird 11. Please refer to %s for "
+                    "possible alternatives." % (pattern, BUGZILLA_BUG % bug),
                     compatibility_type="error",
                     appversions=TB11_DEFINITION,
                     logFunc=err.warning)
@@ -519,9 +522,10 @@ def run_regex_tests(document, err, filename, context=None, is_js=False):
             _compat_test(
                     re.compile(pattern),
                     "Removed, renamed, or changed javascript in use",
-                    "Your add-on uses the javascript method or class %s, which has been "
-                    "changed or removed from Thunderbird 11. Please refer to %s for possible "
-                    "alternatives." % (pattern, BUGZILLA_BUG % bug),
+                    "Your add-on uses the javascript method or class %s, which "
+                    "has been changed or removed from Thunderbird 11. Please "
+                    "refer to %s for possible alternatives." %
+                        (pattern, BUGZILLA_BUG % bug),
                     compatibility_type="error",
                     appversions=TB11_DEFINITION,
                     logFunc=err.notice)
