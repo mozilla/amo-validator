@@ -60,3 +60,15 @@ class TestE4X(TestCase):
         """)
         self.assert_silent()
 
+    def test_double_colon(self):
+        """
+        Test that assignmnts with a double colon on an E4X object don't cause a
+        traceback.
+        """
+        self.run_script("""
+        var req = <nsMessages:GetItem xmlns:nsMessages={nsMessages}
+                      xmlns:nsTypes={nsTypes}/>;
+        req::asdf.oijaewr::aasdf = "foo";
+        """)
+        self.assert_silent()
+
