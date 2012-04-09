@@ -931,3 +931,46 @@ def test_requestAnimationFrame():
     assert err.failed()
     assert err.compat_summary["errors"]
 
+
+def test_fx12_interfaces():
+    """
+    Test that the Firefox 12 compatibility error interfaces throw compatibility
+    errors when they're supposed to.
+    """
+    err = _do_real_test_raw("""
+    var x = '<foo chromemargin="1">';
+    """, versions={'{ec8030f7-c20a-464f-9b0e-13a3a9e97384}':
+                       version_range("firefox", "12.0a1")})
+    assert not err.failed()
+    assert not err.warnings
+    assert err.notices
+    assert err.compat_summary["errors"]
+
+    err = _do_real_test_raw("""
+    var x = window.documentCharsetInfo;
+    """, versions={'{ec8030f7-c20a-464f-9b0e-13a3a9e97384}':
+                       version_range("firefox", "12.0a1")})
+    assert not err.failed(fail_on_warnings=False)
+    assert err.compat_summary["errors"]
+
+    err = _do_real_test_raw("""
+    var x = Components.interfaces.nsIJetpack;
+    """, versions={'{ec8030f7-c20a-464f-9b0e-13a3a9e97384}':
+                       version_range("firefox", "12.0a1")})
+    assert not err.failed(fail_on_warnings=False)
+    assert err.compat_summary["errors"]
+
+    err = _do_real_test_raw("""
+    var x = Components.interfaces.nsIJetpackService;
+    """, versions={'{ec8030f7-c20a-464f-9b0e-13a3a9e97384}':
+                       version_range("firefox", "12.0a1")})
+    assert not err.failed(fail_on_warnings=False)
+    assert err.compat_summary["errors"]
+
+    err = _do_real_test_raw("""
+    var x = Components.interfaces.nsIProxyObjectManager;
+    """, versions={'{ec8030f7-c20a-464f-9b0e-13a3a9e97384}':
+                       version_range("firefox", "12.0a1")})
+    assert not err.failed(fail_on_warnings=False)
+    assert err.compat_summary["errors"]
+
