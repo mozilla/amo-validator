@@ -4,8 +4,8 @@ import re
 from validator.constants import BUGZILLA_BUG
 from validator.compat import (FX4_DEFINITION, FX5_DEFINITION, FX6_DEFINITION,
                               FX7_DEFINITION, FX8_DEFINITION, FX9_DEFINITION,
-                              FX11_DEFINITION, TB7_DEFINITION, TB10_DEFINITION,
-                              TB11_DEFINITION)
+                              FX11_DEFINITION, FX12_DEFINITION, TB7_DEFINITION,
+                              TB10_DEFINITION, TB11_DEFINITION)
 from validator.contextgenerator import ContextGenerator
 
 
@@ -13,6 +13,7 @@ NP_WARNING = "Network preferences may not be modified."
 EUP_WARNING = "Extension update settings may not be modified."
 NSINHS_LINK = ("https://developer.mozilla.org/en/XPCOM_Interface_Reference"
                "/nsINavHistoryService")
+TB7_LINK = "https://developer.mozilla.org/en/Thunderbird_7_for_developers"
 
 GENERIC_PATTERNS = {
     r"globalStorage\[.*\].password":
@@ -69,6 +70,17 @@ FX7_INTERFACES = {"nsIDOMDocumentStyle": 658904,
 FX8_INTERFACES = {"nsISelection2": 672536,
                   "nsISelection3": 672536}
 FX11_INTERFACES = {"nsICharsetResolver": 700490}
+FX12_INTERFACES = {"nsIProxyObjectManager":
+                       (675221,
+                        "This add-on uses nsIProxyObjectManager, which was "
+                        "removed in Gecko 12."),
+                   "documentCharsetInfo": 713825,
+                   "nsIJetpack(Service)?":
+                       (711838,
+                        "This add-on uses the Jetpack service, which was "
+                        "deprecated long ago and is no longer included in "
+                        "Gecko 12. Please update your add-on to use a more "
+                        "recent version of the Add-ons SDK.")}
 
 TB11_STRINGS = {"newToolbarCmd\.label": 694027,
                 "newToolbarCmd\.tooltip": 694027,
@@ -438,15 +450,50 @@ def run_regex_tests(document, err, filename, context=None, is_js=False):
                 compatibility_type="error",
                 tier=5)
 
+    # Firefox 12 Compatibility
+    if err.supports_version(FX12_DEFINITION):
+        for pattern, bug in FX12_INTERFACES.items():
+            if isinstance(bug, tuple):
+                bug, message = bug
+            else:
+                message = ("Your add-on uses interface %s, which has been "
+                           "removed from Gecko 12.") % pattern
+
+            message = "%s See %s for more infomration." % (message,
+                                                           BUGZILLA_BUG % bug)
+            _compat_test(
+                    re.compile(pattern),
+                    "Unsupported interface in use",
+                    message,
+                    compatibility_type="error",
+                    appversions=FX12_DEFINITION,
+                    logFunc=err.warning)
+
+        # Test for `chromemargin` (bug 735876)
+        for instance in re.finditer(r"chromemargin", document):
+            err.notice(
+                err_id=("testcases_regex", "regex_regex_tests", "chromemargin"),
+                notice="`chromemargin` attribute changed in Gecko 12",
+                description="This add-on uses the chromemargin attribute, "
+                            "which after Gecko 12 will not work in the same "
+                            "way  with values other than 0 or -1. Please see "
+                            "%s for more information." % BUGZILLA_BUG % 735876,
+                filename=filename,
+                line=context.get_line(instance.start()),
+                context=context,
+                for_appversions=FX12_DEFINITION,
+                compatibility_type="error",
+                tier=5)
+
     # Thunderbird 7 Compatibility rdf:addressdirectory
     if err.supports_version(TB7_DEFINITION):
         # dictUtils.js removal
         _compat_test(
                 re.compile(r"resource:///modules/dictUtils.js"),
                 "dictUtils.js was removed in Thunderbird 7.",
-                ("The dictUtils.js file is no longer available in "
-                 "Thunderbird 7. You can use Dict.jsm instead. See"
-                 "%s for more information.") % (BUGZILLA_BUG % 621213),
+                "The dictUtils.js file is no longer available in "
+                "Thunderbird 7. You can use Dict.jsm instead. See"
+                "%s for more information." % BUGZILLA_BUG % 621213,
                 compatibility_type="error",
                 appversions=TB7_DEFINITION,
                 logFunc=err.warning)
@@ -454,21 +501,20 @@ def run_regex_tests(document, err, filename, context=None, is_js=False):
         _compat_test(
                 re.compile(r"rdf:addressdirectory"),
                 "The address book does not use RDF in Thunderbird 7.",
-                ("The address book was changed to use a look up table in "
-                 "Thunderbird 7. See "
-                 "https://developer.mozilla.org/en/Thunderbird_7_for_developers and "
-                 "%s for more information.") % (BUGZILLA_BUG % 621213),
+                "The address book was changed to use a look up table in "
+                "Thunderbird 7. See %s and %s for more information." %
+                    (TB7_LINK, BUGZILLA_BUG % 621213),
                 compatibility_type="error",
                 appversions=TB7_DEFINITION)
         # Second test for de-RDFing the addressbook
         # r"GetResource(.*?)\s*\.\s*QueryInterface(.*?nsIAbDirectory);"
         _compat_test(
-                re.compile(r"GetResource\(.*?\)\s*\.\s*QueryInterface\(.*?nsIAbDirectory\)"),
+                re.compile(r"GetResource\(.*?\)\s*\.\s*"
+                           r"QueryInterface\(.*?nsIAbDirectory\)"),
                 "The address book does not use RDF in Thunderbird 7.",
-                ("The address book was changed to use a look up table in "
-                 "Thunderbird 7. See "
-                 "https://developer.mozilla.org/en/Thunderbird_7_for_developers and "
-                 "%s for more information.") % (BUGZILLA_BUG % 621213),
+                "The address book was changed to use a look up table in "
+                "Thunderbird 7. See %s and %s for more information." %
+                    (TB7_LINK, BUGZILLA_BUG % 621213),
                 compatibility_type="error",
                 appversions=TB7_DEFINITION)
 
@@ -478,8 +524,9 @@ def run_regex_tests(document, err, filename, context=None, is_js=False):
         _compat_test(
                 re.compile(r"gDownloadManagerStrings"),
                 "gDownloadManagerStrings was removed in Thunderbird 10.",
-                ("This global is no longer available in "
-                 "Thunderbird 10. See %s for more information.") % (BUGZILLA_BUG % 700220),
+                "This global is no longer available in "
+                "Thunderbird 10. See %s for more information." %
+                    BUGZILLA_BUG % 700220,
                 compatibility_type="error",
                 appversions=TB10_DEFINITION,
                 logFunc=err.warning)
@@ -487,8 +534,9 @@ def run_regex_tests(document, err, filename, context=None, is_js=False):
         _compat_test(
                 re.compile(r"nsTryToClose.js"),
                 "nsTryToClose.js was removed in Thunderbird 10.",
-                ("The nsTryToClose.js file is no longer available in "
-                 "Thunderbird 10. See %s for more information.") % (BUGZILLA_BUG % 539997),
+                "The nsTryToClose.js file is no longer available in "
+                "Thunderbird 10. See %s for more information." %
+                    BUGZILLA_BUG % 539997,
                 compatibility_type="error",
                 appversions=TB10_DEFINITION,
                 logFunc=err.warning)
@@ -499,8 +547,9 @@ def run_regex_tests(document, err, filename, context=None, is_js=False):
         _compat_test(
                 re.compile(r"specialFoldersDeletionAllowed"),
                 "specialFoldersDeletionAllowed was removed in Thunderbird 11.",
-                ("This global is no longer available in "
-                 "Thunderbird 11. See %s for more information.") % (BUGZILLA_BUG % 39121),
+                "This global is no longer available in "
+                "Thunderbird 11. See %s for more information." %
+                    BUGZILLA_BUG % 39121,
                 compatibility_type="error",
                 appversions=TB11_DEFINITION,
                 logFunc=err.notice)
@@ -509,9 +558,9 @@ def run_regex_tests(document, err, filename, context=None, is_js=False):
             _compat_test(
                     re.compile(pattern),
                     "Removed, renamed, or changed strings in use",
-                    "Your add-on uses string %s, which has been changed or removed "
-                    "from Thunderbird 11. Please refer to %s for possible "
-                    "alternatives." % (pattern, BUGZILLA_BUG % bug),
+                    "Your add-on uses string %s, which has been changed or "
+                    "removed from Thunderbird 11. Please refer to %s for "
+                    "possible alternatives." % (pattern, BUGZILLA_BUG % bug),
                     compatibility_type="error",
                     appversions=TB11_DEFINITION,
                     logFunc=err.warning)
@@ -519,9 +568,10 @@ def run_regex_tests(document, err, filename, context=None, is_js=False):
             _compat_test(
                     re.compile(pattern),
                     "Removed, renamed, or changed javascript in use",
-                    "Your add-on uses the javascript method or class %s, which has been "
-                    "changed or removed from Thunderbird 11. Please refer to %s for possible "
-                    "alternatives." % (pattern, BUGZILLA_BUG % bug),
+                    "Your add-on uses the javascript method or class %s, which "
+                    "has been changed or removed from Thunderbird 11. Please "
+                    "refer to %s for possible alternatives." %
+                        (pattern, BUGZILLA_BUG % bug),
                     compatibility_type="error",
                     appversions=TB11_DEFINITION,
                     logFunc=err.notice)
