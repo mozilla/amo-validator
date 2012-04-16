@@ -48,6 +48,10 @@ MOOTOOLS_VERSIONS = ("1.1.1", "1.1.2", "1.2.1", "1.2.2", "1.2.3", "1.2.4",
 PROTOTYPE_VERSIONS = ("1.6.0.2", "1.6.0.3", "1.6.1.0", "1.7.0.0")
 SCRIPTACULOUS_VERSIONS = ("1.8.1", "1.8.2", "1.8.3", "1.9.0")
 SWFOBJECT_VERSIONS = ("2.1", "2.2")
+UNDERSCORE_VERSIONS = ("1.3.3", "1.3.2", "1.3.1", "1.3.0", "1.2.4", "1.2.3",
+                       "1.2.2", "1.2.1", "1.2.0", "1.1.7", "1.1.6", "1.1.5",
+                       "1.1.4", "1.1.3", "1.1.2", "1.1.1", "1.1.0", "1.0.4",
+                       "1.0.3", "1.0.2", "1.0.1", "1.0.0")
 YUI_VERSIONS = ("2.6.0", "2.7.0", "2.8.0r4", "2.8.1", "2.8.2", "2.9.0")
 YUI_NEW_VERSIONS = ("3.3.0", )
 
@@ -130,6 +134,14 @@ get_pattern("swfobject",
 get_pattern("swfobject",
             "https://ajax.googleapis.com/ajax/libs/swfobject/%s/swfobject_src.js",
             SWFOBJECT_VERSIONS)
+
+# Underscore
+get_pattern("underscore",
+            "https://raw.github.com/documentcloud/underscore/%s/underscore.js",
+            UNDERSCORE_VERSIONS)
+get_pattern("underscore",
+            "https://raw.github.com/documentcloud/underscore/%s/underscore-min.js",
+            UNDERSCORE_VERSIONS)
 
 # Old-style YUI loader libraries:
 get_pattern("yui",
