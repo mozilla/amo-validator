@@ -177,7 +177,7 @@ def test_webapp(err, webapp, current_valid_keys, required=True):
                                      "invalid.",
                                      "Bad URL: %s" % url])
 
-            if (not any(url in webapp[key] for url in WEBAPP_AMO_URLS) and
+            if (DEFAULT_WEBAPP_AMO_URL not in webapp[key] and
                 "*" not in webapp[key] and err.get_resource("listed")):
                 err.error(
                     err_id=("webapp", "detect", "iaf_no_amo"),

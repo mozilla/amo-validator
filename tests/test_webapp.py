@@ -258,22 +258,22 @@ def test_webapp_bad_installs_allowed_from_path():
 
 
 def test_webapp_no_amo_installs_allowed_from():
-    """Test that installs_Allowed_from should include AMO."""
+    """Test that installs_allowed_from should include Marketplace."""
 
     err = ErrorBundle(listed=True)
     data = _get_json()
     _detect(err, data)
     assert err.failed()
 
-    # Test that each of the AMO urls is accpetable.
-    for amo_url in validator.constants.WEBAPP_AMO_URLS:
-        err = ErrorBundle(listed=True)
-        data["installs_allowed_from"].append(amo_url)
-        _detect(err, data)
-        assert not err.failed()
+    # Test that the Marketplace production URL is acceptable.
+    err = ErrorBundle(listed=True)
+    data["installs_allowed_from"].append(validator.constants
+                                         .DEFAULT_WEBAPP_AMO_URL)
+    _detect(err, data)
+    assert not err.failed()
 
-        # Reset for the next URL or the wildcard.
-        data = _get_json()
+    # Reset for the next URL or the wildcard.
+    data = _get_json()
 
     err = ErrorBundle(listed=True)
     data["installs_allowed_from"].append("*")
