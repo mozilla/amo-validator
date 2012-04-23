@@ -90,12 +90,10 @@ INTERFACES = {
                         "at shutdown"}}},
     u"nsIDOMNSHTMLElement": entity("nsIDOMNSHTMLElement"),
     u"nsIDOMNSHTMLFrameElement": entity("nsIDOMNSHTMLFrameElement"),
-    u"nsIJSON":
+    u"nsIImapIncomingServer":
         {"value":
-            {u"encode":
-                {"return": call_definitions.nsIJSON_deprec},
-             u"decode":
-                {"return": call_definitions.nsIJSON_deprec}}},
+            {u"GetImapConnectionAndLoadUrl":
+                {"return": call_definitions.TB12_nsIImapProtocol_changed}}},
     u"nsIImapMailFolderSink":
         {"value":
             {u"setUrlState":
@@ -103,11 +101,35 @@ INTERFACES = {
     u"nsIImapProtocol":
         {"value":
             {u"NotifyHdrsToDownload":
-                {"return": call_definitions.nsIImapProtocol_removed}}},
+                {"return": call_definitions.nsIImapProtocol_removed},
+             u"Initialize":
+                {"return": call_definitions.TB12_nsIImapProtocol_changed}}},
+    u"nsIJSON":
+        {"value":
+            {u"encode":
+                {"return": call_definitions.nsIJSON_deprec},
+             u"decode":
+                {"return": call_definitions.nsIJSON_deprec}}},
     u"nsIMailtoUrl":
         {"value":
             {u"GetMessageContents":
                 {"return": call_definitions.nsIMailtoUrl_changed}}},
+    u"nsIMsgDBService":
+        {"value":
+            {u"openMailDBFromFile":
+                {"return": call_definitions.nsIMsgDatabase_changed}}},
+    u"nsIMsgDatabase":
+        {"value":
+            {u"Open":
+                {"return": call_definitions.nsIMsgDatabase_changed}}},  
+    u"nsIMsgFolder":
+        {"value":
+            {u"offlineStoreOutputStream":
+                {"value": call_definitions.nsIMsgFolder_changed}}},
+    u"nsIMsgOutputStream":
+        {"value":
+            {u"folderStream":
+                {"value": call_definitions.nsIMsgDatabase_changed}}},            
     u"nsIMsgQuote":
         {"value":
             {u"quoteMessage":
@@ -478,10 +500,10 @@ GLOBAL_ENTITIES = {
                                 {"xpcom_map":
                                      lambda:
                                         INTERFACES["nsIDOMNSHTMLFrameElement"]},
-                             u"nsIJSON":
+                             u"nsIImapIncomingServer":
                                 {"xpcom_map":
                                      lambda:
-                                        INTERFACES["nsIJSON"]},
+                                        INTERFACES["nsIImapIncomingServer"]},
                              u"nsIImapMailFolderSink":
                                 {"xpcom_map":
                                      lambda:
@@ -490,10 +512,30 @@ GLOBAL_ENTITIES = {
                                 {"xpcom_map":
                                      lambda:
                                         INTERFACES["nsIImapProtocol"]},
+                             u"nsIJSON":
+                                {"xpcom_map":
+                                     lambda:
+                                        INTERFACES["nsIJSON"]},
                              u"nsIMailtoUrl":
                                 {"xpcom_map":
                                      lambda:
                                         INTERFACES["nsIMailtoUrl"]},
+                             u"nsIMsgDatabase":
+                                {"xpcom_map":
+                                     lambda:
+                                        INTERFACES["nsIMsgDatabase"]},
+                             u"nsIMsgDBService":
+                                {"xpcom_map":
+                                     lambda:
+                                        INTERFACES["nsIMsgDBService"]},
+                             u"nsIMsgFolder":
+                                {"xpcom_map":
+                                     lambda:
+                                        INTERFACES["nsIMsgFolder"]},
+                             u"nsIMsgOutputStream":
+                                {"xpcom_map":
+                                     lambda:
+                                        INTERFACES["nsIMsgOutputStream"]},
                              u"nsIMsgQuote":
                                 {"xpcom_map":
                                      lambda:
@@ -559,7 +601,7 @@ GLOBAL_ENTITIES = {
         {"value":
              {u"open":
                   {"dangerous":
-                       # Ban syncrhonous XHR by making sure the third arg
+                       # Ban synchronous XHR by making sure the third arg
                        # is absent and false.
                        lambda a, t, e:
                            a and len(a) >= 3 and
