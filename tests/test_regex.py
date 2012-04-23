@@ -4,7 +4,7 @@ from helper import MockXPI
 from js_helper import _do_real_test_raw as _do_test_raw
 from validator.decorator import version_range
 from validator.errorbundler import ErrorBundle
-from validator.compat import TB11_DEFINITION
+from validator.compat import (TB11_DEFINITION, TB12_DEFINITION)
 import validator.testcases.content
 import validator.testcases.regex as regex_tests
 
@@ -183,6 +183,19 @@ def test_tb11_strings():
     var f = "newToolbarCmd.tooltip";
     var x = "onViewToolbarCommand";
     """, versions=TB11_DEFINITION)
+    assert err.failed()
+    assert err.warnings
+    assert err.notices
+    assert err.compat_summary["errors"]
+
+
+def test_tb12_strings():
+    """Flag changed or removed strings in add-on code"""
+
+    err = _do_test_raw("""
+    var f = "editImageMapButton.label";
+    var x = "haveSmtp1.suffix2";
+    """, versions=TB12_DEFINITION)
     assert err.failed()
     assert err.warnings
     assert err.notices

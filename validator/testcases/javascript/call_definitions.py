@@ -8,7 +8,7 @@ import predefinedentities
 from jstypes import *
 from validator.constants import BUGZILLA_BUG
 from validator.compat import (FX6_DEFINITION, FX7_DEFINITION, FX8_DEFINITION,
-                              FX9_DEFINITION, FX11_DEFINITION)
+                              FX9_DEFINITION, FX11_DEFINITION, TB12_DEFINITION)
 from validator.decorator import version_range
 
 # Function prototypes should implement the following:
@@ -693,6 +693,79 @@ def nsIMailtoUrl_changed(wrapper, arguments, traverser):
         compatibility_type="error",
         for_appversions={'{3550f703-e582-4d05-9a08-453d09bdfdc6}':
                              version_range("thunderbird", "11.0a1", "12.0a1")},
+        tier=5)
+
+    return JSWrapper(JSObject(), traverser=traverser, dirty=True)
+
+
+def nsIMsgFolder_changed(wrapper, arguments, traverser):
+    """
+    Flag use of nsIMsgFolder.offlineStoreOutputStream for incompatibility with
+    Thunderbird 12.
+    """
+    traverser.err.notice(
+        err_id=("testcases_javascript_calldefinitions", "nsIMsgFolder"),
+        notice="Altered nsIMsgFolder.offlineStoreOutputStream attr in use.",
+        description="This add-on appears to use nsIMsgFolder."
+                    "offlineStoreOutputStream which was replaced with "
+                    "method getOfflineStoreOutputStream(in nsIMsgDBHdr aHdr) "
+                    "in Thunderbird 12. For more information, please refer to "
+                    "%s." % BUGZILLA_BUG % 402392,
+        filename=traverser.filename,
+        line=traverser.line,
+        column=traverser.position,
+        context=traverser.context,
+        compatibility_type="error",
+        for_appversions=TB12_DEFINITION,
+        tier=5)
+
+    return JSWrapper(JSObject(), traverser=traverser, dirty=True)
+
+
+def nsIMsgDatabase_changed(wrapper, arguments, traverser):
+    """
+    Flag use of nsIMsgDatabase related methods for incompatibility with
+    Thunderbird 12.
+    """
+    traverser.err.notice(
+        err_id=("testcases_javascript_calldefinitions", "nsIMsgDatabase"),
+        notice="Altered nsIDatabase methods in use.",
+        description="This add-on appears to use nsIMsgDatabase::Open, "
+                    "nsIMsgDBService::openMailDBFromFile, or "
+                    "nsIMsgOutputStream.folderStream which have been changed "
+                    "in Thunderbird 12. For more information, please refer to "
+                    "%s." % BUGZILLA_BUG % 402392,
+        filename=traverser.filename,
+        line=traverser.line,
+        column=traverser.position,
+        context=traverser.context,
+        compatibility_type="error",
+        for_appversions=TB12_DEFINITION,
+        tier=5)
+
+    return JSWrapper(JSObject(), traverser=traverser, dirty=True)
+
+
+def TB12_nsIImapProtocol_changed(wrapper, arguments, traverser):
+    """
+    Flag use of nsIImapProtocol::Initialize and 
+    nsIImapIncomingServer::GetImapConnectionAndLoadUrl for incompatibility
+    with Thunderbird 12.
+    """
+    traverser.err.notice(
+        err_id=("testcases_javascript_calldefinitions", "nsIImapProtocol"),
+        notice="Altered nsIImapProtocol or IncomingServer methods in use.",
+        description="This add-on uses nsIImapProtocol::Initialize or "
+                    "nsIImapIncomingServer::GetImapConnectionAndLoadUrl "
+                    "which had parameters removed "
+                    "in Thunderbird 12. For more information, please refer to "
+                    "%s." % BUGZILLA_BUG % 704707,
+        filename=traverser.filename,
+        line=traverser.line,
+        column=traverser.position,
+        context=traverser.context,
+        compatibility_type="error",
+        for_appversions=TB12_DEFINITION,
         tier=5)
 
     return JSWrapper(JSObject(), traverser=traverser, dirty=True)
