@@ -18,7 +18,9 @@ def test_test_path():
     eq_(validator.webapp.test_path("/foo/bar", True), True)
     eq_(validator.webapp.test_path("//foo/bar"), False)
     eq_(validator.webapp.test_path("//foo/bar", True), False)
-    eq_(validator.webapp.test_path("http://asdf/"), False)
+    eq_(validator.webapp.test_path("http://asdf/"), True)
+    eq_(validator.webapp.test_path("https://asdf/"), True)
+    eq_(validator.webapp.test_path("ftp://asdf/"), False)
     eq_(validator.webapp.test_path("data:asdf"), False)
     eq_(validator.webapp.test_path("data:asdf", True), True)
 
@@ -186,13 +188,14 @@ def test_webapp_icons_relative_url():
 
 
 def test_webapp_icons_absolute_url():
-    """Test that webapp icons can be absolute URLss."""
+    """Test that webapp icons can be absolute URLs."""
 
     err = ErrorBundle(listed=False)
     data = _get_json()
-    data["icons"]["128"] = "/foo/bar"
-    _detect(err, data)
-    assert not err.failed()
+    for icon in ['/foo/bar', 'http://foo.com/bar', 'https://foo.com/bar']:
+        data["icons"]["128"] = icon
+        _detect(err, data)
+        assert not err.failed()
 
 
 def test_webapp_no_locales():

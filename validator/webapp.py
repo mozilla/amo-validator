@@ -45,7 +45,8 @@ def test_path(path, can_be_data=False):
     if can_be_data:
         valid = path.startswith("data:")
     if not valid:
-        valid = path.startswith("/") and not path.startswith("//")
+        valid = (path.startswith(("/", "http://", "https://"))
+                 and not path.startswith("//"))
 
     return valid
 
