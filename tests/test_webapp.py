@@ -49,11 +49,6 @@ def _get_json():
             "48": "/img/icon-48.png",
             "128": "/img/icon-128.png"
         },
-        "widget": {
-            "path": "/widget.html",
-            "width": 100,
-            "height": 200
-        },
         "developer": {
             "name": "Mozilla Labs",
             "url": "http://mozillalabs.com"
@@ -301,65 +296,18 @@ def test_webapp_bad_launch_path():
     assert err.failed()
 
 
-def test_webapp_widget_not_dict():
-    """Test that the widget property is a dict."""
+def test_webapp_widget_deprecated():
+    """Test that the widget property is deprecated."""
 
     err = ErrorBundle(listed=False)
     data = _get_json()
-    data["widget"] = "foo"
+    data["widget"] = {
+        "path": "/butts.html",
+        "width": 100,
+        "height": 200
+    }
     _detect(err, data)
-    assert err.failed()
-
-
-def test_webapp_bad_widget_path():
-    """Test that the widget path is valid."""
-
-    err = ErrorBundle(listed=False)
-    data = _get_json()
-    data["widget"]["path"] = "data:asdf"
-    _detect(err, data)
-    assert err.failed()
-
-
-def test_webapp_bad_widget_size():
-    """Test that the widget size is valid."""
-
-    err = ErrorBundle(listed=False)
-    data = _get_json()
-    data["widget"]["height"] = 100000
-    _detect(err, data)
-    assert err.failed()
-
-
-def test_webapp_widget_size_inclusive():
-    """Test that the widget size can be 1000 or 10."""
-
-    err = ErrorBundle(listed=False)
-    data = _get_json()
-    data["widget"]["height"] = 1000
-    data["widget"]["width"] = 10
-    _detect(err, data)
-    assert not err.failed()
-
-
-def test_webapp_bad_widget_keys():
-    """Test that the widget keys are valid."""
-
-    err = ErrorBundle(listed=False)
-    data = _get_json()
-    data["widget"]["extra"] = "foo"
-    _detect(err, data)
-    assert err.failed()
-
-
-def test_webapp_bad_widget_missing():
-    """Test that the widget keys are present."""
-
-    err = ErrorBundle(listed=False)
-    data = _get_json()
-    del data["widget"]["path"]
-    _detect(err, data)
-    assert err.failed()
+    assert err.warnings
 
 
 def test_webapp_dev_missing():
@@ -373,7 +321,7 @@ def test_webapp_dev_missing():
 
 
 def test_webapp_dev_not_dict():
-    """Test that the developer property must be a dict"""
+    """Test that the developer property must be a dict."""
 
     err = ErrorBundle(listed=False)
     data = _get_json()

@@ -9,13 +9,13 @@ from unicodehelper import decode
 
 MAX_LENGTHS = {"name": 128,
                "description": 1024}
+# TODO: `widget` is deprecated but we should eventually make it invalid.
 VALID_KEYS = set(["name", "description", "launch_path", "icons", "developer",
                   "locales", "default_locale", "installs_allowed_from",
                   "version", "widget", "services", "experimental"])
 INVALID_LOCALE_KEYS = set(["locales", "default_locale",
                            "installs_allowed_from", ])
 DEVELOPER_KEYS = set(["name", "url", ])
-WIDGET_KEYS = set(["height", "width", "path", ])
 
 
 def _test_url(url, can_be_asterisk=False):
@@ -163,7 +163,7 @@ def test_webapp(err, webapp, current_valid_keys, required=True):
             if not isinstance(webapp[key], list):
                 err.error(
                     err_id=("webapp", "detect", "bad_iaf_type"),
-                    error="'installs_allowed_from' must be a list",
+                    error="'installs_allowed_from' must be a list.",
                     description="The value of 'installs_allowed_from' in the "
                                 "manifest must be an array of values.")
                 continue
@@ -201,7 +201,7 @@ def test_webapp(err, webapp, current_valid_keys, required=True):
             if not test_path(webapp[key]):
                 err.error(
                     err_id=("webapp", "detect", "launch_path"),
-                    error="'launch_path' not a valid path",
+                    error="'launch_path' is not a valid path.",
                     description=["The 'launch_path' element is not a valid "
                                  "path.",
                                  "Bad path: %s" % webapp[key]])
@@ -209,7 +209,7 @@ def test_webapp(err, webapp, current_valid_keys, required=True):
             if "default_locale" not in webapp:
                 err.error(
                     err_id=("webapp", "detect", "default_locale"),
-                    error="No default locale set",
+                    error="No default locale set.",
                     description="When locales are available, 'default_locale' "
                                 "must also be present.")
 
@@ -221,42 +221,8 @@ def test_webapp(err, webapp, current_valid_keys, required=True):
                             current_valid_keys=valid_keys,
                             required=False)
         elif key == "widget":
-            if not isinstance(webapp[key], dict):
-                err.error(
-                    err_id=("webapp", "detect", "widget_is_dict"),
-                    error="'widget' property is not an object.",
-                    description="The 'widget' property must be an object.")
-                continue
-
-            for widget_key in webapp[key]:
-                if widget_key not in WIDGET_KEYS:
-                    err.error(
-                        err_id=("webapp", "detect", "widget_keys"),
-                        error="Unknown property found in 'widget'.",
-                        description=["An unknown key was found in the widget "
-                                     "property.",
-                                     "Property: %s" % widget_key])
-                elif (widget_key == "path" and
-                      not test_path(webapp[key]["path"])):
-                    err.error(
-                        err_id=("webapp", "detect", "widget_path"),
-                        error="Widget 'path' invalid.",
-                        description=["The specified widget path key is "
-                                     "invalid.",
-                                     "Invalid path: %s" % webapp[key]["path"]])
-                elif widget_key in ("height", "width", ):
-                    if not (10 <= int(webapp[key][widget_key]) <= 1000):
-                        err.error(
-                            err_id=("webapp", "detect", "widget_size"),
-                            error="Widget size invalid.",
-                            description="The 'height' or 'width' of the "
-                                        "webapp's widget is invalid.")
-
-            for widget_key in WIDGET_KEYS:
-                if widget_key not in webapp[key]:
-                    err.error(
-                        err_id=("webapp", "detect", "widget_mand_keys"),
-                        error="Required widget elements missing",
-                        description=["Keys that belong in the 'widget' key "
-                                     "are missing.",
-                                     "Key: %s" % widget_key])
+            err.warning(
+                err_id=("webapp", "detect", "widget_is_deprecated"),
+                warning="'developer' property is deprecated.",
+                description=["The 'developer' property is deprecated and is "
+                             "no longer supported."])
