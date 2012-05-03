@@ -228,8 +228,8 @@ def test_webapp(err, webapp, current_valid_keys, required=True):
         elif key == "widget":
             err.warning(
                 err_id=("webapp", "detect", "widget_is_deprecated"),
-                warning="'developer' property is deprecated.",
-                description=["The 'developer' property is deprecated and is "
+                warning="'widget' property is deprecated.",
+                description=["The 'widget' property is deprecated and is "
                              "no longer supported."])
         elif key == "screen_size":
             if not isinstance(webapp[key], dict):
