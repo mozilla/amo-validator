@@ -12,10 +12,15 @@ MAX_LENGTHS = {"name": 128,
 # TODO: `widget` is deprecated but we should eventually make it invalid.
 VALID_KEYS = set(["name", "description", "launch_path", "icons", "developer",
                   "locales", "default_locale", "installs_allowed_from",
-                  "version", "widget", "services", "experimental"])
+                  "version", "widget", "services", "experimental",
+                  "screen_size", "required_features", "orientation",
+                  "fullscreen"])
 INVALID_LOCALE_KEYS = set(["locales", "default_locale",
                            "installs_allowed_from", ])
 DEVELOPER_KEYS = set(["name", "url", ])
+SCREEN_SIZE_KEYS = set(["min_width", "min_height"])
+ORIENTATION_KEYS = set(["portrait", "landscape", "portrait-secondary",
+                        "landscape-secondary"])
 
 
 def _test_url(url, can_be_asterisk=False):
@@ -138,7 +143,7 @@ def test_webapp(err, webapp, current_valid_keys, required=True):
         elif key == "icons":
             if not isinstance(webapp[key], dict):
                 err.error(
-                    err_id=("webapp", "detect", "icons_not_list"),
+                    err_id=("webapp", "detect", "icons_not_dict"),
                     error="'icons' property not an object.",
                     description="The 'icons' property is not an object, "
                                 "though it should be.")
@@ -148,7 +153,7 @@ def test_webapp(err, webapp, current_valid_keys, required=True):
                 if not size.isdigit():
                     err.error(
                         err_id=("webapp", "detect", "size_not_num"),
-                        error="Icon size not number.",
+                        error="Icon size is not a number.",
                         description=["Icon sizes (keys) must be natural "
                                      "numbers.",
                                      "Invalid size: %s" % size])
@@ -226,3 +231,73 @@ def test_webapp(err, webapp, current_valid_keys, required=True):
                 warning="'developer' property is deprecated.",
                 description=["The 'developer' property is deprecated and is "
                              "no longer supported."])
+        elif key == "screen_size":
+            if not isinstance(webapp[key], dict):
+                err.error(
+                    err_id=("webapp", "detect", "screen_size_dict"),
+                    error="'screen_size' property is not an object.",
+                    description="The 'screen_size' property must be an "
+                                "object.")
+                continue
+
+            keys = set(webapp[key].keys())
+            extra_keys = keys - SCREEN_SIZE_KEYS
+            if extra_keys:
+                err.warning(
+                    err_id=("webapp", "detect", "extra_screen_size"),
+                    warning="Extra keys in 'screen_size'.",
+                    description=["The 'screen_size' key contains extra keys "
+                                 "that could not be identified.",
+                                 "Extra keys: %s" % ", ".join(extra_keys)])
+
+            for field, size in webapp[key].iteritems():
+                if not size.isdigit():
+                    err.error(
+                        err_id=("webapp", "detect", "screen_size_not_num"),
+                        error="Screen size %r is not a number." % field,
+                        description=["Icon sizes (keys) must be natural "
+                                     "numbers.",
+                                     "Invalid size: %s" % size])
+
+            if not any([s in keys for s in SCREEN_SIZE_KEYS]) and required:
+                err.error(
+                    err_id=("webapp", "detect", "absent_screen_size"),
+                    error="Missing 'min_width' or 'min_height' in "
+                          "'screen_size'.",
+                    description=["The 'screen_size' key must contain at least "
+                                 "one value: 'min_width' or 'min_height'"])
+        elif key == "required_features":
+             if not isinstance(webapp[key], list):
+                 err.error(
+                     err_id=("webapp", "detect", "required_features_list"),
+                     error="'required_features' property is not a list.",
+                     description="The values of 'required_features' must be "
+                                 "an array of values.")
+                 continue
+        elif key == "orientation":
+            if not isinstance(webapp[key], basestring):
+                err.error(
+                    err_id=("webapp", "detect", "orientation_string"),
+                    error="'orientation' property is not a string.",
+                    description="The value of 'orientation' must be a string.")
+                continue
+            if webapp[key] not in ORIENTATION_KEYS and required:
+                err.error(
+                    err_id=("webapp", "detect", "extra_orientation"),
+                    error="Invalid value for 'orientation'.",
+                    description=["The value for the 'orientation' key "
+                                 "contains incorrect values. ",
+                                 "Acceptable values: %s" %
+                                 ", ".join(ORIENTATION_KEYS)])
+        elif key == "fullscreen":
+            if not isinstance(webapp[key], basestring):
+                err.error(
+                    err_id=("webapp", "detect", "fullscreen_string"),
+                    error="'fullscreen' property is not a list.",
+                    description="The value of 'fullscreen' must be a string.")
+                continue
+            if webapp[key] not in ("true", "false"):
+                err.error(
+                    err_id=("webapp", "detect", "fullscreen_boolean"),
+                    error="'fullscreen' property is not a boolean.",
+                    description="The value of 'fullscreen' must be a boolean.")
