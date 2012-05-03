@@ -254,7 +254,7 @@ def test_webapp(err, webapp, current_valid_keys, required=True):
                 if not size.isdigit():
                     err.error(
                         err_id=("webapp", "detect", "screen_size_not_num"),
-                        error="Screen size %r is not a number." % field,
+                        error="Screen size '%s' is not a number." % field,
                         description=["Icon sizes (keys) must be natural "
                                      "numbers.",
                                      "Invalid size: %s" % size])
