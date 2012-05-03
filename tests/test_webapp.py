@@ -73,7 +73,16 @@ def _get_json():
                 }
             }
         },
-        "default_locale": "en"
+        "default_locale": "en",
+        "screen_size": {
+            "min_width": "600",
+            "min_height": "300"
+        },
+        "required_features": [
+            "touch", "geolocation", "webgl"
+        ],
+        "orientation": "landscape",
+        "fullscreen": "true"
     })
 
 
@@ -349,3 +358,204 @@ def test_webapp_bad_dev_url():
     _detect(err, data)
     assert err.failed()
 
+
+def test_webapp_screen_size_missing():
+    """Test that the 'screen_size' property can be absent."""
+
+    err = ErrorBundle(listed=False)
+    data = _get_json()
+    del data["screen_size"]
+    _detect(err, data)
+    assert not err.failed()
+
+
+def test_webapp_screen_size_is_dict():
+    """Test that the 'screen_size' property must be a dict."""
+
+    err = ErrorBundle(listed=False)
+    data = _get_json()
+    data["screen_size"] = "foo"
+    _detect(err, data)
+    assert err.failed()
+
+
+def test_webapp_screen_size_contains_pair():
+    """Test that 'screen_size' must contain at least one key/value pair."""
+
+    err = ErrorBundle(listed=False)
+    data = _get_json()
+    data["screen_size"] = {}
+    _detect(err, data)
+    assert err.failed()
+
+
+def test_webapp_bad_screen_size_key():
+    """Test that the 'screen_size' keys are correct."""
+
+    err = ErrorBundle(listed=False)
+    data = _get_json()
+    data["screen_size"]["max_width"] = "500"
+    _detect(err, data)
+    assert err.failed()
+
+
+def test_webapp_bad_screen_size_value():
+    """Test that the 'screen_size' keys are correct."""
+
+    err = ErrorBundle(listed=False)
+    data = _get_json()
+    data["screen_size"]["min_width"] = "500px"
+    _detect(err, data)
+    assert err.failed()
+
+
+def test_webapp_required_features_missing():
+    """Test that the 'required_features' property can be absent."""
+
+    err = ErrorBundle(listed=False)
+    data = _get_json()
+    del data["screen_size"]
+    _detect(err, data)
+    assert not err.failed()
+
+
+def test_webapp_required_features_is_list():
+    """Test that the 'required_features' property must be a list."""
+
+    err = ErrorBundle(listed=False)
+    data = _get_json()
+    data["required_features"] = "fart"
+    _detect(err, data)
+    assert err.failed()
+
+
+def test_webapp_required_features_missing():
+    """Test that 'required_features' can be absent."""
+
+    err = ErrorBundle(listed=False)
+    data = _get_json()
+    del data["required_features"]
+    _detect(err, data)
+    assert not err.failed()
+
+
+def test_webapp_required_features_empty():
+    """Test that 'required_features' can be an empty list."""
+
+    err = ErrorBundle(listed=False)
+    data = _get_json()
+    data["required_features"] = []
+    _detect(err, data)
+    assert not err.failed()
+
+
+def test_webapp_orientation_missing():
+    """Test that the 'orientation' property can be absent."""
+
+    err = ErrorBundle(listed=False)
+    data = _get_json()
+    del data["orientation"]
+    _detect(err, data)
+    assert not err.failed()
+
+
+def test_webapp_orientation_is_string():
+    """Test that the 'orientation' property must be a string."""
+
+    err = ErrorBundle(listed=False)
+    data = _get_json()
+    data["orientation"] = {}
+    _detect(err, data)
+    assert err.failed()
+
+
+def test_orientation_cannot_be_empty():
+    """Test that 'orientation' cannot be an empty string."""
+
+    err = ErrorBundle(listed=False)
+    data = _get_json()
+    data["orientation"] = ""
+    _detect(err, data)
+    assert err.failed()
+
+
+def test_webapp_orientation_valid_value():
+    """Test that 'orientation' must have a valid value."""
+
+    err = ErrorBundle(listed=False)
+    data = _get_json()
+    for key in validator.webapp.ORIENTATION_KEYS:
+        data["orientation"] = key
+        _detect(err, data)
+        assert not err.failed(), "'orientation' sadly failed for %r" % key
+
+
+def test_webapp_orientation_bad_value():
+    """Test that 'orientation' cannot have an invalid value."""
+
+    err = ErrorBundle(listed=False)
+    data = _get_json()
+    data["orientation"] = "fart"
+    _detect(err, data)
+    assert err.failed()
+
+
+def test_webapp_orientation_empty_value():
+    """Test that 'orientation' cannot have an empty value."""
+
+    err = ErrorBundle(listed=False)
+    data = _get_json()
+    data["orientation"] = ""
+    _detect(err, data)
+    assert err.failed()
+
+
+def test_webapp_fullscreen_missing():
+    """Test that the 'fullscreen' property can be absent."""
+
+    err = ErrorBundle(listed=False)
+    data = _get_json()
+    del data["fullscreen"]
+    _detect(err, data)
+    assert not err.failed()
+
+
+def test_webapp_fullscreen_is_string():
+    """Test that the 'fullscreen' property must be a string."""
+
+    err = ErrorBundle(listed=False)
+    data = _get_json()
+    data["fullscreen"] = {}
+    _detect(err, data)
+    assert err.failed()
+
+
+def test_webapp_fullscreen_cannot_be_empty():
+    """Test that 'fullscreen' cannot be an empty string."""
+
+    err = ErrorBundle(listed=False)
+    data = _get_json()
+    data["fullscreen"] = ""
+    _detect(err, data)
+    assert err.failed()
+
+
+def test_webapp_fullscreen_valid_value():
+    """Test that 'fullscreen' must have a valid value."""
+
+    err = ErrorBundle(listed=False)
+    data = _get_json()
+    for key in ("true", "false"):
+        data["fullscreen"] = key
+        _detect(err, data)
+        assert not err.failed(), "'orientation' sadly failed for %r" % key
+
+
+def test_webapp_fullscreen_bad_value():
+    """Test that 'fullscreen' cannot have an invalid value."""
+
+    err = ErrorBundle(listed=False)
+    data = _get_json()
+    data["fullscreen"] = "fart"
+    _detect(err, data)
+    assert err.failed()
