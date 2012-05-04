@@ -748,7 +748,7 @@ def nsIMsgDatabase_changed(wrapper, arguments, traverser):
 
 def TB12_nsIImapProtocol_changed(wrapper, arguments, traverser):
     """
-    Flag use of nsIImapProtocol::Initialize and 
+    Flag use of nsIImapProtocol::Initialize and
     nsIImapIncomingServer::GetImapConnectionAndLoadUrl for incompatibility
     with Thunderbird 12.
     """
@@ -805,7 +805,12 @@ def js_wrap(wrapper, arguments, traverser):
     if obj.value is None:
         traverser._debug("WRAPPING OBJECT>>NOTHING TO WRAP")
         return JSWrapper(JSObject(), traverser=traverser)
-    obj.value.is_unwrapped = False
+
+    if obj.is_global:
+        obj.value["is_unwrapped"] = False
+    else:
+        obj.value.is_unwrapped = False
+
     return obj
 
 
@@ -820,6 +825,11 @@ def js_unwrap(wrapper, arguments, traverser):
     if obj.value is None:
         traverser._debug("UNWRAPPING OBJECT>>NOTHING TO UNWRAP")
         return JSWrapper(JSObject(unwrapped=True), traverser=traverser)
-    obj.value.is_unwrapped = True
+
+    if obj.is_global:
+        obj.value["is_unwrapped"] = True
+    else:
+        obj.value.is_unwrapped = True
+
     return obj
 
