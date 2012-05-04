@@ -129,7 +129,7 @@ class TestCase(unittest.TestCase):
         """
         assert any(msg["id"] == errid for msg in
                    (self.err.errors + self.err.warnings + self.err.notices)), \
-                "%s was expected, but it was not found." % errid
+                "%s was expected, but it was not found." % repr(errid)
 
 
 class MockZipFile:

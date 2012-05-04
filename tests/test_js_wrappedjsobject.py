@@ -30,6 +30,14 @@ class TestWrappedJSObject(TestCase):
         """)
         self.assert_wrappedjs_failure()
 
+    def test_global_unaffected(self):
+        """Test that globals aren't treated differently from non-globals."""
+        self.run_script("""
+            var x = XPCNativeWrapper.unwrap(unsafeWindow.foobar.zipzap[i]);
+            x.test();
+        """)
+        self.assert_failed(with_warnings=True)
+
     def test_recursive_assign(self):
         """
         Test that properties can't be assigned to the members of unwrapped
