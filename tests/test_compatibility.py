@@ -1,6 +1,7 @@
 from nose.tools import eq_
 
 import validator.constants
+from validator.constants import FIREFOX_GUID, THUNDERBIRD_GUID
 from validator.decorator import version_range
 from validator.testcases.markup.markuptester import MarkupParser
 import validator.testcases.scripting as scripting
@@ -1004,4 +1005,29 @@ def test_fx12_interfaces():
                        version_range("firefox", "12.0a1")})
     assert not err.failed(fail_on_warnings=False)
     assert err.compat_summary["errors"]
+
+
+def test_fx13_interfaces():
+    """
+    Test that the Gecko 13 compatibility warnings and errors for matched
+    patterns are thrown when they're supposed to.
+    """
+
+    err = _do_real_test_raw("""
+    var x = Components.interfaces.nsILivemarkService;
+    """, versions={FIREFOX_GUID: version_range("firefox", "13.0a1")})
+    assert not err.failed(fail_on_warnings=False)
+    assert err.compat_summary["errors"]
+
+    err = _do_real_test_raw("""
+    var x = Components.interfaces.nsIPrefBranch2;
+    """, versions={FIREFOX_GUID: version_range("firefox", "13.0a1")})
+    assert not err.failed(fail_on_warnings=False)
+    assert err.compat_summary["warnings"]
+
+    err = _do_real_test_raw("""
+    var x = Components.interfaces.nsIScriptableUnescapeHTML;
+    """, versions={FIREFOX_GUID: version_range("firefox", "13.0a1")})
+    assert not err.failed(fail_on_warnings=False)
+    assert err.compat_summary["warnings"]
 

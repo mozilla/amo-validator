@@ -4,8 +4,9 @@ import re
 from validator.constants import BUGZILLA_BUG
 from validator.compat import (FX4_DEFINITION, FX5_DEFINITION, FX6_DEFINITION,
                               FX7_DEFINITION, FX8_DEFINITION, FX9_DEFINITION,
-                              FX11_DEFINITION, FX12_DEFINITION, TB7_DEFINITION,
-                              TB10_DEFINITION, TB11_DEFINITION, TB12_DEFINITION)
+                              FX11_DEFINITION, FX12_DEFINITION, FX13_DEFINITION,
+                              TB7_DEFINITION, TB10_DEFINITION, TB11_DEFINITION,
+                              TB12_DEFINITION)
 from validator.contextgenerator import ContextGenerator
 
 
@@ -82,6 +83,30 @@ FX12_INTERFACES = {"nsIProxyObjectManager":
                         "Gecko 12. Please update your add-on to use a more "
                         "recent version of the Add-ons SDK.")}
 
+FX13_INTERFACES = {"nsILivemarkService":
+                       (613588,
+                        "This add-on uses nsILivemarkService, which has been "
+                        "deprecated in Gecko 13. Some of its functions may "
+                        "not work as expected. mozIAsyncLivemarks should be "
+                        "used instead."),
+                   "nsIPrefBranch2":
+                       (718255,
+                        "This add-on uses nsIPrefBranch2, which has been "
+                        "merged into nsIPrefBranch in Gecko 13. Once you drop "
+                        "support for old versions of Gecko, you should stop "
+                        "using nsIPrefBranch2. You can use the == operator as "
+                        "an alternative.",
+                        "warning"),
+                    "nsIScriptableUnescapeHTML":
+                        (650784,
+                         "This add-on uses nsIScriptableUnescapeHTML, which "
+                         "has been deprecated in Gecko 13 in favor of the "
+                         "nsIParserUtils interface. While it will continue to "
+                         "work for the foreseeable future, it is recommended "
+                         "that you change your code to use nsIParserUtils as "
+                         "soon as possible.",
+                         "warning")}
+
 TB11_STRINGS = {"newToolbarCmd\.(label|tooltip)": 694027,
                 "openToolbarCmd\.(label|tooltip)": 694027,
                 "saveToolbarCmd\.(label|tooltip)": 694027,
@@ -107,7 +132,7 @@ TB11_JS = {"onViewToolbarCommand": 644169,
            "AddUrlAttachment": 708982,
            "makeFeedObject": 705504,
            "deleteFeed": 705504,}
-                
+
 TB12_JS = {"TextEditorOnLoad": 695842,
            "Editor(OnLoad|Startup|Shutdown|CanClose)": 695842,
            "gInsertNewIMap": 717240,
@@ -204,7 +229,7 @@ def run_regex_tests(document, err, filename, context=None, is_js=False):
                     "script to attach properties to JavaScript globals. This "
                     "is not allowed.")
 
-        if fnmatch.fnmatch(filename, "defaults/preferences/*.js"):
+        if re.match(r"defaults/preferences/.+\.js", filename):
             _generic_test(
                 PASSWORD_REGEX,
                 "Passwords may be stored in /defaults/preferences JS files.",
@@ -492,6 +517,29 @@ def run_regex_tests(document, err, filename, context=None, is_js=False):
                 compatibility_type="error",
                 tier=5)
 
+    # Firefox 13 Compatibility
+    if err.supports_version(FX13_DEFINITION):
+        for pattern, bug in FX13_INTERFACES.items():
+            error_type = "error"
+            if isinstance(bug, tuple):
+                if len(bug) == 2:
+                    bug, message = bug
+                else:
+                    bug, message, error_type = bug
+            else:
+                message = ("Your add-on uses interface %s, which has been "
+                           "removed from Gecko 12.") % pattern
+
+            message = "%s See %s for more infomration." % (message,
+                                                           BUGZILLA_BUG % bug)
+            _compat_test(
+                    re.compile(pattern),
+                    "Unsupported interface in use",
+                    message,
+                    compatibility_type=error_type,
+                    appversions=FX13_DEFINITION,
+                    logFunc=err.warning)
+
     # Thunderbird 7 Compatibility rdf:addressdirectory
     if err.supports_version(TB7_DEFINITION):
         # dictUtils.js removal
@@ -610,7 +658,7 @@ def run_regex_tests(document, err, filename, context=None, is_js=False):
                 "Removed, renamed, or changed javascript in use",
                 "Your add-on uses the javascript method or class %s, which "
                 "has been changed or removed from Thunderbird 11. Please "
-                "refer to %s for possible alternatives." % 
+                "refer to %s for possible alternatives." %
                 (pattern, BUGZILLA_BUG % bug),
                 compatibility_type="error",
                 appversions=TB12_DEFINITION,
