@@ -10,6 +10,9 @@ from validator.compat import (FX4_DEFINITION, FX5_DEFINITION, FX6_DEFINITION,
 from validator.contextgenerator import ContextGenerator
 
 
+registered_regex_tests = []
+
+
 NP_WARNING = "Network preferences may not be modified."
 EUP_WARNING = "Extension update settings may not be modified."
 NSINHS_LINK = ("https://developer.mozilla.org/en/XPCOM_Interface_Reference"
@@ -83,29 +86,6 @@ FX12_INTERFACES = {"nsIProxyObjectManager":
                         "Gecko 12. Please update your add-on to use a more "
                         "recent version of the Add-ons SDK.")}
 
-FX13_INTERFACES = {"nsILivemarkService":
-                       (613588,
-                        "This add-on uses nsILivemarkService, which has been "
-                        "deprecated in Gecko 13. Some of its functions may "
-                        "not work as expected. mozIAsyncLivemarks should be "
-                        "used instead."),
-                   "nsIPrefBranch2":
-                       (718255,
-                        "This add-on uses nsIPrefBranch2, which has been "
-                        "merged into nsIPrefBranch in Gecko 13. Once you drop "
-                        "support for old versions of Gecko, you should stop "
-                        "using nsIPrefBranch2. You can use the == operator as "
-                        "an alternative.",
-                        "warning"),
-                    "nsIScriptableUnescapeHTML":
-                        (650784,
-                         "This add-on uses nsIScriptableUnescapeHTML, which "
-                         "has been deprecated in Gecko 13 in favor of the "
-                         "nsIParserUtils interface. While it will continue to "
-                         "work for the foreseeable future, it is recommended "
-                         "that you change your code to use nsIParserUtils as "
-                         "soon as possible.",
-                         "warning")}
 
 TB11_STRINGS = {"newToolbarCmd\.(label|tooltip)": 694027,
                 "openToolbarCmd\.(label|tooltip)": 694027,
@@ -517,29 +497,6 @@ def run_regex_tests(document, err, filename, context=None, is_js=False):
                 compatibility_type="error",
                 tier=5)
 
-    # Firefox 13 Compatibility
-    if err.supports_version(FX13_DEFINITION):
-        for pattern, bug in FX13_INTERFACES.items():
-            error_type = "error"
-            if isinstance(bug, tuple):
-                if len(bug) == 2:
-                    bug, message = bug
-                else:
-                    bug, message, error_type = bug
-            else:
-                message = ("Your add-on uses interface %s, which has been "
-                           "removed from Gecko 12.") % pattern
-
-            message = "%s See %s for more infomration." % (message,
-                                                           BUGZILLA_BUG % bug)
-            _compat_test(
-                    re.compile(pattern),
-                    "Unsupported interface in use",
-                    message,
-                    compatibility_type=error_type,
-                    appversions=FX13_DEFINITION,
-                    logFunc=err.warning)
-
     # Thunderbird 7 Compatibility rdf:addressdirectory
     if err.supports_version(TB7_DEFINITION):
         # dictUtils.js removal
@@ -663,3 +620,112 @@ def run_regex_tests(document, err, filename, context=None, is_js=False):
                 compatibility_type="error",
                 appversions=TB12_DEFINITION,
                 logFunc=err.notice)
+
+    # Run all of the registered tests.
+    for cls in registered_regex_tests:
+        if not cls.applicable(err, filename):
+            continue
+        t = cls(err, document, filename, context)
+        for test in t.tests():
+            test()
+
+
+def register_generator(cls):
+    registered_regex_tests.append(cls)
+    return cls
+
+
+class RegexTestGenerator(object):
+    """
+    This stubs out a test generator object. By decorating inheritors of this
+    class with `@register_generator`, the regex tests will be run on any files
+    that are passed to `run_regex_tests()`.
+    """
+
+    def __init__(self, err, document, filename, context):
+        self.err = err
+        self.document = document
+        self.filename = filename
+        self.context = context
+
+        self.app_versions_fallback = None
+
+    @classmethod
+    def applicable(cls, err, filename):
+        """Return whether the tests apply to the current file."""
+        return True  # Default to always applicable.
+
+    def tests(self):
+        """Override this with a generator that produces the regex tests."""
+        pass
+
+    def get_test(self, pattern, title, message, log_function=None,
+                 compat_type=None, app_versions=None):
+        """
+        Return a function that, when called, will log a compatibility warning
+        or error.
+        """
+        app_versions = app_versions or self.app_versions_fallback
+        log_function = log_function or self.err.warning
+        def wrapper():
+            match = re.search(pattern, self.document)
+            if match:
+                log_function(
+                        ("testcases_regex", "generic", "_generated"),
+                        title,
+                        message,
+                        filename=self.filename,
+                        line=self.context.get_line(match.start()),
+                        context=self.context,
+                        compatibility_type=compat_type,
+                        for_appversions=app_versions,
+                        tier=err.tier if app_versions is None else 5)
+
+        return wrapper
+
+    def get_test_bug(self, bug, pattern, title, message, **kwargs):
+        """Helper function to mix in a bug number."""
+        message = [message,
+                   "See bug %s for more information." % BUGZILLA_BUG % bug]
+        return self.get_test(pattern, title, message, **kwargs)
+
+
+DEP_INTERFACE = "Deprecated interface in use"
+
+
+@register_generator
+class Gecko13RegexTests(RegexTestGenerator):
+    """Regex tests for Gecko 13 updates."""
+
+    def __init__(self, *args, **kwargs):
+        super(Gecko13RegexTests, self).__init__(*args, **kwargs)
+        self.app_versions_fallback = FX13_DEFINITION
+
+    @classmethod
+    def applicable(cls, err, filename):
+        return err.supports_version(FX13_DEFINITION)
+
+    def tests(self):
+        yield self.get_test_bug(
+                613588, "nsILivemarkService", DEP_INTERFACE,
+                "This add-on uses nsILivemarkService, which has been "
+                "deprecated in Gecko 13. Some of its functions may not work "
+                "as expected. mozIAsyncLivemarks should be used instead.",
+                compat_type="error")
+        yield self.get_test_bug(
+                718255, "nsIPrefBranch2", DEP_INTERFACE,
+                "This add-on uses nsIPrefBranch2, which has been merged into "
+                "nsIPrefBranch in Gecko 13. Once you drop support for old "
+                "versions of Gecko, you should stop using nsIPrefBranch2. You "
+                "can use the == operator as an alternative.",
+                compat_type="warning")
+        yield self.get_test_bug(
+                650784, "nsIScriptableUnescapeHTML", DEP_INTERFACE,
+                "This add-on uses nsIScriptableUnescapeHTML, which has been "
+                "deprecated in Gecko 13 in favor of the nsIParserUtils "
+                "interface. While it will continue to work for the foreseeable "
+                "future, it is recommended that you change your code to use "
+                "nsIParserUtils as soon as possible.",
+                compat_type="warning")
+
+
