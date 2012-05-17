@@ -129,6 +129,27 @@ def test_targetedapplications(err, xpi_package=None):
                               "install.rdf")
                     continue
 
+                if min_version is None:
+                    err.warning(("testcases_targetapplication",
+                                 "test_targetedapplications",
+                                 "missing_minversion"),
+                                "Missing minVersion property",
+                                "A targetApplication element is missing its "
+                                "minVersion property. This may cause it to be "
+                                "ignored as invalid.",
+                                filename="install.rdf")
+                    continue
+                elif max_version is None:
+                    err.warning(("testcases_targetapplication",
+                                 "test_targetedapplications",
+                                 "missing_maxversion"),
+                                "Missing maxVersion property",
+                                "A targetApplication element is missing its "
+                                "maxVersion property. This may cause it to be "
+                                "ignored as invalid.",
+                                filename="install.rdf")
+                    continue
+
                 all_supported_versions[guid] = \
                     app_versions[min_ver_pos:max_ver_pos + 1]
 
