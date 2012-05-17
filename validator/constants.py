@@ -28,10 +28,8 @@ APPLICATIONS = {
     "{aa3c5121-dab2-40e2-81ca-7ea25febc110}": "android"
 }
 
-APPROVED_APPLICATIONS = json.loads(
-    open(os.path.join(os.path.dirname(__file__),
-                      "app_versions.json")).read())
-
+with open(os.path.join(os.path.dirname(__file__), "app_versions.json")) as avs:
+    APPROVED_APPLICATIONS = json.load(avs)
 
 SPIDERMONKEY_INSTALLATION = os.environ.get("SPIDERMONKEY_INSTALLATION")
 
