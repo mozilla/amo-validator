@@ -270,11 +270,15 @@ def test_webapp_no_amo_installs_allowed_from():
     assert err.failed()
 
     # Test that the Marketplace production URL is acceptable.
-    err = ErrorBundle(listed=True)
-    data["installs_allowed_from"].append(validator.constants
-                                         .DEFAULT_WEBAPP_AMO_URL)
-    _detect(err, data)
-    assert not err.failed()
+    orig_iaf = data["installs_allowed_from"]
+    for url in validator.constants.DEFAULT_WEBAPP_MRKT_URLS:
+        err = ErrorBundle(listed=True)
+
+        # Put together an installs_allowed_from with one of the URLs.
+        data["installs_allowed_from"] = orig_iaf + [url]
+
+        _detect(err, data)
+        assert not err.failed()
 
     # Reset for the next URL or the wildcard.
     data = _get_json()
