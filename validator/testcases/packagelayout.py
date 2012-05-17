@@ -1,8 +1,10 @@
 import fnmatch
 
+from validator.constants import (FF4_MIN, FIREFOX_GUID, FENNEC_GUID,
+                                 THUNDERBIRD_GUID as TB_GUID, ANDROID_GUID,
+                                 PACKAGE_DICTIONARY, )
 import validator.decorator as decorator
 from validator.decorator import version_range
-from validator.constants import *
 
 # Detect blacklisted files based on their extension.
 blacklisted_extensions = ("dll", "exe", "dylib", "so",
@@ -104,14 +106,10 @@ def test_godlikea(err, xpi_package):
 
 @decorator.register_test(
         tier=5,
-        versions={"{ec8030f7-c20a-464f-9b0e-13a3a9e97384}":
-                      version_range("firefox", FF4_MIN),
-                  "{a23983c0-fd0e-11dc-95ff-0800200c9a66}":
-                      version_range("fennec", "4.0"),
-                  "{aa3c5121-dab2-40e2-81ca-7ea25febc110}":
-                      version_range("android", "11.0a1"),
-                  "{3550f703-e582-4d05-9a08-453d09bdfdc6}":
-                      version_range("thunderbird", "3.3a4pre"),})
+        versions={FIREFOX_GUID: version_range("firefox", FF4_MIN),
+                  TB_GUID: version_range("thunderbird", "3.3a4pre"),
+                  FENNEC_GUID: version_range("fennec", "4.0"),
+                  ANDROID_GUID: version_range("android", "11.0a1"),})
 def test_compatibility_binary(err, xpi_package):
     """
     Flags only binary content as being incompatible with future app releases.
