@@ -564,6 +564,12 @@ class Gecko13RegexTests(CompatRegexTestHelper):
                 "See %s for alternatives." % GLOBALSTORAGE_URL,
                 compat_type="error")
 
+        yield self.get_test_bug(
+                702639, "excludeItemsIfParentHasAnnotation",
+                "`excludeItemsIfParentHasAnnotation` no longer supported",
+                "The `excludeItemsIfParentHasAnnotation` query option is no "
+                "longer supported, as of Gecko 13.", compat_type="error")
+
 
 @register_generator
 class Thunderbird7RegexTests(CompatRegexTestHelper):

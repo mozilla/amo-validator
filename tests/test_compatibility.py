@@ -1015,3 +1015,20 @@ def test_globalStorage_flagged():
     assert err.failed()
     assert err.compat_summary["errors"]
 
+
+def test_excludeItemsIfParentHasAnnotation():
+    """
+    Test that `excludeItemsIfParentHasAnnotation` is flagged for Gecko 13.
+    """
+
+    err = _do_real_test_raw("""
+    var x = window.excludeItemsIfParentHasAnnotation;
+    """)
+    assert not err.failed()
+
+    err = _do_real_test_raw("""
+    var x = window.excludeItemsIfParentHasAnnotation;
+    """, versions={FIREFOX_GUID: version_range("firefox", "13.0a1")})
+    assert err.failed()
+    assert err.compat_summary["errors"]
+
