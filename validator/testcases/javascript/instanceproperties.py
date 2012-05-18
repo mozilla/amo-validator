@@ -5,9 +5,18 @@ from validator.compat import FX10_DEFINITION
 from validator.constants import BUGZILLA_BUG
 import jstypes
 
+
 def set_innerHTML(new_value, traverser):
     """Tests that values being assigned to innerHTML are not dangerous."""
+    return _set_HTML_property("innerHTML", new_value, traverser)
 
+
+def set_outerHTML(new_value, traverser):
+    """Tests that values being assigned to outerHTML are not dangerous."""
+    return _set_HTML_property("outerHTML", new_value, traverser)
+
+
+def _set_HTML_property(function, new_value, traverser):
     if not isinstance(new_value, jstypes.JSWrapper):
         new_value = jstypes.JSWrapper(new_value, traverser=traverser)
 
@@ -21,13 +30,14 @@ def set_innerHTML(new_value, traverser):
             if event_assignment.search(literal_value.lower()):
                 traverser.err.warning(
                     err_id=("testcases_javascript_instancetypes",
-                            "set_innerHTML", "event_assignment"),
-                    warning="Event handler assignment via innerHTML",
-                    description=["When assigning event handlers, innerHTML "
+                            "set_%s" % function, "event_assignment"),
+                    warning="Event handler assignment via %s" % function,
+                    description=["When assigning event handlers, %s "
                                  "should never be used. Rather, use a "
-                                 "proper technique, like addEventListener.",
+                                 "proper technique, like addEventListener." %
+                                     function,
                                  "Event handler code: %s" %
-                                    literal_value.encode("ascii", "replace")],
+                                     literal_value.encode("ascii", "replace")],
                     filename=traverser.filename,
                     line=traverser.line,
                     column=traverser.position,
@@ -44,13 +54,13 @@ def set_innerHTML(new_value, traverser):
     else:
         # Variable assignments
         traverser.err.warning(
-            err_id=("testcases_javascript_instancetypes", "set_innerHTML",
+            err_id=("testcases_javascript_instancetypes", "set_%s" % function,
                         "variable_assignment"),
-            warning="innerHTML should not be set dynamically",
+            warning="%s should not be set dynamically" % function,
             description="Due to both security and performance reasons, "
-                        "innerHTML should not be set using dynamic "
+                        "%s should not be set using dynamic "
                         "values. This can lead to security issues or "
-                        "fairly serious performance degradation.",
+                        "fairly serious performance degradation." % function,
             filename=traverser.filename,
             line=traverser.line,
             column=traverser.position,
@@ -114,6 +124,7 @@ def _get_xml(name):
 
 
 OBJECT_DEFINITIONS = {"innerHTML": {"set": set_innerHTML},
+                      "outerHTML": {"set": set_outerHTML},
                       "innerAdjacentHTML": {"set": set_innerHTML},
                       "isElementContentWhitespace":
                           {"get": get_isElementContentWhitespace},
