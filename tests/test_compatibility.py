@@ -1032,3 +1032,48 @@ def test_excludeItemsIfParentHasAnnotation():
     assert err.failed()
     assert err.compat_summary["errors"]
 
+
+def test_startendMarker():
+    """
+    Test that _startMarker and _endMarker are properly flagged in Gecko 13.
+    """
+
+    err = _do_real_test_raw("""
+    var foo = bar();
+    var x = foo._startMarker;
+    var x = foo._endMarker;
+    """)
+    assert not err.failed()
+
+    err = _do_real_test_raw("""
+    var foo = bar();
+    var x = foo._startMarker;
+    """, versions={FIREFOX_GUID: version_range("firefox", "13.0a1")})
+    assert not err.failed()
+    assert err.notices
+    assert err.compat_summary["errors"]
+
+    err = _do_real_test_raw("""
+    var foo = bar();
+    var x = foo._endMarker;
+    """, versions={FIREFOX_GUID: version_range("firefox", "13.0a1")})
+    assert not err.failed()
+    assert err.notices
+    assert err.compat_summary["errors"]
+
+    err = _do_real_test_raw("""
+    var foo = bar();
+    foo._startMarker = 1;
+    """, versions={FIREFOX_GUID: version_range("firefox", "13.0a1")})
+    assert not err.failed()
+    assert err.notices
+    assert err.compat_summary["errors"]
+
+    err = _do_real_test_raw("""
+    var foo = bar();
+    foo._endMarker = 1;
+    """, versions={FIREFOX_GUID: version_range("firefox", "13.0a1")})
+    assert not err.failed()
+    assert err.notices
+    assert err.compat_summary["errors"]
+
