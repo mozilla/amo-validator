@@ -18,82 +18,6 @@ NSINHS_LINK = ("https://developer.mozilla.org/en/XPCOM_Interface_Reference"
                "/nsINavHistoryService")
 TB7_LINK = "https://developer.mozilla.org/en/Thunderbird_7_for_developers"
 
-GENERIC_PATTERNS = {
-    r"globalStorage\[.*\].password":
-        "Global Storage may not be used to store passwords.",
-    r"launch\(\)":
-        "Use of 'launch()' is disallowed because of restrictions on "
-        "nsILocalFile. If the code does not use nsILocalFile, consider a "
-        "different function name."}
-
-# JS category hunting; bug 635423
-# Generate regexes for all of them. Note that they all begin with
-# "JavaScript". Capitalization matters, bro.
-CATEGORY_REGEXES = (
-        map(re.compile,
-            map(lambda r: '''"%s"|'%s'|%s''' % (r, r, r.replace(' ', '-')),
-                map(lambda r: "%s%s" % ("JavaScript ", r),
-                    ("global constructor",
-                     "global constructor prototype alias",
-                     "global property",
-                     "global privileged property",
-                     "global static nameset",
-                     "global dynamic nameset",
-                     "DOM class",
-                     "DOM interface")))))
-
-PASSWORD_REGEX = re.compile("password", re.I)
-PROTOTYPE_REGEX = re.compile(r"(String|Object|Number|Date|RegExp|Function|"
-                             r"Boolean|Array|Iterator)\.prototype"
-                             r"(\.[a-zA-Z0-9]+|\[.+\]) =", re.I)
-
-CHROME_PATTERNS = (
-    (r"(?<![\'\"])require\s*\(\s*[\'\"]"
-     r"(chrome|window-utils|observer-service)"
-     r"[\'\"]\s*\)",
-        'Usage of non-SDK interface',
-        "This SDK-based add-on uses interfaces that aren't part of the SDK."),
-)
-
-
-# DOM mutation events; bug 642153
-DOM_MUTATION_REGEXES = map(re.compile,
-        ("DOMAttrModified", "DOMAttributeNameChanged",
-         "DOMCharacterDataModified", "DOMElementNameChanged",
-         "DOMNodeInserted", "DOMNodeInsertedIntoDocument", "DOMNodeRemoved",
-         "DOMNodeRemovedFromDocument", "DOMSubtreeModified"))
-
-TB11_STRINGS = {"newToolbarCmd\.(label|tooltip)": 694027,
-                "openToolbarCmd\.(label|tooltip)": 694027,
-                "saveToolbarCmd\.(label|tooltip)": 694027,
-                "publishToolbarCmd\.(label|tooltip)": 694027,
-                "messengerWindow\.title": 701671,
-                "folderContextSearchMessages\.(label|accesskey)": 652555,
-                "importFromSeamonkey2\.(label|accesskey)": 689437,
-                "comm4xMailImportMsgs\.properties": 689437,
-                "specialFolderDeletionErr": 39121,
-                "sourceNameSeamonkey": 689437,
-                "sourceNameOExpress": 689437,
-                "sourceNameOutlook": 689437,
-                "failedDuplicateAccount": 709020,}
-
-TB12_STRINGS = {"editImageMapButton\.(label|tooltip)": 717240,
-                "haveSmtp[1-3]\.suffix2": 346306,
-                "EditorImage(Map|MapHotSpot)\.dtd": 717240,
-                "subscribe-errorInvalidOPMLFile": 307629,}
-
-TB11_JS = {"onViewToolbarCommand": 644169,
-           "nsContextMenu": 680192,
-           "MailMigrator\.migrateMail": 712395,
-           "AddUrlAttachment": 708982,
-           "makeFeedObject": 705504,
-           "deleteFeed": 705504,}
-
-TB12_JS = {"TextEditorOnLoad": 695842,
-           "Editor(OnLoad|Startup|Shutdown|CanClose)": 695842,
-           "gInsertNewIMap": 717240,
-           "editImageMap": 717240,
-           "(SelectAll|MessageHas)Attachments": 526998,}
 
 def run_regex_tests(document, err, filename, context=None, is_js=False):
     """Run all of the regex-based JS tests."""
@@ -101,243 +25,9 @@ def run_regex_tests(document, err, filename, context=None, is_js=False):
     if context is None:
         context = ContextGenerator(document)
 
-    def _generic_test(pattern, title, message, metadata={}):
-        """Run a single regex test."""
-        match = pattern.search(document)
-        if match:
-            line = context.get_line(match.start())
-            err.warning(
-                err_id=("testcases_javascript_regex", "generic",
-                        "_generic_test"),
-                warning=title,
-                description=message,
-                filename=filename,
-                line=line,
-                context=context)
-            if metadata:
-                err.metadata.update(metadata)
-
-    def _substring_test(pattern, title, message):
-        """Run a single substringest."""
-        match = re.compile(pattern).search(document)
-        if match:
-            line = context.get_line(match.start())
-            err.warning(
-                err_id=("testcases_javascript_regex", "generic",
-                        "_generic_test"),
-                warning=title,
-                description=message,
-                filename=filename,
-                line=line,
-                context=context)
-
-    def _compat_test(pattern, title, message, compatibility_type,
-                     appversions=None, logFunc=err.notice):
-        """Run a single regex test and return a compatibility message."""
-        match = pattern.search(document)
-        if match:
-            line = context.get_line(match.start())
-            logFunc(
-                ("testcases_javascript_regex", "generic", "_compat_test"),
-                title,
-                description=message,
-                filename=filename,
-                line=line,
-                context=context,
-                compatibility_type=compatibility_type,
-                for_appversions=appversions,
-                tier=5)
-
-    if not filename.startswith("defaults/preferences/"):
-        from javascript.predefinedentities import (BANNED_PREF_BRANCHES,
-                                                   BANNED_PREF_REGEXPS)
-        for pattern in BANNED_PREF_REGEXPS:
-            _generic_test(
-                re.compile("[\"']" + pattern),
-                "Potentially unsafe preference branch referenced",
-                "Extensions should not alter preferences matching /%s/"
-                    % pattern)
-
-        for branch in BANNED_PREF_BRANCHES:
-            _substring_test(
-                branch.replace(r".", r"\."),
-                "Potentially unsafe preference branch referenced",
-                "Extensions should not alter preferences in the '%s' "
-                "preference branch" % branch)
-
-    for pattern, message in GENERIC_PATTERNS.items():
-        _generic_test(
-                re.compile(pattern),
-                "Potentially unsafe JS in use.",
-                message)
-
-    for pattern, title, message in CHROME_PATTERNS:
-        _generic_test(re.compile(pattern), title, message,
-                      {'requires_chrome': True})
-
-    if is_js:
-        for pattern in CATEGORY_REGEXES:
-            _generic_test(
-                    pattern,
-                    "Potential JavaScript category registration",
-                    "Add-ons should not register JavaScript categories. It "
-                    "appears that a JavaScript category was registered via a "
-                    "script to attach properties to JavaScript globals. This "
-                    "is not allowed.")
-
-        if re.match(r"defaults/preferences/.+\.js", filename):
-            _generic_test(
-                PASSWORD_REGEX,
-                "Passwords may be stored in /defaults/preferences JS files.",
-                "Storing passwords in the preferences is insecure and the "
-                "Login Manager should be used instead.")
-
-        is_jsm = filename.endswith(".jsm") or "EXPORTED_SYMBOLS" in document
-
-        if not is_jsm:
-            # Have a non-static/dynamic test for prototype extension.
-            _generic_test(
-                    PROTOTYPE_REGEX,
-                    "JS Prototype extension",
-                    "It appears that an extension of a built-in JS type was "
-                    "made. This is not allowed for security and compatibility "
-                    "reasons.")
-
-    for pattern in DOM_MUTATION_REGEXES:
-        _generic_test(
-                pattern,
-                "DOM Mutation Events Prohibited",
-                "DOM mutation events are flagged because of their "
-                "deprecated status, as well as their extreme "
-                "inefficiency. Consider using a different event.")
-
-    # Thunderbird 7 Compatibility rdf:addressdirectory
-    if err.supports_version(TB7_DEFINITION):
-        # dictUtils.js removal
-        _compat_test(
-                re.compile(r"resource:///modules/dictUtils.js"),
-                "dictUtils.js was removed in Thunderbird 7.",
-                "The dictUtils.js file is no longer available in "
-                "Thunderbird 7. You can use Dict.jsm instead. See"
-                "%s for more information." % BUGZILLA_BUG % 621213,
-                compatibility_type="error",
-                appversions=TB7_DEFINITION,
-                logFunc=err.warning)
-        # de-RDF the addressbook
-        _compat_test(
-                re.compile(r"rdf:addressdirectory"),
-                "The address book does not use RDF in Thunderbird 7.",
-                "The address book was changed to use a look up table in "
-                "Thunderbird 7. See %s and %s for more information." %
-                    (TB7_LINK, BUGZILLA_BUG % 621213),
-                compatibility_type="error",
-                appversions=TB7_DEFINITION)
-        # Second test for de-RDFing the addressbook
-        # r"GetResource(.*?)\s*\.\s*QueryInterface(.*?nsIAbDirectory);"
-        _compat_test(
-                re.compile(r"GetResource\(.*?\)\s*\.\s*"
-                           r"QueryInterface\(.*?nsIAbDirectory\)"),
-                "The address book does not use RDF in Thunderbird 7.",
-                "The address book was changed to use a look up table in "
-                "Thunderbird 7. See %s and %s for more information." %
-                    (TB7_LINK, BUGZILLA_BUG % 621213),
-                compatibility_type="error",
-                appversions=TB7_DEFINITION)
-
-    # Thunderbird 10 Compatibility
-    if err.supports_version(TB10_DEFINITION):
-        # gDownloadManagerStrings removal
-        _compat_test(
-                re.compile(r"gDownloadManagerStrings"),
-                "gDownloadManagerStrings was removed in Thunderbird 10.",
-                "This global is no longer available in "
-                "Thunderbird 10. See %s for more information." %
-                    BUGZILLA_BUG % 700220,
-                compatibility_type="error",
-                appversions=TB10_DEFINITION,
-                logFunc=err.warning)
-        # nsTryToClose.js removal
-        _compat_test(
-                re.compile(r"nsTryToClose.js"),
-                "nsTryToClose.js was removed in Thunderbird 10.",
-                "The nsTryToClose.js file is no longer available in "
-                "Thunderbird 10. See %s for more information." %
-                    BUGZILLA_BUG % 539997,
-                compatibility_type="error",
-                appversions=TB10_DEFINITION,
-                logFunc=err.warning)
-
-    # Thunderbird 11 Compatibility
-    if err.supports_version(TB11_DEFINITION):
-        # specialFoldersDeletionAllowed removal
-        _compat_test(
-            re.compile(r"specialFoldersDeletionAllowed"),
-            "specialFoldersDeletionAllowed was removed in Thunderbird 11.",
-            "This global is no longer available in "
-            "Thunderbird 11. See %s for more information." %
-            BUGZILLA_BUG % 39121,
-            compatibility_type="error",
-            appversions=TB11_DEFINITION,
-            logFunc=err.notice)
-        for pattern, bug in TB11_STRINGS.items():
-            _compat_test(
-                re.compile(pattern),
-                "Removed, renamed, or changed strings in use",
-                "Your add-on uses string %s, which has been changed or "
-                "removed from Thunderbird 11. Please refer to %s for "
-                "possible alternatives." % (pattern, BUGZILLA_BUG % bug),
-                compatibility_type="error",
-                appversions=TB11_DEFINITION,
-                logFunc=err.warning)
-        for pattern, bug in TB11_JS.items():
-            _compat_test(
-                re.compile(pattern),
-                "Removed, renamed, or changed javascript in use",
-                "Your add-on uses the javascript method or class %s, which "
-                "has been changed or removed from Thunderbird 11. Please "
-                "refer to %s for possible alternatives." %
-                (pattern, BUGZILLA_BUG % bug),
-                compatibility_type="error",
-                appversions=TB11_DEFINITION,
-                logFunc=err.notice)
-
-    # Thunderbird 12 Compatibility
-    if err.supports_version(TB12_DEFINITION):
-        _compat_test(
-            re.compile(r"EdImage(Map|MapHotSpot|MapShapes|Overlay)\.js"),
-            "Removed javascript file EdImage*.js in use ",
-            "EdImageMap.js, EdImageMapHotSpot.js, "
-            "EdImageMapShapes.js, and EdImageMapOverlay.js "
-            "were removed in Thunderbird 12. "
-            "See %s for more information." % BUGZILLA_BUG % 717240,
-            compatibility_type="error",
-            appversions=TB12_DEFINITION,
-            logFunc=err.notice)
-        for pattern, bug in TB12_STRINGS.items():
-            _compat_test(
-                re.compile(pattern),
-                "Removed, renamed, or changed strings in use",
-                "Your add-on uses string %s, which has been changed or "
-                "removed from Thunderbird 11. Please refer to %s for "
-                "possible alternatives." % (pattern, BUGZILLA_BUG % bug),
-                compatibility_type="error",
-                appversions=TB12_DEFINITION,
-                logFunc=err.warning)
-        for pattern, bug in TB12_JS.items():
-            _compat_test(
-                re.compile(pattern),
-                "Removed, renamed, or changed javascript in use",
-                "Your add-on uses the javascript method or class %s, which "
-                "has been changed or removed from Thunderbird 11. Please "
-                "refer to %s for possible alternatives." %
-                (pattern, BUGZILLA_BUG % bug),
-                compatibility_type="error",
-                appversions=TB12_DEFINITION,
-                logFunc=err.notice)
-
     # Run all of the registered tests.
     for cls in registered_regex_tests:
-        if not cls.applicable(err, filename):
+        if not cls.applicable(err, filename, document):
             continue
         t = cls(err, document, filename, context)
         # Run standard tests.
@@ -370,7 +60,7 @@ class RegexTestGenerator(object):
         self.app_versions_fallback = None
 
     @classmethod
-    def applicable(cls, err, filename):
+    def applicable(cls, err, filename, document):
         """Return whether the tests apply to the current file."""
         return True  # Default to always applicable.
 
@@ -386,7 +76,7 @@ class RegexTestGenerator(object):
         return []
 
     def get_test(self, pattern, title, message, log_function=None,
-                 compat_type=None, app_versions=None):
+                 compat_type=None, app_versions=None, flags=0):
         """
         Return a function that, when called, will log a compatibility warning
         or error.
@@ -394,7 +84,8 @@ class RegexTestGenerator(object):
         app_versions = app_versions or self.app_versions_fallback
         log_function = log_function or self.err.warning
         def wrapper():
-            for match in re.finditer(pattern, self.document):
+            matched = False
+            for match in re.finditer(pattern, self.document, flags):
                 log_function(
                         ("testcases_regex", "generic", "_generated"),
                         title,
@@ -404,7 +95,9 @@ class RegexTestGenerator(object):
                         context=self.context,
                         compatibility_type=compat_type,
                         for_appversions=app_versions,
-                        tier=err.tier if app_versions is None else 5)
+                        tier=self.err.tier if app_versions is None else 5)
+                matched = True
+            return matched
 
         return wrapper
 
@@ -413,6 +106,183 @@ class RegexTestGenerator(object):
         message = [message,
                    "See bug %s for more information." % BUGZILLA_BUG % bug]
         return self.get_test(pattern, title, message, **kwargs)
+
+
+@register_generator
+class GenericRegexTests(RegexTestGenerator):
+    """Test for generic, banned patterns in a document being scanned."""
+
+    def tests(self):
+        yield self.get_test(
+                r"globalStorage\[.*\].password",
+                "`globalStorage` may be storing passwords",
+                "`globalStorage` should not be used to store passwords.")
+        yield self.get_test(
+                r"launch\(\)",
+                "`launch()` disallowed",
+                "Use of `launch()` is disallowed because of restrictions on "
+                "`nsILocalFile`. If the code does not use `nsILocalFile`, "
+                "consider using a different function name.")
+
+
+@register_generator
+class CategoryRegexTests(RegexTestGenerator):
+    """
+    These tests will flag JavaScript category registration. Category
+    registration is not permitted in add-ons.
+
+    Added from bug 635423
+    """
+
+    # This generates the regular expressions for all combinations of JS
+    # categories. Note that all of them begin with "JavaScript". Capitalization
+    # matters.
+    PATTERNS = map(lambda r: '''"%s"|'%s'|%s''' % (r, r, r.replace(" ", "-")),
+                   ["JavaScript %s" % pattern for pattern in
+                    ("global constructor",
+                     "global constructor prototype alias",
+                     "global property",
+                     "global privileged property",
+                     "global static nameset",
+                     "global dynamic nameset",
+                     "DOM class",
+                     "DOM interface", )])
+
+    def js_tests(self):
+        for pattern in self.PATTERNS:
+            yield self.get_test(
+                    pattern,
+                    "Potential JavaScript category registration",
+                    "Add-ons should not register JavaScript categories. It "
+                    "appears that a JavaScript category was registered via a "
+                    "script to attach properties to JavaScript globals. This "
+                    "is not allowed.")
+
+
+@register_generator
+class DOMMutationRegexTests(RegexTestGenerator):
+    """
+    These regex tests will test that DOM mutation events are not used. These
+    events have extreme performance penalties associated with them and are
+    currently deprecated.
+
+    Added from bug 642153
+    """
+
+    EVENTS = ("DOMAttrModified", "DOMAttributeNameChanged",
+              "DOMCharacterDataModified", "DOMElementNameChanged",
+              "DOMNodeInserted", "DOMNodeInsertedIntoDocument",
+              "DOMNodeRemoved", "DOMNodeRemovedFromDocument",
+              "DOMSubtreeModified", )
+
+    def js_tests(self):
+        for event in self.EVENTS:
+            yield self.get_test(
+                    event,
+                    "DOM mutation event use prohibited",
+                    "DOM mutation events are flagged because of their "
+                    "deprecated status as well as their extreme inefficiency. "
+                    "Consider using a different event.")
+
+
+@register_generator
+class PasswordsInPrefsRegexTests(RegexTestGenerator):
+    """
+    These regex tests will ensure that the developer is not storing passwords
+    in the `/defaults/preferences` JS files.
+
+    Added from bug 647109
+    """
+
+    @classmethod
+    def applicable(cls, err, filename, document):
+        return bool(re.match(r"defaults/preferences/.+\.js", filename))
+
+    def js_tests(self):
+        yield self.get_test(
+                "password",
+                "Passwords may be stored in `defaults/preferences/*.js`",
+                "Storing passwords in the preferences JavaScript files is "
+                "insecure. The Login Manager should be used insted.")
+
+
+@register_generator
+class BannedPrefRegexTests(RegexTestGenerator):
+    """
+    These regex tests will find whether banned preference branches are being
+    referenced from outside preference JS files.
+
+    Added from bug 676815
+    """
+
+    @classmethod
+    def applicable(cls, err, filename, document):
+        return not filename.startswith("defaults/preferences/")
+
+    def tests(self):
+        from javascript.predefinedentities import (BANNED_PREF_BRANCHES,
+                                                   BANNED_PREF_REGEXPS)
+        for pattern in BANNED_PREF_REGEXPS:
+            yield self.get_test(
+                    r"[\"']" + pattern,
+                    "Potentially unsafe preference branch referenced",
+                    "Extensions should not alter preferences matching /%s/."
+                        % pattern)
+
+        for branch in BANNED_PREF_BRANCHES:
+            yield self.get_test(
+                    branch.replace(r".", r"\."),
+                    "Potentially unsafe preference branch referenced",
+                    "Extensions should not alter preferences in the `%s` "
+                    "preference branch" % branch)
+
+
+@register_generator
+class ChromePatternRegexTests(RegexTestGenerator):
+    """
+    Test that an Add-on SDK (Jetpack) add-on doesn't use interfaces that are
+    not part of the SDK.
+
+    Added from bugs 689340, 731109
+    """
+
+    def tests(self):
+        # We want to re-wrap the test because if it detects something, we're
+        # going to set the `requires_chrome` metadata value to `True`.
+        def rewrap():
+            wrapper = self.get_test(
+                    r"(?<![\'\"])require\s*\(\s*[\'\"]"
+                    r"(chrome|window-utils|observer-service)[\'\"]\s*\)",
+                    "Usage of non-SDK interface",
+                    "This SDK-based add-on uses interfaces that aren't part "
+                    "of the SDK.")
+            if wrapper():
+                self.err.metadata["requires_chrome"] = True
+
+        yield rewrap
+
+
+@register_generator
+class JSPrototypeExtRegexTests(RegexTestGenerator):
+    """
+    These regex tests will ensure that the developer is not modifying the
+    prototypes of the global JS types.
+
+    Added from bug 696172
+    """
+
+    @classmethod
+    def applicable(cls, err, filename, document):
+        return not (filename.endswith(".jsm") or "EXPORTED_SYMBOLS" in document)
+
+    def js_tests(self):
+        yield self.get_test(
+                r"(String|Object|Number|Date|RegExp|Function|Boolean|Array|"
+                r"Iterator)\.prototype(\.[a-zA-Z0-9]+|\[.+\]) =",
+                "JS prototype extension",
+                "It appears that an extension of a built-in JS type was made. "
+                "This is not allowed for security and compatibility reasons.",
+                flags=re.I)
 
 
 class CompatRegexTestHelper(RegexTestGenerator):
@@ -426,7 +296,7 @@ class CompatRegexTestHelper(RegexTestGenerator):
         self.app_versions_fallback = self.VERSION
 
     @classmethod
-    def applicable(cls, err, filename):
+    def applicable(cls, err, filename, document):
         return err.supports_version(cls.VERSION)
 
 
@@ -682,4 +552,140 @@ class Gecko13RegexTests(CompatRegexTestHelper):
                 "nsIParserUtils as soon as possible.",
                 compat_type="warning", log_function=self.err.notice)
 
+
+@register_generator
+class Thunderbird7RegexTests(CompatRegexTestHelper):
+    """Regex tests for the Thunderbird 7 update."""
+
+    VERSION = TB7_DEFINITION
+
+    def tests(self):
+        yield self.get_test_bug(
+                621213, r"resource:///modules/dictUtils.js",
+                "`dictUtils.js` was removed in Thunderbird 7",
+                "The `dictUtils.js` file is no longer available in "
+                "Thunderbird as of version 7. You can use `Dict.jsm` "
+                "instead.", compat_type="error")
+        ab_patterns = [r"rdf:addressdirectory",
+                       r"GetResource\(.*?\)\s*\.\s*"
+                           r"QueryInterface\(.*?nsIAbDirectory\)",]
+        for pattern in ab_patterns:
+            yield self.get_test_bug(
+                    621213, pattern,
+                    "The address book does not use RDF in Thunderbird 7",
+                    "The address book was changed to use a look up table in "
+                    "Thunderbird 7. See %s for details." % TB7_LINK,
+                    compat_type="error", log_function=self.err.notice)
+
+
+@register_generator
+class Thunderbird10RegexTests(CompatRegexTestHelper):
+    """Regex tests for the Thunderbird 10 update."""
+
+    VERSION = TB10_DEFINITION
+
+    def tests(self):
+        yield self.get_test_bug(
+                700220, r"gDownloadManagerStrings",
+                "`gDownloadManagerStrings` removed in Thunderbird 10",
+                "The `gDownloadManagerStrings` global is no longer available "
+                "in Thunderbird 10.", compat_type="error")
+        yield self.get_test_bug(
+                539997, r"nsTryToClose.js",
+                "`nsTryToClose.js` removed in Thunderbird 10",
+                "The `nsTryToClose.js` file is no longer available as of "
+                "Thunderbird 10.", compat_type="error")
+
+
+@register_generator
+class Thunderbird11RegexTests(CompatRegexTestHelper):
+    """Regex tests for the Thunderbird 11 update."""
+
+    VERSION = TB11_DEFINITION
+
+    def tests(self):
+        yield self.get_test_bug(
+                39121, r"specialFoldersDeletionAllowed",
+                "`specialFoldersDeletionAllowed` removed in Thunderbird 11",
+                "The `specialFoldersDeletionAllowed` global was removed in "
+                "Thunderbird 11.", compat_type="error",
+                log_function=self.err.notice)
+
+        patterns = {r"newToolbarCmd\.(label|tooltip)": 694027,
+                    r"openToolbarCmd\.(label|tooltip)": 694027,
+                    r"saveToolbarCmd\.(label|tooltip)": 694027,
+                    r"publishToolbarCmd\.(label|tooltip)": 694027,
+                    r"messengerWindow\.title": 701671,
+                    r"folderContextSearchMessages\.(label|accesskey)": 652555,
+                    r"importFromSeamonkey2\.(label|accesskey)": 689437,
+                    r"comm4xMailImportMsgs\.properties": 689437,
+                    r"specialFolderDeletionErr": 39121,
+                    r"sourceNameSeamonkey": 689437,
+                    r"sourceNameOExpress": 689437,
+                    r"sourceNameOutlook": 689437,
+                    r"failedDuplicateAccount": 709020,}
+        for pattern, bug in patterns.items():
+            yield self.get_test_bug(
+                    bug, pattern,
+                    "Removed, renamed, or changed methods in use",
+                    "Some code matched the pattern `%s`, which has been "
+                    "flagged as having changed in Thunderbird 11." % pattern,
+                    compat_type="error")
+
+        js_patterns = {r"onViewToolbarCommand": 644169,
+                       r"nsContextMenu": 680192,
+                       r"MailMigrator\.migrateMail": 712395,
+                       r"AddUrlAttachment": 708982,
+                       r"makeFeedObject": 705504,
+                       r"deleteFeed": 705504, }
+        for pattern, bug in js_patterns.items():
+            yield self.get_test_bug(
+                    bug, pattern,
+                    "Removed, renamed, or changed methods in use",
+                    "Some code matched the JavaScript function `%s`, which has "
+                    "been flagged as having changed, removed, or deprecated "
+                    "in Thunderbird 11." % pattern,
+                    compat_type="error", log_function=self.err.notice)
+
+
+@register_generator
+class Thunderbird12RegexTests(CompatRegexTestHelper):
+    """Regex tests for the Thunderbird 12 update."""
+
+    VERSION = TB12_DEFINITION
+
+    def tests(self):
+        yield self.get_test_bug(
+                717240, r"EdImage(Map|MapHotSpot|MapShapes|Overlay)\.js",
+                "`EdImage*.js` removed in Thunderbird 12",
+                "`EdImageMap.js`, `EdImageMapHotSpot.js`, "
+                "`EdImageMapShapes.js`, and `EdImageMapOverlay.js` were "
+                "removed in Thunderbird 12.", compat_type="error",
+                log_function=self.err.notice)
+
+        patterns = {"editImageMapButton\.(label|tooltip)": 717240,
+                    "haveSmtp[1-3]\.suffix2": 346306,
+                    "EditorImage(Map|MapHotSpot)\.dtd": 717240,
+                    "subscribe-errorInvalidOPMLFile": 307629, }
+        for pattern, bug in patterns.items():
+            yield self.get_test_bug(
+                    bug, pattern,
+                    "Removed, renamed, or changed methods in use",
+                    "Some code matched the pattern `%s`, which has been "
+                    "flagged as having changed in Thunderbird 12." % pattern,
+                    compat_type="error")
+
+        js_patterns = {r"TextEditorOnLoad": 695842,
+                       r"Editor(OnLoad|Startup|Shutdown|CanClose)": 695842,
+                       r"gInsertNewIMap": 717240,
+                       r"editImageMap": 717240,
+                       r"(SelectAll|MessageHas)Attachments": 526998, }
+        for pattern, bug in js_patterns.items():
+            yield self.get_test_bug(
+                    bug, pattern,
+                    "Removed, renamed, or changed methods in use",
+                    "Some code matched the JavaScript function `%s`, which has "
+                    "been flagged as having changed, removed, or deprecated "
+                    "in Thunderbird 12." % pattern,
+                    compat_type="error", log_function=self.err.notice)
 
