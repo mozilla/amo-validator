@@ -1,4 +1,3 @@
-import fnmatch
 import re
 
 from validator.constants import BUGZILLA_BUG
@@ -63,29 +62,6 @@ DOM_MUTATION_REGEXES = map(re.compile,
          "DOMCharacterDataModified", "DOMElementNameChanged",
          "DOMNodeInserted", "DOMNodeInsertedIntoDocument", "DOMNodeRemoved",
          "DOMNodeRemovedFromDocument", "DOMSubtreeModified"))
-
-FX6_INTERFACES = {"nsIDOMDocumentTraversal": 655514,
-                  "nsIDOMDocumentRange": 655513,
-                  "IWeaveCrypto": 651596}
-FX7_INTERFACES = {"nsIDOMDocumentStyle": 658904,
-                  "nsIDOMNSDocument": 658906,
-                  "nsIDOM3TypeInfo": 660539,
-                  "nsIDOM3Node": 659053}
-FX8_INTERFACES = {"nsISelection2": 672536,
-                  "nsISelection3": 672536}
-FX11_INTERFACES = {"nsICharsetResolver": 700490}
-FX12_INTERFACES = {"nsIProxyObjectManager":
-                       (675221,
-                        "This add-on uses nsIProxyObjectManager, which was "
-                        "removed in Gecko 12."),
-                   "documentCharsetInfo": 713825,
-                   "nsIJetpack(Service)?":
-                       (711838,
-                        "This add-on uses the Jetpack service, which was "
-                        "deprecated long ago and is no longer included in "
-                        "Gecko 12. Please update your add-on to use a more "
-                        "recent version of the Add-ons SDK.")}
-
 
 TB11_STRINGS = {"newToolbarCmd\.(label|tooltip)": 694027,
                 "openToolbarCmd\.(label|tooltip)": 694027,
@@ -235,268 +211,6 @@ def run_regex_tests(document, err, filename, context=None, is_js=False):
                 "deprecated status, as well as their extreme "
                 "inefficiency. Consider using a different event.")
 
-    # Firefox 5 Compatibility
-    if err.supports_version(FX5_DEFINITION):
-        _compat_test(
-                re.compile(r"navigator\.language"),
-                "navigator.language may not behave as expected",
-                ("JavaScript code was found that references "
-                 "navigator.language, which will no longer indicate "
-                 "the language of Firefox's UI. To maintain existing "
-                 "functionality, general.useragent.locale should be "
-                 "used in place of `navigator.language`."),
-                compatibility_type="error",
-                appversions=FX5_DEFINITION)
-
-    # Firefox 6 Compatibility
-    if err.supports_version(FX6_DEFINITION):
-        for pattern, bug in FX6_INTERFACES.items():
-            _compat_test(
-                    re.compile(pattern),
-                    "Unsupported interface in use",
-                    ("Your add-on uses interface %s, which has been removed "
-                     "from Firefox 6. Please refer to %s for possible "
-                     "alternatives.") % (pattern, BUGZILLA_BUG % bug),
-                    compatibility_type="error",
-                    appversions=FX6_DEFINITION,
-                    logFunc=err.warning)
-
-        # app.update.timer
-        _compat_test(
-                re.compile(r"app\.update\.timer"),
-                "app.update.timer is incompatible with Firefox 6",
-                ("The 'app.update.timer' preference is being replaced by the "
-                 "'app.update.timerMinimumDelay' preference in Firefox 6. "
-                 "Please refer to %s for more details.") %
-                     (BUGZILLA_BUG % 614181),
-                compatibility_type="error",
-                appversions=FX6_DEFINITION)
-        if is_js:
-            # javascript/data: URI usage in the address bar
-            _compat_test(
-                    re.compile(r"['\"](javascript|data):"),
-                    "javascript:/data: URIs may be incompatible with Firefox "
-                    "6.",
-                    ("Loading 'javascript:' and 'data:' URIs through the "
-                     "location bar may no longer work as expected in Firefox "
-                     "6. If you load these types of URIs, please test your "
-                     "add-on on the latest Firefox 6 builds, or refer to %s "
-                     "for more information.") %
-                         (BUGZILLA_BUG % 656433),
-                    compatibility_type="warning",
-                    appversions=FX6_DEFINITION)
-
-    # Firefox 7 Compatibility
-    if err.supports_version(FX7_DEFINITION):
-        for pattern, bug in FX7_INTERFACES.items():
-            _compat_test(
-                    re.compile(pattern),
-                    "Unsupported interface in use",
-                    ("Your add-on uses interface %s, which has been removed "
-                     "from Firefox 7. Please refer to %s for possible "
-                     "alternatives.") % (pattern, BUGZILLA_BUG % bug),
-                    compatibility_type="error",
-                    appversions=FX7_DEFINITION,
-                    logFunc=err.warning)
-
-        # nsINavHistoryObserver
-        _compat_test(
-                re.compile(r"nsINavHistoryObserver"),
-                "nsINavHistoryObserver interface has changed in Firefox 7",
-                ("The nsINavHistoryObserver interface has changed in Firefox "
-                 "7. Most function calls now required a GUID parameter, "
-                 "please refer to %s and %s for more information.") %
-                    (NSINHS_LINK, BUGZILLA_BUG % 633266),
-                compatibility_type="error",
-                appversions=FX7_DEFINITION)
-        # nsIMarkupDocumentViewer_MOZILLA_2_0_BRANCH
-        _compat_test(
-                re.compile(r"nsIMarkupDocumentViewer_MOZILLA_2_0_BRANCH"),
-                "MOZILLA_2_0 Namespace has been merged in Firefox 7",
-                ("The '_MOZILLA_2_0_BRANCH' interfaces have been merged out. "
-                 "You should now use the namespace without the "
-                 "'_MOZILLA_2_0_BRANCH' suffix. Please refer to %s for more "
-                 "details.") %
-                     (BUGZILLA_BUG % 617539),
-                compatibility_type="warning",
-                appversions=FX7_DEFINITION)
-
-    # Firefox 8 Compatibility
-    if err.supports_version(FX8_DEFINITION):
-        for pattern, bug in FX8_INTERFACES.items():
-            _compat_test(
-                    re.compile(pattern),
-                    "Removed, deprecated, or unsupported interface in use.",
-                    ("The nsISelection2 and nsISelection3 interfaces have "
-                     "been removed in Firefox 8. You can use the nsISelection "
-                     "interface instead. See %s for more details.") %
-                        (BUGZILLA_BUG % bug),
-                    compatibility_type="error",
-                    appversions=FX8_DEFINITION,
-                    logFunc=err.warning)
-
-        # nsIDOMWindowInternal
-        NSIDWI_MDN = ("https://developer.mozilla.org/en/"
-                          "XPCOM_Interface_Reference/nsIDOMWindow")
-        _compat_test(
-                re.compile(r"nsIDOMWindowInternal"),
-                "nsIDOMWindowInternal has been deprecated in Firefox 8.",
-                ("The nsIDOMWindowInternal interface has been deprecated in "
-                 "Firefox 8. You can use the nsIDOMWindow interface instead. "
-                 "See %s for more information.") % NSIDWI_MDN,
-                compatibility_type="warning",
-                appversions=FX8_DEFINITION)
-
-        # ISO8601DateUtils
-        # TODO(basta): Make this a string test instead once they're invented.
-        ISO8601_MDC = ("https://developer.mozilla.org/en/JavaScript/Reference/"
-                           "Global_Objects/Date")
-        _compat_test(
-                re.compile(r"ISO8601DateUtils"),
-                "ISO8601DateUtils.jsm was removed in Firefox 8.",
-                ("The ISO8601DateUtils object is no longer available in "
-                 "Firefox 8. You can use the normal Date object instead. See "
-                 "%s for more information.") % ISO8601_MDC,
-                compatibility_type="error",
-                appversions=FX8_DEFINITION,
-                logFunc=err.warning)
-
-    # Firefox 9 Compatibility
-    if err.supports_version(FX9_DEFINITION):
-        TAINTENABLED_BUG = BUGZILLA_BUG % 679971
-        _compat_test(
-                re.compile(r"navigator\.taintEnabled"),
-                "navigator.taintEnabled was removed in Firefox 9.",
-                ("The taintEnabled function is no longer available in"
-                 " Firefox 9. Since this function was only used for "
-                 "browser detection and this doesn't belong in extension"
-                 " code, you should remove it if possible. For more "
-                 "information, please see %s.") % TAINTENABLED_BUG,
-                compatibility_type="warning",
-                appversions=FX9_DEFINITION,
-                logFunc=err.warning)
-        XRAYPROPS_BUG = BUGZILLA_BUG % 660233
-        _compat_test(
-            re.compile(r"\.nodePrincipal"),
-            ("nodePrincipal only available in chrome context"),
-            ("The nodePrincipal property is no longer accessible from "
-             "untrusted scripts. For more information, please see %s."
-             ) % XRAYPROPS_BUG,
-            compatibility_type="warning",
-            appversions=FX9_DEFINITION)
-        _compat_test(
-            re.compile(r"\.documentURIObject"),
-            ("documentURIObject only available in chrome context"),
-            ("The documentURIObject property is no longer accessible from "
-             "untrusted scripts. For more information, please see %s."
-             ) % XRAYPROPS_BUG,
-            compatibility_type="warning",
-            appversions=FX9_DEFINITION)
-        _compat_test(
-            re.compile(r"\.baseURIObject"),
-            ("baseURIObject only available in chrome context"),
-            ("The baseURIObject property is no longer accessible from "
-             "untrusted scripts. For more information, please see %s."
-             ) % XRAYPROPS_BUG,
-            compatibility_type="warning",
-            appversions=FX9_DEFINITION)
-        _compat_test(
-            re.compile(r"nsIGlobalHistory3"),
-            "nsIGlobalHistory3 was removed in Firefox 9",
-            ("The nsIGlobalHistory3 interface has been removed from Firefox."
-             " For more information, please see %s."
-             ) % (BUGZILLA_BUG % 568971),
-            compatibility_type="warning",
-            appversions=FX9_DEFINITION,
-            logFunc=err.warning)
-
-        # geo.wifi.* warnings
-        geo_wifi_description = (
-                "The geo.wifi.* preferences are no longer created by default "
-                "in Gecko 9. Reading them without testing for their presence "
-                "can result in unexpected errors. See %s for more "
-                "information." % BUGZILLA_BUG % 689252)
-        _compat_test(
-            re.compile(r"geo\.wifi\.uri"),
-            "The preference 'geo.wifi.uri' was removed in Firefox 9",
-            geo_wifi_description,
-            compatibility_type="error",
-            appversions=FX9_DEFINITION,
-            logFunc=err.warning)
-        _compat_test(
-            re.compile(r"geo\.wifi\.protocol"),
-            "The preference 'geo.wifi.protocol' was removed in Firefox 9",
-            geo_wifi_description,
-            compatibility_type="error",
-            appversions=FX9_DEFINITION,
-            logFunc=err.warning)
-
-    # Firefox 11 Compatibility
-    if err.supports_version(FX11_DEFINITION):
-        for pattern, bug in FX11_INTERFACES.items():
-            _compat_test(
-                    re.compile(pattern),
-                    "Unsupported interface in use",
-                    "Your add-on uses interface %s, which has been removed "
-                    "from Firefox 11. Please refer to %s for possible "
-                    "alternatives." % (pattern, BUGZILLA_BUG % bug),
-                    compatibility_type="error",
-                    appversions=FX11_DEFINITION,
-                    logFunc=err.warning)
-
-        # omni.jar renamed
-        for instance in re.finditer(r"omni\.jar", document):
-            err.warning(
-                err_id=("testcases_regex", "regex_regex_tests", "omni.jar"),
-                warning="'omni.jar' renamed to 'omni.ja'",
-                description="This add-on references omni.jar, which was "
-                            "renamed to omni.ja. You should avoid referencing "
-                            "this file directly, and at least update this "
-                            "reference for any versions that support Firefox "
-                            "11 and above. See %s for more information." %
-                                BUGZILLA_BUG % 701875,
-                filename=filename,
-                line=context.get_line(instance.start()),
-                context=context,
-                for_appversions=FX11_DEFINITION,
-                compatibility_type="error",
-                tier=5)
-
-    # Firefox 12 Compatibility
-    if err.supports_version(FX12_DEFINITION):
-        for pattern, bug in FX12_INTERFACES.items():
-            if isinstance(bug, tuple):
-                bug, message = bug
-            else:
-                message = ("Your add-on uses interface %s, which has been "
-                           "removed from Gecko 12.") % pattern
-
-            message = "%s See %s for more infomration." % (message,
-                                                           BUGZILLA_BUG % bug)
-            _compat_test(
-                    re.compile(pattern),
-                    "Unsupported interface in use",
-                    message,
-                    compatibility_type="error",
-                    appversions=FX12_DEFINITION,
-                    logFunc=err.warning)
-
-        # Test for `chromemargin` (bug 735876)
-        for instance in re.finditer(r"chromemargin", document):
-            err.notice(
-                err_id=("testcases_regex", "regex_regex_tests", "chromemargin"),
-                notice="`chromemargin` attribute changed in Gecko 12",
-                description="This add-on uses the chromemargin attribute, "
-                            "which after Gecko 12 will not work in the same "
-                            "way  with values other than 0 or -1. Please see "
-                            "%s for more information." % BUGZILLA_BUG % 735876,
-                filename=filename,
-                line=context.get_line(instance.start()),
-                context=context,
-                for_appversions=FX12_DEFINITION,
-                compatibility_type="error",
-                tier=5)
-
     # Thunderbird 7 Compatibility rdf:addressdirectory
     if err.supports_version(TB7_DEFINITION):
         # dictUtils.js removal
@@ -626,8 +340,13 @@ def run_regex_tests(document, err, filename, context=None, is_js=False):
         if not cls.applicable(err, filename):
             continue
         t = cls(err, document, filename, context)
+        # Run standard tests.
         for test in t.tests():
             test()
+        # Run tests that would otherwise be guarded by `is_js`.
+        if is_js:
+            for test in t.js_tests():
+                test()
 
 
 def register_generator(cls):
@@ -657,7 +376,14 @@ class RegexTestGenerator(object):
 
     def tests(self):
         """Override this with a generator that produces the regex tests."""
-        pass
+        return []
+
+    def js_tests(self):
+        """
+        Override this with a generator that produces regex tests that are
+        exclusive to JavaScript.
+        """
+        return []
 
     def get_test(self, pattern, title, message, log_function=None,
                  compat_type=None, app_versions=None):
@@ -668,8 +394,7 @@ class RegexTestGenerator(object):
         app_versions = app_versions or self.app_versions_fallback
         log_function = log_function or self.err.warning
         def wrapper():
-            match = re.search(pattern, self.document)
-            if match:
+            for match in re.finditer(pattern, self.document):
                 log_function(
                         ("testcases_regex", "generic", "_generated"),
                         title,
@@ -690,20 +415,249 @@ class RegexTestGenerator(object):
         return self.get_test(pattern, title, message, **kwargs)
 
 
-DEP_INTERFACE = "Deprecated interface in use"
-
-
-@register_generator
-class Gecko13RegexTests(RegexTestGenerator):
-    """Regex tests for Gecko 13 updates."""
+class CompatRegexTestHelper(RegexTestGenerator):
+    """
+    A helper that makes it easier to stay DRY. This will automatically check
+    for applicability against the value set as the app_versions_fallback.
+    """
 
     def __init__(self, *args, **kwargs):
-        super(Gecko13RegexTests, self).__init__(*args, **kwargs)
-        self.app_versions_fallback = FX13_DEFINITION
+        super(CompatRegexTestHelper, self).__init__(*args, **kwargs)
+        self.app_versions_fallback = self.VERSION
 
     @classmethod
     def applicable(cls, err, filename):
-        return err.supports_version(FX13_DEFINITION)
+        return err.supports_version(cls.VERSION)
+
+
+DEP_INTERFACE = "Deprecated interface in use"
+DEP_INTERFACE_DESC = ("This add-on uses `%s`, which is deprecated in Gecko %d "
+                      "and should not be used.")
+
+@register_generator
+class Gecko5RegexTests(CompatRegexTestHelper):
+    """Regex tests for Gecko 5 updates."""
+
+    VERSION = FX5_DEFINITION
+
+    def tests(self):
+        yield self.get_test(
+                r"navigator\.language",
+                "`navigator.language` may not behave as expected.",
+                "JavaScript code was found that references `navigator."
+                "language`, which will no longer indicate that language of "
+                "the application's UI. To maintain existing functionality, "
+                "`general.useragent.locale` should be used in place of "
+                "`navigator.language`.", compat_type="error",
+                log_function=self.err.notice)
+
+
+@register_generator
+class Gecko6RegexTests(CompatRegexTestHelper):
+    """Regex tests for Gecko 6 updates."""
+
+    VERSION = FX6_DEFINITION
+
+    def tests(self):
+        interfaces = {"nsIDOMDocumentTraversal": 655514,
+                      "nsIDOMDocumentRange": 655513,
+                      "IWeaveCrypto": 651596}
+        for interface, bug in interfaces.items():
+            yield self.get_test_bug(
+                    bug=bug,
+                    pattern=interface,
+                    title=DEP_INTERFACE,
+                    message=DEP_INTERFACE_DESC % (interface, 6),
+                    compat_type="error")
+
+        yield self.get_test_bug(
+                614181, r"app\.update\.timer",
+                "`app.update.timer` is incompatible with Gecko 6",
+                "The `app.update.timer` preference is being replaced by the "
+                "`app.update.timerMinimumDelay` preference in Gecko 6.",
+                compat_type="error")
+
+    def js_tests(self):
+        yield self.get_test_bug(
+                656433, r"['\"](javascript|data):",
+                "`javascript:`/`data:` URIs may be incompatible with Gecko 6",
+                "Loading `javascript:` and `data:` URIs through the location "
+                "bar may no longer work as expected in Gecko 6. If you load "
+                "these types of URIs, please test your add-on using the "
+                "latest builds of the applications that it targets.",
+                compat_type="warning", log_function=self.err.notice)
+
+
+@register_generator
+class Gecko7RegexTests(CompatRegexTestHelper):
+    """Regex tests for Gecko 7 updates."""
+
+    VERSION = FX7_DEFINITION
+
+    def tests(self):
+        interfaces = {"nsIDOMDocumentStyle": 658904,
+                      "nsIDOMNSDocument": 658906,
+                      "nsIDOM3TypeInfo": 660539,
+                      "nsIDOM3Node": 659053}
+        for interface, bug in interfaces.items():
+            yield self.get_test_bug(
+                    bug=bug,
+                    pattern=interface,
+                    title=DEP_INTERFACE,
+                    message=DEP_INTERFACE_DESC % (interface, 7),
+                    compat_type="error")
+
+        yield self.get_test_bug(
+                633266, "nsINavHistoryObserver",
+                "`nsINavHistoryObserver` interface has changed in Gecko 7",
+                "The `nsINavHistoryObserver` interface has change in Gecko 7. "
+                "Most function calls now require a GUID parameter. Please "
+                "refer to %s for more information." % NSINHS_LINK,
+                compat_type="error", log_function=self.err.notice)
+        yield self.get_test_bug(
+                617539, "nsIMarkupDocumentViewer_MOZILLA_2_0_BRANCH",
+                "`_MOZILLA_2_0_BRANCH` has been merged in Gecko 7",
+                "The `_MOZILLA_2_0_BRANCH` interfaces have been merged out. "
+                "You should now use the namespace without the "
+                "`_MOZILLA_2_0_BRANCH` suffix.", compat_type="warning")
+
+
+@register_generator
+class Gecko8RegexTests(CompatRegexTestHelper):
+    """Regex tests for Gecko 8 updates."""
+
+    VERSION = FX8_DEFINITION
+
+    def tests(self):
+        interfaces = {"nsISelection2": 672536,
+                      "nsISelection3": 672536}
+        for interface, bug in interfaces.items():
+            yield self.get_test_bug(
+                    bug=bug,
+                    pattern=interface,
+                    title=DEP_INTERFACE,
+                    message=DEP_INTERFACE_DESC % (interface, 8),
+                    compat_type="error")
+
+        NSIDWI_MDN = ("https://developer.mozilla.org/en/"
+                      "XPCOM_Interface_Reference/nsIDOMWindow")
+        yield self.get_test(
+                "nsIDOMWindowInternal", DEP_INTERFACE,
+                "The `nsIDOMWindowInternal` interface has been deprecated in "
+                "Gecko 8. You can use the `nsIDOMWindow` interface instead. "
+                "See %s for more information." % NSIDWI_MDN,
+                compat_type="warning")
+
+        ISO8601_MDC = ("https://developer.mozilla.org/en/JavaScript/Reference/"
+                       "Global_Objects/Date")
+        yield self.get_test(
+                "ISO8601DateUtils",
+                "`ISO8601DateUtils.jsm` was removed in Gecko 8",
+                "The `ISO8601DateUtils object is no longer available in Gecko "
+                "8. You can use the normal `Date` object instead. See %s"
+                "for more information." % ISO8601_MDC,
+                compat_type="error")
+
+
+@register_generator
+class Gecko9RegexTests(CompatRegexTestHelper):
+    """Regex tests for Gecko 8 updates."""
+
+    VERSION = FX9_DEFINITION
+
+    def tests(self):
+        yield self.get_test_bug(
+                679971, r"navigator\.taintEnabled",
+                "`navigator.taintEnabled` was removed in Gecko 9",
+                "The `taintEnabled` function is no longer available in Gecko "
+                "9. Since this function was only used for browser detection "
+                "and this doesn't belong in extension code, it should be "
+                "removed if possible.", compat_type="warning")
+
+        chrome_context_props = [r"\.nodePrincipal", r"\.documentURIObject",
+                                r"\.baseURIObject", ]
+        for property in chrome_context_props:
+            yield self.get_test_bug(
+                    660233, property,
+                    "`%s` only available in chrome contexts" % property,
+                    "The `%s` property is no longer accessible from untrusted "
+                    "scripts as of Gecko 9." % property,
+                    compat_type="warning", log_function=self.err.notice)
+
+        yield self.get_test_bug(
+                568971, r"nsIGlobalHistory3", DEP_INTERFACE,
+                DEP_INTERFACE_DESC % ("nsIGlobalHistory3", 9),
+                compat_type="warning")
+
+        # geo.wifi.* warnings
+        for pattern in ["geo.wifi.uri", r"geo.wifi.protocol", ]:
+            yield self.get_test_bug(
+                    689252, pattern.replace(".", r"\."),
+                    "`%s` removed in Gecko 9" % pattern,
+                    "The `geo.wifi.*` preferences are no longer created by "
+                    "default in Gecko 9. Reading them without testing for "
+                    "their presence can result in unexpected errors.",
+                    compat_type="error")
+
+
+@register_generator
+class Gecko11RegexTests(CompatRegexTestHelper):
+    """Regex tests for Gecko 11 updates."""
+
+    VERSION = FX11_DEFINITION
+
+    def tests(self):
+        yield self.get_test_bug(
+                700490, "nsICharsetResolver", DEP_INTERFACE,
+                DEP_INTERFACE_DESC % ("nsICharsetResolver", 11),
+                compat_type="error")
+
+        yield self.get_test_bug(
+                701875, r"omni\.jar",
+                "`omni.jar` renamed to `omni.ja` in Gecko 11",
+                "This add-on references `omni.jar`, which was renamed to "
+                "`omni.ja`. You should avoid referencing this file directly, "
+                "and at least update this reference for any versions that "
+                "support Gecko 11 and above.", compat_type="error")
+
+
+@register_generator
+class Gecko12RegexTests(CompatRegexTestHelper):
+    """Regex tests for Gecko 12 updates."""
+
+    VERSION = FX12_DEFINITION
+
+    def tests(self):
+        yield self.get_test_bug(
+                675221, "nsIProxyObjectManager", DEP_INTERFACE,
+                "This add-on uses nsIProxyObjectManager, which was removed in "
+                "Gecko 12.", compat_type="error")
+        yield self.get_test_bug(
+                713825, "documentCharsetInfo",
+                "Deprecated JavaScript property",
+                "documentCharsetInfo has been deprecated in Gecko 12 and "
+                "should no longer be used.", compat_type="error")
+        yield self.get_test_bug(
+                711838, "nsIJetpack(Service)?", DEP_INTERFACE,
+                "This add-on uses the Jetpack service, which was deprecated "
+                "long ago and is no longer included in Gecko 12. Please "
+                "update your add-on to use a more recent version of the "
+                "Add-ons SDK.", compat_type="error")
+
+        # `chromemargin`; bug 735876
+        yield self.get_test_bug(
+                735876, "chromemargin",
+                "`chromemargin` attribute changed in Gecko 12",
+                "This add-on uses the chromemargin attribute, which after "
+                "Gecko 12 will not work in the same way with values other "
+                "than 0 or -1.", compat_type="error",
+                log_function=self.err.notice)
+
+@register_generator
+class Gecko13RegexTests(CompatRegexTestHelper):
+    """Regex tests for Gecko 13 updates."""
+
+    VERSION = FX13_DEFINITION
 
     def tests(self):
         yield self.get_test_bug(
@@ -726,6 +680,6 @@ class Gecko13RegexTests(RegexTestGenerator):
                 "interface. While it will continue to work for the foreseeable "
                 "future, it is recommended that you change your code to use "
                 "nsIParserUtils as soon as possible.",
-                compat_type="warning")
+                compat_type="warning", log_function=self.err.notice)
 
 

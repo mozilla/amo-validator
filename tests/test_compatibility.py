@@ -199,14 +199,13 @@ def test_fx7_markupdocumentviewer():
     var x = "nsIMarkupDocumentViewer_MOZILLA_2_0_BRANCH";
     """)
     assert not err.failed()
-    assert not err.notices
     assert not any(err.compat_summary.values())
 
     err = _do_real_test_raw("""
     var x = "nsIMarkupDocumentViewer_MOZILLA_2_0_BRANCH";
     """, versions={FIREFOX_GUID: version_range("firefox", "7.0a1")})
-    assert not err.failed()
-    assert err.notices
+    assert not err.failed(fail_on_warnings=False)
+    assert err.warnings
     assert err.compat_summary["warnings"]
 
 
@@ -287,8 +286,8 @@ def test_fx8_compat():
     err = _do_real_test_raw("""
     var x = "nsIDOMWindowInternal";
     """, versions={FIREFOX_GUID: version_range("firefox", "8.0a1")})
-    assert not err.failed()
-    assert err.notices
+    assert not err.failed(fail_on_warnings=False)
+    assert err.warnings
     assert err.compat_summary["warnings"]
 
     err = _do_real_test_raw("""
@@ -301,7 +300,6 @@ def test_fx8_compat():
     var x = "ISO8601DateUtils";
     """, versions={FIREFOX_GUID: version_range("firefox", "8.0a1")})
     assert err.failed()
-    assert err.warnings
     assert err.compat_summary["errors"]
 
 
