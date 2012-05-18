@@ -991,6 +991,12 @@ def test_fx13_interfaces():
     assert not err.failed(fail_on_warnings=False)
     assert err.compat_summary["warnings"]
 
+    err = _do_real_test_raw("""
+    var x = Components.interfaces.nsIAccessNode;
+    """, versions={FIREFOX_GUID: version_range("firefox", "13.0a1")})
+    assert not err.failed(fail_on_warnings=False)
+    assert err.compat_summary["errors"]
+
 
 def test_globalStorage_flagged():
     """

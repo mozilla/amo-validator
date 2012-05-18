@@ -549,6 +549,11 @@ class Gecko13RegexTests(CompatRegexTestHelper):
                 "future, it is recommended that you change your code to use "
                 "nsIParserUtils as soon as possible.",
                 compat_type="warning", log_function=self.err.notice)
+        yield self.get_test_bug(
+                672507, "nsIAccessNode", DEP_INTERFACE,
+                "The `nsIAccessNode` interface has been merged into "
+                "`nsIAccessible`. You should use that interface instead.",
+                compat_type="error")
 
         GLOBALSTORAGE_URL = ("https://developer.mozilla.org/en/XUL_School/"
                              "Local_Storage")
