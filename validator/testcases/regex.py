@@ -113,10 +113,8 @@ class GenericRegexTests(RegexTestGenerator):
     """Test for generic, banned patterns in a document being scanned."""
 
     def tests(self):
-        yield self.get_test(
-                r"globalStorage\[.*\].password",
-                "`globalStorage` may be storing passwords",
-                "`globalStorage` should not be used to store passwords.")
+        # globalStorage.(.+)password test removed for bug 752740
+
         yield self.get_test(
                 r"launch\(\)",
                 "`launch()` disallowed",
@@ -551,6 +549,15 @@ class Gecko13RegexTests(CompatRegexTestHelper):
                 "future, it is recommended that you change your code to use "
                 "nsIParserUtils as soon as possible.",
                 compat_type="warning", log_function=self.err.notice)
+
+        GLOBALSTORAGE_URL = ("https://developer.mozilla.org/en/XUL_School/"
+                             "Local_Storage")
+        yield self.get_test_bug(
+                687579, "globalStorage",
+                "`globalStorage` removed in Gecko 13",
+                "As of Gecko 13, the `globalStorage` object has been removed. "
+                "See %s for alternatives." % GLOBALSTORAGE_URL,
+                compat_type="error")
 
 
 @register_generator
