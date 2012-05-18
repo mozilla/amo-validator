@@ -1,68 +1,45 @@
 from validator.decorator import version_range
+from validator.constants import (FIREFOX_GUID, FENNEC_GUID,
+                                 THUNDERBIRD_GUID as TB_GUID, ANDROID_GUID)
 
 
 # Compatibility app/version ranges:
-FX4_DEFINITION = {"{ec8030f7-c20a-464f-9b0e-13a3a9e97384}":
-                      version_range("firefox", "3.7a1pre", "5.0a2"),
-                  "{a23983c0-fd0e-11dc-95ff-0800200c9a66}":
-                      version_range("fennec", "4.0b1pre", "5.0a2")}
-FX5_DEFINITION = {"{ec8030f7-c20a-464f-9b0e-13a3a9e97384}":
-                      version_range("firefox", "5.0a2", "6.0a1"),
-                  "{a23983c0-fd0e-11dc-95ff-0800200c9a66}":
-                      version_range("fennec", "5.0a2", "6.0a1")}
-FX6_DEFINITION = {"{ec8030f7-c20a-464f-9b0e-13a3a9e97384}":
-                      version_range("firefox", "6.0a1", "7.0a1"),
-                  "{a23983c0-fd0e-11dc-95ff-0800200c9a66}":
-                      version_range("fennec", "6.0a1", "7.0a1")}
-FX7_DEFINITION = {"{ec8030f7-c20a-464f-9b0e-13a3a9e97384}":
-                      version_range("firefox", "7.0a1", "8.0a1"),
-                  "{a23983c0-fd0e-11dc-95ff-0800200c9a66}":
-                      version_range("fennec", "7.0a1", "8.0a1"),
-                  "{3550f703-e582-4d05-9a08-453d09bdfdc6}":
-                      version_range("thunderbird", "7.0a1", "8.0a1")}
-FX8_DEFINITION = {"{ec8030f7-c20a-464f-9b0e-13a3a9e97384}":
-                      version_range("firefox", "8.0a1", "9.0a1"),
-                  "{a23983c0-fd0e-11dc-95ff-0800200c9a66}":
-                      version_range("fennec", "8.0a1", "9.0a1"),
-                  "{3550f703-e582-4d05-9a08-453d09bdfdc6}":
-                      version_range("thunderbird", "8.0a1", "9.0a1")}
-FX9_DEFINITION = {"{ec8030f7-c20a-464f-9b0e-13a3a9e97384}":
-                      version_range("firefox", "9.0a1", "10.0a1"),
-                  "{a23983c0-fd0e-11dc-95ff-0800200c9a66}":
-                      version_range("fennec", "9.0a1", "10.0a1"),
-                  "{3550f703-e582-4d05-9a08-453d09bdfdc6}":
-                      version_range("thunderbird", "9.0a1", "10.0a1")}
-FX10_DEFINITION = {"{ec8030f7-c20a-464f-9b0e-13a3a9e97384}":
-                       version_range("firefox", "10.0a1", "11.0a1"),
-                   "{a23983c0-fd0e-11dc-95ff-0800200c9a66}":
-                       version_range("fennec", "10.0a1", "11.0a1"),
-                   "{aa3c5121-dab2-40e2-81ca-7ea25febc110}":
-                       version_range("android", "10.0a1", "11.0a1"),
-                   "{3550f703-e582-4d05-9a08-453d09bdfdc6}":
-                       version_range("thunderbird", "10.0a1", "11.0a1")}
-FX11_DEFINITION = {"{ec8030f7-c20a-464f-9b0e-13a3a9e97384}":
-                       version_range("firefox", "11.0a1", "12.0a1"),
-                   "{a23983c0-fd0e-11dc-95ff-0800200c9a66}":
-                       version_range("fennec", "11.0a1", "12.0a1"),
-                   "{aa3c5121-dab2-40e2-81ca-7ea25febc110}":
-                       version_range("android", "11.0a1", "12.0a1"),
-                   "{3550f703-e582-4d05-9a08-453d09bdfdc6}":
-                       version_range("thunderbird", "11.0a1", "12.0a1")}
-FX12_DEFINITION = {"{ec8030f7-c20a-464f-9b0e-13a3a9e97384}":
-                       version_range("firefox", "12.0a1", "13.0a1"),
-                   "{a23983c0-fd0e-11dc-95ff-0800200c9a66}":
-                       version_range("fennec", "12.0a1", "13.0a1"),
-                   "{aa3c5121-dab2-40e2-81ca-7ea25febc110}":
-                       version_range("android", "12.0a1", "13.0a1"),
-                   "{3550f703-e582-4d05-9a08-453d09bdfdc6}":
-                       version_range("thunderbird", "12.0a1", "13.0a1")}
+FX4_DEFINITION = {FIREFOX_GUID: version_range("firefox", "3.7a1pre", "5.0a2"),
+                  FENNEC_GUID: version_range("fennec", "4.0b1pre", "5.0a2")}
+FX5_DEFINITION = {FIREFOX_GUID: version_range("firefox", "5.0a2", "6.0a1"),
+                  FENNEC_GUID: version_range("fennec", "5.0a2", "6.0a1")}
+
+# Starting with FX6, the version number coalesced, so we can use a simple
+# helper to build these out.
+def _build_definition(maj_version_num, firefox=True, fennec=True,
+                      thunderbird=True, android=False):
+    definition = {}
+    app_version_range = (lambda app:
+                             version_range(app,
+                                           "%d.0a1" % maj_version_num,
+                                           "%d.0a1" % (maj_version_num + 1)))
+    if firefox:
+        definition[FIREFOX_GUID] = app_version_range("firefox")
+    if fennec:
+        definition[FENNEC_GUID] = app_version_range("fennec")
+    if thunderbird:
+        definition[TB_GUID] = app_version_range("thunderbird")
+    if android:
+        definition[ANDROID_GUID] = app_version_range("android")
+
+    return definition
 
 
-TB7_DEFINITION = {"{3550f703-e582-4d05-9a08-453d09bdfdc6}":
-                      version_range("thunderbird", "7.0a1", "8.0a1")}
-TB10_DEFINITION = {"{3550f703-e582-4d05-9a08-453d09bdfdc6}":
-                      version_range("thunderbird", "10.0a1", "11.0a1")}
-TB11_DEFINITION = {"{3550f703-e582-4d05-9a08-453d09bdfdc6}":
-                      version_range("thunderbird", "11.0a1", "12.0a1")}
-TB12_DEFINITION = {"{3550f703-e582-4d05-9a08-453d09bdfdc6}":
-                      version_range("thunderbird", "12.0a1", "13.0a1")}
+FX6_DEFINITION = _build_definition(6, thunderbird=False)
+FX7_DEFINITION = _build_definition(7)
+FX8_DEFINITION = _build_definition(8)
+FX9_DEFINITION = _build_definition(9)
+FX10_DEFINITION = _build_definition(10, android=True)
+FX11_DEFINITION = _build_definition(11, android=True)
+FX12_DEFINITION = _build_definition(12, android=True)
+FX13_DEFINITION = _build_definition(13, android=True)
+
+TB7_DEFINITION = {TB_GUID: version_range("thunderbird", "7.0a1", "8.0a1")}
+TB10_DEFINITION = {TB_GUID: version_range("thunderbird", "10.0a1", "11.0a1")}
+TB11_DEFINITION = {TB_GUID: version_range("thunderbird", "11.0a1", "12.0a1")}
+TB12_DEFINITION = {TB_GUID: version_range("thunderbird", "12.0a1", "13.0a1")}

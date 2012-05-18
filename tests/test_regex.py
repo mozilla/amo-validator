@@ -96,7 +96,8 @@ def test_app_update_timer():
     var f = app.update.timer;
     """, versions={"{ec8030f7-c20a-464f-9b0e-13a3a9e97384}":
                        version_range("firefox", "6.0a1")})
-    assert not err.failed()
+    assert not err.failed(fail_on_warnings=False)
+    assert err.warnings
     assert err.compat_summary["errors"]
 
 

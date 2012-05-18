@@ -6,6 +6,7 @@ import types
 import spidermonkey
 import instanceactions
 import instanceproperties
+from validator.constants import FENNEC_GUID, FIREFOX_GUID
 from validator.decorator import version_range
 from jstypes import *
 
@@ -464,9 +465,9 @@ def _readonly_top(t, r, rn):
         line=t.line,
         column=t.position,
         context=t.context,
-        for_appversions={'{ec8030f7-c20a-464f-9b0e-13a3a9e97384}':
+        for_appversions={FIREFOX_GUID:
                              version_range("firefox", "6.0a1", "7.0a1"),
-                         '{a23983c0-fd0e-11dc-95ff-0800200c9a66}':
+                         FENNEC_GUID:
                              version_range("fennec", "6.0a1", "7.0a1")},
         compatibility_type="warning",
         tier=5)
