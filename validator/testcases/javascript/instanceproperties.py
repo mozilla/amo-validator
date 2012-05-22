@@ -148,7 +148,6 @@ OBJECT_DEFINITIONS = {"_endMarker": {"get": startendMarker,
                                        "set": startendMarker},
                       "innerHTML": {"set": set_innerHTML},
                       "outerHTML": {"set": set_outerHTML},
-                      "innerAdjacentHTML": {"set": set_innerHTML},
                       "isElementContentWhitespace":
                           {"get": get_isElementContentWhitespace},
                       "xmlEncoding": _get_xml("xmlEncoding"),

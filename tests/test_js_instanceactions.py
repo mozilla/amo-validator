@@ -77,3 +77,27 @@ def test_callexpression_argument_traversal():
     }});
     """).failed()
 
+
+def test_insertAdjacentHTML():
+    """Test that insertAdjacentHTML works the same as innerHTML."""
+
+    assert not _do_test_raw("""
+    var x = foo();
+    x.insertAdjacentHTML("foo bar", "<div></div>");
+    """).failed()
+
+    assert _do_test_raw("""
+    var x = foo();
+    x.insertAdjacentHTML("foo bar", "<div onclick=\\"foo\\"></div>");
+    """).failed()
+
+    # Test without declaration
+    assert _do_test_raw("""
+    x.insertAdjacentHTML("foo bar", "<div onclick=\\"foo\\"></div>");
+    """).failed()
+
+    assert _do_test_raw("""
+    var x = foo();
+    x.insertAdjacentHTML("foo bar", "x" + y);
+    """).failed()
+
