@@ -1,6 +1,7 @@
 from nose.tools import eq_
 
 import validator.constants
+from validator.constants import FIREFOX_GUID, THUNDERBIRD_GUID as TB_GUID
 from validator.decorator import version_range
 from validator.testcases.markup.markuptester import MarkupParser
 import validator.testcases.scripting as scripting
@@ -47,8 +48,7 @@ def test_navigator_language():
 
     err = _do_real_test_raw("""
     alert(navigator.language);
-    """, versions={'{ec8030f7-c20a-464f-9b0e-13a3a9e97384}':
-                    version_range("firefox", "5.0")})
+    """, versions={FIREFOX_GUID: version_range("firefox", "5.0")})
     assert not err.failed()
     assert err.compat_summary["errors"]
 
@@ -70,8 +70,7 @@ def test_menu_item_compat():
             assert not err.failed()
             return err
 
-        err = test({"{ec8030f7-c20a-464f-9b0e-13a3a9e97384}":
-                        version_range("firefox", "6.0a1")})
+        err = test({FIREFOX_GUID: version_range("firefox", "6.0a1")})
         if should_fail:
             assert err.notices
             assert err.compat_summary["warnings"]
@@ -118,8 +117,7 @@ def test_window_top():
 
     err = _do_real_test_raw("""
     window.top = "foo";
-    """, versions={'{ec8030f7-c20a-464f-9b0e-13a3a9e97384}':
-                       version_range("firefox", "6.0a1")})
+    """, versions={FIREFOX_GUID: version_range("firefox", "6.0a1")})
     print err.print_summary(verbose=True)
     assert not err.failed()
     assert err.notices
@@ -127,8 +125,7 @@ def test_window_top():
 
     err = _do_real_test_raw("""
     top = "foo";
-    """, versions={'{ec8030f7-c20a-464f-9b0e-13a3a9e97384}':
-                       version_range("firefox", "6.0a1")})
+    """, versions={FIREFOX_GUID: version_range("firefox", "6.0a1")})
     print err.print_summary(verbose=True)
     assert not err.failed()
     assert err.notices
@@ -150,8 +147,7 @@ def test_custom_addon_types():
 
     err = _do_real_test_raw("""
     AddonManagerPrivate.registerProvider();
-    """, versions={'{ec8030f7-c20a-464f-9b0e-13a3a9e97384}':
-                       version_range("firefox", "6.0a1")})
+    """, versions={FIREFOX_GUID: version_range("firefox", "6.0a1")})
     print err.print_summary(verbose=True)
     assert not err.failed()
     assert err.notices
@@ -172,8 +168,7 @@ def test_fx7_regex_xpcom():
 
     err = _do_real_test_raw("""
     var x = "nsIDOMDocumentStyle";
-    """, versions={'{ec8030f7-c20a-464f-9b0e-13a3a9e97384}':
-                       version_range("firefox", "7.0a1")})
+    """, versions={FIREFOX_GUID: version_range("firefox", "7.0a1")})
     assert err.failed()
     assert len(err.warnings) == 1
     assert err.compat_summary["errors"]
@@ -191,8 +186,7 @@ def test_fx7_nsinavhistoryobserver():
 
     err = _do_real_test_raw("""
     var x = "nsINavHistoryObserver";
-    """, versions={'{ec8030f7-c20a-464f-9b0e-13a3a9e97384}':
-                       version_range("firefox", "7.0a1")})
+    """, versions={FIREFOX_GUID: version_range("firefox", "7.0a1")})
     assert not err.failed()
     assert err.notices
     assert err.compat_summary["errors"]
@@ -205,15 +199,13 @@ def test_fx7_markupdocumentviewer():
     var x = "nsIMarkupDocumentViewer_MOZILLA_2_0_BRANCH";
     """)
     assert not err.failed()
-    assert not err.notices
     assert not any(err.compat_summary.values())
 
     err = _do_real_test_raw("""
     var x = "nsIMarkupDocumentViewer_MOZILLA_2_0_BRANCH";
-    """, versions={'{ec8030f7-c20a-464f-9b0e-13a3a9e97384}':
-                       version_range("firefox", "7.0a1")})
-    assert not err.failed()
-    assert err.notices
+    """, versions={FIREFOX_GUID: version_range("firefox", "7.0a1")})
+    assert not err.failed(fail_on_warnings=False)
+    assert err.warnings
     assert err.compat_summary["warnings"]
 
 
@@ -233,8 +225,7 @@ def test_fx7_nsIDOMFile():
     var x = Components.classes["foo"].createInstance(
         Components.interfaces.nsIDOMFile);
     x.getAsDataURL();
-    """, versions={'{ec8030f7-c20a-464f-9b0e-13a3a9e97384}':
-                       version_range("firefox", "7.0a1")})
+    """, versions={FIREFOX_GUID: version_range("firefox", "7.0a1")})
     assert not err.failed(fail_on_warnings=False)
     assert len(err.notices) == 1
     assert err.compat_summary["errors"]
@@ -242,8 +233,7 @@ def test_fx7_nsIDOMFile():
     err = _do_real_test_raw("""
     var x = document.getElementById("whatever");
     x.getAsDataURL();
-    """, versions={'{ec8030f7-c20a-464f-9b0e-13a3a9e97384}':
-                       version_range("firefox", "7.0a1")})
+    """, versions={FIREFOX_GUID: version_range("firefox", "7.0a1")})
     assert not err.failed()
     assert len(err.notices) == 1
     assert err.compat_summary["errors"]
@@ -265,8 +255,7 @@ def test_fx7_nsIJSON():
     var x = Components.classes["foo"].createInstance(
         Components.interfaces.nsIJSON);
     x.encode();
-    """, versions={'{ec8030f7-c20a-464f-9b0e-13a3a9e97384}':
-                       version_range("firefox", "7.0a1")})
+    """, versions={FIREFOX_GUID: version_range("firefox", "7.0a1")})
     assert not err.failed(fail_on_warnings=False)
     assert len(err.notices) == 1
     assert err.compat_summary["warnings"]
@@ -283,8 +272,7 @@ def test_fx8_compat():
 
     err = _do_real_test_raw("""
     var x = "nsISelection2";
-    """, versions={'{ec8030f7-c20a-464f-9b0e-13a3a9e97384}':
-                       version_range("firefox", "8.0a1")})
+    """, versions={FIREFOX_GUID: version_range("firefox", "8.0a1")})
     assert err.failed()
     assert err.warnings
     assert err.compat_summary["errors"]
@@ -297,10 +285,9 @@ def test_fx8_compat():
 
     err = _do_real_test_raw("""
     var x = "nsIDOMWindowInternal";
-    """, versions={'{ec8030f7-c20a-464f-9b0e-13a3a9e97384}':
-                       version_range("firefox", "8.0a1")})
-    assert not err.failed()
-    assert err.notices
+    """, versions={FIREFOX_GUID: version_range("firefox", "8.0a1")})
+    assert not err.failed(fail_on_warnings=False)
+    assert err.warnings
     assert err.compat_summary["warnings"]
 
     err = _do_real_test_raw("""
@@ -311,10 +298,8 @@ def test_fx8_compat():
 
     err = _do_real_test_raw("""
     var x = "ISO8601DateUtils";
-    """, versions={'{ec8030f7-c20a-464f-9b0e-13a3a9e97384}':
-                       version_range("firefox", "8.0a1")})
+    """, versions={FIREFOX_GUID: version_range("firefox", "8.0a1")})
     assert err.failed()
-    assert err.warnings
     assert err.compat_summary["errors"]
 
 
@@ -325,8 +310,7 @@ def futureCompatWarning(code, version, fails=True):
 
     err = _do_real_test_raw(
         code,
-        versions={'{ec8030f7-c20a-464f-9b0e-13a3a9e97384}':
-                      version_range("firefox", version)})
+        versions={FIREFOX_GUID: version_range("firefox", version)})
     if fails:
         assert err.failed()
     else:
@@ -342,8 +326,7 @@ def futureCompatError(code, version):
 
     err = _do_real_test_raw(
         code,
-        versions={'{ec8030f7-c20a-464f-9b0e-13a3a9e97384}':
-                      version_range("firefox", version)})
+        versions={FIREFOX_GUID: version_range("firefox", version)})
     print err.print_summary()
     assert err.failed()
     assert err.compat_summary["errors"]
@@ -382,7 +365,8 @@ def test_fx9_nsIURLParser_parsePath():
     """
     futureCompatError(
         """
-        var URLi = Components.classes["@mozilla.org/network/url-parser;1?auth=maybe"].
+        var URLi = Components.classes[
+                        "@mozilla.org/network/url-parser;1?auth=maybe"].
                        createInstance(Components.interfaces.nsIURLParser);
         var filepathPos = {}, filepathLen = {}, paramPos = {}, paramLen = {},
             queryPos = {}, queryLen = {}, refPos = {}, refLen = {};
@@ -393,15 +377,15 @@ def test_fx9_nsIURLParser_parsePath():
 
     err = _do_real_test_raw(
         """
-        var URLi = Components.classes["@mozilla.org/network/url-parser;1?auth=maybe"].
+        var URLi = Components.classes[
+                        "@mozilla.org/network/url-parser;1?auth=maybe"].
                        createInstance(Components.interfaces.nsIURLParser);
         var filepathPos = {}, filepathLen = {}, queryPos = {}, queryLen = {},
             refPos = {}, refLen = {};
         URLi.parsePath(urlObj.path, -1, filepathPos, filepathLen, queryPos,
                        queryLen, refPos, refLen);
         """,
-        versions={'{ec8030f7-c20a-464f-9b0e-13a3a9e97384}':
-                      version_range("firefox", "9.0a1")})
+        versions={FIREFOX_GUID: version_range("firefox", "9.0a1")})
     assert not err.failed(fail_on_warnings=False)
     assert not err.compat_summary["errors"]
 
@@ -410,13 +394,11 @@ def test_fx9_nsIURL_param():
     """
     nsIURL.param no longer exists in Firefox 9.
     """
-    futureCompatError(
-        """
-        var myURI = {};
-        var myURL = myURI.QueryInterface(Components.interfaces.nsIURL);
-        alert(myURL.param);
-        """,
-        '9.0a1')
+    futureCompatError("""
+    var myURI = {};
+    var myURL = myURI.QueryInterface(Components.interfaces.nsIURL);
+    alert(myURL.param);
+    """, '9.0a1')
 
 
 def test_fx9_nsIBrowserHistory_removePages():
@@ -442,8 +424,7 @@ def test_fx9_nsIBrowserHistory_removePages():
                                  Components.interfaces.nsIBrowserHistory);
         browserHistory.removePages(uriList, uriList.length);
         """,
-        versions={'{ec8030f7-c20a-464f-9b0e-13a3a9e97384}':
-                      version_range("firefox", "9.0a1")})
+        versions={FIREFOX_GUID: version_range("firefox", "9.0a1")})
     assert not err.failed(fail_on_warnings=False)
     assert not err.compat_summary["errors"]
 
@@ -512,8 +493,7 @@ def test_fx9_nsIEditor_updateDefaultDictionary():
                                Components.interfaces.nsIEditorSpellCheck);
         spellChecker.UpdateCurrentDictionary();
         """,
-        versions={'{ec8030f7-c20a-464f-9b0e-13a3a9e97384}':
-                      version_range("firefox", "9.0a1")})
+        versions={FIREFOX_GUID: version_range("firefox", "9.0a1")})
     assert not err.failed(fail_on_warnings=False)
     assert not err.compat_summary["errors"]
 
@@ -551,8 +531,7 @@ def test_tb6_nsIImapMailFolderSink():
     var x = Components.classes["foo"].createInstance(
         Components.interfaces.nsIImapMailFolderSink);
     x.setUrlState();
-    """, versions={'{3550f703-e582-4d05-9a08-453d09bdfdc6}':
-                       version_range("thunderbird", "6.0a1")})
+    """, versions={TB_GUID: version_range("thunderbird", "6.0a1")})
     assert not err.failed(fail_on_warnings=False)
     assert len(err.notices) == 1
     assert err.compat_summary["errors"]
@@ -574,8 +553,7 @@ def test_tb6_nsIImapProtocol():
     var x = Components.classes["foo"].createInstance(
         Components.interfaces.nsIImapProtocol);
     x.NotifyHdrsToDownload();
-    """, versions={'{3550f703-e582-4d05-9a08-453d09bdfdc6}':
-                       version_range("thunderbird", "6.0a1")})
+    """, versions={TB_GUID: version_range("thunderbird", "6.0a1")})
     assert not err.failed(fail_on_warnings=False)
     assert len(err.notices) == 1
     assert err.compat_summary["errors"]
@@ -593,8 +571,7 @@ def test_flag_getSelection():
 
     err = _do_real_test_raw("""
     var x = document.getSelection();
-    """, versions={'{ec8030f7-c20a-464f-9b0e-13a3a9e97384}':
-                       version_range("firefox", "8.0a1", "9.0a1")})
+    """, versions={FIREFOX_GUID: version_range("firefox", "8.0a1", "9.0a1")})
     assert not err.failed()
     assert len(err.notices) == 1
     assert err.compat_summary["errors"]
@@ -616,8 +593,7 @@ def test_tb7_nsIMsgThread():
     var x = Components.classes["foo"].createInstance(
         Components.interfaces.nsIMsgThread);
     x.GetChildAt();
-    """, versions={'{3550f703-e582-4d05-9a08-453d09bdfdc6}':
-                       version_range("thunderbird", "7.0a1")})
+    """, versions={TB_GUID: version_range("thunderbird", "7.0a1")})
     assert not err.failed(fail_on_warnings=False)
     assert len(err.notices) == 1
     assert err.compat_summary["errors"]
@@ -645,8 +621,7 @@ def test_tb7_mail_attachment_api():
     openAttachment();
     detachAttachment();
     cloneAttachment();
-    """, versions={'{3550f703-e582-4d05-9a08-453d09bdfdc6}':
-                       version_range("thunderbird", "7.0a1")})
+    """, versions={TB_GUID: version_range("thunderbird", "7.0a1")})
     assert not err.failed()
     assert len(err.notices) == 6
     assert err.compat_summary["errors"]
@@ -663,8 +638,7 @@ def test_tb7_dictUtils_removal():
 
     err = _do_real_test_raw("""
     var x = 'Components.utils.import("resource:///modules/dictUtils.js");';
-    """, versions={'{3550f703-e582-4d05-9a08-453d09bdfdc6}':
-                       version_range("thunderbird", "7.0a1")})
+    """, versions={TB_GUID: version_range("thunderbird", "7.0a1")})
     assert err.failed()
     assert err.warnings
     assert err.compat_summary["errors"]
@@ -680,22 +654,20 @@ def test_tb7_deRDF_addressbook():
 
     err = _do_real_test_raw("""
     var x = 'datasources="rdf:addressdirectory" ref="moz-abdirectory://"';
-    """, versions={'{3550f703-e582-4d05-9a08-453d09bdfdc6}':
-                       version_range("thunderbird", "7.0a1")})
+    """, versions={TB_GUID: version_range("thunderbird", "7.0a1")})
     assert not err.failed()
     assert err.notices
     assert err.compat_summary["errors"]
 
     err = _do_real_test_raw("""
-    var x = 'GetResource(SomeText)    .  QueryInterface(6inTestxnsIAbDirectory);';
+    var x = 'GetResource(SomeText).QueryInterface(6inTestxnsIAbDirectory);';
     """)
     assert not err.failed()
     assert not err.notices
 
     err = _do_real_test_raw("""
-    var x = "GetResource(SomeText)  .  QueryInterface(Some8678StuffnsIAbDirectory)";
-    """, versions={'{3550f703-e582-4d05-9a08-453d09bdfdc6}':
-                       version_range("thunderbird", "7.0a1")})
+    var x = "GetResource(SomeText).QueryInterface(Some8678StuffnsIAbDirectory)";
+    """, versions={TB_GUID: version_range("thunderbird", "7.0a1")})
     assert not err.failed()
     assert err.notices
     assert err.compat_summary["errors"]
@@ -719,15 +691,17 @@ def test_tb8_nsIMsgSearchScopeTerm():
         Components.interfaces.nsIMsgSearchScopeTerm);
     x.mailFile();
     x.inputStream();
-    """, versions={'{3550f703-e582-4d05-9a08-453d09bdfdc6}':
-                       version_range("thunderbird", "8.0a1")})
+    """, versions={TB_GUID: version_range("thunderbird", "8.0a1")})
     assert not err.failed(fail_on_warnings=False)
     assert len(err.notices) == 2
     assert err.compat_summary["errors"]
 
 
 def test_tb9_compatibility():
-    """Test that gComposeBundle, FocusOnFirstAttachment, WhichPaneHasFocus are flagged."""
+    """
+    Test that gComposeBundle, FocusOnFirstAttachment, WhichPaneHasFocus are
+    flagged.
+    """
 
     err = _do_real_test_raw("""
     var x = "";
@@ -744,8 +718,7 @@ def test_tb9_compatibility():
     x = gComposeBundle();
     FocusOnFirstAttachment();
     WhichPaneHasFocus();
-    """, versions={'{3550f703-e582-4d05-9a08-453d09bdfdc6}':
-                       version_range("thunderbird", "9.0a1")})
+    """, versions={TB_GUID: version_range("thunderbird", "9.0a1")})
     assert not err.failed(fail_on_warnings=False)
     assert len(err.notices) == 3
     assert err.compat_summary["errors"]
@@ -836,8 +809,7 @@ def test_tb10_compatibility():
     AddMessageComposeOfflineObserver();
     RemoveMessageComposeOfflineObserver();
     x = gDownloadManagerStrings.get();
-    """, versions={'{3550f703-e582-4d05-9a08-453d09bdfdc6}':
-                       version_range("thunderbird", "10.0a1")})
+    """, versions={TB_GUID: version_range("thunderbird", "10.0a1")})
     assert err.failed()
     assert len(err.warnings) == 1
     assert len(err.notices) == 4
@@ -855,8 +827,7 @@ def test_fx11_compatibility():
 
     err = _do_real_test_raw("""
     var x = "nsICharsetResolver";
-    """, versions={'{ec8030f7-c20a-464f-9b0e-13a3a9e97384}':
-                       version_range("firefox", "11.0a1")})
+    """, versions={FIREFOX_GUID: version_range("firefox", "11.0a1")})
     assert err.failed()
     assert err.warnings
     assert err.compat_summary["errors"]
@@ -875,8 +846,7 @@ def test_fx11_omni_jar():
 
     err = _do_real_test_raw("""
     var x = "omni.jar";
-    """, versions={'{ec8030f7-c20a-464f-9b0e-13a3a9e97384}':
-                       version_range("firefox", "11.0a1")})
+    """, versions={FIREFOX_GUID: version_range("firefox", "11.0a1")})
     assert not err.failed(fail_on_warnings=False)
     assert err.warnings
     assert err.compat_summary["errors"]
@@ -906,8 +876,7 @@ def test_tb11_compatibility():
     var y = Components.classes["foo"].createInstance(
         Components.interfaces.nsIMailtoUrl);
     y.GetMessageContents();
-    """, versions={'{3550f703-e582-4d05-9a08-453d09bdfdc6}':
-                       version_range("thunderbird", "11.0a1")})
+    """, versions={TB_GUID: version_range("thunderbird", "11.0a1")})
     assert err.failed
     assert len(err.notices) == 2
     assert err.compat_summary["errors"]
@@ -937,8 +906,7 @@ def test_tb12_compatibility():
     var y = Components.classes["foo"].createInstance(
         Components.interfaces.nsIMsgDatabase);
     y.Open();
-    """, versions={'{3550f703-e582-4d05-9a08-453d09bdfdc6}':
-                       version_range("thunderbird", "12.0a1")})
+    """, versions={TB_GUID: version_range("thunderbird", "12.0a1")})
     assert err.failed
     assert len(err.notices) == 2
     assert err.compat_summary["errors"]
@@ -951,14 +919,12 @@ def test_requestAnimationFrame():
 
     err = _do_real_test_raw("""
     requestAnimationFrame(foo);
-    """, versions={'{ec8030f7-c20a-464f-9b0e-13a3a9e97384}':
-                       version_range("firefox", "11.0a1")})
+    """, versions={FIREFOX_GUID: version_range("firefox", "11.0a1")})
     assert not err.failed()
 
     err = _do_real_test_raw("""
     requestAnimationFrame();
-    """, versions={'{ec8030f7-c20a-464f-9b0e-13a3a9e97384}':
-                       version_range("firefox", "11.0a1")})
+    """, versions={FIREFOX_GUID: version_range("firefox", "11.0a1")})
     assert err.failed()
     assert err.compat_summary["errors"]
 
@@ -970,8 +936,7 @@ def test_fx12_interfaces():
     """
     err = _do_real_test_raw("""
     var x = '<foo chromemargin="1">';
-    """, versions={'{ec8030f7-c20a-464f-9b0e-13a3a9e97384}':
-                       version_range("firefox", "12.0a1")})
+    """, versions={FIREFOX_GUID: version_range("firefox", "12.0a1")})
     assert not err.failed()
     assert not err.warnings
     assert err.notices
@@ -979,29 +944,136 @@ def test_fx12_interfaces():
 
     err = _do_real_test_raw("""
     var x = window.documentCharsetInfo;
-    """, versions={'{ec8030f7-c20a-464f-9b0e-13a3a9e97384}':
-                       version_range("firefox", "12.0a1")})
+    """, versions={FIREFOX_GUID: version_range("firefox", "12.0a1")})
     assert not err.failed(fail_on_warnings=False)
     assert err.compat_summary["errors"]
 
     err = _do_real_test_raw("""
     var x = Components.interfaces.nsIJetpack;
-    """, versions={'{ec8030f7-c20a-464f-9b0e-13a3a9e97384}':
-                       version_range("firefox", "12.0a1")})
+    """, versions={FIREFOX_GUID: version_range("firefox", "12.0a1")})
     assert not err.failed(fail_on_warnings=False)
     assert err.compat_summary["errors"]
 
     err = _do_real_test_raw("""
     var x = Components.interfaces.nsIJetpackService;
-    """, versions={'{ec8030f7-c20a-464f-9b0e-13a3a9e97384}':
-                       version_range("firefox", "12.0a1")})
+    """, versions={FIREFOX_GUID: version_range("firefox", "12.0a1")})
     assert not err.failed(fail_on_warnings=False)
     assert err.compat_summary["errors"]
 
     err = _do_real_test_raw("""
     var x = Components.interfaces.nsIProxyObjectManager;
-    """, versions={'{ec8030f7-c20a-464f-9b0e-13a3a9e97384}':
-                       version_range("firefox", "12.0a1")})
+    """, versions={FIREFOX_GUID: version_range("firefox", "12.0a1")})
     assert not err.failed(fail_on_warnings=False)
+    assert err.compat_summary["errors"]
+
+
+def test_fx13_interfaces():
+    """
+    Test that the Gecko 13 compatibility warnings and errors for matched
+    patterns are thrown when they're supposed to.
+    """
+
+    err = _do_real_test_raw("""
+    var x = Components.interfaces.nsILivemarkService;
+    """, versions={FIREFOX_GUID: version_range("firefox", "13.0a1")})
+    assert not err.failed(fail_on_warnings=False)
+    assert err.compat_summary["errors"]
+
+    err = _do_real_test_raw("""
+    var x = Components.interfaces.nsIPrefBranch2;
+    """, versions={FIREFOX_GUID: version_range("firefox", "13.0a1")})
+    assert not err.failed(fail_on_warnings=False)
+    assert err.compat_summary["warnings"]
+
+    err = _do_real_test_raw("""
+    var x = Components.interfaces.nsIScriptableUnescapeHTML;
+    """, versions={FIREFOX_GUID: version_range("firefox", "13.0a1")})
+    assert not err.failed(fail_on_warnings=False)
+    assert err.compat_summary["warnings"]
+
+    err = _do_real_test_raw("""
+    var x = Components.interfaces.nsIAccessNode;
+    """, versions={FIREFOX_GUID: version_range("firefox", "13.0a1")})
+    assert not err.failed(fail_on_warnings=False)
+    assert err.compat_summary["errors"]
+
+
+def test_globalStorage_flagged():
+    """
+    Test that all references to `globalStorage` are flagged with a warning and
+    a compatibility error.
+    """
+
+    err = _do_real_test_raw("""
+    var x = window.globalStorage["foo"];
+    """)
+    assert not err.failed()
+
+    err = _do_real_test_raw("""
+    var x = window.globalStorage["foo"];
+    """, versions={FIREFOX_GUID: version_range("firefox", "13.0a1")})
+    assert err.failed()
+    assert err.compat_summary["errors"]
+
+
+def test_excludeItemsIfParentHasAnnotation():
+    """
+    Test that `excludeItemsIfParentHasAnnotation` is flagged for Gecko 13.
+    """
+
+    err = _do_real_test_raw("""
+    var x = window.excludeItemsIfParentHasAnnotation;
+    """)
+    assert not err.failed()
+
+    err = _do_real_test_raw("""
+    var x = window.excludeItemsIfParentHasAnnotation;
+    """, versions={FIREFOX_GUID: version_range("firefox", "13.0a1")})
+    assert err.failed()
+    assert err.compat_summary["errors"]
+
+
+def test_startendMarker():
+    """
+    Test that _startMarker and _endMarker are properly flagged in Gecko 13.
+    """
+
+    err = _do_real_test_raw("""
+    var foo = bar();
+    var x = foo._startMarker;
+    var x = foo._endMarker;
+    """)
+    assert not err.failed()
+
+    err = _do_real_test_raw("""
+    var foo = bar();
+    var x = foo._startMarker;
+    """, versions={FIREFOX_GUID: version_range("firefox", "13.0a1")})
+    assert not err.failed()
+    assert err.notices
+    assert err.compat_summary["errors"]
+
+    err = _do_real_test_raw("""
+    var foo = bar();
+    var x = foo._endMarker;
+    """, versions={FIREFOX_GUID: version_range("firefox", "13.0a1")})
+    assert not err.failed()
+    assert err.notices
+    assert err.compat_summary["errors"]
+
+    err = _do_real_test_raw("""
+    var foo = bar();
+    foo._startMarker = 1;
+    """, versions={FIREFOX_GUID: version_range("firefox", "13.0a1")})
+    assert not err.failed()
+    assert err.notices
+    assert err.compat_summary["errors"]
+
+    err = _do_real_test_raw("""
+    var foo = bar();
+    foo._endMarker = 1;
+    """, versions={FIREFOX_GUID: version_range("firefox", "13.0a1")})
+    assert not err.failed()
+    assert err.notices
     assert err.compat_summary["errors"]
 

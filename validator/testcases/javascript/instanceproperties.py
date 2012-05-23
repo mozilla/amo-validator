@@ -1,7 +1,7 @@
 import re
 import types
 
-from validator.compat import FX10_DEFINITION
+from validator.compat import FX10_DEFINITION, FX13_DEFINITION
 from validator.constants import BUGZILLA_BUG
 import jstypes
 
@@ -81,12 +81,31 @@ def get_isElementContentWhitespace(traverser):
         error="isElementContentWhitespace property removed in Gecko 10.",
         description='The "isElementContentWhitespace" property has been '
                     'removed. See %s for more information.' %
-                        (BUGZILLA_BUG % 687422),
+                        BUGZILLA_BUG % 687422,
         filename=traverser.filename,
         line=traverser.line,
         column=traverser.position,
         context=traverser.context,
         for_appversions=FX10_DEFINITION,
+        compatibility_type="error",
+        tier=5)
+
+
+def startendMarker(*args):
+    traverser = args[0] if len(args) == 1 else args[1]
+    traverser.err.notice(
+        err_id=("testcases_javascript_instanceproperties",
+                "get_startendMarker"),
+        notice="`_startMarker` and `_endMarker` changed in Gecko 13",
+        description="The `_startMarker` and `_endMarker` variables have "
+                    "changed in a backward-incompatible way in Gecko 13. They "
+                    "are now element references instead of numeric indices. "
+                    "See %s for more information." % BUGZILLA_BUG % 731563,
+        filename=traverser.filename,
+        line=traverser.line,
+        column=traverser.position,
+        context=traverser.context,
+        for_appversions=FX13_DEFINITION,
         compatibility_type="error",
         tier=5)
 
@@ -113,7 +132,11 @@ def _get_xml(name):
     return {"get": wrapper}
 
 
-OBJECT_DEFINITIONS = {"innerHTML": {"set": set_innerHTML},
+OBJECT_DEFINITIONS = {"_endMarker": {"get": startendMarker,
+                                     "set": startendMarker},
+                      "_startMarker": {"get": startendMarker,
+                                       "set": startendMarker},
+                      "innerHTML": {"set": set_innerHTML},
                       "innerAdjacentHTML": {"set": set_innerHTML},
                       "isElementContentWhitespace":
                           {"get": get_isElementContentWhitespace},

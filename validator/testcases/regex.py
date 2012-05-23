@@ -1,12 +1,15 @@
-import fnmatch
 import re
 
 from validator.constants import BUGZILLA_BUG
 from validator.compat import (FX4_DEFINITION, FX5_DEFINITION, FX6_DEFINITION,
                               FX7_DEFINITION, FX8_DEFINITION, FX9_DEFINITION,
-                              FX11_DEFINITION, FX12_DEFINITION, TB7_DEFINITION,
-                              TB10_DEFINITION, TB11_DEFINITION, TB12_DEFINITION)
+                              FX11_DEFINITION, FX12_DEFINITION, FX13_DEFINITION,
+                              TB7_DEFINITION, TB10_DEFINITION, TB11_DEFINITION,
+                              TB12_DEFINITION)
 from validator.contextgenerator import ContextGenerator
+
+
+registered_regex_tests = []
 
 
 NP_WARNING = "Network preferences may not be modified."
@@ -15,104 +18,6 @@ NSINHS_LINK = ("https://developer.mozilla.org/en/XPCOM_Interface_Reference"
                "/nsINavHistoryService")
 TB7_LINK = "https://developer.mozilla.org/en/Thunderbird_7_for_developers"
 
-GENERIC_PATTERNS = {
-    r"globalStorage\[.*\].password":
-        "Global Storage may not be used to store passwords.",
-    r"launch\(\)":
-        "Use of 'launch()' is disallowed because of restrictions on "
-        "nsILocalFile. If the code does not use nsILocalFile, consider a "
-        "different function name."}
-
-# JS category hunting; bug 635423
-# Generate regexes for all of them. Note that they all begin with
-# "JavaScript". Capitalization matters, bro.
-CATEGORY_REGEXES = (
-        map(re.compile,
-            map(lambda r: '''"%s"|'%s'|%s''' % (r, r, r.replace(' ', '-')),
-                map(lambda r: "%s%s" % ("JavaScript ", r),
-                    ("global constructor",
-                     "global constructor prototype alias",
-                     "global property",
-                     "global privileged property",
-                     "global static nameset",
-                     "global dynamic nameset",
-                     "DOM class",
-                     "DOM interface")))))
-
-PASSWORD_REGEX = re.compile("password", re.I)
-PROTOTYPE_REGEX = re.compile(r"(String|Object|Number|Date|RegExp|Function|"
-                             r"Boolean|Array|Iterator)\.prototype"
-                             r"(\.[a-zA-Z0-9]+|\[.+\]) =", re.I)
-
-CHROME_PATTERNS = (
-    (r"(?<![\'\"])require\s*\(\s*[\'\"]"
-     r"(chrome|window-utils|observer-service)"
-     r"[\'\"]\s*\)",
-        'Usage of non-SDK interface',
-        "This SDK-based add-on uses interfaces that aren't part of the SDK."),
-)
-
-
-# DOM mutation events; bug 642153
-DOM_MUTATION_REGEXES = map(re.compile,
-        ("DOMAttrModified", "DOMAttributeNameChanged",
-         "DOMCharacterDataModified", "DOMElementNameChanged",
-         "DOMNodeInserted", "DOMNodeInsertedIntoDocument", "DOMNodeRemoved",
-         "DOMNodeRemovedFromDocument", "DOMSubtreeModified"))
-
-FX6_INTERFACES = {"nsIDOMDocumentTraversal": 655514,
-                  "nsIDOMDocumentRange": 655513,
-                  "IWeaveCrypto": 651596}
-FX7_INTERFACES = {"nsIDOMDocumentStyle": 658904,
-                  "nsIDOMNSDocument": 658906,
-                  "nsIDOM3TypeInfo": 660539,
-                  "nsIDOM3Node": 659053}
-FX8_INTERFACES = {"nsISelection2": 672536,
-                  "nsISelection3": 672536}
-FX11_INTERFACES = {"nsICharsetResolver": 700490}
-FX12_INTERFACES = {"nsIProxyObjectManager":
-                       (675221,
-                        "This add-on uses nsIProxyObjectManager, which was "
-                        "removed in Gecko 12."),
-                   "documentCharsetInfo": 713825,
-                   "nsIJetpack(Service)?":
-                       (711838,
-                        "This add-on uses the Jetpack service, which was "
-                        "deprecated long ago and is no longer included in "
-                        "Gecko 12. Please update your add-on to use a more "
-                        "recent version of the Add-ons SDK.")}
-
-TB11_STRINGS = {"newToolbarCmd\.(label|tooltip)": 694027,
-                "openToolbarCmd\.(label|tooltip)": 694027,
-                "saveToolbarCmd\.(label|tooltip)": 694027,
-                "publishToolbarCmd\.(label|tooltip)": 694027,
-                "messengerWindow\.title": 701671,
-                "folderContextSearchMessages\.(label|accesskey)": 652555,
-                "importFromSeamonkey2\.(label|accesskey)": 689437,
-                "comm4xMailImportMsgs\.properties": 689437,
-                "specialFolderDeletionErr": 39121,
-                "sourceNameSeamonkey": 689437,
-                "sourceNameOExpress": 689437,
-                "sourceNameOutlook": 689437,
-                "failedDuplicateAccount": 709020,}
-
-TB12_STRINGS = {"editImageMapButton\.(label|tooltip)": 717240,
-                "haveSmtp[1-3]\.suffix2": 346306,
-                "EditorImage(Map|MapHotSpot)\.dtd": 717240,
-                "subscribe-errorInvalidOPMLFile": 307629,}
-
-TB11_JS = {"onViewToolbarCommand": 644169,
-           "nsContextMenu": 680192,
-           "MailMigrator\.migrateMail": 712395,
-           "AddUrlAttachment": 708982,
-           "makeFeedObject": 705504,
-           "deleteFeed": 705504,}
-                
-TB12_JS = {"TextEditorOnLoad": 695842,
-           "Editor(OnLoad|Startup|Shutdown|CanClose)": 695842,
-           "gInsertNewIMap": 717240,
-           "editImageMap": 717240,
-           "(SelectAll|MessageHas)Attachments": 526998,}
 
 def run_regex_tests(document, err, filename, context=None, is_js=False):
     """Run all of the regex-based JS tests."""
@@ -120,83 +25,130 @@ def run_regex_tests(document, err, filename, context=None, is_js=False):
     if context is None:
         context = ContextGenerator(document)
 
-    def _generic_test(pattern, title, message, metadata={}):
-        """Run a single regex test."""
-        match = pattern.search(document)
-        if match:
-            line = context.get_line(match.start())
-            err.warning(
-                err_id=("testcases_javascript_regex", "generic",
-                        "_generic_test"),
-                warning=title,
-                description=message,
-                filename=filename,
-                line=line,
-                context=context)
-            if metadata:
-                err.metadata.update(metadata)
+    # Run all of the registered tests.
+    for cls in registered_regex_tests:
+        if not cls.applicable(err, filename, document):
+            continue
+        t = cls(err, document, filename, context)
+        # Run standard tests.
+        for test in t.tests():
+            test()
+        # Run tests that would otherwise be guarded by `is_js`.
+        if is_js:
+            for test in t.js_tests():
+                test()
 
-    def _substring_test(pattern, title, message):
-        """Run a single substringest."""
-        match = re.compile(pattern).search(document)
-        if match:
-            line = context.get_line(match.start())
-            err.warning(
-                err_id=("testcases_javascript_regex", "generic",
-                        "_generic_test"),
-                warning=title,
-                description=message,
-                filename=filename,
-                line=line,
-                context=context)
 
-    def _compat_test(pattern, title, message, compatibility_type,
-                     appversions=None, logFunc=err.notice):
-        """Run a single regex test and return a compatibility message."""
-        match = pattern.search(document)
-        if match:
-            line = context.get_line(match.start())
-            logFunc(
-                ("testcases_javascript_regex", "generic", "_compat_test"),
-                title,
-                description=message,
-                filename=filename,
-                line=line,
-                context=context,
-                compatibility_type=compatibility_type,
-                for_appversions=appversions,
-                tier=5)
+def register_generator(cls):
+    registered_regex_tests.append(cls)
+    return cls
 
-    if not filename.startswith("defaults/preferences/"):
-        from javascript.predefinedentities import (BANNED_PREF_BRANCHES,
-                                                   BANNED_PREF_REGEXPS)
-        for pattern in BANNED_PREF_REGEXPS:
-            _generic_test(
-                re.compile("[\"']" + pattern),
-                "Potentially unsafe preference branch referenced",
-                "Extensions should not alter preferences matching /%s/"
-                    % pattern)
 
-        for branch in BANNED_PREF_BRANCHES:
-            _substring_test(
-                branch.replace(r".", r"\."),
-                "Potentially unsafe preference branch referenced",
-                "Extensions should not alter preferences in the '%s' "
-                "preference branch" % branch)
+class RegexTestGenerator(object):
+    """
+    This stubs out a test generator object. By decorating inheritors of this
+    class with `@register_generator`, the regex tests will be run on any files
+    that are passed to `run_regex_tests()`.
+    """
 
-    for pattern, message in GENERIC_PATTERNS.items():
-        _generic_test(
-                re.compile(pattern),
-                "Potentially unsafe JS in use.",
-                message)
+    def __init__(self, err, document, filename, context):
+        self.err = err
+        self.document = document
+        self.filename = filename
+        self.context = context
 
-    for pattern, title, message in CHROME_PATTERNS:
-        _generic_test(re.compile(pattern), title, message,
-                      {'requires_chrome': True})
+        self.app_versions_fallback = None
 
-    if is_js:
-        for pattern in CATEGORY_REGEXES:
-            _generic_test(
+    @classmethod
+    def applicable(cls, err, filename, document):
+        """Return whether the tests apply to the current file."""
+        return True  # Default to always applicable.
+
+    def tests(self):
+        """Override this with a generator that produces the regex tests."""
+        return []
+
+    def js_tests(self):
+        """
+        Override this with a generator that produces regex tests that are
+        exclusive to JavaScript.
+        """
+        return []
+
+    def get_test(self, pattern, title, message, log_function=None,
+                 compat_type=None, app_versions=None, flags=0):
+        """
+        Return a function that, when called, will log a compatibility warning
+        or error.
+        """
+        app_versions = app_versions or self.app_versions_fallback
+        log_function = log_function or self.err.warning
+        def wrapper():
+            matched = False
+            for match in re.finditer(pattern, self.document, flags):
+                log_function(
+                        ("testcases_regex", "generic", "_generated"),
+                        title,
+                        message,
+                        filename=self.filename,
+                        line=self.context.get_line(match.start()),
+                        context=self.context,
+                        compatibility_type=compat_type,
+                        for_appversions=app_versions,
+                        tier=self.err.tier if app_versions is None else 5)
+                matched = True
+            return matched
+
+        return wrapper
+
+    def get_test_bug(self, bug, pattern, title, message, **kwargs):
+        """Helper function to mix in a bug number."""
+        message = [message,
+                   "See bug %s for more information." % BUGZILLA_BUG % bug]
+        return self.get_test(pattern, title, message, **kwargs)
+
+
+@register_generator
+class GenericRegexTests(RegexTestGenerator):
+    """Test for generic, banned patterns in a document being scanned."""
+
+    def tests(self):
+        # globalStorage.(.+)password test removed for bug 752740
+
+        yield self.get_test(
+                r"launch\(\)",
+                "`launch()` disallowed",
+                "Use of `launch()` is disallowed because of restrictions on "
+                "`nsILocalFile`. If the code does not use `nsILocalFile`, "
+                "consider using a different function name.")
+
+
+@register_generator
+class CategoryRegexTests(RegexTestGenerator):
+    """
+    These tests will flag JavaScript category registration. Category
+    registration is not permitted in add-ons.
+
+    Added from bug 635423
+    """
+
+    # This generates the regular expressions for all combinations of JS
+    # categories. Note that all of them begin with "JavaScript". Capitalization
+    # matters.
+    PATTERNS = map(lambda r: '''"%s"|'%s'|%s''' % (r, r, r.replace(" ", "-")),
+                   ["JavaScript %s" % pattern for pattern in
+                    ("global constructor",
+                     "global constructor prototype alias",
+                     "global property",
+                     "global privileged property",
+                     "global static nameset",
+                     "global dynamic nameset",
+                     "DOM class",
+                     "DOM interface", )])
+
+    def js_tests(self):
+        for pattern in self.PATTERNS:
+            yield self.get_test(
                     pattern,
                     "Potential JavaScript category registration",
                     "Add-ons should not register JavaScript categories. It "
@@ -204,414 +156,554 @@ def run_regex_tests(document, err, filename, context=None, is_js=False):
                     "script to attach properties to JavaScript globals. This "
                     "is not allowed.")
 
-        if fnmatch.fnmatch(filename, "defaults/preferences/*.js"):
-            _generic_test(
-                PASSWORD_REGEX,
-                "Passwords may be stored in /defaults/preferences JS files.",
-                "Storing passwords in the preferences is insecure and the "
-                "Login Manager should be used instead.")
 
-        is_jsm = filename.endswith(".jsm") or "EXPORTED_SYMBOLS" in document
+@register_generator
+class DOMMutationRegexTests(RegexTestGenerator):
+    """
+    These regex tests will test that DOM mutation events are not used. These
+    events have extreme performance penalties associated with them and are
+    currently deprecated.
 
-        if not is_jsm:
-            # Have a non-static/dynamic test for prototype extension.
-            _generic_test(
-                    PROTOTYPE_REGEX,
-                    "JS Prototype extension",
-                    "It appears that an extension of a built-in JS type was "
-                    "made. This is not allowed for security and compatibility "
-                    "reasons.")
+    Added from bug 642153
+    """
 
-    for pattern in DOM_MUTATION_REGEXES:
-        _generic_test(
-                pattern,
-                "DOM Mutation Events Prohibited",
-                "DOM mutation events are flagged because of their "
-                "deprecated status, as well as their extreme "
-                "inefficiency. Consider using a different event.")
+    EVENTS = ("DOMAttrModified", "DOMAttributeNameChanged",
+              "DOMCharacterDataModified", "DOMElementNameChanged",
+              "DOMNodeInserted", "DOMNodeInsertedIntoDocument",
+              "DOMNodeRemoved", "DOMNodeRemovedFromDocument",
+              "DOMSubtreeModified", )
 
-    # Firefox 5 Compatibility
-    if err.supports_version(FX5_DEFINITION):
-        _compat_test(
-                re.compile(r"navigator\.language"),
-                "navigator.language may not behave as expected",
-                ("JavaScript code was found that references "
-                 "navigator.language, which will no longer indicate "
-                 "the language of Firefox's UI. To maintain existing "
-                 "functionality, general.useragent.locale should be "
-                 "used in place of `navigator.language`."),
-                compatibility_type="error",
-                appversions=FX5_DEFINITION)
+    def js_tests(self):
+        for event in self.EVENTS:
+            yield self.get_test(
+                    event,
+                    "DOM mutation event use prohibited",
+                    "DOM mutation events are flagged because of their "
+                    "deprecated status as well as their extreme inefficiency. "
+                    "Consider using a different event.")
 
-    # Firefox 6 Compatibility
-    if err.supports_version(FX6_DEFINITION):
-        for pattern, bug in FX6_INTERFACES.items():
-            _compat_test(
-                    re.compile(pattern),
-                    "Unsupported interface in use",
-                    ("Your add-on uses interface %s, which has been removed "
-                     "from Firefox 6. Please refer to %s for possible "
-                     "alternatives.") % (pattern, BUGZILLA_BUG % bug),
-                    compatibility_type="error",
-                    appversions=FX6_DEFINITION,
-                    logFunc=err.warning)
 
-        # app.update.timer
-        _compat_test(
-                re.compile(r"app\.update\.timer"),
-                "app.update.timer is incompatible with Firefox 6",
-                ("The 'app.update.timer' preference is being replaced by the "
-                 "'app.update.timerMinimumDelay' preference in Firefox 6. "
-                 "Please refer to %s for more details.") %
-                     (BUGZILLA_BUG % 614181),
-                compatibility_type="error",
-                appversions=FX6_DEFINITION)
-        if is_js:
-            # javascript/data: URI usage in the address bar
-            _compat_test(
-                    re.compile(r"['\"](javascript|data):"),
-                    "javascript:/data: URIs may be incompatible with Firefox "
-                    "6.",
-                    ("Loading 'javascript:' and 'data:' URIs through the "
-                     "location bar may no longer work as expected in Firefox "
-                     "6. If you load these types of URIs, please test your "
-                     "add-on on the latest Firefox 6 builds, or refer to %s "
-                     "for more information.") %
-                         (BUGZILLA_BUG % 656433),
-                    compatibility_type="warning",
-                    appversions=FX6_DEFINITION)
+@register_generator
+class PasswordsInPrefsRegexTests(RegexTestGenerator):
+    """
+    These regex tests will ensure that the developer is not storing passwords
+    in the `/defaults/preferences` JS files.
 
-    # Firefox 7 Compatibility
-    if err.supports_version(FX7_DEFINITION):
-        for pattern, bug in FX7_INTERFACES.items():
-            _compat_test(
-                    re.compile(pattern),
-                    "Unsupported interface in use",
-                    ("Your add-on uses interface %s, which has been removed "
-                     "from Firefox 7. Please refer to %s for possible "
-                     "alternatives.") % (pattern, BUGZILLA_BUG % bug),
-                    compatibility_type="error",
-                    appversions=FX7_DEFINITION,
-                    logFunc=err.warning)
+    Added from bug 647109
+    """
 
-        # nsINavHistoryObserver
-        _compat_test(
-                re.compile(r"nsINavHistoryObserver"),
-                "nsINavHistoryObserver interface has changed in Firefox 7",
-                ("The nsINavHistoryObserver interface has changed in Firefox "
-                 "7. Most function calls now required a GUID parameter, "
-                 "please refer to %s and %s for more information.") %
-                    (NSINHS_LINK, BUGZILLA_BUG % 633266),
-                compatibility_type="error",
-                appversions=FX7_DEFINITION)
-        # nsIMarkupDocumentViewer_MOZILLA_2_0_BRANCH
-        _compat_test(
-                re.compile(r"nsIMarkupDocumentViewer_MOZILLA_2_0_BRANCH"),
-                "MOZILLA_2_0 Namespace has been merged in Firefox 7",
-                ("The '_MOZILLA_2_0_BRANCH' interfaces have been merged out. "
-                 "You should now use the namespace without the "
-                 "'_MOZILLA_2_0_BRANCH' suffix. Please refer to %s for more "
-                 "details.") %
-                     (BUGZILLA_BUG % 617539),
-                compatibility_type="warning",
-                appversions=FX7_DEFINITION)
+    @classmethod
+    def applicable(cls, err, filename, document):
+        return bool(re.match(r"defaults/preferences/.+\.js", filename))
 
-    # Firefox 8 Compatibility
-    if err.supports_version(FX8_DEFINITION):
-        for pattern, bug in FX8_INTERFACES.items():
-            _compat_test(
-                    re.compile(pattern),
-                    "Removed, deprecated, or unsupported interface in use.",
-                    ("The nsISelection2 and nsISelection3 interfaces have "
-                     "been removed in Firefox 8. You can use the nsISelection "
-                     "interface instead. See %s for more details.") %
-                        (BUGZILLA_BUG % bug),
-                    compatibility_type="error",
-                    appversions=FX8_DEFINITION,
-                    logFunc=err.warning)
+    def js_tests(self):
+        yield self.get_test(
+                "password",
+                "Passwords may be stored in `defaults/preferences/*.js`",
+                "Storing passwords in the preferences JavaScript files is "
+                "insecure. The Login Manager should be used insted.")
 
-        # nsIDOMWindowInternal
+
+@register_generator
+class BannedPrefRegexTests(RegexTestGenerator):
+    """
+    These regex tests will find whether banned preference branches are being
+    referenced from outside preference JS files.
+
+    Added from bug 676815
+    """
+
+    @classmethod
+    def applicable(cls, err, filename, document):
+        return not filename.startswith("defaults/preferences/")
+
+    def tests(self):
+        from javascript.predefinedentities import (BANNED_PREF_BRANCHES,
+                                                   BANNED_PREF_REGEXPS)
+        for pattern in BANNED_PREF_REGEXPS:
+            yield self.get_test(
+                    r"[\"']" + pattern,
+                    "Potentially unsafe preference branch referenced",
+                    "Extensions should not alter preferences matching /%s/."
+                        % pattern)
+
+        for branch in BANNED_PREF_BRANCHES:
+            yield self.get_test(
+                    branch.replace(r".", r"\."),
+                    "Potentially unsafe preference branch referenced",
+                    "Extensions should not alter preferences in the `%s` "
+                    "preference branch" % branch)
+
+
+@register_generator
+class ChromePatternRegexTests(RegexTestGenerator):
+    """
+    Test that an Add-on SDK (Jetpack) add-on doesn't use interfaces that are
+    not part of the SDK.
+
+    Added from bugs 689340, 731109
+    """
+
+    def tests(self):
+        # We want to re-wrap the test because if it detects something, we're
+        # going to set the `requires_chrome` metadata value to `True`.
+        def rewrap():
+            wrapper = self.get_test(
+                    r"(?<![\'\"])require\s*\(\s*[\'\"]"
+                    r"(chrome|window-utils|observer-service)[\'\"]\s*\)",
+                    "Usage of non-SDK interface",
+                    "This SDK-based add-on uses interfaces that aren't part "
+                    "of the SDK.")
+            if wrapper():
+                self.err.metadata["requires_chrome"] = True
+
+        yield rewrap
+
+
+@register_generator
+class JSPrototypeExtRegexTests(RegexTestGenerator):
+    """
+    These regex tests will ensure that the developer is not modifying the
+    prototypes of the global JS types.
+
+    Added from bug 696172
+    """
+
+    @classmethod
+    def applicable(cls, err, filename, document):
+        return not (filename.endswith(".jsm") or "EXPORTED_SYMBOLS" in document)
+
+    def js_tests(self):
+        yield self.get_test(
+                r"(String|Object|Number|Date|RegExp|Function|Boolean|Array|"
+                r"Iterator)\.prototype(\.[a-zA-Z0-9]+|\[.+\]) =",
+                "JS prototype extension",
+                "It appears that an extension of a built-in JS type was made. "
+                "This is not allowed for security and compatibility reasons.",
+                flags=re.I)
+
+
+class CompatRegexTestHelper(RegexTestGenerator):
+    """
+    A helper that makes it easier to stay DRY. This will automatically check
+    for applicability against the value set as the app_versions_fallback.
+    """
+
+    def __init__(self, *args, **kwargs):
+        super(CompatRegexTestHelper, self).__init__(*args, **kwargs)
+        self.app_versions_fallback = self.VERSION
+
+    @classmethod
+    def applicable(cls, err, filename, document):
+        return err.supports_version(cls.VERSION)
+
+
+DEP_INTERFACE = "Deprecated interface in use"
+DEP_INTERFACE_DESC = ("This add-on uses `%s`, which is deprecated in Gecko %d "
+                      "and should not be used.")
+
+@register_generator
+class Gecko5RegexTests(CompatRegexTestHelper):
+    """Regex tests for Gecko 5 updates."""
+
+    VERSION = FX5_DEFINITION
+
+    def tests(self):
+        yield self.get_test(
+                r"navigator\.language",
+                "`navigator.language` may not behave as expected.",
+                "JavaScript code was found that references `navigator."
+                "language`, which will no longer indicate that language of "
+                "the application's UI. To maintain existing functionality, "
+                "`general.useragent.locale` should be used in place of "
+                "`navigator.language`.", compat_type="error",
+                log_function=self.err.notice)
+
+
+@register_generator
+class Gecko6RegexTests(CompatRegexTestHelper):
+    """Regex tests for Gecko 6 updates."""
+
+    VERSION = FX6_DEFINITION
+
+    def tests(self):
+        interfaces = {"nsIDOMDocumentTraversal": 655514,
+                      "nsIDOMDocumentRange": 655513,
+                      "IWeaveCrypto": 651596}
+        for interface, bug in interfaces.items():
+            yield self.get_test_bug(
+                    bug=bug,
+                    pattern=interface,
+                    title=DEP_INTERFACE,
+                    message=DEP_INTERFACE_DESC % (interface, 6),
+                    compat_type="error")
+
+        yield self.get_test_bug(
+                614181, r"app\.update\.timer",
+                "`app.update.timer` is incompatible with Gecko 6",
+                "The `app.update.timer` preference is being replaced by the "
+                "`app.update.timerMinimumDelay` preference in Gecko 6.",
+                compat_type="error")
+
+    def js_tests(self):
+        yield self.get_test_bug(
+                656433, r"['\"](javascript|data):",
+                "`javascript:`/`data:` URIs may be incompatible with Gecko 6",
+                "Loading `javascript:` and `data:` URIs through the location "
+                "bar may no longer work as expected in Gecko 6. If you load "
+                "these types of URIs, please test your add-on using the "
+                "latest builds of the applications that it targets.",
+                compat_type="warning", log_function=self.err.notice)
+
+
+@register_generator
+class Gecko7RegexTests(CompatRegexTestHelper):
+    """Regex tests for Gecko 7 updates."""
+
+    VERSION = FX7_DEFINITION
+
+    def tests(self):
+        interfaces = {"nsIDOMDocumentStyle": 658904,
+                      "nsIDOMNSDocument": 658906,
+                      "nsIDOM3TypeInfo": 660539,
+                      "nsIDOM3Node": 659053}
+        for interface, bug in interfaces.items():
+            yield self.get_test_bug(
+                    bug=bug,
+                    pattern=interface,
+                    title=DEP_INTERFACE,
+                    message=DEP_INTERFACE_DESC % (interface, 7),
+                    compat_type="error")
+
+        yield self.get_test_bug(
+                633266, "nsINavHistoryObserver",
+                "`nsINavHistoryObserver` interface has changed in Gecko 7",
+                "The `nsINavHistoryObserver` interface has change in Gecko 7. "
+                "Most function calls now require a GUID parameter. Please "
+                "refer to %s for more information." % NSINHS_LINK,
+                compat_type="error", log_function=self.err.notice)
+        yield self.get_test_bug(
+                617539, "nsIMarkupDocumentViewer_MOZILLA_2_0_BRANCH",
+                "`_MOZILLA_2_0_BRANCH` has been merged in Gecko 7",
+                "The `_MOZILLA_2_0_BRANCH` interfaces have been merged out. "
+                "You should now use the namespace without the "
+                "`_MOZILLA_2_0_BRANCH` suffix.", compat_type="warning")
+
+
+@register_generator
+class Gecko8RegexTests(CompatRegexTestHelper):
+    """Regex tests for Gecko 8 updates."""
+
+    VERSION = FX8_DEFINITION
+
+    def tests(self):
+        interfaces = {"nsISelection2": 672536,
+                      "nsISelection3": 672536}
+        for interface, bug in interfaces.items():
+            yield self.get_test_bug(
+                    bug=bug,
+                    pattern=interface,
+                    title=DEP_INTERFACE,
+                    message=DEP_INTERFACE_DESC % (interface, 8),
+                    compat_type="error")
+
         NSIDWI_MDN = ("https://developer.mozilla.org/en/"
-                          "XPCOM_Interface_Reference/nsIDOMWindow")
-        _compat_test(
-                re.compile(r"nsIDOMWindowInternal"),
-                "nsIDOMWindowInternal has been deprecated in Firefox 8.",
-                ("The nsIDOMWindowInternal interface has been deprecated in "
-                 "Firefox 8. You can use the nsIDOMWindow interface instead. "
-                 "See %s for more information.") % NSIDWI_MDN,
-                compatibility_type="warning",
-                appversions=FX8_DEFINITION)
+                      "XPCOM_Interface_Reference/nsIDOMWindow")
+        yield self.get_test(
+                "nsIDOMWindowInternal", DEP_INTERFACE,
+                "The `nsIDOMWindowInternal` interface has been deprecated in "
+                "Gecko 8. You can use the `nsIDOMWindow` interface instead. "
+                "See %s for more information." % NSIDWI_MDN,
+                compat_type="warning")
 
-        # ISO8601DateUtils
-        # TODO(basta): Make this a string test instead once they're invented.
         ISO8601_MDC = ("https://developer.mozilla.org/en/JavaScript/Reference/"
-                           "Global_Objects/Date")
-        _compat_test(
-                re.compile(r"ISO8601DateUtils"),
-                "ISO8601DateUtils.jsm was removed in Firefox 8.",
-                ("The ISO8601DateUtils object is no longer available in "
-                 "Firefox 8. You can use the normal Date object instead. See "
-                 "%s for more information.") % ISO8601_MDC,
-                compatibility_type="error",
-                appversions=FX8_DEFINITION,
-                logFunc=err.warning)
+                       "Global_Objects/Date")
+        yield self.get_test(
+                "ISO8601DateUtils",
+                "`ISO8601DateUtils.jsm` was removed in Gecko 8",
+                "The `ISO8601DateUtils object is no longer available in Gecko "
+                "8. You can use the normal `Date` object instead. See %s"
+                "for more information." % ISO8601_MDC,
+                compat_type="error")
 
-    # Firefox 9 Compatibility
-    if err.supports_version(FX9_DEFINITION):
-        TAINTENABLED_BUG = BUGZILLA_BUG % 679971
-        _compat_test(
-                re.compile(r"navigator\.taintEnabled"),
-                "navigator.taintEnabled was removed in Firefox 9.",
-                ("The taintEnabled function is no longer available in"
-                 " Firefox 9. Since this function was only used for "
-                 "browser detection and this doesn't belong in extension"
-                 " code, you should remove it if possible. For more "
-                 "information, please see %s.") % TAINTENABLED_BUG,
-                compatibility_type="warning",
-                appversions=FX9_DEFINITION,
-                logFunc=err.warning)
-        XRAYPROPS_BUG = BUGZILLA_BUG % 660233
-        _compat_test(
-            re.compile(r"\.nodePrincipal"),
-            ("nodePrincipal only available in chrome context"),
-            ("The nodePrincipal property is no longer accessible from "
-             "untrusted scripts. For more information, please see %s."
-             ) % XRAYPROPS_BUG,
-            compatibility_type="warning",
-            appversions=FX9_DEFINITION)
-        _compat_test(
-            re.compile(r"\.documentURIObject"),
-            ("documentURIObject only available in chrome context"),
-            ("The documentURIObject property is no longer accessible from "
-             "untrusted scripts. For more information, please see %s."
-             ) % XRAYPROPS_BUG,
-            compatibility_type="warning",
-            appversions=FX9_DEFINITION)
-        _compat_test(
-            re.compile(r"\.baseURIObject"),
-            ("baseURIObject only available in chrome context"),
-            ("The baseURIObject property is no longer accessible from "
-             "untrusted scripts. For more information, please see %s."
-             ) % XRAYPROPS_BUG,
-            compatibility_type="warning",
-            appversions=FX9_DEFINITION)
-        _compat_test(
-            re.compile(r"nsIGlobalHistory3"),
-            "nsIGlobalHistory3 was removed in Firefox 9",
-            ("The nsIGlobalHistory3 interface has been removed from Firefox."
-             " For more information, please see %s."
-             ) % (BUGZILLA_BUG % 568971),
-            compatibility_type="warning",
-            appversions=FX9_DEFINITION,
-            logFunc=err.warning)
+
+@register_generator
+class Gecko9RegexTests(CompatRegexTestHelper):
+    """Regex tests for Gecko 8 updates."""
+
+    VERSION = FX9_DEFINITION
+
+    def tests(self):
+        yield self.get_test_bug(
+                679971, r"navigator\.taintEnabled",
+                "`navigator.taintEnabled` was removed in Gecko 9",
+                "The `taintEnabled` function is no longer available in Gecko "
+                "9. Since this function was only used for browser detection "
+                "and this doesn't belong in extension code, it should be "
+                "removed if possible.", compat_type="warning")
+
+        chrome_context_props = [r"\.nodePrincipal", r"\.documentURIObject",
+                                r"\.baseURIObject", ]
+        for property in chrome_context_props:
+            yield self.get_test_bug(
+                    660233, property,
+                    "`%s` only available in chrome contexts" % property,
+                    "The `%s` property is no longer accessible from untrusted "
+                    "scripts as of Gecko 9." % property,
+                    compat_type="warning", log_function=self.err.notice)
+
+        yield self.get_test_bug(
+                568971, r"nsIGlobalHistory3", DEP_INTERFACE,
+                DEP_INTERFACE_DESC % ("nsIGlobalHistory3", 9),
+                compat_type="warning")
 
         # geo.wifi.* warnings
-        geo_wifi_description = (
-                "The geo.wifi.* preferences are no longer created by default "
-                "in Gecko 9. Reading them without testing for their presence "
-                "can result in unexpected errors. See %s for more "
-                "information." % BUGZILLA_BUG % 689252)
-        _compat_test(
-            re.compile(r"geo\.wifi\.uri"),
-            "The preference 'geo.wifi.uri' was removed in Firefox 9",
-            geo_wifi_description,
-            compatibility_type="error",
-            appversions=FX9_DEFINITION,
-            logFunc=err.warning)
-        _compat_test(
-            re.compile(r"geo\.wifi\.protocol"),
-            "The preference 'geo.wifi.protocol' was removed in Firefox 9",
-            geo_wifi_description,
-            compatibility_type="error",
-            appversions=FX9_DEFINITION,
-            logFunc=err.warning)
+        for pattern in ["geo.wifi.uri", r"geo.wifi.protocol", ]:
+            yield self.get_test_bug(
+                    689252, pattern.replace(".", r"\."),
+                    "`%s` removed in Gecko 9" % pattern,
+                    "The `geo.wifi.*` preferences are no longer created by "
+                    "default in Gecko 9. Reading them without testing for "
+                    "their presence can result in unexpected errors.",
+                    compat_type="error")
 
-    # Firefox 11 Compatibility
-    if err.supports_version(FX11_DEFINITION):
-        for pattern, bug in FX11_INTERFACES.items():
-            _compat_test(
-                    re.compile(pattern),
-                    "Unsupported interface in use",
-                    "Your add-on uses interface %s, which has been removed "
-                    "from Firefox 11. Please refer to %s for possible "
-                    "alternatives." % (pattern, BUGZILLA_BUG % bug),
-                    compatibility_type="error",
-                    appversions=FX11_DEFINITION,
-                    logFunc=err.warning)
 
-        # omni.jar renamed
-        for instance in re.finditer(r"omni\.jar", document):
-            err.warning(
-                err_id=("testcases_regex", "regex_regex_tests", "omni.jar"),
-                warning="'omni.jar' renamed to 'omni.ja'",
-                description="This add-on references omni.jar, which was "
-                            "renamed to omni.ja. You should avoid referencing "
-                            "this file directly, and at least update this "
-                            "reference for any versions that support Firefox "
-                            "11 and above. See %s for more information." %
-                                BUGZILLA_BUG % 701875,
-                filename=filename,
-                line=context.get_line(instance.start()),
-                context=context,
-                for_appversions=FX11_DEFINITION,
-                compatibility_type="error",
-                tier=5)
+@register_generator
+class Gecko11RegexTests(CompatRegexTestHelper):
+    """Regex tests for Gecko 11 updates."""
 
-    # Firefox 12 Compatibility
-    if err.supports_version(FX12_DEFINITION):
-        for pattern, bug in FX12_INTERFACES.items():
-            if isinstance(bug, tuple):
-                bug, message = bug
-            else:
-                message = ("Your add-on uses interface %s, which has been "
-                           "removed from Gecko 12.") % pattern
+    VERSION = FX11_DEFINITION
 
-            message = "%s See %s for more infomration." % (message,
-                                                           BUGZILLA_BUG % bug)
-            _compat_test(
-                    re.compile(pattern),
-                    "Unsupported interface in use",
-                    message,
-                    compatibility_type="error",
-                    appversions=FX12_DEFINITION,
-                    logFunc=err.warning)
+    def tests(self):
+        yield self.get_test_bug(
+                700490, "nsICharsetResolver", DEP_INTERFACE,
+                DEP_INTERFACE_DESC % ("nsICharsetResolver", 11),
+                compat_type="error")
 
-        # Test for `chromemargin` (bug 735876)
-        for instance in re.finditer(r"chromemargin", document):
-            err.notice(
-                err_id=("testcases_regex", "regex_regex_tests", "chromemargin"),
-                notice="`chromemargin` attribute changed in Gecko 12",
-                description="This add-on uses the chromemargin attribute, "
-                            "which after Gecko 12 will not work in the same "
-                            "way  with values other than 0 or -1. Please see "
-                            "%s for more information." % BUGZILLA_BUG % 735876,
-                filename=filename,
-                line=context.get_line(instance.start()),
-                context=context,
-                for_appversions=FX12_DEFINITION,
-                compatibility_type="error",
-                tier=5)
+        yield self.get_test_bug(
+                701875, r"omni\.jar",
+                "`omni.jar` renamed to `omni.ja` in Gecko 11",
+                "This add-on references `omni.jar`, which was renamed to "
+                "`omni.ja`. You should avoid referencing this file directly, "
+                "and at least update this reference for any versions that "
+                "support Gecko 11 and above.", compat_type="error")
 
-    # Thunderbird 7 Compatibility rdf:addressdirectory
-    if err.supports_version(TB7_DEFINITION):
-        # dictUtils.js removal
-        _compat_test(
-                re.compile(r"resource:///modules/dictUtils.js"),
-                "dictUtils.js was removed in Thunderbird 7.",
-                "The dictUtils.js file is no longer available in "
-                "Thunderbird 7. You can use Dict.jsm instead. See"
-                "%s for more information." % BUGZILLA_BUG % 621213,
-                compatibility_type="error",
-                appversions=TB7_DEFINITION,
-                logFunc=err.warning)
-        # de-RDF the addressbook
-        _compat_test(
-                re.compile(r"rdf:addressdirectory"),
-                "The address book does not use RDF in Thunderbird 7.",
-                "The address book was changed to use a look up table in "
-                "Thunderbird 7. See %s and %s for more information." %
-                    (TB7_LINK, BUGZILLA_BUG % 621213),
-                compatibility_type="error",
-                appversions=TB7_DEFINITION)
-        # Second test for de-RDFing the addressbook
-        # r"GetResource(.*?)\s*\.\s*QueryInterface(.*?nsIAbDirectory);"
-        _compat_test(
-                re.compile(r"GetResource\(.*?\)\s*\.\s*"
-                           r"QueryInterface\(.*?nsIAbDirectory\)"),
-                "The address book does not use RDF in Thunderbird 7.",
-                "The address book was changed to use a look up table in "
-                "Thunderbird 7. See %s and %s for more information." %
-                    (TB7_LINK, BUGZILLA_BUG % 621213),
-                compatibility_type="error",
-                appversions=TB7_DEFINITION)
 
-    # Thunderbird 10 Compatibility
-    if err.supports_version(TB10_DEFINITION):
-        # gDownloadManagerStrings removal
-        _compat_test(
-                re.compile(r"gDownloadManagerStrings"),
-                "gDownloadManagerStrings was removed in Thunderbird 10.",
-                "This global is no longer available in "
-                "Thunderbird 10. See %s for more information." %
-                    BUGZILLA_BUG % 700220,
-                compatibility_type="error",
-                appversions=TB10_DEFINITION,
-                logFunc=err.warning)
-        # nsTryToClose.js removal
-        _compat_test(
-                re.compile(r"nsTryToClose.js"),
-                "nsTryToClose.js was removed in Thunderbird 10.",
-                "The nsTryToClose.js file is no longer available in "
-                "Thunderbird 10. See %s for more information." %
-                    BUGZILLA_BUG % 539997,
-                compatibility_type="error",
-                appversions=TB10_DEFINITION,
-                logFunc=err.warning)
+@register_generator
+class Gecko12RegexTests(CompatRegexTestHelper):
+    """Regex tests for Gecko 12 updates."""
 
-    # Thunderbird 11 Compatibility
-    if err.supports_version(TB11_DEFINITION):
-        # specialFoldersDeletionAllowed removal
-        _compat_test(
-            re.compile(r"specialFoldersDeletionAllowed"),
-            "specialFoldersDeletionAllowed was removed in Thunderbird 11.",
-            "This global is no longer available in "
-            "Thunderbird 11. See %s for more information." %
-            BUGZILLA_BUG % 39121,
-            compatibility_type="error",
-            appversions=TB11_DEFINITION,
-            logFunc=err.notice)
-        for pattern, bug in TB11_STRINGS.items():
-            _compat_test(
-                re.compile(pattern),
-                "Removed, renamed, or changed strings in use",
-                "Your add-on uses string %s, which has been changed or "
-                "removed from Thunderbird 11. Please refer to %s for "
-                "possible alternatives." % (pattern, BUGZILLA_BUG % bug),
-                compatibility_type="error",
-                appversions=TB11_DEFINITION,
-                logFunc=err.warning)
-        for pattern, bug in TB11_JS.items():
-            _compat_test(
-                re.compile(pattern),
-                "Removed, renamed, or changed javascript in use",
-                "Your add-on uses the javascript method or class %s, which "
-                "has been changed or removed from Thunderbird 11. Please "
-                "refer to %s for possible alternatives." %
-                (pattern, BUGZILLA_BUG % bug),
-                compatibility_type="error",
-                appversions=TB11_DEFINITION,
-                logFunc=err.notice)
+    VERSION = FX12_DEFINITION
 
-    # Thunderbird 12 Compatibility
-    if err.supports_version(TB12_DEFINITION):
-        _compat_test(
-            re.compile(r"EdImage(Map|MapHotSpot|MapShapes|Overlay)\.js"),
-            "Removed javascript file EdImage*.js in use ",
-            "EdImageMap.js, EdImageMapHotSpot.js, "
-            "EdImageMapShapes.js, and EdImageMapOverlay.js "
-            "were removed in Thunderbird 12. "
-            "See %s for more information." % BUGZILLA_BUG % 717240,
-            compatibility_type="error",
-            appversions=TB12_DEFINITION,
-            logFunc=err.notice)
-        for pattern, bug in TB12_STRINGS.items():
-            _compat_test(
-                re.compile(pattern),
-                "Removed, renamed, or changed strings in use",
-                "Your add-on uses string %s, which has been changed or "
-                "removed from Thunderbird 11. Please refer to %s for "
-                "possible alternatives." % (pattern, BUGZILLA_BUG % bug),
-                compatibility_type="error",
-                appversions=TB12_DEFINITION,
-                logFunc=err.warning)
-        for pattern, bug in TB12_JS.items():
-            _compat_test(
-                re.compile(pattern),
-                "Removed, renamed, or changed javascript in use",
-                "Your add-on uses the javascript method or class %s, which "
-                "has been changed or removed from Thunderbird 11. Please "
-                "refer to %s for possible alternatives." % 
-                (pattern, BUGZILLA_BUG % bug),
-                compatibility_type="error",
-                appversions=TB12_DEFINITION,
-                logFunc=err.notice)
+    def tests(self):
+        yield self.get_test_bug(
+                675221, "nsIProxyObjectManager", DEP_INTERFACE,
+                "This add-on uses nsIProxyObjectManager, which was removed in "
+                "Gecko 12.", compat_type="error")
+        yield self.get_test_bug(
+                713825, "documentCharsetInfo",
+                "Deprecated JavaScript property",
+                "documentCharsetInfo has been deprecated in Gecko 12 and "
+                "should no longer be used.", compat_type="error")
+        yield self.get_test_bug(
+                711838, "nsIJetpack(Service)?", DEP_INTERFACE,
+                "This add-on uses the Jetpack service, which was deprecated "
+                "long ago and is no longer included in Gecko 12. Please "
+                "update your add-on to use a more recent version of the "
+                "Add-ons SDK.", compat_type="error")
+
+        # `chromemargin`; bug 735876
+        yield self.get_test_bug(
+                735876, "chromemargin",
+                "`chromemargin` attribute changed in Gecko 12",
+                "This add-on uses the chromemargin attribute, which after "
+                "Gecko 12 will not work in the same way with values other "
+                "than 0 or -1.", compat_type="error",
+                log_function=self.err.notice)
+
+@register_generator
+class Gecko13RegexTests(CompatRegexTestHelper):
+    """Regex tests for Gecko 13 updates."""
+
+    VERSION = FX13_DEFINITION
+
+    def tests(self):
+        yield self.get_test_bug(
+                613588, "nsILivemarkService", DEP_INTERFACE,
+                "This add-on uses nsILivemarkService, which has been "
+                "deprecated in Gecko 13. Some of its functions may not work "
+                "as expected. mozIAsyncLivemarks should be used instead.",
+                compat_type="error")
+        yield self.get_test_bug(
+                718255, "nsIPrefBranch2", DEP_INTERFACE,
+                "This add-on uses nsIPrefBranch2, which has been merged into "
+                "nsIPrefBranch in Gecko 13. Once you drop support for old "
+                "versions of Gecko, you should stop using nsIPrefBranch2. You "
+                "can use the == operator as an alternative.",
+                compat_type="warning")
+        yield self.get_test_bug(
+                650784, "nsIScriptableUnescapeHTML", DEP_INTERFACE,
+                "This add-on uses nsIScriptableUnescapeHTML, which has been "
+                "deprecated in Gecko 13 in favor of the nsIParserUtils "
+                "interface. While it will continue to work for the foreseeable "
+                "future, it is recommended that you change your code to use "
+                "nsIParserUtils as soon as possible.",
+                compat_type="warning", log_function=self.err.notice)
+        yield self.get_test_bug(
+                672507, "nsIAccessNode", DEP_INTERFACE,
+                "The `nsIAccessNode` interface has been merged into "
+                "`nsIAccessible`. You should use that interface instead.",
+                compat_type="error")
+
+        GLOBALSTORAGE_URL = ("https://developer.mozilla.org/en/XUL_School/"
+                             "Local_Storage")
+        yield self.get_test_bug(
+                687579, "globalStorage",
+                "`globalStorage` removed in Gecko 13",
+                "As of Gecko 13, the `globalStorage` object has been removed. "
+                "See %s for alternatives." % GLOBALSTORAGE_URL,
+                compat_type="error")
+
+        yield self.get_test_bug(
+                702639, "excludeItemsIfParentHasAnnotation",
+                "`excludeItemsIfParentHasAnnotation` no longer supported",
+                "The `excludeItemsIfParentHasAnnotation` query option is no "
+                "longer supported, as of Gecko 13.", compat_type="error")
+
+
+@register_generator
+class Thunderbird7RegexTests(CompatRegexTestHelper):
+    """Regex tests for the Thunderbird 7 update."""
+
+    VERSION = TB7_DEFINITION
+
+    def tests(self):
+        yield self.get_test_bug(
+                621213, r"resource:///modules/dictUtils.js",
+                "`dictUtils.js` was removed in Thunderbird 7",
+                "The `dictUtils.js` file is no longer available in "
+                "Thunderbird as of version 7. You can use `Dict.jsm` "
+                "instead.", compat_type="error")
+        ab_patterns = [r"rdf:addressdirectory",
+                       r"GetResource\(.*?\)\s*\.\s*"
+                           r"QueryInterface\(.*?nsIAbDirectory\)",]
+        for pattern in ab_patterns:
+            yield self.get_test_bug(
+                    621213, pattern,
+                    "The address book does not use RDF in Thunderbird 7",
+                    "The address book was changed to use a look up table in "
+                    "Thunderbird 7. See %s for details." % TB7_LINK,
+                    compat_type="error", log_function=self.err.notice)
+
+
+@register_generator
+class Thunderbird10RegexTests(CompatRegexTestHelper):
+    """Regex tests for the Thunderbird 10 update."""
+
+    VERSION = TB10_DEFINITION
+
+    def tests(self):
+        yield self.get_test_bug(
+                700220, r"gDownloadManagerStrings",
+                "`gDownloadManagerStrings` removed in Thunderbird 10",
+                "The `gDownloadManagerStrings` global is no longer available "
+                "in Thunderbird 10.", compat_type="error")
+        yield self.get_test_bug(
+                539997, r"nsTryToClose.js",
+                "`nsTryToClose.js` removed in Thunderbird 10",
+                "The `nsTryToClose.js` file is no longer available as of "
+                "Thunderbird 10.", compat_type="error")
+
+
+@register_generator
+class Thunderbird11RegexTests(CompatRegexTestHelper):
+    """Regex tests for the Thunderbird 11 update."""
+
+    VERSION = TB11_DEFINITION
+
+    def tests(self):
+        yield self.get_test_bug(
+                39121, r"specialFoldersDeletionAllowed",
+                "`specialFoldersDeletionAllowed` removed in Thunderbird 11",
+                "The `specialFoldersDeletionAllowed` global was removed in "
+                "Thunderbird 11.", compat_type="error",
+                log_function=self.err.notice)
+
+        patterns = {r"newToolbarCmd\.(label|tooltip)": 694027,
+                    r"openToolbarCmd\.(label|tooltip)": 694027,
+                    r"saveToolbarCmd\.(label|tooltip)": 694027,
+                    r"publishToolbarCmd\.(label|tooltip)": 694027,
+                    r"messengerWindow\.title": 701671,
+                    r"folderContextSearchMessages\.(label|accesskey)": 652555,
+                    r"importFromSeamonkey2\.(label|accesskey)": 689437,
+                    r"comm4xMailImportMsgs\.properties": 689437,
+                    r"specialFolderDeletionErr": 39121,
+                    r"sourceNameSeamonkey": 689437,
+                    r"sourceNameOExpress": 689437,
+                    r"sourceNameOutlook": 689437,
+                    r"failedDuplicateAccount": 709020,}
+        for pattern, bug in patterns.items():
+            yield self.get_test_bug(
+                    bug, pattern,
+                    "Removed, renamed, or changed methods in use",
+                    "Some code matched the pattern `%s`, which has been "
+                    "flagged as having changed in Thunderbird 11." % pattern,
+                    compat_type="error")
+
+        js_patterns = {r"onViewToolbarCommand": 644169,
+                       r"nsContextMenu": 680192,
+                       r"MailMigrator\.migrateMail": 712395,
+                       r"AddUrlAttachment": 708982,
+                       r"makeFeedObject": 705504,
+                       r"deleteFeed": 705504, }
+        for pattern, bug in js_patterns.items():
+            yield self.get_test_bug(
+                    bug, pattern,
+                    "Removed, renamed, or changed methods in use",
+                    "Some code matched the JavaScript function `%s`, which has "
+                    "been flagged as having changed, removed, or deprecated "
+                    "in Thunderbird 11." % pattern,
+                    compat_type="error", log_function=self.err.notice)
+
+
+@register_generator
+class Thunderbird12RegexTests(CompatRegexTestHelper):
+    """Regex tests for the Thunderbird 12 update."""
+
+    VERSION = TB12_DEFINITION
+
+    def tests(self):
+        yield self.get_test_bug(
+                717240, r"EdImage(Map|MapHotSpot|MapShapes|Overlay)\.js",
+                "`EdImage*.js` removed in Thunderbird 12",
+                "`EdImageMap.js`, `EdImageMapHotSpot.js`, "
+                "`EdImageMapShapes.js`, and `EdImageMapOverlay.js` were "
+                "removed in Thunderbird 12.", compat_type="error",
+                log_function=self.err.notice)
+
+        patterns = {"editImageMapButton\.(label|tooltip)": 717240,
+                    "haveSmtp[1-3]\.suffix2": 346306,
+                    "EditorImage(Map|MapHotSpot)\.dtd": 717240,
+                    "subscribe-errorInvalidOPMLFile": 307629, }
+        for pattern, bug in patterns.items():
+            yield self.get_test_bug(
+                    bug, pattern,
+                    "Removed, renamed, or changed methods in use",
+                    "Some code matched the pattern `%s`, which has been "
+                    "flagged as having changed in Thunderbird 12." % pattern,
+                    compat_type="error")
+
+        js_patterns = {r"TextEditorOnLoad": 695842,
+                       r"Editor(OnLoad|Startup|Shutdown|CanClose)": 695842,
+                       r"gInsertNewIMap": 717240,
+                       r"editImageMap": 717240,
+                       r"(SelectAll|MessageHas)Attachments": 526998, }
+        for pattern, bug in js_patterns.items():
+            yield self.get_test_bug(
+                    bug, pattern,
+                    "Removed, renamed, or changed methods in use",
+                    "Some code matched the JavaScript function `%s`, which has "
+                    "been flagged as having changed, removed, or deprecated "
+                    "in Thunderbird 12." % pattern,
+                    compat_type="error", log_function=self.err.notice)
+
