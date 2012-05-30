@@ -35,7 +35,6 @@ def test_valid_name():
     z = XPIManager(get_path('xpi/install_rdf_only.xpi'))
     contents = z.package_contents()
     assert 'install.rdf' in contents
-    assert z.test() == False
 
 
 def test_read_file():
@@ -55,16 +54,6 @@ def test_write_file():
             eq_(z.read(f), d.encode('utf-8'))
         finally:
             os.unlink(temp_fn)
-
-
-def test_bad_file():
-    """Tests that the XPI manager correctly reports a bad XPI file."""
-    try:
-        x = XPIManager(get_path('junk.xpi'))
-    except BadZipfile:
-        pass
-    x = XPIManager(get_path('corrupt.xpi'))
-    assert x.test()
 
 
 def test_missing_file():

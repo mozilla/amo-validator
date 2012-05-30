@@ -37,19 +37,6 @@ class XPIManager(object):
         """Get info on a single file."""
         return self.package_contents()[name]
 
-    def test(self):
-        """
-        Tests the validity and non-corruptness of the zip. Will return true on
-        failure.
-        """
-
-        # This guy tests the hashes of the content.
-        try:
-            output = self.zf.testzip()
-            return output is not None
-        except:
-            return True
-
     def package_contents(self):
         "Returns a dictionary of file information"
 
