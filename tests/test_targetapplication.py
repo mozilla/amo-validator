@@ -43,6 +43,22 @@ def test_valid_targetapps():
                 ['3.6', '3.6.4', '3.6.*'])
 
 
+def test_missing_min_max():
+    """
+    Test that the minVersion and maxVersion properties of each
+    targetApplication are present.
+    """
+
+    _do_test("tests/resources/targetapplication/missing_min.xpi",
+             targetapp.test_targetedapplications,
+             True,
+             True)
+
+    _do_test("tests/resources/targetapplication/missing_max.xpi",
+             targetapp.test_targetedapplications,
+             True,
+             True)
+
 def test_bad_min_max():
     """Tests that the lower/upper-bound version number for a
     targetApplication entry is indeed a valid version number"""
