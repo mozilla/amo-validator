@@ -21,3 +21,5 @@ do
         python ../make_hash.py $f $tagname >> ../../validator/testcases/jetpack_data.txt
     done
 done
+
+sort ../../validator/testcases/jetpack_data.txt -o ../../validator/testcases/jetpack_data.txt
