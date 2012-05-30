@@ -2,6 +2,8 @@ import logging
 import os
 import re
 import signal
+from zipfile import BadZipfile
+from zlib import error as zlib_error
 
 from validator.typedetection import detect_type
 from validator.opensearch import detect_opensearch
@@ -139,19 +141,23 @@ def test_package(err, file_, name, expectation=PACKAGE_ANY,
     # Load up a new instance of an XPI.
     try:
         package = XPIManager(file_, mode="r", name=name)
-    except:
+
+        # Test the install.rdf file to see if we can get the type that way.
+        has_install_rdf = "install.rdf" in package
+        if has_install_rdf:
+            _load_install_rdf(err, package, expectation)
+    except IOError:
         # Die on this one because the file won't open.
         return err.error(("main",
                           "test_package",
                           "unopenable"),
                          "The XPI could not be opened.")
-
-    # Test the XPI file for corruption.
-    if package.test():
-        return err.error(("main",
-                          "test_package",
-                          "corrupt"),
-                         "XPI package appears to be corrupt.")
+    except (BadZipfile, zlib_error):
+        # Die if the zip file is corrupt.
+        return err.error(
+            ("submain", "_load_install_rdf", "badzipfile"),
+            error="Corrupt ZIP file",
+            description="We were unable to decompress the zip file.")
 
     if package.extension in assumed_extensions:
         assumed_type = assumed_extensions[package.extension]
