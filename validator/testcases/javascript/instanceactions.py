@@ -12,10 +12,11 @@ node
 
 import types
 
+import actions
 from validator.compat import FX10_DEFINITION
 from validator.constants import BUGZILLA_BUG
-import actions
 from jstypes import *
+from instanceproperties import _set_HTML_property
 
 
 def createElement(args, traverser, node, wrapper):
@@ -141,6 +142,19 @@ def nsIDOMFile_deprec(args, traverser, node, wrapper):
     cd_nsIDOMFile_deprec(None, [], traverser)
 
 
+def insertAdjacentHTML(args, traverser, node, wrapper):
+    """
+    Perfrom the same tests on content inserted into the DOM via
+    insertAdjacentHTML as we otherwise would for content inserted via the
+    various innerHTML/outerHTML properties.
+    """
+    if not args or len(args) < 2:
+        return
+
+    content = traverser._traverse_node(args[1])
+    _set_HTML_property("insertAdjacentHTML", content, traverser)
+
+
 def isSameNode(args, traverser, node, wrapper):
     """Raise an error when an add-on uses node.isSameNode(foo)."""
     traverser.err.error(
@@ -206,6 +220,7 @@ INSTANCE_DEFINITIONS = {"createElement": createElement,
                         "getAsBinary": nsIDOMFile_deprec,
                         "getAsDataURL": nsIDOMFile_deprec,
                         "getInterface": getInterface,
+                        "insertAdjacentHTML": insertAdjacentHTML,
                         "isSameNode": isSameNode,
                         "PageMod": PageMod,
                         "QueryInterface": QueryInterface,

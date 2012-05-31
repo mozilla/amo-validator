@@ -25,27 +25,27 @@ def test_innerHTML():
     """).failed()
 
 
-def test_innerAdjacentHTML():
-    """Test that innerAdjacentHTML works the same as innerHTML."""
+def test_outerHTML():
+    """Test that the dev can't define event handler in outerHTML."""
 
     assert not _do_test_raw("""
     var x = foo();
-    x.innerAdjacentHTML = "<div></div>";
+    x.outerHTML = "<div></div>";
     """).failed()
 
     assert _do_test_raw("""
     var x = foo();
-    x.innerAdjacentHTML = "<div onclick=\\"foo\\"></div>";
+    x.outerHTML = "<div onclick=\\"foo\\"></div>";
     """).failed()
 
     # Test without declaration
     assert _do_test_raw("""
-    x.innerAdjacentHTML = "<div onclick=\\"foo\\"></div>";
+    x.outerHTML = "<div onclick=\\"foo\\"></div>";
     """).failed()
 
     assert _do_test_raw("""
     var x = foo();
-    x.innerAdjacentHTML = "x" + y;
+    x.outerHTML = "x" + y;
     """).failed()
 
 
