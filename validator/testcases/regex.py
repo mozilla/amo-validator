@@ -748,7 +748,7 @@ class Thunderbird13RegexTests(CompatRegexTestHelper):
             yield self.get_test_bug(
                     bug, pattern,
                     "Removed, renamed, or changed methods in use",
-                    "Some code matched the JavaScript function `%s`, which has "
+                    "A javascript function matched the pattern `%s`, which has "
                     "been flagged as having changed, removed, or deprecated "
                     "in Thunderbird 13." % pattern,
                     compat_type="error", log_function=self.err.notice)

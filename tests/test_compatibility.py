@@ -939,6 +939,28 @@ def test_tb13_compatibility():
     assert len(err.notices) == 2
     assert err.compat_summary["errors"]
 
+    # Test the regex checks
+    err = _do_real_test_raw("""
+    var x = serverPageInit();
+    var x = loginPageInit();
+    var x = serverPageValidate();
+    var x = serverPageUnload();
+    var x = loginPageValidate();
+    var x = setupBccTextbox();
+    var x = setupCcTextbox();
+    """, versions={TB_GUID: version_range("thunderbird", "13.0a1")})
+    assert err.failed
+    assert len(err.notices) == 7
+    assert err.compat_summary["errors"]
+
+    # Make sure only the desired functions are causing errors
+    err = _do_real_test_raw("""
+    var x = serverPage();
+    var x = clientPageInit();
+    """, versions={TB_GUID: version_range("thunderbird", "13.0a1")})
+    assert not err.failed(fail_on_warnings=False)
+    assert not err.notices
+    assert not err.compat_summary["errors"]
 
 def test_requestAnimationFrame():
     """
