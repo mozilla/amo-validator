@@ -11,7 +11,8 @@ def detect_type(err, install_rdf=None, xpi_package=None):
     translated_types = {"2": PACKAGE_EXTENSION,
                         "4": PACKAGE_THEME,
                         "8": PACKAGE_LANGPACK,
-                        "32": PACKAGE_MULTI}
+                        "32": PACKAGE_MULTI,
+                        "64": PACKAGE_DICTIONARY}
 
     # If we're missing our install.rdf file, we can try to make some
     # assumptions.

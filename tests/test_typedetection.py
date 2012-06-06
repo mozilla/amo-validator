@@ -31,14 +31,6 @@ def _test_type(file_, expectation, failure=False):
 
 
 def test_extension():
-    """When no install.rdf file is present and the file ends with XPI,
-    then the type detection module should return type "Dictionary"."""
-
-    _test_type("tests/resources/typedetection/td_bad_dict.xpi",
-               PACKAGE_DICTIONARY)
-
-
-def test_extension():
     "Tests that type detection can detect an addon of type 'extension'"
 
     err =_test_type("tests/resources/typedetection/td_notype_ext.xpi",
@@ -65,6 +57,10 @@ def test_dictionary():
     "Tests that type detection can detect an addon of type 'dictionary'"
 
     err =_test_type("tests/resources/typedetection/td_dictionary.xpi",
+                    PACKAGE_DICTIONARY)
+    assert not err.notices
+
+    err =_test_type("tests/resources/typedetection/td_notype_dictionary.xpi",
                     PACKAGE_DICTIONARY)
     assert not err.notices
 

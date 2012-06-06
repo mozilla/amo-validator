@@ -241,6 +241,8 @@ def test_dictionary_layout(err, xpi_package=None):
         "dictionaries/*.dic"]
     whitelisted_files = [
         "install.js",
+        "icon.png",
+        "icon64.png",
         "dictionaries/*.aff",  # List again because there must >0
         "dictionaries/*.dic",
         "chrome.manifest",
