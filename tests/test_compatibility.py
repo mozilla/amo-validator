@@ -922,21 +922,9 @@ def test_tb13_compatibility():
     var y = Components.classes["foo"].createInstance(
         Components.interfaces.nsIMsgNewsFolder);
     y.getGroupUsernameWithUI();
-    """)
-    assert not err.failed(fail_on_warnings=False)
-    assert not err.warnings
-    assert not any(err.compat_summary.values())
-
-    err = _do_real_test_raw("""
-    var x = Components.classes["foo"].createInstance(
-        Components.interfaces.nsIMsgLocalMailFolder);
-    x.addMessage();
-    var y = Components.classes["foo"].createInstance(
-        Components.interfaces.nsIMsgNewsFolder);
-    y.getGroupUsernameWithUI();
     """, versions={TB_GUID: version_range("thunderbird", "13.0a1")})
     assert err.failed
-    assert len(err.notices) == 2
+    assert len(err.warnings) == 2
     assert err.compat_summary["errors"]
 
     # Test the regex checks

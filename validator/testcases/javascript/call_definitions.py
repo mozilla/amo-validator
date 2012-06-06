@@ -777,9 +777,9 @@ def TB13_nsIMsgLocalMailFolder_changed(wrapper, arguments, traverser):
     Flag use of nsIMsgLocalMailFolder::addMessage and addMessageBatch
     with Thunderbird 13.
     """
-    traverser.err.notice(
+    traverser.err.warning(
         err_id=("testcases_javascript_calldefinitions", "nsIMsgLocalMailFolder"),
-        notice="Altered nsIMsgLocalMailFolder methods in use.",
+        warning="Altered nsIMsgLocalMailFolder methods in use.",
         description="This add-on uses nsIMsgLocalMailFolder::addMessage or "
                     "nsIMsgLocalMailFolder::addMessageBatch "
                     "which had their return values altered "
@@ -798,9 +798,9 @@ def TB13_nsIMsgLocalMailFolder_changed(wrapper, arguments, traverser):
 def TB13_nsIMsgNewsFolder_changed(wrapper, arguments, traverser):
     """Flag use of several nsIMsgNewsFolder methods with Thunderbird 13."""
   
-    traverser.err.notice(
+    traverser.err.warning(
         err_id=("testcases_javascript_calldefinitions", "nsIMsgNewsFolder"),
-        notice="Altered nsIMsgNewsFolder methods in use.",
+        warning="Altered nsIMsgNewsFolder methods in use.",
         description="This add-on uses nsIMsgNewsFolder::getGroupPasswordWithUI"
                     " getGroupUsernameWithUI(), forgetGroupUsername() "
                     "or forgetGroupPassword() which were removed "
