@@ -5,7 +5,7 @@ from validator.compat import (FX4_DEFINITION, FX5_DEFINITION, FX6_DEFINITION,
                               FX7_DEFINITION, FX8_DEFINITION, FX9_DEFINITION,
                               FX11_DEFINITION, FX12_DEFINITION, FX13_DEFINITION,
                               TB7_DEFINITION, TB10_DEFINITION, TB11_DEFINITION,
-                              TB12_DEFINITION)
+                              TB12_DEFINITION, TB13_DEFINITION)
 from validator.contextgenerator import ContextGenerator
 
 
@@ -705,5 +705,51 @@ class Thunderbird12RegexTests(CompatRegexTestHelper):
                     "Some code matched the JavaScript function `%s`, which has "
                     "been flagged as having changed, removed, or deprecated "
                     "in Thunderbird 12." % pattern,
+                    compat_type="error", log_function=self.err.notice)
+
+
+@register_generator
+class Thunderbird13RegexTests(CompatRegexTestHelper):
+    """Regex tests for the Thunderbird 13 update."""
+
+    VERSION = TB13_DEFINITION
+
+    def tests(self):
+        # String changes for add-ons depending on Thunderbird localizations
+        patterns = {"searchAllMessages\.(label|keyLabel2)": 728897,
+                    "username(Desc|Label|SmtpDesc|SmtpLabel)\.(label|accesskey)": 71008,
+                    "loginTitle\.label": 71008,
+                    "smtpServer(Desc|Label)\.(label|accesskey)": 71008,
+                    "incomingServer(NameDesc|Label)\.(label|accesskey)": 71008,
+                    "serverTitle\.label": 71008,
+                    "location\.label": 716706,
+                    "feed-properties\.dtd": 716706,}
+        for pattern, bug in patterns.items():
+            yield self.get_test_bug(
+                    bug, pattern,
+                    "Removed, renamed, or changed labels in use",
+                    "Some string matched the pattern `%s`, which has been "
+                    "flagged as having changed in Thunderbird 13." % pattern,
+                    compat_type="error")
+
+        js_patterns = {r"webSearchProvider\.js": 733802,
+                       r"general\.useragent\.extra\.thunderbird": 726942,
+                       r"gPermissionManager\._updatePermissions": 728810,
+                       r"(gPromptService|gHeaderParser)": 722187,
+                       r"setup(Cc|Bcc)Textbox": 208628, 
+                       r"onBiffMinChange": 532391, 
+                       r"(server|login)Page(Validate|Unload|Init)": 71008, 
+                       r"feed-properties\.js": 716706,
+                       r"gFeedSubscriptionsWindow\.(init|uninit)": 716706,
+                       r"openComposeWindowForRSSArticle": 716706,
+                       r"nsOfflineStartupModule\.getBundle": 722168,
+                       r"GetOnlineDelimiter": 301714, }
+        for pattern, bug in js_patterns.items():
+            yield self.get_test_bug(
+                    bug, pattern,
+                    "Removed, renamed, or changed methods in use",
+                    "A javascript function matched the pattern `%s`, which has "
+                    "been flagged as having changed, removed, or deprecated "
+                    "in Thunderbird 13." % pattern,
                     compat_type="error", log_function=self.err.notice)
 

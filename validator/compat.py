@@ -43,3 +43,4 @@ TB7_DEFINITION = {TB_GUID: version_range("thunderbird", "7.0a1", "8.0a1")}
 TB10_DEFINITION = {TB_GUID: version_range("thunderbird", "10.0a1", "11.0a1")}
 TB11_DEFINITION = {TB_GUID: version_range("thunderbird", "11.0a1", "12.0a1")}
 TB12_DEFINITION = {TB_GUID: version_range("thunderbird", "12.0a1", "13.0a1")}
+TB13_DEFINITION = _build_definition(13, firefox=False, fennec=False)
