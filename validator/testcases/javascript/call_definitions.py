@@ -8,7 +8,8 @@ import predefinedentities
 from jstypes import *
 from validator.constants import BUGZILLA_BUG
 from validator.compat import (FX6_DEFINITION, FX7_DEFINITION, FX8_DEFINITION,
-                              FX9_DEFINITION, FX11_DEFINITION, TB12_DEFINITION)
+                              FX9_DEFINITION, FX11_DEFINITION, TB12_DEFINITION,
+                              TB13_DEFINITION)
 from validator.decorator import version_range
 
 # Function prototypes should implement the following:
@@ -770,6 +771,50 @@ def TB12_nsIImapProtocol_changed(wrapper, arguments, traverser):
 
     return JSWrapper(JSObject(), traverser=traverser, dirty=True)
 
+
+def TB13_nsIMsgLocalMailFolder_changed(wrapper, arguments, traverser):
+    """
+    Flag use of nsIMsgLocalMailFolder::addMessage and addMessageBatch
+    with Thunderbird 13.
+    """
+    traverser.err.notice(
+        err_id=("testcases_javascript_calldefinitions", "nsIMsgLocalMailFolder"),
+        notice="Altered nsIMsgLocalMailFolder methods in use.",
+        description="This add-on uses nsIMsgLocalMailFolder::addMessage or "
+                    "nsIMsgLocalMailFolder::addMessageBatch "
+                    "which had their return values altered "
+                    "in Thunderbird 13. For more information, please refer to "
+                    "%s." % BUGZILLA_BUG % 647699,
+        filename=traverser.filename,
+        line=traverser.line,
+        column=traverser.position,
+        context=traverser.context,
+        compatibility_type="error",
+        for_appversions=TB13_DEFINITION,
+        tier=5)
+
+    return JSWrapper(JSObject(), traverser=traverser, dirty=True)
+
+def TB13_nsIMsgNewsFolder_changed(wrapper, arguments, traverser):
+    """Flag use of several nsIMsgNewsFolder methods with Thunderbird 13."""
+  
+    traverser.err.notice(
+        err_id=("testcases_javascript_calldefinitions", "nsIMsgNewsFolder"),
+        notice="Altered nsIMsgNewsFolder methods in use.",
+        description="This add-on uses nsIMsgNewsFolder::getGroupPasswordWithUI"
+                    " getGroupUsernameWithUI(), forgetGroupUsername() "
+                    "or forgetGroupPassword() which were removed "
+                    "in Thunderbird 13. For more information, please refer to "
+                    "%s." % BUGZILLA_BUG % 201750,
+        filename=traverser.filename,
+        line=traverser.line,
+        column=traverser.position,
+        context=traverser.context,
+        compatibility_type="error",
+        for_appversions=TB13_DEFINITION,
+        tier=5)
+
+    return JSWrapper(JSObject(), traverser=traverser, dirty=True)
 
 def requestAnimationFrame(wrapper, arguments, traverser):
     """
