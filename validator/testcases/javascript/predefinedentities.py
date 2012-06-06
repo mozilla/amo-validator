@@ -121,11 +121,27 @@ INTERFACES = {
     u"nsIMsgDatabase":
         {"value":
             {u"Open":
-                {"return": call_definitions.nsIMsgDatabase_changed}}},  
+                {"return": call_definitions.nsIMsgDatabase_changed}}},
     u"nsIMsgFolder":
         {"value":
             {u"offlineStoreOutputStream":
                 {"value": call_definitions.nsIMsgFolder_changed}}},
+    u"nsIMsgLocalMailFolder":
+        {"value":
+            {u"addMessage":
+                {"return": call_definitions.TB13_nsIMsgLocalMailFolder_changed},
+             u"addMessageBatch":
+                {"return": call_definitions.TB13_nsIMsgLocalMailFolder_changed}}},
+    u"nsIMsgNewsFolder":
+        {"value":
+            {u"getGroupPasswordWithUI":
+                {"return": call_definitions.TB13_nsIMsgNewsFolder_changed},
+             u"getGroupUsernameWithUI":
+                {"return": call_definitions.TB13_nsIMsgNewsFolder_changed},
+             u"forgetGroupUsername":
+                {"return": call_definitions.TB13_nsIMsgNewsFolder_changed},
+             u"forgetGroupPassword":
+                {"return": call_definitions.TB13_nsIMsgNewsFolder_changed}}},
     u"nsIMsgOutputStream":
         {"value":
             {u"folderStream":
@@ -532,6 +548,14 @@ GLOBAL_ENTITIES = {
                                 {"xpcom_map":
                                      lambda:
                                         INTERFACES["nsIMsgFolder"]},
+                             u"nsIMsgLocalMailFolder":
+                                {"xpcom_map":
+                                     lambda:
+                                        INTERFACES["nsIMsgLocalMailFolder"]},
+                             u"nsIMsgNewsFolder":
+                                {"xpcom_map":
+                                     lambda:
+                                        INTERFACES["nsIMsgNewsFolder"]},
                              u"nsIMsgOutputStream":
                                 {"xpcom_map":
                                      lambda:
