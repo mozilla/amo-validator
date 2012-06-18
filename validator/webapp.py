@@ -224,12 +224,15 @@ def test_webapp(err, webapp, current_valid_keys, required=True):
                                 "must be a string.")
                 continue
 
-            if not test_path(webapp[key]):
+            if (not webapp[key].startswith("/") or
+                webapp[key].startswith("//")):
                 err.error(
                     err_id=("webapp", "detect", "launch_path"),
                     error="'launch_path' is not a valid path.",
-                    description=["The 'launch_path' element is not a valid "
-                                 "path.",
+                    description=["The `launch_path` element is not a valid "
+                                 "path. It must always be relative to the "
+                                 "origin of the domain that the manifest is "
+                                 "hosted on.",
                                  "Bad path: %s" % webapp[key]])
         elif key == "locales":
             if "default_locale" not in webapp:

@@ -328,6 +328,17 @@ def test_webapp_bad_launch_path():
     _detect(err, data)
     assert err.failed()
 
+    err = ErrorBundle(listed=False)
+    data["launch_path"] = "http://foo.com/bar"
+    _detect(err, data)
+    assert err.failed()
+
+    err = ErrorBundle(listed=False)
+    data["launch_path"] = "/foo/bar"
+    _detect(err, data)
+    assert not err.failed()
+
+
 
 def test_webapp_widget_deprecated():
     """Test that the widget property is deprecated."""
