@@ -289,6 +289,26 @@ def test_webapp_no_amo_installs_allowed_from():
     assert not err.failed()
 
 
+def test_webapp_installs_allowed_from_protocol():
+    """
+    Test that if the developer includes a URL in the `installs_allowed_from`
+    parameter that is a valid Marketplace URL but uses HTTP instead of HTTPS,
+    we flag it as using the wrong protocol and not as an invalid URL.
+    """
+
+    err = ErrorBundle(listed=True)
+    data = _get_json()
+
+    bad_url = validator.constants.DEFAULT_WEBAPP_MRKT_URLS[0].replace("https",
+                                                                      "http")
+
+    data["installs_allowed_from"] = (bad_url, )
+    _detect(err, data)
+    assert err.failed()
+
+    assert any("bad_protocol_mrkt_url" in e["id"] for e in err.errors)
+
+
 def test_webapp_launch_path_not_string():
     """Test that the launch path is a string."""
 

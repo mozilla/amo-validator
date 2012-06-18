@@ -173,6 +173,8 @@ def test_webapp(err, webapp, current_valid_keys, required=True):
                                 "manifest must be an array of values.")
                 continue
 
+            found_mrkt_url = False
+
             for url in webapp[key]:
                 if not _test_url(url, can_be_asterisk=True):
                     err.error(
@@ -181,11 +183,26 @@ def test_webapp(err, webapp, current_valid_keys, required=True):
                         description=["A URL from 'installs_allowed_from' is "
                                      "invalid.",
                                      "Bad URL: %s" % url])
+                elif (url.startswith("http://") and
+                      "https://%s" % url[7:] in DEFAULT_WEBAPP_MRKT_URLS):
+                    # Don't flag the add-on for not having a marketplace URL,
+                    # since they have one (it's just the wrong protocol).
+                    found_mrkt_url = True
+                    err.error(
+                        err_id=("webapp", "detect", "bad_protocol_mrkt_url"),
+                        error="Marketplace URL must use HTTPS",
+                        description="You are including a Marketplace URL in "
+                                    "the `installs_allowed_from` list, however "
+                                    "the URL that you are using (%s) is not "
+                                    "a secure URL. Change the protocol from "
+                                    "`http://` to `https://` to correct this "
+                                    "issue." % url)
 
             # If none of the acceptable webapp installation URLs are present
             # and the webapp doesn't allow installs from "*" and the webapp is
             # headed for the marketplace, report an error.
-            if (all(url not in webapp[key] for url in
+            if (not found_mrkt_url and
+                all(url not in webapp[key] for url in
                     DEFAULT_WEBAPP_MRKT_URLS) and
                 "*" not in webapp[key] and err.get_resource("listed")):
                 err.error(
