@@ -48,3 +48,15 @@ def test_app_versions():
     print validator.constants.APPROVED_APPLICATIONS
     assert validator.constants.APPROVED_APPLICATIONS["1"]["name"] == "Foo App"
 
+
+def test_mrkt_urls():
+    "Tests that Marketplace URLs are correctly added to the MRKT_URLS constant."
+
+    validate(path="tests/resources/junk.xpi",
+             market_urls=["foobar"])
+    print validator.constants.DEFAULT_WEBAPP_MRKT_URLS
+    assert "foobar" in validator.constants.DEFAULT_WEBAPP_MRKT_URLS
+
+    # Clean up!
+    validator.constants.DEFAULT_WEBAPP_MRKT_URLS.remove("foobar")
+
