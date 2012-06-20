@@ -1,33 +1,48 @@
 import rdflib
 import types
 from rdflib import URIRef
+from rdflib.exceptions import ParserError
 from StringIO import StringIO
+from xml.sax import SAXParseException
+
+
+class RDFException(Exception):
+    """Exception thrown when the RDF parser encounters a problem."""
+
+    def __init__(self, message=None, orig_exception=None):
+        if message is None and orig_exception is not None:
+            message = orig_exception.message
+
+        super(RDFException, self).__init__(message)
+        self.orig_exception = orig_exception
+
+    def line(self):
+        return (self.orig_exception.getLineNumber() if self.orig_exception else
+                None)
 
 
 class RDFParser(object):
-    """This little gem (not to be confused with a Ruby gem) loads and
-    parses an RDF file."""
+    """Parser wrapper for RDF files."""
 
     def __init__(self, data, namespace=None):
         # Load up and parse the file in XML format.
         graph = rdflib.Graph()
 
         self.manifest = u"urn:mozilla:install-manifest"
-        self.namespace = "http://www.mozilla.org/2004/em-rdf"
-        if namespace is not None:
-            self.namespace = namespace
+        self.namespace = namespace or "http://www.mozilla.org/2004/em-rdf"
 
-        # Try it!
         if isinstance(data, types.StringTypes):
             data = StringIO(data)  # Wrap data in a pseudo-file
 
         try:
             graph.parse(data, format="xml")
-        except Exception as error:
-            self.rdf = None
-            return
-        else:
             self.rdf = graph
+        except ParserError as ex:
+            # Re-raise the exception in a local exception type.
+            raise RDFException(message=ex.message)
+        except SAXParseException as ex:
+            # Raise the SAX parse exceptions so we get some line info.
+            raise RDFException(orig_exception=ex)
 
     def uri(self, element, namespace=None):
         "Returns a URIRef object for use with the RDF document."
