@@ -1,6 +1,5 @@
-import rdflib
 import types
-from rdflib import URIRef
+from rdflib import Graph, URIRef
 from rdflib.exceptions import ParserError
 from StringIO import StringIO
 from xml.sax import SAXParseException
@@ -21,28 +20,88 @@ class RDFException(Exception):
                 None)
 
 
+class AddonRDFEntity(object):
+    """
+    A "resolved" entity within an RDF file in an add-on. For use by SAX during
+    the entity resolution process.
+    """
+
+    def getByteStream(self):
+        yield None
+
+    def getSystemId(self):
+        return ""
+
+
+class AddonRDFEntityResolver(object):
+    """
+    An entity resolver to be used by SAX for resolving internal entity
+    references.
+    """
+
+    def __init__(self, err):
+        self.err = err
+
+    def resolveEntity(self, public, system):
+        if system.startswith("data:"):
+            self.err.warning(
+                    err_id=("rdf", "entity_resolver", "data_uri"),
+                    warning="`data:` URIs are not permitted in `install.rdf`.",
+                    filename="install.rdf")
+        elif system.startswith("chrome://"):
+            self.err.warning(
+                    err_id=("rdf", "entity_resolver", "chrome_uri"),
+                    warning="`chrome://` URI referenced before initialization.",
+                    description="A chrome URI was referenced before the "
+                                "browser chrome was initialized.",
+                    filename="install.rdf")
+        else:
+            self.err.warning(
+                    err_id=("rdf", "entity_resolver", "remote_uri"),
+                    warning="Remote URI referenced from `install.rdf`.",
+                    description="Remote URIs should not be used within "
+                                "`install.rdf` files.",
+                    filename="install.rdf")
+
+        return AddonRDFEntity()
+
+
 class RDFParser(object):
     """Parser wrapper for RDF files."""
 
-    def __init__(self, data, namespace=None):
-        # Load up and parse the file in XML format.
-        graph = rdflib.Graph()
-
+    def __init__(self, err, data, namespace=None):
+        self.err = err
         self.manifest = u"urn:mozilla:install-manifest"
         self.namespace = namespace or "http://www.mozilla.org/2004/em-rdf"
 
         if isinstance(data, types.StringTypes):
             data = StringIO(data)  # Wrap data in a pseudo-file
 
+        from rdflib.plugins.parsers import rdfxml
+        orig_create_parser = rdfxml.create_parser
+
         try:
+            # Patch rdflib to not resolve URL entities.
+            def create_parser(*args, **kwargs):
+                parser = orig_create_parser(*args, **kwargs)
+                parser.setEntityResolver(AddonRDFEntityResolver(err))
+                return parser
+            rdfxml.create_parser = create_parser
+
+            # Load up and parse the file in XML format.
+            graph = Graph()
             graph.parse(data, format="xml")
             self.rdf = graph
+
         except ParserError as ex:
             # Re-raise the exception in a local exception type.
             raise RDFException(message=ex.message)
         except SAXParseException as ex:
             # Raise the SAX parse exceptions so we get some line info.
             raise RDFException(orig_exception=ex)
+        finally:
+            # If we fail, we don't want to sully up the creation function.
+            rdfxml.create_parser = orig_create_parser
 
     def uri(self, element, namespace=None):
         "Returns a URIRef object for use with the RDF document."
@@ -55,7 +114,7 @@ class RDFParser(object):
     def get_root_subject(self):
         "Returns the BNode which describes the topmost subject of the graph."
 
-        manifest = rdflib.term.URIRef(self.manifest)
+        manifest = URIRef(self.manifest)
 
         if list(self.rdf.triples((manifest, None, None))):
             return manifest

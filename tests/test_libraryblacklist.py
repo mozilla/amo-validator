@@ -4,7 +4,6 @@ import validator.testcases.content as test_content
 from validator.compat import FX9_DEFINITION
 from validator.errorbundler import ErrorBundle
 from validator.xpi import XPIManager
-from validator.rdf import RDFParser
 
 
 def test_blacklisted_files():

@@ -13,7 +13,7 @@ targetapp.APPROVED_APPLICATIONS = \
 def _do_test_raw(rdf, listed=True, overrides=None):
     err = ErrorBundle(listed=listed)
     err.overrides = overrides
-    rdf = RDFParser(rdf.strip())
+    rdf = RDFParser(err, rdf.strip())
     err.save_resource("has_install_rdf", True)
     err.save_resource("install_rdf", rdf)
 

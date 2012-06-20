@@ -1,6 +1,5 @@
 import logging
 import os
-import re
 import signal
 from zipfile import BadZipfile
 from zlib import error as zlib_error
@@ -189,22 +188,8 @@ def test_package(err, file_, name, expectation=PACKAGE_ANY,
 
 
 def _load_install_rdf(err, package, expectation):
-    # Load up the install.rdf file.
-    install_rdf_data = package.read("install.rdf")
-
-    if re.search('<!doctype', install_rdf_data, re.I):
-        err.save_resource("bad_install_rdf", True)
-        return err.error(("main",
-                          "test_package",
-                          "doctype_in_installrdf"),
-                         "DOCTYPEs are not permitted in install.rdf",
-                         "The add-on's install.rdf file contains a DOCTYPE. "
-                         "It must be removed before your add-on can be "
-                         "validated.",
-                         filename="install.rdf")
-
     try:
-        install_rdf = RDFParser(install_rdf_data)
+        install_rdf = RDFParser(err, package.read("install.rdf"))
     except RDFException as ex:
         err.error(
                 err_id=("main", "test_package", "parse_error"),
@@ -215,7 +200,7 @@ def _load_install_rdf(err, package, expectation):
                 line=ex.line())
         return
     else:
-        if install_rdf.rdf is None or not install_rdf:
+        if install_rdf.rdf is None:
             err.error(
                     err_id=("main", "test_package", "cannot_parse_installrdf"),
                     error="Cannot read `install.rdf`",
@@ -228,14 +213,13 @@ def _load_install_rdf(err, package, expectation):
 
     # Load up the results of the type detection
     results = detect_type(err, install_rdf, package)
-
     if results is None:
-        return err.error(("main",
-                          "test_package",
-                          "undeterminable_type"),
-                         "Unable to determine add-on type",
-                         "The type detection algorithm could not determine "
-                         "the type of the add-on.")
+        err.error(
+                err_id=("main", "test_package", "undeterminable_type"),
+                error="Unable to determine add-on type",
+                description="The type detection algorithm could not determine "
+                            "the type of the add-on.")
+        return
     else:
         err.set_type(results)
 
