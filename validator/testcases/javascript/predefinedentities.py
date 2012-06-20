@@ -252,6 +252,21 @@ INTERFACES = {
                        call_definitions.spellcheck_savedefaultdictionary}}}
     }
 
+INTERFACE_ENTITIES = {u"nsIXMLHttpRequest":
+                          {"xpcom_map":
+                               lambda: GLOBAL_ENTITIES["XMLHttpRequest"]},
+                      u"nsIProcess": {"dangerous": True},
+                      u"nsIDOMGeoGeolocation": {"dangerous": True},
+                      u"nsIX509CertDB": {"dangerous": True}}
+for interface in INTERFACES:
+    def construct(interface):
+        def wrap():
+            return INTERFACES[interface]
+        return wrap
+    INTERFACE_ENTITIES[interface] = {"xpcom_map": construct(interface)}
+
+#import pdb; pdb.set_trace()
+
 
 def build_quick_xpcom(method, interface, traverser):
     """A shortcut to quickly build XPCOM objects on the fly."""
@@ -483,137 +498,7 @@ GLOBAL_ENTITIES = {
                                         a and
                                         _get_as_str(t(a[0]).get_literal_value())
                                             .count("ctypes.jsm")}}},
-              u"interfaces":
-                  {"value": {u"nsIXMLHttpRequest":
-                                {"xpcom_map":
-                                     lambda:
-                                        GLOBAL_ENTITIES["XMLHttpRequest"]},
-                             u"nsIAccessibleRetrieval":
-                                {"xpcom_map":
-                                     lambda:
-                                        INTERFACES["nsIAccessibleRetrieval"]},
-                             u"nsIBrowserSearchService":
-                                {"xpcom_map":
-                                     lambda:
-                                        INTERFACES["nsIBrowserSearchService"]},
-                             u"nsICategoryManager":
-                                {"xpcom_map":
-                                     lambda:
-                                        INTERFACES["nsICategoryManager"]},
-                             u"nsIComm4xProfile":
-                                {"xpcom_map":
-                                     lambda:
-                                        INTERFACES["nsIComm4xProfile"]},
-                             u"nsIComponentRegistrar":
-                                {"xpcom_map":
-                                     lambda:
-                                        INTERFACES["nsIComponentRegistrar"]},
-                             u"nsIDOMNSHTMLElement":
-                                {"xpcom_map":
-                                     lambda:
-                                        INTERFACES["nsIDOMNSHTMLElement"]},
-                             u"nsIDOMNSHTMLFrameElement":
-                                {"xpcom_map":
-                                     lambda:
-                                        INTERFACES["nsIDOMNSHTMLFrameElement"]},
-                             u"nsIImapIncomingServer":
-                                {"xpcom_map":
-                                     lambda:
-                                        INTERFACES["nsIImapIncomingServer"]},
-                             u"nsIImapMailFolderSink":
-                                {"xpcom_map":
-                                     lambda:
-                                        INTERFACES["nsIImapMailFolderSink"]},
-                             u"nsIImapProtocol":
-                                {"xpcom_map":
-                                     lambda:
-                                        INTERFACES["nsIImapProtocol"]},
-                             u"nsIJSON":
-                                {"xpcom_map":
-                                     lambda:
-                                        INTERFACES["nsIJSON"]},
-                             u"nsIMailtoUrl":
-                                {"xpcom_map":
-                                     lambda:
-                                        INTERFACES["nsIMailtoUrl"]},
-                             u"nsIMsgDatabase":
-                                {"xpcom_map":
-                                     lambda:
-                                        INTERFACES["nsIMsgDatabase"]},
-                             u"nsIMsgDBService":
-                                {"xpcom_map":
-                                     lambda:
-                                        INTERFACES["nsIMsgDBService"]},
-                             u"nsIMsgFolder":
-                                {"xpcom_map":
-                                     lambda:
-                                        INTERFACES["nsIMsgFolder"]},
-                             u"nsIMsgLocalMailFolder":
-                                {"xpcom_map":
-                                     lambda:
-                                        INTERFACES["nsIMsgLocalMailFolder"]},
-                             u"nsIMsgNewsFolder":
-                                {"xpcom_map":
-                                     lambda:
-                                        INTERFACES["nsIMsgNewsFolder"]},
-                             u"nsIMsgOutputStream":
-                                {"xpcom_map":
-                                     lambda:
-                                        INTERFACES["nsIMsgOutputStream"]},
-                             u"nsIMsgQuote":
-                                {"xpcom_map":
-                                     lambda:
-                                        INTERFACES["nsIMsgQuote"]},
-                             u"nsIMsgSearchScopeTerm":
-                                {"xpcom_map":
-                                     lambda:
-                                        INTERFACES["nsIMsgSearchScopeTerm"]},
-                             u"nsIMsgThread":
-                                {"xpcom_map":
-                                     lambda:
-                                        INTERFACES["nsIMsgThread"]},
-                             u"nsIObserverService":
-                                {"xpcom_map":
-                                     lambda:
-                                        INTERFACES["nsIObserverService"]},
-                             u"nsIResProtocolHandler":
-                                {"xpcom_map":
-                                     lambda:
-                                        INTERFACES["nsIResProtocolHandler"]},
-                             u"nsIStringBundleService":
-                                {"xpcom_map":
-                                     lambda:
-                                        INTERFACES["nsIStringBundleService"]},
-                             u"nsIStyleSheetService":
-                                {"xpcom_map":
-                                     lambda:
-                                        INTERFACES["nsIStyleSheetService"]},
-                             u"nsIWindowMediator":
-                                {"xpcom_map":
-                                     lambda:
-                                        INTERFACES["nsIWindowMediator"]},
-                             u"nsIURLParser":
-                                {"xpcom_map":
-                                     lambda: INTERFACES["nsIURLParser"]},
-                             u"nsIURL":
-                                {"xpcom_map": lambda: INTERFACES["nsIURL"]},
-                             u"nsIBrowserHistory":
-                                 {"xpcom_map":
-                                     lambda: INTERFACES["nsIBrowserHistory"]},
-                             u"nsIEditorSpellCheck":
-                                 {"xpcom_map":
-                                     lambda:
-                                        INTERFACES["nsIEditorSpellCheck"]},
-                             u"nsIWindowWatcher":
-                                {"xpcom_map":
-                                     lambda:
-                                        INTERFACES["nsIWindowWatcher"]},
-                             u"nsIProcess":
-                                {"dangerous": True},
-                             u"nsIDOMGeoGeolocation":
-                                {"dangerous": True},
-                             u"nsIX509CertDB":
-                                {"dangerous": True}}}}},
+              u"interfaces": {"value": INTERFACE_ENTITIES}}},
     u"extensions": {"dangerous": True},
     u"xpcnativewrappers": {"dangerous": True},
 
