@@ -62,8 +62,7 @@ def test_pass_jetpack():
                       "jetpackID": "",
                       "manifest": {}}
 
-    with open("jetpack/addon-sdk/python-lib/cuddlefish/"
-                  "app-extension/bootstrap.js") as bootstrap_file:
+    with open("tests/resources/bootstrap.js") as bootstrap_file:
         bootstrap = bootstrap_file.read()
     with open("jetpack/addon-sdk/packages/test-harness/lib/"
                   "harness.js") as harness_file:
@@ -93,8 +92,7 @@ def test_missing_elements():
     harnessoptions = {"sdkVersion": "foo",
                       "jetpackID": ""}
 
-    with open("jetpack/addon-sdk/python-lib/cuddlefish/"
-                  "app-extension/bootstrap.js") as bootstrap_file:
+    with open("tests/resources/bootstrap.js") as bootstrap_file:
         bootstrap = bootstrap_file.read()
 
     err = _do_test(MockXPI({"bootstrap.js": bootstrap,
@@ -110,8 +108,7 @@ def test_skip_safe_files():
                       "jetpackID": "",
                       "manifest": {}}
 
-    with open("jetpack/addon-sdk/python-lib/cuddlefish/"
-                  "app-extension/bootstrap.js") as bootstrap_file:
+    with open("tests/resources/bootstrap.js") as bootstrap_file:
         bootstrap = bootstrap_file.read()
 
     err = _do_test(MockXPI({"bootstrap.js": bootstrap,
@@ -128,8 +125,7 @@ def test_skip_safe_files():
 def test_pass_manifest_elements():
     """Test that proper elements in harness-options will pass."""
 
-    with open("jetpack/addon-sdk/python-lib/cuddlefish/"
-                  "app-extension/bootstrap.js") as bootstrap_file:
+    with open("tests/resources/bootstrap.js") as bootstrap_file:
         bootstrap = bootstrap_file.read()
         bootstrap_hash = hashlib.sha256(bootstrap).hexdigest()
 
@@ -164,8 +160,7 @@ def test_pass_manifest_elements():
 def test_ok_resource():
     """Test that resource:// URIs aren't flagged."""
 
-    with open("jetpack/addon-sdk/python-lib/cuddlefish/"
-                  "app-extension/bootstrap.js") as bootstrap_file:
+    with open("tests/resources/bootstrap.js") as bootstrap_file:
         bootstrap = bootstrap_file.read()
         bootstrap_hash = hashlib.sha256(bootstrap).hexdigest()
 
@@ -192,8 +187,7 @@ def test_ok_resource():
 def test_bad_resource():
     """Test for failure on non-resource:// modules."""
 
-    with open("jetpack/addon-sdk/python-lib/cuddlefish/"
-                  "app-extension/bootstrap.js") as bootstrap_file:
+    with open("tests/resources/bootstrap.js") as bootstrap_file:
         bootstrap = bootstrap_file.read()
         bootstrap_hash = hashlib.sha256(bootstrap).hexdigest()
 
@@ -220,8 +214,7 @@ def test_bad_resource():
 def test_missing_manifest_elements():
     """Test that missing manifest elements in harness-options will fail."""
 
-    with open("jetpack/addon-sdk/python-lib/cuddlefish/"
-                  "app-extension/bootstrap.js") as bootstrap_file:
+    with open("tests/resources/bootstrap.js") as bootstrap_file:
         bootstrap = bootstrap_file.read()
         bootstrap_hash = hashlib.sha256(bootstrap).hexdigest()
 
@@ -261,8 +254,7 @@ def test_mismatched_hash():
                      "jsSHA256": "",
                      "docsSHA256": ""}}}
 
-    with open("jetpack/addon-sdk/python-lib/cuddlefish/"
-                  "app-extension/bootstrap.js") as bootstrap_file:
+    with open("tests/resources/bootstrap.js") as bootstrap_file:
         bootstrap = bootstrap_file.read()
 
     err = _do_test(MockXPI({"bootstrap.js": bootstrap,
@@ -279,8 +271,7 @@ def test_mismatched_db_hash():
     Jetpack known file database.
     """
 
-    with open("jetpack/addon-sdk/python-lib/cuddlefish/"
-                  "app-extension/bootstrap.js") as bootstrap_file:
+    with open("tests/resources/bootstrap.js") as bootstrap_file:
         bootstrap = bootstrap_file.read()
         # Break the hash with this.
         bootstrap = "function() {}; %s" % bootstrap
@@ -361,8 +352,7 @@ def test_bad_sdkversion():
                       "jetpackID": "",
                       "manifest": {}}
 
-    with open("jetpack/addon-sdk/python-lib/cuddlefish/"
-                  "app-extension/bootstrap.js") as bootstrap_file:
+    with open("tests/resources/bootstrap.js") as bootstrap_file:
         bootstrap = bootstrap_file.read()
     with open("jetpack/addon-sdk/packages/test-harness/lib/"
                   "harness.js") as harness_file:
