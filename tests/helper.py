@@ -146,6 +146,7 @@ class MockXPI:
         self.zf = MockZipFile()
         self.data = data
         self.subpackage = subpackage
+        self.filename = "mock_xpi.xpi"
 
     def test(self):
         return True
