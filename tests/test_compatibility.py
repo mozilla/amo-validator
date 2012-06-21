@@ -1115,3 +1115,35 @@ def test_startendMarker():
     assert err.notices
     assert err.compat_summary["errors"]
 
+
+def test_fx14_importhtml():
+    """
+    Test that the importHTMLFromFile and importHTMLFromURI functions are both
+    flagged in FX14.
+    """
+
+    err = _do_real_test_raw("""
+    var x = Components.classes["foo"].createInstance(
+        Components.interfaces.nsIPlacesImportExportService);
+    x.importHTMLFromFile();
+    x.importHTMLFromURI();
+    """)
+    assert not err.failed()
+    assert not err.compat_summary["errors"]
+
+    err = _do_real_test_raw("""
+    var x = Components.classes["foo"].createInstance(
+        Components.interfaces.nsIPlacesImportExportService);
+    x.importHTMLFromFile();
+    """, versions={FIREFOX_GUID: version_range("firefox", "14.0a1")})
+    assert err.failed()
+    assert err.compat_summary["errors"]
+
+    err = _do_real_test_raw("""
+    var x = Components.classes["foo"].createInstance(
+        Components.interfaces.nsIPlacesImportExportService);
+    x.importHTMLFromURI();
+    """, versions={FIREFOX_GUID: version_range("firefox", "14.0a1")})
+    assert err.failed()
+    assert err.compat_summary["errors"]
+

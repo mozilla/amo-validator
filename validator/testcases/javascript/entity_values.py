@@ -1,4 +1,4 @@
-from validator.compat import FX10_DEFINITION
+from validator.compat import FX10_DEFINITION, FX14_DEFINITION
 from validator.constants import BUGZILLA_BUG
 
 
@@ -23,6 +23,33 @@ def entity(name, result=None):
         else:
             return {"value": {}}
     return {"value": return_wrap}
+
+
+def deprecated_entity(name, version, message, bug, status="deprecated",
+                      compat_type="error"):
+    def wrap(traverser):
+        traverser.err.warning(
+            err_id=("testcases_javascript_entity_values", name),
+            warning="`%s` has been %s.",
+            description=[message,
+                         "See %s for more information." % BUGZILLA_BUG % bug],
+            filename=traverser.filename,
+            line=traverser.line,
+            column=traverser.position,
+            context=traverser.context,
+            for_appversions=version,
+            compatibility_type=compat_type,
+            tier=5)
+    register_entity(name)(wrap)
+
+DEP_IHF_MESSAGE = ("The `importHTMLFromFile` and `importHTMLFromURI` functions "
+                   "have been removed from the `nsIPlacesImportExportService` "
+                   "interface. You can use the equivalent functions in the "
+                   "`BookmarkHTMLUtils` module instead.")
+deprecated_entity(name="importHTMLFromFile", version=FX14_DEFINITION,
+                  message=DEP_IHF_MESSAGE, bug=482911)
+deprecated_entity(name="importHTMLFromURI", version=FX14_DEFINITION,
+                  message=DEP_IHF_MESSAGE, bug=482911)
 
 
 @register_entity("document.xmlEncoding")

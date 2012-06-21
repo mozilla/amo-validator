@@ -41,6 +41,7 @@ BANNED_PREF_REGEXPS = [
     r"extensions\..*\.update\.(url|enabled|interval)",
 ]
 
+
 # See https://github.com/mattbasta/amo-validator/wiki/JS-Predefined-Entities
 # for details on entity properties.
 
@@ -249,7 +250,11 @@ INTERFACES = {
                        call_definitions.spellcheck_updatecurrentdictionary},
               u"saveDefaultDictionary":
                   {"value":
-                       call_definitions.spellcheck_savedefaultdictionary}}}
+                       call_definitions.spellcheck_savedefaultdictionary}}},
+    u"nsIPlacesImportExportService":
+        {"value":
+             {u"importHTMLFromFile": entity("importHTMLFromFile"),
+              u"importHTMLFromURI": entity("importHTMLFromURI"),}}
     }
 
 INTERFACE_ENTITIES = {u"nsIXMLHttpRequest":
