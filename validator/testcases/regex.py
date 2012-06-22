@@ -4,6 +4,7 @@ from validator.constants import BUGZILLA_BUG
 from validator.compat import (FX4_DEFINITION, FX5_DEFINITION, FX6_DEFINITION,
                               FX7_DEFINITION, FX8_DEFINITION, FX9_DEFINITION,
                               FX11_DEFINITION, FX12_DEFINITION, FX13_DEFINITION,
+                              FX14_DEFINITION,
                               TB7_DEFINITION, TB10_DEFINITION, TB11_DEFINITION,
                               TB12_DEFINITION, TB13_DEFINITION)
 from validator.contextgenerator import ContextGenerator
@@ -572,6 +573,22 @@ class Gecko13RegexTests(CompatRegexTestHelper):
 
 
 @register_generator
+class Gecko14RegexTests(CompatRegexTestHelper):
+    """Regex tests for Gecko 14 updates."""
+
+    VERSION = FX14_DEFINITION
+
+    def tests(self):
+        BLOB_BUILDER_DEP = "`BlobBuilder` and `MozBlobBuilder` are deprecated."
+
+        yield self.get_test_bug(
+                736687, "(Moz)?BlobBuilder", BLOB_BUILDER_DEP,
+                "The `BlobBuilder` and `MozBlobBuilder` objects are now "
+                "deprecated. You should use the `Blob` constructor instead.",
+                compat_type="warning")
+
+
+@register_generator
 class Thunderbird7RegexTests(CompatRegexTestHelper):
     """Regex tests for the Thunderbird 7 update."""
 
@@ -736,9 +753,9 @@ class Thunderbird13RegexTests(CompatRegexTestHelper):
                        r"general\.useragent\.extra\.thunderbird": 726942,
                        r"gPermissionManager\._updatePermissions": 728810,
                        r"(gPromptService|gHeaderParser)": 722187,
-                       r"setup(Cc|Bcc)Textbox": 208628, 
-                       r"onBiffMinChange": 532391, 
-                       r"(server|login)Page(Validate|Unload|Init)": 71008, 
+                       r"setup(Cc|Bcc)Textbox": 208628,
+                       r"onBiffMinChange": 532391,
+                       r"(server|login)Page(Validate|Unload|Init)": 71008,
                        r"feed-properties\.js": 716706,
                        r"gFeedSubscriptionsWindow\.(init|uninit)": 716706,
                        r"openComposeWindowForRSSArticle": 716706,
@@ -752,4 +769,5 @@ class Thunderbird13RegexTests(CompatRegexTestHelper):
                     "been flagged as having changed, removed, or deprecated "
                     "in Thunderbird 13." % pattern,
                     compat_type="error", log_function=self.err.notice)
+
 

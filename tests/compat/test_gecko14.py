@@ -51,3 +51,13 @@ class TestFX14Compat(CompatTestCase):
         self.assert_silent()
         self.assert_compat_error()
 
+    def test_Blob(self):
+        """Test that the (Moz)BlobBuilder objects are deprecated."""
+        self.run_regex_for_compat("MozBlobBuilder")
+        self.assert_silent()
+        self.assert_compat_warning(type_="warning")
+
+        self.run_regex_for_compat("BlobBuilder")
+        self.assert_silent()
+        self.assert_compat_warning(type_="warning")
+
