@@ -50,6 +50,12 @@ deprecated_entity(name="importHTMLFromFile", version=FX14_DEFINITION,
                   message=DEP_IHF_MESSAGE, bug=482911)
 deprecated_entity(name="importHTMLFromURI", version=FX14_DEFINITION,
                   message=DEP_IHF_MESSAGE, bug=482911)
+deprecated_entity(name="nsINavHistoryQueryOptions.redirectsMode",
+                  version=FX14_DEFINITION,
+                  message="The `redirectsMode` option has been removed from "
+                          "the `nsINavHistoryQueryOptions` interface. Error "
+                          "visits are no longer stored in the history, so it "
+                          "is no longer necessary.", bug=737841)
 
 
 @register_entity("document.xmlEncoding")

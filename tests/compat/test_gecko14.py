@@ -38,5 +38,10 @@ class TestFX14Compat(CompatTestCase):
             self.assert_silent()
             self.assert_compat_error()
 
-
+    def test_nsIHistoryQueryOptions(self):
+        """Test that `redirectsMode` is flagged in Gecko 14."""
+        for method in self.run_xpcom_for_compat(
+                "nsINavHistoryQueryOptions", ["redirectsMode"]):
+            self.assert_silent()
+            self.assert_compat_error()
 

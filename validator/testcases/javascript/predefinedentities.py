@@ -264,6 +264,8 @@ INTERFACES = {
              {u"getItemGUID": entity("nsINavBookmarksService"),
               u"setItemGUID": entity("nsINavBookmarksService"),
               u"getItemIdForGUID": entity("nsINavBookmarksService"),}},
+    u"nsINavHistoryQueryOptions":
+        {"value": {u"redirectsMode": entity("nsINavHistoryQueryOptions.redirectsMode")}},
     }
 
 INTERFACE_ENTITIES = {u"nsIXMLHttpRequest":
