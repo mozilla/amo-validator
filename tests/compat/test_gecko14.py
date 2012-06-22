@@ -45,3 +45,9 @@ class TestFX14Compat(CompatTestCase):
             self.assert_silent()
             self.assert_compat_error()
 
+    def test_onFaviconDataAvailable(self):
+        """Test that `onFaviconDataAvailable` is flagged in Gecko 14."""
+        self.run_script_for_compat("alert(x.onFaviconDataAvailable());")
+        self.assert_silent()
+        self.assert_compat_error()
+
