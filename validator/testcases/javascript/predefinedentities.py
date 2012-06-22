@@ -259,6 +259,11 @@ INTERFACES = {
         {"value":
              {u"queryCommandText": entity("nsIDOMHTMLDocument"),
               u"execCommandShowHelp": entity("nsIDOMHTMLDocument")}},
+    u"nsINavBookmarksService":
+        {"value":
+             {u"getItemGUID": entity("nsINavBookmarksService"),
+              u"setItemGUID": entity("nsINavBookmarksService"),
+              u"getItemIdForGUID": entity("nsINavBookmarksService"),}},
     }
 
 INTERFACE_ENTITIES = {u"nsIXMLHttpRequest":

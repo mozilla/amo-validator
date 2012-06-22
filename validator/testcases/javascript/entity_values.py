@@ -171,3 +171,23 @@ def queryCommandText(traverser):
         compatibility_type="error",
         tier=5)
 
+
+@register_entity("nsINavBookmarksService")
+def nsINavBookarmsService(traverser):
+    traverser.err.warning(
+        err_id=("testcases_javascript_entity_values",
+                "nsINavBookmarksService"),
+        warning="GUIDs have been dropped from `nsINavBookmarksService`.",
+        description="The `getItemGUID`, `setItemGUID`, and `getITemIdForGUID` "
+                    "methods in Gecko 14. See %s for more information." %
+                        "http://blog.bonardo.net/2012/02/16/"
+                        "add-ons-devs-heads-up-we-are-killing-old-bookmarks"
+                        "-guids",
+        filename=traverser.filename,
+        line=traverser.line,
+        column=traverser.position,
+        context=traverser.context,
+        for_appversions=FX14_DEFINITION,
+        compatibility_type="error",
+        tier=5)
+

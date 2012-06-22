@@ -29,3 +29,14 @@ class TestFX14Compat(CompatTestCase):
             self.assert_silent()
             self.assert_compat_error()
 
+    def test_nsINavBookmarksService(self):
+        """Test that GUIDs are removed from `nsINavBookarmsService`."""
+
+        for method in self.run_xpcom_for_compat(
+                "nsINavBookmarksService", ["getItemGUID", "setItemGUID",
+                                           "getItemIdForGUID"]):
+            self.assert_silent()
+            self.assert_compat_error()
+
+
+
