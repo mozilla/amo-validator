@@ -18,3 +18,14 @@ class TestFX14Compat(CompatTestCase):
             self.assert_silent()
             self.assert_compat_error()
 
+    def test_nsIDOMHTMLDocument(self):
+        """
+        Test that `queryCommandText` and `execCommandShowHelp` have been
+        flagged in Gecko 14.
+        """
+        for method in self.run_xpcom_for_compat(
+                "nsIDOMHTMLDocument",
+                ["queryCommandText()", "execCommandShowHelp()"]):
+            self.assert_silent()
+            self.assert_compat_error()
+

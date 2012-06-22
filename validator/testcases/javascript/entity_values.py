@@ -153,3 +153,21 @@ def nsIBrowserHistory(traverser):
         tier=5)
 
 
+@register_entity("nsIDOMHTMLDocument")
+def queryCommandText(traverser):
+    traverser.err.warning(
+        err_id=("testcases_javascript_entity_values",
+                "nsIDOMHTMLDocument"),
+        warning="`queryCommandText` and `execCommandShowHelp` removed.",
+        description="The `queryCommandText` and `execCommandShowHelp` methods "
+                    "have been removed from the `nsIDOMHTMLDocument` interface "
+                    "in Gecko 14. See %s for more information." %
+                        BUGZILLA_BUG % 742261,
+        filename=traverser.filename,
+        line=traverser.line,
+        column=traverser.position,
+        context=traverser.context,
+        for_appversions=FX14_DEFINITION,
+        compatibility_type="error",
+        tier=5)
+

@@ -254,7 +254,11 @@ INTERFACES = {
     u"nsIPlacesImportExportService":
         {"value":
              {u"importHTMLFromFile": entity("importHTMLFromFile"),
-              u"importHTMLFromURI": entity("importHTMLFromURI"),}}
+              u"importHTMLFromURI": entity("importHTMLFromURI"),}},
+    u"nsIDOMHTMLDocument":
+        {"value":
+             {u"queryCommandText": entity("nsIDOMHTMLDocument"),
+              u"execCommandShowHelp": entity("nsIDOMHTMLDocument")}},
     }
 
 INTERFACE_ENTITIES = {u"nsIXMLHttpRequest":
