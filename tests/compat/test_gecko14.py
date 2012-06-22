@@ -61,3 +61,12 @@ class TestFX14Compat(CompatTestCase):
         self.assert_silent()
         self.assert_compat_warning(type_="warning")
 
+    def test_nsILocalFile(self):
+        """
+        Test that `nsILocalFile` suggests that `nsIFile` should be used
+        instead.
+        """
+        self.run_regex_for_compat("nsILocalFile")
+        self.assert_silent()
+        self.assert_compat_warning(type_="warning")
+

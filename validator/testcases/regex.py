@@ -120,8 +120,8 @@ class GenericRegexTests(RegexTestGenerator):
                 r"launch\(\)",
                 "`launch()` disallowed",
                 "Use of `launch()` is disallowed because of restrictions on "
-                "`nsILocalFile`. If the code does not use `nsILocalFile`, "
-                "consider using a different function name.")
+                "`nsIFile` and `nsILocalFile`. If the code does not use "
+                "those namespaces, consider using a different function name.")
 
 
 @register_generator
@@ -586,6 +586,15 @@ class Gecko14RegexTests(CompatRegexTestHelper):
                 "The `BlobBuilder` and `MozBlobBuilder` objects are now "
                 "deprecated. You should use the `Blob` constructor instead.",
                 compat_type="warning")
+
+        yield self.get_test_bug(
+                682360, "nsILocalFile",
+                "`nsILocalFile` should be replaced with `nsIFile`.",
+                "Starting with Gecko 14, `nsILocalFile` inherits all functions "
+                "and attributes from `nsIFile`, meaning that you no longer "
+                "need to use `nsILocalFile`. If your add-on doesn't support "
+                "versions older than 14, you should use `nsIFile` instead of "
+                "`nsILocalFile`.", compat_type="warning")
 
 
 @register_generator
