@@ -1,5 +1,4 @@
 # -*- coding: utf-8 -*-
-import copy
 import json
 import os
 import tempfile
@@ -49,7 +48,7 @@ class TestWebapps(TestCase):
         super(TestWebapps, self).setUp()
         self.listed = False
 
-        self.data = copy.deepcopy({
+        self.data = {
             "version": "1.0",
             "name": "MozillaBall",
             "description": "Exciting Open Web development action!",
@@ -92,7 +91,7 @@ class TestWebapps(TestCase):
             ],
             "orientation": "landscape",
             "fullscreen": "true"
-        })
+        }
 
     def analyze(self):
         """Run the webapp tests on the file."""
@@ -257,6 +256,7 @@ class TestWebapps(TestCase):
         parameter that is a valid Marketplace URL but uses HTTP instead of
         HTTPS, we flag it as using the wrong protocol and not as an invalid URL.
         """
+        self.listed = True
         bad_url = validator.constants.DEFAULT_WEBAPP_MRKT_URLS[0].replace(
                 "https", "http")
 

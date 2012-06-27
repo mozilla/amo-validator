@@ -43,7 +43,7 @@ def validate(path, format="json",
 
     # Set the marketplace URLs if they're provided.
     if market_urls is not None:
-        validator.constants.DEFAULT_WEBAPP_MRKT_URLS.extend(market_urls)
+        validator.constants.DEFAULT_WEBAPP_MRKT_URLS = market_urls
 
     bundle = ErrorBundle(listed=listed, determined=determined,
                          overrides=overrides, spidermonkey=spidermonkey,

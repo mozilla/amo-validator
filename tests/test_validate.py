@@ -1,7 +1,7 @@
 import json
 from validator.validate import validate as validate
 from validator.errorbundler import ErrorBundle
-import validator.constants
+import validator.constants as constants
 
 
 def test_validate():
@@ -45,18 +45,22 @@ def test_app_versions():
     "Tests that the validate function properly loads app_versions.json"
     validate(path="tests/resources/junk.xpi",
              approved_applications="tests/resources/test_app_versions.json")
-    print validator.constants.APPROVED_APPLICATIONS
-    assert validator.constants.APPROVED_APPLICATIONS["1"]["name"] == "Foo App"
+    print constants.APPROVED_APPLICATIONS
+    assert constants.APPROVED_APPLICATIONS["1"]["name"] == "Foo App"
 
 
 def test_mrkt_urls():
-    "Tests that Marketplace URLs are correctly added to the MRKT_URLS constant."
+    """
+    Tests that Marketplace URLs are correctly added to the MRKT_URLS constant.
+    """
+    # Keep a copy so we don't permanently overwrite.
+    MRKT_URLS = constants.DEFAULT_WEBAPP_MRKT_URLS[:]
 
     validate(path="tests/resources/junk.xpi",
              market_urls=["foobar"])
-    print validator.constants.DEFAULT_WEBAPP_MRKT_URLS
-    assert "foobar" in validator.constants.DEFAULT_WEBAPP_MRKT_URLS
+    print constants.DEFAULT_WEBAPP_MRKT_URLS
+    assert "foobar" in constants.DEFAULT_WEBAPP_MRKT_URLS
 
     # Clean up!
-    validator.constants.DEFAULT_WEBAPP_MRKT_URLS.remove("foobar")
+    constants.DEFAULT_WEBAPP_MRKT_URLS = MRKT_URLS
 
