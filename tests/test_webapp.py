@@ -8,21 +8,31 @@ from nose.tools import eq_
 
 import validator.constants
 from validator.errorbundler import ErrorBundle
+from validator.specs.webapps import WebappSpec
 import validator.webapp
 
 
 def test_test_path():
     """Test the test_path function."""
 
-    eq_(validator.webapp.test_path("/foo/bar"), True)
-    eq_(validator.webapp.test_path("/foo/bar", True), True)
-    eq_(validator.webapp.test_path("//foo/bar"), False)
-    eq_(validator.webapp.test_path("//foo/bar", True), False)
-    eq_(validator.webapp.test_path("http://asdf/"), True)
-    eq_(validator.webapp.test_path("https://asdf/"), True)
-    eq_(validator.webapp.test_path("ftp://asdf/"), False)
-    eq_(validator.webapp.test_path("data:asdf"), False)
-    eq_(validator.webapp.test_path("data:asdf", True), True)
+    s = WebappSpec("{}", None)
+
+    eq_(s._path_valid("*"), False)
+    eq_(s._path_valid("*", can_be_asterisk=True), True)
+    eq_(s._path_valid("/foo/bar"), False)
+    eq_(s._path_valid("/foo/bar", can_be_absolute=True), True)
+    eq_(s._path_valid("//foo/bar"), False)
+    eq_(s._path_valid("//foo/bar", can_be_absolute=True), False)
+    eq_(s._path_valid("//foo/bar", can_be_relative=True), False)
+    eq_(s._path_valid("http://asdf/"), False)
+    eq_(s._path_valid("https://asdf/"), False)
+    eq_(s._path_valid("ftp://asdf/"), False)
+    eq_(s._path_valid("http://asdf/", can_have_protocol=True), True)
+    eq_(s._path_valid("https://asdf/", can_have_protocol=True), True)
+    # No FTP for you!
+    eq_(s._path_valid("ftp://asdf/", can_have_protocol=True), False)
+    eq_(s._path_valid("data:asdf"), False)
+    eq_(s._path_valid("data:asdf", can_be_data=True), True)
 
 
 def _detect(err, data):
@@ -130,6 +140,7 @@ def test_webapp_invalid_name():
     data = _get_json()
     data["name"] = ["foo", "bar"]
     _detect(err, data)
+    print err.print_summary(verbose=True)
     assert err.failed()
 
 
@@ -306,7 +317,7 @@ def test_webapp_installs_allowed_from_protocol():
     _detect(err, data)
     assert err.failed()
 
-    assert any("bad_protocol_mrkt_url" in e["id"] for e in err.errors)
+    assert any("iaf_bad_mrkt_protocol" in e["id"] for e in err.errors)
 
 
 def test_webapp_launch_path_not_string():
@@ -339,7 +350,6 @@ def test_webapp_bad_launch_path():
     assert not err.failed()
 
 
-
 def test_webapp_widget_deprecated():
     """Test that the widget property is deprecated."""
 
@@ -351,7 +361,7 @@ def test_webapp_widget_deprecated():
         "height": 200
     }
     _detect(err, data)
-    assert err.warnings
+    assert err.failed()
 
 
 def test_webapp_dev_missing():
@@ -519,7 +529,8 @@ def test_webapp_orientation_valid_value():
 
     err = ErrorBundle(listed=False)
     data = _get_json()
-    for key in validator.webapp.ORIENTATION_KEYS:
+    for key in ("portrait", "landscape", "portrait-secondary",
+                "landscape-secondary",):
         data["orientation"] = key
         _detect(err, data)
         assert not err.failed(), "'orientation' sadly failed for %r" % key
@@ -583,7 +594,8 @@ def test_webapp_fullscreen_valid_value():
     for key in ("true", "false"):
         data["fullscreen"] = key
         _detect(err, data)
-        assert not err.failed(), "'orientation' sadly failed for %r" % key
+        print err.print_summary(verbose=True)
+        assert not err.failed(), "'fullscreen' sadly failed for %r" % key
 
 
 def test_webapp_fullscreen_bad_value():
