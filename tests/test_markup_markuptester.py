@@ -371,3 +371,15 @@ def test_script_scraping():
         set(["/relative.js", "chrome://namespace/absolute.js",
              "very_relative.js"]))
 
+
+def test_prefwindow_ids():
+    """Test that `<prefwindow>` tags without IDs are flagged."""
+
+    err = _test_xul_raw("""<foo>
+    <prefwindow></prefwindow>
+    </foo>""", "foo.xul", should_fail=True)
+
+    err = _test_xul_raw("""<foo>
+    <prefwindow id="foobar"></prefwindow>
+    </foo>""", "foo.xul", should_fail=False)
+

@@ -230,7 +230,6 @@ class MarkupParser(htmlparser.HTMLParser):
                         line=self.line,
                         context=self.context)
 
-
         # Test for banned elements in language pack and theme markup.
         if self.err.detected_type in (PACKAGE_LANGPACK, PACKAGE_THEME):
             if (tag in UNSAFE_TAGS or
@@ -266,7 +265,23 @@ class MarkupParser(htmlparser.HTMLParser):
                                      line=self.line,
                                      context=self.context)
 
-        if tag in ("iframe", "browser") and self.extension == "xul":
+        if tag == "prefwindow":
+            # Flag <prefwindow> elements without IDs.
+
+            if not any((key == "id") for key, val in attrs):
+                self.err.warning(
+                        err_id=("markup", "starttag", "prefwindow_id"),
+                        warning="`<prefwindow>` elements must have IDs.",
+                        description="`<prefwindow>` elements without `id` "
+                                    "attributes cause errors to be reported "
+                                    "in the error console and prevent "
+                                    "persistence of certain properties of the "
+                                    "dialog.",
+                        filename=self.filename,
+                        line=self.line,
+                        context=self.context)
+
+        elif tag in ("iframe", "browser") and self.extension == "xul":
             # Bork if XUL iframe has no type attribute
 
             type_ = None
