@@ -1,4 +1,4 @@
-import fnmatch
+from fnmatch import fnmatch as fnm
 
 from validator.constants import (FF4_MIN, FIREFOX_GUID, FENNEC_GUID,
                                  THUNDERBIRD_GUID as TB_GUID, ANDROID_GUID,
@@ -21,6 +21,10 @@ blacklisted_magic_numbers = (
         (0x46, 0x57, 0x53),  # Uncompressed SWF
         (0x43, 0x57, 0x53),  # ZLIB compressed SWF
 )
+
+# If there are more than 10 .class files in a package, it is flagged as a Java
+# archive file.
+JAVA_JAR_THRESHOLD = 10
 
 
 def test_unknown_file(err, filename):
@@ -45,6 +49,8 @@ def test_unknown_file(err, filename):
 def test_blacklisted_files(err, xpi_package=None):
     "Detects blacklisted files and extensions."
 
+    flagged_files = []
+
     for name in xpi_package:
         file_ = xpi_package.info(name)
         # Simple test to ensure that the extension isn't blacklisted
@@ -52,21 +58,7 @@ def test_blacklisted_files(err, xpi_package=None):
         if extension in blacklisted_extensions:
             # Note that there is a binary extension in the metadata
             err.metadata["contains_binary_extension"] = True
-            err.warning(
-                err_id=("testcases_packagelayout",
-                        "test_blacklisted_files",
-                        "disallowed_extension"),
-                warning="Flagged file extension found",
-                description=["The file \"%s\" has a flagged file extension." %
-                                 name,
-                             "The extension of this file is flagged because "
-                             "it usually identifies binary components. Please "
-                             "see "
-                             "http://addons.mozilla.org/developers/docs/"
-                                 "policies/reviews#section-binary"
-                             " for more information on the binary content "
-                             "review process."],
-                filename=name)
+            flagged_files.append(name)
             continue
 
         # Perform a deep inspection to detect magic numbers for known binary
@@ -86,6 +78,35 @@ def test_blacklisted_files(err, xpi_package=None):
                              "unauthorized scripts, etc.).",
                              u"The file \"%s\" contains flagged content" %
                                  name],
+                filename=name)
+
+    if flagged_files:
+        # Detect Java JAR files:
+        if (sum(1 for f in flagged_files if f.endswith(".class")) >
+                JAVA_JAR_THRESHOLD):
+            err.notice(
+                err_id=("testcases_packagelayout",
+                        "test_blacklisted_files",
+                        "java_jar"),
+                notice="Java JAR file detected.",
+                description="A Java JAR file was detected in the add-on.",
+                filename=xpi_package.filename)
+        else:
+            err.warning(
+                err_id=("testcases_packagelayout",
+                        "test_blacklisted_files",
+                        "disallowed_extension"),
+                warning="Flagged file extensions found.",
+                description=["Files whose names end with flagged extensions "
+                             "have been found in the add-on.",
+                             "The extension of these files are flagged because "
+                             "they usually identify binary components. Please "
+                             "see "
+                             "http://addons.mozilla.org/developers/docs/"
+                                 "policies/reviews#section-binary"
+                             " for more information on the binary content "
+                             "review process.",
+                             "\n".join(flagged_files)],
                 filename=name)
 
 
@@ -182,14 +203,13 @@ def test_emunpack(err, xpi_package):
             executables = ("exe", "dll", "so", "dylib", "exe", "bin")
             # Search for unpack-worthy files
             for file_ in xpi_package:
-                if fnmatch.fnmatch(file_, "chrome/icons/default/*"):
+                if file_.startswith("chrome/icons/default/"):
                     fails = True
                     break
                 # Executables in /components/ should also be flagged.
-                if fnmatch.fnmatch(file_, "components/*") and \
-                   [x for x in executables
-                           if file_[-len(x) - 1:] == ".%s" % x]:
-
+                if (file_.startswith("components/") and
+                    [x for x in executables if
+                     file_[-len(x) - 1:] == ".%s" % x]):
                     fails = True
                     break
 
@@ -213,7 +233,7 @@ def test_emunpack(err, xpi_package):
             return
 
         for file_ in xpi_package:
-            if fnmatch.fnmatch(file_, "*.jar"):
+            if file_.endswith(".jar"):
                 err.notice(("testcases_packagelayout",
                             "test_emunpack",
                             "should_be_false"),
@@ -296,12 +316,10 @@ def test_layout(err, xpi, mandatory, whitelisted,
     files should and should not be in the package."""
 
     # A shortcut to prevent excessive lookups
-    fnm = fnmatch.fnmatch
 
     for file_ in xpi:
 
-        if fnm(file_, "__MACOSX/*") or \
-           fnm(file_, ".DS_Store"):
+        if file_ == ".DS_Store" or file_.startswith("__MACOSX/"):
             continue
 
         # Remove the file from the mandatory file list.
