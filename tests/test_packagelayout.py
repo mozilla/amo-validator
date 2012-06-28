@@ -23,6 +23,23 @@ def test_blacklisted_files():
     assert not err.compat_summary["errors"]
 
 
+def test_java_jar_detection():
+    """
+    Test that Java archives are flagged as such so that they do not generate
+    hundreds or thousands of errors.
+    """
+
+    classes = ("c%d.class" % i for i in xrange(1000))
+    def strings():  # Look at how functional this is. How functional!
+        while 1:
+            yield ""
+    mock_xpi = MockXPI(dict(zip(classes, strings())))
+    err = ErrorBundle(None, True)
+    packagelayout.test_blacklisted_files(err, mock_xpi)
+
+    assert not err.failed()
+    assert err.notices
+
 
 def test_blacklisted_magic_numbers():
     "Tests that blacklisted magic numbers are banned"
