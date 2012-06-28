@@ -1,6 +1,5 @@
 import logging
 import os
-import re
 import signal
 from zipfile import BadZipfile
 from zlib import error as zlib_error
@@ -9,7 +8,7 @@ from validator.typedetection import detect_type
 from validator.opensearch import detect_opensearch
 from validator.webapp import detect_webapp
 from validator.chromemanifest import ChromeManifest
-from validator.rdf import RDFParser
+from validator.rdf import RDFException, RDFParser
 from validator.xpi import XPIManager
 from validator import decorator
 
@@ -189,43 +188,38 @@ def test_package(err, file_, name, expectation=PACKAGE_ANY,
 
 
 def _load_install_rdf(err, package, expectation):
-    # Load up the install.rdf file.
-    install_rdf_data = package.read("install.rdf")
-
-    if re.search('<!doctype', install_rdf_data, re.I):
-        err.save_resource("bad_install_rdf", True)
-        return err.error(("main",
-                          "test_package",
-                          "doctype_in_installrdf"),
-                         "DOCTYPEs are not permitted in install.rdf",
-                         "The add-on's install.rdf file contains a DOCTYPE. "
-                         "It must be removed before your add-on can be "
-                         "validated.",
-                         filename="install.rdf")
-
-    install_rdf = RDFParser(install_rdf_data)
-
-    if install_rdf.rdf is None or not install_rdf:
-        return err.error(("main",
-                          "test_package",
-                          "cannot_parse_installrdf"),
-                         "Cannot Parse install.rdf",
-                         "The install.rdf file could not be parsed.",
-                         filename="install.rdf")
+    try:
+        install_rdf = RDFParser(err, package.read("install.rdf"))
+    except RDFException as ex:
+        err.error(
+                err_id=("main", "test_package", "parse_error"),
+                error="Could not parse `install.rdf`.",
+                description="The RDF parser was unable to parse the "
+                            "install.rdf file included with this add-on.",
+                filename="install.rdf",
+                line=ex.line())
+        return
     else:
-        err.save_resource("has_install_rdf", True, pushable=True)
-        err.save_resource("install_rdf", install_rdf, pushable=True)
+        if install_rdf.rdf is None:
+            err.error(
+                    err_id=("main", "test_package", "cannot_parse_installrdf"),
+                    error="Cannot read `install.rdf`",
+                    description="The install.rdf file could not be parsed.",
+                    filename="install.rdf")
+            return
+        else:
+            err.save_resource("has_install_rdf", True, pushable=True)
+            err.save_resource("install_rdf", install_rdf, pushable=True)
 
     # Load up the results of the type detection
     results = detect_type(err, install_rdf, package)
-
     if results is None:
-        return err.error(("main",
-                          "test_package",
-                          "undeterminable_type"),
-                         "Unable to determine add-on type",
-                         "The type detection algorithm could not determine "
-                         "the type of the add-on.")
+        err.error(
+                err_id=("main", "test_package", "undeterminable_type"),
+                error="Unable to determine add-on type",
+                description="The type detection algorithm could not determine "
+                            "the type of the add-on.")
+        return
     else:
         err.set_type(results)
 

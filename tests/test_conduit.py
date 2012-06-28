@@ -3,7 +3,6 @@ import validator.testcases as testcases
 import validator.testcases.conduit as conduit
 from validator.errorbundler import ErrorBundle
 from validator.xpi import XPIManager
-from validator.rdf import RDFParser
 from helper import _do_test
 from validator.constants import *
 
