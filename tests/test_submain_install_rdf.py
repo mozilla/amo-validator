@@ -73,7 +73,7 @@ def test_doctype():
     err = ErrorBundle()
     xpi = MockXPIManager(
             {"install.rdf": "tests/resources/installrdf/doctype.rdf"})
-    assert isinstance(submain._load_install_rdf(err, xpi, None), ErrorBundle)
+    submain._load_install_rdf(err, xpi, None)
     assert err.failed()
     assert not err.get_resource("has_install_rdf")
     assert not err.get_resource("install_rdf")

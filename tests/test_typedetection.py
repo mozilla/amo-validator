@@ -17,7 +17,7 @@ def _test_type(file_, expectation, failure=False):
 
     # Load up the install.rdf into an RDFParser
     install_file = package.read("install.rdf")
-    install_rdf = RDFParser(install_file)
+    install_rdf = RDFParser(err, install_file)
 
     results = typedetection.detect_type(err, install_rdf, package)
 

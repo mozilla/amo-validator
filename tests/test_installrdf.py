@@ -96,7 +96,7 @@ def _run_test_raw(data, failure=True, detected_type=0, listed=True,
     err.save_resource("listed", listed)
     err.overrides = overrides
 
-    parser = RDFParser(data)
+    parser = RDFParser(err, data)
     installrdf._test_rdf(err, parser)
 
     print err.print_summary(verbose=True)

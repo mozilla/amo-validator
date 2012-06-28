@@ -25,7 +25,7 @@ def _do_test(path, test, failure=True,
     if require_install:
         err.save_resource("has_install_rdf", True)
         rdf_data = package.read("install.rdf")
-        install_rdf = RDFParser(rdf_data)
+        install_rdf = RDFParser(err, rdf_data)
         err.save_resource("install_rdf", install_rdf)
 
     populate_chrome_manifest(err, package)
