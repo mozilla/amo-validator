@@ -64,7 +64,7 @@ INTERFACES = {
     u"nsIAccessibleRetrieval":
         {"dangerous":
             "Using the nsIAccessibleRetrieval interface causes significant "
-            "performance degradation in Firefox. It should only be used in "
+            "performance degradation in Gecko. It should only be used in "
             "accessibility-related add-ons."},
     u"nsIBrowserSearchService":
         {"value":
@@ -145,7 +145,7 @@ INTERFACES = {
     u"nsIMsgOutputStream":
         {"value":
             {u"folderStream":
-                {"value": call_definitions.nsIMsgDatabase_changed}}},            
+                {"value": call_definitions.nsIMsgDatabase_changed}}},
     u"nsIMsgQuote":
         {"value":
             {u"quoteMessage":

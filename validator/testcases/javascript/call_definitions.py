@@ -21,16 +21,16 @@ from validator.decorator import version_range
 def amp_rp_bug660359(wrapper, arguments, traverser):
     """
     Flag all calls to AddonManagerPrivate.registerProvider for incompatibility
-    with Firefox 6.
+    with Gecko 6.
     """
 
     traverser.err.notice(
         err_id=("testcases_javascript_calldefinitions",
                 "amp_rp_bug660359"),
-        notice="Custom add-on types may not work properly in Firefox 6",
+        notice="Custom add-on types may not work properly in Gecko 6",
         description="This add-on appears to register custom add-on types, "
                     "which are affected and may not work properly due to "
-                    "changes made on Firefox 6. For more information, "
+                    "changes made on Gecko 6. For more information, "
                     "please refer to "
                     "https://bugzilla.mozilla.org/show_bug.cgi?id=595848",
         filename=traverser.filename,
@@ -51,7 +51,7 @@ def urlparser_parsepath_bug691588(wrapper, arguments, traverser):
             ("testcases_javascript_call_definititions",
              "fx9_compat",
              "urlparser_691588"),
-            ("nsIURLParser.parsePath's signature has changed in Firefox 9."
+            ("nsIURLParser.parsePath's signature has changed in Gecko 9."
              " See %s for more information.") % (BUGZILLA_BUG % 665706),
             for_appversions=FX9_DEFINITION,
             filename=traverser.filename, line=traverser.line,
@@ -65,14 +65,15 @@ def url_param_bug691588(t):
     nsIURL.param is gone in FX9.
     """
     t.err.error(
-        ("testcases_javascript_call_definititions",
-         "fx9_compat",
-         "urlparser_691588"),
-        ("nsIURL.param has been removed in Firefox 9."
-         " See %s for more information.") % (BUGZILLA_BUG % 665706),
+        err_id=("testcases_javascript_call_definititions", "fx9_compat",
+                "urlparser_691588"),
+        error="`nsIURL.param` has been removed in Gecko 9.",
+        description="See %s for more information." % BUGZILLA_BUG % 665706,
         for_appversions=FX9_DEFINITION,
-        filename=t.filename, line=t.line,
-        column=t.position, context=t.context,
+        filename=t.filename,
+        line=t.line,
+        column=t.position,
+        context=t.context,
         compatibility_type="error",
         tier=5)
 
@@ -83,28 +84,29 @@ def browserhistory_removepages(wrapper, arguments, traverser):
     """
     if len(arguments) > 2:
         traverser.err.error(
-            ("testcases_javascript_call_definititions",
-             "fx9_compat",
-             "browserhistory_removepages"),
-            ("nsIBrowser.removePages' signature has changed in Firefox 9."
-             " See %s for more information.") % (BUGZILLA_BUG % 681420),
+            err_id=("testcases_javascript_call_definititions",
+             "fx9_compat", "browserhistory_removepages"),
+            error="nsIBrowser.removePages' signature has changed in Gecko 9.",
+            description="See %s for more information." %
+                    BUGZILLA_BUG % 681420,
             for_appversions=FX9_DEFINITION,
-            filename=traverser.filename, line=traverser.line,
-            column=traverser.position, context=traverser.context,
+            filename=traverser.filename,
+            line=traverser.line,
+            column=traverser.position,
+            context=traverser.context,
             compatibility_type="error",
             tier=5)
 
 
 def browserhistory_registeropenpage(t):
     """
-    nsIBrowser.registerOpenPage is gone in Firefox 9.
+    nsIBrowser.registerOpenPage is gone in Gecko 9.
     """
     t.err.error(
-        ("testcases_javascript_call_definititions",
-         "fx9_compat",
-         "browserhistory_registeropenpage"),
-        ("nsIBrowser.registerOpenPage has been removed in Firefox 9."
-         " See %s for more information.") % (BUGZILLA_BUG % 681420),
+        err_id=("testcases_javascript_call_definititions",
+                "fx9_compat", "browserhistory_registeropenpage"),
+        error="nsIBrowser.registerOpenPage has been removed in Gecko 9.",
+        description="See %s for more information." % BUGZILLA_BUG % 681420,
         for_appversions=FX9_DEFINITION,
         filename=t.filename, line=t.line,
         column=t.position, context=t.context,
@@ -114,14 +116,13 @@ def browserhistory_registeropenpage(t):
 
 def browserhistory_unregisteropenpage(t):
     """
-    nsIBrowser.unregisterOpenPage is gone in Firefox 9.
+    nsIBrowser.unregisterOpenPage is gone in Gecko 9.
     """
     t.err.error(
-        ("testcases_javascript_call_definititions",
-         "fx9_compat",
-         "browserhistory_unregisteropenpage"),
-        ("nsIBrowser.unregisterOpenPage has been removed in Firefox 9."
-         " See %s for more information.") % (BUGZILLA_BUG % 681420),
+        err_id=("testcases_javascript_call_definititions",
+                "fx9_compat", "browserhistory_unregisteropenpage"),
+        error="nsIBrowser.unregisterOpenPage has been removed in Gecko 9.",
+        description="See %s for more information." % BUGZILLA_BUG % 681420,
         for_appversions=FX9_DEFINITION,
         filename=t.filename, line=t.line,
         column=t.position, context=t.context,
@@ -131,14 +132,14 @@ def browserhistory_unregisteropenpage(t):
 
 def spellcheck_savedefaultdictionary(t):
     """
-    nsIEditorSpellCheck.saveDefaultDictionary is gone in Firefox 9.
+    nsIEditorSpellCheck.saveDefaultDictionary is gone in Gecko 9.
     """
     t.err.error(
         ("testcases_javascript_call_definititions",
          "fx9_compat",
          "spellcheck_savedefaultdictionary"),
         ("nsIEditorSpellCheck.saveDefaultDictionary has been removed in"
-         " Firefox 9. See %s for more information.") % (BUGZILLA_BUG % 678842),
+         " Gecko 9. See %s for more information.") % (BUGZILLA_BUG % 678842),
         for_appversions=FX9_DEFINITION,
         filename=t.filename, line=t.line,
         column=t.position, context=t.context,
@@ -148,7 +149,7 @@ def spellcheck_savedefaultdictionary(t):
 
 def spellcheck_updatecurrentdictionary(wrapper, arguments, traverser):
     """
-    nsIEditorSpellCheck.UpdateCurrentDictionary takes no args in Firefox 9.
+    nsIEditorSpellCheck.UpdateCurrentDictionary takes no args in Gecko 9.
     """
     if len(arguments) > 0:
         traverser.err.error(
@@ -156,7 +157,7 @@ def spellcheck_updatecurrentdictionary(wrapper, arguments, traverser):
              "fx9_compat",
              "spellcheck_updatecurrentdictionary"),
             ("nsIEditorSpellCheck.UpdateCurrentDictionary takes no arguments "
-             "in Firefox 9. See %s for more information."
+             "in Gecko 9. See %s for more information."
              ) % (BUGZILLA_BUG % 678842),
             for_appversions=FX9_DEFINITION,
             filename=traverser.filename, line=traverser.line,
@@ -364,7 +365,7 @@ def nsIDOMFile_deprec(wrapper, arguments, traverser):
                 "deprec"),
         notice="Deprecated nsIDOMFile methods in use.",
         description=("Your add-on uses methods that have been removed from "
-                     "the nsIDOMFile interface in Firefox 7. Please refer to "
+                     "the nsIDOMFile interface in Gecko 7. Please refer to "
                      "%s for more information.") % (BUGZILLA_BUG % 661876),
         filename=traverser.filename,
         line=traverser.line,
@@ -384,7 +385,7 @@ def nsIJSON_deprec(wrapper, arguments, traverser):
                 "deprec"),
         notice="Deprecated nsIJSON methods in use.",
         description=("The encode and decode methods in nsIJSON have been "
-                     "deprecated in Firefox 7. You can use the methods in the "
+                     "deprecated in Gecko 7. You can use the methods in the "
                      "global JSON object instead. See %s for more "
                      "information.") %
                          "https://developer.mozilla.org/En/Using_native_JSON",
@@ -443,7 +444,7 @@ def nsIImapProtocol_removed(wrapper, arguments, traverser):
 
 
 def document_getSelection(wrapper, arguments, traverser):
-    """Flag Firefox 8 calls to document.getSelection()."""
+    """Flag Gecko 8 calls to document.getSelection()."""
 
     MDN_ARTICLE = "https://developer.mozilla.org/En/Window.getSelection"
 
@@ -451,7 +452,7 @@ def document_getSelection(wrapper, arguments, traverser):
         err_id=("testcases_javascript_calldefinitions", "document_getSel"),
         notice="document.getSelection()'s return type has changed.",
         description="The return type of document.getSelection() has changed "
-                    "in Firefox 8. This function is deprecated, and you "
+                    "in Gecko 8. This function is deprecated, and you "
                     "should be using window.getSelection() instead. See "
                     "%s for more information." % MDN_ARTICLE,
         filename=traverser.filename,
@@ -797,7 +798,7 @@ def TB13_nsIMsgLocalMailFolder_changed(wrapper, arguments, traverser):
 
 def TB13_nsIMsgNewsFolder_changed(wrapper, arguments, traverser):
     """Flag use of several nsIMsgNewsFolder methods with Thunderbird 13."""
-  
+
     traverser.err.warning(
         err_id=("testcases_javascript_calldefinitions", "nsIMsgNewsFolder"),
         warning="Altered nsIMsgNewsFolder methods in use.",

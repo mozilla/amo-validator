@@ -6,7 +6,7 @@ import types
 import spidermonkey
 import instanceactions
 import instanceproperties
-from validator.constants import FENNEC_GUID, FIREFOX_GUID
+from validator.constants import BUGZILLA_BUG, FENNEC_GUID, FIREFOX_GUID
 from validator.decorator import version_range
 from jstypes import *
 
@@ -457,10 +457,9 @@ def _readonly_top(t, r, rn):
                 "_readonly_top"),
         notice="window.top is a reserved variable",
         description="The 'top' global variable is reserved and cannot be "
-                    "assigned any values starting with Firefox 6. Review your "
+                    "assigned any values starting with Gecko 6. Review your "
                     "code for any uses of the 'top' global, and refer to "
-                    "https://bugzilla.mozilla.org/show_bug.cgi?id=654137 "
-                    "for more information.",
+                    "%s for more information." % BUGZILLA_BUG % 654137,
         filename=t.filename,
         line=t.line,
         column=t.position,

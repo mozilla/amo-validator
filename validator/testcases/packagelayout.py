@@ -219,7 +219,7 @@ def test_emunpack(err, xpi_package):
                          "should_be_true"),
                         "Add-on should set <em:unpack> to true",
                         "The add-on meets criteria indicating that it will "
-                        "not work correctly in Firefox 4 and above. Set "
+                        "not work correctly in Gecko 4 and above. Set "
                         "<em:unpack> to 'true' in the install.rdf file to fix "
                         "this.",
                         filename="install.rdf",
@@ -240,7 +240,7 @@ def test_emunpack(err, xpi_package):
                            "Add-on contains JAR files, no <em:unpack>",
                            "The add-on contains JAR files and does not set "
                            "<em:unpack> to 'true'. This can result in "
-                           "performance issues in add-ons that target Firefox "
+                           "performance issues in add-ons that target Gecko "
                            "4. It is recommended that you consider no longer "
                            "using JAR files to package your chrome files.",
                            filename="install.rdf",
