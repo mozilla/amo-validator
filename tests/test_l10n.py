@@ -55,6 +55,19 @@ def test_missingfiles():
              set_type=PACKAGE_EXTENSION)
 
 
+def test_multiple_predicates():
+    """
+    Test that the manifest parser recognizes when there are multiple
+    predicates of the same type.
+    """
+
+    l10n.LOCALE_CACHE = {}
+    _do_test("tests/resources/l10n/l10n_multpreds.xpi",
+             l10n.test_xpi,
+             failure=False,
+             set_type=PACKAGE_EXTENSION)
+
+
 def test_unmodified():
     """Test a package containing localization entities that have been
     unmodified from the reference locale (en-US)"""
