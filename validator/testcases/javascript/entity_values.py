@@ -1,3 +1,4 @@
+from call_definitions import open_in_chrome_context
 from validator.compat import FX10_DEFINITION, FX14_DEFINITION
 from validator.constants import BUGZILLA_BUG
 
@@ -196,4 +197,15 @@ def nsINavBookarmsService(traverser):
         for_appversions=FX14_DEFINITION,
         compatibility_type="error",
         tier=5)
+
+
+@register_entity("nsIWindowWatcher.openWindow")
+def nsIWindowWatcher_openWindow(traverser):
+    def on_open(wrapper, arguments, traverser):
+        if not arguments:
+            return
+        uri = traverser._traverse_node(arguments[0])
+        open_in_chrome_context(uri, "nsIWindowWatcher.openWindow", traverser)
+
+    return {"return": on_open}
 
