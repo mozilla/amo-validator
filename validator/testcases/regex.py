@@ -123,6 +123,13 @@ class GenericRegexTests(RegexTestGenerator):
                 "`nsIFile` and `nsILocalFile`. If the code does not use "
                 "those namespaces, consider using a different function name.")
 
+        yield self.get_test(
+                r"resource://services-sync",
+                "Sync services objects are not intended to be re-used",
+                "The Sync services objects are not intended to be re-used, and "
+                "they often change in ways that break add-ons. It is strongly "
+                "recommended that you do not rely on them.")
+
 
 @register_generator
 class CategoryRegexTests(RegexTestGenerator):
