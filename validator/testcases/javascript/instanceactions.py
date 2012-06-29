@@ -191,6 +191,15 @@ def onFaviconDataAvailable(args, traverser, node, wrapper):
         tier=5)
 
 
+def openDialog(args, traverser, node, wrapper):
+    """Raise an error if the first argument is a remote URL."""
+    if not args:
+        return
+    uri = traverser._traverse_node(args[0])
+    from call_definitions import open_in_chrome_context
+    open_in_chrome_context(uri, "openDialog", traverser)
+
+
 def replaceWholeText(args, traverser, node, wrapper):
     """Raise an error when an add-on uses node.replaceWholeText(foo)."""
     traverser.err.error(
@@ -242,6 +251,7 @@ INSTANCE_DEFINITIONS = {"createElement": createElement,
                         "insertAdjacentHTML": insertAdjacentHTML,
                         "isSameNode": isSameNode,
                         "onFaviconDataAvailable": onFaviconDataAvailable,
+                        "openDialog": openDialog,
                         "PageMod": PageMod,
                         "QueryInterface": QueryInterface,
                         "replaceWholeText": replaceWholeText,

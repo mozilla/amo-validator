@@ -1,4 +1,4 @@
-from js_helper import _do_test_raw
+from js_helper import _do_test_raw, TestCase
 
 def test_createElement():
     """Tests that createElement calls are filtered properly"""
@@ -100,4 +100,48 @@ def test_insertAdjacentHTML():
     var x = foo();
     x.insertAdjacentHTML("foo bar", "x" + y);
     """).failed()
+
+
+class TestInstanceActions(TestCase):
+
+    def test_openDialog_pass(self):
+        """
+        Test that `*.openDialog("<remote url>")` throws doesn't throw an error
+        for chrome/local URIs.
+        """
+        self.run_script("""
+        foo.openDialog("foo")
+        foo.openDialog("chrome://foo/bar")
+        """)
+        self.assert_silent()
+
+    def test_openDialog_flag_var(self):
+        """
+        Test that `*.openDialog(bar)` throws doesn't throw an error where `bar`
+        is a dirty object.
+        """
+        self.run_script("""
+        foo.openDialog(bar)
+        """)
+        self.assert_notices()
+
+    def test_openDialog(self):
+        """
+        Test that `*.openDialog("<remote url>")` throws an error where
+        <remote url> is a non-chrome, non-relative URL.
+        """
+
+        def test_uri(self, uri):
+            self.setUp()
+            self.setup_err()
+            self.run_script('foo.openDialog("%s")' % uri)
+            self.assert_failed(with_warnings=True)
+
+
+        uris = ["http://foo/bar/",
+                "https://foo/bar/",
+                "ftp://foo/bar/",
+                "data:asdf"]
+        for uri in uris:
+            yield test_uri, self, uri
 
