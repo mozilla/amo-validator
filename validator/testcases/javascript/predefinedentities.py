@@ -222,7 +222,8 @@ INTERFACES = {
                         e.get_resource("em:bootstrap") and \
                         "Authors of bootstrapped add-ons must take care "
                         "to remove any added observers "
-                        "at shutdown"}}},
+                        "at shutdown"},
+             u"openWindow": entity("nsIWindowWatcher.openWindow")}},
     u"nsIURLParser":
         {"value":
              {u"parsePath":

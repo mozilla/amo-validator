@@ -1,5 +1,6 @@
 import copy
 import math
+import re
 import types
 
 import actions
@@ -878,4 +879,32 @@ def js_unwrap(wrapper, arguments, traverser):
         obj.value.is_unwrapped = True
 
     return obj
+
+
+def open_in_chrome_context(uri, method, traverser):
+    if not uri.is_literal():
+        traverser.err.notice(
+            err_id=("js", "instanceactions", "%s_nonliteral" % method),
+            notice="`%s` called with non-literal parameter." % method,
+            description="Calling `%s` with variable parameters can result in "
+                        "potential security vulnerabilities if the variable "
+                        "contains a remote URI. Consider using `window.open` "
+                        "with the `chrome=no` flag." % method,
+            filename=traverser.filename,
+            line=traverser.line,
+            column=traverser.position,
+            context=traverser.context)
+
+    remote_url = re.compile(r"^(https?|ftp|data):(//)?", re.I)
+    uri = unicode(uri.get_literal_value())
+    if uri.startswith("//") or remote_url.match(uri):
+        traverser.err.warning(
+            err_id=("js", "instanceactions", "%s_remote_uri" % method),
+            warning="`%s` called with non-local URI." % method,
+            description="Calling `%s` with a non-local URI will result in the "
+                        "dialog being opened with chrome privileges." % method,
+            filename=traverser.filename,
+            line=traverser.line,
+            column=traverser.position,
+            context=traverser.context)
 

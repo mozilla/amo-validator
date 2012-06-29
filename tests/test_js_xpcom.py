@@ -1,6 +1,6 @@
 from nose.tools import eq_
 
-from js_helper import _do_test_raw, _do_real_test_raw
+from js_helper import _do_test_raw, _do_real_test_raw, TestCase
 
 
 def test_xmlhttprequest():
@@ -252,4 +252,55 @@ def test_xpcom_nsibrowsersearchservice():
                    .getService(Components.interfaces.nsIBrowserSearchService);
     foo.defaultEngine = 123;
     """).failed()
+
+
+class TestnsIWindowWatcher(TestCase):
+
+    def _run_against_foo(self, script):
+        self.run_script("""
+        var foo = Cc["foo"].getService(Components.interfaces.nsIWindowWatcher);
+        %s
+        """ % script)
+
+    def test_openWindow_pass(self):
+        """
+        Test that `foo.openWindow("<remote url>")` throws doesn't throw an error
+        for chrome/local URIs.
+        """
+        self._run_against_foo("""
+        foo.openWindow("foo")
+        foo.openWindow("chrome://foo/bar")
+        """)
+        self.assert_silent()
+
+    def test_openWindow_flag_var(self):
+        """
+        Test that `foo.openWindow(bar)` throws doesn't throw an error where `bar`
+        is a dirty object.
+        """
+        self._run_against_foo("""
+        foo.openWindow(bar)
+        """)
+        self.assert_notices()
+
+    def test_openWindow(self):
+        """
+        Test that `foo.openWindow("<remote url>")` throws an error where
+        <remote url> is a non-chrome, non-relative URL.
+        """
+
+        def test_uri(self, uri):
+            self.setUp()
+            self.setup_err()
+            self._run_against_foo('foo.openWindow("%s")' % uri)
+            self.assert_failed(with_warnings=True)
+
+
+        uris = ["http://foo/bar/",
+                "https://foo/bar/",
+                "ftp://foo/bar/",
+                "data:asdf"]
+        for uri in uris:
+            yield test_uri, self, uri
+
 
