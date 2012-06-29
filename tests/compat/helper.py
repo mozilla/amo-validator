@@ -23,7 +23,12 @@ class CompatTestCase(JSTestCase, RegexTestCase):
     def run_xpcom_for_compat(self, interface, methods=None):
         """
         Yields after each method has been run as a script. Used to test that
-        methods are properly flagged for compatibility tests.
+        XPCOM members are properly flagged for compatibility tests.
+
+        - `interface` should be the name of the XPCOM interface.
+        - `methods` should be the member to test. It may be a simple reference
+          to a member (i.e.: `foo`) or an action upon a member (i.e.:
+          `foo('bar')` or `foo["bar"] = "zap"`).
         """
 
         script = """
