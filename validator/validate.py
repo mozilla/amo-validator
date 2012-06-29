@@ -19,7 +19,8 @@ def validate(path, format="json",
              expectation=PACKAGE_ANY,
              for_appversions=None,
              overrides=None,
-             timeout=None):
+             timeout=None,
+             market_urls=None):
     """
     Perform validation in one easy step!
 
@@ -34,10 +35,15 @@ def validate(path, format="json",
     timeout: Number of seconds before aborting addon validation.
     """
 
-    # Load up the target applications
-    apps = json.load(open(approved_applications))
-    validator.constants.APPROVED_APPLICATIONS.clear()
-    validator.constants.APPROVED_APPLICATIONS.update(apps)
+    # Load up the target applications.
+    with open(approved_applications) as approved_apps:
+        apps = json.load(approved_apps)
+        validator.constants.APPROVED_APPLICATIONS.clear()
+        validator.constants.APPROVED_APPLICATIONS.update(apps)
+
+    # Set the marketplace URLs if they're provided.
+    if market_urls is not None:
+        validator.constants.DEFAULT_WEBAPP_MRKT_URLS = market_urls
 
     bundle = ErrorBundle(listed=listed, determined=determined,
                          overrides=overrides, spidermonkey=spidermonkey,
