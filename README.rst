@@ -440,9 +440,23 @@ Language Packs
 ==============
 
 With every version of every app that's released, the language pack references
-need to be updated. It is usually easiest to extract them from the OS X .app
-packages, though they can likely be obtained elsewhere.
+need to be updated.
 
-These reference files need to be placed in the ``validator/testcases/langpacks``
-directory.
+We now have an automated tool to ease this tedious process. It is currently
+designed to work on OS X with the OS X versions of Mozilla applications, though
+it could conceivably run on any \*NIX platform against the OS X application
+packages.
 
+To run the tool, first create a new directory: ``extras/language_controls/``
+
+Put the ``.app`` packages for each updated product into this directory. Once
+this is ready, simply run: ::
+
+    cd extras
+    python update_langpacks.py
+
+That should be it. Note that this tool will fail horribly if any of the teams
+change the locations that the various language files are stored in.
+
+Also note that this tool should only be run against the en-US versions of these
+applications.

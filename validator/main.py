@@ -89,6 +89,10 @@ def main():
                         compatibility tests:
                         {"{ec8030f7-c20a-464f-9b0e-13a3a9e97384}": ["6.*"]}
                         """)
+    parser.add_argument("--timeout",
+                        help="The amount of time before validation is "
+                             "terminated with a timeout exception.",
+                        default="60")
 
     args = parser.parse_args()
 
@@ -110,6 +114,12 @@ def main():
     if args.for_appversions:
         for_appversions = json.loads(args.for_appversions)
 
+    try:
+        timeout = int(args.timeout)
+    except ValueError:
+        print "Invalid timeout. Integer expected."
+        sys.exit(1)
+
     expectation = expectations[args.type]
     error_bundle = validate(args.package,
                             format=None,
@@ -118,7 +128,8 @@ def main():
                             listed=not args.selfhosted,
                             overrides=overrides,
                             for_appversions=for_appversions,
-                            expectation=expectation)
+                            expectation=expectation,
+                            timeout=timeout)
 
     # Print the output of the tests based on the requested format.
     if args.output == "text":

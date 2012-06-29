@@ -149,39 +149,56 @@ def test_xpi(err, xpi_package):
     locales = _get_locales(err, None, raw_locales)
 
     # Use the first locale by default
-    ref_name = locales.keys()[0]
-    # Try to find en-US, as this is where the majority of users is
-    for name, locale in locales.items():
-        if locale["name"] == 'en-US':
-            ref_name = name
-            break
+    ref_lang = locales.values()[0]["name"]
+    # Try to find en-US, as this is where the majority of users is.
+    if ref_lang != "en-US":
+        for name, locale in locales.items():
+            if locale["name"] == "en-US":
+                ref_lang = "en-US"
+                break
 
-    reference = locales[ref_name]
-    reference_locale = _get_locale_manager(err,
-                                           xpi_package,
-                                           reference)
+    references = {}
+    for locale_name, locale in locales.items():
+        if locale["name"] == ref_lang:
+            references[locale_name] = locale
+
+    references_locales = {}
+    for ref_name, reference in references.items():
+        references_locales[ref_name] = \
+                _get_locale_manager(err, xpi_package, reference)
+
+    def get_reference(locale):
+        for r_name, r in references.items():
+            if r["predicate"] == locale["predicate"]:
+                return r_name, r
+        return None, None
+
     # Loop through the locales and test the valid ones.
     for name, locale in locales.items():
         # Ignore the reference locale
-        if name == ref_name:
+        if name in references:
+            continue
+
+        ref_name, reference = get_reference(locale)
+
+        # If we can't find a reference for the current namespace, bail.
+        if reference is None or ref_name is None:
             continue
 
         target_locale = _get_locale_manager(err,
                                             xpi_package,
                                             locale)
+        # If we can't find the target locale, just bail.
         if target_locale is None:
             continue
-        split_target = locale["name"].split("-")
 
         # Isolate each of the target locales' results.
-        results = _compare_packages(reference_locale,
+        results = _compare_packages(references_locales[ref_name],
                                     target_locale,
                                     reference["target"],
                                     locale["target"])
-        _aggregate_results(err,
-                           results,
-                           locale,
-                           ref_name.startswith(split_target[0]))
+        similar = reference["name"].startswith(locale["name"].split("-")[0])
+        _aggregate_results(err, results, locale, similar)
 
     # Clear the cache at the end of the test
     L10N_CACHE = {}
@@ -329,9 +346,10 @@ def _compare_packages(reference, target, ref_base="", locale_base=""):
                 missing_entities.append(rname)
                 continue
 
-            if rvalue == tar_doc.entities[rname] and \
-               len(rvalue) > L10N_LENGTH_THRESHOLD and \
-               not fnmatch.fnmatch(rvalue, "http*://*"):
+            if (not rname.startswith("pref.timezone.") and
+                rvalue == tar_doc.entities[rname] and
+                len(rvalue) > L10N_LENGTH_THRESHOLD and
+                not fnmatch.fnmatch(rvalue, "http*://*")):
 
                 unchanged_entities.append((rname, rline))
                 continue
