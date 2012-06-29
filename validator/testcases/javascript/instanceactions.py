@@ -13,7 +13,7 @@ node
 import types
 
 import actions
-from validator.compat import FX10_DEFINITION
+from validator.compat import FX10_DEFINITION, FX14_DEFINITION
 from validator.constants import BUGZILLA_BUG
 from jstypes import *
 from instanceproperties import _set_HTML_property
@@ -172,6 +172,25 @@ def isSameNode(args, traverser, node, wrapper):
         tier=5)
 
 
+def onFaviconDataAvailable(args, traverser, node, wrapper):
+    """Raise an error indicating to use `onComplete` instead."""
+    traverser.err.warning(
+        err_id=("testcases_javascript_instanceactions",
+                "onFaviconDataAvailable"),
+        warning="`onFaviconDataAvailable` renamed to `onComplete`",
+        description="The `onFaviconDataAvailable` function has been renamed "
+                    "to `onComplete`. Also note that the function behaves "
+                    "slightly differently now. See %s for more information." %
+                        BUGZILLA_BUG % 737133,
+        filename=traverser.filename,
+        line=traverser.line,
+        column=traverser.position,
+        context=traverser.context,
+        for_appversions=FX14_DEFINITION,
+        compatibility_type="error",
+        tier=5)
+
+
 def replaceWholeText(args, traverser, node, wrapper):
     """Raise an error when an add-on uses node.replaceWholeText(foo)."""
     traverser.err.error(
@@ -222,6 +241,7 @@ INSTANCE_DEFINITIONS = {"createElement": createElement,
                         "getInterface": getInterface,
                         "insertAdjacentHTML": insertAdjacentHTML,
                         "isSameNode": isSameNode,
+                        "onFaviconDataAvailable": onFaviconDataAvailable,
                         "PageMod": PageMod,
                         "QueryInterface": QueryInterface,
                         "replaceWholeText": replaceWholeText,

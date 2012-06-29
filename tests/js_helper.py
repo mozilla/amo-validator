@@ -100,7 +100,8 @@ class TestCase(helper.TestCase):
         """
         if self.err is None:
             self.setup_err()
-        self.err.supported_versions = {}
+        if self.err.supported_versions is None:
+            self.err.supported_versions = {}
 
         validator.testcases.content._process_file(self.err, MockXPI(),
                                                   self.file_path, script,

@@ -1,12 +1,11 @@
-import os
 import sys
-import unittest
 
 from validator.submain import populate_chrome_manifest
 from validator.rdf import RDFParser
 from validator.xpi import XPIManager
 from validator.errorbundler import ErrorBundle
 from validator.outputhandlers.shellcolors import OutputHandler
+import validator.testcases.regex as regex
 
 
 def _do_test(path, test, failure=True,
@@ -42,7 +41,7 @@ def _do_test(path, test, failure=True,
     return err
 
 
-class TestCase(unittest.TestCase):
+class TestCase(object):
     def setUp(self):
         self.err = None
         self.is_jetpack = False
@@ -56,15 +55,17 @@ class TestCase(unittest.TestCase):
         """
         self.err = None
 
-    def setup_err(self):
+    def setup_err(self, for_appversions=None):
         """
         Instantiate the error bundle object. Use the `instant` parameter to
-        have it output errors as they're generated.
+        have it output errors as they're generated. `for_appversions` may be set
+        to target the test cases at a specific Gecko version range.
 
         An existing error bundle will be overwritten with a fresh one that has
         the state that the test case was setup with.
         """
-        self.err = ErrorBundle(instant=True)
+        self.err = ErrorBundle(instant=True,
+                               for_appversions=for_appversions or {})
         self.err.handler = OutputHandler(sys.stdout, True)
 
         if self.is_jetpack:
@@ -121,6 +122,8 @@ class TestCase(unittest.TestCase):
         assert not self.err.errors, 'Got these: %s' % self.err.errors
         assert not self.err.warnings, 'Got these: %s' % self.err.warnings
         assert not self.err.notices, 'Got these: %s' % self.err.notices
+        assert not any(self.err.compat_summary.values()), \
+                "Found compatibility messages."
 
     def assert_got_errid(self, errid):
         """
@@ -130,6 +133,26 @@ class TestCase(unittest.TestCase):
         assert any(msg["id"] == errid for msg in
                    (self.err.errors + self.err.warnings + self.err.notices)), \
                 "%s was expected, but it was not found." % repr(errid)
+
+
+class RegexTestCase(TestCase):
+    """
+    A helper class to provide functions useful for performing tests against
+    regex test scenarios.
+    """
+
+    def run_regex(self, input):
+        """Run the standard regex tests for non-JavaScript input."""
+        if self.err is None:
+            self.setup_err()
+        input = '<input onclick="%s" />' % input
+        regex.run_regex_tests(input, self.err, "foo.txt", is_js=False)
+
+    def run_js_regex(self, input):
+        """Run the standard regex tests for JavaScript input."""
+        if self.err is None:
+            self.setup_err()
+        regex.run_regex_tests(input, self.err, "foo.txt", is_js=True)
 
 
 class MockZipFile:
