@@ -202,3 +202,17 @@ def test_tb12_strings():
     assert err.notices
     assert err.compat_summary["errors"]
 
+
+def test_servicessync():
+    """
+    Test that instances of `resource://services-sync` are flagged due to their
+    volatile nature.
+    """
+
+    err = _do_test_raw("""
+    var r = "resource://services-sync";
+    """)
+    assert err.failed()
+    assert err.warnings
+    assert not any(val for k, val in err.compat_summary.items())
+
