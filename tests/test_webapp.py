@@ -232,7 +232,8 @@ class TestWebapps(TestCase):
         """Test that the various Marketplace URLs work."""
 
         # Test that the Marketplace production URL is acceptable.
-        orig_iaf = data["installs_allowed_from"]
+        self.setUp()
+        orig_iaf = self.data["installs_allowed_from"]
 
         def test_iaf(self, iaf, url):
             self.setUp()
