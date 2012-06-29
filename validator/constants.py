@@ -41,7 +41,8 @@ with open(os.path.join(os.path.dirname(__file__), "app_versions.json")) as avs:
 
 SPIDERMONKEY_INSTALLATION = os.environ.get("SPIDERMONKEY_INSTALLATION")
 
-DEFAULT_WEBAPP_AMO_URL = "https://marketplace.mozilla.org"
+DEFAULT_WEBAPP_MRKT_URLS = ["https://marketplace.mozilla.org",
+                            "https://marketplace-dev.allizom.org"]
 BUGZILLA_BUG = "https://bugzilla.mozilla.org/show_bug.cgi?id=%d"
 
 JETPACK_URI_URL = "https://wiki.mozilla.org/Labs/Jetpack/Release_Notes/" \

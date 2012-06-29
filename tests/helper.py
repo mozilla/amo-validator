@@ -47,6 +47,7 @@ class TestCase(object):
         self.is_jetpack = False
         self.is_bootstrapped = False
         self.detected_type = None
+        self.listed = True
 
     def reset(self):
         """
@@ -65,7 +66,8 @@ class TestCase(object):
         the state that the test case was setup with.
         """
         self.err = ErrorBundle(instant=True,
-                               for_appversions=for_appversions or {})
+                               for_appversions=for_appversions or {},
+                               listed=self.listed)
         self.err.handler = OutputHandler(sys.stdout, True)
 
         if self.is_jetpack:
@@ -90,7 +92,8 @@ class TestCase(object):
         if with_errors:
             assert self.err.errors, "Errors were expected."
         elif self.err.errors:
-            raise "Tests found unexpected errors: %s" % self.err.print_summary()
+            raise AssertionError("Tests found unexpected errors: %s" %
+                                self.err.print_summary(verbose=True))
 
         if with_warnings is not None:
             if with_warnings:
