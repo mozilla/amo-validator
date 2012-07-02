@@ -31,7 +31,7 @@ def deprecated_entity(name, version, message, bug, status="deprecated",
     def wrap(traverser):
         traverser.err.warning(
             err_id=("testcases_javascript_entity_values", name),
-            warning="`%s` has been %s.",
+            warning="`%s` has been %s." % (name, status),
             description=[message,
                          "See %s for more information." % BUGZILLA_BUG % bug],
             filename=traverser.filename,
