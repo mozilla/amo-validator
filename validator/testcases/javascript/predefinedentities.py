@@ -143,6 +143,9 @@ INTERFACES = {
                 {"return": call_definitions.TB13_nsIMsgNewsFolder_changed},
              u"forgetGroupPassword":
                 {"return": call_definitions.TB13_nsIMsgNewsFolder_changed}}},
+    u"nsIMsgPluggableStore":
+        {"value":
+            {u"copyMessages": entity("nsIMsgPluggableStore.copyMessages")}},
     u"nsIMsgOutputStream":
         {"value":
             {u"folderStream":
