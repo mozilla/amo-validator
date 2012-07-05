@@ -50,7 +50,7 @@ class TestWebapps(TestCase):
 
         self.data = {
             "version": "1.0",
-            "name": "MozillaBall",
+            "name": "MozBall",
             "description": "Exciting Open Web development action!",
             "icons": {
                 "16": "/img/icon-16.png",
@@ -135,6 +135,12 @@ class TestWebapps(TestCase):
         self.data["name"] = ["foo", "bar"]
         self.analyze()
         self.assert_failed(with_errors=True)
+
+    def test_long_name(self):
+        """Test that long names are flagged for truncation in Gaia."""
+        self.data["name"] = "This is a long name."
+        self.analyze()
+        self.assert_failed(with_warnings=True)
 
     def test_maxlengths(self):
         """Test that certain elements are capped in length."""

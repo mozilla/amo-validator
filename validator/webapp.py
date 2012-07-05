@@ -29,3 +29,12 @@ def detect_webapp(err, package):
     ws = WebappSpec(webapp, err)
     ws.validate()
 
+    # This magic number brought to you by @cvan (see bug 770755)
+    if "name" in webapp and len(webapp["name"]) > 9:
+        err.warning(
+                err_id=("webapp", "b2g", "name_truncated"),
+                warning="App name may be truncated in Gaia.",
+                description="Your app's name is long enough to possibly be "
+                            "truncated in Gaia (Firefox OS). Consider using "
+                            "a shorter name for your app.")
+
