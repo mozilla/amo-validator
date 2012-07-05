@@ -51,6 +51,15 @@ class TestFX14Compat(CompatTestCase):
         self.assert_silent()
         self.assert_compat_error()
 
+    def test_onFaviconDataAvailable_assignment(self):
+        """
+        Test that assignments to `onFaviconDataAvailable` is flagged in Gecko
+        14.
+        """
+        self.run_script_for_compat("{onFaviconDataAvailable: foo()}")
+        self.assert_silent()
+        self.assert_compat_error()
+
     def test_Blob(self):
         """Test that the (Moz)BlobBuilder objects are deprecated."""
         self.run_regex_for_compat("MozBlobBuilder")

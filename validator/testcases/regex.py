@@ -603,6 +603,13 @@ class Gecko14RegexTests(CompatRegexTestHelper):
                 "versions older than 14, you should use `nsIFile` instead of "
                 "`nsILocalFile`.", compat_type="warning")
 
+        yield self.get_test_bug(
+                737133, "onFaviconDataAvailable",
+                "`onFaviconDataAvailable` renamed to `onComplete`.",
+                "The `onFaviconDataAvailable` function has been renamed to "
+                "`onComplete`. Also note that the function behaves slightly "
+                "differently now.", compat_type="error")
+
 
 @register_generator
 class Thunderbird7RegexTests(CompatRegexTestHelper):
@@ -795,7 +802,8 @@ class Thunderbird14RegexTests(CompatRegexTestHelper):
 
     def tests(self):
         # String changes for add-ons depending on Thunderbird localizations
-        patterns = {r"spellCheck(IgnoreWord|NoSuggestions|AddToDictionary)\.(label|accesskey)": 735986,
+        patterns = {r"spellCheck(IgnoreWord|NoSuggestions|AddToDictionary)\."
+                        "(label|accesskey)": 735986,
                     r"account(Title|SettingsDesc)\.label": 340324,
                     r"messageStorage\.label": 340324,
                     r"emptyTrashOnExit\.(label|accesskey)": 340324,

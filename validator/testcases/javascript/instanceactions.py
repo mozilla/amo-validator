@@ -172,25 +172,6 @@ def isSameNode(args, traverser, node, wrapper):
         tier=5)
 
 
-def onFaviconDataAvailable(args, traverser, node, wrapper):
-    """Raise an error indicating to use `onComplete` instead."""
-    traverser.err.warning(
-        err_id=("testcases_javascript_instanceactions",
-                "onFaviconDataAvailable"),
-        warning="`onFaviconDataAvailable` renamed to `onComplete`",
-        description="The `onFaviconDataAvailable` function has been renamed "
-                    "to `onComplete`. Also note that the function behaves "
-                    "slightly differently now. See %s for more information." %
-                        BUGZILLA_BUG % 737133,
-        filename=traverser.filename,
-        line=traverser.line,
-        column=traverser.position,
-        context=traverser.context,
-        for_appversions=FX14_DEFINITION,
-        compatibility_type="error",
-        tier=5)
-
-
 def openDialog(args, traverser, node, wrapper):
     """Raise an error if the first argument is a remote URL."""
     if not args:
@@ -250,7 +231,6 @@ INSTANCE_DEFINITIONS = {"createElement": createElement,
                         "getInterface": getInterface,
                         "insertAdjacentHTML": insertAdjacentHTML,
                         "isSameNode": isSameNode,
-                        "onFaviconDataAvailable": onFaviconDataAvailable,
                         "openDialog": openDialog,
                         "PageMod": PageMod,
                         "QueryInterface": QueryInterface,
