@@ -1,5 +1,5 @@
 from call_definitions import open_in_chrome_context
-from validator.compat import FX10_DEFINITION, FX14_DEFINITION
+from validator.compat import FX10_DEFINITION, FX14_DEFINITION, TB14_DEFINITION
 from validator.constants import BUGZILLA_BUG
 
 
@@ -208,4 +208,23 @@ def nsIWindowWatcher_openWindow(traverser):
         open_in_chrome_context(uri, "nsIWindowWatcher.openWindow", traverser)
 
     return {"return": on_open}
+
+# Thunderbird 14 IDL changes
+@register_entity("nsIMsgPluggableStore.copyMessages")
+def nsIMsgPluggableStore_copyMessages(traverser):
+    traverser.err.notice(
+        err_id=("testcases_javascript_entity_values",
+                "nsIMsgPluggableStore_copyMessages"),
+        notice="Altered nsIMsgPluggableStore.copyMessages method in use.",
+        description="This add-on uses nsIMsgPluggableStore.copyMessages "
+                    "which was changed "
+                    "in Thunderbird 14. For more information, please refer to "
+                    "%s." % BUGZILLA_BUG % 738651,
+        filename=traverser.filename,
+        line=traverser.line,
+        column=traverser.position,
+        context=traverser.context,
+        for_appversions=TB14_DEFINITION,
+        compatibility_type="error",
+        tier=5)
 
