@@ -22,7 +22,7 @@ class TestWebappAccessories(TestCase):
     def test_path(self):
         """Test that paths are tested properly for allowances."""
 
-        s = WebappSpec("{}", None)
+        s = WebappSpec("{}", ErrorBundle())
 
         eq_(s._path_valid("*"), False)
         eq_(s._path_valid("*", can_be_asterisk=True), True)
@@ -188,6 +188,19 @@ class TestWebapps(TestCase):
 
         for icon in ['/foo/bar', 'http://foo.com/bar', 'https://foo.com/bar']:
             yield test_icon, self, icon
+
+    def test_icons_has_min_selfhosted(self):
+        del self.data["icons"]["128"]
+        self.analyze()
+        self.assert_silent()
+
+    def test_icons_has_min_listed(self):
+        self.listed = True
+        self.data["installs_allowed_from"] = \
+                validator.constants.DEFAULT_WEBAPP_MRKT_URLS
+        del self.data["icons"]["128"]
+        self.analyze()
+        self.assert_failed(with_errors=True)
 
     def test_no_locales(self):
         """Test that locales are not required."""

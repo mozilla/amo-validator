@@ -12,7 +12,8 @@ class WebappSpec(Spec):
 
     SPEC_NAME = "Web App Manifest"
     MORE_INFO = ("You can find more information at %s" %
-                    "https://developer.mozilla.org/en/OpenWebApps/The_Manifest")
+                     "https://developer.mozilla.org/en/OpenWebApps/The_Manifest")
+    MIN_REQUIRED_ICON_SIZE = 128
     SPEC = {
         "expected_type": dict,
         "required_nodes": ["name", "description"],
@@ -34,7 +35,8 @@ class WebappSpec(Spec):
                             "process": lambda s: s.process_launch_path,
                             "not_empty": True},
             "icons": {"expected_type": dict,
-                      "child_process": lambda s: s.process_icon_size},
+                      "child_process": lambda s: s.process_icon_size,
+                      "process": lambda s: s.process_icons},
             "developer":
                 {"expected_type": dict,
                  "child_nodes": {"name": {"expected_type": types.StringTypes,
@@ -81,7 +83,9 @@ class WebappSpec(Spec):
         }
     }
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self, data, err, **kwargs):
+        self.SPEC = copy.deepcopy(self.SPEC)
+
         # Get all of the locale-able nodes and allow them to be included within
         # locale elements.
         locale_nodes = ("name", "description", "launch_path", "icons",
@@ -103,7 +107,12 @@ class WebappSpec(Spec):
         locale_all_nodes["child_nodes"] = sparse_nodes
         locale_all_nodes["allowed_once_nodes"] = locale_nodes
 
-        super(WebappSpec, self).__init__(*args, **kwargs)
+        # If we're listed, we require icons.
+        if err.get_resource("listed"):
+            self.SPEC["required_nodes"].append("icons")
+            self.SPEC["allowed_once_nodes"].remove("icons")
+
+        super(WebappSpec, self).__init__(data, err, **kwargs)
 
     def _path_valid(self, path, can_be_asterisk=False, can_be_absolute=False,
                     can_be_relative=False, can_be_data=False,
@@ -167,6 +176,19 @@ class WebappSpec(Spec):
                 description=["Paths to icons must be absolute URLs.",
                              "Found: %s" % node,
                              self.MORE_INFO])
+
+    def process_icons(self, node):
+        # This test only applies to listed apps.
+        if self.err.get_resource("listed"):
+            max_size = max(int(x) for x in node.keys() if x.isdigit())
+            if max_size < self.MIN_REQUIRED_ICON_SIZE:
+                self.err.error(
+                    err_id=("spec", "webapp", "icon_minsize"),
+                    error="An icon of at least %dx%d pixels must be provided." %
+                            (self.MIN_REQUIRED_ICON_SIZE,
+                             self.MIN_REQUIRED_ICON_SIZE),
+                    description="An icon with a minimum size of 128x128 must "
+                                "be provided by each app.")
 
     def process_dev_url(self, node):
         if not self._path_valid(node, can_have_protocol=True):
