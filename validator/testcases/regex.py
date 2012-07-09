@@ -610,6 +610,15 @@ class Gecko14RegexTests(CompatRegexTestHelper):
                 "`onComplete`. Also note that the function behaves slightly "
                 "differently now.", compat_type="error")
 
+        GUID_LINK = ("http://blog.bonardo.net/2012/02/16/"
+                     "add-ons-devs-heads-up-we-are-killing-old-bookmarks-guids")
+        yield self.get_test(
+                "(getItemGUID|setItemGUID|getItemIdForGUID)",
+                "`getItemGUID`, `setItemGUID`, and `getItemIdForGUID` were "
+                "removed.",
+                "Item GUIDs have been dropped from the Bookmarks Service. See "
+                "%s for more information." % GUID_LINK, compat_type="error")
+
 
 @register_generator
 class Thunderbird7RegexTests(CompatRegexTestHelper):
