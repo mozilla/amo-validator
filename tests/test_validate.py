@@ -64,3 +64,15 @@ def test_mrkt_urls():
     # Clean up!
     constants.DEFAULT_WEBAPP_MRKT_URLS = MRKT_URLS
 
+
+def test_is_compat():
+    """Test that we know when we're running a compatibility test."""
+    out = validate(path="tests/resources/junk.xpi", format=None,
+                   compat_test=False)
+    assert not out.get_resource("is_compat_test")
+
+    out = validate(path="tests/resources/junk.xpi", format=None,
+                   compat_test=True)
+    assert out.get_resource("is_compat_test")
+
+

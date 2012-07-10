@@ -20,7 +20,8 @@ def validate(path, format="json",
              for_appversions=None,
              overrides=None,
              timeout=None,
-             market_urls=None):
+             market_urls=None,
+             compat_test=False):
     """
     Perform validation in one easy step!
 
@@ -48,6 +49,7 @@ def validate(path, format="json",
     bundle = ErrorBundle(listed=listed, determined=determined,
                          overrides=overrides, spidermonkey=spidermonkey,
                          for_appversions=for_appversions)
+    bundle.save_resource("is_compat_test", compat_test)
     validator.submain.prepare_package(bundle, path, expectation,
                                       for_appversions=for_appversions,
                                       timeout=timeout)
