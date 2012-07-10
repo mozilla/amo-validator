@@ -619,6 +619,14 @@ class Gecko14RegexTests(CompatRegexTestHelper):
                 "Item GUIDs have been dropped from the Bookmarks Service. See "
                 "%s for more information." % GUID_LINK, compat_type="error")
 
+        yield self.get_test_bug(
+                737841, "redirectsMode",
+                "`redirectsMode` removed from `nsINavHistoryQueryOptions`",
+                "The `redirectsMode` option has been removed from the "
+                "`nsINavHistoryQueryOptions` interface. Error visits are no "
+                "longer stored in the history, so it is no longer necessary.",
+                compat_type="error")
+
 
 @register_generator
 class Thunderbird7RegexTests(CompatRegexTestHelper):

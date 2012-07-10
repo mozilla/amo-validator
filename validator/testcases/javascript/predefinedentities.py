@@ -263,8 +263,6 @@ INTERFACES = {
         {"value":
              {u"queryCommandText": entity("nsIDOMHTMLDocument"),
               u"execCommandShowHelp": entity("nsIDOMHTMLDocument")}},
-    u"nsINavHistoryQueryOptions":
-        {"value": {u"redirectsMode": entity("nsINavHistoryQueryOptions.redirectsMode")}},
     }
 
 INTERFACE_ENTITIES = {u"nsIXMLHttpRequest":
