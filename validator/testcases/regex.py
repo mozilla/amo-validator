@@ -839,16 +839,16 @@ class Thunderbird14RegexTests(CompatRegexTestHelper):
                     compat_type="error")
 
         js_patterns = {r"feed-subscriptions\.js": 737115,
-                       r"msgComposeService": 739051,
-                       r"IsCanSearchMessagesEnabled": 537378,
-                       r"(g|cv)(Prefs|IOService|HeaderParser)": 733496,
-                       r"(nsPrefBranch|CollapseSectionSeparators)": 713277,
-                       r"g(PrefBranch|MailSession)": 736870,
-                       r"gIncomingServer": 340324,
-                       r"getPromptService": 732807,
+                       r"(\b|\()msgComposeService": 739051,
+                       r"(\b|\()IsCanSearchMessagesEnabled": 537378,
+                       r"(\b|\()(g|cv)(Prefs|IOService|HeaderParser)": 733496,
+                       r"(\b|\()(nsPrefBranch|CollapseSectionSeparators)": 713277,
+                       r"(\b|\()g(PrefBranch|MailSession)": 736870,
+                       r"(\b|\()gIncomingServer": 340324,
+                       r"(\b|\()getPromptService": 732807,
                        r"mailnews\.display\.html_sanitizer\.allowed_tags": 650776,
                        r"downloadheaders\.js": 732811,
-                       r"kSmallCommit": 747102,}
+                       r"(\b|\()kSmallCommit": 747102,}
         for pattern, bug in js_patterns.items():
             yield self.get_test_bug(
                     bug, pattern,
