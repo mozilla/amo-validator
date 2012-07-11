@@ -17,7 +17,8 @@ class TestTB14Compat(CompatTestCase):
 
     def test_functions(self):
         patterns = ["mailnews.display.html_sanitizer.allowed_tags", "gPrefs()",
-         "gHeaderParser()", "msgComposeService()", "nsPrefBranch()",]
+         "gHeaderParser()", "(msgComposeService()", "nsPrefBranch()",
+         "(cvHeaderParser",]
         for pattern in patterns:
             self.run_regex_for_compat("var x = %s();" % pattern)
             self.assert_silent()
@@ -26,7 +27,8 @@ class TestTB14Compat(CompatTestCase):
 
         # Extra tests for similar functions.
         for pattern in ["cvsPrefs()", "mailnews()", 
-                        "CollapseSectionHeaderators()",]:
+                        "CollapseSectionHeaderators()",
+                        "msgMailSession", "msgPrefs",]:
             self.run_regex_for_compat("var x = %s();" % pattern)
             self.assert_silent()
             self.assert_compat_silent()
