@@ -5,6 +5,7 @@ from validator.constants import *
 
 
 OPTIONS_TYPE_VALUES = ("1", "2", "3")
+VERSION_PATTERN = re.compile("^[-+*.\w]{,32}$")
 
 
 @decorator.register_test(tier=1)
@@ -25,12 +26,9 @@ def _test_rdf(err, install):
     """Wrapper for install.rdf testing to make unit testing so much
     easier."""
 
-    if not err.get_resource("listed"):
-        shouldnt_exist = ("hidden", )
-    else:
-        shouldnt_exist = ("updateURL",
-                          "updateKey",
-                          "hidden", )
+    shouldnt_exist = ("hidden", )
+    if err.get_resource("listed"):
+        shouldnt_exist += ("updateURL", "updateKey", )
     obsolete = ("file", "skin", "requires", )
     must_exist_once = ["id",
                        "version",
@@ -208,7 +206,6 @@ def _test_id(err, value):
 def _test_version(err, value):
     "Tests an install.rdf version number"
 
-    version_pattern = re.compile("^[-+*.\w]{,32}$")
 
     err.metadata["version"] = value
 
@@ -223,7 +220,7 @@ def _test_version(err, value):
                   "install.rdf")
 
     # Must be a valid version number.
-    if not version_pattern.match(value):
+    if not VERSION_PATTERN.match(value):
         err.error(("testcases_installrdf",
                    "_test_version",
                    "invalid_format"),
