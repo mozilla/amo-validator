@@ -1,5 +1,6 @@
 import json
 import os
+import types
 
 from . import constants
 from .constants import PACKAGE_ANY, PACKAGE_WEBAPP
@@ -65,11 +66,20 @@ def validate(path, format="json",
                          for_appversions=for_appversions)
     bundle.save_resource("is_compat_test", compat_test)
 
-    # Load up the target applications.
-    with open(approved_applications) as approved_apps:
-        apps = json.load(approved_apps)
-        constants.APPROVED_APPLICATIONS.clear()
-        constants.APPROVED_APPLICATIONS.update(apps)
+    if isinstance(approved_applications, types.StringTypes):
+        # Load up the target applications if the approved applications is a
+        # path (string).
+        with open(approved_applications) as approved_apps:
+            apps = json.load(approved_apps)
+    elif isinstance(approved_applications, dict):
+        # If the lists of approved applications are already in a dict, just use
+        # that instead of trying to pull from a file.
+        apps = approved_applications
+    else:
+        raise ValueError("Unknown format for `approved_applications`.")
+
+    constants.APPROVED_APPLICATIONS.clear()
+    constants.APPROVED_APPLICATIONS.update(apps)
 
     # Set the marketplace URLs if they're provided.
     set_market_urls(market_urls)
