@@ -1,7 +1,8 @@
 import json
-from validator.validate import validate as validate
+from validator.validate import validate, validate_app
 from validator.errorbundler import ErrorBundle
 import validator.constants as constants
+from validator.constants import PACKAGE_WEBAPP
 
 
 def test_validate():
@@ -75,4 +76,19 @@ def test_is_compat():
                    compat_test=True)
     assert out.get_resource("is_compat_test")
 
+
+def test_webapp():
+    """Test that webapps can be validated traditionally."""
+    out = validate(path="tests/resources/testwebapp.webapp",
+                   expectation=PACKAGE_WEBAPP)
+    j = json.loads(out)
+    assert j["success"], "Expected not to fail"
+
+
+def test_webapp_new():
+    """Test that webapps can be validated with the new api."""
+    with open("tests/resources/testwebapp.webapp") as file_:
+        out = validate_app(file_.read())
+    j = json.loads(out)
+    assert j["success"], "Expected not to fail"
 

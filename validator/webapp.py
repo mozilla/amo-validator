@@ -11,11 +11,17 @@ def detect_webapp(err, package):
     """Detect, parse, and validate a webapp manifest."""
 
     # Parse the file.
+    with open(package, mode="r") as f:
+        detect_webapp_string(err, f.read())
+
+def detect_webapp_string(err, data):
+    """
+    Parse and validate a webapp based on the string version of the provided
+    manifest.
+    """
     try:
-        with open(package, mode="r") as f:
-            data = f.read()
-            u_data = decode(data)
-            webapp = json.loads(u_data)
+        u_data = decode(data)
+        webapp = json.loads(u_data)
     except ValueError:
         return err.error(
             err_id=("webapp",
@@ -24,6 +30,14 @@ def detect_webapp(err, package):
             error="JSON Parse Error",
             description="The webapp extension could not be parsed due to a "
                         "syntax error in the JSON.")
+    else:
+        detect_webapp_raw(err, webapp)
+
+
+def detect_webapp_raw(err, webapp):
+    """
+    Parse and validate a webapp based on the dict version of the manifest.
+    """
 
     from validator.specs.webapps import WebappSpec
     ws = WebappSpec(webapp, err)
