@@ -1,50 +1,97 @@
 import json
-from validator.validate import validate as validate
+
+from mock import patch
+from nose.tools import eq_
+
+from validator.validate import validate, validate_app
 from validator.errorbundler import ErrorBundle
 import validator.constants as constants
+from validator.constants import PACKAGE_WEBAPP
+
+from helper import TestCase
 
 
-def test_validate():
-    output = validate(path="tests/resources/packagelayout/theme.jar")
-    j = json.loads(output)
-    print j
-    assert j["metadata"]["name"] == "name_value"
+class TestValidate(TestCase):
 
-    output = validate(path="tests/resources/packagelayout/theme.jar",
-                      format=None)
-    assert isinstance(output, ErrorBundle)
-    assert output.metadata["name"] == "name_value"
-    assert output.get_resource("SPIDERMONKEY") == False
+    def run(self, path, **kwargs):
+        self.output = validate(path=path, **kwargs)
 
-    output = validate(path="tests/resources/packagelayout/theme.jar",
-                      spidermonkey="foospidermonkey",
-                      format=None)
-    assert output.get_resource("SPIDERMONKEY") == "foospidermonkey"
-    assert output.determined
-    assert output.get_resource("listed")
+    def test_metadata(self):
+        """Test that the generated JSON has the appropriate metadata valuees."""
+        self.run("tests/resources/packagelayout/theme.jar")
+        j = json.loads(self.output)
+        eq_(j["metadata"]["name"], "name_value")
 
-    output = validate(path="tests/resources/packagelayout/theme.jar",
-                      determined=False,
-                      format=None)
-    assert not output.determined
-    assert output.get_resource("listed")
+    def test_metadata_bundle(self):
+        """
+        Test that the error bundle returned by validate() has the appropriate
+        values within it.
+        """
+        self.run("tests/resources/packagelayout/theme.jar", format=None)
+        eq_(self.output.metadata["name"], "name_value")
+        eq_(self.output.get_resource("SPIDERMONKEY"), False)
 
-    output = validate(path="tests/resources/packagelayout/theme.jar",
-                      listed=False,
-                      format=None)
-    assert output.determined
-    assert not output.get_resource("listed")
+    def test_spidermonkey(self):
+        """
+        Test that the appropriate path for Spidermonkey is set through the
+        `validate()` function.
+        """
+        self.run("tests/resources/packagelayout/theme.jar", format=None,
+                 spidermonkey="foospidermonkey")
+        eq_(self.output.get_resource("SPIDERMONKEY"), "foospidermonkey")
+        assert self.output.determined
+        assert self.output.get_resource("listed")
 
-    output = validate(path="tests/resources/packagelayout/theme.jar",
-                      overrides="foo",
-                      format=None)
-    assert output.overrides == "foo"
+    def test_undetermined(self):
+        """
+        Test that when the validation is run with `determined=False`, that
+        value is pushed through the full validation process.
+        """
+        self.run("tests/resources/packagelayout/theme.jar", format=None,
+                 determined=False)
+        assert not self.output.determined
+        assert self.output.get_resource("listed")
+
+    def test_unlisted(self):
+        """
+        Test that when the validation is run with `listed=False`, that value
+        is pushed through the full validation process.
+        """
+        self.run("tests/resources/packagelayout/theme.jar", format=None,
+                 listed=False)
+        assert self.output.determined
+        assert not self.output.get_resource("listed")
+
+    def test_overrides(self):
+        """
+        Test that when the validation is run with `overrides="foo"`, that value
+        is pushed through the full validation process.
+        """
+        self.run("tests/resources/packagelayout/theme.jar", format=None,
+                 overrides="foo")
+        assert self.output.determined
+        assert self.output.get_resource("listed")
+        eq_(self.output.overrides, "foo")
 
 
+@patch.dict("validator.constants.APPROVED_APPLICATIONS")
 def test_app_versions():
     "Tests that the validate function properly loads app_versions.json"
     validate(path="tests/resources/junk.xpi",
              approved_applications="tests/resources/test_app_versions.json")
+    print constants.APPROVED_APPLICATIONS
+    assert constants.APPROVED_APPLICATIONS["1"]["name"] == "Foo App"
+
+
+@patch.dict("validator.constants.APPROVED_APPLICATIONS")
+def test_app_versions_dict():
+    """
+    Test that `approved_applications` can be provided as a pre-parsed dict
+    of versions.
+    """
+    with open("tests/resources/test_app_versions.json") as f:
+        apps = json.load(f)
+    validate(path="tests/resources/junk.xpi", approved_applications=apps)
     print constants.APPROVED_APPLICATIONS
     assert constants.APPROVED_APPLICATIONS["1"]["name"] == "Foo App"
 
@@ -75,4 +122,19 @@ def test_is_compat():
                    compat_test=True)
     assert out.get_resource("is_compat_test")
 
+
+def test_webapp():
+    """Test that webapps can be validated traditionally."""
+    out = validate(path="tests/resources/testwebapp.webapp",
+                   expectation=PACKAGE_WEBAPP)
+    j = json.loads(out)
+    assert j["success"], "Expected not to fail"
+
+
+def test_webapp_new():
+    """Test that webapps can be validated with the new api."""
+    with open("tests/resources/testwebapp.webapp") as file_:
+        out = validate_app(file_.read())
+    j = json.loads(out)
+    assert j["success"], "Expected not to fail"
 
