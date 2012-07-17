@@ -1,17 +1,20 @@
+from collections import defaultdict
 import hashlib
 import json
 import os
 
 import validator.decorator as decorator
 from validator.constants import PACKAGE_EXTENSION
+from validator.version import Version
 from content import FLAGGED_FILES
 
 
 SAFE_FILES = (".jpg", ".ico", ".png", ".gif", ".txt")
 
+EMPTY_FILE_SHA256SUMS = "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
 
 @decorator.register_test(tier=1, expected_type=PACKAGE_EXTENSION)
-def inspect_jetpack(err, xpi_package):
+def inspect_jetpack(err, xpi_package, allow_old_sdk=False):
     """
     If the add-on is a Jetpack extension, its contents should be tested to
     ensure that none of the Jetpack libraries have been tampered with.
@@ -84,15 +87,31 @@ def inspect_jetpack(err, xpi_package):
     jetpack_data = open(os.path.join(os.path.dirname(__file__),
                                      "jetpack_data.txt"))
     # Parse the jetpack data into something useful.
-    jetpack_hash_table = {}
-    for line in [x.split() for x in jetpack_data]:
-        jetpack_hash_table[line[-1]] = tuple(line[:-1])
+    jetpack_hash_table = defaultdict(dict)
+    latest_jetpack = None
+    for path, version_str, hash in map(str.split, jetpack_data):
+        version = Version(version_str)
+        if version.is_release and (not latest_jetpack or
+                                   version > latest_jetpack):
+            latest_jetpack = version
+        jetpack_hash_table[hash][version_str] = path
+
+    if not allow_old_sdk and Version(sdk_version) != latest_jetpack:
+        err.warning(
+            err_id=("testcases_jetpack", "inspect_jetpack",
+                    "outdated_version"),
+            warning="Outdated version of Add-on SDK",
+            description="You are using version %s of the Add-on SDK, "
+                        "which is outdated. Please upgrade to version "
+                        "%s and repack your add-on"
+                            % (sdk_version, latest_jetpack))
 
     # Prepare a place to store mentioned hashes.
     found_hashes = set()
 
     loaded_modules = []
     tested_files = {}
+    file_hashes = {}
     unknown_files = []
     mandatory_module_elements = ("moduleName", "packageName", "requirements",
                                  "sectionName", "docsSHA256", "jsSHA256")
@@ -145,6 +164,7 @@ def inspect_jetpack(err, xpi_package):
             continue
 
         blob_hash = hashlib.sha256(xpi_package.read(zip_path)).hexdigest()
+        file_hashes[zip_path] = blob_hash
 
         # Make sure that the module's hash matches what the manifest says.
         if blob_hash != module["jsSHA256"]:
@@ -187,8 +207,9 @@ def inspect_jetpack(err, xpi_package):
             filename in FLAGGED_FILES):
             continue
 
-        blob = xpi_package.read(filename)
-        blob_hash = hashlib.sha256(blob).hexdigest()
+        blob_hash = (file_hashes.get(filename, None) or
+                     hashlib.sha256(xpi_package.read(filename)).hexdigest())
+        file_hashes[filename] = blob_hash
 
         if blob_hash not in jetpack_hash_table:
             unknown_files.append(filename)
@@ -200,6 +221,29 @@ def inspect_jetpack(err, xpi_package):
         # Mark the hashes we actually find as being present.
         if blob_hash in found_hashes:
             found_hashes.discard(blob_hash)
+
+    for zip_path, versions in tested_files.items():
+        if sdk_version in versions:
+            tested_files[zip_path] = sdk_version, versions[sdk_version]
+        else:
+            # This isn't the version it claims to be. Go with the latest
+            # Jetpack version we know about that contains it.
+            version = str(max(map(Version, versions.keys())))
+            tested_files[zip_path] = version, versions[version]
+
+            if (file_hashes[zip_path] not in EMPTY_FILE_SHA256SUMS and
+                not zip_path.endswith("/")):
+                err.warning(
+                    err_id=("testcases_jetpack",
+                            "inspect_jetpack",
+                            "mismatched_version"),
+                    warning="Jetpack module version mismatch",
+                    description=["A file in the Jetpack add-on does not match "
+                                 "the SDK version specified in harness-options"
+                                 ".json.",
+                                 "Module: %s" % zip_path,
+                                 "Versions: %s/%s" % (sdk_version, version)],
+                    filename=zip_path)
 
     # We've got hashes left over
     if found_hashes:
