@@ -8,11 +8,12 @@ from js_helper import _do_real_test_raw as _js_test
 from validator.testcases.markup.markuptester import MarkupParser
 import validator.testcases.jetpack as jetpack
 from validator.errorbundler import ErrorBundle
+from validator.xpi import XPIManager
 
-def _do_test(xpi_package):
+def _do_test(xpi_package, allow_old_sdk=True):
 
     err = ErrorBundle()
-    jetpack.inspect_jetpack(err, xpi_package)
+    jetpack.inspect_jetpack(err, xpi_package, allow_old_sdk=allow_old_sdk)
     return err
 
 class MockXPI:
@@ -58,17 +59,13 @@ def test_bad_harnessoptions():
 def test_pass_jetpack():
     """Test that a minimalistic Jetpack setup will pass."""
 
-    harnessoptions = {"sdkVersion": "foo",
+    harnessoptions = {"sdkVersion": "1.8-dev",
                       "jetpackID": "",
                       "manifest": {}}
 
     with open("tests/resources/bootstrap.js") as bootstrap_file:
         bootstrap = bootstrap_file.read()
-    with open("jetpack/addon-sdk/packages/test-harness/lib/"
-                  "harness.js") as harness_file:
-        harness = harness_file.read()
     err = _do_test(MockXPI({"bootstrap.js": bootstrap,
-                            "components/harness.js": harness,
                             "harness-options.json":
                                 json.dumps(harnessoptions)}))
     print err.print_summary(verbose=True)
@@ -80,16 +77,11 @@ def test_pass_jetpack():
     assert pretested_files
     assert "bootstrap.js" in pretested_files
 
-    # Even though harness.js is no longer in Jetpack 1.4+ add-ons, we should
-    # make sure that we don't start throwing errors for it for older Jetpack
-    # add-ons.
-    assert "components/harness.js" in pretested_files
-
 
 def test_missing_elements():
     """Test that missing elements in harness-options will fail."""
 
-    harnessoptions = {"sdkVersion": "foo",
+    harnessoptions = {"sdkVersion": "1.8-dev",
                       "jetpackID": ""}
 
     with open("tests/resources/bootstrap.js") as bootstrap_file:
@@ -104,7 +96,7 @@ def test_missing_elements():
 def test_skip_safe_files():
     """Test that missing elements in harness-options will fail."""
 
-    harnessoptions = {"sdkVersion": "foo",
+    harnessoptions = {"sdkVersion": "1.8-dev",
                       "jetpackID": "",
                       "manifest": {}}
 
@@ -131,7 +123,7 @@ def test_pass_manifest_elements():
 
     harnessoptions = {
             "jetpackID": "foobar",
-            "sdkVersion": "foo",
+            "sdkVersion": "1.8-dev",
             "manifest": {
                 "bootstrap.js":
                     {"requirements": {},
@@ -166,7 +158,7 @@ def test_ok_resource():
 
     harnessoptions = {
             "jetpackID": "foobar",
-            "sdkVersion": "foo",
+            "sdkVersion": "1.8-dev",
             "manifest": {
                 "resource://bootstrap.js":
                     {"requirements": {},
@@ -192,7 +184,7 @@ def test_bad_resource():
         bootstrap_hash = hashlib.sha256(bootstrap).hexdigest()
 
     harnessoptions = {
-            "sdkVersion": "foo",
+            "sdkVersion": "1.8-dev",
             "jetpackID": "foobar",
             "manifest":
                 {"http://foo.com/bar/bootstrap.js":
@@ -219,7 +211,7 @@ def test_missing_manifest_elements():
         bootstrap_hash = hashlib.sha256(bootstrap).hexdigest()
 
     harnessoptions = {
-            "sdkVersion": "foo",
+            "sdkVersion": "1.8-dev",
             "jetpackID": "foobar",
             "manifest":
                 {"resource://bootstrap.js":
@@ -244,7 +236,7 @@ def test_mismatched_hash():
     """
 
     harnessoptions = {
-            "sdkVersion": "foo",
+            "sdkVersion": "1.8-dev",
             "jetpackID": "foobar",
             "manifest":
                 {"resource://bootstrap.js":
@@ -278,7 +270,7 @@ def test_mismatched_db_hash():
         bootstrap_hash = hashlib.sha256(bootstrap).hexdigest()
 
     harnessoptions = {
-            "sdkVersion": "foo",
+            "sdkVersion": "1.8-dev",
             "jetpackID": "foobar",
             "manifest":
                 {"resource://bootstrap.js":
@@ -304,6 +296,19 @@ def test_mismatched_db_hash():
     nose.tools.eq_(err.metadata["jetpack_unknown_files"],
                    ["bootstrap.js",
                     "resources/bootstrap.js"])
+
+
+def test_mismatched_module_version():
+    """
+    Tests that add-ons using modules from a version of the SDK
+    other than the version they claim.
+    """
+
+    xpi = XPIManager("tests/resources/jetpack/jetpack-1.8-pretending-1.8.1.xpi")
+    err = _do_test(xpi)
+
+    assert err.failed()
+    assert any(w["id"][2] == "mismatched_version" for w in err.warnings)
 
 
 def test_absolute_uris_in_js():
@@ -362,4 +367,19 @@ def test_bad_sdkversion():
                             "harness-options.json":
                                 json.dumps(harnessoptions)}))
     assert err.failed() and err.errors
+
+
+def test_outdated_sdkversion():
+    """
+    Tests that add-ons using a version other than the latest release
+    are warned against, but module hashes are still recognized.
+    """
+
+    xpi = XPIManager("tests/resources/jetpack/jetpack-1.8-outdated.xpi")
+    err = _do_test(xpi, allow_old_sdk=False)
+
+    assert err.failed()
+    # Make sure we don't have any version mismatch warnings
+    eq_(len(err.warnings), 1)
+    eq_(err.warnings[0]["id"][2], "outdated_version")
 
