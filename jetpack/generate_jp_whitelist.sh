@@ -22,4 +22,4 @@ do
     done
 done
 
-sort ../../validator/testcases/jetpack_data.txt -o ../../validator/testcases/jetpack_data.txt
+sort ../../validator/testcases/jetpack_data.txt -d -o ../../validator/testcases/jetpack_data.txt
