@@ -47,7 +47,7 @@ def detect_webapp_raw(err, webapp):
     if "name" in webapp and len(webapp["name"]) > 9:
         err.warning(
                 err_id=("webapp", "b2g", "name_truncated"),
-                warning="App name may be truncated in Gaia.",
+                warning="App name may be truncated on Firefox OS devices.",
                 description="Your app's name is long enough to possibly be "
                             "truncated on Firefox OS devices. Consider using "
                             "a shorter name for your app.")
