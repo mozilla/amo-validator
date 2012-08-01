@@ -14,6 +14,7 @@ def detect_webapp(err, package):
     with open(package, mode="r") as f:
         detect_webapp_string(err, f.read())
 
+
 def detect_webapp_string(err, data):
     """
     Parse and validate a webapp based on the string version of the provided
@@ -51,4 +52,3 @@ def detect_webapp_raw(err, webapp):
                 description="Your app's name is long enough to possibly be "
                             "truncated on Firefox OS devices. Consider using "
                             "a shorter name for your app.")
-

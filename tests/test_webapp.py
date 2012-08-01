@@ -204,6 +204,12 @@ class TestWebapps(TestCase):
 
     def test_no_locales(self):
         """Test that locales are not required."""
+        del self.data["locales"]
+        self.analyze()
+        self.assert_silent()
+
+    def test_no_default_locale_no_locales(self):
+        """Test that locales are not required if no default_locale."""
         del self.data["default_locale"]
         del self.data["locales"]
         self.analyze()

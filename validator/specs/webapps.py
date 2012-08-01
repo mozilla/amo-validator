@@ -53,7 +53,6 @@ class WebappSpec(Spec):
                  "child_nodes": {"*": {"expected_type": dict,
                                        "child_nodes": {}}}},  # Set in __init__
             "default_locale": {"expected_type": types.StringTypes,
-                               "process": lambda s: s.process_default_locale,
                                "not_empty": True},
             "installs_allowed_from": {"expected_type": list,
                                       "process": lambda s: s.process_iaf,
@@ -198,15 +197,6 @@ class WebappSpec(Spec):
                 description=["`url`s provided for the `developer` element must "
                              "be full URLs (including the protocol).",
                              "Found: %s" % node,
-                             self.MORE_INFO])
-
-    def process_default_locale(self, node):
-        if "locales" not in self.data:
-            self.err.error(
-                err_id=("spec", "webapp", "def_locale_wo_locales"),
-                error="`default_locale` without `locales`",
-                description=["A `default_locale` was provided without a "
-                             "`locales` node.",
                              self.MORE_INFO])
 
     def process_iaf(self, node):
