@@ -101,51 +101,6 @@ def test_app_update_timer():
     assert err.compat_summary["errors"]
 
 
-def test_incompatible_uris():
-    """Flag instances of javascript:/data: in compatibility."""
-
-    fx6 = {"{ec8030f7-c20a-464f-9b0e-13a3a9e97384}":
-               version_range("firefox", "6.0a1")}
-
-    err = _do_test_raw("""
-    var f = "javascript:foo();";
-    """)
-    assert not err.failed()
-    assert not any(err.compat_summary.values())
-
-    err = ErrorBundle()
-    err.supported_versions = fx6
-    regex_tests.run_regex_tests("""
-    var f = "javascript:foo();";
-    """, err, "foo.bar", is_js=False)
-    assert not err.failed()
-    assert not any(err.compat_summary.values())
-
-    err = _do_test_raw("""
-    var f = "javascript:foo();";
-    """, versions=fx6)
-    assert not err.failed()
-    assert err.compat_summary["warnings"]
-
-    err = _do_test_raw("""
-    var f = "data:foo();";
-    """, versions=fx6)
-    assert not err.failed()
-    assert err.compat_summary["warnings"]
-
-    err = _do_test_raw("""
-    var foo = "postdata:LOL NOT THE CASE";
-    """, versions=fx6)
-    assert not err.failed()
-    assert not any(err.compat_summary.values())
-
-    err = _do_test_raw("""
-    var foo = { data: "LOL NOT THE CASE" };
-    """, versions=fx6)
-    assert not err.failed()
-    assert not any(err.compat_summary.values())
-
-
 def test_chrome_usage():
 
     def base_case():

@@ -353,16 +353,6 @@ class Gecko6RegexTests(CompatRegexTestHelper):
                 "`app.update.timerMinimumDelay` preference in Gecko 6.",
                 compat_type="error")
 
-    def js_tests(self):
-        yield self.get_test_bug(
-                656433, r"['\"](javascript|data):",
-                "`javascript:`/`data:` URIs may be incompatible with Gecko 6",
-                "Loading `javascript:` and `data:` URIs through the location "
-                "bar may no longer work as expected in Gecko 6. If you load "
-                "these types of URIs, please test your add-on using the "
-                "latest builds of the applications that it targets.",
-                compat_type="warning", log_function=self.err.notice)
-
 
 @register_generator
 class Gecko7RegexTests(CompatRegexTestHelper):
