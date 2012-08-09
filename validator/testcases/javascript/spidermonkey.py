@@ -99,7 +99,9 @@ def _get_tree(code, shell=SPIDERMONKEY_INSTALLATION):
     temp.write(code.encode("utf_8"))
     temp.flush()
 
-    data = """try{
+    data = """
+    try{options("allow_xml");}catch(e){}
+    try{
         print(JSON.stringify(Reflect.parse(read(%s))));
     } catch(e) {
         print(JSON.stringify({
