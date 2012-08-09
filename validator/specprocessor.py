@@ -135,7 +135,7 @@ class Spec(object):
                 len(branch) > spec_branch["max_length"]):
                 self.err.error(
                     err_id=("spec", "iterate", "max_length"),
-                    error="`%s` has exceeded its maximum length.",
+                    error="`%s` has exceeded its maximum length." % branch_name,
                     description=["`%s` has a maximum length (%d), which has "
                                  "been exceeded (%d)." %
                                      (branch_name, spec_branch["max_length"],
@@ -242,7 +242,8 @@ class Spec(object):
                     continue
                 self.err.error(
                     err_id=("spec", "iterate", "allow_once_multiple"),
-                    error="%s found `%s` more than once.",
+                    error="%s found `%s` more than once." %
+                              (self.SPEC_NAME, child_name),
                     description=["%ss may only contain a single `%s` element, "
                                  "however, it was encountered multiple times." %
                                      (self.SPEC_NAME, child_name),
