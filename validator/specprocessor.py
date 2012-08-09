@@ -113,7 +113,7 @@ class Spec(object):
         if "not_empty" in spec_branch and not branch:
             self.err.error(
                 err_id=("spec", "iterate", "empty"),
-                error="`%s` is empty.",
+                error="`%s` is empty." % branch_name,
                 description=["A value was expected for `%s`, but one wasn't "
                              "found." % branch_name,
                              self.MORE_INFO])
