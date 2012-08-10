@@ -14,8 +14,8 @@ POLLUTION_COMPONENTS_PATH = re.compile(r"/?components/.*\.jsm?")
 POLLUTION_EXCEPTIONS = set(["Cc", "Ci", "Cu", ])
 
 
-class Traverser:
-    "Traverses the AST Tree and determines problems with a chunk of JS."
+class Traverser(object):
+    """Traverses the AST Tree and determines problems with a chunk of JS."""
 
     def __init__(self, err, filename, start_line=0, context=None,
                  is_jsm=False):
@@ -34,6 +34,9 @@ class Traverser:
         # Can use the `this` object
         self.can_use_this = False
         self.this_stack = []
+
+        # For ordering of function traversal.
+        self.function_collection = []
 
         # For debugging
         self.debug_level = 0
@@ -60,7 +63,12 @@ class Traverser:
 
         self._debug("START>>")
         try:
+            self.function_collection.append([])
             self._traverse_node(data)
+
+            func_coll = self.function_collection.pop()
+            for func in func_coll:
+                func()
         except Exception:
             print "Exception in JS traversal; %s (%d;%d)" % (
                       self.filename, self.line, self.position)
@@ -116,12 +124,12 @@ class Traverser:
         if "__traversal" in node and node["__traversal"] is not None:
             return node["__traversal"]
 
-        if isinstance(node, (str, unicode)):
+        if isinstance(node, types.StringTypes):
             return JSWrapper(JSLiteral(node), traverser=self)
         elif "type" not in node or node["type"] not in DEFINITIONS:
             return JSWrapper(JSObject(), traverser=self, dirty=True)
 
-        self._debug("TRAVERSE>>%s" % (node["type"]))
+        self._debug("TRAVERSE>>%s" % node["type"])
         self.debug_level += 1
 
         # Extract location information if it's available

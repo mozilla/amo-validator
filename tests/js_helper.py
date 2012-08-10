@@ -126,5 +126,5 @@ class TestCase(helper.TestCase):
         Assert that the value of a variable from the final script context
         contains the value specified.
         """
-        self.assertEqual(self.get_var(name), value)
+        eq_(self.get_var(name), value)
 

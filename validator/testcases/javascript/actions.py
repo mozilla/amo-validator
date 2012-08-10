@@ -122,52 +122,62 @@ def test_identifier(traverser, name):
 def _function(traverser, node):
     "Prevents code duplication"
 
-    me = JSObject()
+    def wrap(traverser, node):
+        me = JSObject()
 
-    # Replace the current context with a prototypeable JS object.
-    traverser._pop_context()
-    traverser._push_context(me)
-    traverser._debug("THIS_PUSH")
-    traverser.this_stack.append(me)  # Allow references to "this"
+        traverser.function_collection.append([])
 
-    # Declare parameters in the local scope
-    params = []
-    for param in node["params"]:
-        if param["type"] == "Identifier":
-            params.append(param["name"])
-        elif param["type"] == "ArrayPattern":
-            for element in param["elements"]:
-                # Array destructuring in function prototypes? LOL!
-                if element is None or element["type"] != "Identifier":
-                    continue
-                params.append(element["name"])
+        # Replace the current context with a prototypeable JS object.
+        traverser._pop_context()
+        traverser._push_context(me)
+        traverser._debug("THIS_PUSH")
+        traverser.this_stack.append(me)  # Allow references to "this"
 
-    local_context = traverser._peek_context(1)
-    for param in params:
-        var = JSWrapper(lazy=True, traverser=traverser)
+        # Declare parameters in the local scope
+        params = []
+        for param in node["params"]:
+            if param["type"] == "Identifier":
+                params.append(param["name"])
+            elif param["type"] == "ArrayPattern":
+                for element in param["elements"]:
+                    # Array destructuring in function prototypes? LOL!
+                    if element is None or element["type"] != "Identifier":
+                        continue
+                    params.append(element["name"])
 
-        # We can assume that the params are static because we don't care about
-        # what calls the function. We want to know whether the function solely
-        # returns static values. If so, it is a static function.
-        #var.dynamic = False
-        local_context.set(param, var)
+        local_context = traverser._peek_context(1)
+        for param in params:
+            var = JSWrapper(lazy=True, traverser=traverser)
 
-    traverser._traverse_node(node["body"])
+            # We can assume that the params are static because we don't care
+            # about what calls the function. We want to know whether the
+            # function solely returns static values. If so, it is a static
+            # function.
+            local_context.set(param, var)
 
-    # Since we need to manually manage the "this" stack, pop off that context.
-    traverser._debug("THIS_POP")
-    traverser.this_stack.pop()
+        traverser._traverse_node(node["body"])
 
-    return me
+        # Since we need to manually manage the "this" stack, pop off that
+        # context.
+        traverser._debug("THIS_POP")
+        traverser.this_stack.pop()
+
+        # Call all of the function collection's members to traverse all of the
+        # child functions.
+        func_coll = traverser.function_collection.pop()
+        for func in func_coll:
+            func()
+
+    # Put the function off for traversal at the end of the current block scope.
+    traverser.function_collection[-1].append(lambda: wrap(traverser, node))
+
+    return JSWrapper(traverser=traverser, callable=True, dirty=True)
 
 
 def _define_function(traverser, node):
     "Makes a function happy"
 
     me = _function(traverser, node)
-    me = JSWrapper(value=me,
-                   traverser=traverser,
-                   callable=True)
     traverser._peek_context(2).set(node["id"]["name"], me)
 
     return True
@@ -176,12 +186,7 @@ def _define_function(traverser, node):
 def _func_expr(traverser, node):
     "Represents a lambda function"
 
-    # Collect the result as an object
-    results = _function(traverser, node)
-    if not isinstance(results, JSWrapper):
-        results = JSWrapper(value=results, traverser=traverser)
-    results.callable = True
-    return results
+    return _function(traverser, node)
 
 
 def _define_with(traverser, node):
