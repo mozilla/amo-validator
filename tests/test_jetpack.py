@@ -383,3 +383,16 @@ def test_outdated_sdkversion():
     eq_(len(err.warnings), 1)
     eq_(err.warnings[0]["id"][2], "outdated_version")
 
+
+def test_future_sdkversion():
+    """
+    Test that if the developer is using a verison of the SDK that's newer than
+    the latest recognized version, we don't throw an error.
+    """
+
+    xpi = XPIManager("tests/resources/jetpack/jetpack-1.8-future.xpi")
+    err = _do_test(xpi, allow_old_sdk=False)
+
+    print err.print_summary(verbose=True)
+    assert not err.failed()
+

@@ -96,7 +96,8 @@ def inspect_jetpack(err, xpi_package, allow_old_sdk=False):
             latest_jetpack = version
         jetpack_hash_table[hash][version_str] = path
 
-    if not allow_old_sdk and Version(sdk_version) != latest_jetpack:
+    suppress_warnings = False
+    if not allow_old_sdk and Version(sdk_version) < latest_jetpack:
         err.warning(
             err_id=("testcases_jetpack", "inspect_jetpack",
                     "outdated_version"),
@@ -105,6 +106,14 @@ def inspect_jetpack(err, xpi_package, allow_old_sdk=False):
                         "which is outdated. Please upgrade to version "
                         "%s and repack your add-on"
                             % (sdk_version, latest_jetpack))
+    elif Version(sdk_version) > latest_jetpack:
+        err.notice(
+            err_id=("testcases_jetpack", "inspect_jetpack",
+                    "future_version"),
+            notice="Future version of Add-on SDK unrecognized",
+            description="We've detected that the add-on uses a version of the "
+                        "add-on SDK that we do not yet recognize.")
+        suppress_warnings = True
 
     # Prepare a place to store mentioned hashes.
     found_hashes = set()
@@ -222,6 +231,14 @@ def inspect_jetpack(err, xpi_package, allow_old_sdk=False):
         if blob_hash in found_hashes:
             found_hashes.discard(blob_hash)
 
+    # Store the collected information in the output metadata.
+    err.save_resource("pretested_files", pretested_files)
+    err.metadata["jetpack_loaded_modules"] = loaded_modules
+    err.metadata["jetpack_unknown_files"] = unknown_files
+
+    if suppress_warnings:
+        return
+
     for zip_path, versions in tested_files.items():
         if sdk_version in versions:
             tested_files[zip_path] = sdk_version, versions[sdk_version]
@@ -257,9 +274,5 @@ def inspect_jetpack(err, xpi_package, allow_old_sdk=False):
             filename="harness-options.json")
 
     # Store the collected information in the output metadata.
-    err.metadata["jetpack_loaded_modules"] = loaded_modules
     err.metadata["jetpack_identified_files"] = tested_files
-    err.metadata["jetpack_unknown_files"] = unknown_files
-
-    err.save_resource("pretested_files", pretested_files)
 
