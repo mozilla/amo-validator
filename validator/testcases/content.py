@@ -270,7 +270,7 @@ def _process_file(err, xpi_package, name, file_data, name_lower,
             return None
 
         # Let the error bunder know we're in a sub-package.
-        err.push_state(name.lower())
+        err.push_state(name)
         err.set_type(PACKAGE_SUBPACKAGE if
                      is_subpackage else
                      PACKAGE_THEME)
