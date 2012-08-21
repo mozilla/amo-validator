@@ -7,6 +7,12 @@ class TestE4X(TestCase):
     Tests related to the E4X implementation in the JS engine.
     """
 
+    def run_script(self, script):
+        super(TestE4X, self).run_script(script)
+        self.err.warnings = filter(lambda w:
+                                       not w["id"][-1].startswith("warn_e4x"),
+                                   self.err.warnings)
+
     def test_pass(self):
         """Test that E4X isn't immediately rejected."""
         self.run_script("""var x = <foo a={x}><bar /><{zap} /></foo>;""")

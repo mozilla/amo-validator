@@ -85,8 +85,8 @@ class TestCase(object):
         is tested that errors are not present. If with_warnings is not None,
         the presence of warnings is tested just like with_errors)
         """
-        assert self.err.failed(fail_on_warnings=with_warnings or
-                                                with_warnings is None), \
+        assert self.err.failed(
+            fail_on_warnings=with_warnings or with_warnings is None), \
                 "Test did not fail; failure was expected."
 
         if with_errors:
