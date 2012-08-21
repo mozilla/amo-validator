@@ -4,7 +4,7 @@ from validator.constants import BUGZILLA_BUG
 from validator.compat import (FX4_DEFINITION, FX5_DEFINITION, FX6_DEFINITION,
                               FX7_DEFINITION, FX8_DEFINITION, FX9_DEFINITION,
                               FX11_DEFINITION, FX12_DEFINITION, FX13_DEFINITION,
-                              FX14_DEFINITION,
+                              FX14_DEFINITION, FX15_DEFINITION,
                               TB7_DEFINITION, TB10_DEFINITION, TB11_DEFINITION,
                               TB12_DEFINITION, TB13_DEFINITION, TB14_DEFINITION)
 from validator.contextgenerator import ContextGenerator
@@ -616,6 +616,49 @@ class Gecko14RegexTests(CompatRegexTestHelper):
                 "`nsINavHistoryQueryOptions` interface. Error visits are no "
                 "longer stored in the history, so it is no longer necessary.",
                 compat_type="error")
+
+
+@register_generator
+class Gecko15RegexTests(CompatRegexTestHelper):
+    """Regex tests for Gecko 15 updates."""
+
+    VERSION = FX15_DEFINITION
+
+    def tests(self):
+
+        yield self.get_test_bug(
+                615213, "nsIGlobalHistory",
+                "`nsIGlobalHistory` has been removed.",
+                "The `nsIGlobalHistory` interface has been removed. You can "
+                "use `nsIGlobalHistory2` instead.", compat_type="error")
+
+        nISSWLink = ("https://blog.mozilla.org/nfroyd/2012/05/14/"
+                         "statement-wrappers-have-been-deprecated/")
+        yield self.get_test(
+                "mozIStorageStatementWrapper",
+                "`mozIStorageStatementWrapper` has been removed.",
+                "The `mozIStorageStatementWrapper` interface has been removed. "
+                "It is no longer necessary, you can use `mozIStorageStatement` "
+                "directly instead. See %s for more information." % nISSWLink,
+                compat_type="error")
+
+        aPWDLink = ("https://developer.mozilla.org/en-US/docs/"
+                        "XPCOM_Interface_Reference/nsIBrowserHistory"
+                        "#addPageWithDetails%28%29")
+        yield self.get_test(
+                "addPageWithDetails",
+                "`addPageWithDetails` has been removed.",
+                "The `addPageWithDetails` function has been removed. You can "
+                "use the equivalent `mozIAsyncHistory.updatePlaces` function "
+                "instead. See %s for more information." % aPWDLink,
+                compat_type="error")
+
+        yield self.get_test_bug(
+                730340, "(_DOMElement|_feedURI|_siteURI|_cellProperties)",
+                "Private Properties removed from Places code.",
+                "Places nodes no longer hold metadata in private properties. "
+                "If you're using these properties to obtain Places data, this "
+                "will no longer work.", compat_type="error")
 
 
 @register_generator

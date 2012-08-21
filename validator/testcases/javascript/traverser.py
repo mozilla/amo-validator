@@ -2,11 +2,13 @@ import copy
 import re
 import types
 
-import validator.testcases.javascript.actions as actions
-from validator.testcases.javascript.jstypes import *
-from validator.testcases.javascript.nodedefinitions import DEFINITIONS
-from validator.testcases.javascript.predefinedentities import \
-               GLOBAL_ENTITIES, BANNED_IDENTIFIERS
+from validator.compat import FX15_DEFINITION
+
+from . import actions
+from .jstypes import *
+from .nodedefinitions import DEFINITIONS, E4X_NODES
+from .predefinedentities import GLOBAL_ENTITIES, BANNED_IDENTIFIERS
+
 
 DEBUG = False
 IGNORE_POLLUTION = False
@@ -40,6 +42,8 @@ class Traverser(object):
 
         # For debugging
         self.debug_level = 0
+
+        self.warned_e4x = False
 
         # If we're not debugging, don't waste more cycles than we need to.
         if not DEBUG:
@@ -137,6 +141,36 @@ class Traverser(object):
             self.line = self.start_line + int(node["loc"]["start"]["line"])
             self.position = int(node["loc"]["start"]["column"])
 
+        if node["type"] in E4X_NODES and not self.warned_e4x:
+            self.warned_e4x = True
+
+            if self.err.supports_version(FX15_DEFINITION):
+                self.err.warning(
+                    ("js", "traverser", "warn_e4x_compat"),
+                    "E4X Deprecated",
+                    "It is no longer possible to pass E4X objects between most "
+                    "contexts, including different chrome windows or JS "
+                    "modules. You should also be aware that E4X is in a quick "
+                    "deprecation path. See %s for more information." %
+                        "https://developer.mozilla.org/en-US/docs/E4X",
+                    filename=self.filename,
+                    line=self.line,
+                    column=self.position,
+                    context=self.context,
+                    compatibility_type="warning",
+                    for_appversions=FX15_DEFINITION,
+                    tier=5)
+            else:
+                self.err.warning(
+                    ("js", "traverser", "warn_e4x"),
+                    "E4X Deprecated",
+                    "E4X has been deprecated and will be disabled by default "
+                    "for content in Gecko 16, and will be removed in Gecko 17.",
+                    filename=self.filename,
+                    line=self.line,
+                    column=self.position,
+                    context=self.context)
+
         # Extract properties about the node that we're traversing
         (branches, establish_context, action, returns,
              block_level) = DEFINITIONS[node["type"]]
@@ -163,7 +197,6 @@ class Traverser(object):
                 self._debug("ACTION>>%s (%s)" % (action_debug,
                                                  node["type"]))
 
-        # print node["type"], branches
         if action_result is None:
             self.debug_level += 1
             # Use the node definition to determine and subsequently traverse
@@ -302,18 +335,16 @@ class Traverser(object):
             dang = entity["dangerous"]
             if dang and not isinstance(dang, types.LambdaType):
                 self._debug("DANGEROUS")
-                self.err.warning(("testcases_javascript_traverser",
-                                  "_build_global",
-                                  "dangerous_global"),
-                                 "Illegal or deprecated access to the '%s' global" % name,
-                                 [dang if
-                                  isinstance(dang, (types.StringTypes, list, tuple)) else
-                                  "Access to the '%s' property is deprecated "
-                                  "for security or other reasons." % name],
-                                 self.filename,
-                                 line=self.line,
-                                 column=self.position,
-                                 context=self.context)
+                self.err.warning(
+                    ("js", "traverser", "dangerous_global"),
+                    "Illegal or deprecated access to the '%s' global" % name,
+                    [dang if isinstance(dang, (types.StringTypes, list, tuple))
+                     else "Access to the '%s' property is deprecated "
+                          "for security or other reasons." % name],
+                    self.filename,
+                    line=self.line,
+                    column=self.position,
+                    context=self.context)
 
         if "name" not in entity:
             entity["name"] = name

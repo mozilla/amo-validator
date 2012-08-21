@@ -113,3 +113,9 @@ DEFINITIONS = {
     "XMLName": node(branches=("contents", )),
 
 }
+
+E4X_NODES = set(["XMLElement", "XMLList", "XMLStartTag", "XMLEndTag",
+                 "XMLPointTag", "XMLName", "XMLEscape",
+                 "XMLDefaultDeclaration", "XMLQualifiedIdentifier",
+                 "XMLFunctionQualifiedIdentifier",
+                 "XMLAttributeSelector", "XMLFilterExpression"])
