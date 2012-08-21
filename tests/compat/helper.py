@@ -52,6 +52,7 @@ class CompatTestCase(JSTestCase, RegexTestCase):
 
     def _run_member_for_compat(self, method):
         # Run the method without version restrictions.
+        self.setup_err()
         method()
 
         # Store away that error bundle to prepare for the next error bundle.
