@@ -2,6 +2,7 @@ import re
 import fnmatch
 import cssutils
 
+from validator.constants import PACKAGE_THEME
 from validator.contextgenerator import ContextGenerator
 
 BAD_URL_PAT = "url\(['\"]?(?!(chrome:|resource:))(\/\/|(ht|f)tps?:\/\/|data:)[a-z0-9\/\-\.#]*['\"]?\)"
@@ -105,7 +106,7 @@ def _run_css_tests(err, tokens, filename, line_start=0, context=None):
             if value == "#identity-box":
                 identity_box_mods.append(str(line + line_start))
 
-    if identity_box_mods:
+    if identity_box_mods and err.detected_type != PACKAGE_THEME:
         err.warning(("testcases_markup_csstester",
                     "_run_css_tests",
                     "identity_box"),
