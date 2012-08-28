@@ -180,7 +180,9 @@ class JSWrapper(object):
 
         # We want to obey the permissions of global objects
         if (self.is_global and
-            (not traverser or not traverser.is_jsm) and
+            (not traverser or
+             not (traverser.is_jsm or
+                  traverser.err.get_resource("em:bootstrap") == "true")) and
             (isinstance(self.value, dict) and
              ("overwritable" not in self.value or
               self.value["overwritable"] == False))):

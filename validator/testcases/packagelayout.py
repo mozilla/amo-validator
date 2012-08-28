@@ -241,8 +241,9 @@ def test_emunpack(err, xpi_package):
                            "The add-on contains JAR files and does not set "
                            "<em:unpack> to 'true'. This can result in "
                            "performance issues in add-ons that target Gecko "
-                           "4. It is recommended that you consider no longer "
-                           "using JAR files to package your chrome files.",
+                           "4 and above. It is recommended that you consider "
+                           "no longer using JAR files to package your chrome "
+                           "files.",
                            filename="install.rdf",
                            tier=1)
                 return

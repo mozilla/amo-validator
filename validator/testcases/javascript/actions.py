@@ -604,6 +604,7 @@ def _expr_assignment(traverser, node):
 
         if (global_overwrite and
             not traverser.is_jsm and
+            not traverser.err.get_resource("em:bootstrap") and
             readonly_value == True):
 
             traverser.err.warning(

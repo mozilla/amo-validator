@@ -67,6 +67,35 @@ def test_global_overwrite():
     """).failed()
 
 
+def test_global_overwrite_bootstrapped():
+    """Test that restartless add-ons don't get overwrite warnings."""
+
+    err = _do_test_raw("""
+    Number.prototype = "This is the new prototype";
+    """, bootstrap=True)
+    assert not err.failed()
+
+    err = _do_test_raw("""
+    Object.prototype.test = "bar";
+    """, bootstrap=True)
+    assert not any("global_overwrite" in m['id'] for m in err.warnings)
+
+    err = _do_test_raw("""
+    Object.prototype["test"] = "bar";
+    """, bootstrap=True)
+    assert not any("global_overwrite" in m['id'] for m in err.warnings)
+
+    assert not _do_test_raw("""
+    Object = "asdf";
+    """, bootstrap=True).failed()
+
+    err = _do_test_raw("""
+    var x = Object.prototype;
+    x.test = "asdf";
+    """, bootstrap=True)
+    assert not any("global_overwrite" in m['id'] for m in err.warnings)
+
+
 def test_with_statement():
     "Tests that 'with' statements work as intended"
 
