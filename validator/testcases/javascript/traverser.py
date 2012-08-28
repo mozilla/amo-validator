@@ -216,6 +216,10 @@ class Traverser(object):
         # If we defined a context, pop it.
         if establish_context or block_level:
             self._pop_context()
+            # WithStatements declare two blocks: one for the block and one for
+            # the object that's being withed. We need both because of `let`s.
+            if node["type"] == "WithStatement":
+                self._pop_context()
 
         self.debug_level -= 1
 
@@ -341,13 +345,12 @@ class Traverser(object):
                     [dang if isinstance(dang, (types.StringTypes, list, tuple))
                      else "Access to the '%s' property is deprecated "
                           "for security or other reasons." % name],
-                    self.filename,
+                    filename=self.filename,
                     line=self.line,
                     column=self.position,
                     context=self.context)
 
-        if "name" not in entity:
-            entity["name"] = name
+        entity.setdefault("name", name)
 
         # Build out the wrapper object from the global definition.
         result = JSWrapper(is_global=True, traverser=self, lazy=True)
@@ -361,20 +364,26 @@ class Traverser(object):
 
         return result
 
-    def _set_variable(self, name, value, glob=False):
-        "Sets the value of a variable/object in the local or global scope."
+    def _declare_variable(self, name, value, type_="var"):
+        context = None
+        if type_ == "let":
+            context = self.contexts[-1]
+        elif type_ in ("var", "const", ):
+            contexts = ([self.contexts[0]] +
+                        filter(lambda c: c.type_ == "default",
+                               self.contexts[1:]))
+            context = contexts[-1]
+        elif type_ == "glob":
+            # Look down through the lexical scope. If the variable being
+            # assigned is present in one of those objects, use that as the
+            # target context.
+            for ctx in reversed(self.contexts[1:]):
+                if ctx.has_var(name):
+                    context = ctx
+                    break
 
-        self._debug("SETTING_OBJECT")
+        if not context:
+            context = self.contexts[0]
 
-        i = 0
-        for context in reversed(self.contexts):
-            i += 1
-            if context.has_var(name):
-                self._debug("SETTING_OBJECT>>LOCAL>>%d" % i)
-                context.set(name, value)
-                return value
-
-        self._debug("SETTING_OBJECT>>LOCAL")
-        self.contexts[0 if glob else -1].set(name, value)
+        context.set(name, value)
         return value
-

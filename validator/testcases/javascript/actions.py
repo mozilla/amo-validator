@@ -25,8 +25,7 @@ def _expand_globals(traverser, node):
     """Expands a global object that has a lambda value."""
 
     if (node.is_global and
-        "value" in node.value and
-        isinstance(node.value["value"], types.LambdaType)):
+        isinstance(node.value.get("value"), types.LambdaType)):
 
         result = node.value["value"](t=traverser)
         if isinstance(result, dict):
@@ -84,8 +83,8 @@ def trace_member(traverser, node, instantiate=False):
 
         # If we're supposed to instantiate the object and it doesn't already
         # exist, instantitate the object.
-        if (instantiate and not (traverser._is_local_variable(node["name"]) or
-                                 traverser._is_global(node["name"]))):
+        if (instantiate and not (traverser._is_global(node["name"]) or
+                                 traverser._is_local_variable(node["name"]))):
             output = JSWrapper(JSObject(), traverser=traverser)
             traverser.contexts[0].set(node["name"], output)
         else:
@@ -129,6 +128,7 @@ def _function(traverser, node):
 
         # Replace the current context with a prototypeable JS object.
         traverser._pop_context()
+        me.type_ = "default"  # Treat the function as a normal object.
         traverser._push_context(me)
         traverser._debug("THIS_PUSH")
         traverser.this_stack.append(me)  # Allow references to "this"
@@ -193,9 +193,10 @@ def _define_with(traverser, node):
     "Handles `with` statements"
 
     object_ = traverser._traverse_node(node["object"])
-    if isinstance(object_, JSWrapper) and \
-       isinstance(object_.value, JSObject):
+    if (isinstance(object_, JSWrapper) and
+        isinstance(object_.value, JSObject)):
         traverser.contexts[-1] = object_.value
+        traverser.contexts.append(JSContext("block"))
     return
 
 
@@ -227,16 +228,16 @@ def _define_var(traverser, node):
                 for var in vars:
                     if not var:
                         continue
-                    traverser._set_variable(var, None)
+                    traverser._declare_variable(var, None)
 
             # The variables are declared inline
             elif declaration["init"]["type"] == "ArrayPattern":
                 # TODO : Test to make sure len(values) == len(vars)
                 for value in declaration["init"]["elements"]:
                     if vars[0]:
-                        traverser._set_variable(vars[0], JSWrapper(
-                                traverser._traverse_node(value),
-                                traverser=traverser))
+                        traverser._declare_variable(
+                            vars[0], JSWrapper(traverser._traverse_node(value),
+                                               traverser=traverser))
                     vars = vars[1:]  # Pop off the first value
 
             # It's being assigned by a JSArray (presumably)
@@ -245,7 +246,7 @@ def _define_var(traverser, node):
                 assigner = traverser._traverse_node(declaration["init"])
                 for value in assigner.value.elements:
                     if vars[0]:
-                        traverser._set_variable(vars[0], value)
+                        traverser._declare_variable(vars[0], value)
                     vars = vars[1:]
 
         elif declaration["id"]["type"] == "ObjectPattern":
@@ -263,9 +264,9 @@ def _define_var(traverser, node):
                         continue
 
                     if prop["value"]["type"] == "Identifier":
-                        traverser._set_variable(prop["value"]["name"],
-                                                init_obj.get(traverser,
-                                                             prop_name))
+                        traverser._declare_variable(
+                            prop["value"]["name"],
+                            init_obj.get(traverser, prop_name))
                     elif prop["value"]["type"] == "ObjectPattern":
                         _proc_objpattern(init_obj.get(traverser, prop_name),
                                          prop["value"]["properties"])
@@ -285,12 +286,13 @@ def _define_var(traverser, node):
 
             if not isinstance(var_value, JSWrapper):
                 var = JSWrapper(value=var_value,
-                                const=(node["kind"] == "const"),
+                                const=node["kind"] == "const",
                                 traverser=traverser)
             else:
                 var = var_value
                 var.const = node["kind"] == "const"
-            traverser._set_variable(var_name, var)
+
+            traverser._declare_variable(var_name, var, type_=node["kind"])
 
     traverser.debug_level -= 1
 
@@ -534,7 +536,7 @@ def _ident(traverser, node):
 
 
 def _expr_assignment(traverser, node):
-    "Evaluates an AssignmentExpression node."
+    """Evaluate an AssignmentExpression node."""
 
     traverser._debug("ASSIGNMENT_EXPRESSION")
     traverser.debug_level += 1
@@ -565,7 +567,7 @@ def _expr_assignment(traverser, node):
                                   "readonly" in global_dict else
                                   True)
 
-            traverser._set_variable(node_left["name"], right, glob=True)
+            traverser._declare_variable(node_left["name"], right, type_="glob")
         elif node_left["type"] == "MemberExpression":
             member_object = trace_member(traverser, node_left["object"],
                                          instantiate=True)
@@ -808,7 +810,7 @@ def _expr_binary(traverser, node):
 
 
 def _expr_unary(traverser, node):
-    "Evaluates a UnaryExpression node"
+    """Evaluate a UnaryExpression node."""
 
     expr = traverser._traverse_node(node["argument"])
     expr_lit = expr.get_literal_value()
@@ -868,8 +870,6 @@ def _get_as_num(value):
                 return float(value)
         elif isinstance(value, (int, float, long)):
             return value
-        elif value is None:
-            return 0
         else:
             return int(value)
     except ValueError:
@@ -882,19 +882,18 @@ def _get_as_str(value):
         return ""
 
     if isinstance(value, bool):
-        # .lower() because JS bools are lowercase.
-        return unicode(value).lower()
+        return "true" if value else "false"
     elif isinstance(value, (int, float, long)):
         if value == float('inf'):
-            return "Infinity"
+            return u"Infinity"
         elif value == float('-inf'):
-            return "-Infinity"
+            return u"-Infinity"
 
         # Try to see if we can shave off some trailing significant figures.
         try:
             if int(value) == value:
                 return unicode(int(value))
-        except:
+        except ValueError:
             pass
     return unicode(value)
 

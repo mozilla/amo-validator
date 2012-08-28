@@ -12,6 +12,7 @@ class JSObject(object):
     """
 
     def __init__(self, unwrapped=False):
+        self.type_ = "object"  # For use when an object is pushed as a context.
         self.data = {u"prototype": JSPrototype()}
         self.is_unwrapped = unwrapped
 
@@ -103,7 +104,7 @@ class JSContext(JSObject):
     """A variable context"""
 
     def __init__(self, context_type, unwrapped=False):
-        self._type = context_type
+        self.type_ = context_type
         self.data = {}
         self.is_unwrapped = False  # Contexts cannot be unwrapped.
 
@@ -131,7 +132,7 @@ class JSWrapper(object):
         self.const = const
         self.traverser = traverser
         self.value = None  # Instantiate the placeholder value
-        self.is_global = False  # Not yet......
+        self.is_global = False  # Not yet...
         self.dirty = False  # Also not yet...
         self.context = context
 

@@ -37,7 +37,7 @@ class TestFunctionTraversal(TestCase):
         """Test that function declarations happen in the right time."""
 
         self.run_script("""
-        foo = "first"
+        foo = "first";
         function test() {
             foo = "second";
         }

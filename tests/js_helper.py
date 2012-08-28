@@ -93,7 +93,7 @@ class TestCase(helper.TestCase):
         with open(path) as script_file:
             return self.run_script(script_file.read())
 
-    def run_script(self, script, expose_pollution=False):
+    def run_script(self, script, expose_pollution=False, bootstrap=False):
         """
         Run the standard set of JS engine tests on the script passed via
         `script`.
@@ -102,6 +102,8 @@ class TestCase(helper.TestCase):
             self.setup_err()
         if self.err.supported_versions is None:
             self.err.supported_versions = {}
+        if bootstrap:
+            self.err.save_resource("em:bootstrap", "true")
 
         validator.testcases.content._process_file(self.err, MockXPI(),
                                                   self.file_path, script,
