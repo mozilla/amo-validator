@@ -18,7 +18,8 @@ def get_pattern(prefix, url_pattern, versions):
             print "Failed"
 
 DOJO_VERSIONS = ("1.1.1", "1.2.0", "1.2.3", "1.3.0", "1.3.1", "1.3.2", "1.4.0",
-                 "1.4.1", "1.4.3", "1.5", "1.5.1", "1.6", "1.6.1")
+                 "1.4.1", "1.4.3", "1.5", "1.5.1", "1.6", "1.6.1", "1.7.0",
+                 "1.7.1", "1.7.2", "1.7.3", "1.8.0")
 # Google doesn't yet host EXT4.*
 EXT_VERSIONS = ("3.0.0", "3.1.0")
 JQUERY_CODE_VERSIONS = ("1.0.pack", "1.0.1.pack", "1.0.1", "1.0.2.pack",
@@ -30,7 +31,7 @@ JQUERY_CODE_VERSIONS = ("1.0.pack", "1.0.1.pack", "1.0.1", "1.0.2.pack",
                         "1.5.2", "1.6.min", "1.6", "1.6.1.min", "1.6.1",
                         "1.6.2.min", "1.6.2", "1.6.3.min", "1.6.3",
                         "1.6.4.min", "1.6.4", "1.7.min", "1.7", "1.7.1.min",
-                        "1.7.1", "1.7.2.min", "1.7.2", )
+                        "1.7.1", "1.7.2.min", "1.7.2", "1.8.0.min", "1.8.0" )
 JQUERY_GCODE_VERSIONS = ("1.1.3", "1.1.3.1.pack", "1.1.3.1", "1.1.4.pack",
                          "1.1.4", "1.2.min", "1.2.pack", "1.2", "1.2.1.min",
                          "1.2.1.pack", "1.2.1", "1.2.2.pack", "1.2.2.min",
@@ -43,10 +44,11 @@ JQUERYUI_VERSIONS = ("1.5.2", "1.5.3", "1.6.0", "1.7.0", "1.7.1", "1.7.2",
                      "1.7.3", "1.8.0", "1.8.1", "1.8.2", "1.8.4", "1.8.5",
                      "1.8.6", "1.8.7", "1.8.8", "1.8.9", "1.8.10", "1.8.11",
                      "1.8.12", "1.8.13", "1.8.14", "1.8.15", "1.8.16", "1.8.17",
-                     "1.8.18", "1.8.19", "1.8.20", "1.8.21", )
+                     "1.8.18", "1.8.19", "1.8.20", "1.8.21", "1.8.22", "1.8.23")
 MOOTOOLS_VERSIONS = ("1.1.1", "1.1.2", "1.2.1", "1.2.2", "1.2.3", "1.2.4",
-                     "1.2.5", "1.3.0", "1.3.1", "1.3.2", "1.4.0", "1.4.1")
-PROTOTYPE_VERSIONS = ("1.6.0.2", "1.6.0.3", "1.6.1.0", "1.7.0.0")
+                     "1.2.5", "1.3.0", "1.3.1", "1.3.2", "1.4.0", "1.4.1",
+                     "1.4.2", "1.4.3", "1.4.4", "1.4.5")
+PROTOTYPE_VERSIONS = ("1.6.0.2", "1.6.0.3", "1.6.1.0", "1.7.0.0", "1.7.1.0")
 SCRIPTACULOUS_VERSIONS = ("1.8.1", "1.8.2", "1.8.3", "1.9.0")
 SWFOBJECT_VERSIONS = ("2.1", "2.2")
 UNDERSCORE_VERSIONS = ("1.3.3", "1.3.2", "1.3.1", "1.3.0", "1.2.4", "1.2.3",
@@ -54,7 +56,7 @@ UNDERSCORE_VERSIONS = ("1.3.3", "1.3.2", "1.3.1", "1.3.0", "1.2.4", "1.2.3",
                        "1.1.4", "1.1.3", "1.1.2", "1.1.1", "1.1.0", "1.0.4",
                        "1.0.3", "1.0.2", "1.0.1", "1.0.0")
 YUI_VERSIONS = ("2.6.0", "2.7.0", "2.8.0r4", "2.8.1", "2.8.2", "2.9.0")
-YUI_NEW_VERSIONS = ("3.3.0", "3.4.0", "3.4.1", "3.5.0", "3.5.1")
+YUI_NEW_VERSIONS = ("3.3.0", "3.4.0", "3.4.1", "3.5.0", "3.5.1", "3.6.0")
 
 
 get_pattern("dojo",
@@ -146,18 +148,16 @@ get_pattern("underscore",
 
 # Old-style YUI loader libraries:
 get_pattern("yui",
-            "https://ajax.googleapis.com/ajax/libs/yui/%s/build/yuiloader/"
-            "yuiloader-min.js",
+            "http://yui.yahooapis.com/%s/build/yuiloader/yuiloader-min.js",
             YUI_VERSIONS)
 get_pattern("yui",
-            "https://ajax.googleapis.com/ajax/libs/yui/%s/build/yuiloader/"
-            "yuiloader.js",
+            "http://yui.yahooapis.com/%s/build/yuiloader/yuiloader.js",
             YUI_VERSIONS)
 
 # New-style YUI libraries
 get_pattern("yui",
-            "https://ajax.googleapis.com/ajax/libs/yui/%s/build/yui/yui.min.js",
+            "http://yui.yahooapis.com/%s/build/yui-base/yui-base-min.js",
             YUI_NEW_VERSIONS)
 get_pattern("yui",
-            "https://ajax.googleapis.com/ajax/libs/yui/%s/build/yui/yui.js",
+            "http://yui.yahooapis.com/%s/build/yui-base/yui-base.js",
             YUI_NEW_VERSIONS)
