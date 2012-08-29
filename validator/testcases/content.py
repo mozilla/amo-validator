@@ -57,10 +57,6 @@ def test_packed_packages(err, xpi_package=None):
               "hashes.txt")) as f:
         hash_blacklist = [x[:-1] for x in f]
 
-    with open(os.path.join(os.path.dirname(__file__),
-              "whitelist_hashes.txt")) as f:
-        hash_whitelist = [x[:-1] for x in f]
-
     overlays = set()
     chrome = err.get_resource("chrome.manifest_nopush")
     if chrome:
@@ -112,12 +108,8 @@ def test_packed_packages(err, xpi_package=None):
             pass
 
         if not err.for_appversions:
-            # Skip over whitelisted and blacklisted hashes
-            # unless we are checking for compatibility.
             hash = hashlib.sha1(file_data).hexdigest()
-            if hash in hash_whitelist:
-                continue
-            elif hash in hash_blacklist:
+            if hash in hash_blacklist:
                 err.notice(
                     err_id=("testcases_content",
                             "test_packed_packages",
