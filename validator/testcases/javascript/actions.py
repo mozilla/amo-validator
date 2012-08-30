@@ -856,11 +856,11 @@ def _expr_unary_typeof(wrapper):
 
 def _get_as_num(value):
     """Return the JS numeric equivalent for a value."""
-    if value is None:
-        return 0
 
     if isinstance(value, JSWrapper):
         value = value.get_literal_value()
+    if value is None:
+        return 0
 
     try:
         if isinstance(value, types.StringTypes):
