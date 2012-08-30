@@ -285,15 +285,8 @@ class Traverser(object):
         return self._get_global(variable)
 
     def _is_local_variable(self, variable):
-        "Returns whether a variable is defined in the current scope"
-
-        context_count = len(self.contexts)
-        for c in range(context_count):
-            context = self.contexts[context_count - c - 1]
-            if context.has_var(variable):
-                return True
-
-        return False
+        """Return whether a variable is defined in the current scope."""
+        return any(ctx.has_var(variable) for ctx in self.contexts)
 
     def _seek_local_variable(self, variable, depth=-1):
         # Loop through each context in reverse order looking for the defined
@@ -319,7 +312,7 @@ class Traverser(object):
 
     def _is_global(self, name):
         "Returns whether a name is a global entity"
-        return name in GLOBAL_ENTITIES
+        return not self._is_local_variable(name) and name in GLOBAL_ENTITIES
 
     def _get_global(self, name):
         "Gets a variable from the predefined variable context."
