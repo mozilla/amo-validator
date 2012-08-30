@@ -6,7 +6,8 @@ from validator.compat import (FX4_DEFINITION, FX5_DEFINITION, FX6_DEFINITION,
                               FX11_DEFINITION, FX12_DEFINITION, FX13_DEFINITION,
                               FX14_DEFINITION, FX15_DEFINITION,
                               TB7_DEFINITION, TB10_DEFINITION, TB11_DEFINITION,
-                              TB12_DEFINITION, TB13_DEFINITION, TB14_DEFINITION)
+                              TB12_DEFINITION, TB13_DEFINITION, TB14_DEFINITION,
+                              TB15_DEFINITION)
 from validator.contextgenerator import ContextGenerator
 
 
@@ -805,7 +806,7 @@ class Thunderbird13RegexTests(CompatRegexTestHelper):
     VERSION = TB13_DEFINITION
 
     def tests(self):
-        # String changes for add-ons depending on Thunderbird localizations
+        # String changes for add-ons depending on Thunderbird localizations.
         patterns = {"searchAllMessages\.(label|keyLabel2)": 728897,
                     "username(Desc|Label|SmtpDesc|SmtpLabel)\.(label|accesskey)": 71008,
                     "loginTitle\.label": 71008,
@@ -851,7 +852,7 @@ class Thunderbird14RegexTests(CompatRegexTestHelper):
     VERSION = TB14_DEFINITION
 
     def tests(self):
-        # String changes for add-ons depending on Thunderbird localizations
+        # String changes for add-ons depending on Thunderbird localizations.
         patterns = {r"spellCheck(IgnoreWord|NoSuggestions|AddToDictionary)\."
                         "(label|accesskey)": 735986,
                     r"account(Title|SettingsDesc)\.label": 340324,
@@ -889,5 +890,68 @@ class Thunderbird14RegexTests(CompatRegexTestHelper):
                     "A javascript function matched the pattern `%s`, which has "
                     "been flagged as having changed, removed, or deprecated "
                     "in Thunderbird 14." % pattern,
+                    compat_type="error", log_function=self.err.notice)
+
+
+@register_generator
+class Thunderbird15RegexTests(CompatRegexTestHelper):
+    """Regex tests for the Thunderbird 15 update."""
+
+    VERSION = TB15_DEFINITION
+
+    def tests(self):
+        # String changes for add-ons depending on Thunderbird localizations.
+        patterns = {r"hdrReplyButton1\.tooltip": 747298,
+                    r"ScreenName\.(label|accesskey)": 759328,
+                    r"searchAllChatMessages\.label\.base": 743235,
+                    r"accountsWindow\.style": 742674,
+                    r"smtpDesc\.label": 391061,
+                    r"trainingWarning\.label": 397197,
+                    r"whitelist\.(label|accesskey)": 397197,
+                    r"update\.restart\.applyButton\.(label|accesskey)": 755968,
+                    r"junkBarMessage1\.label": 590226,}
+        for pattern, bug in patterns.items():
+            yield self.get_test_bug(
+                    bug, pattern,
+                    "Removed, renamed, or changed labels in use",
+                    "Some string matched the pattern `%s`, which has been "
+                    "flagged as having changed in Thunderbird 15." % pattern,
+                    compat_type="error")
+
+        prefix_patterns = {r"FZ_(FEED|QUICKMODE|DESTFOLDER|"
+                            "STORED|VALID|LAST_SEEN_TIMESTAMP)": 721517,
+                           r"RDF_(TYPE|LITERAL_TRUE|LITERAL_FALSE)": 721517,
+                           r"DC_(NS|CREATOR|SUBJECT|DATE|TITLE"
+                            "|LASTMODIFIED|IDENTIFIER)": 721517,
+                           r"RSS_(NS|CHANNEL|TITLE|DESCRIPTION|ITEMS|"
+                            "ITEM|LINK|CONTENT_NS|CONTENT_ENCODED)": 721517,
+                           r"ATOM_(03_NS|IETF_NS)": 721517,
+                           r"INVALID_ITEM_PURGE_DELAY": 721517,
+                           r"kFeedUrlDelimiter": 721517,
+                           r"get(FeedUrlsInFolder|NodeValue|RDFTargetValue|"
+                            "ParentTargetForChildResource)": 721517,                        
+                           r"getSubscriptions(DS|List|File)": 721517,
+                           r"getItems(DS|File)": 721517,
+                           r"(add|delete)Feed": 721517,
+                           r"initAcountActionsButton": 739573,
+                           r"gFeedSubscriptionsWindow": 750292,
+                           r"showIMConversationInTab": 743235,
+                           r"waitForBuddyInfo": 753807,
+                           r"(updateFolderFeedURL|containerUtils)": 721517,}
+
+        js_patterns = {r"debug-utils\.js": 721517,
+                       r"Configurator": 735524,  # Intentional unrestricted substring.
+                       r"\.capabilityPref": 558659,}
+
+        # Add restricting prefix for ( or word boundary to prevent substring matching.
+        js_patterns.update(dict(("(\b|\()" + k, v) for k, v in prefix_patterns.items()))
+
+        for pattern, bug in js_patterns.items():
+            yield self.get_test_bug(
+                    bug, pattern,
+                    "Removed, renamed, or changed methods in use",
+                    "A javascript function matched the pattern `%s`, which has "
+                    "been flagged as having changed, removed, or deprecated "
+                    "in Thunderbird 15." % pattern,
                     compat_type="error", log_function=self.err.notice)
 

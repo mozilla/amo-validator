@@ -105,6 +105,9 @@ INTERFACES = {
                 {"return": call_definitions.nsIImapProtocol_removed},
              u"Initialize":
                 {"return": call_definitions.TB12_nsIImapProtocol_changed}}},
+    u"nsIImportMail":
+        {"value":
+            {u"ImportMailbox": entity("nsIImportMail.ImportMailbox")}},
     u"nsIJSON":
         {"value":
             {u"encode":
