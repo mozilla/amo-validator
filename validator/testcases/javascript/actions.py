@@ -872,7 +872,7 @@ def _get_as_num(value):
             return value
         else:
             return int(value)
-    except ValueError:
+    except ValueError, TypeError:
         return 0
 
 
