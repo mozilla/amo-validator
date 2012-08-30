@@ -25,7 +25,7 @@ class TestTB14Compat(CompatTestCase):
             assert self.compat_err.notices
             assert self.compat_err.compat_summary["errors"]
 
-        # Extra tests for similar functions.
+        # These patterns should not be flagged.
         for pattern in ["cvsPrefs()", "mailnews()", 
                         "CollapseSectionHeaderators()",
                         "msgMailSession", "msgPrefs",]:

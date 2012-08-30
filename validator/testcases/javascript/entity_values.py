@@ -1,5 +1,6 @@
 from call_definitions import open_in_chrome_context
-from validator.compat import FX10_DEFINITION, FX14_DEFINITION, TB14_DEFINITION
+from validator.compat import (FX10_DEFINITION, FX14_DEFINITION, TB14_DEFINITION,
+                              TB15_DEFINITION)
 from validator.constants import BUGZILLA_BUG
 
 
@@ -199,6 +200,26 @@ def nsIMsgPluggableStore_copyMessages(traverser):
         column=traverser.position,
         context=traverser.context,
         for_appversions=TB14_DEFINITION,
+        compatibility_type="error",
+        tier=5)
+
+
+# Thunderbird 15 IDL changes
+@register_entity("nsIImportMail.ImportMailbox")
+def nsIImportMail_ImportMailbox(traverser):
+    traverser.err.notice(
+        err_id=("testcases_javascript_entity_values",
+                "nsIImportMail_ImportMailbox"),
+        notice="Altered `nsIImportMail.ImportMailbox` method in use.",
+        description="This add-on uses `nsIImportMail.ImportMailbox` "
+                    "which had its second parameter changed from `nsIFile` "
+                    "to `nsIMsgFolder` in Thunderbird 15. Please refer to: "
+                    "%s." % BUGZILLA_BUG % 729676,
+        filename=traverser.filename,
+        line=traverser.line,
+        column=traverser.position,
+        context=traverser.context,
+        for_appversions=TB15_DEFINITION,
         compatibility_type="error",
         tier=5)
 
