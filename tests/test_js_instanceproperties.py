@@ -1,4 +1,6 @@
-from js_helper import _do_test_raw
+from validator.compat import FX18_DEFINITION
+
+from js_helper import _do_test_raw, TestCase
 
 
 def test_innerHTML():
@@ -90,4 +92,31 @@ def test_on_event_null():
         y = null;
     x.onclick = y;
     """).failed()
+
+
+class TestHandleEvent(TestCase):
+
+    def test_on_event_handleEvent_pass(self):
+        """
+        Test that objects with `handleEvent` methods aren't flagged for
+        versions of Gecko less than 18.
+        """
+
+        self.run_script("""
+        foo.onclick = {handleEvent: function() {alert("bar");}};
+        """)
+        self.assert_failed(with_warnings=True)
+
+    def test_on_event_handleEvent_fail(self):
+        """
+        Objects with `handleEvent` methods should be flagged as errors when add-ons
+        target Gecko version 18.
+        """
+
+        self.setup_err(for_appversions=FX18_DEFINITION)
+
+        self.run_script("""
+        foo.onclick = {handleEvent: function() {alert("bar");}};
+        """)
+        self.assert_failed(with_errors=True)
 

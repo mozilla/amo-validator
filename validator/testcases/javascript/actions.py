@@ -882,7 +882,7 @@ def _get_as_str(value):
         return ""
 
     if isinstance(value, bool):
-        return "true" if value else "false"
+        return u"true" if value else u"false"
     elif isinstance(value, (int, float, long)):
         if value == float('inf'):
             return u"Infinity"

@@ -1,7 +1,7 @@
 import re
 import types
 
-from validator.compat import FX10_DEFINITION, FX13_DEFINITION
+from validator.compat import FX10_DEFINITION, FX13_DEFINITION, FX18_DEFINITION
 from validator.constants import BUGZILLA_BUG
 import jstypes
 
@@ -68,8 +68,11 @@ def _set_HTML_property(function, new_value, traverser):
 
 
 def set_on_event(new_value, traverser):
-    "This ensures that on* properties are not assigned string values."
-    if (new_value.is_literal() and
+    """Ensure that on* properties are not assigned string values."""
+
+    is_literal = new_value.is_literal()
+
+    if (is_literal and
         isinstance(new_value.get_literal_value(), types.StringTypes)):
         traverser.err.warning(
             err_id=("testcases_javascript_instancetypes", "set_on_event",
@@ -79,6 +82,21 @@ def set_on_event(new_value, traverser):
                         "assigned by setting an on* property to a "
                         "string of JS code. Rather, consider using "
                         "addEventListener.",
+            filename=traverser.filename,
+            line=traverser.line,
+            column=traverser.position,
+            context=traverser.context)
+    elif not is_literal and new_value.has_property("handleEvent"):
+        mess_type = (traverser.err.error if
+                     traverser.err.supports_version(FX18_DEFINITION) else
+                     traverser.err.warning)
+        mess_type(
+            ("js", "on*", "handleEvent"),
+            "`handleEvent` no longer implemented in Gecko 18.",
+            description="As of Gecko 18, objects with `handleEvent` methods "
+                        "may no longer be assigned to `on*` properties. Doing "
+                        "so will be equivalent to assigning `null` to the "
+                        "property.",
             filename=traverser.filename,
             line=traverser.line,
             column=traverser.position,
