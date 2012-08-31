@@ -6,7 +6,6 @@ import subprocess
 import tempfile
 from cStringIO import StringIO
 
-from validator.constants import SPIDERMONKEY_INSTALLATION
 from validator.contextgenerator import ContextGenerator
 import validator.unicodehelper as unicodehelper
 
@@ -16,15 +15,14 @@ JS_ESCAPE = re.compile("\\\\+[ux]", re.I)
 def get_tree(code, err=None, filename=None, shell=None):
     "Retrieves the parse tree for a JS snippet"
 
-    if not code:
+    if not code or not shell:
         return None
 
     # Filter characters, convert to Unicode, etc.
     code = prepare_code(code, err, filename)
 
     try:
-        tree = _get_tree(code,
-                         shell if shell else SPIDERMONKEY_INSTALLATION)
+        tree = _get_tree(code, shell)
         return tree
     except JSReflectException as exc:
         str_exc = str(exc).strip("'\"")
