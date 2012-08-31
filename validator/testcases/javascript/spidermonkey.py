@@ -84,7 +84,7 @@ def prepare_code(code, err, filename):
     return code
 
 
-def _get_tree(code, shell=SPIDERMONKEY_INSTALLATION):
+def _get_tree(code, shell):
     "Returns an AST tree of the JS passed in `code`."
 
     if not code:
