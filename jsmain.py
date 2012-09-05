@@ -3,6 +3,7 @@
 import sys
 import os
 
+from validator.constants import SPIDERMONKEY_INSTALLATION
 from validator.errorbundler import ErrorBundle
 from validator.outputhandlers.shellcolors import OutputHandler
 import validator.testcases.scripting as scripting
@@ -50,8 +51,7 @@ if __name__ == '__main__':
         GLOBAL_ENTITIES[u"exit"] = {"return": do_exit}
 
         while True:
-            line = sys.stdin.readline()
-
+            line = raw_input("js> ")
             if line == "enable bootstrap\n":
                 err.save_resource("em:bootstrap", True)
                 continue
@@ -73,7 +73,7 @@ if __name__ == '__main__':
                     print actions[vars[0]](wrap)
                 continue
 
-            tree = spidermonkey.get_tree(line, err)
+            tree = spidermonkey.get_tree(line, err, shell=SPIDERMONKEY_INSTALLATION)
             if tree is None:
                 continue
             tree = tree["body"]

@@ -6,6 +6,10 @@ from validator.constants import BUGZILLA_BUG
 import jstypes
 
 
+EVENT_ASSIGNMENT = re.compile("<.+ on[a-z]+=")
+JS_URL = re.compile("href=[\'\"]javascript:")
+
+
 def set_innerHTML(new_value, traverser):
     """Tests that values being assigned to innerHTML are not dangerous."""
     return _set_HTML_property("innerHTML", new_value, traverser)
@@ -25,9 +29,8 @@ def _set_HTML_property(function, new_value, traverser):
         if isinstance(literal_value, types.StringTypes):
             # Static string assignments
 
-            # Test for on* attributes
-            event_assignment = re.compile("<.+ on[a-z]+=")
-            if event_assignment.search(literal_value.lower()):
+            # Test for on* attributes and script tags.
+            if EVENT_ASSIGNMENT.search(literal_value.lower()):
                 traverser.err.warning(
                     err_id=("testcases_javascript_instancetypes",
                             "set_%s" % function, "event_assignment"),
@@ -38,6 +41,21 @@ def _set_HTML_property(function, new_value, traverser):
                                      function,
                                  "Event handler code: %s" %
                                      literal_value.encode("ascii", "replace")],
+                    filename=traverser.filename,
+                    line=traverser.line,
+                    column=traverser.position,
+                    context=traverser.context)
+            elif ("<script" in literal_value or
+                  JS_URL.search(literal_value)):
+                traverser.err.warning(
+                    err_id=("testcases_javascript_instancetypes",
+                            "set_%s" % function, "script_assignment"),
+                    warning="Scripts should not be created with `%s`" %
+                                function,
+                    description="`%s` should not be used to add scripts to "
+                                "pages via script tags or JavaScript URLs. "
+                                "Instead, use event listeners and external "
+                                "JavaScript." % function,
                     filename=traverser.filename,
                     line=traverser.line,
                     column=traverser.position,

@@ -1,3 +1,5 @@
+from mock import patch
+
 from validator.compat import FX18_DEFINITION
 
 from js_helper import _do_test_raw, TestCase
@@ -26,6 +28,12 @@ def test_innerHTML():
     x.innerHTML = "x" + y;
     """).failed()
 
+    assert _do_test_raw("""x.innerHTML = "<script>";""").failed()
+
+    assert _do_test_raw("""
+    x.innerHTML = '<a href="javascript:alert();">';
+    """).failed()
+
 
 def test_outerHTML():
     """Test that the dev can't define event handler in outerHTML."""
@@ -51,18 +59,26 @@ def test_outerHTML():
     """).failed()
 
 
+def _mock_html_error(self, *args, **kwargs):
+    self.err.error(("foo", "bar"),
+                   "Does not pass validation.")
+
+@patch('validator.testcases.markup.markuptester.MarkupParser.process',
+       _mock_html_error)
 def test_complex_innerHTML():
     """Tests that innerHTML can't be assigned an HTML chunk with bad code"""
 
-    assert not _do_test_raw("""
-    var x = foo();
-    x.innerHTML = "<script src=\\"chrome://foo.bar/\\"></script>";
-    """).failed()
-
     assert _do_test_raw("""
     var x = foo();
-    x.innerHTML = "<script src=\\"http://foo.bar/\\"></script>";
+    x.innerHTML = "<b></b>";
     """).failed()
+
+
+def test_function_return():
+    """
+    Test that the return value of a function is considered a dynamic value.
+    """
+    assert _do_test_raw("""x.innerHTML = foo();""").failed()
 
 
 def test_on_event():

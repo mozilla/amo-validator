@@ -406,7 +406,7 @@ def _call_expression(traverser, node):
     if member.is_global and "return" in member.value:
         return member.value["return"](wrapper=member, arguments=args,
                                       traverser=traverser)
-    return True
+    return JSWrapper(traverser=traverser)
 
 
 def _call_settimeout(a, t, e):
