@@ -1,7 +1,9 @@
 from collections import defaultdict
 import hashlib
+from itertools import imap
 import json
 import os
+import pickle
 
 import validator.decorator as decorator
 from validator.constants import PACKAGE_EXTENSION
@@ -11,7 +13,33 @@ from content import FLAGGED_FILES
 
 SAFE_FILES = (".jpg", ".ico", ".png", ".gif", ".txt")
 
-EMPTY_FILE_SHA256SUMS = "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+EMPTY_FILE_SHA256SUMS = ("e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495"
+                         "991b7852b855")
+
+JETPACK_DATA_FILE = os.path.join(os.path.dirname(__file__), "jetpack_data.txt")
+JETPACK_PICKLE_FILE = JETPACK_DATA_FILE + ".pickle"
+
+if os.path.exists(JETPACK_PICKLE_FILE):
+    with open(JETPACK_PICKLE_FILE) as pickle_file:
+        jetpack_hash_table = pickle.load(pickle_file)
+        latest_jetpack = pickle.load(pickle_file)
+else:
+    # Read the jetpack data file in.
+    with open(JETPACK_DATA_FILE) as jetpack_data:
+        # Parse the jetpack data into something useful.
+        jetpack_hash_table = defaultdict(dict)
+        latest_jetpack = None
+        for path, version_str, hash in imap(str.split, jetpack_data):
+            version = Version(version_str)
+            if version.is_release and (not latest_jetpack or
+                                       version > latest_jetpack):
+                latest_jetpack = version
+            jetpack_hash_table[hash][version_str] = path
+
+    with open(JETPACK_PICKLE_FILE, "w") as pickle_file:
+        pickle.dump(jetpack_hash_table, pickle_file)
+        pickle.dump(latest_jetpack, pickle_file)
+
 
 @decorator.register_test(tier=1, expected_type=PACKAGE_EXTENSION)
 def inspect_jetpack(err, xpi_package, allow_old_sdk=False):
@@ -82,19 +110,6 @@ def inspect_jetpack(err, xpi_package, allow_old_sdk=False):
     if not pretested_files:
         err.save_resource("pretested_files", [])
         pretested_files = []
-
-    # Read the jetpack data file in.
-    jetpack_data = open(os.path.join(os.path.dirname(__file__),
-                                     "jetpack_data.txt"))
-    # Parse the jetpack data into something useful.
-    jetpack_hash_table = defaultdict(dict)
-    latest_jetpack = None
-    for path, version_str, hash in map(str.split, jetpack_data):
-        version = Version(version_str)
-        if version.is_release and (not latest_jetpack or
-                                   version > latest_jetpack):
-            latest_jetpack = version
-        jetpack_hash_table[hash][version_str] = path
 
     suppress_warnings = False
     if not allow_old_sdk and Version(sdk_version) < latest_jetpack:
