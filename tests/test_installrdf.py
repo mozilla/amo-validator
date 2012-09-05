@@ -1,3 +1,5 @@
+from mock import patch
+
 import validator.testcases.installrdf as installrdf
 from validator.errorbundler import ErrorBundle
 from validator.rdf import RDFParser
@@ -79,14 +81,14 @@ def test_fail_name():
 
 
 def _run_test(filename, failure=True, detected_type=0, listed=True,
-              overrides=None):
+              overrides=None, compat=False):
     "Runs a test on an install.rdf file"
 
     return _run_test_raw(open(filename).read(), failure, detected_type,
-                         listed, overrides)
+                         listed, overrides, compat)
 
 def _run_test_raw(data, failure=True, detected_type=0, listed=True,
-                  overrides=None):
+                  overrides=None, compat=False):
     "Runs a test on an install.rdf snippet"
 
     data = data.strip()
@@ -96,8 +98,12 @@ def _run_test_raw(data, failure=True, detected_type=0, listed=True,
     err.save_resource("listed", listed)
     err.overrides = overrides
 
-    parser = RDFParser(err, data)
-    installrdf._test_rdf(err, parser)
+    if compat:
+        err.save_resource("is_compat_test", True)
+
+    err.save_resource("has_install_rdf", True)
+    err.save_resource("install_rdf", RDFParser(err, data))
+    installrdf.test_install_rdf_params(err)
 
     print err.print_summary(verbose=True)
 
@@ -109,7 +115,8 @@ def _run_test_raw(data, failure=True, detected_type=0, listed=True,
     return err
 
 
-def test_has_rdf():
+@patch("validator.testcases.installrdf._test_rdf")
+def test_has_rdf(install_rdf):
     "Tests that tests won't be run if there's no install.rdf"
 
     err = ErrorBundle()
@@ -117,18 +124,11 @@ def test_has_rdf():
     assert installrdf.test_install_rdf_params(err, None) is None
 
     err.detected_type = 0
-    err.save_resource("install_rdf", "test")
+    err.save_resource("install_rdf", RDFParser(err, "<rdf></rdf>"))
     err.save_resource("has_install_rdf", True)
-    testrdf = installrdf._test_rdf
-    installrdf._test_rdf = lambda x, y: y
 
     result = installrdf.test_install_rdf_params(err, None)
-    installrdf._test_rdf = testrdf
-
-    print result
-    assert result == "test"
-
-    return err
+    assert install_rdf.called
 
 
 def test_passing():
@@ -139,10 +139,15 @@ def test_passing():
 
 
 def test_unpack():
-    "Tests that the unpack variable is ."
-
     err = _run_test("tests/resources/installrdf/unpack.rdf", False)
     assert err.get_resource("em:unpack") == "true"
+
+
+def test_compat_flag():
+    "Tests that elements that must exist once only exist once."
+
+    _run_test("tests/resources/installrdf/must_exist_once_missing.rdf",
+              compat=True, failure=False)
 
 
 def test_must_exist_once():

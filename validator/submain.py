@@ -90,8 +90,8 @@ def prepare_package(err, path, expectation=0, for_appversions=None,
         signal.setitimer(signal.ITIMER_REAL, timeout)
     output = test_package(err, package, path, expectation,
                           for_appversions)
-    package.close()
     validation_state['complete'] = True
+    package.close()
 
     return output
 

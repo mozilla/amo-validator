@@ -16,6 +16,10 @@ def test_install_rdf_params(err, xpi_package=None):
     if not err.get_resource("has_install_rdf"):
         return
 
+    # We skip over install.rdf tests during bulk validation. See bug 735841.
+    if err.get_resource("is_compat_test"):
+        return
+
     install = err.get_resource("install_rdf")
 
     # This returns for testing reasons
@@ -56,9 +60,7 @@ def _test_rdf(err, install):
                       "unpack"]  # This has other rules; CAUTION!
 
     # Support a name requirement override.
-    if (err.overrides and
-        "ignore_empty_name" in err.overrides and
-        err.overrides["ignore_empty_name"]):
+    if err.overrides and err.overrides.get("ignore_empty_name"):
         must_exist_once.remove("name")
         may_exist_once.append("name")
 
@@ -72,9 +74,9 @@ def _test_rdf(err, install):
                  "requires",
                  "developer",)
 
-    if err.detected_type == PACKAGE_THEME or \
-          (err.subpackages and
-           err.subpackages[0]["detected_type"] == PACKAGE_THEME):
+    if (err.detected_type == PACKAGE_THEME or
+        (err.subpackages and
+         err.subpackages[0]["detected_type"] == PACKAGE_THEME)):
         must_exist_once.append("internalName")
 
     top_id = install.get_root_subject()

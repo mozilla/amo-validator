@@ -64,14 +64,14 @@ class TestValidate(TestCase):
 
     def test_overrides(self):
         """
-        Test that when the validation is run with `overrides="foo"`, that value
-        is pushed through the full validation process.
+        Test that when the validation is run with `overrides={"foo": "foo"}`,
+        that value is pushed through the full validation process.
         """
         self.run("tests/resources/packagelayout/theme.jar", format=None,
-                 overrides="foo")
+                 overrides={"foo": "foo"})
         assert self.output.determined
         assert self.output.get_resource("listed")
-        eq_(self.output.overrides, "foo")
+        eq_(self.output.overrides, {"foo": "foo"})
 
 
 @patch.dict("validator.constants.APPROVED_APPLICATIONS")
