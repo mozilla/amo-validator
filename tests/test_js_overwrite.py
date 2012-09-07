@@ -157,3 +157,15 @@ class TestOverwrite(TestCase):
 
         self.run_script("""gBrowser.selectedTab = 123;""")
         self.assert_silent()
+
+    def test_constructors(self):
+        """Test that the constructors cannot be overwritten."""
+        def test(self, contsructor):
+            self.setUp()
+            self.run_script("""%s = "foo";""" % constructor)
+            self.assert_failed(with_warnings=True)
+
+        for constructor in ["Function", "Object", "String", "Number", "RegExp",
+                            "File", "Boolean", "Array", "Date"]:
+            yield test, self, constructor
+

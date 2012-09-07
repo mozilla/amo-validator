@@ -421,6 +421,7 @@ GLOBAL_ENTITIES = {
          "return": call_definitions.boolean_global},
     u"RegExp": {"value": {u"prototype": {"readonly": True}}},
     u"Date": {"value": {u"prototype": {"readonly": True}}},
+    u"File": {"value": {u"prototype": {"readonly": True}}},
 
     u"Math":
         {"value":
