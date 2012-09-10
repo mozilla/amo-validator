@@ -62,11 +62,11 @@ def test_in_operator():
     var dict = {"abc":123, "foo":"bar"};
 
     // Must be true
-    var x = "a" in list;
+    var x = 0 in list;
     var y = "abc" in dict;
 
     // Must be false
-    var a = "bar" in list;
+    var a = 5 in list;
     var b = "asdf" in dict;
     """)
     assert err.message_count == 0
