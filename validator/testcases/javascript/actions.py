@@ -373,8 +373,8 @@ def _call_expression(traverser, node):
                 description=result if isinstance(result, (types.StringTypes,
                                                           list, tuple)) else
                             "The global `%s` function was called using a set "
-                            "of dangerous parameters. `%s` calls of this "
-                            "nature are deprecated." % member.value,
+                            "of dangerous parameters. Calls of this nature "
+                            "are deprecated." % member.value,
                 filename=traverser.filename,
                 line=traverser.line,
                 column=traverser.position,

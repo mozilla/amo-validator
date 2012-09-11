@@ -1,4 +1,3 @@
-from itertools import count
 import re
 import types
 
@@ -91,8 +90,8 @@ class Traverser(object):
                     return
 
                 # This performs the namespace pollution test.
-                global_context_size = count(
-                    "cvan" for name in self.contexts[0].data if
+                global_context_size = sum(
+                    1 for name in self.contexts[0].data if
                     name not in POLLUTION_EXCEPTIONS)
                 self._debug("Final context size: %d" % global_context_size)
 
