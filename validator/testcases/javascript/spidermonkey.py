@@ -18,12 +18,8 @@ def get_tree(code, err=None, filename=None, shell=None):
     if not code or not shell:
         return None
 
-    # Filter characters, convert to Unicode, etc.
-    code = prepare_code(code, err, filename)
-
     try:
-        tree = _get_tree(code, shell)
-        return tree
+        return _get_tree(code, shell)
     except JSReflectException as exc:
         str_exc = str(exc).strip("'\"")
         if ("SyntaxError" in str_exc or
@@ -74,14 +70,13 @@ class JSReflectException(Exception):
         return self
 
 
-def prepare_code(code, err, filename):
-    "Prepares code for tree generation"
-    # Acceptable unicode characters still need to be stripped. Just remove the
-    # slash: a character is necessary to prevent bad identifier errors
-    code = JS_ESCAPE.sub("u", code)
+def prepare_code(code):
+    """Prepare code for tree generation."""
 
     code = unicodehelper.decode(code)
-    return code
+    # Acceptable unicode characters still need to be stripped. Just remove the
+    # slash: a character is necessary to prevent bad identifier errors.
+    return JS_ESCAPE.sub("u", code)
 
 
 def _get_tree(code, shell):
@@ -90,10 +85,9 @@ def _get_tree(code, shell):
     if not code:
         return None
 
-    code = unicodehelper.decode(code)
+    code = prepare_code(code)
 
     temp = tempfile.NamedTemporaryFile(mode="w+b", delete=False)
-    #temp.write(codecs.BOM_UTF8)
     temp.write(code.encode("utf_8"))
     temp.flush()
 

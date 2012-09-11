@@ -188,8 +188,8 @@ def xpcom_constructor(method, extend=False, mutate=False, pretraversed=False):
 
         traverser._debug("(Building XPCOM...)")
 
-        inst = traverser._build_global(method,
-                                       copy.deepcopy(argz.value["xpcom_map"]()))
+        inst = traverser._build_global(
+            method, argz.value["xpcom_map"]())
         inst.value["overwritable"] = True
 
         if extend or mutate:
@@ -212,7 +212,7 @@ def xpcom_constructor(method, extend=False, mutate=False, pretraversed=False):
                 if extend and mutate:
                     if callable(parent.value["value"]):
                         parent.value["value"] = \
-                            copy.deepcopy(parent.value["value"](t=traverser))
+                            parent.value["value"](t=traverser)
 
                     parent.value["value"].update(inst.value["value"])
                     return parent
