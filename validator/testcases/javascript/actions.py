@@ -369,12 +369,12 @@ def _call_expression(traverser, node):
                 err_id=("testcases_javascript_actions", "_call_expression",
                         "called_dangerous_global"),
                 warning="`%s` called in potentially dangerous manner" %
-                            member.value,
+                            member.value.name,
                 description=result if isinstance(result, (types.StringTypes,
                                                           list, tuple)) else
                             "The global `%s` function was called using a set "
                             "of dangerous parameters. Calls of this nature "
-                            "are deprecated." % member.value,
+                            "are deprecated." % member.value.name,
                 filename=traverser.filename,
                 line=traverser.line,
                 column=traverser.position,
