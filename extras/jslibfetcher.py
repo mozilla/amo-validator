@@ -1,21 +1,30 @@
 import urllib
 import os
 
+
+def process(url, destination):
+    destination = "jslibs/%s" % destination
+
+    if os.path.exists(destination):
+        return
+
+    try:
+        print url
+        urllib.urlretrieve(url, destination)
+    except Exception:
+        print "Failed"
+
+
 def get_pattern(prefix, url_pattern, versions):
-
     for version in versions:
-        version = version
         url = url_pattern % version
-        name = "%s.%s.%s" % (prefix, version, url.split("/")[-1])
+        process(url, "%s.%s.%s" % (prefix, version, url.split("/")[-1]))
 
-        if os.path.exists("jslibs/%s" % name):
-            continue
 
-        try:
-            print url
-            urllib.urlretrieve(url, "jslibs/%s" % name)
-        except Exception:
-            print "Failed"
+process("https://addons.cdn.mozilla.net/en-US/firefox/files/browse/149703/"
+        "file-serve/bootstrap.js?token=e9d0767e-643c-48ad-b09e-fc075ca60b77",
+        "PersonasInteractive_bootstrap.js")
+
 
 DOJO_VERSIONS = ("1.1.1", "1.2.0", "1.2.3", "1.3.0", "1.3.1", "1.3.2", "1.4.0",
                  "1.4.1", "1.4.3", "1.5", "1.5.1", "1.6", "1.6.1", "1.7.0",
