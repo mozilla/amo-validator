@@ -3,10 +3,9 @@ import json
 from mock import patch
 from nose.tools import eq_
 
-from validator.validate import validate, validate_app
+from validator.validate import validate
 from validator.errorbundler import ErrorBundle
 import validator.constants as constants
-from validator.constants import PACKAGE_WEBAPP
 
 from helper import TestCase
 
@@ -96,22 +95,6 @@ def test_app_versions_dict():
     assert constants.APPROVED_APPLICATIONS["1"]["name"] == "Foo App"
 
 
-def test_mrkt_urls():
-    """
-    Tests that Marketplace URLs are correctly added to the MRKT_URLS constant.
-    """
-    # Keep a copy so we don't permanently overwrite.
-    MRKT_URLS = constants.DEFAULT_WEBAPP_MRKT_URLS[:]
-
-    validate(path="tests/resources/junk.xpi",
-             market_urls=["foobar"])
-    print constants.DEFAULT_WEBAPP_MRKT_URLS
-    assert "foobar" in constants.DEFAULT_WEBAPP_MRKT_URLS
-
-    # Clean up!
-    constants.DEFAULT_WEBAPP_MRKT_URLS = MRKT_URLS
-
-
 def test_is_compat():
     """Test that we know when we're running a compatibility test."""
     out = validate(path="tests/resources/junk.xpi", format=None,
@@ -121,20 +104,4 @@ def test_is_compat():
     out = validate(path="tests/resources/junk.xpi", format=None,
                    compat_test=True)
     assert out.get_resource("is_compat_test")
-
-
-def test_webapp():
-    """Test that webapps can be validated traditionally."""
-    out = validate(path="tests/resources/testwebapp.webapp",
-                   expectation=PACKAGE_WEBAPP)
-    j = json.loads(out)
-    assert j["success"], "Expected not to fail"
-
-
-def test_webapp_new():
-    """Test that webapps can be validated with the new api."""
-    with open("tests/resources/testwebapp.webapp") as file_:
-        out = validate_app(file_.read())
-    j = json.loads(out)
-    assert j["success"], "Expected not to fail"
 

@@ -6,7 +6,6 @@ from zlib import error as zlib_error
 
 from validator.typedetection import detect_type
 from validator.opensearch import detect_opensearch
-from validator.webapp import detect_webapp
 from validator.chromemanifest import ChromeManifest
 from validator.rdf import RDFException, RDFParser
 from validator.xpi import XPIManager
@@ -62,7 +61,8 @@ def prepare_package(err, path, expectation=0, for_appversions=None,
     if package_extension == ".xml":
         return test_search(err, path, expectation)
     elif expectation == PACKAGE_WEBAPP:
-        return test_webapp(err, path, expectation)
+        raise NotImplementedError(
+            "Webapps are not supported in amo-validator.")
 
     # Test that the package is an XPI.
     if package_extension not in (".xpi", ".jar"):
@@ -115,22 +115,6 @@ def test_search(err, package, expectation=0):
 
     if expected_search_provider and not err.failed():
         err.set_type(PACKAGE_SEARCHPROV)
-
-
-def test_webapp(err, package, expectation=0):
-    "Tests the package to see if it is a search provider."
-
-    expected_webapp = expectation in (PACKAGE_ANY, PACKAGE_WEBAPP)
-    if not expected_webapp:
-        return err.warning(
-            err_id=("main", "test_webapp", "extension"),
-            warning="Unexpected file extension.",
-            description="An unexpected file extension was encountered.")
-
-    detect_webapp(err, package)
-
-    if expected_webapp and not err.failed():
-        err.set_type(PACKAGE_WEBAPP)
 
 
 def test_package(err, file_, name, expectation=PACKAGE_ANY,

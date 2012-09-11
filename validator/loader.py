@@ -8,4 +8,3 @@ import validator.testcases.langpack
 import validator.testcases.packagelayout
 import validator.testcases.targetapplication
 import validator.testcases.themes
-
