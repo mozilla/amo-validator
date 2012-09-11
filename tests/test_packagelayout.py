@@ -1,3 +1,5 @@
+from itertools import repeat
+
 import validator.testcases.packagelayout as packagelayout
 from validator.errorbundler import ErrorBundle
 from helper import _do_test, MockXPI
@@ -30,10 +32,7 @@ def test_java_jar_detection():
     """
 
     classes = ("c%d.class" % i for i in xrange(1000))
-    def strings():  # Look at how functional this is. How functional!
-        while 1:
-            yield ""
-    mock_xpi = MockXPI(dict(zip(classes, strings())))
+    mock_xpi = MockXPI(dict(zip(classes, repeat(""))))
     err = ErrorBundle(None, True)
     packagelayout.test_blacklisted_files(err, mock_xpi)
 

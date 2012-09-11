@@ -74,9 +74,11 @@ class Version(object):
         return self._version
 
     def __cmp__(self, other):
-        return reduce(lambda acc, (a, b): acc or cmp(a, b),
-                      izip_longest(self.parts, other.parts),
-                      0)
+        for s_part, o_part in izip_longest(self.parts, other.parts):
+            cres = cmp(s_part, o_part)
+            if cres:
+                return cres
+        return 0
 
     @property
     def is_release(self):

@@ -214,8 +214,10 @@ def PageMod(args, traverser, node, wrapper):
         return
 
     content_script = pm_properties.get(traverser, "contentScript")
-    content_script = content_script.get_literal_value()
-    if not isinstance(content_script, (str, unicode)):
+    if not content_script.is_literal():
+        return
+    content_script = actions._get_as_str(content_script.get_literal_value())
+    if not content_script.strip():
         return
 
     import validator.testcases.scripting as sub_scripting

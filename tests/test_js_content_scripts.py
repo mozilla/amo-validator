@@ -8,12 +8,16 @@ def test_pagemod_noop():
     Test that invalid conditions do not throw exceptions or messages when the
     PageMod function is used improperly.
     """
-    assert not _do_test_raw("foo.PageMod();").failed()
-    assert not _do_test_raw("foo.PageMod(null);").failed()
-    assert not _do_test_raw("foo.PageMod({});").failed()
-    assert not _do_test_raw("foo.PageMod(window);").failed()
-    assert not _do_test_raw("foo.PageMod({contentScript: null});").failed()
-    assert not _do_test_raw("foo.PageMod({contentScript: 4});").failed()
+
+    def wrap(script):
+        assert not _do_test_raw(script).failed()
+
+    yield wrap, "foo.PageMod();"
+    yield wrap, "foo.PageMod(null);"
+    yield wrap, "foo.PageMod({});"
+    yield wrap, "foo.PageMod(window);"
+    yield wrap, "foo.PageMod({contentScript: null});"
+    yield wrap, "foo.PageMod({contentScript: 4});"
 
 
 def test_pagemod_pass():
@@ -39,4 +43,3 @@ def test_pagemod_fail():
     assert _do_test_raw("""
         foo.PageMod({contentScript: "ev" + "al();"});
     """).failed()
-
