@@ -210,14 +210,13 @@ def _load_install_rdf(err, package, expectation):
     # Compare the results of the low-level type detection to
     # that of the expectation and the assumption.
     if not expectation in (PACKAGE_ANY, results):
-        err.warning(("main",
-                     "test_package",
-                     "extension_type_mismatch"),
-                    "Extension Type Mismatch",
-                    ["We detected that the add-on's type does not match the "
-                     "expected type.",
-                     'Type "%s" expected, found "%s")' %
-                         (types[expectation], types[results])])
+        err.warning(
+            err_id=("main", "test_package", "extension_type_mismatch"),
+            warning="Extension Type Mismatch",
+            description=["We detected that the add-on's type does not match "
+                         "the expected type.",
+                         'Type "%s" expected, found "%s"' %
+                             (types[expectation], types[results])])
 
 
 def populate_chrome_manifest(err, xpi_package):
@@ -263,8 +262,17 @@ def populate_chrome_manifest(err, xpi_package):
                 yield triple
 
                 if triple["subject"] == "manifest":
+                    subpath = triple["predicate"]
+                    # If the path is relative, make it relative to the current
+                    # file.
+                    if not subpath.startswith("/"):
+                        subpath = "%s/%s" % (
+                            "/".join(path.split("/")[:-1]), subpath)
+
+                    subpath = subpath.lstrip("/")
+
                     for subtriple in get_linked_manifest(
-                            triple["predicate"], path, manifest, triple):
+                            subpath, path, manifest, triple):
                         yield subtriple
 
             chrome_recursion_buster.discard(path)

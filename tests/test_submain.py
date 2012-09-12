@@ -159,6 +159,32 @@ def test_proper_linked_manifest():
     eq_(zaps[0]["context"].data, ["zap baz", ""])
 
 
+def test_proper_linked_manifest_relative():
+    """
+    Test that linked manifests are imported relatively when using relative
+    paths.
+    """
+
+    err = ErrorBundle()
+    package = MockXPI({
+        "chrome.manifest": "tests/resources/submain/linkman/subdir.manifest",
+        "dir/level2.manifest":
+            "tests/resources/submain/linkman/foosub.manifest",
+        "dir/foo.manifest": "tests/resources/submain/linkman/base2.manifest"})
+
+    submain.populate_chrome_manifest(err, package)
+    chrome = err.get_resource("chrome.manifest")
+    assert chrome
+
+    assert not err.failed() or err.notices
+
+    # From the linked manifest:
+    zaps = list(chrome.get_triples(subject="zap"))
+    assert zaps
+    eq_(zaps[0]["filename"], "dir/foo.manifest")
+    eq_(zaps[0]["context"].data, ["zap baz", ""])
+
+
 def test_missing_manifest_link():
     """Test that missing linked manifests are properly flagged."""
 
@@ -191,6 +217,8 @@ def test_linked_manifest_recursion():
     submain.populate_chrome_manifest(err, package)
     chrome = err.get_resource("chrome.manifest")
     assert chrome
+
+    print err.print_summary(verbose=True)
 
     assert err.failed()
     assert not err.notices
