@@ -234,18 +234,19 @@ def test_emunpack(err, xpi_package):
 
         for file_ in xpi_package:
             if file_.endswith(".jar"):
-                err.notice(("testcases_packagelayout",
-                            "test_emunpack",
-                            "should_be_false"),
-                           "Add-on contains JAR files, no <em:unpack>",
-                           "The add-on contains JAR files and does not set "
-                           "<em:unpack> to 'true'. This can result in "
-                           "performance issues in add-ons that target Gecko "
-                           "4 and above. It is recommended that you consider "
-                           "no longer using JAR files to package your chrome "
-                           "files.",
-                           filename="install.rdf",
-                           tier=1)
+                err.notice(
+                    err_id=("packagelayout", "emunpack", "should_be_false"),
+                    notice="Add-on contains JAR files, no <em:unpack>",
+                    description="The add-on contains JAR files and does not "
+                                "set <em:unpack> to 'true'. This can result "
+                                "in performance issues in add-ons that target "
+                                "Gecko 4 and above. You should either no "
+                                "longer use JAR files to package your chrome "
+                                "files (preferred) or add "
+                                "`<em:unpack>true</em:unpack>` to the "
+                                "install.rdf.",
+                    filename="install.rdf",
+                    tier=1)
                 return
 
 
