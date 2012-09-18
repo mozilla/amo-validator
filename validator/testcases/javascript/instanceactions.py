@@ -19,6 +19,29 @@ from jstypes import *
 from instanceproperties import _set_HTML_property
 
 
+def addEventListener(args, traverser, node, wrapper):
+    """
+    Handle calls to addEventListener and make sure that the fourth argument is
+    falsey.
+    """
+
+    if not args or len(args) < 4:
+        return
+
+    fourth_arg = traverser._traverse_node(args[3])
+    if fourth_arg.get_literal_value():
+        traverser.err.notice(
+            err_id=("js", "instanceactions", "addEventListener_fourth"),
+            notice="`addEventListener` called with truthy fourth argument.",
+            description="A falsey fourth argument indicates code that "
+                        "accesses untrusted code. This code should be "
+                        "further investigated.",
+        filename=traverser.filename,
+        line=traverser.line,
+        column=traverser.position,
+        context=traverser.context)
+
+
 def createElement(args, traverser, node, wrapper):
     """Handles createElement calls"""
 
@@ -226,7 +249,8 @@ def PageMod(args, traverser, node, wrapper):
             line=traverser.line, context=traverser.context)
 
 
-INSTANCE_DEFINITIONS = {"createElement": createElement,
+INSTANCE_DEFINITIONS = {"addEventListener": addEventListener,
+                        "createElement": createElement,
                         "createElementNS": createElementNS,
                         "getAsBinary": nsIDOMFile_deprec,
                         "getAsDataURL": nsIDOMFile_deprec,

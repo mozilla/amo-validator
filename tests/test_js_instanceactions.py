@@ -1,5 +1,23 @@
 from js_helper import _do_test_raw, TestCase
 
+
+def test_addEventListener():
+    """Test that addEventListener gets flagged appropriately."""
+
+    err = _do_test_raw("""
+    x.addEventListener("click", function() {}, true);
+    x.addEventListener("click", function() {}, true, false);
+    """)
+    assert not err.failed()
+    assert not err.notices
+
+    err = _do_test_raw("""
+    x.addEventListener("click", function() {}, true, true);
+    """)
+    assert not err.failed()
+    assert err.notices
+
+
 def test_createElement():
     """Tests that createElement calls are filtered properly"""
 
