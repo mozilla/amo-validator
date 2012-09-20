@@ -119,7 +119,7 @@ def _get_tree(code, shell):
         try:
             temp.close()
             os.unlink(temp.name)
-        except:
+        except IOError:
             pass
 
     if not data:

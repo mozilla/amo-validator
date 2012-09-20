@@ -31,7 +31,7 @@ def decode(data):
     # Try straight UTF-8
     try:
         return unicode(data, "utf-8")
-    except:
+    except UnicodeDecodeError:
         pass
 
     # Test for latin_1, because it can be matched as UTF-16
@@ -40,7 +40,7 @@ def decode(data):
     if all(ord(c) < 256 for c in data):
         try:
             return unicode(data, "latin_1")
-        except:
+        except UnicodeDecodeError:
             pass
 
     # Test for various common encodings.

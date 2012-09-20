@@ -122,7 +122,7 @@ class MarkupParser(htmlparser.HTMLParser):
             try:
                 line = line.decode("ascii", "ignore")
                 self.feed(line + "\n")
-            except:
+            except Exception:
                 raise exc_instance, None, traceback
 
         except Exception as inst:

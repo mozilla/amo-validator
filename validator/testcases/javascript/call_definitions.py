@@ -310,7 +310,7 @@ def python_wrap(func, args, nargs=False):
                              ", ".join(map(str, params)))
         try:
             output = func(*params)
-        except:
+        except (ValueError, TypeError):
             # If we cannot compute output, just return nothing.
             output = None
 

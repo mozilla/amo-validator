@@ -8,7 +8,7 @@ def detect_opensearch(err, package, listed=False):
     # Parse the file.
     try:
         srch_prov = parse(package)
-    except:
+    except Exception:
         err.error(
             err_id=("opensearch",
                     "detect_opensearch",

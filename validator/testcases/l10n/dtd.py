@@ -48,7 +48,7 @@ class DTDParser(object):
             line += "\n"
             try:
                 parser.feed(line)
-            except:
+            except Exception:
                 parser = DTDXMLParser()
             else:
                 if parser.out_buffer:

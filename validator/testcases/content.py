@@ -251,7 +251,7 @@ def _process_file(err, xpi_package, name, file_data, name_lower,
         try:
             sub_xpi = XPIManager(package, mode="r", name=name,
                                  subpackage=is_subpackage)
-        except:
+        except Exception:
             err.error(("testcases_content",
                        "test_packed_packages",
                        "jar_subpackage_corrupt"),

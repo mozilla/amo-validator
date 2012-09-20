@@ -25,7 +25,7 @@ def test_css_file(err, filename, data, line_start=1):
                        filename=filename,
                        line_start=line_start - 1,
                        context=context)
-    except:  # pragma: no cover
+    except Exception:  # pragma: no cover
         # This happens because tokenize is a generator.
         # Bravo, Mr. Bond, Bravo.
         err.warning(("testcases_markup_csstester",
