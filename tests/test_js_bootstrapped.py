@@ -1,6 +1,7 @@
 from validator.errorbundler import ErrorBundle
 from validator.testcases import scripting
 
+
 scripting.traverser.DEBUG = True
 
 def _test(script):
@@ -25,24 +26,30 @@ def test_bootstrapped():
         ("nsIWindowWatcher", "addListener()"),
     )
 
-    for method in methods:
-        assert _test("""
-            Components.classes[""]
-                      .getService(Components.interfaces.%s)
-                      .%s;
-        """ % method).failed()
+    def test_wrap(js):
+        assert _test(js).failed()
 
-    assert not _test("""
-        Components.classes[""]
-                  .getService(Components.interfaces.nsIResProtocolHandler)
-                  .setSubstitution("foo", null);
-    """).failed()
+    for method in methods:
+        yield test_wrap, 'Cc[""].getService(Ci.%s).%s;' % method
+
+
+def test_bootstrapped_pass():
+    """Test that bootstrap-agnostic tests pass while boostrapping."""
+
+    err = _test("""
+        Cc[""]
+          .getService(Ci.nsIResProtocolHandler)
+          .setSubstitution("foo", null);
+    """)
+    print err.print_summary(verbose=True)
+    assert not err.failed()
+
 
 def test_bootstrapped_componentmanager():
 
     for method in ('autoRegister', 'registerFactory'):
         assert _test("""
-            Components.manager.QueryInterface(Components.interfaces.nsIComponentRegistrar)
-                      .%s();
+            Components.manager
+              .QueryInterface(Ci.nsIComponentRegistrar)
+              .%s();
         """ % method).failed()
-

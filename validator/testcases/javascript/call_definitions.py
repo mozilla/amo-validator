@@ -907,4 +907,3 @@ def open_in_chrome_context(uri, method, traverser):
             line=traverser.line,
             column=traverser.position,
             context=traverser.context)
-

@@ -61,8 +61,8 @@ if __name__ == '__main__':
                 continue
             elif line.startswith(("inspect ", "isglobal ")):
                 actions = {"inspect": lambda wrap: wrap.value if
-                                                    wrap.is_global else
-                                                    wrap.output(),
+                                                   wrap.is_global else
+                                                   wrap.output(),
                            "isglobal": lambda wrap: wrap.is_global}
                 vars = line.split()
                 final_context = trav.contexts[-1]
@@ -82,4 +82,3 @@ if __name__ == '__main__':
                 output = trav._traverse_node(branch)
                 if output is not None:
                     print output.output()
-

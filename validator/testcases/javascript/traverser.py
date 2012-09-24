@@ -293,7 +293,7 @@ class Traverser(object):
         # Loop through each context in reverse order looking for the defined
         # variable.
         for context in reversed(self.contexts):
-            # If it has the variable, return it
+            # If it has the variable, return it.
             if context.has_var(variable):
                 self._debug("SEEK>>FOUND")
                 return context.get(variable, traverser=self)
@@ -305,9 +305,13 @@ class Traverser(object):
     def _build_global(self, name, entity):
         "Builds an object based on an entity from the predefined entity list"
 
-        if "dangerous" in entity:
-            dang = entity["dangerous"]
-            if dang and not isinstance(dang, types.LambdaType):
+        if (not isinstance(entity.get("dangerous"), types.LambdaType) or
+            "dangerous_on_read" in entity):
+            dang = entity.get("dangerous", entity.get("dangerous_on_read"))
+
+            if isinstance(dang, types.LambdaType):
+                dang = dang(self._traverse_node, self.err)
+            if dang:
                 self._debug("DANGEROUS")
                 self.err.warning(
                     ("js", "traverser", "dangerous_global"),

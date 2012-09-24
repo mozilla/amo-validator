@@ -7,6 +7,7 @@ from call_definitions import xpcom_constructor as xpcom_const, python_wrap
 from entity_values import entity
 from jstypes import JSWrapper
 
+
 # A list of identifiers and member values that may not be used.
 BANNED_IDENTIFIERS = {
     u"newThread": "Creating threads from JavaScript is a common cause "
@@ -56,12 +57,10 @@ INTERFACES = {
                     lambda a, t, e:
                         e.get_resource("em:bootstrap") and \
                         ("Bootstrapped add-ons may not create persistent "
-                         "category entries"
-                         if a and len(a) > 3 and t(a[3]).get_literal_value()
-                         else
-                         "Authors of bootstrapped add-ons must take care "
-                         "to cleanup any added category entries "
-                         "at shutdown")}}},
+                         "category entries."
+                         if len(a) > 3 and t(a[3]).is_literal() else
+                         "Authors of bootstrapped add-ons must take care to "
+                         "clean up any added category entries at shutdown.")}}},
     u"nsIAccessibleRetrieval":
         {"dangerous":
             "Using the nsIAccessibleRetrieval interface causes significant "
@@ -79,16 +78,15 @@ INTERFACES = {
             {u"autoRegister":
                 {"dangerous":
                     lambda a, t, e:
-                        e.get_resource("em:bootstrap") and \
-                        "Bootstrapped add-ons may not register "
-                        "chrome manifest files"},
+                        e.get_resource("em:bootstrap") and
+                        "Bootstrapped add-ons may not register chrome "
+                        "manifest files."},
              u"registerFactory":
                 {"dangerous":
                     lambda a, t, e:
-                        e.get_resource("em:bootstrap") and \
-                        "Authors of bootstrapped add-ons must take care "
-                        "to cleanup any component registrations "
-                        "at shutdown"}}},
+                        e.get_resource("em:bootstrap") and
+                        "Authors of bootstrapped add-ons must take care to "
+                        "clean up any component registrations at shutdown."}}},
     u"nsIDOMNSHTMLElement": entity("nsIDOMNSHTMLElement"),
     u"nsIDOMNSHTMLFrameElement": entity("nsIDOMNSHTMLFrameElement"),
     u"nsIImapIncomingServer":
@@ -172,63 +170,58 @@ INTERFACES = {
             {u"addObserver":
                 {"dangerous":
                     lambda a, t, e:
-                        e.get_resource("em:bootstrap") and \
+                        e.get_resource("em:bootstrap") and
                         "Authors of bootstrapped add-ons must take care "
                         "to remove any added observers "
-                        "at shutdown"}}},
+                        "at shutdown."}}},
     u"nsIResProtocolHandler":
         {"value":
             {u"setSubstitution":
                 {"dangerous":
                     lambda a, t, e:
-                        e.get_resource("em:bootstrap") and \
-                        a and \
-                        len(a) > 1 and  \
-                        t(a[1]).get_literal_value() and \
+                        e.get_resource("em:bootstrap") and
+                        a and len(a) > 1 and t(a[1]).get_literal_value() and
                         "Authors of bootstrapped add-ons must take care "
-                        "to cleanup any added resource substitutions "
-                        "at shutdown"}}},
+                        "to clean up any added resource substitutions "
+                        "at shutdown."}}},
     u"nsIStringBundleService":
         {"value":
             {u"createStringBundle":
                 {"dangerous":
                     lambda a, t, e:
-                        e.get_resource("em:bootstrap") and \
+                        e.get_resource("em:bootstrap") and
                         "Authors of bootstrapped add-ons must take care "
-                        "to flush the string bundle cache at shutdown"},
+                        "to flush the string bundle cache at shutdown."},
              u"createExtensibleBundle":
                 {"dangerous":
                     lambda a, t, e:
-                        e.get_resource("em:bootstrap") and \
+                        e.get_resource("em:bootstrap") and
                         "Authors of bootstrapped add-ons must take care "
-                        "to flush the string bundle cache at shutdown"}}},
+                        "to flush the string bundle cache at shutdown."}}},
     u"nsIStyleSheetService":
         {"value":
             {u"loadAndRegisterSheet":
                 {"dangerous":
                     lambda a, t, e:
-                        e.get_resource("em:bootstrap") and \
-                        "Authors of bootstrapped add-ons must take care "
-                        "to unregister any registered stylesheets "
-                        "at shutdown"}}},
+                        e.get_resource("em:bootstrap") and
+                        "Authors of bootstrapped add-ons must take care to "
+                        "unregister registered stylesheets at shutdown."}}},
     u"nsIWindowMediator":
         {"value":
             {"registerNotification":
                 {"dangerous":
                     lambda a, t, e:
-                        e.get_resource("em:bootstrap") and \
+                        e.get_resource("em:bootstrap") and
                         "Authors of bootstrapped add-ons must take care "
-                        "to remove any added observers "
-                        "at shutdown"}}},
+                        "to remove any added observers at shutdown."}}},
     u"nsIWindowWatcher":
         {"value":
             {u"addListener":
                 {"dangerous":
                     lambda a, t, e:
-                        e.get_resource("em:bootstrap") and \
+                        e.get_resource("em:bootstrap") and
                         "Authors of bootstrapped add-ons must take care "
-                        "to remove any added observers "
-                        "at shutdown"},
+                        "to remove any added observers at shutdown."},
              u"openWindow": entity("nsIWindowWatcher.openWindow")}},
     u"nsIURLParser":
         {"value":
@@ -281,8 +274,6 @@ for interface in INTERFACES:
         return wrap
     INTERFACE_ENTITIES[interface] = {"xpcom_map": construct(interface)}
 
-#import pdb; pdb.set_trace()
-
 
 def build_quick_xpcom(method, interface, traverser):
     """A shortcut to quickly build XPCOM objects on the fly."""
@@ -290,10 +281,10 @@ def build_quick_xpcom(method, interface, traverser):
     interface_obj = traverser._build_global(
                         name=method,
                         entity={"xpcom_map": lambda: INTERFACES[interface]})
-    object = constructor(None, [interface_obj], traverser)
-    if isinstance(object, JSWrapper):
-        object = object.value
-    return object
+    obj = constructor(None, [interface_obj], traverser)
+    if isinstance(obj, JSWrapper):
+        obj = obj.value
+    return obj
 
 
 # GLOBAL_ENTITIES is also representative of the `window` object.
@@ -333,22 +324,17 @@ GLOBAL_ENTITIES = {
               u"createElement":
                   {"dangerous":
                        lambda a, t, e:
-                           not a or
-                           unicode(t(a[0]).get_literal_value()).lower() ==
-                               "script"},
+                           not a or _get_as_str(t(a[0])).lower() == "script"},
               u"createElementNS":
                   {"dangerous":
                        lambda a, t, e:
-                           not a or
-                           unicode(t(a[0]).get_literal_value()).lower() ==
-                               "script"},
+                           not a or _get_as_str(t(a[0])).lower() == "script"},
               u"getSelection":
                   {"return": call_definitions.document_getSelection},
               u"loadOverlay":
                   {"dangerous":
                        lambda a, t, e:
-                           not a or
-                           not unicode(t(a[0]).get_literal_value()).lower()
+                           not a or not _get_as_str(t(a[0])).lower()
                                .startswith(("chrome:", "resource:"))},
               u"xmlEncoding": entity("document.xmlEncoding"),
               u"xmlVersion": entity("document.xmlVersion"),
@@ -491,13 +477,13 @@ GLOBAL_ENTITIES = {
                             {"value":
                                  {u"enablePrivilege":
                                       {"dangerous": True}}}}}}},
-
     u"navigator":
         {"value": {u"wifi": {"dangerous": True},
                    u"geolocation": {"dangerous": True}}},
 
     u"Components":
-        {"readonly": True,
+        {"dangerous_on_read":
+             lambda t, e: bool(e.metadata.get("is_jetpack")),
          "value":
              {u"classes":
                   {"xpcom_wildcard": True,
@@ -512,9 +498,7 @@ GLOBAL_ENTITIES = {
                              u"import":
                                  {"dangerous":
                                       lambda a, t, e:
-                                        a and
-                                        _get_as_str(t(a[0]).get_literal_value())
-                                            .count("ctypes.jsm")}}},
+                                          a and "ctypes.jsm" in _get_as_str(t(a[0]))}}},
               u"interfaces": {"value": INTERFACE_ENTITIES}}},
     u"extensions": {"dangerous": True},
     u"xpcnativewrappers": {"dangerous": True},

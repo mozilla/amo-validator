@@ -422,7 +422,7 @@ def _call_create_pref(a, t, e):
     branch.
     """
 
-    if not t.im_self.filename.startswith("defaults/preferences/") or len(a) == 0:
+    if not t.im_self.filename.startswith("defaults/preferences/") or not a:
         return
 
     value = str(t(a[0]).get_literal_value())
@@ -864,6 +864,9 @@ def _get_as_num(value):
 
 def _get_as_str(value):
     """Return the JS string equivalent for a literal value."""
+
+    if isinstance(value, JSWrapper):
+        value = value.get_literal_value()
     if value is None:
         return ""
 

@@ -10,13 +10,15 @@ import validator.testcases.jetpack as jetpack
 from validator.errorbundler import ErrorBundle
 from validator.xpi import XPIManager
 
+
 def _do_test(xpi_package, allow_old_sdk=True):
 
     err = ErrorBundle()
     jetpack.inspect_jetpack(err, xpi_package, allow_old_sdk=allow_old_sdk)
     return err
 
-class MockXPI:
+
+class MockXPI(object):
 
     def __init__(self, resources):
         self.resources = resources
@@ -309,6 +311,16 @@ def test_mismatched_module_version():
 
     assert err.failed()
     assert any(w["id"][2] == "mismatched_version" for w in err.warnings)
+
+
+def test_components_flagged():
+    """Test that `Components` is flagged in Jetpack."""
+
+    js = """
+    var x = Components.services.foo.bar;
+    """
+    assert not _js_test(js).failed()
+    assert _js_test(js, jetpack=True).failed()
 
 
 def test_absolute_uris_in_js():
