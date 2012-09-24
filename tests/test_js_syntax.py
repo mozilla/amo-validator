@@ -5,6 +5,7 @@ from js_helper import _do_test_raw
 from validator.testcases.javascript.jstypes import JSWrapper
 from validator.testcases.javascript.actions import _get_as_num
 
+
 def test_array_destructuring():
     """
     Make sure that multi-level and prototype array destructuring don't cause
@@ -39,3 +40,13 @@ def test_get_as_num():
 
     yield test, JSWrapper(3), 3
     yield test, JSWrapper(None), 0
+
+
+def test_spidermonkey_warning():
+    """
+    Test that stderr warnings in Spidermonkey do not trip runtime errors.
+    """
+    assert not _do_test_raw("""
+    var x = 0999999999999;
+    """).failed()
+

@@ -111,7 +111,7 @@ def _get_tree(code, shell):
                                      stdout=subprocess.PIPE)
 
         data, stderr = shell_obj.communicate()
-        if stderr:
+        if stderr and not data:
             raise RuntimeError('Error calling %r: %s' % (cmd, stderr))
 
         # Closing the temp file will delete it.
