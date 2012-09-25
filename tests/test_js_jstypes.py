@@ -1,3 +1,5 @@
+from nose.tools import eq_
+
 import validator.testcases.javascript.jstypes as jstypes
 from js_helper import _do_test_raw
 
@@ -71,3 +73,26 @@ def test_jsarray_contsructor():
     x["zap"] = "foo";
     baz("zap" in x);
     """).failed()
+
+
+def test_jsobject_get_wrap():
+    """Test that JSObject always returns a JSWrapper."""
+
+    x = jstypes.JSObject()
+    x.data["foo"] = jstypes.JSLiteral("bar")
+
+    out = x.get("foo")
+    assert isinstance(out, jstypes.JSWrapper)
+    eq_(out.get_literal_value(), "bar")
+
+
+def test_jsarray_get_wrap():
+    """Test that JSArray always returns a JSWrapper."""
+
+    x = jstypes.JSArray()
+    x.elements = [None, jstypes.JSLiteral("bar")]
+
+    out = x.get("1")
+    assert isinstance(out, jstypes.JSWrapper)
+    eq_(out.get_literal_value(), "bar")
+

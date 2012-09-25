@@ -46,6 +46,8 @@ class JSObject(object):
 
         if output is None:
             return JSWrapper(JSObject(), dirty=True, traverser=traverser)
+        if not isinstance(output, JSWrapper):
+            output = JSWrapper(output, traverser=traverser)
         return output
 
     def get_literal_value(self):
@@ -456,7 +458,10 @@ class JSArray(JSObject):
 
         # Courtesy of Ian Bicking: http://bit.ly/hxv6qt
         try:
-            return self.elements[int(index.strip().split()[0])]
+            output = self.elements[int(index.strip().split()[0])]
+            if not isinstance(output, JSWrapper):
+                output = JSWrapper(output, traverser=traverser)
+            return output
         except (ValueError, IndexError, KeyError):
             return super(JSArray, self).get(index, instantiate, traverser)
 
