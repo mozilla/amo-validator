@@ -9,3 +9,6 @@
 /src
 /extras/jslibs
 /extras/language_controls
+dist/
+amo_validator.egg-info/
+
