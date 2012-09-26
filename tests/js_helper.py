@@ -23,6 +23,7 @@ def _do_test_raw(script, path="foo.js", bootstrap=False, ignore_pollution=True,
     "Performs a test on a JS file"
 
     err = ErrorBundle(instant=True)
+    err.save_resource("SPIDERMONKEY", False)
     if jetpack:
         err.metadata["is_jetpack"] = True
 

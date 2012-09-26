@@ -127,6 +127,7 @@ def main():
                             determined=args.determined,
                             listed=not args.selfhosted,
                             overrides=overrides,
+                            spidermonkey=SPIDERMONKEY_INSTALLATION,
                             for_appversions=for_appversions,
                             expectation=expectation,
                             timeout=timeout)
