@@ -104,7 +104,8 @@ def set_on_event(new_value, traverser):
             line=traverser.line,
             column=traverser.position,
             context=traverser.context)
-    elif not is_literal and new_value.has_property("handleEvent"):
+    elif (not is_literal and isinstance(new_value.value, jstypes.JSObject) and
+          "handleEvent" in new_value.value.data):
         mess_type = (traverser.err.error if
                      traverser.err.supports_version(FX18_DEFINITION) else
                      traverser.err.warning)

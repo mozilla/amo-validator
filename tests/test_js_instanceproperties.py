@@ -136,3 +136,18 @@ class TestHandleEvent(TestCase):
         """)
         self.assert_failed(with_errors=True)
 
+    def test_on_event_handleEvent_ignore(self):
+        """
+        Test that dirty objects don't trigger handleEvent errors.
+        """
+
+        self.setup_err(for_appversions=FX18_DEFINITION)
+
+        self.run_script("""
+        var dirty = this_creates_a_dirty_object();
+        foo.onclick = dirty;
+        """)
+        self.assert_silent()
+
+
+
