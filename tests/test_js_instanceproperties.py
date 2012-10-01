@@ -134,7 +134,7 @@ class TestHandleEvent(TestCase):
         self.run_script("""
         foo.onclick = {handleEvent: function() {alert("bar");}};
         """)
-        self.assert_failed(with_errors=True)
+        self.assert_failed(with_warnings=True)
 
     def test_on_event_handleEvent_ignore(self):
         """

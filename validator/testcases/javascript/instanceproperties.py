@@ -106,12 +106,9 @@ def set_on_event(new_value, traverser):
             context=traverser.context)
     elif (not is_literal and isinstance(new_value.value, jstypes.JSObject) and
           "handleEvent" in new_value.value.data):
-        mess_type = (traverser.err.error if
-                     traverser.err.supports_version(FX18_DEFINITION) else
-                     traverser.err.warning)
-        mess_type(
-            ("js", "on*", "handleEvent"),
-            "`handleEvent` no longer implemented in Gecko 18.",
+        traverser.err.warning(
+            err_id=("js", "on*", "handleEvent"),
+            warning="`handleEvent` no longer implemented in Gecko 18.",
             description="As of Gecko 18, objects with `handleEvent` methods "
                         "may no longer be assigned to `on*` properties. Doing "
                         "so will be equivalent to assigning `null` to the "
