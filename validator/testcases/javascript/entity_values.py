@@ -1,6 +1,6 @@
 from call_definitions import open_in_chrome_context
-from validator.compat import (FX10_DEFINITION, FX14_DEFINITION, TB14_DEFINITION,
-                              TB15_DEFINITION)
+from validator.compat import (FX10_DEFINITION, FX14_DEFINITION, FX16_DEFINITION,
+                              TB14_DEFINITION, TB15_DEFINITION)
 from validator.constants import BUGZILLA_BUG
 
 
@@ -52,6 +52,12 @@ deprecated_entity(name="importHTMLFromFile", version=FX14_DEFINITION,
                   message=DEP_IHF_MESSAGE, bug=482911)
 deprecated_entity(name="importHTMLFromURI", version=FX14_DEFINITION,
                   message=DEP_IHF_MESSAGE, bug=482911)
+
+JAVA_MESSAGE = "The global variables related to Java have been removed."
+deprecated_entity(name="java", version=FX16_DEFINITION,
+                  message=JAVA_MESSAGE, bug=748343)
+deprecated_entity(name="Packages", version=FX16_DEFINITION,
+                  message=JAVA_MESSAGE, bug=748343)
 
 
 @register_entity("document.xmlEncoding")

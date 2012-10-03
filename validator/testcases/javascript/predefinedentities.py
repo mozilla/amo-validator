@@ -573,6 +573,9 @@ GLOBAL_ENTITIES = {
                                    "Consider using a different API if it is "
                                    "available in order to achieve similar "
                                    "functionality."},
+
+    u"java": entity("java"),
+    u"Packages": entity("Packages"),
 }
 
 CONTENT_DOCUMENT = GLOBAL_ENTITIES[u"content"]["value"][u"document"]

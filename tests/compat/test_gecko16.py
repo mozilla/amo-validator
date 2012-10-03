@@ -30,3 +30,15 @@ class TestFX16Compat(CompatTestCase):
         self.run_script_for_compat("mozIndexedDB.foo.bar;")
         self.assert_silent()
         self.assert_compat_error()
+
+    def test_java(self):
+        """Test that `java` is flagged in Gecko 16."""
+        self.run_script_for_compat("var x = java;")
+        self.assert_silent()
+        self.assert_compat_error()
+
+    def test_Packages(self):
+        """Test that `Packages` is flagged in Gecko 16."""
+        self.run_script_for_compat("var x = Packages;")
+        self.assert_silent()
+        self.assert_compat_error()
