@@ -7,7 +7,9 @@
 from itertools import izip_longest
 import re
 
+
 __all__ = 'Version', 'VersionPart'
+
 
 def strcmp(a, b):
     # Null string comes after any non-null string
@@ -17,6 +19,7 @@ def strcmp(a, b):
         return -1
 
     return cmp(a, b)
+
 
 class VersionPart(object):
     numA   = 0
@@ -62,7 +65,9 @@ class VersionPart(object):
         return (int(match.group(1) or 0),
                 match.group(2))
 
+
 class Version(object):
+
     def __init__(self, version):
         self._version = version
         self.parts = map(VersionPart, version.split('.'))
@@ -83,4 +88,3 @@ class Version(object):
     @property
     def is_release(self):
         return bool(re.match(r'^[\d.]+$', self._version))
-

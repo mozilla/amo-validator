@@ -4,11 +4,12 @@ from validator.constants import BUGZILLA_BUG
 from validator.compat import (FX4_DEFINITION, FX5_DEFINITION, FX6_DEFINITION,
                               FX7_DEFINITION, FX8_DEFINITION, FX9_DEFINITION,
                               FX11_DEFINITION, FX12_DEFINITION, FX13_DEFINITION,
-                              FX14_DEFINITION, FX15_DEFINITION,
+                              FX14_DEFINITION, FX15_DEFINITION, FX16_DEFINITION,
                               TB7_DEFINITION, TB10_DEFINITION, TB11_DEFINITION,
                               TB12_DEFINITION, TB13_DEFINITION, TB14_DEFINITION,
                               TB15_DEFINITION)
 from validator.contextgenerator import ContextGenerator
+from markup.csstester import UNPREFIXED_MESSAGE
 
 
 registered_regex_tests = []
@@ -663,6 +664,36 @@ class Gecko15RegexTests(CompatRegexTestHelper):
 
 
 @register_generator
+class Gecko16RegexTests(CompatRegexTestHelper):
+    """Regex tests for Gecko 16 updates."""
+
+    VERSION = FX16_DEFINITION
+
+    def tests(self):
+
+        yield self.get_test_bug(
+                722872, "nsITransferable",
+                "`nsITransferable` has been changed in Gecko 16.",
+                "The `nsITransferable` interface has changed to better "
+                "support Private Browsing Mode. After instantiating the "
+                "object, you should call `.init(null)` on it, before any "
+                "other functions are called.", compat_type="error")
+
+        yield self.get_test_bug(
+                726378, "mozIndexedDB",
+                "`mozIndexedDB` has been unprefixed in Gecko 16.",
+                "The `mozIndexedDB` object has been renamed to `indexedDB` in "
+                "Firefox 16.", compat_type="error")
+
+    def js_tests(self):
+
+        yield self.get_test(
+                "Moz(Transition|Animation|Transform)[a-zA-Z]+",
+                "Some CSS selectors have been unprefixed in Gecko 16.",
+                UNPREFIXED_MESSAGE, compat_type="warning")
+
+
+@register_generator
 class Thunderbird7RegexTests(CompatRegexTestHelper):
     """Regex tests for the Thunderbird 7 update."""
 
@@ -929,7 +960,7 @@ class Thunderbird15RegexTests(CompatRegexTestHelper):
                            r"INVALID_ITEM_PURGE_DELAY": 721517,
                            r"kFeedUrlDelimiter": 721517,
                            r"get(FeedUrlsInFolder|NodeValue|RDFTargetValue|"
-                            "ParentTargetForChildResource)": 721517,                        
+                            "ParentTargetForChildResource)": 721517,
                            r"getSubscriptions(DS|List|File)": 721517,
                            r"getItems(DS|File)": 721517,
                            r"(add|delete)Feed": 721517,
@@ -954,4 +985,3 @@ class Thunderbird15RegexTests(CompatRegexTestHelper):
                     "been flagged as having changed, removed, or deprecated "
                     "in Thunderbird 15." % pattern,
                     compat_type="error", log_function=self.err.notice)
-

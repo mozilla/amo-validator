@@ -1,3 +1,4 @@
+from validator.compat import FX16_DEFINITION
 from validator.constants import PACKAGE_THEME
 import validator.testcases.markup.csstester as csstester
 from validator.errorbundler import ErrorBundle
@@ -45,7 +46,7 @@ def test_css_identitybox_themes():
 def test_remote_urls():
     "Tests the Regex used to detect remote URLs"
 
-    t = lambda s:csstester.BAD_URL.match(s) is not None
+    t = lambda s: csstester.BAD_URL.match(s) is not None
 
     assert not t("url(foo/bar.abc)")
     assert not t('url("foo/bar.abc")')
@@ -63,3 +64,45 @@ def test_remote_urls():
     assert not t("UrL(/abc.def)")
     assert t("url(HTTP://foo.bar/)")
 
+
+def test_unprefixed_patterns():
+    """
+    Test that add-ons that use prefixed CSS descriptors get a compat warning.
+    """
+
+    def test_descriptor(descriptor):
+        err = ErrorBundle(for_appversions=FX16_DEFINITION)
+        csstester.test_css_snippet(err, "x.css", "x {%s: 0;}" % descriptor, 0)
+        assert err.warnings
+        assert any(err.compat_summary.values())
+
+    yield test_descriptor, "-moz-transition-foo"
+    yield test_descriptor, "-moz-keyframes"
+    yield test_descriptor, "-moz-animation-keyframes"
+    yield test_descriptor, "-moz-transform-stuff"
+    yield test_descriptor, "-moz-perspective-stuff"
+    yield test_descriptor, "-moz-backface-visibility"
+    yield test_descriptor, "-moz-super-gradient"
+
+
+def test_unprefixed_moz_calc():
+    err = ErrorBundle(for_appversions=FX16_DEFINITION)
+    csstester.test_css_snippet(
+        err, "x.css", "x {foo: -moz-calc(40% + 100px);}", 0)
+    assert err.warnings
+    assert any(err.compat_summary.values())
+
+
+def test_unprefixed_patterns_unchanged():
+    """
+    Test that patterns that haven't been unprefixed don't get flagged.
+    """
+
+    def test_descriptor(descriptor):
+        err = ErrorBundle(for_appversions=FX16_DEFINITION)
+        csstester.test_css_snippet(err, "x.css", "x {%s: 0;}" % descriptor, 0)
+        assert not err.failed()
+        assert not any(err.compat_summary.values())
+
+    yield test_descriptor, "-moz-gradient"
+    yield test_descriptor, "calc"

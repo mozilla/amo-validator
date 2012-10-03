@@ -1,12 +1,24 @@
 import re
-import fnmatch
+from functools import partial
 import cssutils
 
+from validator.compat import FX16_DEFINITION
 from validator.constants import PACKAGE_THEME
 from validator.contextgenerator import ContextGenerator
 
+
 BAD_URL_PAT = "url\(['\"]?(?!(chrome:|resource:))(\/\/|(ht|f)tps?:\/\/|data:)[a-z0-9\/\-\.#]*['\"]?\)"
 BAD_URL = re.compile(BAD_URL_PAT, re.I)
+
+SKIP_TYPES = ("S", "COMMENT")
+
+UNPREFIXED_LINK1 = ("https://developer.mozilla.org/en-US/docs/"
+                    "Firefox_16_for_developers")
+UNPREFIXED_LINK2 = "https://hacks.mozilla.org/2012/07/aurora-16-is-out/"
+UNPREFIXED_MESSAGE = ["Several CSS properties have been unprefixed in Firefox "
+                      "16 and no longer work in their prefixed form.",
+                      "For more information, see %s and %s" %
+                          (UNPREFIXED_LINK1, UNPREFIXED_LINK2)]
 
 
 def test_css_file(err, filename, data, line_start=1):
@@ -54,32 +66,36 @@ def _run_css_tests(err, tokens, filename, line_start=0, context=None):
 
     last_descriptor = None
 
-    skip_types = ("S", "COMMENT")
-
     identity_box_mods = []
     unicode_errors = []
 
     while True:
 
         try:
-            (tok_type, value, line, position) = tokens.next()
+            tok_type, value, line, position = tokens.next()
         except UnicodeDecodeError:
             unicode_errors.append(str(line + line_start))
             continue
         except StopIteration:
             break
-        except Exception, e:
-            # Comment me out for debug!
-            raise
 
-            print type(e), e
-            print filename
-            print line + line_start
+        if tok_type in SKIP_TYPES:
             continue
 
         # Save the last descriptor for reference.
-        if tok_type == "IDENT":
-            last_descriptor = value.lower()
+        if tok_type in ("IDENT", "FUNCTION"):
+            value_lower = value.lower()
+            if tok_type == "IDENT":
+                last_descriptor = value_lower
+            else:
+                value_lower = value_lower[:-1]
+
+            reporter = partial(err.warning,
+                               description=UNPREFIXED_MESSAGE,
+                               filename=filename, line=line, column=position,
+                               for_appversions=FX16_DEFINITION, tier=5,
+                               compatibility_type="warning")
+            _test_unprefixed_identifier(reporter, value_lower)
 
         elif tok_type == "URI":
 
@@ -124,3 +140,26 @@ def _run_css_tests(err, tokens, filename, line_start=0, context=None):
                   "encountered, causing some problems.",
                   "Lines: %s" % ", ".join(unicode_errors)],
                  filename)
+
+
+UNPREFIXED_WARNING = "`%s` is no longer prefixed in Gecko 16."
+
+UNPREFIXED_PATTERNS = map(re.compile, ['-moz-[a-z]+-gradient'])
+
+
+def _test_unprefixed_identifier(reporter, identifier):
+    if identifier in ("-moz-keyframes", "-moz-calc",
+                      "-moz-backface-visibility"):
+        reporter(
+            err_id=("css", "prefixes", "match"),
+            warning=UNPREFIXED_WARNING % identifier)
+    elif identifier.startswith(("-moz-transition", "-moz-animation",
+                                "-moz-animation", "-moz-transform",
+                                "-moz-perspective")):
+        reporter(
+            err_id=("css", "prefixes", "startswith"),
+            warning=UNPREFIXED_WARNING % identifier)
+    elif any(pat.match(identifier) for pat in UNPREFIXED_PATTERNS):
+        reporter(
+            err_id=("css", "prefixes", "pattern"),
+            warning=UNPREFIXED_WARNING % identifier)
