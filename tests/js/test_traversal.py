@@ -1,3 +1,10 @@
+from itertools import imap, repeat
+
+from mock import patch
+
+from validator.testcases import content
+
+from tests.helper import MockXPI
 from tests.js_helper import TestCase
 
 
@@ -71,3 +78,36 @@ class TestFunctionTraversal(TestCase):
         """)
         self.assert_var_eq("foo", "second")
 
+
+class TestTooMuchJS(TestCase):
+    """
+    If you have an add-on and you trigger this code, then you're probably doing
+    it wrong. This tests that any add-on with more than 1000 JS files in any
+    given XPI or JAR do not perform exhaustive validation.
+    """
+
+    @patch('validator.testcases.content.run_regex_tests', lambda *a, **kw: None)
+    @patch('validator.testcases.scripting.test_js_file', lambda *a, **kw: None)
+    def run_mocked_scripts(self, count):
+        self.setup_err()
+
+        scripts = dict(zip(imap(lambda i: "s%d.js" % i, xrange(count)),
+                           repeat("tests/resources/content/regex_error.js")))
+
+        x = MockXPI(scripts)
+
+        self.err.save_resource(
+            "scripts",
+            [{"scripts": scripts.keys(),
+              "package": x,
+              "state": []}])
+
+        content.test_packed_scripts(self.err, x)
+
+    def test_few_js(self):
+        self.run_mocked_scripts(900)
+        self.assert_silent()
+
+    def test_many_js(self):
+        self.run_mocked_scripts(1001)
+        self.assert_failed(with_warnings=True)

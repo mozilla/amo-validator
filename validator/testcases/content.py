@@ -201,6 +201,17 @@ def test_packed_scripts(err, xpi_package):
     if not scripts:
         return
 
+    total_scripts = sum(len(bundle["scripts"]) for bundle in scripts)
+    exhaustive = True
+    if total_scripts > 1000:
+        err.warning(
+            err_id=("testcases_content", "packed_js", "too_much_js"),
+            warning="TOO MUCH JS FOR EXHAUSTIVE VALIDATION",
+            description="There are too many JS files for the validator to "
+                        "process sequentially. An editor must manually "
+                        "review the JS in this add-on.")
+        exhaustive = False
+
     # Get the chrome manifest in case there's information about pollution
     # exemptions.
     chrome = err.get_resource("chrome.manifest_nopush")
@@ -221,6 +232,12 @@ def test_packed_scripts(err, xpi_package):
         for script in script_bundle["scripts"]:
             file_data = unicodehelper.decode(package.read(script))
 
+            run_regex_tests(file_data, err, script, is_js=True)
+            # If we're not running an exhaustive set of tests, skip the full JS
+            # parse and traversal.
+            if not exhaustive:
+                continue
+
             if marked_scripts:
                 reversed_script = chrome.reverse_lookup(script_bundle["state"],
                                                         script)
@@ -232,7 +249,6 @@ def test_packed_scripts(err, xpi_package):
             else:
                 # Run the standard script tests on the scripts.
                 testendpoint_js.test_js_file(err, script, file_data)
-            run_regex_tests(file_data, err, script, is_js=True)
 
         for i in range(len(script_bundle["state"])):
             err.pop_state()
