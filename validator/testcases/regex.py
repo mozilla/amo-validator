@@ -21,6 +21,8 @@ NSINHS_LINK = ("https://developer.mozilla.org/en/XPCOM_Interface_Reference"
                "/nsINavHistoryService")
 TB7_LINK = "https://developer.mozilla.org/en/Thunderbird_7_for_developers"
 
+NSIT_LINK = "https://developer.mozilla.org/en-US/docs/Using_the_Clipboard"
+
 
 def run_regex_tests(document, err, filename, context=None, is_js=False):
     """Run all of the regex-based JS tests."""
@@ -671,13 +673,15 @@ class Gecko16RegexTests(CompatRegexTestHelper):
 
     def tests(self):
 
-        yield self.get_test_bug(
-                722872, "nsITransferable",
+        yield self.get_test(
+                "nsITransferable",
                 "`nsITransferable` has been changed in Gecko 16.",
                 "The `nsITransferable` interface has changed to better "
                 "support Private Browsing Mode. After instantiating the "
-                "object, you should call `.init(null)` on it, before any "
-                "other functions are called.", compat_type="error")
+                "object, you should call the `init` function on it before "
+                "any other functions are called. See %s for more "
+                "information." % NSIT_LINK,
+                compat_type="error")
 
         yield self.get_test_bug(
                 726378, "mozIndexedDB",
