@@ -1,6 +1,6 @@
 from call_definitions import open_in_chrome_context
 from validator.compat import (FX10_DEFINITION, FX14_DEFINITION, FX16_DEFINITION,
-                              TB14_DEFINITION, TB15_DEFINITION)
+                              TB14_DEFINITION, TB15_DEFINITION, TB16_DEFINITION)
 from validator.constants import BUGZILLA_BUG
 
 
@@ -229,3 +229,51 @@ def nsIImportMail_ImportMailbox(traverser):
         compatibility_type="error",
         tier=5)
 
+
+# Thunderbird 16 IDL changes
+TB16_METHODS = {
+    "imIUserStatusInfo.setUserIcon": "aIconFile",
+    "nsIMsgCloudFileProvider.uploadFile": "aFile",
+    "nsIMsgCloudFileProvider.urlForFile": "aFile",
+    "nsIMsgCloudFileProvider.cancelFileUpload": "aFile",
+    "nsIMsgCloudFileProvider.deleteFile": "aFile",
+    "nsIMessenger.saveAttachmentToFolder": "aDestFolder",
+    "nsIMsgAccountManager.folderUriForPath": "aLocalPath",
+    "nsIMsgIncomingServer.setDefaultLocalPath": "aDefaultLocalPath",
+    "nsIMsgIncomingServer.getFileValue": "return type",
+    "nsIMsgIncomingServer.setFileValue": "aValue",
+    "nsIMsgPluggableStore.getSummaryFile": "aFolder",
+    "nsIMsgFilterPlugin.updateData": "aFile",
+    "nsIMsgFilterService.OpenFilterList": "filterFile",
+    "nsIMsgFilterService.SaveFilterList": "filterFile",
+    "nsIURLFetcher.fireURLRequest": "localFile",
+    "nsIURLFetcher.initialize": "localFIle",
+    "nsIMsgDatabase.openMailDBFromFile": "aFile",
+    "nsIMailboxService.ParseMailbox": "aMailboxPath",
+    "nsINoIncomingServer.copyDefaultMessages": "parentDir"}
+
+TB16_ATTRIBUTES = [
+    "nsIAbLDAPDirectory.replicationFile",
+    "nsIAbLDAPDirectory.databaseFile",
+    "nsIAbManager.userProfileDirectory",
+    "nsIMsgFolder.filePath",
+    "nsIMsgIdentity.signature",
+    "nsIMsgIncomingServer.localPath"
+    "nsIMsgProtocolInfo.defaultLocalPath",
+    "nsIMsgFilterList.defaultFile",
+    "nsIMsgSend.tmpFile",
+    "nsIImportMailboxDescriptor.file",
+    "nsIRssIncomingServer.subscriptionsDataSourcePath",
+    "nsIRssIncomingServer.feedItemsDataSourcePath"]
+
+for attrib in TB16_ATTRIBUTES:
+    deprecated_entity(name=attrib, version=TB16_DEFINITION, 
+                      message="This attribute has been changed from "
+                      "`nsILocalFile` to `nsIFile`", 
+                      bug=749930)
+
+for func, param in TB16_METHODS.items():
+    deprecated_entity(name=func, version=TB16_DEFINITION, 
+                      message="The `%s` parameter has been changed from "
+                      " `nsILocalFile` to `nsIFile`" % param, 
+                      bug=749930)
