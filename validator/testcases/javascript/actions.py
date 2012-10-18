@@ -11,6 +11,29 @@ from validator.decorator import version_range
 from jstypes import *
 
 
+NUMERIC_TYPES = (int, long, float, complex)
+
+# None of these operations (or their augmented assignment counterparts) should
+# be performed on non-numeric data. Any time we get non-numeric data for these
+# guys, we just return window.NaN.
+NUMERIC_OPERATORS = ("-", "*", "/", "%", "<<", ">>", ">>>", "|", "^", "&")
+NUMERIC_OPERATORS += tuple("%s=" % op for op in NUMERIC_OPERATORS)
+
+
+def get_NaN(traverser):
+    # If we've cached the traverser's NaN instance, just use that.
+    ncache = getattr(traverser, "NAN_CACHE", None)
+    if ncache is not None:
+        return ncache
+
+    # Otherwise, we need to import GLOBAL_ENTITIES and build a raw copy.
+    from predefinedentities import GLOBAL_ENTITIES
+    ncache = traverser._build_global("NaN", GLOBAL_ENTITIES[u"NaN"])
+    # Cache it so we don't need to do this again.
+    traverser.NAN_CACHE = ncache
+    return ncache
+
+
 def _get_member_exp_property(traverser, node):
     """Return the string value of a member expression's property."""
 
@@ -100,15 +123,14 @@ def test_identifier(traverser, name):
 
     import predefinedentities
     if name in predefinedentities.BANNED_IDENTIFIERS:
-        traverser.err.warning(("testcases_scripting",
-                               "create_identifier",
-                               "banned_identifier"),
-                              "Banned or deprecated JavaScript Identifier",
-                              predefinedentities.BANNED_IDENTIFIERS[name],
-                              filename=traverser.filename,
-                              line=traverser.line,
-                              column=traverser.position,
-                              context=traverser.context)
+        traverser.err.warning(
+            err_id=("js", "actions", "banned_identifier"),
+            warning="Banned or deprecated JavaScript Identifier",
+            description=predefinedentities.BANNED_IDENTIFIERS[name],
+            filename=traverser.filename,
+            line=traverser.line,
+            column=traverser.position,
+            context=traverser.context)
 
 
 def _function(traverser, node):
@@ -618,9 +640,14 @@ def _expr_assignment(traverser, node):
     traverser._debug("ASSIGNMENT>>PARSING LEFT")
     left = traverser._traverse_node(node["left"])
     traverser._debug("ASSIGNMENT>>DONE PARSING LEFT")
+    traverser.debug_level -= 1
 
     if isinstance(left, JSWrapper):
+        if left.dirty:
+            return left
+
         lit_left = left.get_literal_value()
+        token = node["operator"]
 
         # Don't perform an operation on None. Python freaks out
         if lit_left is None:
@@ -628,13 +655,9 @@ def _expr_assignment(traverser, node):
         if lit_right is None:
             lit_right = 0
 
-        if (isinstance(lit_left, types.StringTypes) or
-            isinstance(lit_right, types.StringTypes)):
-            lit_left = _get_as_str(lit_left)
-            lit_right = _get_as_str(lit_right)
+        # Give them default values so we have them in scope.
+        gleft, gright = 0, 0
 
-        gleft = _get_as_num(left)
-        gright = _get_as_num(right)
         # All of the assignment operators
         operators = {"=": lambda: right,
                      "+=": lambda: lit_left + lit_right,
@@ -649,35 +672,47 @@ def _expr_assignment(traverser, node):
                      "^=": lambda: int(gleft) ^ int(gright),
                      "&=": lambda: int(gleft) & int(gright)}
 
-        token = node["operator"]
+        # If we're modifying a non-numeric type with a numeric operator, return
+        # NaN.
+        if (not isinstance(lit_left, NUMERIC_TYPES) and
+                token in NUMERIC_OPERATORS):
+            left.set_value(get_NaN(traverser), traverser=traverser)
+            return left
+
+        # If either side of the assignment operator is a string, both sides
+        # need to be casted to strings first.
+        if (isinstance(lit_left, types.StringTypes) or
+                isinstance(lit_right, types.StringTypes)):
+            lit_left = _get_as_str(lit_left)
+            lit_right = _get_as_str(lit_right)
+
+        gleft, gright = _get_as_num(left), _get_as_num(right)
+
         traverser._debug("ASSIGNMENT>>OPERATION:%s" % token)
         if token not in operators:
-            traverser._debug("ASSIGNMENT>>OPERATOR NOT FOUND")
-            traverser.debug_level -= 1
+            # We don't support that operator. (yet?)
+            traverser._debug("ASSIGNMENT>>OPERATOR NOT FOUND", 1)
             return left
         elif token in ("<<=", ">>=", ">>>=") and gright < 0:
+            # The user is doing weird bitshifting that will return 0 in JS but
+            # not in Python.
             left.set_value(0, traverser=traverser)
             return left
         elif (token in ("<<=", ">>=", ">>>=", "|=", "^=", "&=") and
               (abs(gleft) == float('inf') or abs(gright) == float('inf'))):
             # Don't bother handling infinity for integer-converted operations.
-            from predefinedentities import GLOBAL_ENTITIES
-            left.set_value(traverser._build_global("NaN",
-                                                   GLOBAL_ENTITIES[u"NaN"]),
-                           traverser=traverser)
+            left.set_value(get_NaN(traverser), traverser=traverser)
             return left
 
         traverser._debug("ASSIGNMENT::L-value global? (%s)" %
-                         ("Y" if left.is_global else "N"))
+                         ("Y" if left.is_global else "N"), 1)
         new_value = operators[token]()
-        traverser._debug("ASSIGNMENT::New value >> %s" % new_value)
+        traverser._debug("ASSIGNMENT::New value >> %s" % new_value, 1)
         left.set_value(new_value, traverser=traverser)
-        traverser.debug_level -= 1
         return left
 
     # Though it would otherwise be a syntax error, we say that 4=5 should
     # evaluate out to 5.
-    traverser.debug_level -= 1
     return right
 
 
@@ -704,21 +739,21 @@ def _expr_binary(traverser, node):
     else:
         left = traverser._traverse_node(node["left"])
 
-    traverser.debug_level -= 1
-
     # Traverse the right half of the binary expression.
-    traverser._debug("BIN_EXP>>r-value")
-    traverser.debug_level += 1
+    traverser._debug("BIN_EXP>>r-value", -1)
 
     if (operator == "instanceof" and
-        node["right"]["type"] == "Identifier" and
-        node["right"]["name"] == "Function"):
+            node["right"]["type"] == "Identifier" and
+            node["right"]["name"] == "Function"):
         # We make an exception for instanceof's r-value if it's a dangerous
         # global, specifically Function.
+        traverser.debug_level -= 1
         return JSWrapper(True, traverser=traverser)
     else:
         right = traverser._traverse_node(node["right"])
-        traverser._debug("Is dirty? %r" % right.dirty)
+        traverser._debug("Is dirty? %r" % right.dirty, 1)
+
+    traverser.debug_level -= 1
 
     # Dirty l or r values mean we can skip the expression. A dirty value
     # indicates that a lazy operation took place that introduced some
@@ -727,8 +762,6 @@ def _expr_binary(traverser, node):
         return left
     elif right.dirty:
         return right
-
-    traverser.debug_level -= 1
 
     # Binary expressions are only executed on literals.
     left_wrap = left
@@ -744,7 +777,7 @@ def _expr_binary(traverser, node):
         "==": lambda: left == right or gleft == gright,
         "!=": lambda: left != right,
         "===": lambda: left == right,  # Be flexible.
-        "!==": lambda: not (type(left) == type(right) or left != right),
+        "!==": lambda: type(left) != type(right) or left != right,
         ">": lambda: left > right,
         "<": lambda: left < right,
         "<=": lambda: left <= right,
@@ -761,9 +794,6 @@ def _expr_binary(traverser, node):
         # TODO : implement instanceof
     }
 
-    traverser.debug_level -= 1
-
-    operator = node["operator"]
     output = None
     if (operator in (">>", "<<", ">>>") and
         ((left is None or right is None) or

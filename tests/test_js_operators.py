@@ -237,3 +237,17 @@ def test_concat_plus_infinity():
           "c": "fooInfinity",
           "d": "foo-Infinity"})
 
+
+def test_simple_operators_when_dirty():
+    """
+    Test that when we're dealing with dirty objects, binary operations don't
+    cave in the roof.
+
+    Note that this test (if it fails) may cause some ugly crashes.
+    """
+
+    _do_test_raw("""
+    var x = foo();  // x is now a dirty object.
+    y = foo();  // y is now a dirty object as well.
+    """ +
+    """y += y + x;""" * 100)  # This bit makes the validator's head explode.

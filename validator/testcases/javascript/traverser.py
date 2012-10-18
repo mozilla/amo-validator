@@ -46,17 +46,18 @@ class Traverser(object):
 
         # If we're not debugging, don't waste more cycles than we need to.
         if not DEBUG:
-            self._debug = lambda x: None
+            self._debug = lambda *args, **kwargs: None
 
-    def _debug(self, data):
-        "Writes a message to the console if debugging is enabled."
+    def _debug(self, data, indent=0):
+        """Write a message to the console if debugging is enabled."""
         if DEBUG:
             output = data
             if isinstance(data, JSObject) or isinstance(data, JSContext):
                 output = data.output()
 
             output = unicode(output)
-            print ". " * self.debug_level + output.encode("ascii", "replace")
+            print (". " * (self.debug_level + indent) +
+                   output.encode("ascii", "replace"))
 
     def run(self, data):
         if DEBUG:
