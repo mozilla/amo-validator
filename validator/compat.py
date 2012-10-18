@@ -54,3 +54,5 @@ TB12_DEFINITION = {TB_GUID: version_range("thunderbird", "12.0a1", "13.0a1")}
 TB13_DEFINITION = _build_definition(13, firefox=False, fennec=False)
 TB14_DEFINITION = _build_definition(14, firefox=False, fennec=False)
 TB15_DEFINITION = _build_definition(15, firefox=False, fennec=False)
+TB16_DEFINITION = _build_definition(16, firefox=False, fennec=False)
+TB17_DEFINITION = _build_definition(17, firefox=False, fennec=False)

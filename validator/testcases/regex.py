@@ -7,7 +7,7 @@ from validator.compat import (FX4_DEFINITION, FX5_DEFINITION, FX6_DEFINITION,
                               FX14_DEFINITION, FX15_DEFINITION, FX16_DEFINITION,
                               TB7_DEFINITION, TB10_DEFINITION, TB11_DEFINITION,
                               TB12_DEFINITION, TB13_DEFINITION, TB14_DEFINITION,
-                              TB15_DEFINITION)
+                              TB15_DEFINITION, TB16_DEFINITION)
 from validator.contextgenerator import ContextGenerator
 from markup.csstester import UNPREFIXED_MESSAGE
 
@@ -988,4 +988,41 @@ class Thunderbird15RegexTests(CompatRegexTestHelper):
                     "A javascript function matched the pattern `%s`, which has "
                     "been flagged as having changed, removed, or deprecated "
                     "in Thunderbird 15." % pattern,
+                    compat_type="error", log_function=self.err.notice)
+
+
+@register_generator
+class Thunderbird16RegexTests(CompatRegexTestHelper):
+    """Regex tests for the Thunderbird 16 update."""
+
+    VERSION = TB16_DEFINITION
+
+    def tests(self):
+        """String and JS changes for Thunderbird add-ons"""
+
+        # String changes for add-ons that use our localizations.
+        patterns = {r"(contact|home|other|phone|work)\.heading": 762508,
+                    r"mapItButton\.label": 762508,
+                    r"mapIt\.tooltip": 762508,
+                    r"font\.langGroup\.unicode": 323747,
+                    r"offlineCompact\.(label|accesskey)": 758803,
+                    r"mb\.label": 758804}
+        for pattern, bug in patterns.items():
+            yield self.get_test_bug(
+                    bug, pattern,
+                    "Removed, renamed, or changed labels in use.",
+                    "Some string matched the pattern `%s`, which has been "
+                    "flagged as having changed in Thunderbird 16." % pattern,
+                    compat_type="error")
+
+        js_patterns = {r"(\b|\()parseAdoptedMsgLine": 740453,
+                       r"(\b|\()normalEndMsgWriteStream": 740453}
+
+        for pattern, bug in js_patterns.items():
+            yield self.get_test_bug(
+                    bug, pattern,
+                    "Removed, renamed, or changed methods in use.",
+                    "A JavaScript function matched the pattern `%s`, which has "
+                    "been flagged as having changed, removed, or deprecated "
+                    "in Thunderbird 16." % pattern,
                     compat_type="error", log_function=self.err.notice)

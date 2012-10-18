@@ -50,6 +50,9 @@ CONTENT_DOCUMENT = None
 
 
 INTERFACES = {
+    u"imIUserStatusInfo":
+        {"value":
+            {u"setUserIcon": entity("imIUserStatusInfo.setUserIcon")}},
     u"nsICategoryManager":
         {"value":
             {u"addCategoryEntry":
@@ -61,6 +64,14 @@ INTERFACES = {
                          if len(a) > 3 and t(a[3]).is_literal() else
                          "Authors of bootstrapped add-ons must take care to "
                          "clean up any added category entries at shutdown.")}}},
+    u"nsIAbLDAPDirectory":
+        {"value": 
+            {u"replicationFile": entity("nsIAbLDAPDirectory.replicationFile"),
+             u"databaseFile": entity("nsIAbLDAPDirectory.databaseFile")}},
+    u"nsIAbManager":
+        {"value": 
+            {u"userProfileDirectory": 
+                entity("nsIAbManager.userProfileDirectory")}},       
     u"nsIAccessibleRetrieval":
         {"dangerous":
             "Using the nsIAccessibleRetrieval interface causes significant "
@@ -106,28 +117,75 @@ INTERFACES = {
     u"nsIImportMail":
         {"value":
             {u"ImportMailbox": entity("nsIImportMail.ImportMailbox")}},
+    u"nsIImportMailboxDescriptor":
+        {"value":
+            {u"file": entity("nsIImportMailboxDescriptor.file")}},
     u"nsIJSON":
         {"value":
             {u"encode":
                 {"return": call_definitions.nsIJSON_deprec},
              u"decode":
                 {"return": call_definitions.nsIJSON_deprec}}},
+    u"nsIMailboxService":
+        {"value":
+            {u"ParseMailbox": entity("nsIMailboxService.ParseMailbox")}},
     u"nsIMailtoUrl":
         {"value":
             {u"GetMessageContents":
                 {"return": call_definitions.nsIMailtoUrl_changed}}},
-    u"nsIMsgDBService":
+    u"nsIMessenger":
         {"value":
-            {u"openMailDBFromFile":
-                {"return": call_definitions.nsIMsgDatabase_changed}}},
+            {u"saveAttachmentToFolder": 
+                entity("nsIMessenger.saveAttachmentToFolder")}},
+    u"nsIMsgAccountManager":
+        {"value":
+            {u"folderUriForPath": 
+                entity("nsIMsgAccountManager.folderUriForPath")}},
+    u"nsIMsgLocalMailFolder":
+        {"value":
+            {u"addMessage":
+                {"return": call_definitions.TB13_nsIMsgLocalMailFolder_changed},
+             u"addMessageBatch":
+                {"return": call_definitions.TB13_nsIMsgLocalMailFolder_changed}}},
+    u"nsIMsgCloudFileProvider":
+        {"value":
+            {u"uploadFile": entity("nsIMsgCloudFileProvider.uploadFile"),
+             u"urlForFile": entity("nsIMsgCloudFileProvider.urlForFile"),
+             u"cancelFileUpload": entity("nsIMsgCloudFileProvider.cancelFileUpload"),
+             u"deleteFile": entity("nsIMsgCloudFileProvider.deleteFile")}},
     u"nsIMsgDatabase":
         {"value":
             {u"Open":
-                {"return": call_definitions.nsIMsgDatabase_changed}}},
+                {"return": call_definitions.nsIMsgDatabase_changed}},
+             u"openMailDBFromFile": entity("nsIMsgDatabase.openMailDBFromFile")},
+    u"nsIMsgDBService":
+      {"value":
+        {u"openMailDBFromFile":
+            {"return": call_definitions.nsIMsgDatabase_changed}}},
+    u"nsIMsgFilterPlugin":
+        {"value":
+            {u"updateData": entity("nsIMsgFilterPlugin.updateData")}},
+    u"nsIMsgFilterList":
+        {"value":
+            {u"defaultFile": entity("nsIMsgFilterList.defaultFile")}},
+    u"nsIMsgFilterService":
+        {"value":
+            {u"OpenFilterList": entity("nsIMsgFilterService.OpenFilterList"),
+             u"SaveFilterList": entity("nsIMsgFilterService.SaveFilterList")}},
     u"nsIMsgFolder":
         {"value":
             {u"offlineStoreOutputStream":
-                {"value": call_definitions.nsIMsgFolder_changed}}},
+                {"value": call_definitions.nsIMsgFolder_changed},
+             u"filePath": entity("nsIMsgFolder.filePath")}},
+    u"nsIMsgIdentity":
+        {"value": 
+            {u"signature": entity("nsIMsgIdentity.signature")}},
+    u"nsIMsgIncomingServer":
+        {"value":
+            {u"setDefaultLocalPath": entity("nsIMsgIncomingServer.setDefaultLocalPath"),
+             u"getFileValue": entity("nsIMsgIncomingServer.getFileValue"),
+             u"setFileValue": entity("nsIMsgIncomingServer.setFileValue"),
+             u"localPath": entity("nsIMsgIncomingServer.localPath")}},
     u"nsIMsgLocalMailFolder":
         {"value":
             {u"addMessage":
@@ -146,7 +204,11 @@ INTERFACES = {
                 {"return": call_definitions.TB13_nsIMsgNewsFolder_changed}}},
     u"nsIMsgPluggableStore":
         {"value":
-            {u"copyMessages": entity("nsIMsgPluggableStore.copyMessages")}},
+            {u"copyMessages": entity("nsIMsgPluggableStore.copyMessages"),
+             u"getSummaryFile": entity("nsIMsgPluggableStore.getSummaryFile")}},
+    u"nsIMsgProtocolInfo":
+        {"value":
+            {u"defaultLocalPath": entity("nsIMsgProtocolInfo.defaultLocalPath")}},
     u"nsIMsgOutputStream":
         {"value":
             {u"folderStream":
@@ -161,10 +223,17 @@ INTERFACES = {
                 {"return": call_definitions.nsIMsgSearchScopeTerm_removed},
              u"inputStream":
                 {"return": call_definitions.nsIMsgSearchScopeTerm_removed}}},
+   u"nsIMsgSend":
+        {"value":
+            {u"tmpFile": entity("nsIMsgSend.tmpFile")}},
     u"nsIMsgThread":
         {"value":
             {u"GetChildAt":
                 {"return": call_definitions.nsIMsgThread_removed}}},
+    u"nsINoIncomingServer":
+        {"value":
+            {u"copyDefaultMessages": 
+                entity("nsINoIncomingServer.copyDefaultMessages")}},
     u"nsIObserverService":
         {"value":
             {u"addObserver":
@@ -184,6 +253,12 @@ INTERFACES = {
                         "Authors of bootstrapped add-ons must take care "
                         "to clean up any added resource substitutions "
                         "at shutdown."}}},
+    u"nsIRssIncomingServer":
+        {"value": 
+            {u"subscriptionsDataSourcePath": 
+                entity("nsIRssIncomingServer.subscriptionsDataSourcePath"),
+             u"feedItemsDataSourcePath": 
+                entity("nsIRssIncomingServer.feedItemsDataSourcePath")}},
     u"nsIStringBundleService":
         {"value":
             {u"createStringBundle":
@@ -231,6 +306,10 @@ INTERFACES = {
         {"value":
              {u"param":
                   {"value": call_definitions.url_param_bug691588}}},
+    u"nsIUrlFetcher":
+        {"value":
+            {u"fireUrlRequest": entity("nsIUrlFetcher.fireUrlRequest"),
+             u"initialize": entity("nsIUrlFetcher.initialize")}},
     u"nsIBrowserHistory":
         {"value":
              {u"lastPageVisited": entity("nsIBrowserHistory.lastPageVisited"),
