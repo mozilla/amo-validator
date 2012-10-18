@@ -48,6 +48,9 @@ BUGZILLA_BUG = "https://bugzilla.mozilla.org/show_bug.cgi?id=%d"
 JETPACK_URI_URL = "https://wiki.mozilla.org/Labs/Jetpack/Release_Notes/" \
                       "1.4#Known_Issues"
 
+# The maximum size of any string in JS analysis.
+MAX_STR_SIZE = 1024 * 24  # 24KB
+
 # Graciously provided by @kumar in bug 614574
 if (not SPIDERMONKEY_INSTALLATION or
     not os.path.exists(SPIDERMONKEY_INSTALLATION)):

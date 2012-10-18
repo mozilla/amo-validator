@@ -6,7 +6,8 @@ import types
 import spidermonkey
 import instanceactions
 import instanceproperties
-from validator.constants import BUGZILLA_BUG, FENNEC_GUID, FIREFOX_GUID
+from validator.constants import (BUGZILLA_BUG, FENNEC_GUID, FIREFOX_GUID,
+                                 MAX_STR_SIZE)
 from validator.decorator import version_range
 from jstypes import *
 
@@ -707,6 +708,12 @@ def _expr_assignment(traverser, node):
         traverser._debug("ASSIGNMENT::L-value global? (%s)" %
                          ("Y" if left.is_global else "N"), 1)
         new_value = operators[token]()
+
+        # Cap the length of analyzed strings.
+        if (isinstance(new_value, types.StringTypes)
+                and len(new_value) > MAX_STR_SIZE):
+            new_value = new_value[:MAX_STR_SIZE]
+
         traverser._debug("ASSIGNMENT::New value >> %s" % new_value, 1)
         left.set_value(new_value, traverser=traverser)
         return left
@@ -796,8 +803,7 @@ def _expr_binary(traverser, node):
 
     output = None
     if (operator in (">>", "<<", ">>>") and
-        ((left is None or right is None) or
-         gright < 0)):
+            (left is None or right is None or gright < 0)):
         output = False
     elif operator in operators:
         # Concatenation can be silly, so always turn undefineds into empty
@@ -807,22 +813,24 @@ def _expr_binary(traverser, node):
                 left = ""
             if right is None:
                 right = ""
-            if isinstance(left, types.StringTypes) or \
-               isinstance(right, types.StringTypes):
+            if (isinstance(left, types.StringTypes) or
+                    isinstance(right, types.StringTypes)):
                 left = _get_as_str(left)
                 right = _get_as_str(right)
 
         # Don't even bother handling infinity if it's a numeric computation.
         if (operator in ("<<", ">>", ">>>") and
-            (abs(gleft) == float('inf') or abs(gright) == float('inf'))):
-            from predefinedentities import GLOBAL_ENTITIES
-            return traverser._build_global("NaN", GLOBAL_ENTITIES[u"NaN"])
+                (abs(gleft) == float('inf') or abs(gright) == float('inf'))):
+            return get_NaN(traverser)
 
         output = operators[operator]()
 
-    if not isinstance(output, JSWrapper):
-        return JSWrapper(output, traverser=traverser)
-    return output
+        # Cap the length of analyzed strings.
+        if (isinstance(output, types.StringTypes)
+                and len(output) > MAX_STR_SIZE):
+            output = output[:MAX_STR_SIZE]
+
+    return JSWrapper(output, traverser=traverser)
 
 
 def _expr_unary(traverser, node):
