@@ -52,7 +52,7 @@ if __name__ == '__main__':
 
         while True:
             line = raw_input("js> ")
-            trav._debug_level = 0
+            trav.debug_level = 0
             if line == "enable bootstrap\n":
                 err.save_resource("em:bootstrap", True)
                 continue

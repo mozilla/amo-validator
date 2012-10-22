@@ -5,6 +5,7 @@ from StringIO import StringIO
 
 from regex import run_regex_tests
 from validator.contextgenerator import ContextGenerator
+from validator.constants import MAX_JS_THRESHOLD
 from validator import decorator
 from validator import submain as testendpoint_validator
 from validator import unicodehelper
@@ -203,7 +204,7 @@ def test_packed_scripts(err, xpi_package):
 
     total_scripts = sum(len(bundle["scripts"]) for bundle in scripts)
     exhaustive = True
-    if total_scripts > 1000:
+    if total_scripts > MAX_JS_THRESHOLD:
         err.warning(
             err_id=("testcases_content", "packed_js", "too_much_js"),
             warning="TOO MUCH JS FOR EXHAUSTIVE VALIDATION",
