@@ -32,14 +32,13 @@ class ErrorBundle(object):
     """
 
     def __init__(self, determined=True, listed=True, instant=False,
-                 overrides=None, spidermonkey=None, for_appversions=None):
+                 overrides=None, spidermonkey=False, for_appversions=None):
 
         self.handler = None
 
         self.errors = []
         self.warnings = []
         self.notices = []
-        self.message_count = 0
         self.message_tree = {}
 
         self.compat_summary = {"errors": 0,
@@ -57,7 +56,6 @@ class ErrorBundle(object):
 
         # TODO: Break off into resource helper
         self.resources = {}
-        self.overrides = None
         self.pushable_resources = {}
         self.final_context = None
 
@@ -69,13 +67,10 @@ class ErrorBundle(object):
         self.instant = instant
         self.determined = determined
 
-        # TODO: Break off into version helper
         self.version_requirements = None
 
-        if overrides:
-            self.overrides = overrides
-        if spidermonkey:
-            self.save_resource("SPIDERMONKEY", spidermonkey)
+        self.overrides = overrides or None
+        self.save_resource("SPIDERMONKEY", spidermonkey or False)
 
         self.supported_versions = self.for_appversions = for_appversions
 
@@ -142,10 +137,12 @@ class ErrorBundle(object):
         if tier > self.ending_tier:
             self.ending_tier = tier
 
+    @property
+    def message_count(self):
+        return len(self.errors) + len(self.warnings) + len(self.notices)
+
     def _save_message(self, stack, type_, message, context=None):
         "Stores a message in the appropriate message stack."
-
-        self.message_count += 1
 
         uid = uuid.uuid4().hex
         message["uid"] = uid
@@ -435,10 +432,7 @@ class ErrorBundle(object):
         "Prints a message and takes care of all sorts of nasty code"
 
         # Load up the standard output.
-        output = ["\n",
-                  prefix,
-                  message["message"],
-                  "\n"]
+        output = ["\n", prefix, message["message"]]
 
         # We have some extra stuff for verbose mode.
         if verbose:
@@ -511,8 +505,7 @@ class ErrorBundle(object):
             # the provided versions for the GUID are supported.
             if (guid in support and
                 any((detected_version in requirements[guid]) for
-                    detected_version in
-                    support[guid])):
+                    detected_version in support[guid])):
                 return True
 
     def discard_unused_messages(self, ending_tier):

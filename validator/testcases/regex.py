@@ -5,6 +5,7 @@ from validator.compat import (FX4_DEFINITION, FX5_DEFINITION, FX6_DEFINITION,
                               FX7_DEFINITION, FX8_DEFINITION, FX9_DEFINITION,
                               FX11_DEFINITION, FX12_DEFINITION, FX13_DEFINITION,
                               FX14_DEFINITION, FX15_DEFINITION, FX16_DEFINITION,
+                              FX17_DEFINITION,
                               TB7_DEFINITION, TB10_DEFINITION, TB11_DEFINITION,
                               TB12_DEFINITION, TB13_DEFINITION, TB14_DEFINITION,
                               TB15_DEFINITION, TB16_DEFINITION)
@@ -695,6 +696,39 @@ class Gecko16RegexTests(CompatRegexTestHelper):
                 "Moz(Transition|Animation|Transform)[a-zA-Z]+",
                 "Some CSS selectors have been unprefixed in Gecko 16.",
                 UNPREFIXED_MESSAGE, compat_type="warning")
+
+
+@register_generator
+class Gecko17RegexTests(CompatRegexTestHelper):
+    """Regex tests for Gecko 17 updates."""
+
+    VERSION = FX17_DEFINITION
+
+    CFMM_URL = ("http://mxr.mozilla.org/mozilla-beta/source/content/base/"
+                "public/nsIMessageManager.idl")
+
+    def js_tests(self):
+
+        yield self.get_test_bug(
+                776825, "nsIChromeFrameMessageManager",
+                "`nsIChromeFrameMessageManager` has been removed.",
+                "The `nsIChromeFrameMessageManager` interface has been "
+                "removed, and the new Message Manager interfaces should be "
+                "used instead. See %s for more information." % self.CFMM_URL,
+                compat_type="error")
+
+        yield self.get_test_bug(
+                761278, "onuploadprogress",
+                "`onuploadprogress` has been removed.",
+                "The `onuploadprogress` property has been removed from "
+                "`XMLHttpRequest`.", compat_type="error")
+
+        yield self.get_test_bug(
+                327244, "checkLoadURI(Str)?",
+                "`checkLoadURI` and `checkLoadURIStr` have been removed.",
+                "The `checkLoadURI` and `checkLoadURIStr` interfaces have "
+                "been removed. You should use `checkLoadURIWithPrincipal` "
+                "instead.", compat_type="error")
 
 
 @register_generator

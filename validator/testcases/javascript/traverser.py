@@ -2,6 +2,7 @@ import re
 import types
 
 from validator.compat import FX15_DEFINITION
+from validator.constants import DESCRIPTION_TYPES
 
 from . import actions
 from .jstypes import *
@@ -190,8 +191,7 @@ class Traverser(object):
                     action_debug = (action_result.output() if
                                     isinstance(action_result, JSWrapper) else
                                     action_result)
-                self._debug("ACTION>>%s (%s)" % (action_debug,
-                                                 node["type"]))
+                self._debug("ACTION>>%s (%s)" % (action_debug, node["type"]))
 
         if action_result is None:
             self.debug_level += 1
@@ -306,18 +306,21 @@ class Traverser(object):
     def _build_global(self, name, entity):
         "Builds an object based on an entity from the predefined entity list"
 
-        if (not isinstance(entity.get("dangerous"), types.LambdaType) or
+        if (not callable(entity.get("dangerous")) or
             "dangerous_on_read" in entity):
             dang = entity.get("dangerous", entity.get("dangerous_on_read"))
 
-            if isinstance(dang, types.LambdaType):
+            if callable(dang):
                 dang = dang(self._traverse_node, self.err)
+
             if dang:
+                actions.call_dangerous_function(self, entity, name)
+
                 self._debug("DANGEROUS")
                 self.err.warning(
                     ("js", "traverser", "dangerous_global"),
                     "Illegal or deprecated access to the `%s` global" % name,
-                    [dang if isinstance(dang, (types.StringTypes, list, tuple))
+                    [dang if isinstance(dang, DESCRIPTION_TYPES)
                      else "Access to the `%s` property is deprecated "
                           "for security or other reasons." % name],
                     filename=self.filename,

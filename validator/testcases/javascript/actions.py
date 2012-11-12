@@ -6,8 +6,9 @@ import types
 import spidermonkey
 import instanceactions
 import instanceproperties
-from validator.constants import (BUGZILLA_BUG, FENNEC_GUID, FIREFOX_GUID,
-                                 MAX_STR_SIZE)
+from validator.compat import FX17_DEFINITION
+from validator.constants import (BUGZILLA_BUG, DESCRIPTION_TYPES, FENNEC_GUID,
+                                 FIREFOX_GUID, MAX_STR_SIZE)
 from validator.decorator import version_range
 from jstypes import *
 
@@ -354,6 +355,22 @@ def _define_literal(traverser, node):
                      traverser=traverser)
 
 
+def call_dangerous_function(traverser, member, name):
+    if name in ("eval", "Function", ):
+        traverser.err.notice(
+            err_id=("js", "actions", "_call_expression", "eval_compat"),
+            notice="`toString` for function objects has changed.",
+            description=["The `toString` implementation for function objects "
+                         "have changed. If you are using `eval` or `Function` "
+                         "to change the behavior of 'native' functions, it is "
+                         "probably not working correctly in Firefox 17 and "
+                         "above.",
+                         "See %s for details." % BUGZILLA_BUG % 761723],
+            for_appversions=FX17_DEFINITION,
+            compatibility_type="error",
+            tier=5)
+
+
 def _call_expression(traverser, node):
     args = node["arguments"]
     map(traverser._traverse_node, args)
@@ -377,14 +394,15 @@ def _call_expression(traverser, node):
             column=traverser.position,
             context=traverser.context)
 
-    if (member.is_global and
-        "dangerous" in member.value and
-        isinstance(member.value["dangerous"], types.LambdaType)):
+    if member.is_global and callable(member.value.get("dangerous", None)):
+        result = member.value["dangerous"](a=args, t=traverser._traverse_node,
+                                           e=traverser.err)
+        name = member.value.get("name", "")
 
-        dangerous = member.value["dangerous"]
-        t = traverser._traverse_node
-        result = dangerous(a=args, t=t, e=traverser.err)
-        if result and "name" in member.value:
+        if result:
+            call_dangerous_function(traverser, member, name)
+
+        if result and name:
             ## Generate a string representation of the params
             #params = u", ".join([_get_as_str(t(p).get_literal_value()) for
             #                     p in args])
@@ -393,8 +411,8 @@ def _call_expression(traverser, node):
                         "called_dangerous_global"),
                 warning="`%s` called in potentially dangerous manner" %
                             member.value["name"],
-                description=result if isinstance(result, (types.StringTypes,
-                                                          list, tuple)) else
+                description=result if isinstance(result,
+                                                 DESCRIPTION_TYPES) else
                             "The global `%s` function was called using a set "
                             "of dangerous parameters. Calls of this nature "
                             "are deprecated." % member.value["name"],

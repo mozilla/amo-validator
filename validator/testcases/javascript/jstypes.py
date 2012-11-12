@@ -512,4 +512,3 @@ class JSArray(JSObject):
 
     def output(self):
         return u"[%s]" % self.get_literal_value()
-

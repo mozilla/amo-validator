@@ -2,6 +2,10 @@
 
 import json
 import os
+import types
+
+
+DESCRIPTION_TYPES = types.StringTypes + (list, tuple, )
 
 # Package type constants.
 PACKAGE_ANY = 0

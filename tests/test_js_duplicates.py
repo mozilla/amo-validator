@@ -19,4 +19,3 @@ def test_no_dups():
     assert _do_test_raw("""
     eval.prototype = true;
     """).message_count == 2
-

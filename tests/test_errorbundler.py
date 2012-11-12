@@ -142,15 +142,19 @@ def test_file_structure():
     bundle = ErrorBundle(True) # No color since no output
 
     # Populate the bundle with some test data.
-    bundle.error((), "error", "", "file1", 123)
-    bundle.error((), "error", "", "file2")
+    bundle.error((), "error", description="",
+                 filename="file1", column=123)
+    bundle.error((), "error", description="",
+                 filename="file2")
     bundle.error((), "error")
 
     # Push a state
     bundle.push_state("foo")
 
-    bundle.warning((), "warning", "", "file4", 123)
-    bundle.warning((), "warning", "", "file5")
+    bundle.warning((), "warning", description="",
+                   filename="file4", column=123)
+    bundle.warning((), "warning", description="",
+                   filename="file5")
     bundle.warning((), "warning")
 
     bundle.pop_state()
