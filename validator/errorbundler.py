@@ -1,6 +1,8 @@
 import json
 import sys
+import types
 import uuid
+from functools import partial
 from StringIO import StringIO
 
 from outputhandlers.shellcolors import OutputHandler
@@ -59,9 +61,7 @@ class ErrorBundle(object):
         self.pushable_resources = {}
         self.final_context = None
 
-        self.metadata = {
-            'requires_chrome': False,
-        }
+        self.metadata = {'requires_chrome': False}
         if listed:
             self.resources["listed"] = True
         self.instant = instant
@@ -74,62 +74,26 @@ class ErrorBundle(object):
 
         self.supported_versions = self.for_appversions = for_appversions
 
-    def error(self, err_id, error,
-              description='', filename='', line=None, column=None,
-              context=None, tier=None, for_appversions=None,
-              compatibility_type=None):
-        "Stores an error message for the validation process"
-        self._save_message(self.errors,
-                           "errors",
-                           {"id": err_id,
-                            "message": error,
-                            "description": description,
-                            "file": filename,
-                            "line": line,
-                            "column": column,
-                            "tier": tier,
-                            "for_appversions": for_appversions,
-                            "compatibility_type": compatibility_type},
-                           context=context)
-        return self
+    def _message(type_, message_type):
+        def wrap(self, *args, **kwargs):
+            message = {
+                "id": kwargs.get('err_id') or args[0],
+                "message": kwargs.get(message_type) or args[1],
+                "file": kwargs.get("filename", "")  # Filename is never None.
+            }
+            for field in ("description", "line", "column", "tier",
+                          "for_appversions", "compatibility_type"):
+                message[field] = kwargs.get(field)
 
-    def warning(self, err_id, warning,
-                description='', filename='', line=None, column=None,
-                context=None, tier=None, for_appversions=None,
-                compatibility_type=None):
-        "Stores a warning message for the validation process"
-        self._save_message(self.warnings,
-                           "warnings",
-                           {"id": err_id,
-                            "message": warning,
-                            "description": description,
-                            "file": filename,
-                            "line": line,
-                            "column": column,
-                            "tier": tier,
-                            "for_appversions": for_appversions,
-                            "compatibility_type": compatibility_type},
-                           context=context)
-        return self
+            self._save_message(getattr(self, type_), type_, message,
+                               context=kwargs.get("context"))
+            return self
+        return wrap
 
-    def notice(self, err_id, notice,
-               description="", filename="", line=None, column=None,
-               context=None, tier=None, for_appversions=None,
-               compatibility_type=None):
-        "Stores an informational message about the validation"
-        self._save_message(self.notices,
-                           "notices",
-                           {"id": err_id,
-                            "message": notice,
-                            "description": description,
-                            "file": filename,
-                            "line": line,
-                            "column": column,
-                            "tier": tier,
-                            "for_appversions": for_appversions,
-                            "compatibility_type": compatibility_type},
-                           context=context)
-        return self
+    # And then all the real functions. Ahh, how clean!
+    error = _message("errors", "error")
+    warning = _message("warnings", "warning")
+    notice = _message("notices", "notice")
 
     def set_tier(self, tier):
         "Updates the tier and ending tier"
@@ -152,9 +116,9 @@ class ErrorBundle(object):
             if isinstance(context, tuple):
                 message["context"] = context
             else:
-                message["context"] = \
-                            context.get_context(line=message["line"],
-                                                column=message["column"])
+                message["context"] = (
+                    context.get_context(line=message["line"],
+                                        column=message["column"]))
         else:
             message["context"] = None
 
@@ -208,10 +172,6 @@ class ErrorBundle(object):
         if self.instant:
             self._print_message(type_, message, verbose=True)
 
-    def set_type(self, type_):
-        "Stores the type of addon we're scanning"
-        self.detected_type = type_
-
     def failed(self, fail_on_warnings=True):
         """Returns a boolean value describing whether the validation
         succeeded or not."""
@@ -236,9 +196,9 @@ class ErrorBundle(object):
         else:
             self.resources[name] = resource
 
+    @property
     def is_nested_package(self):
         "Returns whether the current package is within a PACKAGE_MULTI"
-
         return bool(self.package_stack)
 
     def push_state(self, new_file=""):
@@ -423,7 +383,7 @@ class ErrorBundle(object):
 
         if data is None:
             return ""
-        if isinstance(data, (str, unicode)):
+        if isinstance(data, types.StringTypes):
             return data
         elif isinstance(data, (list, tuple)):
             return "\n".join(self._flatten_list(x) for x in data)

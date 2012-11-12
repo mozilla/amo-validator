@@ -195,7 +195,7 @@ def test_packed_scripts(err, xpi_package):
     # This test doesn't apply to subpackages. We keep references to the
     # subpackage bundles so we can process everything at once in an unpushed
     # state.
-    if err.is_nested_package():
+    if err.is_nested_package:
         return
 
     scripts = err.get_resource("scripts")
@@ -280,13 +280,12 @@ def _process_file(err, xpi_package, name, file_data, name_lower,
 
         # Let the error bunder know we're in a sub-package.
         err.push_state(name)
-        err.set_type(PACKAGE_SUBPACKAGE if
-                     is_subpackage else
-                     PACKAGE_THEME)
+        err.detected_type = (PACKAGE_SUBPACKAGE if is_subpackage else
+                             PACKAGE_THEME)
         err.set_tier(1)
-        supported_versions = (err.supported_versions.copy()
-                              if err.supported_versions
-                              else err.supported_versions)
+        supported_versions = (err.supported_versions.copy() if
+                              err.supported_versions else
+                              err.supported_versions)
 
         if is_subpackage:
             testendpoint_validator.test_inner_package(err, sub_xpi)

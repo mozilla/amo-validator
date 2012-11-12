@@ -20,7 +20,7 @@ def _test_xul_raw(data, path, should_fail=False, type_=None):
     err = ErrorBundle()
     err.supported_versions = {}
     if type_:
-        err.set_type(type_)
+        err.detected_type = type_
 
     parser = markuptester.MarkupParser(err, debug=True)
     parser.process(filename, data, extension)

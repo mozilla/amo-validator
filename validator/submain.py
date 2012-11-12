@@ -114,7 +114,7 @@ def test_search(err, package, expectation=0):
     detect_opensearch(err, package, listed=err.get_resource("listed"))
 
     if expected_search_provider and not err.failed():
-        err.set_type(PACKAGE_SEARCHPROV)
+        err.detected_type = PACKAGE_SEARCHPROV
 
 
 def test_package(err, file_, name, expectation=PACKAGE_ANY,
@@ -205,7 +205,7 @@ def _load_install_rdf(err, package, expectation):
                             "the type of the add-on.")
         return
     else:
-        err.set_type(results)
+        err.detected_type = results
 
     # Compare the results of the low-level type detection to
     # that of the expectation and the assumption.

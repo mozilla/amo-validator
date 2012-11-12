@@ -250,7 +250,15 @@ TB16_METHODS = {
     "nsIURLFetcher.initialize": "localFIle",
     "nsIMsgDatabase.openMailDBFromFile": "aFile",
     "nsIMailboxService.ParseMailbox": "aMailboxPath",
-    "nsINoIncomingServer.copyDefaultMessages": "parentDir"}
+    "nsINoIncomingServer.copyDefaultMessages": "parentDir",
+}
+
+for func, param in TB16_METHODS.items():
+    deprecated_entity(
+        name=func, version=TB16_DEFINITION,
+        message="The `%s` parameter has been changed from `nsILocalFile` to "
+                "`nsIFile`" % param,
+        bug=749930)
 
 TB16_ATTRIBUTES = [
     "nsIAbLDAPDirectory.replicationFile",
@@ -264,16 +272,12 @@ TB16_ATTRIBUTES = [
     "nsIMsgSend.tmpFile",
     "nsIImportMailboxDescriptor.file",
     "nsIRssIncomingServer.subscriptionsDataSourcePath",
-    "nsIRssIncomingServer.feedItemsDataSourcePath"]
+    "nsIRssIncomingServer.feedItemsDataSourcePath",
+]
 
 for attrib in TB16_ATTRIBUTES:
-    deprecated_entity(name=attrib, version=TB16_DEFINITION, 
-                      message="This attribute has been changed from "
-                      "`nsILocalFile` to `nsIFile`", 
-                      bug=749930)
-
-for func, param in TB16_METHODS.items():
-    deprecated_entity(name=func, version=TB16_DEFINITION, 
-                      message="The `%s` parameter has been changed from "
-                      " `nsILocalFile` to `nsIFile`" % param, 
-                      bug=749930)
+    deprecated_entity(
+        name=attrib, version=TB16_DEFINITION,
+        message="This attribute has been changed from `nsILocalFile` to "
+                "`nsIFile`",
+        bug=749930)

@@ -13,7 +13,7 @@ def test_json():
 
     # Use the StringIO as an output buffer.
     bundle = ErrorBundle() # No color since no output
-    bundle.set_type(4)
+    bundle.detected_type = 4
     bundle.set_tier(4)
     bundle.set_tier(3)
 
@@ -56,7 +56,7 @@ def test_type():
 
     bundle = ErrorBundle()
 
-    bundle.set_type(5)
+    bundle.detected_type = 5
     assert bundle.detected_type == 5
 
 
@@ -67,7 +67,7 @@ def test_states():
     bundle = ErrorBundle()
 
     # Populate the bundle with some test data.
-    bundle.set_type(4)
+    bundle.detected_type = 4
     bundle.error((), "error")
     bundle.warning((), "warning")
     bundle.notice((), "notice")
@@ -76,7 +76,7 @@ def test_states():
     # Push a state
     bundle.push_state("test.xpi")
 
-    bundle.set_type(2)
+    bundle.detected_type = 2
     bundle.error((), "nested error")
     bundle.warning((), "nested warning")
     bundle.notice((), "nested notice")
@@ -84,7 +84,7 @@ def test_states():
     # Push another state
     bundle.push_state("test2.xpi")
 
-    bundle.set_type(3)
+    bundle.detected_type = 3
     bundle.error((), "super nested error")
     bundle.warning((), "super nested warning")
     bundle.notice((), "super nested notice")
@@ -268,7 +268,7 @@ def test_json_constructs():
     """This tests some of the internal JSON stuff so we don't break zamboni."""
 
     e = ErrorBundle()
-    e.set_type(1)
+    e.detected_type = 1
     e.error(("a", "b", "c"),
             "Test")
     e.error(("a", "b", "foo"),

@@ -160,6 +160,7 @@ class MockPackStack(object):
             stack = []
         self.package_stack = stack
 
+    @property
     def is_nested_package(self):
         return bool(self.package_stack)
 

@@ -1,3 +1,4 @@
+import itertools
 import re
 import types
 
@@ -344,13 +345,17 @@ class Traverser(object):
 
     def _declare_variable(self, name, value, type_="var"):
         context = None
-        if type_ == "let":
+        if type_ in ("var", "const", ):
+            # Same as `reversed(self.contexts[1:])`
+            for cont in itertools.islice(reversed(self.contexts), None,
+                                         len(self.contexts)):
+                if cont.type_ == "default":
+                    context = cont
+                    break
+            else:
+                context = self.contexts[0]
+        elif type_ == "let":
             context = self.contexts[-1]
-        elif type_ in ("var", "const", ):
-            contexts = ([self.contexts[0]] +
-                        filter(lambda c: c.type_ == "default",
-                               self.contexts[1:]))
-            context = contexts[-1]
         elif type_ == "glob":
             # Look down through the lexical scope. If the variable being
             # assigned is present in one of those objects, use that as the

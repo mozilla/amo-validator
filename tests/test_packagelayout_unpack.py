@@ -12,12 +12,11 @@ def _do_test(unpack=False, contents=None, set_type=0, is_ff4=False):
 
     err = ErrorBundle(None, True)
     if set_type:
-        err.set_type(set_type)
+        err.detected_type = set_type
     err.save_resource("em:unpack", unpack)
     err.save_resource("ff4", is_ff4)
-    packagelayout.test_emunpack(err,
-                                MockXPI(dict(zip(contents,
-                                                 [True for c in contents]))))
+    packagelayout.test_emunpack(
+        err, MockXPI(dict(zip(contents, [True for c in contents]))))
     return err
 
 

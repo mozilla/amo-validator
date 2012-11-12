@@ -63,10 +63,8 @@ class ChromeManifest(object):
         for triple in self.triples:
 
             # Filter out non-matches
-            if (subject and
-                triple["subject"] != subject) or \
-               (predicate and
-                triple["predicate"] != predicate):  # pragma: no cover
+            if ((subject and triple["subject"] != subject) or
+                (predicate and triple["predicate"] != predicate)):
                 continue
 
             yield triple["object"]
@@ -111,7 +109,7 @@ class ChromeManifest(object):
 
             # Handle jarred paths differently.
             if path_location.startswith("jar:"):
-                if not error_bundle.is_nested_package():
+                if not error_bundle.is_nested_package:
                     continue
 
                 # Parse out the JAR and it's location within the chrome.
@@ -134,7 +132,7 @@ class ChromeManifest(object):
             else:
                 # If we're in a subpackage, a content instruction referring to
                 # the root of the package obviously doesn't apply.
-                if error_bundle.is_nested_package():
+                if error_bundle.is_nested_package:
                     continue
 
                 chrome_path = self._url_chunk_join(chrome_name, "content")

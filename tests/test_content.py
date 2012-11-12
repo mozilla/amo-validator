@@ -112,7 +112,7 @@ def test_jar_subpackage():
     "Tests JAR files that are subpackages."
 
     err = ErrorBundle()
-    err.set_type(PACKAGE_EXTENSION)
+    err.detected_type = PACKAGE_EXTENSION
     err.supported_versions = {"foo": ["1.2.3"]}
     mock_package = MockXPI(
         {"chrome/subpackage.jar":
@@ -139,7 +139,7 @@ def test_xpi_subpackage():
     "XPIs should never be subpackages; only nested extensions"
 
     err = ErrorBundle()
-    err.set_type(PACKAGE_EXTENSION)
+    err.detected_type = PACKAGE_EXTENSION
     mock_package = MockXPI(
         {"chrome/package.xpi":
              "tests/resources/content/subpackage.jar"})
@@ -176,7 +176,7 @@ def test_jar_nonsubpackage():
     "Tests XPI files that are not subpackages."
 
     err = ErrorBundle()
-    err.set_type(PACKAGE_MULTI)
+    err.detected_type = PACKAGE_MULTI
     err.save_resource("is_multipackage", True)
     mock_package = MockXPI(
         {"foo.jar":
@@ -289,7 +289,7 @@ def test_langpack():
 
     err = ErrorBundle()
     err.supported_versions = {}
-    err.set_type(PACKAGE_LANGPACK)
+    err.detected_type = PACKAGE_LANGPACK
     mock_package = MockXPI({"foo.dtd": "tests/resources/content/junk.xpi"})
 
     result = content.test_packed_packages(err, mock_package)
@@ -323,4 +323,3 @@ def test_make_script_absolute():
     eq_(msa("chrome://a/b/c.xul", "/foo/bar.js"), "chrome://a/foo/bar.js")
     eq_(msa("chrome://a/b/c.xul", "foo.js"), "chrome://a/b/foo.js")
     eq_(msa("chrome://a/b/c.xul", "foo/bar.js"), "chrome://a/b/foo/bar.js")
-

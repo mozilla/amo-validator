@@ -122,7 +122,7 @@ def test_xpi(err, xpi_package):
 
     # Skip over incompatible (or unnecessary) package types.
     if (err.detected_type != PACKAGE_EXTENSION or
-        err.is_nested_package()):
+        err.is_nested_package):
         return None
 
     # Don't even both with the test(s) if there's no chrome.manifest.

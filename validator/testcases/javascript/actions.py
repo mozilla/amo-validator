@@ -49,9 +49,7 @@ def _get_member_exp_property(traverser, node):
 def _expand_globals(traverser, node):
     """Expands a global object that has a lambda value."""
 
-    if (node.is_global and
-        isinstance(node.value.get("value"), types.LambdaType)):
-
+    if node.is_global and callable(node.value.get("value")):
         result = node.value["value"](t=traverser)
         if isinstance(result, dict):
             output = traverser._build_global("--", result)
@@ -648,7 +646,7 @@ def _expr_assignment(traverser, node):
                 column=traverser.position,
                 context=traverser.context)
 
-        if isinstance(readonly_value, types.LambdaType):
+        if callable(readonly_value):
             # The readonly attribute supports a lambda function that accepts
             readonly_value(t=traverser, r=right, rn=node["right"])
 
