@@ -8,7 +8,7 @@ from validator.compat import (FX4_DEFINITION, FX5_DEFINITION, FX6_DEFINITION,
                               FX17_DEFINITION,
                               TB7_DEFINITION, TB10_DEFINITION, TB11_DEFINITION,
                               TB12_DEFINITION, TB13_DEFINITION, TB14_DEFINITION,
-                              TB15_DEFINITION, TB16_DEFINITION)
+                              TB15_DEFINITION, TB16_DEFINITION, TB17_DEFINITION)
 from validator.contextgenerator import ContextGenerator
 from markup.csstester import UNPREFIXED_MESSAGE
 
@@ -1059,4 +1059,46 @@ class Thunderbird16RegexTests(CompatRegexTestHelper):
                     "A JavaScript function matched the pattern `%s`, which has "
                     "been flagged as having changed, removed, or deprecated "
                     "in Thunderbird 16." % pattern,
+                    compat_type="error", log_function=self.err.notice)
+
+@register_generator
+class Thunderbird17RegexTests(CompatRegexTestHelper):
+    """Regex tests for the Thunderbird 17 update."""
+
+    VERSION = TB17_DEFINITION
+
+    def tests(self):
+        """String and JS changes for Thunderbird add-ons"""
+
+        # String changes for add-ons that use our localizations.
+        patterns = {r"searchTermListButtonsFlexValue": 743974,
+                    r"sendWindow\.title": 255050,
+                    r"addonsMgr\.label": 513164,
+                    r"manageAddons(DescWin|DescUnix2)?\.(label|accesskey)": 513164}
+        for pattern, bug in patterns.items():
+            yield self.get_test_bug(
+                    bug, pattern,
+                    "Removed, renamed, or changed labels in use.",
+                    "Some string matched the pattern `%s`, which has been "
+                    "flagged as having changed in Thunderbird 17." % pattern,
+                    compat_type="error")
+
+        js_patterns = {r"(\b|\()onlineContacts": 775105,
+                       r"(\b|\()initContactList": 775105,
+                       r"(\b|\()onShowAttachmentListContextMenu": 780200,
+                       r"(\b|\()FillAttachmentListPopup": 780200,
+                       r"(\b|\()showAddonsMgr": 513164,
+                       r"(\b|\()(Get|Change)FeedOpenHandler": 596234,
+                       r"(\b|\()gShowFeedSummaryToggle": 596234,
+                       r"(\b|\()ChangeFeedShowSummaryPref": 596234,
+                       r"(\b|\()FeedSetContentView(Toggle)?": 596234,
+                       r"(\b|\()FeedCheckContentFormat": 596234}
+
+        for pattern, bug in js_patterns.items():
+            yield self.get_test_bug(
+                    bug, pattern,
+                    "Removed, renamed, or changed methods in use.",
+                    "A JavaScript function matched the pattern `%s`, which has "
+                    "been flagged as having changed, removed, or deprecated "
+                    "in Thunderbird 17." % pattern,
                     compat_type="error", log_function=self.err.notice)
