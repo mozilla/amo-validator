@@ -1,11 +1,38 @@
 import json
 import nose
 import sys
+from nose.tools import eq_
 from StringIO import StringIO
 
 import validator.errorbundler as errorbundler
 from validator.errorbundler import ErrorBundle
 from validator.contextgenerator import ContextGenerator
+
+
+def test_message_completeness():
+    """Test we're fully expecting all of the values for a message."""
+
+    bundle = ErrorBundle()
+
+    bundle.error(
+        ("id", ),
+        "error",
+        "description",
+        "file",
+        123,  # line
+        456  # column
+    )
+
+    results = json.loads(bundle.render_json())
+    eq_(len(results["messages"]), 1, "Unexpected number of messages.")
+
+    message = results["messages"][0]
+    eq_(message["id"], ["id"])
+    eq_(message["message"], "error")
+    eq_(message["description"], "description")
+    eq_(message["file"], "file")
+    eq_(message["line"], 123)
+    eq_(message["column"], 456)
 
 
 def test_json():

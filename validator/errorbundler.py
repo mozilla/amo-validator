@@ -77,12 +77,19 @@ class ErrorBundle(object):
     def _message(type_, message_type):
         def wrap(self, *args, **kwargs):
             message = {
-                "id": kwargs.get('err_id') or args[0],
+                "id": kwargs.get("err_id") or args[0],
                 "message": kwargs.get(message_type) or args[1],
-                "file": kwargs.get("filename", "")  # Filename is never None.
+                "description": kwargs.get("description",
+                                          args[2] if len(args) > 2 else None),
+                # Filename is never None.
+                "file": kwargs.get("filename",
+                                   args[3] if len(args) > 3 else ""),
+                "line": kwargs.get("line",
+                                   args[4] if len(args) > 4 else None),
+                "column": kwargs.get("column",
+                                     args[5] if len(args) > 5 else None),
             }
-            for field in ("description", "line", "column", "tier",
-                          "for_appversions", "compatibility_type"):
+            for field in ("tier", "for_appversions", "compatibility_type", ):
                 message[field] = kwargs.get(field)
 
             self._save_message(getattr(self, type_), type_, message,
