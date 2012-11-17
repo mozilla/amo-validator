@@ -383,3 +383,7 @@ def test_prefwindow_ids():
     <prefwindow id="foobar"></prefwindow>
     </foo>""", "foo.xul", should_fail=False)
 
+
+def test_valueless_attribute():
+    """Test that valueless attributes generate no errors."""
+    _test_xul_raw("<foo bar />", "foo.xul", should_fail=False)

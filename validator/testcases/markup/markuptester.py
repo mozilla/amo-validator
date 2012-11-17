@@ -357,6 +357,10 @@ class MarkupParser(htmlparser.HTMLParser):
         for attr in attrs:
             attr_name, attr_value = attr[0].lower(), attr[1]
 
+            # We don't care about valueless attributes.
+            if attr_value is None:
+                continue
+
             if (attr_name == "xmlns:xbl" and
                 attr_value == "http://www.mozilla.org/xbl"):
                 self.xbl = True
