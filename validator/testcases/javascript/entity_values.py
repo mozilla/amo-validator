@@ -266,7 +266,7 @@ TB16_ATTRIBUTES = [
     "nsIAbManager.userProfileDirectory",
     "nsIMsgFolder.filePath",
     "nsIMsgIdentity.signature",
-    "nsIMsgIncomingServer.localPath"
+    "nsIMsgIncomingServer.localPath",
     "nsIMsgProtocolInfo.defaultLocalPath",
     "nsIMsgFilterList.defaultFile",
     "nsIMsgSend.tmpFile",
