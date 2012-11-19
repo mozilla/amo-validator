@@ -6,4 +6,4 @@ rdflib==3.2.1
 simplejson==2.3.0
 argparse==1.1
 -e git://github.com/mattbasta/fastchardet#egg=fastchardet
-mock==1.0b1
+mock==1.0.0
