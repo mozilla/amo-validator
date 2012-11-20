@@ -364,6 +364,10 @@ def call_dangerous_function(traverser, member, name):
                          "probably not working correctly in Firefox 17 and "
                          "above.",
                          "See %s for details." % BUGZILLA_BUG % 761723],
+            filename=traverser.filename,
+            line=traverser.line,
+            column=traverser.position,
+            context=traverser.context,
             for_appversions=FX17_DEFINITION,
             compatibility_type="error",
             tier=5)
