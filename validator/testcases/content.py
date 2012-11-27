@@ -21,6 +21,10 @@ FLAGGED_FILES = set([".DS_Store", "Thumbs.db"])
 FLAGGED_EXTENSIONS = set([".orig", ".old", "~"])
 OSX_REGEX = re.compile("__MACOSX")
 
+with open(os.path.join(os.path.dirname(__file__), "hashes.txt")) as f:
+    hash_blacklist = set(map(str.rstrip, f))
+
+
 @decorator.register_test(tier=1)
 def test_xpcnativewrappers(err, xpi_package=None):
     """Tests the chrome.manifest file to ensure that it doesn't contain
@@ -53,15 +57,8 @@ def test_packed_packages(err, xpi_package=None):
     pretested_files = err.get_resource("pretested_files") or []
 
     scripts = set()
-
-    with open(os.path.join(os.path.dirname(__file__),
-              "hashes.txt")) as f:
-        hash_blacklist = [x[:-1] for x in f]
-
-    overlays = set()
     chrome = err.get_resource("chrome.manifest_nopush")
-    if chrome:
-        overlays = chrome.get_applicable_overlays(err)
+    overlays = chrome.get_applicable_overlays(err) if chrome else set()
 
     marked_scripts = err.get_resource("marked_scripts")
     if not marked_scripts:
@@ -356,4 +353,3 @@ def _make_script_absolute(xul_path, script):
         xul_path_split = xul_path.split("/")
         xul_path_split[-1] = script
         return "/".join(xul_path_split)
-
