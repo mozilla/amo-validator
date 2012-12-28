@@ -25,6 +25,9 @@ process("https://addons.cdn.mozilla.net/en-US/firefox/files/browse/149703/"
         "file-serve/bootstrap.js?token=e9d0767e-643c-48ad-b09e-fc075ca60b77",
         "PersonasInteractive_bootstrap.js")
 
+process("https://raw.github.com/voldsoftware/toolbarbutton-jplib/stable/lib/"
+        "toolbarbutton.js", "toolbarbutton.js")
+
 
 DOJO_VERSIONS = ("1.1.1", "1.2.0", "1.2.3", "1.3.0", "1.3.1", "1.3.2", "1.4.0",
                  "1.4.1", "1.4.3", "1.5", "1.5.1", "1.6", "1.6.1", "1.7.0",
@@ -172,3 +175,14 @@ get_pattern("yui",
 get_pattern("yui",
             "http://yui.yahooapis.com/%s/build/yui-base/yui-base.js",
             YUI_NEW_VERSIONS)
+
+
+CRYPTO_FILES = ["aes", "cipher-core", "core", "enc-base64", "enc-utf16",
+                "evpkdf", "hmac", "md5", "mode-cfb", "mode-ctr", "mode-ecb",
+                "mode-ofb", "pad-ansix923", "pad-iso10126", "pad-iso97971",
+                "pad-nopadding", "pad-zeropadding", "pbkdf2", "rabbit", "rc4",
+                "sha1", "sha224", "sha256", "sha384", "sha512", "tripledes",
+                "x64-core"]
+get_pattern(
+    "crypto_js", "http://crypto-js.googlecode.com/svn/tags/3.0.2/src/%s.js",
+    CRYPTO_FILES)
