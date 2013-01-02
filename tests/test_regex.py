@@ -171,3 +171,9 @@ def test_servicessync():
     assert err.warnings
     assert not any(val for k, val in err.compat_summary.items())
 
+
+def test_mouseevents():
+    """Test that mouse events are properly handled."""
+
+    err = _do_test_raw("window.addEventListener('mousemove', func);")
+    assert err.warnings

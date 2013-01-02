@@ -135,6 +135,15 @@ class GenericRegexTests(RegexTestGenerator):
                 "they often change in ways that break add-ons. It is strongly "
                 "recommended that you do not rely on them.")
 
+    def js_tests(self):
+        yield self.get_test(
+                "mouse(move|over|out)",
+                "Mouse events may cause performance issues.",
+                "The use of `mousemove`, `mouseover`, and `mouseout` is "
+                "discouraged. These events are dispatched with high frequency "
+                "and can cause severe performance issues.",
+                log_function=self.err.warning)
+
 
 @register_generator
 class CategoryRegexTests(RegexTestGenerator):
