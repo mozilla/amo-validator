@@ -416,6 +416,7 @@ GLOBAL_ENTITIES = {
                            not a or not _get_as_str(t(a[0])).lower()
                                .startswith(("chrome:", "resource:"))},
               u"write": entity("document.write"),
+              u"writeln": entity("document.write"),
               u"xmlEncoding": entity("document.xmlEncoding"),
               u"xmlVersion": entity("document.xmlVersion"),
               u"xmlStandalone": entity("document.xmlStandalone")}},

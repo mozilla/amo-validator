@@ -54,11 +54,16 @@ def test_outerHTML():
 def test_document_write():
     """Test that the dev can't define event handler in outerHTML."""
 
-    assert not _do_test_raw("""document.write("<div></div>");""").failed()
+    assert not _do_test_raw("""
+    document.write("<div></div>");
+    document.writeln("<div></div>");
+    """).failed()
 
     for pattern in _DANGEROUS_STRINGS:
         assert _do_test_raw(
             """document.write(%s);""" % pattern).failed(), pattern
+        assert _do_test_raw(
+            """document.writeln(%s);""" % pattern).failed(), pattern
 
 
 def _mock_html_error(self, *args, **kwargs):
