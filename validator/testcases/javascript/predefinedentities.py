@@ -65,13 +65,13 @@ INTERFACES = {
                          "Authors of bootstrapped add-ons must take care to "
                          "clean up any added category entries at shutdown.")}}},
     u"nsIAbLDAPDirectory":
-        {"value": 
+        {"value":
             {u"replicationFile": entity("nsIAbLDAPDirectory.replicationFile"),
              u"databaseFile": entity("nsIAbLDAPDirectory.databaseFile")}},
     u"nsIAbManager":
-        {"value": 
-            {u"userProfileDirectory": 
-                entity("nsIAbManager.userProfileDirectory")}},       
+        {"value":
+            {u"userProfileDirectory":
+                entity("nsIAbManager.userProfileDirectory")}},
     u"nsIAccessibleRetrieval":
         {"dangerous":
             "Using the nsIAccessibleRetrieval interface causes significant "
@@ -135,11 +135,11 @@ INTERFACES = {
                 {"return": call_definitions.nsIMailtoUrl_changed}}},
     u"nsIMessenger":
         {"value":
-            {u"saveAttachmentToFolder": 
+            {u"saveAttachmentToFolder":
                 entity("nsIMessenger.saveAttachmentToFolder")}},
     u"nsIMsgAccountManager":
         {"value":
-            {u"folderUriForPath": 
+            {u"folderUriForPath":
                 entity("nsIMsgAccountManager.folderUriForPath")}},
     u"nsIMsgLocalMailFolder":
         {"value":
@@ -178,7 +178,7 @@ INTERFACES = {
                 {"value": call_definitions.nsIMsgFolder_changed},
              u"filePath": entity("nsIMsgFolder.filePath")}},
     u"nsIMsgIdentity":
-        {"value": 
+        {"value":
             {u"signature": entity("nsIMsgIdentity.signature")}},
     u"nsIMsgIncomingServer":
         {"value":
@@ -232,7 +232,7 @@ INTERFACES = {
                 {"return": call_definitions.nsIMsgThread_removed}}},
     u"nsINoIncomingServer":
         {"value":
-            {u"copyDefaultMessages": 
+            {u"copyDefaultMessages":
                 entity("nsINoIncomingServer.copyDefaultMessages")}},
     u"nsIObserverService":
         {"value":
@@ -254,10 +254,10 @@ INTERFACES = {
                         "to clean up any added resource substitutions "
                         "at shutdown."}}},
     u"nsIRssIncomingServer":
-        {"value": 
-            {u"subscriptionsDataSourcePath": 
+        {"value":
+            {u"subscriptionsDataSourcePath":
                 entity("nsIRssIncomingServer.subscriptionsDataSourcePath"),
-             u"feedItemsDataSourcePath": 
+             u"feedItemsDataSourcePath":
                 entity("nsIRssIncomingServer.feedItemsDataSourcePath")}},
     u"nsIStringBundleService":
         {"value":
@@ -415,6 +415,7 @@ GLOBAL_ENTITIES = {
                        lambda a, t, e:
                            not a or not _get_as_str(t(a[0])).lower()
                                .startswith(("chrome:", "resource:"))},
+              u"write": entity("document.write"),
               u"xmlEncoding": entity("document.xmlEncoding"),
               u"xmlVersion": entity("document.xmlVersion"),
               u"xmlStandalone": entity("document.xmlStandalone")}},

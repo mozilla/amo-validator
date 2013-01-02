@@ -2,6 +2,7 @@
 
 import json
 import os
+import re
 import types
 
 
@@ -58,6 +59,10 @@ MAX_STR_SIZE = 1024 * 24  # 24KB
 # The maximum number of JS files that can be exhaustively validated in one
 # package.
 MAX_JS_THRESHOLD = 900
+
+# The pattern that matches event assignments
+# TODO(valcom): Move this to valcom when that's a thing.
+EVENT_ASSIGNMENT = re.compile("<.+ on[a-z]+=")
 
 # Graciously provided by @kumar in bug 614574
 if (not SPIDERMONKEY_INSTALLATION or

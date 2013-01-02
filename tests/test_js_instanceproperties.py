@@ -5,6 +5,12 @@ from validator.compat import FX18_DEFINITION
 from js_helper import _do_test_raw, TestCase
 
 
+_DANGEROUS_STRINGS = ['"x" + y',
+                      '"<div onclick=\\"foo\\"></div>"',
+                      '"<a href=\\"javascript:alert();\\">"',
+                      '"<script>"']
+
+
 def test_innerHTML():
     """Tests that the dev can't define event handlers in innerHTML."""
 
@@ -13,26 +19,16 @@ def test_innerHTML():
     x.innerHTML = "<div></div>";
     """).failed()
 
-    assert _do_test_raw("""
-    var x = foo();
-    x.innerHTML = "<div onclick=\\"foo\\"></div>";
-    """).failed()
+    for pattern in _DANGEROUS_STRINGS:
 
-    # Test without declaration
-    assert _do_test_raw("""
-    x.innerHTML = "<div onclick=\\"foo\\"></div>";
-    """).failed()
+        assert _do_test_raw("""
+        var x = foo();
+        x.innerHTML = %s;
+        """ % pattern).failed(), pattern
 
-    assert _do_test_raw("""
-    var x = foo();
-    x.innerHTML = "x" + y;
-    """).failed()
-
-    assert _do_test_raw("""x.innerHTML = "<script>";""").failed()
-
-    assert _do_test_raw("""
-    x.innerHTML = '<a href="javascript:alert();">';
-    """).failed()
+        assert _do_test_raw("""
+        x.innerHTML = %s;
+        """ % pattern).failed(), pattern
 
 
 def test_outerHTML():
@@ -43,20 +39,26 @@ def test_outerHTML():
     x.outerHTML = "<div></div>";
     """).failed()
 
-    assert _do_test_raw("""
-    var x = foo();
-    x.outerHTML = "<div onclick=\\"foo\\"></div>";
-    """).failed()
+    for pattern in _DANGEROUS_STRINGS:
 
-    # Test without declaration
-    assert _do_test_raw("""
-    x.outerHTML = "<div onclick=\\"foo\\"></div>";
-    """).failed()
+        assert _do_test_raw("""
+        var x = foo();
+        x.outerHTML = %s;
+        """ % pattern).failed(), pattern
 
-    assert _do_test_raw("""
-    var x = foo();
-    x.outerHTML = "x" + y;
-    """).failed()
+        assert _do_test_raw("""
+        x.outerHTML = %s;
+        """ % pattern).failed(), pattern
+
+
+def test_document_write():
+    """Test that the dev can't define event handler in outerHTML."""
+
+    assert not _do_test_raw("""document.write("<div></div>");""").failed()
+
+    for pattern in _DANGEROUS_STRINGS:
+        assert _do_test_raw(
+            """document.write(%s);""" % pattern).failed(), pattern
 
 
 def _mock_html_error(self, *args, **kwargs):

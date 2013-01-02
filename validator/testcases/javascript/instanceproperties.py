@@ -2,11 +2,10 @@ import re
 import types
 
 from validator.compat import FX10_DEFINITION, FX13_DEFINITION, FX18_DEFINITION
-from validator.constants import BUGZILLA_BUG
+from validator.constants import BUGZILLA_BUG, EVENT_ASSIGNMENT
 import jstypes
 
 
-EVENT_ASSIGNMENT = re.compile("<.+ on[a-z]+=")
 JS_URL = re.compile("href=[\'\"]javascript:")
 
 
@@ -20,6 +19,7 @@ def set_outerHTML(new_value, traverser):
     return _set_HTML_property("outerHTML", new_value, traverser)
 
 
+# TODO(valcom): Make this generic and put it in utils
 def _set_HTML_property(function, new_value, traverser):
     if not isinstance(new_value, jstypes.JSWrapper):
         new_value = jstypes.JSWrapper(new_value, traverser=traverser)
@@ -73,8 +73,9 @@ def _set_HTML_property(function, new_value, traverser):
         # Variable assignments
         traverser.err.warning(
             err_id=("testcases_javascript_instancetypes", "set_%s" % function,
-                        "variable_assignment"),
-            warning="%s should not be set dynamically" % function,
+                    "variable_assignment"),
+            warning="Markup should not be passed to `%s` dynamically." %
+                        function,
             description="Due to both security and performance reasons, "
                         "%s should not be set using dynamic "
                         "values. This can lead to security issues or "

@@ -1,4 +1,5 @@
 from call_definitions import open_in_chrome_context
+from instanceproperties import _set_HTML_property
 from validator.compat import (FX10_DEFINITION, FX14_DEFINITION, FX16_DEFINITION,
                               TB14_DEFINITION, TB15_DEFINITION, TB16_DEFINITION)
 from validator.constants import BUGZILLA_BUG
@@ -58,6 +59,17 @@ deprecated_entity(name="java", version=FX16_DEFINITION,
                   message=JAVA_MESSAGE, bug=748343)
 deprecated_entity(name="Packages", version=FX16_DEFINITION,
                   message=JAVA_MESSAGE, bug=748343)
+
+
+@register_entity("document.write")
+def document_write(traverser):
+    def on_write(wrapper, arguments, traverser):
+        if not arguments:
+            return
+        value = traverser._traverse_node(arguments[0])
+        _set_HTML_property('document.write()', value, traverser)
+
+    return {"return": on_write}
 
 
 @register_entity("document.xmlEncoding")
