@@ -747,6 +747,8 @@ class Gecko18RegexTests(CompatRegexTestHelper):
     VERSION = FX18_DEFINITION
 
     BLOB_URL = "https://developer.mozilla.org/en-US/docs/DOM/BlobBuilder"
+    IMG_URL = ("https://developer.mozilla.org/en-US/docs/"
+               "XPCOM_Interface_Reference/imgICache")
 
     def js_tests(self):
 
@@ -771,7 +773,8 @@ class Gecko18RegexTests(CompatRegexTestHelper):
                 722861, "imgI(Cache|Loader)",
                 "`imgICache` and `imgILoader` have been deprecated.",
                 "The `imgICache` and `imgILoader` interfaces have been "
-                "deprecated in Gecko 18. You should use `imgITools` instead.",
+                "deprecated in Gecko 18. You should use `imgITools` instead. "
+                "See %s for more information." % self.IMG_URL,
                 compat_type="error")
 
         yield self.get_test_bug(
