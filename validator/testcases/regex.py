@@ -737,6 +737,8 @@ class Gecko18RegexTests(CompatRegexTestHelper):
 
     VERSION = FX18_DEFINITION
 
+    BLOB_URL = "https://developer.mozilla.org/en-US/docs/DOM/BlobBuilder"
+
     def js_tests(self):
 
         yield self.get_test_bug(
@@ -782,7 +784,8 @@ class Gecko18RegexTests(CompatRegexTestHelper):
                 744907, "BlobBuilder",
                 "`BlobBuiler` has been removed.",
                 "The `BlobBuilder` object has been removed. You should use "
-                "the `Blob` constructor instead.",
+                "the `Blob` constructor instead. See %s for more "
+                "information." % self.BLOB_URL,
                 compat_type="error")
 
         yield self.get_test_bug(
