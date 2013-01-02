@@ -5,7 +5,7 @@ from validator.compat import (FX4_DEFINITION, FX5_DEFINITION, FX6_DEFINITION,
                               FX7_DEFINITION, FX8_DEFINITION, FX9_DEFINITION,
                               FX11_DEFINITION, FX12_DEFINITION, FX13_DEFINITION,
                               FX14_DEFINITION, FX15_DEFINITION, FX16_DEFINITION,
-                              FX17_DEFINITION,
+                              FX17_DEFINITION, FX18_DEFINITION,
                               TB7_DEFINITION, TB10_DEFINITION, TB11_DEFINITION,
                               TB12_DEFINITION, TB13_DEFINITION, TB14_DEFINITION,
                               TB15_DEFINITION, TB16_DEFINITION, TB17_DEFINITION)
@@ -729,6 +729,77 @@ class Gecko17RegexTests(CompatRegexTestHelper):
                 "The `checkLoadURI` and `checkLoadURIStr` interfaces have "
                 "been removed. You should use `checkLoadURIWithPrincipal` "
                 "instead.", compat_type="error")
+
+
+@register_generator
+class Gecko18RegexTests(CompatRegexTestHelper):
+    """Regex tests for Gecko 18 updates."""
+
+    VERSION = FX18_DEFINITION
+
+    def js_tests(self):
+
+        yield self.get_test_bug(
+                794602, "saveURI",
+                "`saveURI` has been changed.",
+                "The `saveURI` function have changed to support per-window "
+                "private browsing. You should now pass a context as an "
+                "additional argument.",
+                compat_type="error", log_function=self.err.notice)
+
+        yield self.get_test_bug(
+                769764,
+                "nsIProtocolProxyService|nsIProxyAutoConfig|newProxiedChannel",
+                "Proxy interfaces have been changed.",
+                "The `nsIProtocolProxyService` and `nsIProxyAutoConfig` "
+                "interfaces, as well as the `newProxiedChannel` function have "
+                "changed in order to make the proxy API asynchronous.",
+                compat_type="error", log_function=self.err.notice)
+
+        yield self.get_test_bug(
+                722861, "imgI(Cache|Loader)",
+                "`imgICache` and `imgILoader` have been deprecated.",
+                "The `imgICache` and `imgILoader` interfaces have been "
+                "deprecated in Gecko 18. You should use `imgITools` instead.",
+                compat_type="error")
+
+        yield self.get_test_bug(
+                774963, "removeDataFromDomain",
+                "`removeDataFromDomain` has been moved.",
+                "The `removeDataFromDomain` function has been moved to "
+                "`ClearRecentHistory.jsm`.",
+                compat_type="error", log_function=self.err.notice)
+
+        yield self.get_test_bug(
+                695399, "openCacheEntry",
+                "`openCacheEntry` no longer works from main thread.",
+                "The `openCacheEntry` function no longer works when invoked "
+                "from the main thread. You should use `asyncOpenCacheEntry` "
+                "instead.",
+                compat_type="error", log_function=self.err.notice)
+
+        yield self.get_test_bug(
+                744907, "BlobBuilder",
+                "`BlobBuiler` has been removed.",
+                "The `BlobBuilder` object has been removed. You should use "
+                "the `Blob` constructor instead.",
+                compat_type="error")
+
+        yield self.get_test_bug(
+                741059, "setAndLoadFaviconForPage",
+                "`setAndLoadFaviconForPage` has been changed.",
+                "The `setAndLoadFaviconForPage` function have changed to "
+                "support per-window private browsing. You should now pass a "
+                "load type as an additional argument.",
+                compat_type="error", log_function=self.err.notice)
+
+        yield self.get_test_bug(
+                795065, "addDownload|saveURL",
+                "`addDownlod` and `saveURL` have been changed.",
+                "The `addDownload` and `saveURL` functions have changed to "
+                "support per-window private browsing. You should now pass an "
+                "additional argument to them.",
+                compat_type="error", log_function=self.err.notice)
 
 
 @register_generator

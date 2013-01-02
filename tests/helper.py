@@ -78,12 +78,13 @@ class TestCase(object):
             self.err.detected_Type = self.detected_type
 
     def assert_failed(self, with_errors=False, with_warnings=None):
-        """
-        First, asserts that the error bundle registers a failure (recognizing
-        whether warnings are acknowledged). Second, if with_errors is True,
-        the presence of errors is asserted. If it is not true (default), it
-        is tested that errors are not present. If with_warnings is not None,
-        the presence of warnings is tested just like with_errors)
+        """First, asserts that the error bundle registers a failure
+        (recognizing whether warnings are acknowledged). Second, if
+        `with_errors`is True, the presence of errors is asserted. If it is not
+        true (default), it is tested that errors are not present. If
+        `with_warnings` is not None, the presence of warnings is tested just
+        like `with_errors`.
+
         """
         assert self.err.failed(
             fail_on_warnings=with_warnings or with_warnings is None), \
@@ -103,15 +104,16 @@ class TestCase(object):
                            self.err.print_summary())
 
     def assert_notices(self):
-        """
-        Assert that notices have been generated during the validation process.
+        """Assert that notices have been generated during the validation
+        process.
+
         """
         assert self.err.notices, "Notices were expected."
 
     def assert_passes(self, warnings_pass=False):
-        """
-        Assert that no errors have been raised. If warnings_pass is True, also
-        assert that there are no warnings.
+        """Assert that no errors have been raised. If `warnings_pass` is True,
+        also assert that there are no warnings.
+
         """
         assert not self.failed(fail_on_warnings=not warnings_pass), \
                 ("Test was intended to pass%s, but it did not." %

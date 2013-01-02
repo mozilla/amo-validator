@@ -486,4 +486,3 @@ class ErrorBundle(object):
             for message in stack:
                 if message["tier"] > ending_tier:
                     stack.remove(message)
-

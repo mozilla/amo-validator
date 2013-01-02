@@ -17,36 +17,36 @@ class CompatTestCase(JSTestCase, RegexTestCase):
         Test a script with and without version restrictions to determine
         whether it properly raises JavaScript compatibility messages.
         """
-        self._run_member_for_compat(lambda: self.run_script(script,
-                                                            expose_pollution))
+        self._run_member_for_compat(
+            lambda: self.run_script(script, expose_pollution))
 
     def run_xpcom_for_compat(self, interface, methods=None):
-        """
-        Yields after each method has been run as a script. Used to test that
+        """Yields after each method has been run as a script. Used to test that
         XPCOM members are properly flagged for compatibility tests.
 
         - `interface` should be the name of the XPCOM interface.
         - `methods` should be the member to test. It may be a simple reference
           to a member (i.e.: `foo`) or an action upon a member (i.e.:
           `foo('bar')` or `foo["bar"] = "zap"`).
+
         """
+
+        if not methods:
+            return
 
         script = """
         var x = Components.classes[""].createInstance(Components.interfaces.%s);
         x.%%s;
         """ % interface
 
-        if not methods:
-            return
-
         for method in methods:
             self.run_script_for_compat(script % method)
             yield
 
     def run_regex_for_compat(self, input):
-        """
-        Test an input with and without version restrictions to determine
+        """Test an input with and without version restrictions to determine
         whether it properly raises regex compatibility messages.
+
         """
         self._run_member_for_compat(lambda: self.run_regex(input))
 
@@ -72,14 +72,15 @@ class CompatTestCase(JSTestCase, RegexTestCase):
                 "Got %s" % self.compat_err.compat_summary
 
     def assert_compat_error(self, type_="warning"):
-        """
-        Assert that a compat error was raised as a message of type `type_`.
+        """Assert that a compat error was raised as a message of type `type_`.
+
         """
         self._assert_compat_type("error", type_)
 
     def assert_compat_warning(self, type_="notice"):
-        """
-        Assert that a compat warning was raised as a message of type `type_`.
+        """Assert that a compat warning was raised as a message of type
+        `type_`.
+
         """
         self._assert_compat_type("warning", type_)
 
