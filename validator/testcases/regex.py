@@ -550,8 +550,7 @@ class Gecko13RegexTests(CompatRegexTestHelper):
                 718255, "nsIPrefBranch2", DEP_INTERFACE,
                 "This add-on uses nsIPrefBranch2, which has been merged into "
                 "nsIPrefBranch in Gecko 13. Once you drop support for old "
-                "versions of Gecko, you should stop using nsIPrefBranch2. You "
-                "can use the == operator as an alternative.",
+                "versions of Gecko, you should stop using nsIPrefBranch2.",
                 compat_type="warning")
         yield self.get_test_bug(
                 650784, "nsIScriptableUnescapeHTML", DEP_INTERFACE,
