@@ -259,6 +259,7 @@ INTERFACES = {
                 entity("nsIRssIncomingServer.subscriptionsDataSourcePath"),
              u"feedItemsDataSourcePath":
                 entity("nsIRssIncomingServer.feedItemsDataSourcePath")}},
+    u"nsISound": {"value": {"play": entity("nsISound.play")}},
     u"nsIStringBundleService":
         {"value":
             {u"createStringBundle":

@@ -156,6 +156,21 @@ def nsIDOMNSHTMLFrameElement(traverser):
         tier=5)
 
 
+@register_entity("nsISound.play")
+def nsISoundPlay(traverser):
+    traverser.err.warning(
+        err_id=("testcases_javascript_entity_values",
+                "nsISound_play"),
+        warning="`nsISound.play` should not be used.",
+        description="The `nsISound.play` function is synchronous, and thus "
+                    "freezes the interface while the sound is playing. It "
+                    "be avoided in favor of the HTML5 audio APIs.",
+        filename=traverser.filename,
+        line=traverser.line,
+        column=traverser.position,
+        context=traverser.context)
+
+
 @register_entity("nsIBrowserHistory.lastPageVisited")
 def nsIBrowserHistory(traverser):
     traverser.err.error(

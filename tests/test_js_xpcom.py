@@ -254,6 +254,20 @@ def test_xpcom_nsibrowsersearchservice():
     """).failed()
 
 
+def test_nsisound_play():
+    """Test that nsISound.play is flagged."""
+
+    assert not _do_test_raw("""
+    var foo = Cc["foo"].getService(Components.interfaces.nsISound);
+    foo.bar("asdf");
+    """).failed()
+
+    assert _do_test_raw("""
+    var foo = Cc["foo"].getService(Components.interfaces.nsISound);
+    foo.play("asdf");
+    """).failed()
+
+
 class TestnsIWindowWatcher(TestCase):
 
     def _run_against_foo(self, script):
@@ -302,5 +316,3 @@ class TestnsIWindowWatcher(TestCase):
                 "data:asdf"]
         for uri in uris:
             yield test_uri, self, uri
-
-
