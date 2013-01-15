@@ -49,21 +49,23 @@ BANNED_PREF_REGEXPS = [
 CONTENT_DOCUMENT = None
 
 
+CATEGORY_MANAGER = {
+    u"addCategoryEntry":
+        {"dangerous":
+            lambda a, t, e:
+                e.get_resource("em:bootstrap") and
+                ("Bootstrapped add-ons may not create persistent category "
+                 "entries." if len(a) > 3 and t(a[3]).is_literal() else
+                 "Authors of bootstrapped add-ons must take care to clean up "
+                 "any added category entries at shutdown.")}}
+
+
 INTERFACES = {
     u"imIUserStatusInfo":
         {"value":
             {u"setUserIcon": entity("imIUserStatusInfo.setUserIcon")}},
     u"nsICategoryManager":
-        {"value":
-            {u"addCategoryEntry":
-                {"dangerous":
-                    lambda a, t, e:
-                        e.get_resource("em:bootstrap") and \
-                        ("Bootstrapped add-ons may not create persistent "
-                         "category entries."
-                         if len(a) > 3 and t(a[3]).is_literal() else
-                         "Authors of bootstrapped add-ons must take care to "
-                         "clean up any added category entries at shutdown.")}}},
+        {"value": CATEGORY_MANAGER},
     u"nsIAbLDAPDirectory":
         {"value":
             {u"replicationFile": entity("nsIAbLDAPDirectory.replicationFile"),
@@ -658,6 +660,9 @@ GLOBAL_ENTITIES = {
 
     u"java": entity("java"),
     u"Packages": entity("Packages"),
+
+    u"XPCOMUtils":
+        {"value": {u"categoryManager": {"value": CATEGORY_MANAGER}}},
 }
 
 CONTENT_DOCUMENT = GLOBAL_ENTITIES[u"content"]["value"][u"document"]

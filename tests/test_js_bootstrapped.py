@@ -32,6 +32,8 @@ def test_bootstrapped():
     for method in methods:
         yield test_wrap, 'Cc[""].getService(Ci.%s).%s;' % method
 
+    yield test_wrap, "XPCOMUtils.categoryManager.addCategoryEntry();"
+
 
 def test_bootstrapped_pass():
     """Test that bootstrap-agnostic tests pass while boostrapping."""
