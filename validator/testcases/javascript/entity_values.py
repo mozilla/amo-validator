@@ -120,6 +120,22 @@ def xmlStandalone(traverser):
         tier=5)
 
 
+@register_entity("nsIDNSService.resolve")
+def nsIDNSServiceResolve(traverser):
+    traverser.err.warning(
+        err_id=("testcases_javascript_entity_values",
+                "nsIDNSServiceResolve"),
+        warning="`nsIDNSService.resolve()` should not be used.",
+        description="The `nsIDNSService.resolve` method performs a "
+                    "synchronous DNS lookup, which will freeze the UI. This "
+                    "can result in severe performance issues. "
+                    "`nsIDNSService.asyncResolve()` should be used instead.",
+        filename=traverser.filename,
+        line=traverser.line,
+        column=traverser.position,
+        context=traverser.context)
+
+
 @register_entity("nsIDOMNSHTMLElement")
 def nsIDOMNSHTMLElement(traverser):
     traverser.err.error(

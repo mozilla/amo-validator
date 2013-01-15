@@ -268,6 +268,20 @@ def test_nsisound_play():
     """).failed()
 
 
+def test_nsidnsservice_resolve():
+    """Test that nsIDNSService.resolve is flagged."""
+
+    assert not _do_test_raw("""
+    var foo = Cc["foo"].getService(Components.interfaces.nsIDNSService);
+    foo.asyncResolve("asdf");
+    """).failed()
+
+    assert _do_test_raw("""
+    var foo = Cc["foo"].getService(Components.interfaces.nsIDNSService);
+    foo.resolve("asdf");
+    """).failed()
+
+
 class TestnsIWindowWatcher(TestCase):
 
     def _run_against_foo(self, script):

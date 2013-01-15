@@ -102,6 +102,7 @@ INTERFACES = {
                         "clean up any component registrations at shutdown."}}},
     u"nsIDOMNSHTMLElement": entity("nsIDOMNSHTMLElement"),
     u"nsIDOMNSHTMLFrameElement": entity("nsIDOMNSHTMLFrameElement"),
+    u"nsIDNSService": {"value": {u"resolve": entity("nsIDNSService.resolve")}},
     u"nsIImapIncomingServer":
         {"value":
             {u"GetImapConnectionAndLoadUrl":
