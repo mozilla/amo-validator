@@ -32,8 +32,7 @@ class OutputHandler:
 
             # Initialize a store for the colors and pre-populate it
             # with the un-color color.
-            self.colors = {}
-            self.colors["NORMAL"] = curses.tigetstr("sgr0") or ''
+            self.colors = {"NORMAL": curses.tigetstr("sgr0") or ''}
 
             # Determines capabilities of the terminal.
             fgColorSeq = curses.tigetstr('setaf') or \
@@ -62,15 +61,14 @@ class OutputHandler:
         rany = text.rfind("<<")
 
         # Put in the escape sequences.
-        text = text.replace("%", "%%")
-        text = text.replace("<<", "%(").replace(">>", ")s")
+        for color, code in self.colors.items():
+            text = text.replace("<<%s>>" % color, code)
 
         # Make sure that the last sequence is a NORMAL sequence.
         if rany > -1 and rnormal < rany:
-            text += "%(NORMAL)s"
+            text += self.colors["NORMAL"]
 
-        # Replace our placeholders with the physical sequence data.
-        return text % self.colors
+        return text
 
     def write(self, text):
         "Uses curses to print in the fanciest way possible."
