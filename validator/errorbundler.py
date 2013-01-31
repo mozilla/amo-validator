@@ -322,7 +322,7 @@ class ErrorBundle(object):
 
         types = {0: "Unknown",
                  1: "Extension/Multi-Extension",
-                 2: "Theme",
+                 2: "Full Theme",
                  3: "Dictionary",
                  4: "Language Pack",
                  5: "Search Provider",

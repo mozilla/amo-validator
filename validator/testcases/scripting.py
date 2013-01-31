@@ -29,7 +29,7 @@ def test_js_file(err, filename, data, line=0, context=None, pollutable=False):
                 err_id=("testcases_scripting",
                         "test_js_file",
                         "theme_js"),
-                warning="JS run from theme",
+                warning="JS run from full theme",
                 description="Themes should not contain executable code.",
                 filename=filename,
                 line=line)

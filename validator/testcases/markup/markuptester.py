@@ -212,7 +212,7 @@ class MarkupParser(htmlparser.HTMLParser):
                                 "unsafe_theme_xbl_element"),
                         warning="Banned XBL element in theme.",
                         description=["Certain XBL elements are disallowed in "
-                                     "themes.",
+                                     "full themes.",
                                      "Element: <xbl:%s>" % tag],
                         filename=self.filename,
                         line=self.line,
@@ -252,8 +252,8 @@ class MarkupParser(htmlparser.HTMLParser):
                 self.err.warning(
                     err_id=("markup", "starttag", "remote_src_href"),
                     warning="`src`/`href` attributes must be local.",
-                    description="Themes and language packs may not reference "
-                                "remote resources.",
+                    description="Full Themes and language packs may not "
+                                "reference remote resources.",
                     filename=self.filename,
                     line=self.line,
                     context=self.context)
@@ -378,7 +378,8 @@ class MarkupParser(htmlparser.HTMLParser):
                                 "theme_attr_prefix"),
                         warning="Attribute contains banned prefix",
                         description=["A mark element's attribute contains a "
-                                     "prefix which is not allowed in themes.",
+                                     "prefix which is not allowed in full "
+                                     "themes.",
                                      "Attribute: %s" % attr_name],
                         filename=self.filename,
                         line=self.line,

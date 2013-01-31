@@ -20,7 +20,7 @@ def test_theme_manifest(err, xpi_package=None):
                 err_id=("themes", "test_theme_manifest",
                         "invalid_chrome_manifest_subject"),
                 warning="Invalid chrome.manifest subject",
-                description=["chrome.manifest files for themes are only "
+                description=["chrome.manifest files for full themes are only "
                              "allowed to have 'skin' and 'style' items. "
                              "Other types of items are disallowed for "
                              "security reasons.",
