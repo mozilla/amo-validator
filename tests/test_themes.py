@@ -1,6 +1,8 @@
-import validator.testcases.themes as themes
-from validator.errorbundler import ErrorBundle
 from validator.constants import PACKAGE_THEME
+from validator.errorbundler import ErrorBundle
+import validator.testcases.markup.csstester as csstester
+import validator.testcases.themes as themes
+
 from helper import _do_test
 from js_helper import _do_real_test_raw
 
@@ -33,3 +35,19 @@ def test_js_banned():
     print err.print_summary(verbose=True)
     assert err.failed()
 
+
+def test_remote_css():
+    """Test that remote CSS references are flagged."""
+
+    snippet = """
+    x {foo: url(http://foo.com/bar);}
+    """
+
+    err = ErrorBundle()
+    csstester.test_css_snippet(err, "x.css", snippet, 0)
+    assert not err.failed()
+
+    err = ErrorBundle()
+    err.detected_type = PACKAGE_THEME
+    csstester.test_css_snippet(err, "x.css", snippet, 0)
+    assert err.failed()

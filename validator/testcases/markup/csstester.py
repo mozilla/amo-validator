@@ -7,8 +7,9 @@ from validator.constants import PACKAGE_THEME
 from validator.contextgenerator import ContextGenerator
 
 
-BAD_URL_PAT = "url\(['\"]?(?!(chrome:|resource:))(\/\/|(ht|f)tps?:\/\/|data:)[a-z0-9\/\-\.#]*['\"]?\)"
+BAD_URL_PAT = "url\(['\"]?(?!(chrome:|resource:))(\/\/|(ht|f)tps?:\/\/|data:).*['\"]?\)"
 BAD_URL = re.compile(BAD_URL_PAT, re.I)
+REM_URL = re.compile("url\(['\"]?(\/\/|ht|f)tps?:\/\/.*['\"]?\)", re.I)
 
 SKIP_TYPES = ("S", "COMMENT")
 
@@ -27,7 +28,8 @@ def test_css_file(err, filename, data, line_start=1):
     tokenizer = cssutils.tokenize2.Tokenizer()
     context = ContextGenerator(data)
 
-    data = "".join(c for c in data if 8 < ord(c) < 127)
+    if data:
+        data = "".join(c for c in data if 8 < ord(c) < 127)
 
     token_generator = tokenizer.tokenize(data)
 
@@ -101,21 +103,29 @@ def _run_css_tests(err, tokens, filename, line_start=0, context=None):
 
             # If we hit a URI after -moz-binding, we may have a
             # potential security issue.
-            if last_descriptor == "-moz-binding":
+            if last_descriptor == "-moz-binding" and BAD_URL.match(value):
                 # We need to make sure the URI is not remote.
-                if BAD_URL.match(value):
-                    err.warning(("testcases_markup_csstester",
-                                 "_run_css_tests",
-                                 "-moz-binding_external"),
-                                "Cannot reference external scripts.",
-                                "-moz-binding cannot reference external "
+                err.warning(
+                    err_id=("css", "_run_css_tests", "-moz-binding_external"),
+                    warning="Cannot reference external scripts",
+                    description="`-moz-binding` cannot reference external "
                                 "scripts in CSS. This is considered to be a "
                                 "security issue. The script file must be "
                                 "placed in the /content/ directory of the "
                                 "package.",
-                                filename,
-                                line=line + line_start,
-                                context=context.get_context(line))
+                    filename=filename,
+                    line=line + line_start,
+                    context=context.get_context(line))
+            elif err.detected_type == PACKAGE_THEME and REM_URL.match(value):
+                err.warning(
+                    err_id=("css", "_run_css_tests", "remote_url"),
+                    warning="Themes may not reference remote resources",
+                    description="Themes may not reference resources that are "
+                                "stored on remote servers. All resources must "
+                                "be stored locally within the theme.",
+                    filename=filename,
+                    line=line + line_start,
+                    context=context.get_context(line))
 
         elif tok_type == "HASH":
             # Search for interference with the identity box.

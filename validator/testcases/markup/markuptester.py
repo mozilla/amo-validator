@@ -34,6 +34,10 @@ UNSAFE_THEME_XBL = ("constructor", "destructor", "field", "getter",
 GENERIC_IDS = ("string-bundle", "strings", )
 
 
+REMOTE_URL_PATTERN = re.compile("(ht|f)tps?://")
+_markedsectionclose = re.compile(r']\s*]\s*>')
+
+
 class MarkupParser(htmlparser.HTMLParser):
     """Parse and analyze the versious components of markup files."""
 
@@ -136,23 +140,22 @@ class MarkupParser(htmlparser.HTMLParser):
                 self.debug and "testscript" in self.xml_state):
                 if "script_comments" in self.reported or not self.strict:
                     return
-                self.err.notice(("testcases_markup_markuptester",
-                                 "_feed",
-                                 "missing_script_comments"),
-                                "Missing comments in <script> tag",
-                                "Markup parsing errors occurred while trying "
+                self.err.notice(
+                    err_id=("markup", "_feed", "missing_script_comments"),
+                    notice="Missing comments in <script> tag",
+                    description="Markup parsing errors occurred while trying "
                                 "to parse the file. This would likely be "
                                 "mitigated by wrapping <script> tag contents "
                                 "in HTML comment tags (<!-- -->)",
-                                self.filename,
-                                line=self.line,
-                                context=self.context,
-                                tier=2)
+                    filename=self.filename,
+                    line=self.line,
+                    context=self.context,
+                    tier=2)
                 self.reported.add("script_comments")
                 return
 
             if self.strict:
-                self.err.warning(("testcases_markup_markuptester",
+                self.err.warning(("markup",
                                   "_feed",
                                   "parse_error"),
                                  "Markup parsing error",
@@ -188,9 +191,7 @@ class MarkupParser(htmlparser.HTMLParser):
         # A fictional tag for testing purposes.
         if tag == "xbannedxtestx":
             self.err.error(
-                err_id=("testcases_markup_markuptester",
-                        "handle_starttag",
-                        "banned_element"),
+                err_id=("markup", "starttag", "banned_element"),
                 error="Banned markup element",
                 description="A banned markup element was found.",
                 filename=self.filename,
@@ -207,8 +208,7 @@ class MarkupParser(htmlparser.HTMLParser):
             if self.xbl:
                 if tag in UNSAFE_THEME_XBL:
                     self.err.warning(
-                        err_id=("testcases_markup_markuptester",
-                                "handle_starttag",
+                        err_id=("markup", "starttag",
                                 "unsafe_theme_xbl_element"),
                         warning="Banned XBL element in theme.",
                         description=["Certain XBL elements are disallowed in "
@@ -221,8 +221,7 @@ class MarkupParser(htmlparser.HTMLParser):
                 elif (tag == "property" and
                       any(a[0] in (u"onset", u"onget") for a in attrs)):
                     self.err.warning(
-                        err_id=("testcases_markup_markuptester",
-                                "handle_starttag",
+                        err_id=("markup", "starttag",
                                 "theme_xbl_property"),
                         warning="Themes are not allowed to use XBL properties",
                         description="XBL properties cannot be used in themes.",
@@ -236,9 +235,7 @@ class MarkupParser(htmlparser.HTMLParser):
                 (self.err.detected_type == PACKAGE_THEME and
                  tag in UNSAFE_THEME_TAGS)):
                 self.err.warning(
-                    err_id=("testcases_markup_markuptester",
-                            "handle_starttag",
-                            "unsafe_langpack_theme"),
+                    err_id=("markup", "starttag", "unsafe_langpack_theme"),
                     warning="Unsafe tag for add-on type",
                     description=["A tag in your markup has been marked as "
                                  "being potentially unsafe. Consider "
@@ -248,22 +245,18 @@ class MarkupParser(htmlparser.HTMLParser):
                     filename=self.filename,
                     line=self.line,
                     context=self.context)
-                if DEBUG:  # pragma: no cover
-                    print "Unsafe Tag ------"
 
             # Make sure all src/href attributes are local
-            for attr in attrs:
-                if attr[0].lower() in ("src", "href") and \
-                   not self._is_url_local(attr[1].lower()):
-                    self.err.warning(("testcases_markup_markuptester",
-                                      "handle_starttag",
-                                      "remote_src_href"),
-                                     "src/href attributes must be local.",
-                                     "Language packs require that all src and "
-                                     "href attributes are relative URLs.",
-                                     self.filename,
-                                     line=self.line,
-                                     context=self.context)
+            if any(not self._is_url_local(attr[1]) for attr in attrs if
+                   attr[0] in ("src", "href")):
+                self.err.warning(
+                    err_id=("markup", "starttag", "remote_src_href"),
+                    warning="`src`/`href` attributes must be local.",
+                    description="Themes and language packs may not reference "
+                                "remote resources.",
+                    filename=self.filename,
+                    line=self.line,
+                    context=self.context)
 
         if tag == "prefwindow":
             # Flag <prefwindow> elements without IDs.
@@ -302,9 +295,7 @@ class MarkupParser(htmlparser.HTMLParser):
             if (type_ and
                 not (type_ in SAFE_IFRAME_TYPES or
                      not remote_src)):
-                self.err.warning(("testcases_markup_markuptester",
-                                  "handle_starttag",
-                                  "iframe_type_unsafe"),
+                self.err.warning(("markup", "starttag", "iframe_type_unsafe"),
                                  "iframe/browser missing 'type' attribute",
                                  "All iframe and browser elements must have "
                                  "either a valid `type` attribute or a `src` "
@@ -315,9 +306,7 @@ class MarkupParser(htmlparser.HTMLParser):
             elif ((not type_ or
                    type_ not in SAFE_IFRAME_TYPES) and
                   remote_src):
-                self.err.warning(("testcases_markup_markuptester",
-                                  "handle_starttag",
-                                  "iframe_type_unsafe"),
+                self.err.warning(("markup", "starttag", "iframe_type_unsafe"),
                                  "Typeless iframes/browsers must be local.",
                                  "iframe and browser elements that lack a type "
                                  "attribute must always have src attributes "
@@ -339,8 +328,7 @@ class MarkupParser(htmlparser.HTMLParser):
             if src:
                 if not self._is_url_local(src):
                     self.err.warning(
-                        err_id=("testcases_markup_markuptester",
-                                "handle_starttag",
+                        err_id=("markup", "starttag",
                                 "banned_remote_scripts"),
                         warning="Scripts must not be remote in XUL",
                         description="In XUL, <script> tags must not be "
@@ -370,8 +358,8 @@ class MarkupParser(htmlparser.HTMLParser):
                 attr_value.startswith("resource://") and
                 "-data/" in attr_value):
                 self.err.warning(
-                        err_id=("testcases_markup_markuptester",
-                                "handle_starttag", "jetpack_abs_uri"),
+                        err_id=("markup", "starttag",
+                                "jetpack_abs_uri"),
                         warning="Absolute URI referenced in Jetpack 1.4",
                         description=["As of Jetpack 1.4, absolute URIs are no "
                                      "longer allowed within add-ons.",
@@ -386,8 +374,7 @@ class MarkupParser(htmlparser.HTMLParser):
                 attr_value.startswith(("data:", "javascript:"))):
 
                 self.err.warning(
-                        err_id=("testcases_markup_markuptester",
-                                "handle_starttag",
+                        err_id=("markup", "starttag",
                                 "theme_attr_prefix"),
                         warning="Attribute contains banned prefix",
                         description=["A mark element's attribute contains a "
@@ -406,8 +393,7 @@ class MarkupParser(htmlparser.HTMLParser):
                 # Warn about DOM mutation event handlers.
                 if attr_name in DOM_MUTATION_HANDLERS:
                     self.err.warning(
-                        err_id=("testcases_markup_markuptester",
-                                "handle_starttag",
+                        err_id=("markup", "starttag",
                                 "dom_manipulation_handler"),
                         warning="DOM Mutation Events Prohibited",
                         description="DOM mutation events are flagged because "
@@ -418,11 +404,10 @@ class MarkupParser(htmlparser.HTMLParser):
                         line=self.line,
                         context=self.context)
 
-                scripting.test_js_snippet(err=self.err,
-                                          data=attr_value,
-                                          filename=self.filename,
-                                          line=self.line,
-                                          context=self.context)
+                scripting.test_js_snippet(
+                    err=self.err, data=attr_value,
+                    filename=self.filename, line=self.line,
+                    context=self.context)
 
             elif (self.extension == "xul" and
                   attr_name in ("insertbefore", "insertafter") and
@@ -431,8 +416,7 @@ class MarkupParser(htmlparser.HTMLParser):
                                                     "javascriptConsole",
                                                     "webConsole"))):
                 self.err.notice(
-                    err_id=("testcases_markup_markuptester",
-                            "handle_starttag",
+                    err_id=("markup", "starttag",
                             "incompatible_menu_items"),
                     notice="Menu item has been moved",
                     description="Your add-on has an overlay that uses the "
@@ -453,8 +437,8 @@ class MarkupParser(htmlparser.HTMLParser):
             # Test for generic IDs
             if attr_name == "id" and attr_value in GENERIC_IDS:
                 self.err.warning(
-                    err_id=("testcases_markup_markuptester",
-                            "handle_starttag", "generic_ids"),
+                    err_id=("markup",
+                            "starttag", "generic_ids"),
                     warning="Overlay contains generically-named IDs",
                     description="An overlay is using a generically-named ID "
                                 "that could cause compatibility problems with "
@@ -489,8 +473,8 @@ class MarkupParser(htmlparser.HTMLParser):
                 if DEBUG:
                     print "Unstrict; extra closing tags ------"
                 return
-            self.err.warning(("testcases_markup_markuptester",
-                              "handle_endtag",
+            self.err.warning(("markup",
+                              "endtag",
                               "extra_closing_tags"),
                              "Markup parsing error",
                              "The markup file has more closing tags than it "
@@ -516,8 +500,8 @@ class MarkupParser(htmlparser.HTMLParser):
         elif tag not in self.xml_state:
             # If the tag we're processing isn't on the stack, then
             # something is wrong.
-            self.err.warning(("testcases_markup_markuptester",
-                              "handle_endtag",
+            self.err.warning(("markup",
+                              "endtag",
                               "extra_closing_tags"),
                              "Parse error: tag closed before opened",
                              ["Markup tags cannot be closed before they are "
@@ -550,8 +534,8 @@ class MarkupParser(htmlparser.HTMLParser):
             self.extension[0] == 'x' and
             not self.strict):
 
-            self.err.warning(("testcases_markup_markuptester",
-                              "handle_endtag",
+            self.err.warning(("markup",
+                              "endtag",
                               "invalid_nesting"),
                              "Markup invalidly nested",
                              "It has been determined that the document "
@@ -584,7 +568,6 @@ class MarkupParser(htmlparser.HTMLParser):
 
     def parse_marked_section(self, i, report=0):
         rawdata = self.rawdata
-        _markedsectionclose = re.compile(r']\s*]\s*>')
 
         assert rawdata[i:i + 3] == '<![', \
                "unexpected call to parse_marked_section()"
@@ -630,13 +613,10 @@ class MarkupParser(htmlparser.HTMLParser):
         return " " + " ".join(output)
 
     def _is_url_local(self, url):
-
+        url = url.lower()
         if url.startswith("chrome://"):
             return True
-
-        pattern = re.compile("(ht|f)tps?://")
-
-        return not pattern.match(url)
+        return not REMOTE_URL_PATTERN.match(url)
 
     # Code to fix for Python issue 670664
 
