@@ -117,8 +117,6 @@ class Traverser(object):
                        filename=self.filename)
 
     def _traverse_node(self, node):
-        "Finds a node's internal blocks and helps manage state."
-
         if node is None:
             return JSWrapper(JSObject(), traverser=self, dirty=True)
 
@@ -128,46 +126,20 @@ class Traverser(object):
 
         if isinstance(node, types.StringTypes):
             return JSWrapper(JSLiteral(node), traverser=self)
-        elif "type" not in node or node["type"] not in DEFINITIONS:
-            return JSWrapper(JSObject(), traverser=self, dirty=True)
-
-        self._debug("TRAVERSE>>%s" % node["type"])
-        self.debug_level += 1
 
         # Extract location information if it's available
         if "loc" in node and node["loc"] is not None:
             self.line = self.start_line + int(node["loc"]["start"]["line"])
             self.position = int(node["loc"]["start"]["column"])
 
-        if node["type"] in E4X_NODES and not self.warned_e4x:
-            self.warned_e4x = True
+        if node.get("type") in E4X_NODES and not self.warned_e4x:
+            self.warn_e4x()
 
-            if self.err.supports_version(FX15_DEFINITION):
-                self.err.warning(
-                    ("js", "traverser", "warn_e4x_compat"),
-                    "E4X Deprecated",
-                    "It is no longer possible to pass E4X objects between most "
-                    "contexts, including different chrome windows or JS "
-                    "modules. You should also be aware that E4X is in a quick "
-                    "deprecation path. See %s for more information." %
-                        "https://developer.mozilla.org/en-US/docs/E4X",
-                    filename=self.filename,
-                    line=self.line,
-                    column=self.position,
-                    context=self.context,
-                    compatibility_type="warning",
-                    for_appversions=FX15_DEFINITION,
-                    tier=5)
-            else:
-                self.err.warning(
-                    ("js", "traverser", "warn_e4x"),
-                    "E4X Deprecated",
-                    "E4X has been deprecated and will be disabled by default "
-                    "for content in Gecko 16, and will be removed in Gecko 17.",
-                    filename=self.filename,
-                    line=self.line,
-                    column=self.position,
-                    context=self.context)
+        if node.get("type") not in DEFINITIONS:
+            return JSWrapper(JSObject(), traverser=self, dirty=True)
+
+        self._debug("TRAVERSE>>%s" % node["type"])
+        self.debug_level += 1
 
         # Extract properties about the node that we're traversing
         (branches, establish_context, action, returns,
@@ -201,13 +173,11 @@ class Traverser(object):
             for branch in branches:
                 if branch in node:
                     self._debug("BRANCH>>%s" % branch)
-                    self.debug_level += 1
                     b = node[branch]
                     if isinstance(b, list):
                         map(self._traverse_node, b)
                     else:
                         self._traverse_node(b)
-                    self.debug_level -= 1
             self.debug_level -= 1
 
         # If we defined a context, pop it.
@@ -230,6 +200,26 @@ class Traverser(object):
 
         node["__traversal"] = None
         return JSWrapper(JSObject(), traverser=self, dirty=True)
+
+    def warn_e4x(self, *args, **kwargs):
+        if self.warned_e4x:
+            return
+        self.warned_e4x = True
+
+        self.err.warning(
+            err_id=("js", "traverser", "e4x"),
+            warning="E4X Deprecated/Removed",
+            description="It is no longer possible to pass E4X objects "
+                        "between most contexts, including different chrome "
+                        "windows or JS modules. E4X will be completely "
+                        "removed by Gecko 20 (or possibly earlier). See %s "
+                        "for more information." %
+                        "https://developer.mozilla.org/en-US/docs/E4X",
+            filename=self.filename,
+            line=self.line,
+            column=self.position,
+            context=self.context,
+            compatibility_type="error")
 
     def _push_block_context(self):
         "Adds a block context to the current interpretation frame"

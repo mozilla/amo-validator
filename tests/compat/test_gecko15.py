@@ -45,4 +45,4 @@ class TestFX15Compat(CompatTestCase):
         var x = <foo></foo>;
         """)
         self.assert_failed(with_warnings=True)
-        self.assert_compat_warning("warning")
+        self.assert_compat_error("warning")

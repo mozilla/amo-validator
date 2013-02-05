@@ -114,8 +114,9 @@ DEFINITIONS = {
 
 }
 
-E4X_NODES = set(["XMLElement", "XMLList", "XMLStartTag", "XMLEndTag",
-                 "XMLPointTag", "XMLName", "XMLEscape",
-                 "XMLDefaultDeclaration", "XMLQualifiedIdentifier",
-                 "XMLFunctionQualifiedIdentifier",
-                 "XMLAttributeSelector", "XMLFilterExpression"])
+E4X_NODES = set([
+    "XMLElement", "XMLList", "XMLStartTag", "XMLEndTag", "XMLPointTag",
+    "XMLName", "XMLEscape", "XMLDefaultDeclaration",
+    "XMLQualifiedIdentifier", "XMLFunctionQualifiedIdentifier",
+    "XMLAttributeSelector", "XMLFilterExpression", "XMLAnyName", "XML",
+    "XMLCdata", "XMLComment", "XMLProcessingInstruction"])

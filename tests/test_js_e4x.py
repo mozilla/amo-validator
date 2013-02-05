@@ -8,15 +8,14 @@ class TestE4X(TestCase):
     """
 
     def run_script(self, script):
-        super(TestE4X, self).run_script(script)
-        self.err.warnings = filter(lambda w:
-                                       not w["id"][-1].startswith("warn_e4x"),
-                                   self.err.warnings)
+        output = super(TestE4X, self).run_script(script)
+        self.err.warnings = filter(
+            lambda w: w["id"][-1] == "e4x", self.err.warnings)
+        return output
 
     def test_pass(self):
         """Test that E4X isn't immediately rejected."""
         self.run_script("""var x = <foo a={x}><bar /><{zap} /></foo>;""")
-        self.assert_silent()
 
     def test_default_declaration(self):
         """
@@ -56,7 +55,7 @@ class TestE4X(TestCase):
         		<errors/>
         	</report>;
         """)
-        self.assert_silent()
+        self.assert_failed(with_warnings=True)
 
     def test_xmlattributeselector(self):
         """Test that XMLAttributeSelectors don't throw tracebacks."""
@@ -64,7 +63,7 @@ class TestE4X(TestCase):
         var x = <foo zip="zap"><bar /></foo>;
         var y = x.@zip;
         """)
-        self.assert_silent()
+        self.assert_failed(with_warnings=True)
 
     def test_double_colon(self):
         """
@@ -76,5 +75,21 @@ class TestE4X(TestCase):
                       xmlns:nsTypes={nsTypes}/>;
         req::asdf.oijaewr::aasdf = "foo";
         """)
-        self.assert_silent()
+        self.assert_failed(with_warnings=True)
 
+    def test_all_deprecated(self):
+        """Test that all of the node types are flagged."""
+        def wrap(line):
+            print line
+            self.setUp()
+            self.run_script(line)
+            self.assert_failed(with_warnings=True)
+
+        yield wrap, 'var x = <![CDATA[Foo.]]>;'
+        yield wrap, 'var x = <>Bar.</>;'
+        yield wrap, 'var x = XML("<foo/>");'
+        yield wrap, 'var x = QName("thing", "stuff");'
+        yield wrap, 'var x = Namespace("foo", "bar");'
+        yield wrap, 'var x = frag..foo;'
+        yield wrap, 'var x = thing.@foo;'
+        yield wrap, 'var x = thing.ns::thing;'

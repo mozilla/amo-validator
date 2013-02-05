@@ -56,6 +56,8 @@ class MarkupParser(htmlparser.HTMLParser):
         self.xml_buffer = []
         self.xbl = False
 
+        self.xml_state_scripts = []
+
         self.reported = set()
         self.found_scripts = set()  # A set of script URLs in the doc.
 
@@ -95,7 +97,7 @@ class MarkupParser(htmlparser.HTMLParser):
                     if cdatapos:
                         self._feed_parser(search_line[:cdatapos])
                     # Collect the rest of the line to send it to the buffer.
-                    search_line = search_line[cdatapos:]
+                    search_line = search_line[cdatapos + 9:]
                     buffering = True
                     continue
 
@@ -155,16 +157,14 @@ class MarkupParser(htmlparser.HTMLParser):
                 return
 
             if self.strict:
-                self.err.warning(("markup",
-                                  "_feed",
-                                  "parse_error"),
-                                 "Markup parsing error",
-                                 ["There was an error parsing a markup "
-                                  "file.",
-                                  str(inst)],
-                                 self.filename,
-                                 line=self.line,
-                                 context=self.context)
+                self.err.warning(
+                    err_id=("markup", "_feed", "parse_error"),
+                    warning="Markup parsing error",
+                    description=["There was an error parsing a markup "
+                                 "file.", str(inst)],
+                    filename=self.filename,
+                    line=self.line,
+                    context=self.context)
             self.reported.add("markup")
 
     def handle_startendtag(self, tag, attrs):
@@ -450,6 +450,10 @@ class MarkupParser(htmlparser.HTMLParser):
                     line=self.line,
                     context=self.context)
 
+        if tag == "script":
+            self.xml_state_scripts.append(any(
+                (x[0] == "type" and "javascript" not in x[1]) for x in attrs))
+
         # When the dev forgets their <!-- --> on a script tag, bad
         # things happen.
         if "script" in self.xml_state and tag != "script":
@@ -520,6 +524,9 @@ class MarkupParser(htmlparser.HTMLParser):
         data_buffer = self.xml_buffer.pop()
         old_state = self.xml_state.pop()
         old_line = self.xml_line_stack.pop()
+        script_type = True
+        if old_state == "script":
+            script_type = self.xml_state_scripts.pop()
 
         # If the tag on the stack isn't what's being closed and it also
         # classifies as a self-closing tag, we just recursively close
@@ -553,7 +560,7 @@ class MarkupParser(htmlparser.HTMLParser):
 
         # Perform analysis on collected data.
         if data_buffer:
-            if tag == "script":
+            if tag == "script" and not script_type:
                 scripting.test_js_snippet(err=self.err, data=data_buffer,
                                           filename=self.filename,
                                           line=old_line, context=self.context)

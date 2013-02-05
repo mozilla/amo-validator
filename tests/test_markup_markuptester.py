@@ -99,7 +99,7 @@ def test_cdata_properly():
     # Test that there are no problems if the CDATA element starts or ends on
     # the same line as the parent tag.
     err = _test_xul_raw("""<foo>
-    <script><![CDATA[
+    <script type="text/x-jquery-tmpl"><![CDATA[
     <button><p><span><foo>
     </bar></zap>
     <selfclosing />
@@ -131,6 +131,41 @@ def test_cdata_properly():
     <selfclosing />
     <><><><""><!><
     ]]>""", "foo.xul", should_fail=False)
+
+
+def test_non_js_not_executed():
+    err = _test_xul_raw("""<foo>
+    <script type="text/x-jquery-tmpl">
+    <![CDATA[
+    <button><p><span><foo>
+    </bar></zap>
+    <selfclosing />
+    <><><><""><!><
+    ]]>
+    </script>
+    </foo>""", "foo.xul", should_fail=False)
+
+    err = _test_xul_raw("""<foo>
+    <script type="application/javascript">
+    <![CDATA[
+    <button><p><span><foo>
+    </bar></zap>
+    <selfclosing />
+    <><><><""><!><
+    ]]>
+    </script>
+    </foo>""", "foo.xul", should_fail=True)
+
+    err = _test_xul_raw("""<foo>
+    <script>
+    <![CDATA[
+    <button><p><span><foo>
+    </bar></zap>
+    <selfclosing />
+    <><><><""><!><
+    ]]>
+    </script>
+    </foo>""", "foo.xul", should_fail=True)
 
 
 def test_xml_overclosing():
