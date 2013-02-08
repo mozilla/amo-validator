@@ -1,11 +1,12 @@
 import re
+from functools import wraps
 
 from validator.constants import BUGZILLA_BUG
 from validator.compat import (FX4_DEFINITION, FX5_DEFINITION, FX6_DEFINITION,
                               FX7_DEFINITION, FX8_DEFINITION, FX9_DEFINITION,
                               FX11_DEFINITION, FX12_DEFINITION, FX13_DEFINITION,
                               FX14_DEFINITION, FX15_DEFINITION, FX16_DEFINITION,
-                              FX17_DEFINITION, FX18_DEFINITION,
+                              FX17_DEFINITION, FX18_DEFINITION, FX19_DEFINITION,
                               TB7_DEFINITION, TB10_DEFINITION, TB11_DEFINITION,
                               TB12_DEFINITION, TB13_DEFINITION, TB14_DEFINITION,
                               TB15_DEFINITION, TB16_DEFINITION, TB17_DEFINITION)
@@ -89,19 +90,21 @@ class RegexTestGenerator(object):
         """
         app_versions = app_versions or self.app_versions_fallback
         log_function = log_function or self.err.warning
+        @wraps(log_function)
         def wrapper():
             matched = False
             for match in re.finditer(pattern, self.document, flags):
+                print log_function.__name__
                 log_function(
-                        ("testcases_regex", "generic", "_generated"),
-                        title,
-                        message,
-                        filename=self.filename,
-                        line=self.context.get_line(match.start()),
-                        context=self.context,
-                        compatibility_type=compat_type,
-                        for_appversions=app_versions,
-                        tier=self.err.tier if app_versions is None else 5)
+                    **{'err_id': ("testcases_regex", "generic", "_generated"),
+                       log_function.__name__: title,
+                       'description': message,
+                       'filename': self.filename,
+                       'line': self.context.get_line(match.start()),
+                       'context': self.context,
+                       'compatibility_type': compat_type,
+                       'for_appversions': app_versions,
+                       'tier': self.err.tier if app_versions is None else 5})
                 matched = True
             return matched
 
@@ -814,6 +817,23 @@ class Gecko18RegexTests(CompatRegexTestHelper):
                 "support per-window private browsing. You should now pass an "
                 "additional argument to them.",
                 compat_type="error", log_function=self.err.notice)
+
+
+@register_generator
+class Gecko19RegexTests(CompatRegexTestHelper):
+    """Regex tests for Gecko 19 updates."""
+
+    VERSION = FX19_DEFINITION
+
+    def js_tests(self):
+
+        yield self.get_test_bug(
+            723002, "nsIContentPrefService",
+            "`nsIContentPrefService` has been changed.",
+            "`nsIContentPrefService` has been changed to support "
+            "per-window private browsing. Most of its functions now "
+            "require an additional argument to specify a context.",
+            compat_type="error", log_function=self.err.notice)
 
 
 @register_generator

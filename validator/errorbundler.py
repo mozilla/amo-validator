@@ -95,6 +95,8 @@ class ErrorBundle(object):
             self._save_message(getattr(self, type_), type_, message,
                                context=kwargs.get("context"))
             return self
+
+        wrap.__name__ = message_type
         return wrap
 
     # And then all the real functions. Ahh, how clean!

@@ -44,6 +44,9 @@ FX16_DEFINITION = _build_definition(16, android=True)
 FX17_DEFINITION = _build_definition(17, android=True)
 FX18_DEFINITION = _build_definition(18, android=True)
 FX19_DEFINITION = _build_definition(19, android=True)
+FX20_DEFINITION = _build_definition(20, android=True)
+FX21_DEFINITION = _build_definition(21, android=True)
+FX22_DEFINITION = _build_definition(22, android=True)
 
 TB6_DEFINITION = {TB_GUID: version_range("thunderbird", "6.0a1", "7.0a1")}
 TB7_DEFINITION = {TB_GUID: version_range("thunderbird", "7.0a1", "8.0a1")}

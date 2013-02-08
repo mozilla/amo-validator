@@ -43,12 +43,13 @@ class CompatTestCase(JSTestCase, RegexTestCase):
             self.run_script_for_compat(script % method)
             yield
 
-    def run_regex_for_compat(self, input):
+    def run_regex_for_compat(self, input, is_js=False):
         """Test an input with and without version restrictions to determine
         whether it properly raises regex compatibility messages.
 
         """
-        self._run_member_for_compat(lambda: self.run_regex(input))
+        self._run_member_for_compat(
+            lambda: self.run_regex(input, is_js=is_js))
 
     def _run_member_for_compat(self, method):
         # Run the method without version restrictions.
@@ -95,4 +96,3 @@ class CompatTestCase(JSTestCase, RegexTestCase):
                    m in message_collection), \
                 ("No %ss that raise a compatibility %s were found." %
                      (type_, compat_type))
-

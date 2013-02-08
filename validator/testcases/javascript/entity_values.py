@@ -1,7 +1,9 @@
 from call_definitions import open_in_chrome_context
 from instanceproperties import _set_HTML_property
-from validator.compat import (FX10_DEFINITION, FX14_DEFINITION, FX16_DEFINITION,
-                              TB14_DEFINITION, TB15_DEFINITION, TB16_DEFINITION)
+from validator.compat import (FX10_DEFINITION, FX14_DEFINITION,
+                              FX16_DEFINITION, FX19_DEFINITION,
+                              TB14_DEFINITION, TB15_DEFINITION,
+                              TB16_DEFINITION)
 from validator.constants import BUGZILLA_BUG
 
 
@@ -10,9 +12,9 @@ ENTITIES = {}
 
 def register_entity(name):
     """Allow an entity's modifier to be registered for use."""
-    def wrap(function):
-        ENTITIES[name] = function
-        return function
+    def wrap(func):
+        ENTITIES[name] = func
+        return func
     return wrap
 
 
@@ -44,6 +46,7 @@ def deprecated_entity(name, version, message, bug, status="deprecated",
             compatibility_type=compat_type,
             tier=5)
     register_entity(name)(wrap)
+
 
 DEP_IHF_MESSAGE = ("The `importHTMLFromFile` and `importHTMLFromURI` functions "
                    "have been removed from the `nsIPlacesImportExportService` "
@@ -237,6 +240,26 @@ def nsIWindowWatcher_openWindow(traverser):
         open_in_chrome_context(uri, "nsIWindowWatcher.openWindow", traverser)
 
     return {"return": on_open}
+
+
+@register_entity("nsIConsoleService.getMessageArray")
+def nsIConsoleService_GetMessageArray(traverser):
+    traverser.err.notice(
+        err_id=("testcases_javascript_entity_values",
+                "nsIConsoleService.getMessageArray"),
+        notice="`getMessageArray` has changed",
+        description="The `getMessageArray` function has changed, and now it "
+                    "returns the array instead of setting the object passed "
+                    "as a parameter. See %s for more information." %
+                    BUGZILLA_BUG % 664695,
+        filename=traverser.filename,
+        line=traverser.line,
+        column=traverser.position,
+        context=traverser.context,
+        for_appversions=FX19_DEFINITION,
+        compatibility_type="error",
+        tier=5)
+
 
 # Thunderbird 14 IDL changes
 @register_entity("nsIMsgPluggableStore.copyMessages")

@@ -146,12 +146,16 @@ class RegexTestCase(TestCase):
     regex test scenarios.
     """
 
-    def run_regex(self, input):
+    def run_regex(self, input, is_js=False):
         """Run the standard regex tests for non-JavaScript input."""
         if self.err is None:
             self.setup_err()
-        input = '<input onclick="%s" />' % input
-        regex.run_regex_tests(input, self.err, "foo.txt", is_js=False)
+
+        if not is_js:
+            input = '<input onclick="%s" />' % input
+        else:
+            input = "'use strict';\n%s" % input
+        regex.run_regex_tests(input, self.err, "foo.txt", is_js=is_js)
 
     def run_js_regex(self, input):
         """Run the standard regex tests for JavaScript input."""
