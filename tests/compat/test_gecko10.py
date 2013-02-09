@@ -63,4 +63,3 @@ class TestFX10Compat(CompatTestCase):
                 "nsIBrowserHistory", ["lastPageVisited"]):
             self.assert_silent()
             self.assert_compat_error(type_="error")
-

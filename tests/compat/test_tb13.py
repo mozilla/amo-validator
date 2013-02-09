@@ -25,14 +25,13 @@ class TestTB13Compat(CompatTestCase):
                     "serverPageUnload", "loginPageValidate", "setupBccTextbox",
                     "setupCcTextbox"]
         for pattern in patterns:
-            self.run_regex_for_compat("var x = %s();" % pattern)
+            self.run_regex_for_compat("var x = %s();" % pattern, is_js=True)
             self.assert_silent()
             assert self.compat_err.notices
             assert self.compat_err.compat_summary["errors"]
 
         # Extra tests for similar functions.
         for pattern in ["serverPage", "clientPageInit"]:
-            self.run_regex_for_compat("var x = %s();" % pattern)
+            self.run_regex_for_compat("var x = %s();" % pattern, is_js=True)
             self.assert_silent()
             self.assert_compat_silent()
-

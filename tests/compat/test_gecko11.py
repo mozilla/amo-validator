@@ -24,4 +24,3 @@ class TestFX11Compat(CompatTestCase):
             self.run_regex_for_compat(pattern)
             self.assert_silent()
             self.assert_compat_error()
-

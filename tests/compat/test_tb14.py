@@ -26,10 +26,9 @@ class TestTB14Compat(CompatTestCase):
             assert self.compat_err.compat_summary["errors"]
 
         # These patterns should not be flagged.
-        for pattern in ["cvsPrefs()", "mailnews()", 
+        for pattern in ["cvsPrefs()", "mailnews()",
                         "CollapseSectionHeaderators()",
                         "msgMailSession", "msgPrefs",]:
-            self.run_regex_for_compat("var x = %s();" % pattern)
+            self.run_regex_for_compat("var x = %s();" % pattern, is_js=True)
             self.assert_silent()
             self.assert_compat_silent()
-

@@ -536,6 +536,7 @@ class Gecko12RegexTests(CompatRegexTestHelper):
                 "than 0 or -1.", compat_type="error",
                 log_function=self.err.notice)
 
+
 @register_generator
 class Gecko13RegexTests(CompatRegexTestHelper):
     """Regex tests for Gecko 13 updates."""

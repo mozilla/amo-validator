@@ -52,4 +52,3 @@ class TestFX13Compat(CompatTestCase):
         self.run_regex_for_compat("nsIAccessNode")
         self.assert_silent()
         self.assert_compat_error()
-

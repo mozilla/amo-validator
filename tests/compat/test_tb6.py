@@ -18,4 +18,3 @@ class TestTB6Compat(CompatTestCase):
                 "nsIImapProtocol", ["NotifyHdrsToDownload()"]):
             self.assert_silent()
             self.assert_compat_error(type_="notice")
-

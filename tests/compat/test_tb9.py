@@ -14,4 +14,3 @@ class TestTB9Compat(CompatTestCase):
             self.run_script_for_compat("%s();" % pattern)
             self.assert_silent()
             self.assert_compat_error(type_="notice")
-

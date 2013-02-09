@@ -19,7 +19,7 @@ class TestTB15Compat(CompatTestCase):
         """Test that these js patterns are flagged in Thunderbird 15."""
         def test_pattern(self, pattern):
             self.setUp()
-            self.run_regex_for_compat("var x = %s();" % pattern)
+            self.run_regex_for_compat("var x = %s();" % pattern, is_js=True)
             self.assert_compat_error(type_="notice")
 
         for r in ["testConfigurator", ".capabilityPref", "(getFeedUrlsInFolder",
@@ -30,10 +30,9 @@ class TestTB15Compat(CompatTestCase):
         """Test that these js patterns are _NOT_ flagged in Thunderbird 15."""
         def test_pattern(self, pattern):
             self.setUp()
-            self.run_regex_for_compat("var x = %s();" % pattern)
+            self.run_regex_for_compat("var x = %s();" % pattern, is_js=True)
             self.assert_compat_silent()
 
         for r in ["getaddFeed", "sometimeswaitForBuddyInfo", "DC_RSS_NS",
                   "msgFeedSubscriptionsWindow", "msgetNodeValue"]:
             yield test_pattern, self, r
-

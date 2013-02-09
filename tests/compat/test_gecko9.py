@@ -8,22 +8,23 @@ class TestGecko9Compat(CompatTestCase):
     VERSION = FX9_DEFINITION
 
     def test_taintEnabled(self):
-        self.run_script_for_compat("alert(navigator.taintEnabled);")
+        self.run_regex_for_compat("alert(navigator.taintEnabled);", is_js=True)
         self.assert_silent()
         self.assert_compat_warning(type_="warning")
 
     def test_documentURIObject(self):
-        self.run_script_for_compat("alert(document.documentURIObject);")
+        self.run_regex_for_compat(
+            "alert(document.documentURIObject);", is_js=True)
         self.assert_silent()
         self.assert_compat_warning()
 
     def test_nodePrincipal(self):
-        self.run_script_for_compat("alert(document.nodePrincipal);")
+        self.run_regex_for_compat("alert(document.nodePrincipal);", is_js=True)
         self.assert_silent()
         self.assert_compat_warning()
 
     def test_baseURIObject(self):
-        self.run_script_for_compat("alert(document.baseURIObject);")
+        self.run_regex_for_compat("alert(document.baseURIObject);", is_js=True)
         self.assert_silent()
         self.assert_compat_warning()
 
@@ -152,4 +153,3 @@ class TestGecko9Compat(CompatTestCase):
         """)
         self.assert_silent()
         self.assert_compat_error()
-

@@ -12,4 +12,3 @@ class TestTB8Compat(CompatTestCase):
                 "nsIMsgSearchScopeTerm", ["mailFile()", "inputStream()"]):
             self.assert_silent()
             self.assert_compat_error(type_="notice")
-

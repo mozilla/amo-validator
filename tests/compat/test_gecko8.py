@@ -26,4 +26,3 @@ class TestGecko8Compat(CompatTestCase):
         self.run_script_for_compat("document.getSelection();")
         self.assert_silent()
         self.assert_compat_error(type_="notice")
-

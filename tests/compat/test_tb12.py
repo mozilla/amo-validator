@@ -19,4 +19,3 @@ class TestTB12Compat(CompatTestCase):
                 "nsIMsgDatabase", ["Open()"]):
             self.assert_silent()
             self.assert_compat_error(type_="notice")
-

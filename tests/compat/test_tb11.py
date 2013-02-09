@@ -19,4 +19,3 @@ class TestTB11Compat(CompatTestCase):
                 "nsIMailtoUrl", ["GetMessageContents()"]):
             self.assert_silent()
             self.assert_compat_error(type_="notice")
-

@@ -37,4 +37,3 @@ class TestGecko7Compat(CompatTestCase):
                 "nsIJSON", ["encode()", "decode()"]):
             self.assert_silent()
             self.assert_compat_warning()
-

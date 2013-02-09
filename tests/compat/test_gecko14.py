@@ -78,4 +78,3 @@ class TestFX14Compat(CompatTestCase):
         self.run_regex_for_compat("nsILocalFile")
         self.assert_silent()
         self.assert_compat_warning(type_="warning")
-

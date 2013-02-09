@@ -81,4 +81,3 @@ class TestGecko6Compat(CompatTestCase):
             <bar insertbefore="something else" />
         </foo>
         """)
-

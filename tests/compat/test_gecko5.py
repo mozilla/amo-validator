@@ -13,8 +13,7 @@ class TestFX5Compat(CompatTestCase):
         with Gecko 5.
         """
 
-        self.run_script_for_compat('alert(navigator.language);')
+        self.run_regex_for_compat('alert(navigator.language);', is_js=True)
         self.assert_silent()
 
         self.assert_compat_error(type_="notice")
-

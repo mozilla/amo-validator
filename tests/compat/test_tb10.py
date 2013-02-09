@@ -19,4 +19,3 @@ class TestTB10Compat(CompatTestCase):
             self.assert_silent()
             assert self.compat_err.warnings or self.compat_err.notices
             assert self.compat_err.compat_summary["errors"]
-
