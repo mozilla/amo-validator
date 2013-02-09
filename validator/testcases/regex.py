@@ -94,7 +94,6 @@ class RegexTestGenerator(object):
         def wrapper():
             matched = False
             for match in re.finditer(pattern, self.document, flags):
-                print log_function.__name__
                 log_function(
                     **{'err_id': ("testcases_regex", "generic", "_generated"),
                        log_function.__name__: title,
