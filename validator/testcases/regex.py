@@ -835,6 +835,13 @@ class Gecko19RegexTests(CompatRegexTestHelper):
             "require an additional argument to specify a context.",
             compat_type="error", log_function=self.err.notice)
 
+        yield self.get_test_bug(
+            664695, "getMessageArray",
+            "`nsIConsoleService::getMessageArray` has been changed.",
+            "The `getMessageArray` function has changed, and now it returns "
+            "the array instead of setting the object passed as a parameter.",
+            compat_type="error", log_function=self.err.notice)
+
 
 @register_generator
 class Thunderbird7RegexTests(CompatRegexTestHelper):

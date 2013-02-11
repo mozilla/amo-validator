@@ -100,10 +100,6 @@ INTERFACES = {
                         e.get_resource("em:bootstrap") and
                         "Authors of bootstrapped add-ons must take care to "
                         "clean up any component registrations at shutdown."}}},
-    u"nsIConsoleService":
-        {"value":
-            {u"getMessageArray":
-                entity("nsIConsoleService.getMessageArray")}},
     u"nsIDOMNSHTMLElement": entity("nsIDOMNSHTMLElement"),
     u"nsIDOMNSHTMLFrameElement": entity("nsIDOMNSHTMLFrameElement"),
     u"nsIDNSService": {"value": {u"resolve": entity("nsIDNSService.resolve")}},

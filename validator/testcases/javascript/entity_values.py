@@ -242,25 +242,6 @@ def nsIWindowWatcher_openWindow(traverser):
     return {"return": on_open}
 
 
-@register_entity("nsIConsoleService.getMessageArray")
-def nsIConsoleService_GetMessageArray(traverser):
-    traverser.err.notice(
-        err_id=("testcases_javascript_entity_values",
-                "nsIConsoleService.getMessageArray"),
-        notice="`getMessageArray` has changed",
-        description="The `getMessageArray` function has changed, and now it "
-                    "returns the array instead of setting the object passed "
-                    "as a parameter. See %s for more information." %
-                    BUGZILLA_BUG % 664695,
-        filename=traverser.filename,
-        line=traverser.line,
-        column=traverser.position,
-        context=traverser.context,
-        for_appversions=FX19_DEFINITION,
-        compatibility_type="error",
-        tier=5)
-
-
 # Thunderbird 14 IDL changes
 @register_entity("nsIMsgPluggableStore.copyMessages")
 def nsIMsgPluggableStore_copyMessages(traverser):
