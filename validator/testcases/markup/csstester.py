@@ -71,6 +71,8 @@ def _run_css_tests(err, tokens, filename, line_start=0, context=None):
     identity_box_mods = []
     unicode_errors = []
 
+    token_history = []
+
     while True:
 
         try:
@@ -83,6 +85,8 @@ def _run_css_tests(err, tokens, filename, line_start=0, context=None):
 
         if tok_type in SKIP_TYPES:
             continue
+
+        token_history.append((tok_type, value))
 
         # Save the last descriptor for reference.
         if tok_type in ("IDENT", "FUNCTION"):
@@ -101,6 +105,8 @@ def _run_css_tests(err, tokens, filename, line_start=0, context=None):
 
         elif tok_type == "URI":
 
+            print token_history
+
             # If we hit a URI after -moz-binding, we may have a
             # potential security issue.
             if last_descriptor == "-moz-binding" and BAD_URL.match(value):
@@ -116,7 +122,11 @@ def _run_css_tests(err, tokens, filename, line_start=0, context=None):
                     filename=filename,
                     line=line + line_start,
                     context=context.get_context(line))
-            elif err.detected_type == PACKAGE_THEME and REM_URL.match(value):
+            elif (err.detected_type == PACKAGE_THEME and
+                  REM_URL.match(value) and
+                  token_history[-2][0] != 'NAMESPACE_SYM'):
+                # If we're a theme and the URL is remote and the last token
+                # wasn't a CSS namespace symbol, raise a warning.
                 err.warning(
                     err_id=("css", "_run_css_tests", "remote_url"),
                     warning="Themes may not reference remote resources",

@@ -51,3 +51,21 @@ def test_remote_css():
     err.detected_type = PACKAGE_THEME
     csstester.test_css_snippet(err, "x.css", snippet, 0)
     assert err.failed()
+
+
+def test_remote_css_ignored():
+    """Test that suspicious but innocuous css-isms are ignored."""
+
+    snippet = """
+    @namespace url(http://foo.bar/asdf);
+    @namespace url("http://foo.bar/asdf");
+    """
+
+    err = ErrorBundle()
+    csstester.test_css_snippet(err, "x.css", snippet, 0)
+    assert not err.failed()
+
+    err = ErrorBundle()
+    err.detected_type = PACKAGE_THEME
+    csstester.test_css_snippet(err, "x.css", snippet, 0)
+    assert not err.failed()
