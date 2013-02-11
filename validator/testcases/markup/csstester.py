@@ -105,8 +105,6 @@ def _run_css_tests(err, tokens, filename, line_start=0, context=None):
 
         elif tok_type == "URI":
 
-            print token_history
-
             # If we hit a URI after -moz-binding, we may have a
             # potential security issue.
             if last_descriptor == "-moz-binding" and BAD_URL.match(value):
