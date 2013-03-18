@@ -13,9 +13,9 @@ def _do_test(url, failure=True, listed=False):
         print results.print_summary()
 
     if failure:
-        assert err.failed()
+        assert err.failed(), 'Expected failure'
     else:
-        assert not err.failed()
+        assert not err.failed(), 'Expected pass'
 
 def test_opensearch():
     "Tests that the OpenSearch detection is working."
@@ -77,6 +77,11 @@ def test_broken_url_attributes():
 
     _do_test("tests/resources/searchprovider/sp_bad_url_atts.xml")
 
+def test_broken_template_attr():
+    "Test that there's no traceback for a missing template attribute."
+
+    _do_test("tests/resources/searchprovider/sp_no_template_attr.xml")
+
 def test_broken_url_searchterms():
     "Tests that a search term field is provided for the <Url> element."
 
@@ -120,8 +125,8 @@ def test_search_failure():
     "Tests the submain test_search function with a failure"
 
     err = ErrorBundle()
-    submain.detect_opensearch = lambda err, x, listed: err.error(("foo", ),
-                                                                 "Test")
+    submain.detect_opensearch = (
+        lambda err, x, listed: err.error(("foo", ), "Test"))
     submain.test_search(err, None, PACKAGE_ANY)
 
     assert err.failed()
