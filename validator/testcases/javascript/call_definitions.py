@@ -167,6 +167,30 @@ def spellcheck_updatecurrentdictionary(wrapper, arguments, traverser):
             tier=5)
 
 
+def webbrowserpersist_saveuri(wrapper, arguments, traverser):
+    """
+    nsIWebBrowserPersist.saveURI requires a valid privacy context as
+    of Firefox 19
+    """
+    if len(arguments) >= 7:
+        load_context = traverser._traverse_node(arguments[6])
+        if load_context.get_literal_value() is None:
+            traverser.err.warning(
+                err_id=("testcases_javascript_call_definititions",
+                 "webbrowserpersist_saveuri"),
+                warning=("saveURI should not be called with a null load "
+                         "context"),
+                description=("While nsIWebBrowserPersist.saveURI accepts null "
+                             "in place of a privacy context, this usage is "
+                             "acceptable only when no appropriate load "
+                             "context exists."),
+                filename=traverser.filename,
+                line=traverser.line,
+                column=traverser.position,
+                context=traverser.context,
+                tier=4)
+
+
 def xpcom_constructor(method, extend=False, mutate=False, pretraversed=False):
     """Returns a function which wraps an XPCOM class instantiation function."""
 

@@ -342,6 +342,11 @@ INTERFACES = {
         {"value":
              {u"queryCommandText": entity("nsIDOMHTMLDocument"),
               u"execCommandShowHelp": entity("nsIDOMHTMLDocument")}},
+    u"nsIWebBrowserPersist":
+        {"value":
+             {u"saveURI":
+                  {"return":
+                       call_definitions.webbrowserpersist_saveuri}}},
     }
 
 INTERFACE_ENTITIES = {u"nsIXMLHttpRequest":
