@@ -282,6 +282,29 @@ def test_nsidnsservice_resolve():
     """).failed()
 
 
+def test_xpcom_nsiwebbrowserpersist():
+    """
+    Test that nsIWebBrowserPersist.saveURI is flagged when called
+    with a null load context.
+    """
+
+    assert _do_test_raw("""
+    var foo = Cc["foo"].getService(Components.interfaces.nsIWebBrowserPersist);
+    foo.saveURI(null, null, null, null, null, null, null);
+    """).failed()
+
+    assert _do_test_raw("""
+    var foo = Cc["foo"].getService(Components.interfaces.nsIWebBrowserPersist);
+    var thing = null;
+    foo.saveURI(null, null, null, null, null, null, thing);
+    """).failed()
+
+    assert not _do_test_raw("""
+    var foo = Cc["foo"].getService(Components.interfaces.nsIWebBrowserPersist);
+    foo.saveURI(null, null, null, null, null, null, thing);
+    """).failed()
+
+
 class TestnsIWindowWatcher(TestCase):
 
     def _run_against_foo(self, script):
