@@ -360,17 +360,6 @@ def test_dom_mutation():
     """, "foo.xul", should_fail=True)
 
 
-def test_dom_mutation():
-    """Test that DOM mutation events are warned against."""
-
-    _test_xul_raw("""
-    <foo><bar onzap="" /></foo>
-    """, "foo.xul")
-
-    _test_xul_raw("""
-    <foo><bar ondomattrmodified="" /></foo>
-    """, "foo.xul", should_fail=True)
-
 def test_proper_line_numbers():
     """Test that the proper line numbers are passed to test_js_snippet."""
 
