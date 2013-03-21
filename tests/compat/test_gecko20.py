@@ -16,21 +16,28 @@ class TestFX20Compat(CompatTestCase):
 
     def test_global_private_browsing_service(self):
         self.run_script_for_compat("""
-            var x = nsIPrivateBrowsingService;
+            var x = "nsIPrivateBrowsingService";
         """)
         self.assert_silent()
         self.assert_compat_error(type_="notice")
 
     def test_decode_image_data(self):
         self.run_script_for_compat("""
-            var x = decodeImageData;
+            var x = "decodeImageData";
         """)
         self.assert_silent()
         self.assert_compat_warning(type_="notice")
 
     def test_decode_image_data(self):
         self.run_script_for_compat("""
-            var x = nsIDOMNSEditableElement;
+            var x = "nsIDOMNSEditableElement";
         """)
         self.assert_silent()
         self.assert_compat_warning(type_="notice")
+
+    def test_profile(self):
+        self.run_script_for_compat("""
+            var x = "nsIProfile";
+        """)
+        self.assert_silent()
+        self.assert_compat_error(type_="notice")

@@ -852,6 +852,7 @@ class Gecko20RegexTests(CompatRegexTestHelper):
     PRIVATE_BROWSING_LINK = "https://developer.mozilla.org/en-US/docs/Updating_addons_broken_by_private_browsing_changes"
     DECODE_LINK = "https://bugzilla.mozilla.org/show_bug.cgi?id=816362"
     EDITABLE_LINK = "https://bugzilla.mozilla.org/show_bug.cgi?id=827546"
+    PROFILE_LINK = "https://bugzilla.mozilla.org/show_bug.cgi?id=807757"
 
     def js_tests(self):
 
@@ -885,6 +886,15 @@ class Gecko20RegexTests(CompatRegexTestHelper):
             "is the recommended way of doing this, which avoids this error. "
             "See {0} for more information.'".format(self.EDITABLE_LINK),
             compat_type="warning", log_function=self.err.notice)
+
+
+        yield self.get_test_bug(
+            807757, "nsIProfile",
+            "`nsIProfile` and `nsIProfileChangeStatus` have been removed.",
+            "`nsIProfile` and `nsIProfileChangeStatus` have been removed "
+            "because they weren't in use anymore. See {0} for more "
+            "information.".format(self.PROFILE_LINK),
+            compat_type="error", log_function=self.err.notice)
 
 
 @register_generator
