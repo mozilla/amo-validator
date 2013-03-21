@@ -851,13 +851,14 @@ class Gecko20RegexTests(CompatRegexTestHelper):
     VERSION = FX20_DEFINITION
     PRIVATE_BROWSING_LINK = "https://developer.mozilla.org/en-US/docs/Updating_addons_broken_by_private_browsing_changes"
     DECODE_LINK = "https://bugzilla.mozilla.org/show_bug.cgi?id=816362"
+    EDITABLE_LINK = "https://bugzilla.mozilla.org/show_bug.cgi?id=827546"
 
     def js_tests(self):
 
         yield self.get_test_bug(
             826079, "nsIPrivateBrowsingService",
             "`nsIPrivateBrowsingService` has been removed.",
-            "nsIPrivateBrowsingService and its related observer "
+            "`nsIPrivateBrowsingService` and its related observer "
             "notifications have been removed due to the new per-window "
             "private browsing mode. See {0} for more "
             "information.".format(self.PRIVATE_BROWSING_LINK),
@@ -866,7 +867,7 @@ class Gecko20RegexTests(CompatRegexTestHelper):
         yield self.get_test_bug(
             826079, "private-browsing",
             "`nsIPrivateBrowsingService` has been removed.",
-            "nsIPrivateBrowsingService and its related observer "
+            "`nsIPrivateBrowsingService` and its related observer "
             "notifications have been removed due to the new per-window "
             "private browsing mode. See {0} formore "
             "information.".format(self.PRIVATE_BROWSING_LINK),
@@ -874,11 +875,24 @@ class Gecko20RegexTests(CompatRegexTestHelper):
 
         yield self.get_test_bug(
             816362, "decodeImageData",
-            "`decodeImageData has been deprecated`",
+            "`decodeImageData` has been deprecated.",
             "decodeImageData has been deprecated. You should instead use "
             "decodeImage, from the same interface. See {0} for more "
             "information.".format(self.DECODE_LINK),
             compat_type="warning", log_function=self.err.notice)
+
+        yield self.get_test_bug(
+            827546, "nsIDOMNSEditableElement",
+            "In Firefox 20, using `QueryInterface` of a non-editable element "
+            "to `nsIDOMNSEditableElement` doesn't throw an exception as "
+            "expected.",
+            "In Firefox 20, using `QueryInterface` of a non-editable element "
+            "to `nsIDOMNSEditableElement` doesn't throw an exception as "
+            "expected. This has been fixed in Firefox 21. Using `instanceof` "
+            "is the recommended way of doing this, which avoids this error. "
+            "See {0} for more information.'".format(self.EDITABLE_LINK),
+            compat_type="warning", log_function=self.err.notice)
+
 
 @register_generator
 class Thunderbird7RegexTests(CompatRegexTestHelper):
