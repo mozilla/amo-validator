@@ -7,9 +7,10 @@ from validator.compat import (FX4_DEFINITION, FX5_DEFINITION, FX6_DEFINITION,
                               FX11_DEFINITION, FX12_DEFINITION, FX13_DEFINITION,
                               FX14_DEFINITION, FX15_DEFINITION, FX16_DEFINITION,
                               FX17_DEFINITION, FX18_DEFINITION, FX19_DEFINITION,
-                              TB7_DEFINITION, TB10_DEFINITION, TB11_DEFINITION,
-                              TB12_DEFINITION, TB13_DEFINITION, TB14_DEFINITION,
-                              TB15_DEFINITION, TB16_DEFINITION, TB17_DEFINITION)
+                              FX20_DEFINITION, TB7_DEFINITION, TB10_DEFINITION,
+                              TB11_DEFINITION, TB12_DEFINITION, TB13_DEFINITION,
+                              TB14_DEFINITION, TB15_DEFINITION, TB16_DEFINITION,
+                              TB17_DEFINITION)
 from validator.contextgenerator import ContextGenerator
 from markup.csstester import UNPREFIXED_MESSAGE
 
@@ -840,6 +841,34 @@ class Gecko19RegexTests(CompatRegexTestHelper):
             "`nsIConsoleService::getMessageArray` has been changed.",
             "The `getMessageArray` function has changed, and now it returns "
             "the array instead of setting the object passed as a parameter.",
+            compat_type="error", log_function=self.err.notice)
+
+
+@register_generator
+class Gecko20RegexTests(CompatRegexTestHelper):
+    """Regex tests for Gecko 20 updates."""
+
+    VERSION = FX20_DEFINITION
+    LINK = "https://developer.mozilla.org/en-US/docs/Updating_addons_broken_by_private_browsing_changes"
+
+    def js_tests(self):
+
+        yield self.get_test_bug(
+            826079, "nsIPrivateBrowsingService",
+            "`nsIPrivateBrowsingService` has been removed.",
+            "nsIPrivateBrowsingService and its related observer "
+            "notifications have been removed due to the new per-window "
+            "private browsing mode. See {0} for more "
+            "information.".format(self.LINK),
+            compat_type="error", log_function=self.err.notice)
+
+        yield self.get_test_bug(
+            826079, "private-browsing",
+            "`nsIPrivateBrowsingService` has been removed.",
+            "nsIPrivateBrowsingService and its related observer "
+            "notifications have been removed due to the new per-window "
+            "private browsing mode. See {0} formore "
+            "information.".format(self.LINK),
             compat_type="error", log_function=self.err.notice)
 
 
