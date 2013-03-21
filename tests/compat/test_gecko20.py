@@ -41,3 +41,10 @@ class TestFX20Compat(CompatTestCase):
         """)
         self.assert_silent()
         self.assert_compat_error(type_="notice")
+
+    def test_places_import(self):
+        self.run_script_for_compat("""
+            var x = "nsIPlacesImportExportService";
+        """)
+        self.assert_silent()
+        self.assert_compat_error(type_="notice")

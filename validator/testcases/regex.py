@@ -853,9 +853,9 @@ class Gecko20RegexTests(CompatRegexTestHelper):
     DECODE_LINK = "https://bugzilla.mozilla.org/show_bug.cgi?id=816362"
     EDITABLE_LINK = "https://bugzilla.mozilla.org/show_bug.cgi?id=827546"
     PROFILE_LINK = "https://bugzilla.mozilla.org/show_bug.cgi?id=807757"
+    PLACES_IMPORT_LINK = "https://bugzilla.mozilla.org/show_bug.cgi?id=763295"
 
     def js_tests(self):
-
 
         for pbs in ("nsIPrivateBrowsingService", "private-browsing"):
             yield self.get_test_bug(
@@ -894,6 +894,15 @@ class Gecko20RegexTests(CompatRegexTestHelper):
             "`nsIProfile` and `nsIProfileChangeStatus` have been removed "
             "because they weren't in use anymore. See {0} for more "
             "information.".format(self.PROFILE_LINK),
+            compat_type="error", log_function=self.err.notice)
+
+        yield self.get_test_bug(
+            763295, "nsIPlacesImportExportService",
+            "`nsIProfile` and `nsIProfileChangeStatus` have been removed.",
+            "`nsIPlacesImportExportService`` was removed. You can use "
+            "`BookmarkHTMLUtils.jsm` "
+            "(resource://gre/modules/BookmarkHTMLUtils.jsm) instead. See {0} "
+            "for more information.".format(self.PLACES_IMPORT_LINK),
             compat_type="error", log_function=self.err.notice)
 
 
