@@ -855,23 +855,16 @@ class Gecko20RegexTests(CompatRegexTestHelper):
 
     def js_tests(self):
 
-        yield self.get_test_bug(
-            826079, "nsIPrivateBrowsingService",
-            "`nsIPrivateBrowsingService` has been removed.",
-            "`nsIPrivateBrowsingService` and its related observer "
-            "notifications have been removed due to the new per-window "
-            "private browsing mode. See {0} for more "
-            "information.".format(self.PRIVATE_BROWSING_LINK),
-            compat_type="error", log_function=self.err.notice)
 
-        yield self.get_test_bug(
-            826079, "private-browsing",
-            "`nsIPrivateBrowsingService` has been removed.",
-            "`nsIPrivateBrowsingService` and its related observer "
-            "notifications have been removed due to the new per-window "
-            "private browsing mode. See {0} formore "
-            "information.".format(self.PRIVATE_BROWSING_LINK),
-            compat_type="error", log_function=self.err.notice)
+        for pbs in ("nsIPrivateBrowsingService", "private-browsing"):
+            yield self.get_test_bug(
+                826079, pbs,
+                "`nsIPrivateBrowsingService` has been removed.",
+                "`nsIPrivateBrowsingService` and its related observer "
+                "notifications have been removed due to the new per-window "
+                "private browsing mode. See {0} for more "
+                "information.".format(self.PRIVATE_BROWSING_LINK),
+                compat_type="error", log_function=self.err.notice)
 
         yield self.get_test_bug(
             816362, "decodeImageData",

@@ -10,7 +10,7 @@ class RDFException(Exception):
 
     def __init__(self, message=None, orig_exception=None):
         if message is None and orig_exception is not None:
-            message = orig_exception.message
+            message = orig_exception.getMessage()
 
         super(RDFException, self).__init__(message)
         self.orig_exception = orig_exception
