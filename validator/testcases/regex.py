@@ -849,7 +849,8 @@ class Gecko20RegexTests(CompatRegexTestHelper):
     """Regex tests for Gecko 20 updates."""
 
     VERSION = FX20_DEFINITION
-    LINK = "https://developer.mozilla.org/en-US/docs/Updating_addons_broken_by_private_browsing_changes"
+    PRIVATE_BROWSING_LINK = "https://developer.mozilla.org/en-US/docs/Updating_addons_broken_by_private_browsing_changes"
+    DECODE_LINK = "https://bugzilla.mozilla.org/show_bug.cgi?id=816362"
 
     def js_tests(self):
 
@@ -859,7 +860,7 @@ class Gecko20RegexTests(CompatRegexTestHelper):
             "nsIPrivateBrowsingService and its related observer "
             "notifications have been removed due to the new per-window "
             "private browsing mode. See {0} for more "
-            "information.".format(self.LINK),
+            "information.".format(self.PRIVATE_BROWSING_LINK),
             compat_type="error", log_function=self.err.notice)
 
         yield self.get_test_bug(
@@ -868,9 +869,16 @@ class Gecko20RegexTests(CompatRegexTestHelper):
             "nsIPrivateBrowsingService and its related observer "
             "notifications have been removed due to the new per-window "
             "private browsing mode. See {0} formore "
-            "information.".format(self.LINK),
+            "information.".format(self.PRIVATE_BROWSING_LINK),
             compat_type="error", log_function=self.err.notice)
 
+        yield self.get_test_bug(
+            816362, "decodeImageData",
+            "`decodeImageData has been deprecated`",
+            "decodeImageData has been deprecated. You should instead use "
+            "decodeImage, from the same interface. See {0} for more "
+            "information.".format(self.DECODE_LINK),
+            compat_type="warning", log_function=self.err.notice)
 
 @register_generator
 class Thunderbird7RegexTests(CompatRegexTestHelper):

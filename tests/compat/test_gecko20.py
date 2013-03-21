@@ -20,3 +20,10 @@ class TestFX20Compat(CompatTestCase):
         """)
         self.assert_silent()
         self.assert_compat_error(type_="notice")
+
+    def test_decode_image_data(self):
+        self.run_script_for_compat("""
+            var x = decodeImageData;
+        """)
+        self.assert_silent()
+        self.assert_compat_warning(type_="notice")
