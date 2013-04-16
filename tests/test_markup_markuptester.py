@@ -7,10 +7,8 @@ from validator.constants import *
 
 
 def _test_xul(path, should_fail=False, type_=None):
-    return _test_xul_raw(open(path).read(),
-                        path,
-                        should_fail,
-                        type_)
+    with open(path) as f:
+        return _test_xul_raw(f.read(), path, should_fail, type_)
 
 
 def _test_xul_raw(data, path, should_fail=False, type_=None):

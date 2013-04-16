@@ -105,9 +105,9 @@ class MarkupParser(htmlparser.HTMLParser):
                     # If we find the end element on the line being scanned,
                     # buffer everything up to the end of it, and let the rest
                     # of the line pass through for further processing.
-                    end_cdatapos = search_line.find("]]>") + 3
+                    end_cdatapos = search_line.find("]]>")
                     self._save_to_buffer(search_line[:end_cdatapos])
-                    search_line = search_line[end_cdatapos:]
+                    search_line = search_line[end_cdatapos + 3:]
                     buffering = False
                 break
 

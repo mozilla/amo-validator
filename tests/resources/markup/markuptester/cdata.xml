@@ -22,4 +22,12 @@ element
 		<node>This is a sample document.</node>
 		<node>This is a sample document.</node>
 	</element>
+
+
+    <script type="application/javascript">
+    <![CDATA[
+        // Something
+    ]]>
+    </script>
+
 </doc>
