@@ -1,4 +1,3 @@
-import copy
 import math
 import re
 import types
@@ -10,6 +9,7 @@ from validator.compat import FX17_DEFINITION
 from validator.constants import (BUGZILLA_BUG, DESCRIPTION_TYPES, FENNEC_GUID,
                                  FIREFOX_GUID, MAX_STR_SIZE)
 from validator.decorator import version_range
+from validator.python import copy
 from jstypes import *
 
 

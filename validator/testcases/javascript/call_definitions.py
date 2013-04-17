@@ -1,4 +1,3 @@
-import copy
 import math
 import re
 import types
@@ -12,6 +11,7 @@ from validator.compat import (FX6_DEFINITION, FX7_DEFINITION, FX8_DEFINITION,
                               FX9_DEFINITION, FX11_DEFINITION, TB12_DEFINITION,
                               TB13_DEFINITION)
 from validator.decorator import version_range
+from validator.python import copy
 
 # Function prototypes should implement the following:
 #  wrapper : The JSWrapper instace that is being called
