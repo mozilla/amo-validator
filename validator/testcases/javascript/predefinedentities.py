@@ -347,6 +347,9 @@ INTERFACES = {
              {u"saveURI":
                   {"return":
                        call_definitions.webbrowserpersist_saveuri}}},
+    u"prplIAccount":
+        {"value":
+             {u"noNewlines": entity("prplIAccount.noNewlines")}}
     }
 
 INTERFACE_ENTITIES = {u"nsIXMLHttpRequest":

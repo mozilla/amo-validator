@@ -10,7 +10,7 @@ from validator.compat import (FX4_DEFINITION, FX5_DEFINITION, FX6_DEFINITION,
                               FX20_DEFINITION, TB7_DEFINITION, TB10_DEFINITION,
                               TB11_DEFINITION, TB12_DEFINITION, TB13_DEFINITION,
                               TB14_DEFINITION, TB15_DEFINITION, TB16_DEFINITION,
-                              TB17_DEFINITION)
+                              TB17_DEFINITION, TB18_DEFINITION)
 from validator.contextgenerator import ContextGenerator
 from markup.csstester import UNPREFIXED_MESSAGE
 
@@ -1276,4 +1276,55 @@ class Thunderbird17RegexTests(CompatRegexTestHelper):
                     "A JavaScript function matched the pattern `%s`, which has "
                     "been flagged as having changed, removed, or deprecated "
                     "in Thunderbird 17." % pattern,
+                    compat_type="error", log_function=self.err.notice)
+
+@register_generator
+class Thunderbird18RegexTests(CompatRegexTestHelper):
+    """Regex tests for the Thunderbird 18 update."""
+
+    VERSION = TB18_DEFINITION
+
+    def tests(self):
+        """String and JS changes for Thunderbird add-ons"""
+
+        # String changes for add-ons that use our localizations.
+        patterns = {r"fullZoomEnlargeCmd\.label": 738194,
+                    r"fullZoomReduceCmd\.label": 738194,
+                    r"fullZoomResetCmd\.label": 738194,
+                    r"fullZoomToggleCmd\.label": 738194,
+                    r"identitiesListDesc\.label": 314806,
+                    r"connection\.error\.certError": 792046,
+                    r"command\.wallops": 799068,
+                    r"searchTermsInvalidMessage": 561762,
+                    r"alreadyDefaultClientTitle": 595723,
+                    r"alreadyDefault": 595723,
+                    r"directoryUsedByOtherAccount": 577775}
+        for pattern, bug in patterns.items():
+            yield self.get_test_bug(
+                    bug, pattern,
+                    "Removed, renamed, or changed labels in use.",
+                    "Some string matched the pattern `%s`, which has been "
+                    "flagged as having changed in Thunderbird 18." % pattern,
+                    compat_type="error")
+
+        js_patterns = {r"initContactList": 775105,
+                       r"ircChannel\.prototype\.setMode": 799068,
+                       r"SetUpToolbarButtons": 785980,
+                       r"queryISupportsArray": 679696,
+                       r"gAttachmentNotifier\.EditAction": 792979,
+                       r"accountManagerContractID": 776705,
+                       r"updateMoveTargetMode": 725488,
+                       r"updatePurgeSpam": 725488,
+                       r"gServer": 577775}
+
+        # Add restricting prefix for ( or word boundary to prevent substring matching.
+        js_patterns.update(dict(("(\b|\()" + k, v) for k, v in js_patterns.items()))
+
+        for pattern, bug in js_patterns.items():
+            yield self.get_test_bug(
+                    bug, pattern,
+                    "Removed, renamed, or changed methods in use.",
+                    "A JavaScript function matched the pattern `%s`, which has "
+                    "been flagged as having changed, removed, or deprecated "
+                    "in Thunderbird 18." % pattern,
                     compat_type="error", log_function=self.err.notice)
