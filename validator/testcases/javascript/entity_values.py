@@ -3,7 +3,7 @@ from instanceproperties import _set_HTML_property
 from validator.compat import (FX10_DEFINITION, FX14_DEFINITION,
                               FX16_DEFINITION, FX19_DEFINITION,
                               TB14_DEFINITION, TB15_DEFINITION,
-                              TB16_DEFINITION)
+                              TB16_DEFINITION, TB18_DEFINITION)
 from validator.constants import BUGZILLA_BUG
 
 
@@ -333,3 +333,20 @@ for attrib in TB16_ATTRIBUTES:
         message="This attribute has been changed from `nsILocalFile` to "
                 "`nsIFile`",
         bug=749930)
+
+# Thunderbird 18 IDL changes
+@register_entity("prplIAccount.noNewlines")
+def prplIAccount_noNewlines(traverser):
+    traverser.err.notice(
+        err_id=("testcases_javascript_entity_values",
+                "prplIAccount_noNewlines"),
+        notice="Altered `prplIAccount.noNewlines` method in use.",
+        description="This add-on uses the `prplIAccount.noNewlines` property "
+                    "which has been removed in `%s`." % BUGZILLA_BUG % 799068,
+        filename=traverser.filename,
+        line=traverser.line,
+        column=traverser.position,
+        context=traverser.context,
+        for_appversions=TB18_DEFINITION,
+        compatibility_type="error",
+        tier=5)
