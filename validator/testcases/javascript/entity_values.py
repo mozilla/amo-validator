@@ -3,7 +3,8 @@ from instanceproperties import _set_HTML_property
 from validator.compat import (FX10_DEFINITION, FX14_DEFINITION,
                               FX16_DEFINITION, FX19_DEFINITION,
                               TB14_DEFINITION, TB15_DEFINITION,
-                              TB16_DEFINITION, TB18_DEFINITION)
+                              TB16_DEFINITION, TB18_DEFINITION,
+                              TB19_DEFINITION)
 from validator.constants import BUGZILLA_BUG
 
 
@@ -34,7 +35,7 @@ def deprecated_entity(name, version, message, bug, status="deprecated",
                       compat_type="error"):
     def wrap(traverser):
         traverser.err.warning(
-            err_id=("testcases_javascript_entity_values", name),
+            err_id=("js", "entities", name),
             warning="`%s` has been %s." % (name, status),
             description=[message,
                          "See %s for more information." % BUGZILLA_BUG % bug],
@@ -47,6 +48,15 @@ def deprecated_entity(name, version, message, bug, status="deprecated",
             tier=5)
     register_entity(name)(wrap)
 
+def register_changed_entities(version_definition, entities, version_string):
+    for entity in entities:
+        deprecated_entity(
+            name=entity["name"],
+            version=version_definition,
+            message="The method or property `%s` has been `%s` in `%s`."
+                % (entity["name"], entity["status"], version_string),
+            bug=entity["bug"],
+            compat_type=entity["compat_type"])
 
 DEP_IHF_MESSAGE = ("The `importHTMLFromFile` and `importHTMLFromURI` functions "
                    "have been removed from the `nsIPlacesImportExportService` "
@@ -350,3 +360,18 @@ def prplIAccount_noNewlines(traverser):
         for_appversions=TB18_DEFINITION,
         compatibility_type="error",
         tier=5)
+
+# Thunderbird 19 IDL changes
+TB19_ENTITIES = [
+    {"name":"nsIMsgCompFields.newshost",
+     "status": "changed",
+     "bug": 133605,
+     "compat_type": "error"},
+    {"name": "nsIMsgSearchAdapter.CurrentUrlDone",
+     "status": "changed",
+     "bug": 801383,
+     "compat_type": "error"}
+]
+register_changed_entities(version_definition=TB19_DEFINITION,
+    entities=TB19_ENTITIES, version_string="Thunderbird 19")
+

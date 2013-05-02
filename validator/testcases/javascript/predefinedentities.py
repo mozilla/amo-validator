@@ -349,7 +349,13 @@ INTERFACES = {
                        call_definitions.webbrowserpersist_saveuri}}},
     u"prplIAccount":
         {"value":
-             {u"noNewlines": entity("prplIAccount.noNewlines")}}
+             {u"noNewlines": entity("prplIAccount.noNewlines")}},
+    u"nsIMsgCompFields":
+        {"value":
+             {u"newshost": entity("nsIMsgCompFields.newshost")}},
+    u"nsIMsgSearchAdapter":
+        {"value":
+             {u"CurrentUrlDone": entity("nsIMsgSearchAdapter.CurrentUrlDone")}}
     }
 
 INTERFACE_ENTITIES = {u"nsIXMLHttpRequest":
