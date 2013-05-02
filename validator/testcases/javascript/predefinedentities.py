@@ -142,8 +142,12 @@ INTERFACES = {
                 entity("nsIMessenger.saveAttachmentToFolder")}},
     u"nsIMsgAccountManager":
         {"value":
-            {u"folderUriForPath":
-                entity("nsIMsgAccountManager.folderUriForPath")}},
+            {u"folderUriForPath": entity("nsIMsgAccountManager.folderUriForPath"),
+             u"allIdentities": entity("nsIMsgAccountManager.allIdentities"),
+             u"GetIdentitiesForServer": entity("nsIMsgAccountManager.GetIdentitiesForServer"),
+             u"accounts": entity("nsIMsgAccountManager.accounts"),
+             u"GetServersForIdentity": entity("nsIMsgAccountManager.GetServersForIdentity"),
+             u"allServers": entity("nsIMsgAccountManager.allServers")}},
     u"nsIMsgLocalMailFolder":
         {"value":
             {u"addMessage":
@@ -174,12 +178,14 @@ INTERFACES = {
     u"nsIMsgFilterService":
         {"value":
             {u"OpenFilterList": entity("nsIMsgFilterService.OpenFilterList"),
-             u"SaveFilterList": entity("nsIMsgFilterService.SaveFilterList")}},
+             u"SaveFilterList": entity("nsIMsgFilterService.SaveFilterList"),
+             u"applyFiltersToFolders": entity("nsIMsgFilterService.applyFiltersToFolders")}},
     u"nsIMsgFolder":
         {"value":
             {u"offlineStoreOutputStream":
                 {"value": call_definitions.nsIMsgFolder_changed},
-             u"filePath": entity("nsIMsgFolder.filePath")}},
+             u"filePath": entity("nsIMsgFolder.filePath"),
+             u"getExpansionArray": entity("nsIMsgFolder.getExpansionArray")}},
     u"nsIMsgIdentity":
         {"value":
             {u"signature": entity("nsIMsgIdentity.signature")}},
@@ -349,7 +355,20 @@ INTERFACES = {
                        call_definitions.webbrowserpersist_saveuri}}},
     u"prplIAccount":
         {"value":
-             {u"noNewlines": entity("prplIAccount.noNewlines")}}
+             {u"noNewlines": entity("prplIAccount.noNewlines")}},
+    u"nsIMsgCompFields":
+        {"value":
+             {u"newshost": entity("nsIMsgCompFields.newshost")}},
+    u"nsIMsgSearchAdapter":
+        {"value":
+             {u"CurrentUrlDone": entity("nsIMsgSearchAdapter.CurrentUrlDone")}},
+    u"nsIMsgAccount":
+        {"value":
+             {u"identities": entity("nsIMsgAccount.identities")}},
+    u"nsIMsgFilter":
+        {"value":
+             {u"getSortedActionList": entity("nsIMsgFilter.getSortedActionList"),
+              u"actionList": entity("nsIMsgFilter.actionList")}}
     }
 
 INTERFACE_ENTITIES = {u"nsIXMLHttpRequest":

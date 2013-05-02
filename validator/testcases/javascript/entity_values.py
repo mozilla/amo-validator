@@ -3,7 +3,8 @@ from instanceproperties import _set_HTML_property
 from validator.compat import (FX10_DEFINITION, FX14_DEFINITION,
                               FX16_DEFINITION, FX19_DEFINITION,
                               TB14_DEFINITION, TB15_DEFINITION,
-                              TB16_DEFINITION, TB18_DEFINITION)
+                              TB16_DEFINITION, TB18_DEFINITION,
+                              TB19_DEFINITION, TB20_DEFINITION)
 from validator.constants import BUGZILLA_BUG
 
 
@@ -34,7 +35,7 @@ def deprecated_entity(name, version, message, bug, status="deprecated",
                       compat_type="error"):
     def wrap(traverser):
         traverser.err.warning(
-            err_id=("testcases_javascript_entity_values", name),
+            err_id=("js", "entities", name),
             warning="`%s` has been %s." % (name, status),
             description=[message,
                          "See %s for more information." % BUGZILLA_BUG % bug],
@@ -47,6 +48,15 @@ def deprecated_entity(name, version, message, bug, status="deprecated",
             tier=5)
     register_entity(name)(wrap)
 
+def register_changed_entities(version_definition, entities, version_string):
+    for entity in entities:
+        deprecated_entity(
+            name=entity["name"],
+            version=version_definition,
+            message="The method or property `%s` has been `%s` in `%s`."
+                % (entity["name"], entity["status"], version_string),
+            bug=entity["bug"],
+            compat_type=entity["compat_type"])
 
 DEP_IHF_MESSAGE = ("The `importHTMLFromFile` and `importHTMLFromURI` functions "
                    "have been removed from the `nsIPlacesImportExportService` "
@@ -350,3 +360,43 @@ def prplIAccount_noNewlines(traverser):
         for_appversions=TB18_DEFINITION,
         compatibility_type="error",
         tier=5)
+
+# Thunderbird 19 IDL changes
+TB19_ENTITIES = [
+    {"name":"nsIMsgCompFields.newshost",
+     "status": "changed",
+     "bug": 133605,
+     "compat_type": "error"},
+    {"name": "nsIMsgSearchAdapter.CurrentUrlDone",
+     "status": "changed",
+     "bug": 801383,
+     "compat_type": "error"}
+]
+register_changed_entities(version_definition=TB19_DEFINITION,
+    entities=TB19_ENTITIES, version_string="Thunderbird 19")
+
+# Thunderbird 20 IDL changes
+TB20_ENTITIES = [
+    {"name": "nsIMsgAccount.identities",
+     "status": "changed", "bug": 820377, "compat_type": "error"},
+    {"name": "nsIMsgAccountManager.allIdentities",
+     "status": "changed", "bug": 820377, "compat_type": "error"},
+    {"name": "nsIMsgAccountManager.GetIdentitiesForServer",
+     "status": "changed", "bug": 820377, "compat_type": "error"},
+    {"name": "nsIMsgAccountManager.accounts",
+     "status": "changed", "bug": 820377, "compat_type": "error"},
+    {"name": "nsIMsgAccountManager.GetServersForIdentity",
+     "status": "changed", "bug": 820377, "compat_type": "error"},
+    {"name": "nsIMsgAccountManager.allServers",
+     "status": "changed", "bug": 820377, "compat_type": "error"},
+    {"name": "nsIMsgFolder.getExpansionArray",
+     "status": "removed", "bug": 821236, "compat_type": "error"},
+    {"name": "nsIMsgFilter.getSortedActionList",
+     "status": "changed", "bug": 821253, "compat_type": "error"},
+    {"name": "nsIMsgFilter.actionList",
+     "status": "removed", "bug": 821743, "compat_type": "error"},
+    {"name": "nsIMsgFilterService.applyFiltersToFolders",
+     "status": "changed", "bug": 822131, "compat_type": "error"}
+]
+register_changed_entities(version_definition=TB20_DEFINITION,
+    entities=TB20_ENTITIES, version_string="Thunderbird 20")
