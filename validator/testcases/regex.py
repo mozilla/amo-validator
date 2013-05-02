@@ -10,7 +10,8 @@ from validator.compat import (FX4_DEFINITION, FX5_DEFINITION, FX6_DEFINITION,
                               FX20_DEFINITION, TB7_DEFINITION, TB10_DEFINITION,
                               TB11_DEFINITION, TB12_DEFINITION, TB13_DEFINITION,
                               TB14_DEFINITION, TB15_DEFINITION, TB16_DEFINITION,
-                              TB17_DEFINITION, TB18_DEFINITION, TB19_DEFINITION)
+                              TB17_DEFINITION, TB18_DEFINITION, TB19_DEFINITION,
+                              TB20_DEFINITION)
 from validator.contextgenerator import ContextGenerator
 from markup.csstester import UNPREFIXED_MESSAGE
 
@@ -1382,3 +1383,59 @@ class Thunderbird19RegexTests(CompatRegexTestHelper):
                     "in Thunderbird 19." % pattern,
                     compat_type="error", log_function=self.err.notice)
 
+@register_generator
+class Thunderbird20RegexTests(CompatRegexTestHelper):
+    """Regex tests for the Thunderbird 20 update."""
+
+    VERSION = TB20_DEFINITION
+
+    def tests(self):
+        """String and JS changes for Thunderbird add-ons"""
+
+        # String changes for add-ons that use our localizations.
+        patterns = {r"appmenuButton.tooltip": 812630,
+                    r"decreaseFontSize.key": 813295,
+                    r"decreaseFontSize.key2": 813295,
+                    r"increaseFontSize.key": 813295,
+                    r"increaseFontSize.key2": 813295,
+                    r"serverNameEmpty": 327812,
+                    r"confirmDeferAccount": 734034}
+        for pattern, bug in patterns.items():
+            yield self.get_test_bug(
+                    bug, pattern,
+                    "Removed, renamed, or changed labels in use.",
+                    "Some string matched the pattern `%s`, which has been "
+                    "flagged as having changed in Thunderbird 20." % pattern,
+                    compat_type="error")
+
+        js_patterns = {r"gIdentity": 807101,
+                       r"enabling": 807101,
+                       r"cleanUpHostname": 327812,
+                       r"gIOService": 794909,
+                       r"gPromptService": 794909,
+                       r"gIsOffline": 794909,
+                       r"gIOService": 794909,
+                       r"gPrefBranch": 795152,
+                       r"GetWindowByWindowType": 795152,
+                       r"specialTabs\.getApplicationUpgradeVersions": 795152,
+                       r"specialTabs\.shouldShowTelemetryNotification": 795152,
+                       r"specialTabs\.showTelemetryNotification": 795152,
+                       r"specialTabs\.shouldShowAboutRightsNotification": 795152,
+                       r"specialTabs\.showAboutRightsNotification": 795152,
+                       r"FocusManager": 795152,
+                       r"nsIWindowMediator": 795152,
+                       r"nsIWindowWatcher": 795152,
+                       r"gPrefs": 795152,
+                       r"gAttachmentNotifier\.handleMutations": 823009}
+
+        # Add restricting prefix for ( or word boundary to prevent substring matching.
+        js_patterns.update(dict(("(\b|\()" + k, v) for k, v in js_patterns.items()))
+
+        for pattern, bug in js_patterns.items():
+            yield self.get_test_bug(
+                    bug, pattern,
+                    "Removed, renamed, or changed methods in use.",
+                    "A JavaScript function matched the pattern `%s`, which has "
+                    "been flagged as having changed, removed, or deprecated "
+                    "in Thunderbird 20." % pattern,
+                    compat_type="error", log_function=self.err.notice)
