@@ -1189,7 +1189,7 @@ class Thunderbird15RegexTests(CompatRegexTestHelper):
                        r"\.capabilityPref": 558659,}
 
         # Add restricting prefix for ( or word boundary to prevent substring matching.
-        js_patterns.update(dict(("(\b|\()" + k, v) for k, v in prefix_patterns.items()))
+        js_patterns.update(dict((r"(\b|\()" + k, v) for k, v in prefix_patterns.items()))
 
         for pattern, bug in js_patterns.items():
             yield self.get_test_bug(
@@ -1319,7 +1319,7 @@ class Thunderbird18RegexTests(CompatRegexTestHelper):
                        r"gServer": 577775}
 
         # Add restricting prefix for ( or word boundary to prevent substring matching.
-        js_patterns.update(dict(("(\b|\()" + k, v) for k, v in js_patterns.items()))
+        js_patterns = (dict((r"(\b|\()" + k, v) for k, v in js_patterns.items()))
 
         for pattern, bug in js_patterns.items():
             yield self.get_test_bug(
@@ -1372,7 +1372,7 @@ class Thunderbird19RegexTests(CompatRegexTestHelper):
                        r"gLastPurpleConvId": 812921}
 
         # Add restricting prefix for ( or word boundary to prevent substring matching.
-        js_patterns.update(dict(("(\b|\()" + k, v) for k, v in js_patterns.items()))
+        js_patterns = (dict((r"(\b|\()" + k, v) for k, v in js_patterns.items()))
 
         for pattern, bug in js_patterns.items():
             yield self.get_test_bug(
@@ -1429,7 +1429,7 @@ class Thunderbird20RegexTests(CompatRegexTestHelper):
                        r"gAttachmentNotifier\.handleMutations": 823009}
 
         # Add restricting prefix for ( or word boundary to prevent substring matching.
-        js_patterns.update(dict(("(\b|\()" + k, v) for k, v in js_patterns.items()))
+        js_patterns = (dict((r"(\b|\()" + k, v) for k, v in js_patterns.items()))
 
         for pattern, bug in js_patterns.items():
             yield self.get_test_bug(
