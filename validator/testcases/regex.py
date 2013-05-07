@@ -7,11 +7,11 @@ from validator.compat import (FX4_DEFINITION, FX5_DEFINITION, FX6_DEFINITION,
                               FX11_DEFINITION, FX12_DEFINITION, FX13_DEFINITION,
                               FX14_DEFINITION, FX15_DEFINITION, FX16_DEFINITION,
                               FX17_DEFINITION, FX18_DEFINITION, FX19_DEFINITION,
-                              FX20_DEFINITION, TB7_DEFINITION, TB10_DEFINITION,
-                              TB11_DEFINITION, TB12_DEFINITION, TB13_DEFINITION,
-                              TB14_DEFINITION, TB15_DEFINITION, TB16_DEFINITION,
-                              TB17_DEFINITION, TB18_DEFINITION, TB19_DEFINITION,
-                              TB20_DEFINITION)
+                              FX20_DEFINITION, FX21_DEFINITION,
+                              TB7_DEFINITION, TB10_DEFINITION, TB11_DEFINITION,
+                              TB12_DEFINITION, TB13_DEFINITION, TB14_DEFINITION,
+                              TB15_DEFINITION, TB16_DEFINITION, TB17_DEFINITION,
+                              TB18_DEFINITION, TB19_DEFINITION, TB20_DEFINITION)
 from validator.contextgenerator import ContextGenerator
 from markup.csstester import UNPREFIXED_MESSAGE
 
@@ -905,6 +905,40 @@ class Gecko20RegexTests(CompatRegexTestHelper):
             "(resource://gre/modules/BookmarkHTMLUtils.jsm) instead. See {0} "
             "for more information.".format(self.PLACES_IMPORT_LINK),
             compat_type="error", log_function=self.err.notice)
+
+
+@register_generator
+class Gecko21RegexTests(CompatRegexTestHelper):
+    """Regex tests for Gecko 21 updates."""
+
+    VERSION = FX21_DEFINITION
+
+    def js_tests(self):
+
+        for pattern in (
+                "resource:///modules/.*",
+                r"resource://gre/modules/(HUDService|MigrationUtils|"
+                    "PlacesUIUtils|PropertyPanel|RecentWindow|offlineAppCache|"
+                    "source-editor)\.jsm"):
+            yield self.get_test_bug(
+                763295, pattern,
+                "Some JS Modules were moved to a different location.",
+                "Some JS modules were moved from `resource:///` and "
+                "`resource://gre/` to `resource://app/`.",
+                compat_type="error", log_function=self.err.warning)
+
+        yield self.get_test_bug(
+            835543, "(RESULT_TYPE_DYNAMIC_CONTAINER|RESULT_TYPE_FULL_VISIT)",
+            "`nsINavHistoryService` members removed.",
+            "`RESULT_TYPE_DYNAMIC_CONTAINER` and `RESULT_TYPE_FULL_VISIT` "
+            "were removed.",
+            compat_type="error", log_function=self.err.warning)
+
+        yield self.get_test_bug(
+            826409, "(onBeforeDeleteURI|onBeforeItemRemoved)",
+            "Event handlers removed in Gecko 21",
+            "`onBeforeDeleteURI` and `onBeforeItemRemoved` were removed.",
+            compat_type="error", log_function=self.err.warning)
 
 
 @register_generator
