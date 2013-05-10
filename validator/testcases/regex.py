@@ -1456,10 +1456,6 @@ class Thunderbird20RegexTests(CompatRegexTestHelper):
                        r"specialTabs\.showTelemetryNotification": 795152,
                        r"specialTabs\.shouldShowAboutRightsNotification": 795152,
                        r"specialTabs\.showAboutRightsNotification": 795152,
-                       r"FocusManager": 795152,
-                       r"nsIWindowMediator": 795152,
-                       r"nsIWindowWatcher": 795152,
-                       r"gPrefs": 795152,
                        r"gAttachmentNotifier\.handleMutations": 823009}
 
         # Add restricting prefix for ( or word boundary to prevent substring matching.
