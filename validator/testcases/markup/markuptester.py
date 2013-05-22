@@ -1,10 +1,8 @@
 import re
 import sys
 import types
-try:
-    import HTMLParser as htmlparser
-except ImportError:  # pragma: no cover
-    import html.parser as htmlparser
+
+from validator.python.HTMLParser import HTMLParser
 
 import validator.testcases.scripting as scripting
 import validator.unicodehelper as unicodehelper
@@ -38,11 +36,11 @@ REMOTE_URL_PATTERN = re.compile("(ht|f)tps?://")
 _markedsectionclose = re.compile(r']\s*]\s*>')
 
 
-class MarkupParser(htmlparser.HTMLParser):
+class MarkupParser(HTMLParser):
     """Parse and analyze the versious components of markup files."""
 
     def __init__(self, err, strict=True, debug=False):
-        htmlparser.HTMLParser.__init__(self)
+        HTMLParser.__init__(self)
         self.err = err
         self.is_jetpack = "is_jetpack" in err.metadata  # Cache this value.
         self.line = 0
@@ -136,24 +134,6 @@ class MarkupParser(htmlparser.HTMLParser):
                 print self.xml_state, inst
 
             if "markup" in self.reported:
-                return
-
-            if ("script" in self.xml_state or
-                self.debug and "testscript" in self.xml_state):
-                if "script_comments" in self.reported or not self.strict:
-                    return
-                self.err.notice(
-                    err_id=("markup", "_feed", "missing_script_comments"),
-                    notice="Missing comments in <script> tag",
-                    description="Markup parsing errors occurred while trying "
-                                "to parse the file. This would likely be "
-                                "mitigated by wrapping <script> tag contents "
-                                "in HTML comment tags (<!-- -->)",
-                    filename=self.filename,
-                    line=self.line,
-                    context=self.context,
-                    tier=2)
-                self.reported.add("script_comments")
                 return
 
             if self.strict:
@@ -574,6 +554,7 @@ class MarkupParser(htmlparser.HTMLParser):
     def handle_comment(self, data):
         self._save_to_buffer(data)
 
+    # This code comes from markupbase.
     def parse_marked_section(self, i, report=0):
         rawdata = self.rawdata
 
@@ -625,82 +606,3 @@ class MarkupParser(htmlparser.HTMLParser):
         if url.startswith("chrome://"):
             return True
         return not REMOTE_URL_PATTERN.match(url)
-
-    # Code to fix for Python issue 670664
-
-    def parse_starttag(self, i):
-        self.__starttag_text = None
-        endpos = self.check_for_whole_start_tag(i)
-        if endpos < 0:
-            return endpos
-        rawdata = self.rawdata
-        self.__starttag_text = rawdata[i:endpos]
-
-        # Now parse the data between i+1 and j into a tag and attrs
-        attrs = []
-        match = htmlparser.tagfind.match(rawdata, i+1)
-        assert match, 'unexpected call to parse_starttag()'
-        k = match.end()
-        self.lasttag = tag = rawdata[i+1:k].lower()
-
-        while k < endpos:
-            m = htmlparser.attrfind.match(rawdata, k)
-            if not m:
-                break
-            attrname, rest, attrvalue = m.group(1, 2, 3)
-            if not rest:
-                attrvalue = None
-            elif attrvalue[:1] == '\'' == attrvalue[-1:] or \
-                 attrvalue[:1] == '"' == attrvalue[-1:]:
-                attrvalue = attrvalue[1:-1]
-                attrvalue = self.unescape(attrvalue)
-            attrs.append((attrname.lower(), attrvalue))
-            k = m.end()
-
-        end = rawdata[k:endpos].strip()
-        if end not in (">", "/>"):
-            lineno, offset = self.getpos()
-            if "\n" in self.__starttag_text:
-                lineno = lineno + self.__starttag_text.count("\n")
-                offset = len(self.__starttag_text) \
-                         - self.__starttag_text.rfind("\n")
-            else:
-                offset = offset + len(self.__starttag_text)
-            self.error("junk characters in start tag: %r"
-                       % (rawdata[k:endpos][:20],))
-        if end.endswith('/>'):
-            # XHTML-style empty tag: <span attr="value" />
-            self.handle_startendtag(tag, attrs)
-        else:
-            self.handle_starttag(tag, attrs)
-            if tag in self.CDATA_CONTENT_ELEMENTS:
-                self.set_cdata_mode(tag)
-        return endpos
-
-    def parse_endtag(self, i):
-        rawdata = self.rawdata
-        assert rawdata[i:i+2] == "</", "unexpected call to parse_endtag"
-        match = htmlparser.endendtag.search(rawdata, i+1) # >
-        if not match:
-            return -1
-        j = match.end()
-        match = htmlparser.endtagfind.match(rawdata, i) # </ + tag + >
-        if not match:
-            if self.cdata_tag is not None:
-                self.handle_data(rawdata[i:j])
-                return j
-            self.error("bad end tag: %r" % (rawdata[i:j],))
-        tag = match.group(1).strip()
-
-        if self.cdata_tag is not None and tag.lower() != self.cdata_tag:
-            self.handle_data(rawdata[i:j])
-            return j
-
-        self.handle_endtag(tag.lower())
-        self.clear_cdata_mode()
-        return j
-
-    def set_cdata_mode(self, tag):
-        self.interesting = htmlparser.interesting_cdata
-        self.cdata_tag = None
-

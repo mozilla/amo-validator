@@ -28,7 +28,7 @@ def _test_xul_raw(data, path, should_fail=False, type_=None):
     if should_fail:
         assert err.failed()
     else:
-        assert not err.failed()
+        assert not err.failed(fail_on_warnings=False)
 
     return err
 
@@ -225,17 +225,9 @@ def test_lp_remote():
               True, PACKAGE_THEME)
 
 
-def test_invalid_markup():
-    "Tests an markup file that is simply broken."
-
-    # Test for the banned test element
+def test_banned_markup():
+    "Tests that banned elements are flagged."
     _test_xul("tests/resources/markup/markuptester/bad_banned.xml", True)
-
-    result = _test_xul("tests/resources/markup/markuptester/bad.xml", True)
-    assert result.warnings
-    result = _test_xul("tests/resources/markup/markuptester/bad_script.xml",
-                       False)
-    assert result.notices
 
 
 def test_bad_encoding():

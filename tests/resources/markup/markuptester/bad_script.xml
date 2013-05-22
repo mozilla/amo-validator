@@ -1,7 +1,0 @@
-<?xml version="1.0"?>
-<xml>
-	<!-- There should be comments in the script tag. -->
-	<testscript>
-		<whatever
-	</testscript>
-</xml>
