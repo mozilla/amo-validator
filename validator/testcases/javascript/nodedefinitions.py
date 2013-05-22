@@ -95,28 +95,4 @@ DEFINITIONS = {
     "LogicalOperator": node(returns=True),
     "AssignmentOperator": node(returns=True),
     "UpdateOperator": node(returns=True),
-
-    "XMLEscape": node(branches=("expression", ), action=actions._expression,
-                      returns=True),
-    "XMLDefaultDeclaration": node(branches=("namespace", )),
-    "XMLQualifiedIdentifier": node(branches=("left", "right")),
-    "XMLFunctionQualifiedIdentifier": node(branches=("right", )),
-
-    "XMLAttributeSelector": node(branches=("attribute", ), returns=True),
-    "XMLFilterExpression": node(branches=("left", "right"), returns=True),
-
-    "XMLElement": node(branches=("contents", ), returns=True),
-    "XMLList": node(branches=("contents", )),
-    "XMLStartTag": node(branches=("contents", )),
-    "XMLEndTag": node(branches=("contents", )),
-    "XMLPointTag": node(branches=("contents", )),
-    "XMLName": node(branches=("contents", )),
-
 }
-
-E4X_NODES = set([
-    "XMLElement", "XMLList", "XMLStartTag", "XMLEndTag", "XMLPointTag",
-    "XMLName", "XMLEscape", "XMLDefaultDeclaration",
-    "XMLQualifiedIdentifier", "XMLFunctionQualifiedIdentifier",
-    "XMLAttributeSelector", "XMLFilterExpression", "XMLAnyName", "XML",
-    "XMLCdata", "XMLComment", "XMLProcessingInstruction"])

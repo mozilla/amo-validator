@@ -38,11 +38,3 @@ class TestFX15Compat(CompatTestCase):
 
         for r in ["_DOMElement", "_feedURI", "_siteURI", "_cellProperties"]:
             yield test_pattern, self, r
-
-    def test_warn_e4x(self):
-        """Test that E4X is flagged as a warning properly."""
-        self.run_script_for_compat("""
-        var x = <foo></foo>;
-        """)
-        self.assert_failed(with_warnings=True)
-        self.assert_compat_error("warning")

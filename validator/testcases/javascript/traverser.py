@@ -7,7 +7,7 @@ from validator.constants import DESCRIPTION_TYPES
 
 from . import actions
 from .jstypes import *
-from .nodedefinitions import DEFINITIONS, E4X_NODES
+from .nodedefinitions import DEFINITIONS
 from .predefinedentities import GLOBAL_ENTITIES, BANNED_IDENTIFIERS
 
 
@@ -43,8 +43,6 @@ class Traverser(object):
 
         # For debugging
         self.debug_level = 0
-
-        self.warned_e4x = False
 
         # If we're not debugging, don't waste more cycles than we need to.
         if not DEBUG:
@@ -132,9 +130,6 @@ class Traverser(object):
             self.line = self.start_line + int(node["loc"]["start"]["line"])
             self.position = int(node["loc"]["start"]["column"])
 
-        if node.get("type") in E4X_NODES and not self.warned_e4x:
-            self.warn_e4x()
-
         if node.get("type") not in DEFINITIONS:
             return JSWrapper(JSObject(), traverser=self, dirty=True)
 
@@ -200,26 +195,6 @@ class Traverser(object):
 
         node["__traversal"] = None
         return JSWrapper(JSObject(), traverser=self, dirty=True)
-
-    def warn_e4x(self, *args, **kwargs):
-        if self.warned_e4x:
-            return
-        self.warned_e4x = True
-
-        self.err.warning(
-            err_id=("js", "traverser", "e4x"),
-            warning="E4X Deprecated/Removed",
-            description="It is no longer possible to pass E4X objects "
-                        "between most contexts, including different chrome "
-                        "windows or JS modules. E4X will be completely "
-                        "removed by Gecko 20 (or possibly earlier). See %s "
-                        "for more information." %
-                        "https://developer.mozilla.org/en-US/docs/E4X",
-            filename=self.filename,
-            line=self.line,
-            column=self.position,
-            context=self.context,
-            compatibility_type="error")
 
     def _push_block_context(self):
         "Adds a block context to the current interpretation frame"

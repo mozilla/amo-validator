@@ -74,11 +74,6 @@ deprecated_entity(name="Packages", version=FX16_DEFINITION,
                   message=JAVA_MESSAGE, bug=748343)
 
 
-@register_entity("XML")
-def XML(traverser):
-    return {"dangerous": traverser.warn_e4x}
-
-
 @register_entity("document.write")
 def document_write(traverser):
     def on_write(wrapper, arguments, traverser):

@@ -520,9 +520,6 @@ GLOBAL_ENTITIES = {
     u"RegExp": {"value": {u"prototype": {"readonly": True}}},
     u"Date": {"value": {u"prototype": {"readonly": True}}},
     u"File": {"value": {u"prototype": {"readonly": True}}},
-    u"XML": entity("XML"),
-    u"QName": entity("XML"),
-    u"Namespace": entity("XML"),
 
     u"Math":
         {"value":

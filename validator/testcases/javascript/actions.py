@@ -780,9 +780,6 @@ def _expr_binary(traverser, node):
         right = traverser._traverse_node(node["right"])
         traverser._debug("Is dirty? %r" % right.dirty, 1)
 
-    if operator == "..":
-        traverser.warn_e4x()
-
     traverser.debug_level -= 1
 
     # Dirty l or r values mean we can skip the expression. A dirty value
