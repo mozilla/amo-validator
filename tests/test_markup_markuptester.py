@@ -365,7 +365,7 @@ def test_proper_line_numbers():
     <script>
     eval("OWOWOWOWOWOWOWOW");
     </script>
-    </foo>""", "foo.xul", should_fail=True)
+    </foo>""", "foo.xul")
 
     assert err.warnings
     warning = err.warnings[0]

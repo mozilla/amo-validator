@@ -1,3 +1,5 @@
+from nose.tools import eq_
+
 import validator.testcases.l10n.dtd as dtd
 
 
@@ -45,13 +47,13 @@ def test_broken_file():
 def _inspect_file_results(parser):
     """Inspect the output of the DTD file tests."""
 
-    assert len(parser) == 7
+    eq_(len(parser), 7)
     assert "foo" in parser.entities
-    assert parser.entities["foo"] == "bar"
+    eq_(parser.entities["foo"], "bar")
     assert "overwrite" in parser.entities
-    assert parser.entities["overwrite"] == "bar"
+    eq_(parser.entities["overwrite"], "bar")
     assert "two" in parser.entities
-    assert parser.entities["two"] == "per"
+    eq_(parser.entities["two"], "per")
     assert "line" in parser.entities
-    assert parser.entities["line"] == "woot"
+    eq_(parser.entities["line"], "woot")
 

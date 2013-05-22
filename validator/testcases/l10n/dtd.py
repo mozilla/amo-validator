@@ -3,9 +3,9 @@ from StringIO import StringIO
 from validator.contextgenerator import ContextGenerator
 
 try:
-    from HTMLParser import HTMLParser
-except ImportError:  # pragma: no cover
     from html.parser import HTMLParser
+except ImportError:  # pragma: no cover
+    from HTMLParser import HTMLParser
 
 
 class DTDParser(object):
@@ -41,14 +41,12 @@ class DTDParser(object):
     def _parse(self, data):
         "Parses the DTD data and stores it in an aggregate format."
 
-        split = data.split("\n")
         parser = DTDXMLParser()
         # Feed the DTD file in line-by-line.
-        for line in split:
-            line += "\n"
+        for split_line in data.split("\n"):
             try:
-                parser.feed(line)
-            except Exception:
+                parser.feed(split_line + "\n")
+            except Exception as e:
                 parser = DTDXMLParser()
             else:
                 if parser.out_buffer:
@@ -65,6 +63,10 @@ class DTDXMLParser(HTMLParser):
         HTMLParser.__init__(self)
         self.out_buffer = []
 
+    # Support for py2.7/3k
+    def handle_comment(self, data):
+        self.unknown_decl(data)
+
     def unknown_decl(self, decl):
         "Handles non-DOCTYPE SGML declarations in *ML documents."
 
@@ -74,7 +76,6 @@ class DTDXMLParser(HTMLParser):
         if not split_decl[0] == "ENTITY" or len(split_decl) < 3:
             # Interestingly enough, it legitimately IS an unknown
             # declaration. Funny thing, you know?
-            # TODO: Log an error?
             return
 
         self.out_buffer.append((split_decl[1],
@@ -84,5 +85,3 @@ class DTDXMLParser(HTMLParser):
     def clear_buffer(self):
         "Clears the return buffer."
         self.out_buffer = []
-
-
