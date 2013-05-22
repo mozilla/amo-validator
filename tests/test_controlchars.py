@@ -36,22 +36,3 @@ def test_controlchars_ascii_warn():
     errs = _do_test("tests/resources/controlchars/controlchars_ascii_warn.js")
     eq_(errs.message_count, 1)
     eq_(errs.warnings[0]["id"][2], "syntax_error")
-
-
-def test_controlchars_utf8_ok():
-    """Test that multi-byte characters are decoded properly (utf-8)."""
-
-    errs = _do_test("tests/resources/controlchars/controlchars_utf-8_ok.js")
-    assert not errs.message_count
-
-
-def test_controlchars_utf8_warn():
-    """
-    Tests that multi-byte characters are decoded properly (utf-8) but remaining
-    non-ascii characters raise warnings.
-    """
-
-    errs = _do_test("tests/resources/controlchars/controlchars_utf-8_warn.js")
-    eq_(errs.message_count, 1)
-    eq_(errs.warnings[0]["id"][2], "syntax_error")
-
