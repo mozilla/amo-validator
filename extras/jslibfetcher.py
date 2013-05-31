@@ -1,9 +1,13 @@
 import urllib
+import urllib2
 import os
 
 
+base_dir = "jslibs/"
+
+
 def process(url, destination):
-    destination = "jslibs/%s" % destination
+    destination = base_dir + destination
 
     if os.path.exists(destination):
         return
@@ -11,8 +15,8 @@ def process(url, destination):
     try:
         print url
         urllib.urlretrieve(url, destination)
-    except Exception:
-        print "Failed"
+    except Exception as e:
+        print "Failed", e
 
 
 def get_pattern(prefix, url_pattern, versions):
@@ -46,7 +50,8 @@ JQUERY_CODE_VERSIONS = ("1.0.pack", "1.0.1.pack", "1.0.1", "1.0.2.pack",
                         "1.7.1", "1.7.2.min", "1.7.2", "1.8.0.min", "1.8.0",
                         "1.8.1.min", "1.8.1", "1.8.2.min", "1.8.2",
                         "1.8.3.min", "1.8.3", "1.9.0.min", "1.9.0",
-                        "1.9.1.min", "1.9.1", "2.0.0.min", "2.0.0")
+                        "1.9.1.min", "1.9.1", "2.0.0.min", "2.0.0",
+                        "2.0.1.min", "2.0.1")
 JQUERY_GCODE_VERSIONS = ("1.1.3", "1.1.3.1.pack", "1.1.3.1", "1.1.4.pack",
                          "1.1.4", "1.2.min", "1.2.pack", "1.2", "1.2.1.min",
                          "1.2.1.pack", "1.2.1", "1.2.2.pack", "1.2.2.min",
@@ -187,3 +192,26 @@ CRYPTO_FILES = ["aes", "cipher-core", "core", "enc-base64", "enc-utf16",
 get_pattern(
     "crypto_js", "http://crypto-js.googlecode.com/svn/tags/3.0.2/src/%s.js",
     CRYPTO_FILES)
+
+
+import zipfile
+from StringIO import StringIO
+
+def process_zip(url):
+
+    url_filename = url.split('/')[-1].split('?')[0].replace('.', '-')
+
+    data = urllib2.urlopen(url)
+    zipdata = StringIO()
+    zipdata.write(data.read())
+
+    zf = zipfile.ZipFile(zipdata)
+    for name in zf.namelist():
+        if name.endswith('.js'):
+            filename = name.split('/')[-1]
+            with open(base_dir + '%s_%s' % (url_filename, filename),
+                      mode="w") as jsf:
+                jsf.write(zf.open(name).read())
+
+
+process_zip('http://kangoextensions.com/kango/kango-framework-latest.zip')
