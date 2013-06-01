@@ -1,13 +1,9 @@
 import urllib
-import urllib2
 import os
 
 
-base_dir = "jslibs/"
-
-
 def process(url, destination):
-    destination = base_dir + destination
+    destination = "jslibs/%s" % destination
 
     if os.path.exists(destination):
         return
@@ -192,26 +188,3 @@ CRYPTO_FILES = ["aes", "cipher-core", "core", "enc-base64", "enc-utf16",
 get_pattern(
     "crypto_js", "http://crypto-js.googlecode.com/svn/tags/3.0.2/src/%s.js",
     CRYPTO_FILES)
-
-
-import zipfile
-from StringIO import StringIO
-
-def process_zip(url):
-
-    url_filename = url.split('/')[-1].split('?')[0].replace('.', '-')
-
-    data = urllib2.urlopen(url)
-    zipdata = StringIO()
-    zipdata.write(data.read())
-
-    zf = zipfile.ZipFile(zipdata)
-    for name in zf.namelist():
-        if name.endswith('.js'):
-            filename = name.split('/')[-1]
-            with open(base_dir + '%s_%s' % (url_filename, filename),
-                      mode="w") as jsf:
-                jsf.write(zf.open(name).read())
-
-
-process_zip('http://kangoextensions.com/kango/kango-framework-latest.zip')
