@@ -174,6 +174,19 @@ def inspect_jetpack(err, xpi_package, allow_old_sdk=False):
             uri = uri[11:]
         zip_path = "resources/%s" % uri.replace("@", "-at-")
 
+        # Check the zipname element if it exists.
+        if zip_path not in xpi_package:
+            err.warning(
+                err_id=("testcases_jetpack",
+                        "inspect_jetpack",
+                        "missing_jetpack_module"),
+                warning="Missing Jetpack module",
+                description=["A Jetpack module listed in harness-options.json "
+                             "could not be found in the add-on.",
+                             "Path: %s" % zip_path],
+                filename="harness-options.json")
+            continue
+
         blob_hash = hashlib.sha256(xpi_package.read(zip_path)).hexdigest()
         file_hashes[zip_path] = blob_hash
 
