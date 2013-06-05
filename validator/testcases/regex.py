@@ -239,7 +239,7 @@ class MarionetteInPrefsRegexTests(RegexTestGenerator):
                     "the browser not being secure. Please remove them.")
 
         for ref, bug in self.MARIONETTE_PREFS.items():
-            yield self.get_test(
+            yield self.get_test_bug(
                     bug,
                     ref,
                     "Marionette preferences are not allowed as it could lead to"
