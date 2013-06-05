@@ -232,7 +232,7 @@ class MarionetteInPrefsRegexTests(RegexTestGenerator):
 
     def tests(self):
         for ref, bug in self.MARIONETTE_REFERENCES.items():
-            yield self.get_test(
+            yield self.get_test_bug(
                     bug,
                     ref,
                     "Marionette references are not allowed as it could lead to"
