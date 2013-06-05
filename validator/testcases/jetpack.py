@@ -174,6 +174,12 @@ def inspect_jetpack(err, xpi_package, allow_old_sdk=False):
             uri = uri[11:]
         zip_path = "resources/%s" % uri.replace("@", "-at-")
 
+        # The key is no longer a URI in newer versions of the SDK
+        if zip_path not in xpi_package:
+            zip_path = 'resources/%s/%s/%s.js' % (
+                module['packageName'], module['sectionName'],
+                module['moduleName'])
+
         # Check the zipname element if it exists.
         if zip_path not in xpi_package:
             err.warning(
