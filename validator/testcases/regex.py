@@ -210,6 +210,43 @@ class DOMMutationRegexTests(RegexTestGenerator):
 
 
 @register_generator
+class MarionetteInPrefsRegexTests(RegexTestGenerator):
+    """
+    These regex tests will ensure that the developer is not switching on
+    Marionette prefs
+
+    Added from bug 741812
+    """
+
+    MARIONETTE_REFERENCES = {"@mozilla.org/marionette;1": 741812,
+                        "{786a1369-dca5-4adc-8486-33d23c88010a}": 741812,
+                        "MarionetteComponent": 741812,
+                        "MarionetteServer": 741812}
+
+    MARIONETTE_PREFS = {"marionette.force-local": 741812,
+                        "marionette.defaultPrefs.enabled": 741812,
+                        "marionette.defaultPrefs.port": 741812}
+    @classmethod
+    def applicable(cls, err, filename, document):
+        return bool(re.match(r"defaults/preferences/.+\.js", filename))
+
+    def tests(self):
+        for ref, bug in self.MARIONETTE_REFERENCES.items():
+            yield self.get_test(
+                    bug,
+                    ref,
+                    "Marionette references are not allowed as it could lead to"
+                    "the browser not being secure. Please remove them.")
+
+        for ref, bug in self.MARIONETTE_PREFS.items():
+            yield self.get_test(
+                    bug,
+                    ref,
+                    "Marionette preferences are not allowed as it could lead to"
+                    "the browser not being secure. Please remove them.")
+
+
+@register_generator
 class PasswordsInPrefsRegexTests(RegexTestGenerator):
     """
     These regex tests will ensure that the developer is not storing passwords
