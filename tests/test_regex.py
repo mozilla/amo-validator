@@ -16,13 +16,26 @@ def test_valid():
 def test_marionette_preferences_and_references_fail():
     "Tests that check for marionette. Added in bug 741812"
 
-    assert _do_test_raw("var x = 'marionette.defaultPrefs.port';").failed()
-    assert _do_test_raw("var x = 'marionette.defaultPrefs.enabled';").failed()
-    assert _do_test_raw("var x = 'marionette.force-local';").failed()
-    assert _do_test_raw("var x = '@mozilla.org/marionette;1';").failed()
-    assert _do_test_raw("var x = '{786a1369-dca5-4adc-8486-33d23c88010a}';").failed()
-    assert _do_test_raw("var x = 'MarionetteComponent';").failed()
-    assert _do_test_raw("var x = 'MarionetteServer';").failed()
+    _dtr = lambda script: _do_test_raw(script, path='defaults/preferences/foo.js')
+
+    assert _dtr("var x = 'marionette.defaultPrefs.port';").failed()
+    assert _dtr("var x = 'marionette.defaultPrefs.enabled';").failed()
+    assert _dtr("var x = 'marionette.force-local';").failed()
+    assert _dtr("var x = '@mozilla.org/marionette;1';").failed()
+    assert _dtr("var x = '{786a1369-dca5-4adc-8486-33d23c88010a}';").failed()
+    assert _dtr("var x = 'MarionetteComponent';").failed()
+    assert _dtr("var x = 'MarionetteServer';").failed()
+
+def test_not_marionette_preferences_and_references_pass():
+    "Tests that check for marionette. Added in bug 741812"
+
+    assert not _do_test_raw("var x = 'marionette.defaultPrefs.port';").failed()
+    assert not _do_test_raw("var x = 'marionette.defaultPrefs.enabled';").failed()
+    assert not _do_test_raw("var x = 'marionette.force-local';").failed()
+    assert not _do_test_raw("var x = '@mozilla.org/marionette;1';").failed()
+    assert not _do_test_raw("var x = '{786a1369-dca5-4adc-8486-33d23c88010a}';").failed()
+    assert not _do_test_raw("var x = 'MarionetteComponent';").failed()
+    assert not _do_test_raw("var x = 'MarionetteServer';").failed()
 
 def test_basic_regex_fail():
     "Tests that a simple Regex match causes a warning"

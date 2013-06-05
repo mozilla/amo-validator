@@ -230,15 +230,17 @@ class MarionetteInPrefsRegexTests(RegexTestGenerator):
     def applicable(cls, err, filename, document):
         return bool(re.match(r"defaults/preferences/.+\.js", filename))
 
-    def tests(self):
+    def js_tests(self):
         title = "Marionette access is disallowed"
         for ref, bug in self.MARIONETTE_REFERENCES.items():
+            print ref
             yield self.get_test_bug(
                     bug, ref, title,
                     "Marionette references are not allowed as it could lead to"
                     "the browser not being secure. Please remove them.")
 
         for ref, bug in self.MARIONETTE_PREFS.items():
+            print ref
             yield self.get_test_bug(
                     bug, ref, title,
                     "Marionette preferences are not allowed as it could lead to"
