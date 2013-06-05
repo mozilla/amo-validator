@@ -218,14 +218,14 @@ class MarionetteInPrefsRegexTests(RegexTestGenerator):
     Added from bug 741812
     """
 
-    MARIONETTE_REFERENCES = {"@mozilla.org/marionette;1": 741812,
-                        "{786a1369-dca5-4adc-8486-33d23c88010a}": 741812,
+    MARIONETTE_REFERENCES = {r"@mozilla\.org/marionette;1": 741812,
+                        r"\{786a1369\-dca5\-4adc-8486\-33d23c88010a\}": 741812,
                         "MarionetteComponent": 741812,
                         "MarionetteServer": 741812}
 
-    MARIONETTE_PREFS = {"marionette.force-local": 741812,
-                        "marionette.defaultPrefs.enabled": 741812,
-                        "marionette.defaultPrefs.port": 741812}
+    MARIONETTE_PREFS = {r"marionette\.force\-local": 741812,
+                        r"marionette\.defaultPrefs\.enabled": 741812,
+                        r"marionette\.defaultPrefs\.port": 741812}
     @classmethod
     def applicable(cls, err, filename, document):
         return bool(re.match(r"defaults/preferences/.+\.js", filename))
