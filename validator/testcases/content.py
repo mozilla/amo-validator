@@ -21,8 +21,10 @@ FLAGGED_FILES = set([".DS_Store", "Thumbs.db"])
 FLAGGED_EXTENSIONS = set([".orig", ".old", "~"])
 OSX_REGEX = re.compile("__MACOSX")
 
-with open(os.path.join(os.path.dirname(__file__), "hashes.txt")) as f:
-    hash_blacklist = set(map(str.rstrip, f))
+hash_library = {}
+for hash_list in "hashes.txt", "static_hashes.txt":
+    with open(os.path.join(os.path.dirname(__file__), hash_list)) as f:
+        hash_library.update(s.strip().split(None, 1) for s in f)
 
 
 @decorator.register_test(tier=1)
@@ -63,6 +65,8 @@ def test_packed_packages(err, xpi_package=None):
     marked_scripts = err.get_resource("marked_scripts")
     if not marked_scripts:
         marked_scripts = set()
+
+    identified_files = err.metadata.setdefault("identified_files", {})
 
     # Iterate each item in the package.
     for name in xpi_package:
@@ -106,8 +110,10 @@ def test_packed_packages(err, xpi_package=None):
             pass
 
         if not err.for_appversions:
-            hash = hashlib.sha1(file_data).hexdigest()
-            if hash in hash_blacklist:
+            hash = hashlib.sha256(file_data).hexdigest()
+            identified = hash_library.get(hash)
+            if identified is not None:
+                identified_files[name] = {"path": identified}
                 err.notice(
                     err_id=("testcases_content",
                             "test_packed_packages",
