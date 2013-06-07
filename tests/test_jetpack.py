@@ -313,6 +313,19 @@ def test_mismatched_module_version():
     assert any(w["id"][2] == "mismatched_version" for w in err.warnings)
 
 
+def test_new_module_location_spec():
+    """
+    Tests that we don't fail for missing modules in add-ons generated with
+    newer versions of the SDK.
+    """
+
+    xpi = XPIManager("tests/resources/jetpack/jetpack-1.14.xpi")
+    err = _do_test(xpi)
+
+    assert not any(w["id"][2] == "missing_jetpack_module"
+                   for w in err.warnings)
+
+
 def test_components_flagged():
     """Test that `Components` is flagged in Jetpack."""
 
