@@ -3,22 +3,19 @@ from setuptools import setup, find_packages
 
 setup(
     name='amo-validator',
-    version='1.0',
-    description='Validates addons for Mozilla products.',
+    version='1.1',
+    description='Validates add-ons for Mozilla products.',
     long_description=open('README.rst').read(),
     author='Matt Basta',
     author_email='me@mattbasta.com',
-    url='http://github.com/mattbasta/amo-validator',
+    url='http://github.com/mozilla/amo-validator',
     license='BSD',
-    packages=find_packages(exclude=['tests',
-                                    'tests/*',
-                                    'extras',
-                                    'extras/*']),
+    packages=find_packages(exclude=['tests', 'tests/*',
+                                    'extras', 'extras/*']),
     include_package_data=True,
     zip_safe=False,
-    install_requires=[p.strip() for p in open('./requirements.txt')
-                                              if not p.startswith(('#',
-                                                                   '-e'))],
+    install_requires=[p.strip() for p in open('./requirements.txt') if
+                      not p.startswith(('#', '-e'))],
     scripts=["addon-validator"],
     classifiers=[
         'Development Status :: 4 - Beta',
