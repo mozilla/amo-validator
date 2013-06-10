@@ -727,7 +727,10 @@ def _expr_assignment(traverser, node):
 
         traverser._debug("ASSIGNMENT::L-value global? (%s)" %
                          ("Y" if left.is_global else "N"), 1)
-        new_value = operators[token]()
+        try:
+            new_value = operators[token]()
+        except Exception:
+            new_value = None
 
         # Cap the length of analyzed strings.
         if (isinstance(new_value, types.StringTypes)
@@ -843,7 +846,10 @@ def _expr_binary(traverser, node):
                 (abs(gleft) == float('inf') or abs(gright) == float('inf'))):
             return get_NaN(traverser)
 
-        output = operators[operator]()
+        try:
+            output = operators[operator]()
+        except Exception:
+            output = None
 
         # Cap the length of analyzed strings.
         if (isinstance(output, types.StringTypes)
