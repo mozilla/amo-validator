@@ -49,6 +49,7 @@ SPIDERMONKEY_INSTALLATION = os.environ.get("SPIDERMONKEY_INSTALLATION")
 DEFAULT_WEBAPP_MRKT_URLS = ["https://marketplace.mozilla.org",
                             "https://marketplace-dev.allizom.org"]
 BUGZILLA_BUG = "https://bugzilla.mozilla.org/show_bug.cgi?id=%d"
+MDN_DOC = "https://developer.mozilla.org/docs/%s"
 
 JETPACK_URI_URL = "https://wiki.mozilla.org/Labs/Jetpack/Release_Notes/" \
                       "1.4#Known_Issues"

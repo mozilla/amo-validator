@@ -1,13 +1,13 @@
 import re
 from functools import wraps
 
-from validator.constants import BUGZILLA_BUG
+from validator.constants import BUGZILLA_BUG, MDN_DOC
 from validator.compat import (FX4_DEFINITION, FX5_DEFINITION, FX6_DEFINITION,
                               FX7_DEFINITION, FX8_DEFINITION, FX9_DEFINITION,
                               FX11_DEFINITION, FX12_DEFINITION, FX13_DEFINITION,
                               FX14_DEFINITION, FX15_DEFINITION, FX16_DEFINITION,
                               FX17_DEFINITION, FX18_DEFINITION, FX19_DEFINITION,
-                              FX20_DEFINITION, FX21_DEFINITION,
+                              FX20_DEFINITION, FX21_DEFINITION, FX22_DEFINITION,
                               TB7_DEFINITION, TB10_DEFINITION, TB11_DEFINITION,
                               TB12_DEFINITION, TB13_DEFINITION, TB14_DEFINITION,
                               TB15_DEFINITION, TB16_DEFINITION, TB17_DEFINITION,
@@ -21,11 +21,7 @@ registered_regex_tests = []
 
 NP_WARNING = "Network preferences may not be modified."
 EUP_WARNING = "Extension update settings may not be modified."
-NSINHS_LINK = ("https://developer.mozilla.org/en/XPCOM_Interface_Reference"
-               "/nsINavHistoryService")
-TB7_LINK = "https://developer.mozilla.org/en/Thunderbird_7_for_developers"
-
-NSIT_LINK = "https://developer.mozilla.org/en-US/docs/Using_the_Clipboard"
+NSINHS_LINK = MDN_DOC % "XPCOM_Interface_Reference/nsINavHistoryService"
 
 
 def run_regex_tests(document, err, filename, context=None, is_js=False):
@@ -698,9 +694,8 @@ class Gecko15RegexTests(CompatRegexTestHelper):
                 "directly instead. See %s for more information." % nISSWLink,
                 compat_type="error")
 
-        aPWDLink = ("https://developer.mozilla.org/en-US/docs/"
-                        "XPCOM_Interface_Reference/nsIBrowserHistory"
-                        "#addPageWithDetails%28%29")
+        aPWDLink = (MDN_DOC % "XPCOM_Interface_Reference/nsIBrowserHistory"
+                              "#addPageWithDetails%28%29")
         yield self.get_test(
                 "addPageWithDetails",
                 "`addPageWithDetails` has been removed.",
@@ -732,7 +727,7 @@ class Gecko16RegexTests(CompatRegexTestHelper):
                 "support Private Browsing Mode. After instantiating the "
                 "object, you should call the `init` function on it before "
                 "any other functions are called. See %s for more "
-                "information." % NSIT_LINK,
+                "information." % MDN_DOC % "Using_the_Clipboard",
                 compat_type="error")
 
         yield self.get_test_bug(
@@ -788,10 +783,6 @@ class Gecko18RegexTests(CompatRegexTestHelper):
 
     VERSION = FX18_DEFINITION
 
-    BLOB_URL = "https://developer.mozilla.org/en-US/docs/DOM/BlobBuilder"
-    IMG_URL = ("https://developer.mozilla.org/en-US/docs/"
-               "XPCOM_Interface_Reference/imgICache")
-
     def js_tests(self):
 
         yield self.get_test_bug(
@@ -816,7 +807,8 @@ class Gecko18RegexTests(CompatRegexTestHelper):
                 "`imgICache` and `imgILoader` have been deprecated.",
                 "The `imgICache` and `imgILoader` interfaces have been "
                 "deprecated in Gecko 18. You should use `imgITools` instead. "
-                "See %s for more information." % self.IMG_URL,
+                "See %s for more information." %
+                    MDN_DOC % "XPCOM_Interface_Reference/imgICache",
                 compat_type="error")
 
         yield self.get_test_bug(
@@ -839,7 +831,7 @@ class Gecko18RegexTests(CompatRegexTestHelper):
                 "`BlobBuiler` has been removed.",
                 "The `BlobBuilder` object has been removed. You should use "
                 "the `Blob` constructor instead. See %s for more "
-                "information." % self.BLOB_URL,
+                "information." % MDN_DOC % "DOM/BlobBuilder",
                 compat_type="error")
 
         yield self.get_test_bug(
@@ -888,11 +880,11 @@ class Gecko20RegexTests(CompatRegexTestHelper):
     """Regex tests for Gecko 20 updates."""
 
     VERSION = FX20_DEFINITION
-    PRIVATE_BROWSING_LINK = "https://developer.mozilla.org/en-US/docs/Updating_addons_broken_by_private_browsing_changes"
-    DECODE_LINK = "https://bugzilla.mozilla.org/show_bug.cgi?id=816362"
-    EDITABLE_LINK = "https://bugzilla.mozilla.org/show_bug.cgi?id=827546"
-    PROFILE_LINK = "https://bugzilla.mozilla.org/show_bug.cgi?id=807757"
-    PLACES_IMPORT_LINK = "https://bugzilla.mozilla.org/show_bug.cgi?id=763295"
+    PRIVATE_BROWSING_LINK = MDN_DOC % "Updating_addons_broken_by_private_browsing_changes"
+    DECODE_LINK = BUGZILLA_BUG % 816362
+    EDITABLE_LINK = BUGZILLA_BUG % 827546
+    PROFILE_LINK = BUGZILLA_BUG % 807757
+    PLACES_IMPORT_LINK = BUGZILLA_BUG % 763295
 
     def js_tests(self):
 
@@ -980,6 +972,98 @@ class Gecko21RegexTests(CompatRegexTestHelper):
 
 
 @register_generator
+class Gecko22RegexTests(CompatRegexTestHelper):
+    """Regex tests for Gecko 22 updates."""
+
+    VERSION = FX22_DEFINITION
+
+    NSIGH2_LINK = MDN_DOC % "XPCOM_Interface_Reference/mozIAsyncHistory"
+    NSIBH_LINK = MDN_DOC % "XPCOM_Interface_Reference/nsINavHistoryService"
+    NSIFS_LINK = MDN_DOC % "XPCOM_Interface_Reference/mozIAsyncFavicons"
+    NSITV_LINK = "https://hg.mozilla.org/mozilla-central/rev/bf88a316cf18#l17.18"
+    NSIPV_LINK = MDN_DOC % "Supporting_per-window_private_browsing"
+
+    def js_tests(self):
+
+        yield self.get_test_bug(
+            838874, "(nsIGlobalHistory2|addURI|isVisited|setPageTitle)",
+            "`nsIGlobalHistory2` no longer implemented.",
+            "`nsIGlobalHistory2` and its functions are no longer available. "
+            "See %s for information about alternative functions." %
+                self.NSIGH2_LINK,
+            compat_type="error", log_function=self.err.warning)
+
+        yield self.get_test_bug(
+            838798, "(nsILivemarkService|itemIsLivemark|"
+                    "nodeIsLivemarkContainer|nodeIsLivemarkItem)",
+            "`nsILivemarkService` removed along with `PlacesUtisl` members.",
+            "The `nsILivemarkService` interface and related functions were "
+            "removed, in favor of its asynchronous alternatives.",
+            compat_type="error", log_function=self.err.warning)
+
+        yield self.get_test_bug(
+            839034, "(markPageAsTyped|markPageAsFollowedLink)",
+            "`nsIBrowserHistory` members moved.",
+            "`markPageAsTyped` and `markPageAsFollowedLink` were moved from "
+            "`nsIBrowserHistory` to `nsINavHistoryService`. See %s for more "
+            "information." % self.NSIBH_LINK,
+            compat_type="error", log_function=self.err.warning)
+
+        yield self.get_test_bug(
+            838839, "(setFaviconUrlForPage|setAndLoadFaviconForPage|"
+                    "setFaviconData|setFaviconDataFromDataURL|getFaviconData|"
+                    "getFaviconDataAsDataURL|getFaviconForPage|"
+                    "getFaviconImageForPage)",
+            "`nsIFaviconService` members removed.",
+            "Several deprecated functions were removed from "
+            "`nsIFaviconService`. See %s for supported alternatives." %
+                self.NSIFS_LINK,
+            compat_type="error", log_function=self.err.warning)
+
+        yield self.get_test_bug(
+            407956, "(getRowProperties|getCellProperties|getColumnProperties)",
+            "`nsITreeView` interface was changed to remove all "
+            "`nsISupportsArray` usage.",
+            "These functions from `nsITreeView` have changed. They now return "
+            "a whitespace delimited string. See %s for more information." %
+                self.NSITV_LINK,
+            compat_type="error", log_function=self.err.warning)
+
+        yield self.get_test_bug(
+            845063, "nsIPrivateBrowsingService",
+            "`nsIPrivateBrowsingService` was removed.",
+            "`nsIPrivateBrowsingService` was removed. See %s for more "
+            "information." % self.NSIPV_LINK,
+            compat_type="error", log_function=self.err.warning)
+
+        yield self.get_test_bug(
+            858185, "fullZoom",
+            "`fullZoom` property was changed.",
+            "Setting the `fullZoom` property can yield unexpected results in "
+            "Gecko 22 and above.",
+            compat_type="error")
+
+        yield self.get_test_bug(
+            842372, "(g|s)etUserData",
+            "`getUserData` and `setUserData are now restricted.",
+            "`getUserData` and `setUserData are now restricted. They can no "
+            "longer be used for content code.",
+            compat_type="warning", log_function=self.err.notice)
+
+        yield self.get_test_bug(
+            480356, "FillInHTMLTooltip",
+            "`FillInHTMLTooltip` was moved.",
+            "`FillInHTMLTooltip` was moved to the tooltip object and is now "
+            "called `fillInPageTooltip`. It still works as a compatibility "
+            "shim, but its usage is deprecated.",
+            compat_type="warning", log_function=self.err.notice)
+
+
+#############################
+#  Thunderbird Regex Tests  #
+#############################
+
+@register_generator
 class Thunderbird7RegexTests(CompatRegexTestHelper):
     """Regex tests for the Thunderbird 7 update."""
 
@@ -1000,7 +1084,8 @@ class Thunderbird7RegexTests(CompatRegexTestHelper):
                     621213, pattern,
                     "The address book does not use RDF in Thunderbird 7",
                     "The address book was changed to use a look up table in "
-                    "Thunderbird 7. See %s for details." % TB7_LINK,
+                    "Thunderbird 7. See %s for details." %
+                        MDN_DOC % "Thunderbird_7_for_developers",
                     compat_type="error", log_function=self.err.notice)
 
 
