@@ -5,7 +5,8 @@ from helper import MockXPI
 from js_helper import _do_test_raw
 
 import validator.xpi as xpi
-import validator.testcases.content as content
+from validator import submain
+from validator.testcases import content
 from validator.errorbundler import ErrorBundle
 from validator.chromemanifest import ChromeManifest
 from validator.constants import *
@@ -312,6 +313,27 @@ def test_jar_subpackage_bad():
     result = content.test_packed_packages(err, mock_package)
     print result
     assert err.failed()
+
+
+def test_subpackage_metadata_preserved():
+    """Tests that metadata is preserved for sub-packages."""
+
+    xpi1 = open("tests/resources/jetpack/jetpack-1.8-outdated.xpi")
+    xpi2 = MockXPI({
+        "thing.xpi": "tests/resources/jetpack/jetpack-1.8-outdated.xpi"})
+
+    err1 = ErrorBundle()
+    err1.detected_type = PACKAGE_EXTENSION
+
+    err2 = ErrorBundle()
+    err2.detected_type = PACKAGE_EXTENSION
+
+    submain.test_package(err1, xpi1, "jetpack-1.8-outdated.xpi")
+    content.test_packed_packages(err2, xpi2)
+
+    assert "sub_packages" in err2.metadata
+    eq_(err1.metadata, err2.metadata["sub_packages"]
+                           .get("thing.xpi"))
 
 
 def test_make_script_absolute():

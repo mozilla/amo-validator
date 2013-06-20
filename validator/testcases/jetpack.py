@@ -297,3 +297,9 @@ def inspect_jetpack(err, xpi_package, allow_old_sdk=False):
     # Store the collected information in the output metadata.
     err.metadata["jetpack_identified_files"] = tested_files
 
+    identified_files = err.metadata.setdefault("identified_files", {})
+
+    for file, (version, path) in tested_files.items():
+        identified_files[file] = {"path": path, "version": version,
+                                  "library": "Jetpack"}
+

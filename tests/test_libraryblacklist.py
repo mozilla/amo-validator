@@ -23,6 +23,9 @@ def test_blacklisted_files():
 
     assert err.notices
     assert not err.failed()
+    eq_(err.metadata.get("identified_files"),
+        {'test.js': {'path': 'This file is a false script to facilitate '
+                             'testing of library blacklisting.'}})
 
 
 def test_skip_blacklisted_file():

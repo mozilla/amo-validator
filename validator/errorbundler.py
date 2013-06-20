@@ -226,7 +226,7 @@ class ErrorBundle(object):
         self.notices = []
         self.message_tree = {}
         self.pushable_resources = {}
-        self.metadata = {}
+        self.metadata = {'requires_chrome': False}
 
         self.package_stack.append(new_file)
 
@@ -238,6 +238,7 @@ class ErrorBundle(object):
         errors = self.errors
         warnings = self.warnings
         notices = self.notices
+        metadata = self.metadata
         # We only rebuild message_tree anyway. No need to restore.
 
         # Copy the existing state back into place
@@ -254,6 +255,8 @@ class ErrorBundle(object):
         self._merge_messages(errors, self.error, name)
         self._merge_messages(warnings, self.warning, name)
         self._merge_messages(notices, self.notice, name)
+
+        self.metadata.setdefault("sub_packages", {})[name] = metadata
 
     def _merge_messages(self, messages, callback, name):
         "Merges a stack of messages into another stack of messages"
