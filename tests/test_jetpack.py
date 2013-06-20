@@ -145,7 +145,9 @@ def test_pass_manifest_elements():
     nose.tools.eq_(err.metadata["jetpack_loaded_modules"],
                    ["addon-kit-lib/drawing.js"])
     assert "jetpack_identified_files" in err.metadata
+    assert "identified_files" in err.metadata
     assert "bootstrap.js" in err.metadata["jetpack_identified_files"]
+    assert "bootstrap.js" in err.metadata["identified_files"]
 
     assert "jetpack_unknown_files" in err.metadata
     assert not err.metadata["jetpack_unknown_files"]

@@ -8,7 +8,7 @@ with open("whitelist_hashes.txt", mode="w") as output:
         for filename in files:
             path = pth.join(pth.dirname(pth.abspath(sys.argv[0])),
                             root, filename)
-            hash = hashlib.sha1(open(path).read()).hexdigest()
+            hash = hashlib.sha256(open(path).read()).hexdigest()
             print path, hash
-            output.write(hash + "\n")
+            output.write('%s %s\n' % (hash, pth.split(path)[-1]))
 
