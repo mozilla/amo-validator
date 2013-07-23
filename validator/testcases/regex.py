@@ -8,6 +8,7 @@ from validator.compat import (FX4_DEFINITION, FX5_DEFINITION, FX6_DEFINITION,
                               FX14_DEFINITION, FX15_DEFINITION, FX16_DEFINITION,
                               FX17_DEFINITION, FX18_DEFINITION, FX19_DEFINITION,
                               FX20_DEFINITION, FX21_DEFINITION, FX22_DEFINITION,
+                              FX23_DEFINITION,
                               TB7_DEFINITION, TB10_DEFINITION, TB11_DEFINITION,
                               TB12_DEFINITION, TB13_DEFINITION, TB14_DEFINITION,
                               TB15_DEFINITION, TB16_DEFINITION, TB17_DEFINITION,
@@ -1057,6 +1058,38 @@ class Gecko22RegexTests(CompatRegexTestHelper):
             "called `fillInPageTooltip`. It still works as a compatibility "
             "shim, but its usage is deprecated.",
             compat_type="warning", log_function=self.err.notice)
+
+
+@register_generator
+class Gecko23RegexTests(CompatRegexTestHelper):
+    """Regex tests for Gecko 23 updates."""
+
+    VERSION = FX23_DEFINITION
+
+    LOAD_LINK = MDN_DOC % "/XUL/School_tutorial/Intercepting_Page_Loads"
+    USFUC_LINK = MDN_DOC % "/XPCOM_Interface_Reference/nsIAboutModule"
+
+    def js_tests(self):
+
+        yield self.get_test_bug(
+            851586, "URI_SAFE_FOR_UNTRUSTED_CONTENT",
+            "`URI_SAFE_FOR_UNTRUSTED_CONTENT` restricted in Gecko 23.",
+            "`URI_SAFE_FOR_UNTRUSTED_CONTENT` can now only be used if your "
+            "`about:` page only has unprivileged HTML code. It can't be used "
+            "with XUL code anymore. We recommend that you stop using the "
+            "`URI_SAFE_FOR_UNTRUSTED_CONTENT` flag entirely. See %s for more "
+            "information." % self.USFUC_LINK,
+            compat_type="error", log_function=self.err.warning)
+
+        yield self.get_test_bug(
+            859586, "\"(Start|End|Fail)DocumentLoad\"",
+            "Document load notifications removed in Gecko 23.",
+            "`\"StartDocumentLoad\"`, `\"EndDocumentLoad\"`, and "
+            "`\"FailDocumentLoad\"` were removed in Gecko 23. You can use "
+            "other, more standard event handlers instead. See %s for more "
+            "information." % self.LOAD_LINK,
+            compat_type="error", log_function=self.err.warning)
+
 
 
 #############################

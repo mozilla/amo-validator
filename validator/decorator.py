@@ -65,7 +65,7 @@ def version_range(guid, version, before=None, app_versions=None):
             break
 
     if not app_key or version not in app_versions[app_key]["versions"]:
-        raise Exception("Bad GUID or version provided for version range")
+        raise Exception("Bad GUID or version provided for version range: %s" % version)
 
     all_versions = app_versions[app_key]["versions"]
     version_pos = all_versions.index(version)
