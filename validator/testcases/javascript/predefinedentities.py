@@ -185,7 +185,8 @@ INTERFACES = {
             {u"offlineStoreOutputStream":
                 {"value": call_definitions.nsIMsgFolder_changed},
              u"filePath": entity("nsIMsgFolder.filePath"),
-             u"getExpansionArray": entity("nsIMsgFolder.getExpansionArray")}},
+             u"getExpansionArray": entity("nsIMsgFolder.getExpansionArray"),
+             u"ListDescendants": entity("nsIMsgFolder.ListDescendants")}},
     u"nsIMsgIdentity":
         {"value":
             {u"signature": entity("nsIMsgIdentity.signature")}},
@@ -368,7 +369,10 @@ INTERFACES = {
     u"nsIMsgFilter":
         {"value":
              {u"getSortedActionList": entity("nsIMsgFilter.getSortedActionList"),
-              u"actionList": entity("nsIMsgFilter.actionList")}}
+              u"actionList": entity("nsIMsgFilter.actionList")}},
+    u"nsIMimeHeaders":
+        {"value":
+            {u"initialize": entity("nsIMimeHeaders.initialize")}},
     }
 
 INTERFACE_ENTITIES = {u"nsIXMLHttpRequest":
