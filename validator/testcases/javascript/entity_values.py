@@ -4,7 +4,8 @@ from validator.compat import (FX10_DEFINITION, FX14_DEFINITION,
                               FX16_DEFINITION, FX19_DEFINITION,
                               TB14_DEFINITION, TB15_DEFINITION,
                               TB16_DEFINITION, TB18_DEFINITION,
-                              TB19_DEFINITION, TB20_DEFINITION)
+                              TB19_DEFINITION, TB20_DEFINITION,
+                              TB21_DEFINITION)
 from validator.constants import BUGZILLA_BUG
 
 
@@ -395,3 +396,17 @@ TB20_ENTITIES = [
 ]
 register_changed_entities(version_definition=TB20_DEFINITION,
     entities=TB20_ENTITIES, version_string="Thunderbird 20")
+
+# Thunderbird 21 IDL changes
+TB21_ENTITIES = [
+    {"name":"nsIMimeHeaders.initialize",
+     "status": "removed",
+     "bug": 790852,
+     "compat_type": "error"},
+    {"name": "nsIMsgFolder.ListDescendants",
+     "status": "removed",
+     "bug": 436089,
+     "compat_type": "error"}
+]
+register_changed_entities(version_definition=TB21_DEFINITION,
+    entities=TB21_ENTITIES, version_string="Thunderbird 21")

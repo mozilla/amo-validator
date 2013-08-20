@@ -12,7 +12,8 @@ from validator.compat import (FX4_DEFINITION, FX5_DEFINITION, FX6_DEFINITION,
                               TB7_DEFINITION, TB10_DEFINITION, TB11_DEFINITION,
                               TB12_DEFINITION, TB13_DEFINITION, TB14_DEFINITION,
                               TB15_DEFINITION, TB16_DEFINITION, TB17_DEFINITION,
-                              TB18_DEFINITION, TB19_DEFINITION, TB20_DEFINITION)
+                              TB18_DEFINITION, TB19_DEFINITION, TB20_DEFINITION,
+                              TB21_DEFINITION)
 from validator.contextgenerator import ContextGenerator
 from markup.csstester import UNPREFIXED_MESSAGE
 
@@ -1625,3 +1626,40 @@ class Thunderbird20RegexTests(CompatRegexTestHelper):
                     "been flagged as having changed, removed, or deprecated "
                     "in Thunderbird 20." % pattern,
                     compat_type="error", log_function=self.err.notice)
+
+@register_generator
+class Thunderbird21RegexTests(CompatRegexTestHelper):
+    """Regex tests for the Thunderbird 21 update."""
+
+    VERSION = TB21_DEFINITION
+
+    def tests(self):
+        """String and JS changes for Thunderbird add-ons"""
+
+        # String changes for add-ons that use our localizations.
+        patterns = {r"command\.whois": 842183}
+        for pattern, bug in patterns.items():
+            yield self.get_test_bug(
+                    bug, pattern,
+                    "Removed, renamed, or changed labels in use.",
+                    "Some string matched the pattern `%s`, which has been "
+                    "flagged as having changed in Thunderbird 21." % pattern,
+                    compat_type="error")
+
+        js_patterns = {r"addEditorClickEventListener": 827017,
+                       r"GetIOService": 795158,
+                       r"GetPromptService": 795158,
+                       r"GetLoginManager": 795158,
+                       r"hasOnlyWhitespaces": 824150}
+
+        # Add restricting prefix for ( or word boundary to prevent substring matching.
+        js_patterns = dict((r"(\b|\()" + k, v) for k, v in js_patterns.items())
+
+        for pattern, bug in js_patterns.items():
+            yield self.get_test_bug(
+                    bug, pattern,
+                    "Removed, renamed, or changed methods in use.",
+                    "A JavaScript function matched the pattern `%s`, which has "
+                    "been flagged as having changed, removed, or deprecated "
+                    "in Thunderbird 21." % pattern,
+                    compat_type="error")
