@@ -179,7 +179,9 @@ INTERFACES = {
         {"value":
             {u"OpenFilterList": entity("nsIMsgFilterService.OpenFilterList"),
              u"SaveFilterList": entity("nsIMsgFilterService.SaveFilterList"),
-             u"applyFiltersToFolders": entity("nsIMsgFilterService.applyFiltersToFolders")}},
+             u"applyFiltersToFolders": entity("nsIMsgFilterService.applyFiltersToFolders"),
+             u"requiresCleanup": entity("nsIMsgFilterService.requiresCleanup"),
+             u"clearRequiresCleanup": entity("nsIMsgFilterService.clearRequiresCleanup")}},
     u"nsIMsgFolder":
         {"value":
             {u"offlineStoreOutputStream":
@@ -373,6 +375,19 @@ INTERFACES = {
     u"nsIMimeHeaders":
         {"value":
             {u"initialize": entity("nsIMimeHeaders.initialize")}},
+    u"nsISmtpService":
+        {"value":
+            {u"GetSmtpServerByIdentity": entity("nsISmtpService.GetSmtpServerByIdentity"),
+             u"smtpServers": entity("nsISmtpService.smtpServers"),
+             u"createSmtpServer": entity("nsISmtpService.createSmtpServer"),
+             u"deleteSmtpServer": entity("nsISmtpService.deleteSmtpServer")}},
+    u"nsIMsgSend":
+        {"value":
+            {u"createAndSendMessage": entity("nsIMsgSend.createAndSendMessage"),
+             u"createRFC822Message": entity("nsIMsgSend.createRFC822Message")}},
+    u"nsIImportService":
+        {"value":
+            {u"CreateRFC822Message": entity("nsIImportService.CreateRFC822Message")}},
     }
 
 INTERFACE_ENTITIES = {u"nsIXMLHttpRequest":

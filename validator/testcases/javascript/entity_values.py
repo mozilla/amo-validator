@@ -5,7 +5,7 @@ from validator.compat import (FX10_DEFINITION, FX14_DEFINITION,
                               TB14_DEFINITION, TB15_DEFINITION,
                               TB16_DEFINITION, TB18_DEFINITION,
                               TB19_DEFINITION, TB20_DEFINITION,
-                              TB21_DEFINITION)
+                              TB21_DEFINITION, TB22_DEFINITION)
 from validator.constants import BUGZILLA_BUG
 
 
@@ -410,3 +410,49 @@ TB21_ENTITIES = [
 ]
 register_changed_entities(version_definition=TB21_DEFINITION,
     entities=TB21_ENTITIES, version_string="Thunderbird 21")
+
+# Thunderbird 22 IDL changes
+TB22_ENTITIES = [
+    {"name":"nsISmtpService.GetSmtpServerByIdentity",
+     "status": "renamed to getServerByIdentity",
+     "bug": 681219,
+     "compat_type": "error"},
+    {"name":"nsISmtpService.smtpServers",
+     "status": "renamed to servers",
+     "bug": 681219,
+     "compat_type": "error"},
+    {"name":"nsISmtpService.createSmtpServer",
+     "status": "renamed to createServer",
+     "bug": 681219,
+     "compat_type": "error"},
+    {"name":"nsISmtpService.deleteSmtpServer",
+     "status": "renamed to deleteServer",
+     "bug": 681219,
+     "compat_type": "error"},
+    {"name":"nsIMimeConverter.encodeMimePartIIStr",
+     "status": "removed",
+     "bug": 834757,
+     "compat_type": "error"},
+    {"name":"nsIMsgSend.createAndSendMessage",
+     "status": "changed",
+     "bug": 737519,
+     "compat_type": "error"},
+    {"name":"nsIMsgSend.createRFC822Message",
+     "status": "changed",
+     "bug": 737519,
+     "compat_type": "error"},
+    {"name":"nsIImportService.CreateRFC822Message",
+     "status": "changed",
+     "bug": 737519,
+     "compat_type": "error"},
+    {"name":"nsIMsgFolder.requiresCleanup",
+     "status": "removed",
+     "bug": 544621,
+     "compat_type": "error"},
+    {"name":"nsIMsgFolder.clearRequiresCleanup",
+     "status": "removed",
+     "bug": 544621,
+     "compat_type": "error"}
+]
+register_changed_entities(version_definition=TB22_DEFINITION,
+    entities=TB22_ENTITIES, version_string="Thunderbird 22")
