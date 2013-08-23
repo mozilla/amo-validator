@@ -13,7 +13,7 @@ from validator.compat import (FX4_DEFINITION, FX5_DEFINITION, FX6_DEFINITION,
                               TB12_DEFINITION, TB13_DEFINITION, TB14_DEFINITION,
                               TB15_DEFINITION, TB16_DEFINITION, TB17_DEFINITION,
                               TB18_DEFINITION, TB19_DEFINITION, TB20_DEFINITION,
-                              TB21_DEFINITION, TB22_DEFINITION)
+                              TB21_DEFINITION, TB22_DEFINITION, TB23_DEFINITION)
 from validator.contextgenerator import ContextGenerator
 from markup.csstester import UNPREFIXED_MESSAGE
 
@@ -1718,3 +1718,46 @@ class Thunderbird22RegexTests(CompatRegexTestHelper):
                     "been flagged as having changed, removed, or deprecated "
                     "in Thunderbird 22." % pattern,
                     compat_type="error")
+
+@register_generator
+class Thunderbird23RegexTests(CompatRegexTestHelper):
+    """Regex tests for the Thunderbird 23 update."""
+
+    VERSION = TB23_DEFINITION
+
+    def tests(self):
+        """String and JS changes for Thunderbird add-ons"""
+
+        # String changes for add-ons that use our localizations.
+        patterns = {r"openAttachmentCmd\.label": 853135,
+                    r"openAttachmentCmd\.accesskey": 853135,
+                    r"applyToCollapsedMsgsTitle": 308690,
+                    r"applyToCollapsedMsgs": 308690,
+                    r"applyToCollapsedAlwaysAskCheckbox": 308690,
+                    r"applyNowButton": 308690,
+                    r"getNextNMessages": 595104,
+                    r"openWindowWarningText": 595104,
+                    r"sanitizePrefs2\.title": 807699,
+                    r"sanitizeItems\.label": 807699,
+                    r"clearDataSettings2\.label": 807699,
+                    r"clearTimeDuration\.dateColumn": 807699,
+                    r"clearTimeDuration\.nameColumn": 807699,
+                    r"historySection\.label": 807699,
+                    r"dataSection\.label": 807699,
+                    r"column\.width": 807699}
+
+        for pattern, bug in patterns.items():
+            yield self.get_test_bug(
+                    bug, pattern,
+                    "Removed, renamed, or changed labels in use.",
+                    "Some string matched the pattern `%s`, which has been "
+                    "flagged as having changed in Thunderbird 21." % pattern,
+                    compat_type="error")
+
+        yield self.get_test_bug(
+                252423, r"(\b|\()FinishHTMLSource",
+                "Removed, renamed, or changed methods in use.",
+                "A JavaScript function matched the pattern `FinishHTMLSource`, which has "
+                "been flagged as having changed, removed, or deprecated "
+                "in Thunderbird 23.",
+                compat_type="error")
