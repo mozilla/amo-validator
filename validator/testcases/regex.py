@@ -13,7 +13,7 @@ from validator.compat import (FX4_DEFINITION, FX5_DEFINITION, FX6_DEFINITION,
                               TB12_DEFINITION, TB13_DEFINITION, TB14_DEFINITION,
                               TB15_DEFINITION, TB16_DEFINITION, TB17_DEFINITION,
                               TB18_DEFINITION, TB19_DEFINITION, TB20_DEFINITION,
-                              TB21_DEFINITION)
+                              TB21_DEFINITION, TB22_DEFINITION)
 from validator.contextgenerator import ContextGenerator
 from markup.csstester import UNPREFIXED_MESSAGE
 
@@ -1662,4 +1662,59 @@ class Thunderbird21RegexTests(CompatRegexTestHelper):
                     "A JavaScript function matched the pattern `%s`, which has "
                     "been flagged as having changed, removed, or deprecated "
                     "in Thunderbird 21." % pattern,
+                    compat_type="error")
+
+@register_generator
+class Thunderbird22RegexTests(CompatRegexTestHelper):
+    """Regex tests for the Thunderbird 22 update."""
+
+    VERSION = TB22_DEFINITION
+
+    def tests(self):
+        """String and JS changes for Thunderbird add-ons"""
+
+        # String changes for add-ons that use our localizations.
+        patterns = {r"growlNotification": 852461,
+                    r"5061": 448624,
+                    r"ErrorCanNotEncrypt": 465351,
+                    r"ErrorCanNotSign": 465351,
+                    r"openFeedMessage\.label": 599036,
+                    r"openFeedMessage\.accesskey": 599036,
+                    r"openFeedWebPageInWindow\.label": 599036,
+                    r"openFeedWebPageInWindow\.accesskey": 599036,
+                    r"openFeedSummaryInWindow\.label": 599036,
+                    r"openFeedSummaryInWindow\.accesskey": 599036,
+                    r"color\.label": 845807,
+                    r"color\.accesskey": 845807,
+                    r"colors\.label": 845807,
+                    r"overrideColors\.label": 845807,
+                    r"fontsAndColors\.label": 845807,
+                    r"fileHereMenu\.label": 325777,
+                    r"fileHereMenu\.accesskey": 325777,
+                    r"fileButton\.label": 325777,
+                    r"fileButton\.accesskey": 325777}
+
+        for pattern, bug in patterns.items():
+            yield self.get_test_bug(
+                    bug, pattern,
+                    "Removed, renamed, or changed labels in use.",
+                    "Some string matched the pattern `%s`, which has been "
+                    "flagged as having changed in Thunderbird 21." % pattern,
+                    compat_type="error")
+
+        js_patterns = {r"gMailSession": 765074,
+                       r"gAccountManager": 852690,
+                       r"gMimeHeaderParser": 852690,
+                       r"InitAppEditMessagesMenu": 814956}
+
+        # Add restricting prefix for ( or word boundary to prevent substring matching.
+        js_patterns = dict((r"(\b|\()" + k, v) for k, v in js_patterns.items())
+
+        for pattern, bug in js_patterns.items():
+            yield self.get_test_bug(
+                    bug, pattern,
+                    "Removed, renamed, or changed methods in use.",
+                    "A JavaScript function matched the pattern `%s`, which has "
+                    "been flagged as having changed, removed, or deprecated "
+                    "in Thunderbird 22." % pattern,
                     compat_type="error")
