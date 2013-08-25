@@ -5,7 +5,8 @@ from validator.compat import (FX10_DEFINITION, FX14_DEFINITION,
                               TB14_DEFINITION, TB15_DEFINITION,
                               TB16_DEFINITION, TB18_DEFINITION,
                               TB19_DEFINITION, TB20_DEFINITION,
-                              TB21_DEFINITION, TB22_DEFINITION)
+                              TB21_DEFINITION, TB22_DEFINITION,
+                              TB24_DEFINITION)
 from validator.constants import BUGZILLA_BUG
 
 
@@ -456,3 +457,17 @@ TB22_ENTITIES = [
 ]
 register_changed_entities(version_definition=TB22_DEFINITION,
     entities=TB22_ENTITIES, version_string="Thunderbird 22")
+
+# Thunderbird 24 IDL changes
+TB24_ENTITIES = [
+    {"name":"nsIMsgFolder.knowsSearchNntpExtension",
+     "status": "removed",
+     "bug": 882502,
+     "compat_type": "error"},
+    {"name":"nsIMsgFolder.allowsPosting",
+     "status": "removed",
+     "bug": 882502,
+     "compat_type": "error"},
+]
+register_changed_entities(version_definition=TB24_DEFINITION,
+    entities=TB24_ENTITIES, version_string="Thunderbird 24")
