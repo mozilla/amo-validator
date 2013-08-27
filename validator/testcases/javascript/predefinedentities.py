@@ -188,7 +188,9 @@ INTERFACES = {
                 {"value": call_definitions.nsIMsgFolder_changed},
              u"filePath": entity("nsIMsgFolder.filePath"),
              u"getExpansionArray": entity("nsIMsgFolder.getExpansionArray"),
-             u"ListDescendants": entity("nsIMsgFolder.ListDescendants")}},
+             u"ListDescendants": entity("nsIMsgFolder.ListDescendants"),
+             u"knowsSearchNntpExtension": entity("nsIMsgFolder.knowsSearchNntpExtension"),
+             u"allowsPosting": entity("nsIMsgFolder.allowsPosting")}},
     u"nsIMsgIdentity":
         {"value":
             {u"signature": entity("nsIMsgIdentity.signature")}},

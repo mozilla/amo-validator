@@ -13,7 +13,8 @@ from validator.compat import (FX4_DEFINITION, FX5_DEFINITION, FX6_DEFINITION,
                               TB12_DEFINITION, TB13_DEFINITION, TB14_DEFINITION,
                               TB15_DEFINITION, TB16_DEFINITION, TB17_DEFINITION,
                               TB18_DEFINITION, TB19_DEFINITION, TB20_DEFINITION,
-                              TB21_DEFINITION, TB22_DEFINITION, TB23_DEFINITION)
+                              TB21_DEFINITION, TB22_DEFINITION, TB23_DEFINITION,
+                              TB24_DEFINITION)
 from validator.contextgenerator import ContextGenerator
 from markup.csstester import UNPREFIXED_MESSAGE
 
@@ -1761,3 +1762,79 @@ class Thunderbird23RegexTests(CompatRegexTestHelper):
                 "been flagged as having changed, removed, or deprecated "
                 "in Thunderbird 23.",
                 compat_type="error")
+
+
+@register_generator
+class Thunderbird24RegexTests(CompatRegexTestHelper):
+    """Regex tests for the Thunderbird 24 update."""
+
+    VERSION = TB24_DEFINITION
+
+    def tests(self):
+        """String and JS changes for Thunderbird add-ons"""
+
+        # String changes for add-ons that use our localizations.
+        patterns = {r"contextForwardAsAttachment\.label": 508250,
+                    r"contextForwardAsAttachment\.accesskey": 508250,
+                    r"globalInbox\.label": 389139,
+                    r"globalInbox\.accesskey": 389139,
+                    r"toField3\.label": 686427,
+                    r"fromField3\.label": 686427,
+                    r"senderField3\.label": 686427,
+                    r"organizationField3\.label": 686427,
+                    r"replyToField3\.label": 686427,
+                    r"subjectField3\.label": 686427,
+                    r"ccField3\.label": 686427,
+                    r"bccField3\.label": 686427,
+                    r"newsgroupsField3\.label": 686427,
+                    r"followupToField3\.label": 686427,
+                    r"tagsHdr3\.label": 686427,
+                    r"dateField3\.label": 686427,
+                    r"userAgentField3\.label": 686427,
+                    r"referencesField3\.label": 686427,
+                    r"messageIdField3\.label": 686427,
+                    r"inReplyToField3\.label": 686427,
+                    r"originalWebsite3\.label": 686427,
+                    r"folderContextOpenNewWindow\.label": 878933,
+                    r"folderContextOpenNewWindow\.accesskey": 878933,
+                    r"contextKillSubthreadMenu\.accesskey": 179033,
+                    r"contextWatchThreadMenu\.accesskey": 179033,
+                    r"viewCRLs\.label": 892255,
+                    r"viewCRLs\.accesskey": 892255,
+                    r"confirmMsgDelete\.shiftDel\.desc": 883485,
+                    r"Nmessages": 179033}
+
+        for pattern, bug in patterns.iteritems():
+            yield self.get_test_bug(
+                    bug, pattern,
+                    "Removed, renamed, or changed labels in use.",
+                    "Some string matched the pattern `%s`, which has been "
+                    "flagged as having changed in Thunderbird 24." % pattern,
+                    compat_type="error")
+
+        js_patterns = {r"AlertWithTitle": 839279,
+                       r"IsWhitespace": 839279,
+                       r"IsEventHandler": 839279,
+                       r"GetHTTPEquivMetaElement": 839279,
+                       r"CreateHTTPEquivMetaElement": 839279,
+                       r"CreateHTTPEquivElement": 839279,
+                       r"ArrangeAccountCentralItems": 861767,
+                       r"getInterfaceForType": 861767,
+                       r"kHighestPort": 810680,
+                       r"selectFolder": 878604,
+                       r"updateSearchFolderPicker": 878604,
+                       r"onChooseFolder": 878604,
+                       r"updateInboxAccount": 389139,
+                       r"gSelectionSummaryStrings\.Nmessages": 179033}
+
+        # Add restricting prefix for ( or word boundary to prevent substring matching.
+        js_patterns = dict((r"(\b|\()" + k, v) for k, v in js_patterns.items())
+
+        for pattern, bug in js_patterns.items():
+            yield self.get_test_bug(
+                    bug, pattern,
+                    "Removed, renamed, or changed methods in use.",
+                    "A JavaScript function matched the pattern `%s`, which has "
+                    "been flagged as having changed, removed, or deprecated "
+                    "in Thunderbird 24." % pattern,
+                    compat_type="error")
