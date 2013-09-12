@@ -1112,8 +1112,8 @@ class Gecko24RegexTests(CompatRegexTestHelper):
 
         yield self.get_test_bug(
             874003, r"prevent(Bubble|Capture)",
-            "`preventBubble` or `preventCapture` were removed.",
-            "`preventBubble` or `preventCapture` were removed in Gecko 24. "
+            "`preventBubble` and `preventCapture` were removed.",
+            "`preventBubble` and `preventCapture` were removed in Gecko 24. "
             "You can use `stopPropagation` instead. See %s for more "
             "information." % self.DOM_LINK,
             compat_type="error", log_function=self.err.warning)
