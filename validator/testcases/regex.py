@@ -8,7 +8,7 @@ from validator.compat import (FX4_DEFINITION, FX5_DEFINITION, FX6_DEFINITION,
                               FX14_DEFINITION, FX15_DEFINITION, FX16_DEFINITION,
                               FX17_DEFINITION, FX18_DEFINITION, FX19_DEFINITION,
                               FX20_DEFINITION, FX21_DEFINITION, FX22_DEFINITION,
-                              FX23_DEFINITION,
+                              FX23_DEFINITION, FX24_DEFINITION,
                               TB7_DEFINITION, TB10_DEFINITION, TB11_DEFINITION,
                               TB12_DEFINITION, TB13_DEFINITION, TB14_DEFINITION,
                               TB15_DEFINITION, TB16_DEFINITION, TB17_DEFINITION,
@@ -1092,6 +1092,67 @@ class Gecko23RegexTests(CompatRegexTestHelper):
             "information." % self.LOAD_LINK,
             compat_type="error", log_function=self.err.warning)
 
+
+@register_generator
+class Gecko24RegexTests(CompatRegexTestHelper):
+    """Regex tests for Gecko 24 updates."""
+
+    VERSION = FX24_DEFINITION
+
+    DOM_LINK = MDN_DOC % "/Web/API/event.stopPropagation"
+    GPD_LINK = MDN_DOC % "/Web/API/event.defaultPrevented"
+
+    def js_tests(self):
+
+        yield self.get_test_bug(
+            867432, r"verifyForUsage\(",
+            "`nsIX509Cert.verifyForUsage` was removed.",
+            "`nsIX509Cert.verifyForUsage` was removed in Gecko 24.",
+            compat_type="error", log_function=self.err.warning)
+
+        yield self.get_test_bug(
+            874003, r"prevent(Bubble|Capture)",
+            "`preventBubble` or `preventCapture` were removed.",
+            "`preventBubble` or `preventCapture` were removed in Gecko 24. "
+            "You can use `stopPropagation` instead. See %s for more "
+            "information." % self.DOM_LINK,
+            compat_type="error", log_function=self.err.warning)
+
+        yield self.get_test_bug(
+            726933, r"getPreventDefault",
+            "`getPreventDefault` is deprecated.",
+            "The `getPreventDefault` function is deprecated. Use the "
+            "`defaultPrevented` property instead. See %s for more "
+            "information." % self.GPD_LINK,
+            compat_type="warning", log_function=self.err.notice)
+
+        yield self.get_test_bug(
+            673919, r"routeEvent",
+            "`routeEvent` was removed.",
+            "The `routeEvent` function was removed in Gecko 24.",
+            compat_type="error", log_function=self.err.warning)
+
+        yield self.get_test_bug(
+            673919, r"(enableExternalCapture|disableExternalCapture)",
+            "`enableExternalCapture` and `disableExternalCapture` were "
+            "removed.",
+            "The `enableExternalCapture` and `disableExternalCapture` "
+            "functions were removed in Gecko 24.",
+            compat_type="error", log_function=self.err.warning)
+
+        yield self.get_test_bug(
+            879118, r"nsIFormHistory2",
+            "`nsIFormHistory2` is deprecated.",
+            "The `nsIFormHistory2` interface is deprecated. The "
+            "`FormHistory.jsm` module should be used instead.",
+            compat_type="warning", log_function=self.err.notice)
+
+        yield self.get_test_bug(
+            882079, r"nsIDocShellHistory",
+            "nsIDocShellHistory` interface was merged into `nsIDocShell`.",
+            "The `nsIDocShellHistory` interface was merged into "
+            "`nsIDocShell`. Use `nsIDocShell` instead.",
+            compat_type="error", log_function=self.err.warning)
 
 
 #############################
