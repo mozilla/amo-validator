@@ -8,7 +8,7 @@ from validator.compat import (FX4_DEFINITION, FX5_DEFINITION, FX6_DEFINITION,
                               FX14_DEFINITION, FX15_DEFINITION, FX16_DEFINITION,
                               FX17_DEFINITION, FX18_DEFINITION, FX19_DEFINITION,
                               FX20_DEFINITION, FX21_DEFINITION, FX22_DEFINITION,
-                              FX23_DEFINITION, FX24_DEFINITION,
+                              FX23_DEFINITION, FX24_DEFINITION, FX25_DEFINITION,
                               TB7_DEFINITION, TB10_DEFINITION, TB11_DEFINITION,
                               TB12_DEFINITION, TB13_DEFINITION, TB14_DEFINITION,
                               TB15_DEFINITION, TB16_DEFINITION, TB17_DEFINITION,
@@ -1152,6 +1152,42 @@ class Gecko24RegexTests(CompatRegexTestHelper):
             "nsIDocShellHistory` interface was merged into `nsIDocShell`.",
             "The `nsIDocShellHistory` interface was merged into "
             "`nsIDocShell`. Use `nsIDocShell` instead.",
+            compat_type="error", log_function=self.err.warning)
+
+
+@register_generator
+class Gecko25RegexTests(CompatRegexTestHelper):
+    """Regex tests for Gecko 25 updates."""
+
+    VERSION = FX25_DEFINITION
+
+    def js_tests(self):
+
+        yield self.get_test_bug(
+            846635, r"getShortcutOrURI",
+            "`getShortcutOrURI` was removed.",
+            "`getShortcutOrURI` was replaced in favor of the asynchronous "
+            "`getShortcutOrURIAndPostData` in Gecko 25.",
+            compat_type="error", log_function=self.err.warning)
+
+        yield self.get_test_bug(
+            846635, r"_canonizeURL",
+            "`_canonizeURL` is now asynchronous in Gecko 25.",
+            "`_canonizeURL` is asynchronous as of Gecko 25.",
+            compat_type="error", log_function=self.err.warning)
+
+        yield self.get_test_bug(
+            776708, r"findbar.xml",
+            "`findbar.xml` has changed in Gecko 25.",
+            "The findbar binding was significantly changed and could break "
+            "any of its consumers.",
+            compat_type="error", log_function=self.err.warning)
+
+        yield self.get_test_bug(
+            895839, r"(getAnnotationURI|(get|set)(Page|Item)AnnotationBinary)",
+            "Binary annotations were removed in Gecko 25.",
+            "Binary annotations have been discontinued, so this function no "
+            "longer exists.",
             compat_type="error", log_function=self.err.warning)
 
 
