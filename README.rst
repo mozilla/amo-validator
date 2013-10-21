@@ -105,12 +105,12 @@ The path to the XPI should point to an XPI file.
                     tier has failed. Certain high-tiered tests may
                     inadvertently fail when this option is enabled for badly
                     malformed add-ons.
---target-appversion     Accepts a JSON string containing an object whose keys
-                    are GUIDs and values are lists of version strings. In the
-                    targetApplication and compatibility tests, the add-on's
-                    predefined ``<em:targetApplication>`` values will be
-                    overridden if its GUIDs match thoes from the JSON. E.g.:
-                    ``{"{ec8030f7-c20a-464f-9b0e-13a3a9e97384}": "5.*"}``
+--target-maxversion     Accepts a JSON string containing an object whose keys
+                    are GUIDs and values are version strings. This will
+                    override the max version that the add-on supports for the
+                    corresponding application GUID.
+--target-minversion     Identical to ``--target-minversion``, except overrides
+                    the min version instead of the max.
 --for-appversions   Accepts a JSON string containing an object whose keys are
                     GUIDs and values are lists of version strings. If this
                     list is specified, non-inlinecompatibility tests will only
