@@ -5,7 +5,7 @@ setup(
     name='amo-validator',
     version='1.1',
     description='Validates add-ons for Mozilla products.',
-    long_description=open('README.rst').read(),
+    long_description=open('README.md').read(),
     author='Matt Basta',
     author_email='me@mattbasta.com',
     url='http://github.com/mozilla/amo-validator',
