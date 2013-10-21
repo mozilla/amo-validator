@@ -80,58 +80,62 @@ Run the validator as follows
 
 The path to the XPI should point to an XPI file.
 
--t
-    The type that you expect your add-on to be detected as. The list of
+<dl>
+    <dt>-t
+    <dd>The type that you expect your add-on to be detected as. The list of
     types is listed below.
--o
-    The type of output to generate. Types are listed below.
--v
-    Enable verbose mode. Extra information will be displayed in verbose mode,
+    <dt>-o
+    <dd>The type of output to generate. Types are listed below.
+    <dt>-v
+    <dd>Enable verbose mode. Extra information will be displayed in verbose mode,
     namely notices (informational messages), Jetpack information if
     available, extra error info (like contexts, file data, etc.), and error
     descriptions. This only applies to `-o text`.
---selfhosted
-    Disables messages that are specific to add-ons hosted on AMO.
---boring
-    Disables colorful shell output.
---determined
-    Continue validating the remaining tiers of an add-on if one tier has
+    <dt>--selfhosted
+    <dd>Disables messages that are specific to add-ons hosted on AMO.
+    <dt>--boring
+    <dd>Disables colorful shell output.
+    <dt>--determined
+    <dd>Continue validating the remaining tiers of an add-on if one tier has
     failed. Certain high-tiered tests may inadvertently fail when this option
     is enabled for badly malformed add-ons.
---target-maxversion
-    Accepts a JSON string containing an object whose keys are GUIDs and
+    <dt>--target-maxversion
+    <dd>Accepts a JSON string containing an object whose keys are GUIDs and
     values are version strings. This will override the max version that the
     add-on supports for the corresponding application GUID. E.g.:
     `{"{ec8030f7-c20a-464f-9b0e-13a3a9e97384}": "6.*"}`
---target-minversion
-    Identical to `--target-minversion`, except overrides the min version
+    <dt>--target-minversion
+    <dd>Identical to `--target-minversion`, except overrides the min version
     instead of the max.
---for-appversions
-    Accepts a JSON string containing an object whose keys are GUIDs and
+    <dt>--for-appversions
+    <dd>Accepts a JSON string containing an object whose keys are GUIDs and
     values are lists of version strings. If this list is specified,
     non-inlinecompatibility tests will only be run if they specifically
     target the applications and veresions in this parameter. E.g.:
     `{"{ec8030f7-c20a-464f-9b0e-13a3a9e97384}": ["6.*"]}`
+</dl>
 
 
 ### Expected Type:
 
 The expected type should be one of the following values:
 
-any (default)
-    Accepts any extension
-extension
-    Accepts only extensions
-theme
-    Accepts only themes
-dictionary
-    Accepts only dictionaries
-languagepack
-    Accepts only language packs
-search
-    Accepts only OpenSearch XML files (unpackaged)
-multi
-    Accepts only multi-item XPI packages
+<dl>
+    <dt>any (default)
+    <dd>Accepts any extension
+    <dt>extension
+    <dd>Accepts only extensions
+    <dt>theme
+    <dd>Accepts only themes
+    <dt>dictionary
+    <dd>Accepts only dictionaries
+    <dt>languagepack
+    <dd>Accepts only language packs
+    <dt>search
+    <dd>Accepts only OpenSearch XML files (unpackaged)
+    <dt>multi
+    <dd>Accepts only multi-item XPI packages
+</dl>
 
 Specifying an expected type will throw an error if the validator
 does not detect that particular type when scanning. All addon type
@@ -142,17 +146,18 @@ detection mechanisms are used to make this determination.
 
 The output type may be either of the following:
 
-text (default)
-    Outputs a textual summary of the addo-on analysis. Supports verbose mode.
-json
-    Outputs a JSON snippet representing a full summary of the add-on analysis.
-
+<dl>
+    <dt>text (default)
+    <dd>Outputs a textual summary of the addo-on analysis. Supports verbose mode.
+    <dt>json
+    <dd>Outputs a JSON snippet representing a full summary of the add-on analysis.
+</dl>
 
 ## Output
 
 ### Text Output Mode (default; `text`)
 
-In ``text`` output mode, output is structured in the format of one
+In `text` output mode, output is structured in the format of one
 message per line. The messages are prefixed by their priority level
 (i.e.: "Warning: This is the message").
 
@@ -162,7 +167,7 @@ add-on type was determined to be.
 
 ### JSON Output Mode (`json`)
 
-In ``JSON`` output mode, output is formatted as a JSON snippet
+In `JSON` output mode, output is formatted as a JSON snippet
 containing all messages. The format for the JSON output is that of the
 sample document below.
 
