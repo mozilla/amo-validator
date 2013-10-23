@@ -178,8 +178,10 @@ def _load_install_rdf(err, package, expectation):
         err.error(
                 err_id=("main", "test_package", "parse_error"),
                 error="Could not parse `install.rdf`.",
-                description="The RDF parser was unable to parse the "
-                            "install.rdf file included with this add-on.",
+                description=["The RDF parser was unable to parse the "
+                             "install.rdf file included with this add-on.",
+                             "Try validating your RDF with the W3 "
+                             "validator: http://www.w3.org/RDF/Validator/"],
                 filename="install.rdf",
                 line=ex.line())
         return
