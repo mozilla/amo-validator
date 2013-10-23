@@ -1,6 +1,9 @@
 import json
-import subprocess
+
+import mock
+
 from js_helper import _do_test_raw
+
 from validator.errorbundler import ErrorBundle
 import validator.testcases.scripting as scripting
 import validator.testcases.javascript.spidermonkey as spidermonkey
@@ -37,23 +40,36 @@ def test_scripting_snippet():
     assert err.failed()
 
 
+class MockSubprocess(object):
+    "A class to mock subprocess"
+
+    PIPE = True
+
+    def Popen(self, command, shell, stderr, stdout, stdin):
+        return MockSubprocessObject()
+
+
+class MockSubprocessObject(object):
+    "A class to mock a subprocess object and implement the communicate method"
+
+    def communicate(self, data):
+        data = json.dumps({"error": True,
+                           "error_message": "ReferenceError: Reflect is not defined",
+                           "line_number": 0})
+        return data, ""
+
+
+@mock.patch("validator.testcases.javascript.spidermonkey.subprocess",
+            MockSubprocess())
 def test_reflectparse_presence():
     "Tests that when Spidermonkey is too old, a proper error is produced"
-
-    spidermonkey.subprocess = MockSubprocess()
 
     try:
         spidermonkey._get_tree("foo bar", "[path]")
     except RuntimeError as err:
-        print str(err)
-        assert (str(err) ==
-            "Spidermonkey version too old; 1.8pre+ required; "
-            "error='ReferenceError: Reflect is not defined'; "
-            "spidermonkey='[path]'")
-    except:
+        assert str(err).startswith("Spidermonkey version too old"), err
+    except Exception:
         raise
-
-    spidermonkey.subprocess = subprocess
 
 
 def test_compiletime_errors():
@@ -64,25 +80,3 @@ def test_compiletime_errors():
 
     # Reference error
     assert _do_test_raw("x - y = 4;").failed()
-
-
-class MockSubprocess(object):
-    "A class to mock subprocess"
-
-    def __init__(self):
-        self.PIPE = True
-
-    def Popen(self, command, shell, stderr, stdout):
-        return MockSubprocessObject()
-
-
-class MockSubprocessObject(object):
-    "A class to mock a subprocess object and implement the communicate method"
-
-    def communicate(self):
-        data = json.dumps({"error": True,
-                           "error_message": "ReferenceError: Reflect is not defined",
-                           "line_number": 0})
-        return data, ""
-
-

@@ -46,7 +46,6 @@ def test_spidermonkey_warning():
     """
     Test that stderr warnings in Spidermonkey do not trip runtime errors.
     """
-    assert not _do_test_raw("""
+    assert _do_test_raw("""
     var x = 0999999999999;
     """).failed()
-
