@@ -251,3 +251,11 @@ def test_simple_operators_when_dirty():
     y = foo();  // y is now a dirty object as well.
     """ +
     """y += y + x;""" * 100)  # This bit makes the validator's head explode.
+
+
+def test_overflow_errors():
+    "Test that OverflowErrors in traversal don't crash the validation process."
+
+    _do_test_raw("""
+    var x = Math.exp(-4*1000000*-0.0641515994108);
+    """)
