@@ -20,7 +20,11 @@ BANNED_IDENTIFIERS = {
 
 BANNED_PREF_BRANCHES = [
     u"browser.newtab.url",
+    u"browser.newtabpage.enabled",
     u"browser.preferences.instantApply",
+    u"browser.search.defaultenginename",
+    u"browser.search.searchEnginesURL",
+    u"browser.startup.homepage",
     u"capability.policy.",
     u"extensions.alwaysUnpack",
     u"extensions.blocklist.",
@@ -34,6 +38,8 @@ BANNED_PREF_BRANCHES = [
     u"extensions.pendingOperations",
     u"extensions.update.",
     u"general.useragent.",
+    u"keyword.URL",
+    u"keyword.enabled",
     u"network.http.",
     u"network.websocket.",
     u"nglayout.debug.disable_xul_cache",
