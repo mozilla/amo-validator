@@ -71,6 +71,5 @@ def test_js_snippet(err, data, filename, line=0, context=None):
     # when return statements exist without a corresponding function.
     data = "(function(){%s\n})()" % data
 
-    # NOTE: pollutable is set to True...for now
-    test_js_file(err, filename, data, line, context, pollutable=True)
+    test_js_file(err, filename, data, line, context, pollutable=False)
 
