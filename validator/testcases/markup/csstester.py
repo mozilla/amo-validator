@@ -17,7 +17,7 @@ UNPREFIXED_LINK1 = ("https://developer.mozilla.org/en-US/docs/"
                     "Firefox_16_for_developers")
 UNPREFIXED_LINK2 = "https://hacks.mozilla.org/2012/07/aurora-16-is-out/"
 UNPREFIXED_MESSAGE = ["Several CSS properties have been unprefixed in Firefox "
-                      "16 and no longer work in their prefixed form.",
+                      "16 and may no longer work in their prefixed form.",
                       "For more information, see %s and %s" %
                           (UNPREFIXED_LINK1, UNPREFIXED_LINK2)]
 
