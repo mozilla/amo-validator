@@ -19,6 +19,7 @@ BANNED_IDENTIFIERS = {
 }
 
 BANNED_PREF_BRANCHES = [
+    u"browser.newtab.url",
     u"browser.preferences.instantApply",
     u"capability.policy.",
     u"extensions.alwaysUnpack",
