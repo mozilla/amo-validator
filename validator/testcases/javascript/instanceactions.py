@@ -33,7 +33,7 @@ def addEventListener(args, traverser, node, wrapper):
         traverser.err.notice(
             err_id=("js", "instanceactions", "addEventListener_fourth"),
             notice="`addEventListener` called with truthy fourth argument.",
-            description="A falsey fourth argument indicates code that "
+            description="A truthy fourth argument indicates code that "
                         "accesses untrusted code. This code should be "
                         "further investigated.",
         filename=traverser.filename,
