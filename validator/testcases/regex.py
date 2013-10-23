@@ -304,8 +304,17 @@ class ChromePatternRegexTests(RegexTestGenerator):
     Test that an Add-on SDK (Jetpack) add-on doesn't use interfaces that are
     not part of the SDK.
 
-    Added from bugs 689340, 731109
+    Added from bugs 689340, 731109, 845492
     """
+
+    INTERFACES = "|".join([
+        # Added from bugs 689340, 731109
+        "chrome", "window-utils", "observer-service",
+        # Added from bug 845492
+        "window/utils", "sdk/window/utils", "sdk/deprecated/window-utils",
+        "tab/utils", "sdk/tab/utils",
+        "system/events", "sdk/system/events",
+    ])
 
     def tests(self):
         # We want to re-wrap the test because if it detects something, we're
@@ -313,10 +322,10 @@ class ChromePatternRegexTests(RegexTestGenerator):
         def rewrap():
             wrapper = self.get_test(
                     r"(?<![\'\"])require\s*\(\s*[\'\"]"
-                    r"(chrome|window-utils|observer-service)[\'\"]\s*\)",
-                    "Usage of non-SDK interface",
+                    r"(%s)[\'\"]\s*\)" % self.INTERFACES,
+                    "Usage of flagged or non-SDK interface",
                     "This SDK-based add-on uses interfaces that aren't part "
-                    "of the SDK.")
+                    "of the SDK or are flagged as sensitive.")
             if wrapper():
                 self.err.metadata["requires_chrome"] = True
 
