@@ -249,16 +249,27 @@ def PageMod(args, traverser, node, wrapper):
             line=traverser.line, context=traverser.context)
 
 
-INSTANCE_DEFINITIONS = {"addEventListener": addEventListener,
-                        "createElement": createElement,
-                        "createElementNS": createElementNS,
-                        "getAsBinary": nsIDOMFile_deprec,
-                        "getAsDataURL": nsIDOMFile_deprec,
-                        "getInterface": getInterface,
-                        "insertAdjacentHTML": insertAdjacentHTML,
-                        "isSameNode": isSameNode,
-                        "openDialog": openDialog,
-                        "PageMod": PageMod,
-                        "QueryInterface": QueryInterface,
-                        "replaceWholeText": replaceWholeText,
-                        "setAttribute": setAttribute}
+def bind(args, traverser, node, wrapper):
+    if "callee" not in node and "object" not in node["callee"]:
+        return
+    obj = traverser._traverse_node(node["callee"]["object"])
+    if obj.callable:
+        return obj
+
+
+INSTANCE_DEFINITIONS = {
+    "addEventListener": addEventListener,
+    "bind": bind,
+    "createElement": createElement,
+    "createElementNS": createElementNS,
+    "getAsBinary": nsIDOMFile_deprec,
+    "getAsDataURL": nsIDOMFile_deprec,
+    "getInterface": getInterface,
+    "insertAdjacentHTML": insertAdjacentHTML,
+    "isSameNode": isSameNode,
+    "openDialog": openDialog,
+    "PageMod": PageMod,
+    "QueryInterface": QueryInterface,
+    "replaceWholeText": replaceWholeText,
+    "setAttribute": setAttribute,
+}

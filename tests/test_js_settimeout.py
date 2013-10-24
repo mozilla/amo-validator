@@ -41,3 +41,14 @@ def test_settimeout_pass():
     window["set" + "Timeout"]();
     """).failed()
 
+
+def test_settimeout_bind_pass():
+    "Test cases in which setTimeout should be allowed"
+
+    assert not _do_test_raw("""
+    setTimeout(function(){foo.bar();}.bind(this), 1000);
+    """).failed()
+
+    assert not _do_test_raw("""
+    window["set" + "Timeout"](function(){foo.bar();}.bind(this), 1000);
+    """).failed()

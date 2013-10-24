@@ -449,13 +449,18 @@ def _call_settimeout(a, t, e):
     those, too.
     """
 
-    if a and a[0]["type"] != "FunctionExpression":
-        return ("In order to prevent vulnerabilities, the setTimeout "
-                "and setInterval functions should be called only with "
-                "function expressions as their first argument.",
-                "Variables referencing function names are acceptable "
-                "but deprecated as they are not amenable to static "
-                "source validation.")
+    if not a:
+        return
+
+    if a[0]["type"] == "FunctionExpression":
+        return
+
+    if t(a[0]).callable:
+        return
+
+    return ("In order to prevent vulnerabilities, the `setTimeout` "
+            "and `setInterval` functions should be called only with "
+            "function expressions as their first argument.")
 
 
 def _call_create_pref(a, t, e):
