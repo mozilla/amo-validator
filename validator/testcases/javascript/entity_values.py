@@ -76,9 +76,24 @@ deprecated_entity(name="Packages", version=FX16_DEFINITION,
                   message=JAVA_MESSAGE, bug=748343)
 
 
+DOC_WRITE_MSG = ("https://developer.mozilla.org/docs/XUL/School_tutorial/"
+                 "DOM_Building_and_HTML_Insertion")
+
 @register_entity("document.write")
 def document_write(traverser):
     def on_write(wrapper, arguments, traverser):
+        traverser.err.warning(
+            err_id=("js", "document.write", "evil"),
+            warning="Use of `document.write` strongly discouraged.",
+            description=["`document.write` will fail in many circumstances ",
+                         "when used in extensions, and has potentially severe "
+                         "security repercussions when used improperly. "
+                         "Therefore, it should not be used. See %s for more "
+                         "information." % DOC_WRITE_MSG],
+            filename=traverser.filename,
+            line=traverser.line,
+            column=traverser.position,
+            context=traverser.context)
         if not arguments:
             return
         value = traverser._traverse_node(arguments[0])
