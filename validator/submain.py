@@ -151,11 +151,6 @@ def test_package(err, file_, name, expectation=PACKAGE_ANY,
                        "unexpected_type"),
                       "Unexpected package type (found theme)")
 
-    # Test the install.rdf file to see if we can get the type that way.
-    has_install_rdf = "install.rdf" in package
-    if has_install_rdf:
-        _load_install_rdf(err, package, expectation)
-
     try:
         output = test_inner_package(err, package, for_appversions)
     except ValidationTimeout as ex:
