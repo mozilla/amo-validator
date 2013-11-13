@@ -444,17 +444,15 @@ GLOBAL_ENTITIES = {
             "value":
                 lambda t: GLOBAL_ENTITIES["Components"]["value"]["utils"]},
     u"Services":
-        {"value": {u"scriptloader": {"dangerous": True},
-                   u"wm":
-                       {"value":
-                            lambda t: build_quick_xpcom("getService",
-                                                        "nsIWindowMediator",
-                                                        t)},
-                   u"ww":
-                       {"value":
-                            lambda t: build_quick_xpcom("getService",
-                                                        "nsIWindowWatcher",
-                                                        t)}}},
+        {"value":
+            {u"wm":
+                {"value":
+                    lambda t: build_quick_xpcom(
+                        "getService", "nsIWindowMediator", t)},
+             u"ww":
+                {"value":
+                    lambda t: build_quick_xpcom(
+                        "getService", "nsIWindowWatcher", t)}}},
 
     u"document":
         {"value":

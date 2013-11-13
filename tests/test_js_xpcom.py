@@ -206,13 +206,6 @@ def test_xpcom_shortcut_cc():
     eq_(len(err.warnings), 0)
 
 
-def test_xpcom_shortcut_services_scriptloader():
-    """Test that Services.scriptloader throws an error."""
-
-    assert _do_test_raw("""
-    Services.scriptloader;
-    """).failed()
-
 def test_xpcom_shortcut_services_wm():
     """Test that Services.wm throws a warning when bootstrapped."""
 
