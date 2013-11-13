@@ -353,3 +353,21 @@ class TestnsIWindowWatcher(TestCase):
                 "data:asdf"]
         for uri in uris:
             yield test_uri, self, uri
+
+
+def test_nsITransferable_init():
+    """
+    Tests that nsITransferable.init() is not called with a null first arg.
+    """
+
+    err = _do_test_raw("""
+    var foo = Cc["foo"].getService(Components.interfaces.nsITransferable);
+    foo.init("hello");
+    """)
+    assert not err.failed()
+
+    err = _do_test_raw("""
+    var foo = Cc["foo"].getService(Components.interfaces.nsITransferable);
+    foo.init(null);
+    """)
+    assert err.failed()

@@ -303,6 +303,10 @@ INTERFACES = {
                         e.get_resource("em:bootstrap") and
                         "Authors of bootstrapped add-ons must take care to "
                         "unregister registered stylesheets at shutdown."}}},
+    u"nsITransferable":
+        {"value":
+            {u"init":
+                entity("nsITransferable.init")}},
     u"nsIWindowMediator":
         {"value":
             {"registerNotification":

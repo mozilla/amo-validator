@@ -264,6 +264,29 @@ def nsIWindowWatcher_openWindow(traverser):
     return {"return": on_open}
 
 
+@register_entity("nsITransferable.init")
+def nsITransferable_init(traverser):
+    def on_init(wrapper, arguments, traverser):
+        if not arguments:
+            return
+        first_arg = traverser._traverse_node(arguments[0])
+        if first_arg.get_literal_value():
+            return
+        traverser.err.warning(
+            err_id=("js_entity_values", "nsITransferable", "init"),
+            warning="`init` should not be called with a null first argument",
+            description="Calling `nsITransferable.init()` with a null first "
+                        "argument has the potential to leak data across "
+                        "private browsing mode sessions. `null` may be "
+                        "appropriate sometimes, but it is not universally.",
+            filename=traverser.filename,
+            line=traverser.line,
+            column=traverser.position,
+            context=traverser.context)
+
+    return {"return": on_init}
+
+
 # Thunderbird 14 IDL changes
 @register_entity("nsIMsgPluggableStore.copyMessages")
 def nsIMsgPluggableStore_copyMessages(traverser):
