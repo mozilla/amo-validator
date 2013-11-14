@@ -13,9 +13,6 @@ from content import FLAGGED_FILES
 
 SAFE_FILES = (".jpg", ".ico", ".png", ".gif", ".txt")
 
-EMPTY_FILE_SHA256SUMS = ("e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495"
-                         "991b7852b855")
-
 JETPACK_DATA_FILE = os.path.join(os.path.dirname(__file__), "jetpack_data.txt")
 JETPACK_PICKLE_FILE = JETPACK_DATA_FILE + ".pickle"
 
@@ -193,7 +190,10 @@ def inspect_jetpack(err, xpi_package, allow_old_sdk=False):
                 filename="harness-options.json")
             continue
 
-        blob_hash = hashlib.sha256(xpi_package.read(zip_path)).hexdigest()
+        file_data = xpi_package.read(zip_path)
+        if not file_data.strip():
+            continue
+        blob_hash = hashlib.sha256(file_data).hexdigest()
         file_hashes[zip_path] = blob_hash
 
         # Make sure that the module's hash matches what the manifest says.
@@ -237,8 +237,12 @@ def inspect_jetpack(err, xpi_package, allow_old_sdk=False):
             filename in FLAGGED_FILES):
             continue
 
+        file_data = xpi_package.read(filename)
+        # Skip empty files.
+        if not file_data.strip():
+            continue
         blob_hash = (file_hashes.get(filename, None) or
-                     hashlib.sha256(xpi_package.read(filename)).hexdigest())
+                     hashlib.sha256(file_data).hexdigest())
         file_hashes[filename] = blob_hash
 
         if blob_hash not in jetpack_hash_table:
@@ -266,11 +270,10 @@ def inspect_jetpack(err, xpi_package, allow_old_sdk=False):
         else:
             # This isn't the version it claims to be. Go with the latest
             # Jetpack version we know about that contains it.
-            version = str(max(map(Version, versions.keys())))
+            version = str(max(Version(v) for v in versions))
             tested_files[zip_path] = version, versions[version]
 
-            if (file_hashes[zip_path] not in EMPTY_FILE_SHA256SUMS and
-                not zip_path.endswith("/")):
+            if not zip_path.endswith("/"):
                 err.warning(
                     err_id=("testcases_jetpack",
                             "inspect_jetpack",
@@ -302,4 +305,3 @@ def inspect_jetpack(err, xpi_package, allow_old_sdk=False):
     for file, (version, path) in tested_files.items():
         identified_files[file] = {"path": path, "version": version,
                                   "library": "Jetpack"}
-

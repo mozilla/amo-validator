@@ -26,6 +26,5 @@ sort ../../validator/testcases/jetpack_data.txt -d -o ../../validator/testcases/
 
 # Delete the old pickle file.
 rm ../../validator/testcases/jetpack/jetpack_data.txt.pickle
-cd ..
 # This will generate the new pickle file.
-nosetests
+cd .. && nosetests
