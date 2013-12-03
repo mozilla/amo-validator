@@ -9,6 +9,7 @@ from validator.compat import (FX4_DEFINITION, FX5_DEFINITION, FX6_DEFINITION,
                               FX17_DEFINITION, FX18_DEFINITION, FX19_DEFINITION,
                               FX20_DEFINITION, FX21_DEFINITION, FX22_DEFINITION,
                               FX23_DEFINITION, FX24_DEFINITION, FX25_DEFINITION,
+                              FX26_DEFINITION,
                               TB7_DEFINITION, TB10_DEFINITION, TB11_DEFINITION,
                               TB12_DEFINITION, TB13_DEFINITION, TB14_DEFINITION,
                               TB15_DEFINITION, TB16_DEFINITION, TB17_DEFINITION,
@@ -1197,6 +1198,71 @@ class Gecko25RegexTests(CompatRegexTestHelper):
             "Binary annotations were removed in Gecko 25.",
             "Binary annotations have been discontinued, so this function no "
             "longer exists.",
+            compat_type="error", log_function=self.err.warning)
+
+
+@register_generator
+class Gecko26RegexTests(CompatRegexTestHelper):
+    """Regex tests for Gecko 26 updates."""
+
+    VERSION = FX26_DEFINITION
+
+    DLM_LINK = MDN_DOC % "/Mozilla/JavaScript_code_modules/Downloads.jsm"
+    HME_LINK = MDN_DOC % "/XPCOM_Interface_Reference/nsISHEntry"
+    WH_LINK = MDN_DOC % "/Web/API/Window.history"
+
+    def js_tests(self):
+
+        yield self.get_test_bug(
+            847863, r"nsIDownloadManager",
+            "`nsIDownloadManager` is now deprecated.",
+            "`nsIDownloadManager` is deprecated. You should use Downloads.jsm "
+            "instead. See %s for more information." % self.DLM_LINK,
+            compat_type="error", log_function=self.err.warning)
+
+        yield self.get_test_bug(
+            910517, r"nsIMemory(Multi)?Reporter(Callback|Manager)?",
+            "Some memory reporting interfaces have been changed.",
+            "The memory reporting interfaces have changed to remove "
+            "uni-reporters.",
+            compat_type="error", log_function=self.err.warning)
+
+        yield self.get_test_bug(
+            910161, r"nsIHistoryEntry",
+            "`nsIHistoryEntry` has been replaced.",
+            "`nsIHistoryEntry` has been replaced with `nsISHEntry` in Gecko "
+            "26. See %s for more information." % self.HME_LINK,
+            compat_type="error", log_function=self.err.warning)
+
+        yield self.get_test_bug(
+            904460, r"_firstTabs",
+            "`_firstTabs` has been removed.",
+            "`_firstTabs` has been removed and is now passed as an argument to "
+            "the `restoreWindow()` function.",
+            compat_type="error", log_function=self.err.warning)
+
+        yield self.get_test_bug(
+            856437, r"lookupMethod",
+            "`Components.lookupMethod` has been removed.",
+            "`Components.lookupMethod` has been removed. The behavior "
+            "implemented by this function now happens automatically, so it is "
+            "unnecessary now.",
+            compat_type="error", log_function=self.err.warning)
+
+        yield self.get_test_bug(
+            846185, r"nsIAccessibleProvider",
+            "`nsIAccessibleProvider` has been removed.",
+            "`nsIAccessibleProvider` has been removed. You should remove its "
+            "references from your bindings and use the role attribute "
+            "instead.",
+            compat_type="error", log_function=self.err.warning)
+
+        yield self.get_test_bug(
+            903311, r"history(\.current|\.previous|\.next|\[.+\])",
+            "Non-standard `window.history` members have been removed.",
+            "A few non-standard properties in `window.history` have been "
+            "removed. You should use the standard equivalents instead. See %s "
+            "for more information." % self.WH_LINK,
             compat_type="error", log_function=self.err.warning)
 
 
