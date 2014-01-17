@@ -43,11 +43,12 @@ so that you get all of the goodies inside.
 
 ### Spidermonkey
 
-A working copy of Spidermonkey (debug or non-debug is fine) is required.
+A working copy of Spidermonkey (debug or non-debug is fine) is required.  The
+easiest way to do this is to just [download the binary](http://ftp.mozilla.org/pub/mozilla.org/firefox/nightly/latest-trunk/jsshell-linux-x86_64.zip).
 
-The best way to make sure you install the right Spidermonkey is to
-[clone](http://hg.mozilla.org/mozilla-central/) the mozilla-central repo
-or [download the tip](http://hg.mozilla.org/mozilla-central/archive/tip.tar.bz2)
+If you want to build it from scratch, [clone](http://hg.mozilla.org/mozilla-central/) 
+the mozilla-central repo or 
+[download the tip](http://hg.mozilla.org/mozilla-central/archive/tip.tar.bz2)
 (which is faster). Then build it from source like this
 
 ```bash
