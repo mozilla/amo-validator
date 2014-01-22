@@ -117,6 +117,7 @@ def test_downloads_indicator_unused():
                             "#downloads-indicator { display: none; }",
                             0)
     assert err.failed()
+    assert any(err.compat_summary.values())
 
 def test_downloads_indicator_icon_allowed():
     """Test that #downloads-indicator-icon is allowed."""
@@ -127,3 +128,4 @@ def test_downloads_indicator_icon_allowed():
                             "#downloads-indicator-icon { display: none; }",
                             0)
     assert not err.failed()
+    assert not any(err.compat_summary.values())
