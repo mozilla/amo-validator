@@ -2,6 +2,7 @@ import re
 from functools import partial
 import cssutils
 
+from validator import bugzilla_link
 from validator.compat import FX16_DEFINITION
 from validator.constants import PACKAGE_THEME
 from validator.contextgenerator import ContextGenerator
@@ -20,6 +21,7 @@ UNPREFIXED_MESSAGE = ["Several CSS properties have been unprefixed in Firefox "
                       "16 and may no longer work in their prefixed form.",
                       "For more information, see %s and %s" %
                           (UNPREFIXED_LINK1, UNPREFIXED_LINK2)]
+DOWNLOADS_INDICATOR_BUG = 845408
 
 
 def test_css_file(err, filename, data, line_start=1):
@@ -70,6 +72,7 @@ def _run_css_tests(err, tokens, filename, line_start=0, context=None):
 
     identity_box_mods = []
     unicode_errors = []
+    downloads_indicator_selectors = []
 
     token_history = []
 
@@ -139,7 +142,8 @@ def _run_css_tests(err, tokens, filename, line_start=0, context=None):
             # Search for interference with the identity box.
             if value == "#identity-box":
                 identity_box_mods.append(str(line + line_start))
-
+            elif value == '#downloads-indicator':
+                downloads_indicator_selectors.append(str(line + line_start))
     if identity_box_mods and err.detected_type != PACKAGE_THEME:
         err.warning(("testcases_markup_csstester",
                     "_run_css_tests",
@@ -158,6 +162,18 @@ def _run_css_tests(err, tokens, filename, line_start=0, context=None):
                   "encountered, causing some problems.",
                   "Lines: %s" % ", ".join(unicode_errors)],
                  filename)
+    if downloads_indicator_selectors:
+        err.warning(("testcases_markup_csstester",
+                     "test_css_file",
+                     "downloads_indicator"),
+                     "The `#downloads-indicator` node was removed from the DOM.",
+                     ["The `#downloads-indicator` node was removed from the DOM. You "
+                      "should be able to use `#downloads-button` instead. See %s for "
+                      "more information." % bugzilla_link(DOWNLOADS_INDICATOR_BUG),
+                      "Lines: %s" % ", ".join(downloads_indicator_selectors)],
+                     filename,
+                     compatibility_type='error')
+
 
 
 UNPREFIXED_WARNING = "`%s` is no longer prefixed in Gecko 16."
