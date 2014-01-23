@@ -1,7 +1,6 @@
 import re
 from functools import wraps
 
-from validator import bugzilla_link
 from validator.constants import BUGZILLA_BUG, MDN_DOC
 from validator.compat import (FX4_DEFINITION, FX5_DEFINITION, FX6_DEFINITION,
                               FX7_DEFINITION, FX8_DEFINITION, FX9_DEFINITION,
@@ -1282,7 +1281,7 @@ class Gecko27RegexTests(CompatRegexTestHelper):
             "The `downloads-indicator` node was removed from the DOM.",
             "The `downloads-indicator` node was removed from the DOM. You "
             "should be able to use `downloads-button` instead. See %s for "
-            "more information." % bugzilla_link(self.BUG_ID),
+            "more information." % BUGZILLA_BUG % self.BUG_ID,
             compat_type="error", log_function=self.err.warning)
 
 

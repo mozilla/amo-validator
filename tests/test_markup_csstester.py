@@ -112,20 +112,17 @@ def test_downloads_indicator_unused():
     """Test that #downloads-indicator is not used."""
 
     err = ErrorBundle(for_appversions=FX27_DEFINITION)
-    csstester.test_css_file(err,
-                            "x.css",
-                            "#downloads-indicator { display: none; }",
-                            0)
+    csstester.test_css_file(err, "x.css",
+                            "#downloads-indicator { display: none; }", 0)
     assert err.failed()
-    assert any(err.compat_summary.values())
+    assert err.compat_summary['errors'] == 1
+
 
 def test_downloads_indicator_icon_allowed():
     """Test that #downloads-indicator-icon is allowed."""
 
     err = ErrorBundle(for_appversions=FX27_DEFINITION)
-    csstester.test_css_file(err,
-                            "x.css",
-                            "#downloads-indicator-icon { display: none; }",
-                            0)
+    csstester.test_css_file(err, "x.css",
+                            "#downloads-indicator-icon { display: none; }", 0)
     assert not err.failed()
-    assert not any(err.compat_summary.values())
+    assert all(val == 0 for val in err.compat_summary.values())
