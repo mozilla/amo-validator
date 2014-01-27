@@ -1278,9 +1278,9 @@ class Gecko27RegexTests(CompatRegexTestHelper):
 
         yield self.get_test_bug(
             self.BUG_ID, r"downloads-indicator",
-            "The `downloads-indicator` node was removed from the DOM.",
-            "The `downloads-indicator` node was removed from the DOM. You "
-            "should be able to use `downloads-button` instead. See %s for "
+            "The `#downloads-indicator` node was removed from the DOM.",
+            "The `#downloads-indicator` node was removed from the DOM. You "
+            "should be able to use `#downloads-button` instead. See %s for "
             "more information." % BUGZILLA_BUG % self.BUG_ID,
             compat_type="error", log_function=self.err.warning)
 
