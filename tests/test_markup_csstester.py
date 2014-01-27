@@ -1,4 +1,4 @@
-from validator.compat import FX16_DEFINITION
+from validator.compat import FX16_DEFINITION, FX27_DEFINITION
 from validator.constants import PACKAGE_THEME
 import validator.testcases.markup.csstester as csstester
 from validator.errorbundler import ErrorBundle
@@ -106,3 +106,23 @@ def test_unprefixed_patterns_unchanged():
 
     yield test_descriptor, "-moz-gradient"
     yield test_descriptor, "calc"
+
+
+def test_downloads_indicator_unused():
+    """Test that #downloads-indicator is not used."""
+
+    err = ErrorBundle(for_appversions=FX27_DEFINITION)
+    csstester.test_css_file(err, "x.css",
+                            "#downloads-indicator { display: none; }", 0)
+    assert err.failed()
+    assert err.compat_summary['errors'] == 1
+
+
+def test_downloads_indicator_icon_allowed():
+    """Test that #downloads-indicator-icon is allowed."""
+
+    err = ErrorBundle(for_appversions=FX27_DEFINITION)
+    csstester.test_css_file(err, "x.css",
+                            "#downloads-indicator-icon { display: none; }", 0)
+    assert not err.failed()
+    assert all(val == 0 for val in err.compat_summary.values())

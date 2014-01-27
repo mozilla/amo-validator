@@ -9,7 +9,7 @@ from validator.compat import (FX4_DEFINITION, FX5_DEFINITION, FX6_DEFINITION,
                               FX17_DEFINITION, FX18_DEFINITION, FX19_DEFINITION,
                               FX20_DEFINITION, FX21_DEFINITION, FX22_DEFINITION,
                               FX23_DEFINITION, FX24_DEFINITION, FX25_DEFINITION,
-                              FX26_DEFINITION,
+                              FX26_DEFINITION, FX27_DEFINITION,
                               TB7_DEFINITION, TB10_DEFINITION, TB11_DEFINITION,
                               TB12_DEFINITION, TB13_DEFINITION, TB14_DEFINITION,
                               TB15_DEFINITION, TB16_DEFINITION, TB17_DEFINITION,
@@ -1263,6 +1263,25 @@ class Gecko26RegexTests(CompatRegexTestHelper):
             "A few non-standard properties in `window.history` have been "
             "removed. You should use the standard equivalents instead. See %s "
             "for more information." % self.WH_LINK,
+            compat_type="error", log_function=self.err.warning)
+
+
+@register_generator
+class Gecko27RegexTests(CompatRegexTestHelper):
+    """Regex tests for Firefox 27 updates."""
+
+    VERSION = FX27_DEFINITION
+
+    BUG_ID = 845408
+
+    def js_tests(self):
+
+        yield self.get_test_bug(
+            self.BUG_ID, r"downloads-indicator",
+            "The `#downloads-indicator` node was removed from the DOM.",
+            "The `#downloads-indicator` node was removed from the DOM. You "
+            "should be able to use `#downloads-button` instead. See %s for "
+            "more information." % BUGZILLA_BUG % self.BUG_ID,
             compat_type="error", log_function=self.err.warning)
 
 
