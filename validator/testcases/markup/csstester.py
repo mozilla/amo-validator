@@ -3,7 +3,7 @@ from functools import partial
 import cssutils
 
 from validator.compat import FX16_DEFINITION
-from validator.constants import PACKAGE_THEME, BUGZILLA_BUG
+from validator.constants import BUGZILLA_BUG, PACKAGE_THEME
 from validator.contextgenerator import ContextGenerator
 
 
