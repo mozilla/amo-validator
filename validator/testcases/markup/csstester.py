@@ -2,7 +2,7 @@ import re
 from functools import partial
 import cssutils
 
-from validator.compat import FX16_DEFINITION
+from validator.compat import FX16_DEFINITION, FX27_DEFINITION
 from validator.constants import BUGZILLA_BUG, PACKAGE_THEME
 from validator.contextgenerator import ContextGenerator
 
@@ -172,7 +172,8 @@ def _run_css_tests(err, tokens, filename, line_start=0, context=None):
                    % BUGZILLA_BUG % DOWNLOADS_INDICATOR_BUG,
                    "Lines: %s" % ", ".join(downloads_indicator_selectors)],
                   filename,
-                  compatibility_type="error")
+                  compatibility_type="error",
+                  for_appversions=FX27_DEFINITION)
 
 
 UNPREFIXED_WARNING = "`%s` is no longer prefixed in Gecko 16."

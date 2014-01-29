@@ -108,6 +108,16 @@ def test_unprefixed_patterns_unchanged():
     yield test_descriptor, "calc"
 
 
+def test_downloads_indicator_gecko_16():
+    """Test that #downloads-indicator is allowed for an old Gecko."""
+
+    err = ErrorBundle(for_appversions=FX16_DEFINITION)
+    csstester.test_css_file(err, "x.css",
+                            "#downloads-indicator { display: none; }", 0)
+    assert not err.failed()
+    assert all(val == 0 for val in err.compat_summary.values())
+
+
 def test_downloads_indicator_unused():
     """Test that #downloads-indicator is not used."""
 
