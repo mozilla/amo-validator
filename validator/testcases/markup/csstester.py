@@ -163,17 +163,18 @@ def _run_css_tests(err, tokens, filename, line_start=0, context=None):
                  filename)
     if downloads_indicator_selectors:
         title = "The `#downloads-indicator` node was removed from the DOM."
-        err.error(("testcases_markup_csstester",
-                   "test_css_file",
-                   "downloads_indicator"),
-                  title,
-                  [title + " You should be able to use `#downloads-button` "
-                   "instead. See %s for more information."
-                   % BUGZILLA_BUG % DOWNLOADS_INDICATOR_BUG,
-                   "Lines: %s" % ", ".join(downloads_indicator_selectors)],
-                  filename,
-                  compatibility_type="error",
-                  for_appversions=FX27_DEFINITION)
+        err.warning(("testcases_markup_csstester",
+                     "test_css_file",
+                     "downloads_indicator"),
+                    title,
+                    [title + " You should be able to use `#downloads-button` "
+                     "instead. See %s for more information."
+                     % BUGZILLA_BUG % DOWNLOADS_INDICATOR_BUG,
+                     "Lines: %s" % ", ".join(downloads_indicator_selectors)],
+                    filename,
+                    compatibility_type="error",
+                    tier=5,
+                    for_appversions=FX27_DEFINITION)
 
 
 UNPREFIXED_WARNING = "`%s` is no longer prefixed in Gecko 16."
