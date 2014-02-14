@@ -1,4 +1,5 @@
-from xml.dom.minidom import parse
+from defusedxml.minidom import parse
+from defusedxml.common import DefusedXmlException
 from validator.constants import *
 
 
@@ -8,6 +9,15 @@ def detect_opensearch(err, package, listed=False):
     # Parse the file.
     try:
         srch_prov = parse(package)
+    except DefusedXmlException:
+        url = "https://pypi.python.org/pypi/defusedxml/0.3#attack-vectors"
+        err.error(
+            err_id=("opensearch", "security_error"),
+            error="OpenSearch: XML Security Error",
+            description="The OpenSearch extension could not be parsed due to "
+                        "a security error in the XML. See {url} for more "
+                        "info.".format(url=url))
+        return err
     except Exception:
         err.error(
             err_id=("opensearch", "parse_error"),

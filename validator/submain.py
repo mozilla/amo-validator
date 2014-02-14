@@ -4,6 +4,8 @@ import signal
 from zipfile import BadZipfile
 from zlib import error as zlib_error
 
+from defusedxml.common import DefusedXmlException
+
 from validator.typedetection import detect_type
 from validator.opensearch import detect_opensearch
 from validator.chromemanifest import ChromeManifest
@@ -169,16 +171,23 @@ def test_package(err, file_, name, expectation=PACKAGE_ANY,
 def _load_install_rdf(err, package, expectation):
     try:
         install_rdf = RDFParser(err, package.read("install.rdf"))
-    except RDFException as ex:
+    except (RDFException, DefusedXmlException) as ex:
+        if isinstance(ex, DefusedXmlException):
+            url = "https://pypi.python.org/pypi/defusedxml/0.3#attack-vectors"
+            reason = "Malicious XML was detected, see {0}.".format(url)
+            line = 0
+        else:
+            reason = ("Try validating your RDF with the W3 validator: "
+                      "http://www.w3.org/RDF/Validator/.")
+            line = ex.line()
         err.error(
                 err_id=("main", "test_package", "parse_error"),
                 error="Could not parse `install.rdf`.",
                 description=["The RDF parser was unable to parse the "
                              "install.rdf file included with this add-on.",
-                             "Try validating your RDF with the W3 "
-                             "validator: http://www.w3.org/RDF/Validator/"],
+                             reason],
                 filename="install.rdf",
-                line=ex.line())
+                line=line)
         return
     else:
         if install_rdf.rdf is None:
