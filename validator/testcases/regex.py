@@ -1078,8 +1078,8 @@ class Gecko23RegexTests(CompatRegexTestHelper):
 
     VERSION = FX23_DEFINITION
 
-    LOAD_LINK = MDN_DOC % "/XUL/School_tutorial/Intercepting_Page_Loads"
-    USFUC_LINK = MDN_DOC % "/XPCOM_Interface_Reference/nsIAboutModule"
+    LOAD_LINK = MDN_DOC % "XUL/School_tutorial/Intercepting_Page_Loads"
+    USFUC_LINK = MDN_DOC % "XPCOM_Interface_Reference/nsIAboutModule"
 
     def js_tests(self):
 
@@ -1109,8 +1109,8 @@ class Gecko24RegexTests(CompatRegexTestHelper):
 
     VERSION = FX24_DEFINITION
 
-    DOM_LINK = MDN_DOC % "/Web/API/event.stopPropagation"
-    GPD_LINK = MDN_DOC % "/Web/API/event.defaultPrevented"
+    DOM_LINK = MDN_DOC % "Web/API/event.stopPropagation"
+    GPD_LINK = MDN_DOC % "Web/API/event.defaultPrevented"
 
     def js_tests(self):
 
@@ -1207,9 +1207,9 @@ class Gecko26RegexTests(CompatRegexTestHelper):
 
     VERSION = FX26_DEFINITION
 
-    DLM_LINK = MDN_DOC % "/Mozilla/JavaScript_code_modules/Downloads.jsm"
-    HME_LINK = MDN_DOC % "/XPCOM_Interface_Reference/nsISHEntry"
-    WH_LINK = MDN_DOC % "/Web/API/Window.history"
+    DLM_LINK = MDN_DOC % "Mozilla/JavaScript_code_modules/Downloads.jsm"
+    HME_LINK = MDN_DOC % "XPCOM_Interface_Reference/nsISHEntry"
+    WH_LINK = MDN_DOC % "Web/API/Window.history"
 
     def js_tests(self):
 
