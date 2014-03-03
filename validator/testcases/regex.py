@@ -9,7 +9,7 @@ from validator.compat import (FX4_DEFINITION, FX5_DEFINITION, FX6_DEFINITION,
                               FX17_DEFINITION, FX18_DEFINITION, FX19_DEFINITION,
                               FX20_DEFINITION, FX21_DEFINITION, FX22_DEFINITION,
                               FX23_DEFINITION, FX24_DEFINITION, FX25_DEFINITION,
-                              FX26_DEFINITION, FX27_DEFINITION,
+                              FX26_DEFINITION, FX27_DEFINITION, FX28_DEFINITION,
                               TB7_DEFINITION, TB10_DEFINITION, TB11_DEFINITION,
                               TB12_DEFINITION, TB13_DEFINITION, TB14_DEFINITION,
                               TB15_DEFINITION, TB16_DEFINITION, TB17_DEFINITION,
@@ -1283,6 +1283,23 @@ class Gecko27RegexTests(CompatRegexTestHelper):
             "should be able to use `#downloads-button` instead. See %s for "
             "more information." % BUGZILLA_BUG % self.BUG_ID,
             compat_type="error", log_function=self.err.warning)
+
+
+@register_generator
+class Gecko28RegexTests(CompatRegexTestHelper):
+    """Regex tests for Firefox 28 updates."""
+
+    VERSION = FX28_DEFINITION
+    BUG_ID = 867097
+
+    def js_tests(self):
+        yield self.get_test_bug(
+                self.BUG_ID, r"__SS_tabStillLoading",
+                "The `__SS_tabStillLoading` property was removed.",
+                "The `__SS_tabStillLoading` property was removed. You can "
+                "the existence of `__SS_data` instead. See %s for more "
+                "information." % BUGZILLA_BUG % self.BUG_ID,
+                compat_type="error", log_function=self.err.warning)
 
 
 #############################
