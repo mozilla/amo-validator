@@ -1297,7 +1297,7 @@ class Gecko28RegexTests(CompatRegexTestHelper):
                 self.BUG_ID, r"__SS_tabStillLoading",
                 "The `__SS_tabStillLoading` property was removed.",
                 "The `__SS_tabStillLoading` property was removed. You can "
-                "the existence of `__SS_data` instead. See %s for more "
+                "check the existence of `__SS_data` instead. See %s for more "
                 "information." % BUGZILLA_BUG % self.BUG_ID,
                 compat_type="error", log_function=self.err.warning)
 
