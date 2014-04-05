@@ -450,6 +450,16 @@ class MarkupParser(HTMLParser):
         if tag == "xul:script":
             tag = "script"
 
+        if tag == "script" and len(self.xml_buffer[-1]) > 1000:
+            self.err.warning(("markup", "complex_script"),
+                             "Long inline script",
+                             "Please store complex scripts in .js files "
+                             "rather than inline script nodes.",
+                             self.filename,
+                             line=self.line,
+                             context=self.context,
+                             tier=2)
+
         if DEBUG:  # pragma: no cover
             print "E: ", tag, self.xml_state
 

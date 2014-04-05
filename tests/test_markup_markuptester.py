@@ -350,6 +350,46 @@ def test_dom_mutation():
     """, "foo.xul", should_fail=True)
 
 
+def test_complex_script_detection():
+    """Test that complex inline scripts are warned against."""
+
+    blanks = "";
+
+    err = _test_xul_raw("""
+    <doc><script>
+    """ + blanks + """
+    </script></doc>
+    """, "foo.xul")
+
+    # short scripts are okay
+    eq_(len(err.warnings), 0)
+
+    err = _test_xul_raw("""
+    <doc><script src="chrome://namespace/absolute.js"></script></doc>
+    """, "foo.xul")
+
+    # referenced scripts are okay
+    eq_(len(err.warnings), 0)
+
+    blanks = """
+    """ * 1001;
+
+    err = _test_xul_raw("""
+    <doc><script>
+    """ + blanks + """
+    </script></doc>
+    """, "foo.xul")
+
+    # but long scripts are not
+    assert err.warnings
+    warning = err.warnings[0]
+    eq_(warning["file"], "foo.xul")
+    eq_(warning["id"], ("markup", "complex_script"))
+
+    # one and only one warning
+    eq_(len(err.warnings), 1)
+
+
 def test_proper_line_numbers():
     """Test that the proper line numbers are passed to test_js_snippet."""
 
