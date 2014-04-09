@@ -79,8 +79,15 @@ class RDFParser(object):
         if isinstance(data, types.StringTypes):
             data = StringIO(data)  # Wrap data in a pseudo-file
 
-        # Use an empty ContentHandler, we just want to make sure it parses.
-        parse(data, ContentHandler())
+        try:
+            # Use an empty ContentHandler, we just want to make sure it parses.
+            parse(data, ContentHandler())
+        except SAXParseException as ex:
+            # Raise the SAX parse exceptions so we get some line info.
+            raise RDFException(orig_exception=ex)
+        else:
+            # We consumed the file, start over from the beginning.
+            data.seek(0)
 
         from rdflib.plugins.parsers import rdfxml
         orig_create_parser = rdfxml.create_parser
