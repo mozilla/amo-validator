@@ -1,8 +1,10 @@
 import types
+
+from defusedxml.sax import parse
 from rdflib import Graph, URIRef
 from rdflib.exceptions import ParserError
 from StringIO import StringIO
-from xml.sax import SAXParseException
+from xml.sax import ContentHandler, SAXParseException
 
 
 class RDFException(Exception):
@@ -76,6 +78,9 @@ class RDFParser(object):
 
         if isinstance(data, types.StringTypes):
             data = StringIO(data)  # Wrap data in a pseudo-file
+
+        # Use an empty ContentHandler, we just want to make sure it parses.
+        parse(data, ContentHandler())
 
         from rdflib.plugins.parsers import rdfxml
         orig_create_parser = rdfxml.create_parser

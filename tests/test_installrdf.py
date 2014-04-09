@@ -1,9 +1,11 @@
+from defusedxml.common import DefusedXmlException
 from mock import patch
+from nose.tools import raises
 
 import validator.testcases.installrdf as installrdf
+from validator.constants import *
 from validator.errorbundler import ErrorBundle
 from validator.rdf import RDFParser
-from validator.constants import *
 
 
 def _test_value(value, test, failure=True):
@@ -295,3 +297,39 @@ def test_optionsType_fail():
 </RDF>
     """, failure=True)
 
+
+@raises(DefusedXmlException)
+def test_billion_laughs_fail():
+    """Test that the parsing fails for XML will a billion laughs attack."""
+    xml = """<?xml version="1.0"?>
+<!DOCTYPE lolz [
+ <!ENTITY lol "lol">
+ <!ELEMENT Description (#PCDATA)>
+ <!ENTITY lol1 "&lol;&lol;&lol;&lol;&lol;&lol;&lol;&lol;&lol;&lol;">
+ <!ENTITY lol2 "&lol1;&lol1;&lol1;&lol1;&lol1;&lol1;&lol1;&lol1;&lol1;&lol1;">
+ <!ENTITY lol3 "&lol2;&lol2;&lol2;&lol2;&lol2;&lol2;&lol2;&lol2;&lol2;&lol2;">
+ <!ENTITY lol4 "&lol3;&lol3;&lol3;&lol3;&lol3;&lol3;&lol3;&lol3;&lol3;&lol3;">
+ <!ENTITY lol5 "&lol4;&lol4;&lol4;&lol4;&lol4;&lol4;&lol4;&lol4;&lol4;&lol4;">
+ <!ENTITY lol6 "&lol5;&lol5;&lol5;&lol5;&lol5;&lol5;&lol5;&lol5;&lol5;&lol5;">
+ <!ENTITY lol7 "&lol6;&lol6;&lol6;&lol6;&lol6;&lol6;&lol6;&lol6;&lol6;&lol6;">
+ <!ENTITY lol8 "&lol7;&lol7;&lol7;&lol7;&lol7;&lol7;&lol7;&lol7;&lol7;&lol7;">
+ <!ENTITY lol9 "&lol8;&lol8;&lol8;&lol8;&lol8;&lol8;&lol8;&lol8;&lol8;&lol8;">
+]>
+<RDF xmlns="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+     xmlns:em="http://www.mozilla.org/2004/em-rdf#">
+    <Description about="urn:mozilla:install-manifest">
+        <em:id>&lol9;@basta.mozilla.com</em:id>
+        <em:version>1.2.3.4</em:version>
+        <em:name>foo bar</em:name>
+        <em:targetApplication>
+            <Description>
+                <em:id>{ec8030f7-c20a-464f-9b0e-13a3a9e97384}</em:id>
+                <em:minVersion>3.7a5pre</em:minVersion>
+                <em:maxVersion>0.3</em:maxVersion>
+            </Description>
+        </em:targetApplication>
+        <em:optionsType>2</em:optionsType>
+    </Description>
+</RDF>
+"""
+    RDFParser(ErrorBundle(), xml)

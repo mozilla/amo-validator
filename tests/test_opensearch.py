@@ -1,9 +1,12 @@
 from StringIO import StringIO
 
-from validator.opensearch import detect_opensearch
+import mock
+from defusedxml import DefusedXmlException
+
 import validator.submain as submain
-from validator.errorbundler import ErrorBundle
 from validator.constants import *
+from validator.errorbundler import ErrorBundle
+from validator.opensearch import detect_opensearch
 
 def _do_test(url, failure=True, listed=False):
     err = ErrorBundle()
@@ -141,3 +144,13 @@ def test_search_failure_undecided():
 
     assert err.failed()
 
+
+def test_search_security_error():
+    """Test that the DefusedXmlException is handled as a security error."""
+
+    err = ErrorBundle()
+    url = "tests/resources/searchprovider/lol.xml"
+    detect_opensearch(err, url, listed=False)
+
+    assert err.failed(), "Expected failure"
+    assert err.errors[0]['id'] == ('opensearch', 'security_error')
