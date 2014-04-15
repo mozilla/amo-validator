@@ -13,8 +13,8 @@ node
 import types
 
 import actions
-from validator.compat import FX10_DEFINITION, FX14_DEFINITION
-from validator.constants import BUGZILLA_BUG
+from validator.compat import FX10_DEFINITION, FX14_DEFINITION, FX29_DEFINITION
+from validator.constants import BUGZILLA_BUG, MDN_DOC
 from jstypes import *
 from instanceproperties import _set_HTML_property
 
@@ -257,6 +257,31 @@ def bind(args, traverser, node, wrapper):
         return obj
 
 
+def livemarkCallback(arguments, traverser, node, wrapper):
+    """
+    Handle calls to addLivemark, removeLivemark and getLivemark that pass
+    callbacks.
+    """
+    bug = BUGZILLA_BUG % 896193
+    mdn = MDN_DOC % "Mozilla/JavaScript_code_modules/Promise.jsm"
+    if len(arguments) > 1:
+        traverser.err.warning(
+            err_id=("js", "instanceactions", "livemark_callback"),
+            warning="Passing a callback to `addLivemark`, `removeLivemark` or "
+                    "`getLivemark` is deprecated.",
+            description="The asynchronous callbacks in these livemark "
+                        "functions are now deprecated. The functions now "
+                        "return promises that should be used instead. See {b} "
+                        "and {m} for more information.".format(b=bug, m=mdn),
+            compatibility_type='warning',
+            for_appversions=FX29_DEFINITION,
+            tier=3,
+            filename=traverser.filename,
+            line=traverser.line,
+            column=traverser.position,
+            context=traverser.context)
+
+
 INSTANCE_DEFINITIONS = {
     "addEventListener": addEventListener,
     "bind": bind,
@@ -272,4 +297,7 @@ INSTANCE_DEFINITIONS = {
     "QueryInterface": QueryInterface,
     "replaceWholeText": replaceWholeText,
     "setAttribute": setAttribute,
+    "addLivemark": livemarkCallback,
+    "removeLivemark": livemarkCallback,
+    "getLivemark": livemarkCallback,
 }

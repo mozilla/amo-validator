@@ -2,20 +2,17 @@ import re
 from functools import wraps
 
 from validator.constants import BUGZILLA_BUG, MDN_DOC
-from validator.compat import (FX4_DEFINITION, FX5_DEFINITION, FX6_DEFINITION,
-                              FX7_DEFINITION, FX8_DEFINITION, FX9_DEFINITION,
-                              FX11_DEFINITION, FX12_DEFINITION, FX13_DEFINITION,
-                              FX14_DEFINITION, FX15_DEFINITION, FX16_DEFINITION,
-                              FX17_DEFINITION, FX18_DEFINITION, FX19_DEFINITION,
-                              FX20_DEFINITION, FX21_DEFINITION, FX22_DEFINITION,
-                              FX23_DEFINITION, FX24_DEFINITION, FX25_DEFINITION,
-                              FX26_DEFINITION, FX27_DEFINITION, FX28_DEFINITION,
-                              TB7_DEFINITION, TB10_DEFINITION, TB11_DEFINITION,
-                              TB12_DEFINITION, TB13_DEFINITION, TB14_DEFINITION,
-                              TB15_DEFINITION, TB16_DEFINITION, TB17_DEFINITION,
-                              TB18_DEFINITION, TB19_DEFINITION, TB20_DEFINITION,
-                              TB21_DEFINITION, TB22_DEFINITION, TB23_DEFINITION,
-                              TB24_DEFINITION)
+from validator.compat import (
+    FX4_DEFINITION, FX5_DEFINITION, FX6_DEFINITION, FX7_DEFINITION,
+    FX8_DEFINITION, FX9_DEFINITION, FX11_DEFINITION, FX12_DEFINITION,
+    FX13_DEFINITION, FX14_DEFINITION, FX15_DEFINITION, FX16_DEFINITION,
+    FX17_DEFINITION, FX18_DEFINITION, FX19_DEFINITION, FX20_DEFINITION,
+    FX21_DEFINITION, FX22_DEFINITION, FX23_DEFINITION, FX24_DEFINITION,
+    FX25_DEFINITION, FX26_DEFINITION, FX27_DEFINITION, FX28_DEFINITION,
+    TB7_DEFINITION, TB10_DEFINITION, TB11_DEFINITION, TB12_DEFINITION,
+    TB13_DEFINITION, TB14_DEFINITION, TB15_DEFINITION, TB16_DEFINITION,
+    TB17_DEFINITION, TB18_DEFINITION, TB19_DEFINITION, TB20_DEFINITION,
+    TB21_DEFINITION, TB22_DEFINITION, TB23_DEFINITION, TB24_DEFINITION)
 from validator.contextgenerator import ContextGenerator
 from markup.csstester import UNPREFIXED_MESSAGE
 
@@ -1294,12 +1291,12 @@ class Gecko28RegexTests(CompatRegexTestHelper):
 
     def js_tests(self):
         yield self.get_test_bug(
-                self.BUG_ID, r"__SS_tabStillLoading",
-                "The `__SS_tabStillLoading` property was removed.",
-                "The `__SS_tabStillLoading` property was removed. You can "
-                "check the existence of `__SS_data` instead. See %s for more "
-                "information." % BUGZILLA_BUG % self.BUG_ID,
-                compat_type="error", log_function=self.err.warning)
+            self.BUG_ID, r"__SS_tabStillLoading",
+            "The `__SS_tabStillLoading` property was removed.",
+            "The `__SS_tabStillLoading` property was removed. You can "
+            "check the existence of `__SS_data` instead. See %s for more "
+            "information." % BUGZILLA_BUG % self.BUG_ID,
+            compat_type="error", log_function=self.err.warning)
 
 
 #############################
