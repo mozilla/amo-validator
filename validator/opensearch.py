@@ -1,5 +1,8 @@
+from xml.parsers.expat import ExpatError
+
 from defusedxml.minidom import parse
 from defusedxml.common import DefusedXmlException
+
 from validator.constants import *
 
 
@@ -18,7 +21,7 @@ def detect_opensearch(err, package, listed=False):
                         "a security error in the XML. See {url} for more "
                         "info.".format(url=url))
         return err
-    except Exception:
+    except ExpatError:
         err.error(
             err_id=("opensearch", "parse_error"),
             error="OpenSearch: XML Parse Error",

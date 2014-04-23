@@ -39,7 +39,7 @@ def test_nonparsing_xml():
     """Tests that a failure is generated for bad XML on OpenSearch"""
 
     err = ErrorBundle()
-    detect_opensearch(err, "foo/bar/_asdf")
+    detect_opensearch(err, "tests/resources/searchprovider/bad_xml.xml")
     assert err.failed()
 
 def test_broken_updateURL():
