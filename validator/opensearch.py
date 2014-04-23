@@ -16,7 +16,7 @@ def detect_opensearch(err, package, listed=False):
             srch_prov = parse(package)
         else:
             # It's not a file object; open it (the XML parser is bad at this).
-            with open(package, 'r') as package_file:
+            with open(package, 'rb') as package_file:
                 srch_prov = parse(package_file)
     except DefusedXmlException:
         url = "https://pypi.python.org/pypi/defusedxml/0.3#attack-vectors"
