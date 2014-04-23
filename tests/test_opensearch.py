@@ -154,3 +154,11 @@ def test_search_security_error():
 
     assert err.failed(), "Expected failure"
     assert err.errors[0]['id'] == ('opensearch', 'security_error')
+
+
+def test_treat_unicode_paths_as_files():
+    """Test that unicode filepaths are treated as filepaths"""
+
+    err = ErrorBundle()
+    detect_opensearch(err, u"tests/resources/searchprovider/pass.xml")
+    assert not err.failed()
