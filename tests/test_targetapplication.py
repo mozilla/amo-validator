@@ -1,6 +1,6 @@
 import json
+from mock import patch
 import validator.testcases.targetapplication as targetapp
-from validator.constants import *
 from validator.errorbundler import ErrorBundle
 from validator.rdf import RDFParser
 from helper import _do_test
@@ -220,6 +220,62 @@ def test_no_supported_mozilla_apps():
 
     assert _do_test_raw(failure_case).failed()
     assert not _do_test_raw(failure_case, listed=False).failed()
+
+
+MISSING_ANDROID_APPROVED_APPLICATIONS = {
+    "1": {
+        "name": "Firefox",
+        "guid": "{ec8030f7-c20a-464f-9b0e-13a3a9e97384}",
+        "versions": ["0.3", "29.*"]
+    }
+}
+
+
+@patch.dict("validator.constants.APPROVED_APPLICATIONS",
+            values=MISSING_ANDROID_APPROVED_APPLICATIONS,
+            clear=True)
+def test_unsupported_mozilla_app_in_approved_apps():
+    """
+    Test that non approved applications are not validated.
+
+    We submit an add-on which has *only* one targetApplication,
+    which targetApplication is a valid Mozilla app but it's missing
+    from the approved applications.
+    """
+
+    failure_case = """
+    <?xml version="1.0"?>
+    <RDF xmlns="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+         xmlns:em="http://www.mozilla.org/2004/em-rdf#">
+
+        <Description about="urn:mozilla:install-manifest">
+            <em:id>testandroidapp@mozillapps.com</em:id>
+            <em:type>2</em:type>
+            <em:name>Test Android App</em:name>
+            <em:version>0.2</em:version>
+            <em:bootstrap>true</em:bootstrap>
+            <em:description>App for testing that it will be rejected when
+            "android" is missing from the approved apps.</em:description>
+            <em:creator>Mister Myster</em:creator>
+
+            <!-- Android -->
+            <em:targetApplication>
+                <Description>
+                    <em:id>{aa3c5121-dab2-40e2-81ca-7ea25febc110}</em:id>
+                    <em:minVersion>30.0a1</em:minVersion>
+                    <em:maxVersion>32.0</em:maxVersion>
+                </Description>
+            </em:targetApplication>
+
+        </Description>
+    </RDF>
+    """
+
+    err = _do_test_raw(failure_case)
+    assert err.failed()
+    assert err.errors[0]['id'] == ('testcases_targetapplication',
+                                   'test_targetedapplication',
+                                   'no_mozilla_support')
 
 
 def test_overrides():
