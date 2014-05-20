@@ -1,6 +1,6 @@
 import validator.constants
 from validator import decorator
-from validator.constants import PACKAGE_DICTIONARY, FF4_MIN, APPLICATIONS
+from validator.constants import FF4_MIN, APPLICATIONS
 
 APP_VERSIONS_URL = "Please check the list of valid versions at: "\
         "https://addons.mozilla.org/en-US/firefox/pages/appversions/"
@@ -19,6 +19,11 @@ def test_targetedapplications(err, xpi_package=None):
         return
 
     APPROVED_APPLICATIONS = validator.constants.APPROVED_APPLICATIONS
+    # Compute APPROVED_IDS dynamically here because APPROVED_APPLICATIONS
+    # is a changing constant (updated on the fly on validate.validate).
+    APPROVED_IDS = dict((x["guid"], y) for (y, x)
+                        in APPROVED_APPLICATIONS.items()
+                        if x['guid'] in APPLICATIONS)
 
     # Search through the install.rdf document for the SeaMonkey
     # GUID string.
@@ -39,14 +44,9 @@ def test_targetedapplications(err, xpi_package=None):
 
             used_targets.append(ta_guid)
 
-            found_guid = False
-            for (guid, key) in [(x["guid"], y) for (y, x) in
-                                    APPROVED_APPLICATIONS.items()]:
-                if guid == ta_guid:
-                    found_guid = key
-                    break
+            found_id = APPROVED_IDS.get(ta_guid)
 
-            if found_guid:
+            if found_id:
                 # Remember if the addon supports Firefox.
                 is_firefox = APPLICATIONS[ta_guid] == "firefox"
 
@@ -68,7 +68,7 @@ def test_targetedapplications(err, xpi_package=None):
                     max_version = install.get_object(target_app, ta_max_ver)
 
                 # Get the approved app versions for this application.
-                app_versions = APPROVED_APPLICATIONS[found_guid]["versions"]
+                app_versions = APPROVED_APPLICATIONS[found_id]["versions"]
 
                 # Ensure that the version numbers are in the app's
                 # list of acceptable version numbers.
@@ -150,7 +150,7 @@ def test_targetedapplications(err, xpi_package=None):
                                 filename="install.rdf")
                     continue
 
-                all_supported_versions[guid] = \
+                all_supported_versions[ta_guid] = \
                     app_versions[min_ver_pos:max_ver_pos + 1]
 
                 # Test whether it's a FF4 addon
@@ -179,11 +179,9 @@ def test_targetedapplications(err, xpi_package=None):
 
     # This finds the UUID of the supported applications and puts it in
     # a fun and easy-to-use format for use in other tests.
-    supports = []
-    for target in no_duplicate_targets:
-        key = str(target)
-        if key in APPLICATIONS:
-            supports.append(APPLICATIONS[key])
+    final_guids = map(str, no_duplicate_targets)
+    approved_guids = list(set(final_guids).intersection(APPROVED_IDS.keys()))
+    supports = [APPLICATIONS[k] for k in approved_guids]
     err.save_resource("supports", supports)
 
     if not err.supported_versions:  # if not set for compatibility
@@ -204,5 +202,3 @@ def test_targetedapplications(err, xpi_package=None):
                          " for more information on supported target "
                          "applications on AMO."],
             filename="install.rdf")
-
-
