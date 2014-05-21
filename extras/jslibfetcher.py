@@ -22,20 +22,11 @@ def get_pattern(prefix, url_pattern, versions):
 
 
 process("https://addons.cdn.mozilla.net/en-US/firefox/files/browse/149703/"
-        "file-serve/bootstrap.js?token=e9d0767e-643c-48ad-b09e-fc075ca60b77",
+        "file-serve/bootstrap.js?token=f885db28-1ec2-419d-8b35-72300523befb",
         "PersonasInteractive_bootstrap.js")
-
-process("https://raw.github.com/voldsoftware/toolbarbutton-jplib/stable/lib/"
-        "toolbarbutton.js", "toolbarbutton.js")
 
 
 DOJO_VERSIONS = [
-    "1.1.1",
-    "1.2.0",
-    "1.2.3",
-    "1.3.0",
-    "1.3.1",
-    "1.3.2",
     "1.4.0",
     "1.4.1",
     "1.4.3",
@@ -48,13 +39,23 @@ DOJO_VERSIONS = [
     "1.7.2",
     "1.7.3",
     "1.8.0",
+    "1.8.1",
+    "1.8.2",
+    "1.8.3",
+    "1.8.4",
+    "1.8.5",
+    "1.8.6",
+    "1.9.0",
+    "1.9.1",
+    "1.9.2",
+    "1.9.3",
 ]
 # Google doesn't yet host EXT4.*
 EXT_VERSIONS = [
     "3.0.0",
     "3.1.0",
 ]
-JQUERY_CODE_VERSIONS = [
+JQUERY_VERSIONS = [
     "1.0.1",
     "1.0.2",
     "1.0.3",
@@ -62,70 +63,42 @@ JQUERY_CODE_VERSIONS = [
     "1.1",
     "1.1.1",
     "1.1.2",
-    "1.4.min",
     "1.4",
-    "1.4.1.min",
     "1.4.1",
-    "1.4.2.min",
     "1.4.2",
-    "1.4.3.min",
     "1.4.4",
-    "1.5.min",
     "1.5",
-    "1.5.1.min",
     "1.5.1",
-    "1.5.2.min",
     "1.5.2",
-    "1.6.min",
     "1.6",
-    "1.6.1.min",
     "1.6.1",
-    "1.6.2.min",
     "1.6.2",
-    "1.6.3.min",
     "1.6.3",
-    "1.6.4.min",
     "1.6.4",
-    "1.7.min",
     "1.7",
-    "1.7.1.min",
     "1.7.1",
-    "1.7.2.min",
     "1.7.2",
-    "1.8.0.min",
     "1.8.0",
-    "1.8.1.min",
     "1.8.1",
-    "1.8.2.min",
     "1.8.2",
-    "1.8.3.min",
     "1.8.3",
-    "1.9.0.min",
     "1.9.0",
-    "1.9.1.min",
     "1.9.1",
-    "2.0.0.min",
     "2.0.0",
-    "2.0.1.min",
     "2.0.1",
     "2.0.2",
-    "2.0.2.min",
     "2.0.3",
-    "2.0.3.min",
     "1.10.0",
-    "1.10.0.min",
     "1.10.1",
-    "1.10.1.min",
     "1.10.2",
-    "1.10.2.min",
     "2.0.0",
     "2.0.1",
     "2.0.2",
     "2.0.3",
     "1.11.0",
-    "1.11.0.min",
     "2.1.0",
-    "2.1.0.min",
+    "1.11.1",
+    "2.1.1",
 ]
 JQUERYUI_VERSIONS = [
     "1.5.2",
@@ -185,6 +158,7 @@ MOOTOOLS_VERSIONS = [
     "1.4.3",
     "1.4.4",
     "1.4.5",
+    "1.5.0",
 ]
 PROTOTYPE_VERSIONS = [
     "1.6.0.2",
@@ -192,6 +166,7 @@ PROTOTYPE_VERSIONS = [
     "1.6.1.0",
     "1.7.0.0",
     "1.7.1.0",
+    "1.7.2.0",
 ]
 SCRIPTACULOUS_VERSIONS = [
     "1.8.1",
@@ -203,6 +178,7 @@ SWFOBJECT_VERSIONS = [
     "2.1", "2.2",
 ]
 UNDERSCORE_VERSIONS = [
+    "1.6.0",
     "1.5.2",
     "1.5.1",
     "1.5.0",
@@ -252,33 +228,13 @@ YUI_NEW_VERSIONS = [
 ]
 
 
-get_pattern("dojo", "https://ajax.googleapis.com/ajax/libs/dojo/%s/dojo/dojo.xd.js",
+# Dojo Toolkit
+get_pattern("dojo",
+            "http://download.dojotoolkit.org/release-%s/dojo.js",
             DOJO_VERSIONS)
 get_pattern("dojo",
-            "https://ajax.googleapis.com/ajax/libs/dojo/%s/dojo/dojo.xd.js.uncompressed.js",
+            "http://download.dojotoolkit.org/release-%s/dojo.js.uncompressed.js",
             DOJO_VERSIONS)
-DOJO_V = lambda v:"http://download.dojotoolkit.org/" \
-                  "release-%s/dojo-release-%s/release/dojo-release-%s/" \
-                  "dojo/%%s" % (v, v, v)
-urllib.urlretrieve(DOJO_V("1.0.3") % "dojo.js",
-                   "jslibs/dojo.1.0.3.js")
-urllib.urlretrieve(DOJO_V("1.0.3") % "dojo.js.uncompressed.js",
-                   "jslibs/dojo.uncompressed.1.0.3.js")
-
-urllib.urlretrieve(DOJO_V("1.1.2") % "dojo.js",
-                   "jslibs/dojo.1.1.2.js")
-urllib.urlretrieve(DOJO_V("1.1.2") % "dojo.js.uncompressed.js",
-                   "jslibs/dojo.uncompressed.1.1.2.js")
-
-urllib.urlretrieve(DOJO_V("1.2.4") % "dojo.js",
-                   "jslibs/dojo.1.2.4.js")
-urllib.urlretrieve(DOJO_V("1.2.4") % "dojo.js.uncompressed.js",
-                   "jslibs/dojo.uncompressed.1.2.4.js")
-
-urllib.urlretrieve(DOJO_V("1.3.3") % "dojo.js",
-                   "jslibs/dojo.1.3.3.js")
-urllib.urlretrieve(DOJO_V("1.3.3") % "dojo.js.uncompressed.js",
-                   "jslibs/dojo.uncompressed.1.3.3.js")
 
 # EXT.js
 get_pattern("ext-core",
@@ -291,10 +247,10 @@ get_pattern("ext-debug",
 # jQuery
 get_pattern("jquery",
             "http://code.jquery.com/jquery-%s.js",
-            JQUERY_CODE_VERSIONS)
-# get_pattern("jquery",
-#             "http://jqueryjs.googlecode.com/files/jquery-%s.js",
-#             JQUERY_GCODE_VERSIONS)
+            JQUERY_VERSIONS)
+get_pattern("jquery",
+            "http://code.jquery.com/jquery-%s.min.js",
+            JQUERY_VERSIONS)
 
 # jQueryUI
 get_pattern("jqueryui",
