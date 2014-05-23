@@ -877,7 +877,23 @@ def js_wrap(wrapper, arguments, traverser):
         traverser._debug("WRAPPING OBJECT>>NOTHING TO WRAP")
         return JSWrapper(JSObject(), traverser=traverser)
 
+    if len(arguments) > 1:
+        traverser.err.warning(
+            err_id=("testcases_js_xpcom", "xpcnativewrapper", "shallow"),
+            warning="Shallow XPCOM wrappers should not be used",
+            description="Shallow XPCOM wrappers are seldom necessary and "
+                        "should not be used. Please use deep wrappers "
+                        "instead.",
+            filename=traverser.filename,
+            line=traverser.line,
+            column=traverser.position,
+            context=traverser.context)
+        # Do not mark shallow wrappers as not unwrapped.
+        return obj;
+
     if obj.is_global:
+        # Why are we changing the original object? XPCNativeWrapper
+        # does not alter its arguments.
         obj.value["is_unwrapped"] = False
     else:
         obj.value.is_unwrapped = False
