@@ -80,6 +80,15 @@ class TestWrappedJSObject(TestCase):
         """)
         self.assert_silent()
 
+    def test_re_shallow_wrapping(self):
+        """Test that objects cannot be unwrapped and then shallow rewrapped."""
+        self.run_script("""
+            var x = XPCNativeWrapper.unwrap(foo);
+            x = XPCNativeWrapper(x, "foo");
+            x.foo.bar.zap = "asdf";
+        """)
+        self.assert_wrappedjs_failure()
+
     def test_rewrapping_from_wrappedjsobject(self):
         """
         Test that objects can be unwrapped and then rewrapped via the
@@ -102,10 +111,17 @@ class TestWrappedJSObject(TestCase):
 
     def test_unsafeWindow_write_banned(self):
         """
-        Test that writes tothe unsafeWindow property is marked as dangerous.
+        Test that writes to the unsafeWindow property is marked as dangerous.
         """
         self.run_script("""
         unsafeWindow.foo.bar = "test";
         """)
         self.assert_failed(with_warnings=True)
 
+    def test_shallow_wrapper_warning(self):
+        """Tests that uses of shallow wrappers are flagged."""
+        self.run_script("""
+            XPCNativeWrapper(unsafeWindow, "foo");
+        """)
+        self.assert_got_errid(("testcases_js_xpcom", "xpcnativewrapper",
+                               "shallow"))
