@@ -273,7 +273,7 @@ def livemarkCallback(arguments, traverser, node, wrapper):
                         "functions are now deprecated. The functions now "
                         "return promises that should be used instead. See {b} "
                         "and {m} for more information.".format(b=bug, m=mdn),
-            compatibility_type='warning',
+            compatibility_type='error',
             for_appversions=FX29_DEFINITION,
             tier=3,
             filename=traverser.filename,
