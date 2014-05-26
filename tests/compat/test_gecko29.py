@@ -11,13 +11,13 @@ class TestFX29Compat(CompatTestCase):
         self.run_script_for_compat(
             'PlacesUtils.livemarks.addLivemark("foo", bar);')
         self.assert_silent()
-        self.assert_compat_error()
+        self.assert_compat_warning("warning")
 
     def test_callback_warning_remove(self):
         self.run_script_for_compat(
             'PlacesUtils.livemarks.removeLivemark("foo", bar);')
         self.assert_silent()
-        self.assert_compat_error()
+        self.assert_compat_warning("warning")
 
     def test_callback_warning_get(self):
         self.run_script_for_compat('''
@@ -26,7 +26,7 @@ class TestFX29Compat(CompatTestCase):
             });
         ''')
         self.assert_silent()
-        self.assert_compat_error()
+        self.assert_compat_warning("warning")
 
     def test_no_callback_no_warning_add(self):
         self.run_script_for_compat(
