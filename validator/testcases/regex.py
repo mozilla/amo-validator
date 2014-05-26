@@ -9,6 +9,7 @@ from validator.compat import (
     FX17_DEFINITION, FX18_DEFINITION, FX19_DEFINITION, FX20_DEFINITION,
     FX21_DEFINITION, FX22_DEFINITION, FX23_DEFINITION, FX24_DEFINITION,
     FX25_DEFINITION, FX26_DEFINITION, FX27_DEFINITION, FX28_DEFINITION,
+    FX30_DEFINITION,
     TB7_DEFINITION, TB10_DEFINITION, TB11_DEFINITION, TB12_DEFINITION,
     TB13_DEFINITION, TB14_DEFINITION, TB15_DEFINITION, TB16_DEFINITION,
     TB17_DEFINITION, TB18_DEFINITION, TB19_DEFINITION, TB20_DEFINITION,
@@ -1297,6 +1298,38 @@ class Gecko28RegexTests(CompatRegexTestHelper):
             "check the existence of `__SS_data` instead. See %s for more "
             "information." % BUGZILLA_BUG % self.BUG_ID,
             compat_type="error", log_function=self.err.warning)
+
+
+@register_generator
+class Gecko30RegexTests(CompatRegexTestHelper):
+    """Regex tests for Gecko 30 updates."""
+
+    VERSION = FX30_DEFINITION
+    BUG_ID = 952307
+
+    def js_tests(self):
+        filenames = [
+            "AddonRepository.jsm",
+            "LightweightThemeImageOptimizer.jsm",
+            "XPIProvider.jsm",
+            "AddonUpdateChecker.jsm",
+            "AddonLogging.jsm",
+            "PluginProvider.jsm",
+            "AddonRepository_SQLiteMigrator.jsm",
+            "XPIProviderUtils.js",
+            "SpellCheckDictionaryBootstrap.js",
+        ]
+
+        for filename in filenames:
+            yield self.get_test_bug(
+                self.BUG_ID,
+                "resource://gre/modules/{name}".format(name=filename),
+                "Some JS modules were moved to a different location.",
+                "These JS modules were moved to a different location. You "
+                "need to change their import path to this: "
+                "resource://gre/modules/addons/{name}"
+                .format(name=filename),
+                compat_type="error", log_function=self.err.warning)
 
 
 #############################
