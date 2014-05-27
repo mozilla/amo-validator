@@ -1,7 +1,8 @@
 import re
 import types
 
-from validator.compat import FX10_DEFINITION, FX13_DEFINITION, FX18_DEFINITION
+from validator.compat import (FX10_DEFINITION, FX13_DEFINITION,
+                              FX18_DEFINITION, FX30_DEFINITION)
 from validator.constants import BUGZILLA_BUG, EVENT_ASSIGNMENT
 import jstypes
 
@@ -177,17 +178,36 @@ def _get_xml(name):
     return {"get": wrapper}
 
 
-OBJECT_DEFINITIONS = {"_endMarker": {"get": startendMarker,
-                                     "set": startendMarker},
-                      "_startMarker": {"get": startendMarker,
-                                       "set": startendMarker},
-                      "innerHTML": {"set": set_innerHTML},
-                      "outerHTML": {"set": set_outerHTML},
-                      "isElementContentWhitespace":
-                          {"get": get_isElementContentWhitespace},
-                      "xmlEncoding": _get_xml("xmlEncoding"),
-                      "xmlStandalone": _get_xml("xmlStandalone"),
-                      "xmlVersion": _get_xml("xmlVersion"),}
+def set__proto__(new_value, traverser):
+    traverser.err.warning(
+        err_id=("testcases_javascript_instanceproperties", "__proto__"),
+        warning="Using __proto__ or setPrototypeOf to set a prototype is now "
+                "deprecated.",
+        description="Using __proto__ or setPrototypeOf to set a prototype is "
+                    "now deprecated. You should use Object.create instead. "
+                    "See bug %s for more information." % BUGZILLA_BUG % 948227,
+        filename=traverser.filename,
+        line=traverser.line,
+        column=traverser.position,
+        context=traverser.context,
+        for_appversions=FX30_DEFINITION,
+        compatibility_type="warning",
+        tier=5)
+
+
+OBJECT_DEFINITIONS = {
+    "_endMarker": {"get": startendMarker,
+                   "set": startendMarker},
+    "_startMarker": {"get": startendMarker,
+                     "set": startendMarker},
+    "innerHTML": {"set": set_innerHTML},
+    "outerHTML": {"set": set_outerHTML},
+    "isElementContentWhitespace": {"get": get_isElementContentWhitespace},
+    "xmlEncoding": _get_xml("xmlEncoding"),
+    "xmlStandalone": _get_xml("xmlStandalone"),
+    "xmlVersion": _get_xml("xmlVersion"),
+    "__proto__": {"set": set__proto__},
+}
 
 
 def get_operation(mode, property):

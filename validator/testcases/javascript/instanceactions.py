@@ -13,7 +13,8 @@ node
 import types
 
 import actions
-from validator.compat import FX10_DEFINITION, FX14_DEFINITION, FX29_DEFINITION
+from validator.compat import (FX10_DEFINITION, FX14_DEFINITION,
+                              FX29_DEFINITION, FX30_DEFINITION)
 from validator.constants import BUGZILLA_BUG, MDN_DOC
 from jstypes import *
 from instanceproperties import _set_HTML_property
@@ -282,6 +283,23 @@ def livemarkCallback(arguments, traverser, node, wrapper):
             context=traverser.context)
 
 
+def setPrototypeOfCallback(arguments, traverser, node, wrapper):
+    traverser.err.warning(
+        err_id=("testcases_javascript_instanceproperties", "setPrototypeOf"),
+        warning="Using __proto__ or setPrototypeOf to set a prototype is now "
+                "deprecated.",
+        description="Using __proto__ or setPrototypeOf to set a prototype is "
+                    "now deprecated. You should use Object.create instead. "
+                    "See bug %s for more information." % BUGZILLA_BUG % 948227,
+        filename=traverser.filename,
+        line=traverser.line,
+        column=traverser.position,
+        context=traverser.context,
+        for_appversions=FX30_DEFINITION,
+        compatibility_type="warning",
+        tier=5)
+
+
 INSTANCE_DEFINITIONS = {
     "addEventListener": addEventListener,
     "bind": bind,
@@ -300,4 +318,5 @@ INSTANCE_DEFINITIONS = {
     "addLivemark": livemarkCallback,
     "removeLivemark": livemarkCallback,
     "getLivemark": livemarkCallback,
+    "setPrototypeOf": setPrototypeOfCallback,
 }
