@@ -1,5 +1,4 @@
 import validator.testcases.chromemanifest
-import validator.testcases.conduit
 import validator.testcases.content
 import validator.testcases.installrdf
 import validator.testcases.jetpack
