@@ -50,3 +50,10 @@ class TestFX30Compat(CompatTestCase):
         Object.create({});""")
         self.assert_silent()
         self.assert_compat_silent()
+
+    def test_DOM_VK_ENTER_usage(self):
+        self.run_script_for_compat("""
+        var foo = KeyboardEvent.DOM_VK_ENTER;
+        """)
+        self.assert_silent()
+        self.assert_compat_warning(type_="warning")

@@ -284,17 +284,13 @@ def livemarkCallback(arguments, traverser, node, wrapper):
 
 
 def setPrototypeOfCallback(arguments, traverser, node, wrapper):
-    traverser.err.warning(
+    traverser.warning(
         err_id=("testcases_javascript_instanceproperties", "setPrototypeOf"),
         warning="Using __proto__ or setPrototypeOf to set a prototype is now "
                 "deprecated.",
         description="Using __proto__ or setPrototypeOf to set a prototype is "
                     "now deprecated. You should use Object.create instead. "
                     "See bug %s for more information." % BUGZILLA_BUG % 948227,
-        filename=traverser.filename,
-        line=traverser.line,
-        column=traverser.position,
-        context=traverser.context,
         for_appversions=FX30_DEFINITION,
         compatibility_type="warning",
         tier=5)
