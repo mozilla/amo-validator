@@ -27,3 +27,26 @@ class TestFX30Compat(CompatTestCase):
         yield test_pattern, self, "resource://gre/modules/XPIProviderUtils.js"
         yield (test_pattern, self,
                "resource://gre/modules/SpellCheckDictionaryBootstrap.js")
+
+    def test_setting__proto__(self):
+        self.run_script_for_compat("var myObj = {}; myObj.__proto__ = {};")
+        self.assert_silent()
+        self.assert_compat_warning(type_="warning")
+
+    def test_reading__proto__(self):
+        self.run_script_for_compat("console.log(myObj.__proto__.foo);")
+        self.assert_silent()
+        self.assert_compat_silent()
+
+    def test_setPrototypeOf_usage(self):
+        self.run_script_for_compat("Object.setPrototypeOf(myObj, {});")
+        self.assert_silent()
+        self.assert_compat_warning(type_="warning")
+
+    def test_object_create_okay(self):
+        self.run_script_for_compat("""
+        // Use this instead of obj.__proto__ = {} or
+        // Object.setPrototypeOf(foo, bar).
+        Object.create({});""")
+        self.assert_silent()
+        self.assert_compat_silent()
