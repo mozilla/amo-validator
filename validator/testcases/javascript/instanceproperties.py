@@ -179,17 +179,26 @@ def _get_xml(name):
 
 
 def set__proto__(new_value, traverser):
-    traverser.err.warning(
+    traverser.warning(
         err_id=("testcases_javascript_instanceproperties", "__proto__"),
         warning="Using __proto__ or setPrototypeOf to set a prototype is now "
                 "deprecated.",
         description="Using __proto__ or setPrototypeOf to set a prototype is "
                     "now deprecated. You should use Object.create instead. "
                     "See bug %s for more information." % BUGZILLA_BUG % 948227,
-        filename=traverser.filename,
-        line=traverser.line,
-        column=traverser.position,
-        context=traverser.context,
+        for_appversions=FX30_DEFINITION,
+        compatibility_type="warning",
+        tier=5)
+
+
+def get_DOM_VK_ENTER(traverser):
+    traverser.warning(
+        err_id=("testcases_javascript_instanceproperties", "__proto__"),
+        warning="DOM_VK_ENTER has been removed.",
+        description="DOM_VK_ENTER has been removed. Removing it from your "
+                    "code shouldn't have any impact since it was never "
+                    "triggered in Firefox anyway. See bug %s for more "
+                    "information." % BUGZILLA_BUG % 969247,
         for_appversions=FX30_DEFINITION,
         compatibility_type="warning",
         tier=5)
@@ -207,6 +216,7 @@ OBJECT_DEFINITIONS = {
     "xmlStandalone": _get_xml("xmlStandalone"),
     "xmlVersion": _get_xml("xmlVersion"),
     "__proto__": {"set": set__proto__},
+    "DOM_VK_ENTER": {"get": get_DOM_VK_ENTER},
 }
 
 
