@@ -743,6 +743,9 @@ GLOBAL_ENTITIES = {
     u"gPropertiesButton": entity("gPropertiesButton"),
     u"gComposeButton": entity("gComposeButton"),
     u"onAbSearchReset": entity("onAbSearchReset"),
+    u"startDebugger": entity("startDebugger"),
+    u"stopDebugger": entity("stopDebugger"),
+    u"onRecipientsInput": entity("onRecipientsInput"),
 }
 
 CONTENT_DOCUMENT = GLOBAL_ENTITIES[u"content"]["value"][u"document"]

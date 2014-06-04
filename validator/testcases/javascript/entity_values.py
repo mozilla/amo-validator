@@ -7,7 +7,7 @@ from validator.compat import (FX10_DEFINITION, FX14_DEFINITION,
                               TB19_DEFINITION, TB20_DEFINITION,
                               TB21_DEFINITION, TB22_DEFINITION,
                               TB24_DEFINITION, TB25_DEFINITION,
-                              TB26_DEFINITION)
+                              TB26_DEFINITION, TB27_DEFINITION)
 from validator.constants import BUGZILLA_BUG
 
 
@@ -610,3 +610,9 @@ deprecated_entity(name="gComposeButton", version=TB26_DEFINITION,
                   message="The global object `gComposeButton` has been removed.", bug=749564)
 deprecated_entity(name="onAbSearchReset", version=TB26_DEFINITION,
                   message="The global object `onAbSearchReset` has been removed.", bug=749564)
+
+# Thunderbird 27 JS globals changes
+deprecated_entity(name="startDebugger", version=TB27_DEFINITION,
+                  message="The global object `startDebugger` has been removed.", bug=884805)
+deprecated_entity(name="stopDebugger", version=TB27_DEFINITION,
+                  message="The global object `stopDebugger` has been removed.", bug=884805)

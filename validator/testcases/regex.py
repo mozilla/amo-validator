@@ -14,7 +14,7 @@ from validator.compat import (
     TB13_DEFINITION, TB14_DEFINITION, TB15_DEFINITION, TB16_DEFINITION,
     TB17_DEFINITION, TB18_DEFINITION, TB19_DEFINITION, TB20_DEFINITION,
     TB21_DEFINITION, TB22_DEFINITION, TB23_DEFINITION, TB24_DEFINITION,
-    TB25_DEFINITION, TB26_DEFINITION)
+    TB25_DEFINITION, TB26_DEFINITION, TB27_DEFINITION)
 from validator.contextgenerator import ContextGenerator
 from markup.csstester import UNPREFIXED_MESSAGE
 
@@ -2234,4 +2234,25 @@ class Thunderbird26RegexTests(CompatRegexTestHelper):
                     "Removed property in use.",
                     "Some string matched the pattern `%s`, which has been "
                     "flagged as having been removed in Thunderbird 26." % pattern,
+                    compat_type="error")
+
+@register_generator
+class Thunderbird27RegexTests(CompatRegexTestHelper):
+
+    VERSION = TB27_DEFINITION
+
+    def tests(self):
+        """String changes for Thunderbird 27 update."""
+        patterns = {r"folderCharsetTab\.label": 916823,
+                    r"folderCharsetTab\.accesskey": 916823,
+                    r"folderCharsetOverride\.label": 916823,
+                    r"folderCharsetOverride\.accesskey": 916823,
+                    r"appmenuQFBMenu\.label": 928670,}
+
+        for pattern, bug in patterns.iteritems():
+            yield self.get_test_bug(
+                    bug, pattern,
+                    "Removed labels in use.",
+                    "Some string matched the pattern `%s`, which has been "
+                    "flagged as having been removed in Thunderbird 27." % pattern,
                     compat_type="error")
