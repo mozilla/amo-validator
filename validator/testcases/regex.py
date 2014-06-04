@@ -13,7 +13,8 @@ from validator.compat import (
     TB7_DEFINITION, TB10_DEFINITION, TB11_DEFINITION, TB12_DEFINITION,
     TB13_DEFINITION, TB14_DEFINITION, TB15_DEFINITION, TB16_DEFINITION,
     TB17_DEFINITION, TB18_DEFINITION, TB19_DEFINITION, TB20_DEFINITION,
-    TB21_DEFINITION, TB22_DEFINITION, TB23_DEFINITION, TB24_DEFINITION)
+    TB21_DEFINITION, TB22_DEFINITION, TB23_DEFINITION, TB24_DEFINITION,
+    TB25_DEFINITION)
 from validator.contextgenerator import ContextGenerator
 from markup.csstester import UNPREFIXED_MESSAGE
 
@@ -2075,4 +2076,136 @@ class Thunderbird24RegexTests(CompatRegexTestHelper):
                     "A JavaScript function matched the pattern `%s`, which has "
                     "been flagged as having changed, removed, or deprecated "
                     "in Thunderbird 24." % pattern,
+                    compat_type="error")
+
+@register_generator
+class Thunderbird25RegexTests(CompatRegexTestHelper):
+    """Regex tests for the Thunderbird 25 update."""
+
+    VERSION = TB25_DEFINITION
+
+    def tests(self):
+        """String and JS changes for Thunderbird add-ons"""
+
+        # String changes for add-ons that use our localizations.
+        patterns = {r"getMsgButton\.label": 217941,
+                    r"\b5000\b": 551919,
+                    r"\b5001\b": 551919,
+                    r"\b5002\b": 551919,
+                    r"\b5003\b": 551919,
+                    r"\b5004\b": 551919,
+                    r"\b5005\b": 551919,
+                    r"\b5006\b": 551919,
+                    r"\b5007\b": 551919,
+                    r"\b5008\b": 551919,
+                    r"\b5009\b": 551919,
+                    r"\b5010\b": 551919,
+                    r"\b5011\b": 551919,
+                    r"\b5012\b": 551919,
+                    r"\b5013\b": 551919,
+                    r"\b5014\b": 551919,
+                    r"\b5015\b": 551919,
+                    r"\b5029\b": 551919,
+                    r"\b5030\b": 551919,
+                    r"\b5031\b": 551919,
+                    r"\b5032\b": 551919,
+                    r"\b5036\b": 551919,
+                    r"\b5037\b": 551919,
+                    r"\b5038\b": 551919,
+                    r"\b5039\b": 551919,
+                    r"\b5040\b": 551919,
+                    r"\b5041\b": 551919,
+                    r"\b5042\b": 551919,
+                    r"\b5043\b": 551919,
+                    r"\b5045\b": 551919,
+                    r"\b5046\b": 551919,
+                    r"\b5047\b": 551919,
+                    r"\b5048\b": 551919,
+                    r"\b5049\b": 551919,
+                    r"\b5050\b": 551919,
+                    r"\b5051\b": 551919,
+                    r"\b5052\b": 551919,
+                    r"\b5053\b": 551919,
+                    r"\b5054\b": 551919,
+                    r"\b5056\b": 551919,
+                    r"\b5057\b": 551919,
+                    r"\b5065\b": 551919,
+                    r"\b5066\b": 551919,
+                    r"\b5067\b": 551919,
+                    r"\b5068\b": 551919,
+                    r"\b5069\b": 551919,
+                    r"\b5070\b": 551919,
+                    r"\b5071\b": 551919,
+                    r"\b5072\b": 551919,
+                    r"\b5073\b": 551919,
+                    r"\b5074\b": 551919,
+                    r"\b5075\b": 551919,
+                    r"\b5076\b": 551919,
+                    r"\b5077\b": 551919,
+                    r"\b5078\b": 551919,
+                    r"\b5079\b": 551919,
+                    r"\b5080\b": 551919,
+                    r"\b5081\b": 551919,
+                    r"\b5082\b": 551919,
+                    r"\b5084\b": 551919,
+                    r"\b5085\b": 551919,
+                    r"\b5090\b": 551919,
+                    r"\b5092\b": 551919,
+                    r"\b5093\b": 551919,
+                    r"\b5095\b": 551919,
+                    r"\b5096\b": 551919,
+                    r"\b5097\b": 551919,
+                    r"\b5100\b": 551919,
+                    r"\b5103\b": 551919,
+                    r"\b5105\b": 551919,
+                    r"\b5106\b": 551919,
+                    r"\b5107\b": 551919,
+                    r"\b5108\b": 551919,
+                    r"\b5110\b": 551919,
+                    r"\b5111\b": 551919,
+                    r"\b5112\b": 551919,
+                    r"\b5113\b": 551919,
+                    r"\b5114\b": 551919,
+                    r"\b5115\b": 551919,
+                    r"\b5116\b": 551919,
+                    r"\b5117\b": 551919,
+                    r"\b5118\b": 551919,
+                    r"\b5119\b": 551919,
+                    r"pop3PasswordFailure": 221592}
+
+        for pattern, bug in patterns.iteritems():
+            yield self.get_test_bug(
+                    bug, pattern,
+                    "Removed, renamed, or changed labels in use.",
+                    "Some string matched the pattern `%s`, which has been "
+                    "flagged as having changed in Thunderbird 25." % pattern,
+                    compat_type="error")
+
+        js_patterns = {r"AddFileAttachment": 889031,
+                       r"AddUrlAttachment": 889031,
+                       r"gQuickSearchFocusEl": 452232,
+                       r"gIsOffline": 452232,
+                       r"gSessionAdded": 452232,
+                       r"gCurrentAutocompleteDirectory": 452232,
+                       r"gAutocompleteSession": 452232,
+                       r"gSetupLdapAutocomplete": 452232,
+                       r"gLDAPSession": 452232,
+                       r"setupLdapAutocompleteSession": 452232,
+                       r"directoryServerObserver": 452232,
+                       r"AddDirectoryServerObserver": 452232,
+                       r"RemoveDirectoryServerObserver": 452232,
+                       r"AddDirectorySettingsObserver": 452232,
+                       r"RemoveDirectorySettingsObserver": 452232,
+                       r"ReleaseAutoCompleteState": 452232}
+
+        # Add restricting prefix for ( or word boundary to prevent substring matching.
+        js_patterns = dict((r"(\b|\()" + k, v) for k, v in js_patterns.items())
+
+        for pattern, bug in js_patterns.items():
+            yield self.get_test_bug(
+                    bug, pattern,
+                    "Removed, renamed, or changed methods in use.",
+                    "A JavaScript function matched the pattern `%s`, which has "
+                    "been flagged as having changed, removed, or deprecated "
+                    "in Thunderbird 25." % pattern,
                     compat_type="error")

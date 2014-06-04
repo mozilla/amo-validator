@@ -117,7 +117,8 @@ INTERFACES = {
     u"nsIImapMailFolderSink":
         {"value":
             {u"setUrlState":
-                {"return": call_definitions.nsIImapMailFolderSink_changed}}},
+                {"return": call_definitions.nsIImapMailFolderSink_changed},
+             u"progressStatus": entity("nsIImapMailFolderSink.progressStatus")}},
     u"nsIImapProtocol":
         {"value":
             {u"NotifyHdrsToDownload":
@@ -374,7 +375,9 @@ INTERFACES = {
              {u"noNewlines": entity("prplIAccount.noNewlines")}},
     u"nsIMsgCompFields":
         {"value":
-             {u"newshost": entity("nsIMsgCompFields.newshost")}},
+             {u"newshost": entity("nsIMsgCompFields.newshost"),
+              u"temporaryFiles": entity("nsIMsgCompFields.temporaryFiles")}},
+
     u"nsIMsgSearchAdapter":
         {"value":
              {u"CurrentUrlDone": entity("nsIMsgSearchAdapter.CurrentUrlDone")}},
@@ -401,6 +404,22 @@ INTERFACES = {
     u"nsIImportService":
         {"value":
             {u"CreateRFC822Message": entity("nsIImportService.CreateRFC822Message")}},
+    u"nsIImapServerSink":
+        {"value":
+         {u"getImapStringByID": entity("nsIImapServerSink.getImapStringByID"),
+          u"fEAlertWithID": entity("nsIImapServerSink.fEAlertWithID")}},
+    u"nsIImportFieldMap":
+        {"value":
+         {u"SetFieldMapByDescription": entity("nsIImportFieldMap.SetFieldMapByDescription"),
+          u"SetFieldValueByDescription": entity("nsIImportFieldMap.SetFieldValueByDescription"),
+          u"GetFieldValue": entity("nsIImportFieldMap.GetFieldValue"),
+          u"GetFieldValueByDescription": entity("nsIImportFieldMap.GetFieldValueByDescription")}},
+    u"nsILocalMailIncomingServer":
+        {"value":
+         {u"createDefaultMailboxes": entity("nsILocalMailIncomingServer.createDefaultMailboxes")}},
+    u"nsIAbLDAPAutoCompFormatter": entity("nsIAbLDAPAutoCompFormatter"),
+    u"nsILDAPAutoCompFormatter": entity("nsILDAPAutoCompFormatter"),
+    u"nsILDAPAutoCompleteSession": entity("nsILDAPAutoCompleteSession"),
     }
 
 INTERFACE_ENTITIES = {u"nsIXMLHttpRequest":

@@ -6,7 +6,7 @@ from validator.compat import (FX10_DEFINITION, FX14_DEFINITION,
                               TB16_DEFINITION, TB18_DEFINITION,
                               TB19_DEFINITION, TB20_DEFINITION,
                               TB21_DEFINITION, TB22_DEFINITION,
-                              TB24_DEFINITION)
+                              TB24_DEFINITION, TB25_DEFINITION)
 from validator.constants import BUGZILLA_BUG
 
 
@@ -509,3 +509,94 @@ TB24_ENTITIES = [
 ]
 register_changed_entities(version_definition=TB24_DEFINITION,
     entities=TB24_ENTITIES, version_string="Thunderbird 24")
+
+# Thunderbird 25 IDL changes
+TB25_ENTITIES = [
+    {"name":"nsIImapMailFolderSink.progressStatus",
+     "status": "renamed to nsIImapMailFolderSink.progressStatusString",
+     "bug": 551919,
+     "compat_type": "error"},
+    {"name":"nsIImapServerSink.getImapStringByID",
+     "status": "renamed to nsIImapServerSink.getImapStringByName",
+     "bug": 551919,
+     "compat_type": "error"},
+    {"name":"nsIImapServerSink.fEAlertWithID",
+     "status": "renamed to nsIImapServerSink.fEAlertWithName",
+     "bug": 551919,
+     "compat_type": "error"},
+    {"name":"nsIMsgCompFields.temporaryFiles",
+     "status": "removed",
+     "bug": 889031,
+     "compat_type": "error"},
+    {"name":"nsIImportFieldMap.SetFieldMapByDescription",
+     "status": "removed",
+     "bug": 891271,
+     "compat_type": "error"},
+    {"name":"nsIImportFieldMap.SetFieldValueByDescription",
+     "status": "removed",
+     "bug": 891271,
+     "compat_type": "error"},
+    {"name":"nsIImportFieldMap.GetFieldValue",
+     "status": "removed",
+     "bug": 891271,
+     "compat_type": "error"},
+    {"name":"nsIImportFieldMap.GetFieldValueByDescription",
+     "status": "removed",
+     "bug": 891271,
+     "compat_type": "error"},
+    {"name":"nsILocalMailIncomingServer.createDefaultMailboxes",
+     "status": "changed",
+     "bug": 886112,
+     "compat_type": "error"},
+    {"name":"nsINoIncomingServer.copyDefaultMessages",
+     "status": "changed",
+     "bug": 886112,
+     "compat_type": "error"},
+]
+register_changed_entities(version_definition=TB25_DEFINITION,
+    entities=TB25_ENTITIES, version_string="Thunderbird 25")
+
+@register_entity("nsIAbLDAPAutoCompFormatter")
+def nsIAbLDAPAutoCompFormatter(traverser):
+    traverser.err.error(
+        err_id=("testcases_idl_removed_interface"),
+        error="nsIAbLDAPAutoCompFormatter interface has been removed in Thunderbird 25.",
+        description='The "nsIAbLDAPAutoCompFormatter" interface has been removed. '
+                    'See %s for more information.' % BUGZILLA_BUG % 452232,
+        filename=traverser.filename,
+        line=traverser.line,
+        column=traverser.position,
+        context=traverser.context,
+        for_appversions=TB25_DEFINITION,
+        compatibility_type="error",
+        tier=5)
+
+@register_entity("nsILDAPAutoCompFormatter")
+def nsILDAPAutoCompFormatter(traverser):
+    traverser.err.error(
+        err_id=("testcases_idl_removed_interface"),
+        error="nsILDAPAutoCompFormatter interface has been removed in Thunderbird 25.",
+        description='The "nsILDAPAutoCompFormatter" interface has been removed. '
+                    'See %s for more information.' % BUGZILLA_BUG % 452232,
+        filename=traverser.filename,
+        line=traverser.line,
+        column=traverser.position,
+        context=traverser.context,
+        for_appversions=TB25_DEFINITION,
+        compatibility_type="error",
+        tier=5)
+
+@register_entity("nsILDAPAutoCompleteSession")
+def nsILDAPAutoCompleteSession(traverser):
+    traverser.err.error(
+        err_id=("testcases_idl_removed_interface"),
+        error="nsILDAPAutoCompleteSession interface removed in Thunderbird 25.",
+        description='The "nsILDAPAutoCompleteSession" interface has been removed. '
+                    'See %s for more information.' % BUGZILLA_BUG % 452232,
+        filename=traverser.filename,
+        line=traverser.line,
+        column=traverser.position,
+        context=traverser.context,
+        for_appversions=TB25_DEFINITION,
+        compatibility_type="error",
+        tier=5)
