@@ -6,7 +6,8 @@ from validator.compat import (FX10_DEFINITION, FX14_DEFINITION,
                               TB16_DEFINITION, TB18_DEFINITION,
                               TB19_DEFINITION, TB20_DEFINITION,
                               TB21_DEFINITION, TB22_DEFINITION,
-                              TB24_DEFINITION, TB25_DEFINITION)
+                              TB24_DEFINITION, TB25_DEFINITION,
+                              TB26_DEFINITION)
 from validator.constants import BUGZILLA_BUG
 
 
@@ -600,3 +601,12 @@ def nsILDAPAutoCompleteSession(traverser):
         for_appversions=TB25_DEFINITION,
         compatibility_type="error",
         tier=5)
+
+
+# Thunderbird 26 JS globals changes
+deprecated_entity(name="gPropertiesButton", version=TB26_DEFINITION,
+                  message="The global object `gPropertiesButton` has been removed.", bug=749564)
+deprecated_entity(name="gComposeButton", version=TB26_DEFINITION,
+                  message="The global object `gComposeButton` has been removed.", bug=749564)
+deprecated_entity(name="onAbSearchReset", version=TB26_DEFINITION,
+                  message="The global object `onAbSearchReset` has been removed.", bug=749564)

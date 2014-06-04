@@ -14,7 +14,7 @@ from validator.compat import (
     TB13_DEFINITION, TB14_DEFINITION, TB15_DEFINITION, TB16_DEFINITION,
     TB17_DEFINITION, TB18_DEFINITION, TB19_DEFINITION, TB20_DEFINITION,
     TB21_DEFINITION, TB22_DEFINITION, TB23_DEFINITION, TB24_DEFINITION,
-    TB25_DEFINITION)
+    TB25_DEFINITION, TB26_DEFINITION)
 from validator.contextgenerator import ContextGenerator
 from markup.csstester import UNPREFIXED_MESSAGE
 
@@ -2208,4 +2208,30 @@ class Thunderbird25RegexTests(CompatRegexTestHelper):
                     "A JavaScript function matched the pattern `%s`, which has "
                     "been flagged as having changed, removed, or deprecated "
                     "in Thunderbird 25." % pattern,
+                    compat_type="error")
+
+@register_generator
+class Thunderbird26RegexTests(CompatRegexTestHelper):
+
+    VERSION = TB26_DEFINITION
+    BUG_ID = 889022
+
+    def tests(self):
+        """Regex tests for the Thunderbird 26 update."""
+        yield self.get_test_bug(
+            self.BUG_ID, r"chrome://messenger/content/widgetglue\.js",
+            "The file `widgetglue.js` has been removed.",
+            "The file `widgetglue.js` has been removed. See %s for more "
+            "information." % BUGZILLA_BUG % self.BUG_ID,
+            compat_type="error", log_function=self.err.warning)
+
+        """String changes for Thunderbird 26 update."""
+        patterns = {r"pop3MessageFolderBusy": 592235}
+
+        for pattern, bug in patterns.iteritems():
+            yield self.get_test_bug(
+                    bug, pattern,
+                    "Removed property in use.",
+                    "Some string matched the pattern `%s`, which has been "
+                    "flagged as having been removed in Thunderbird 26." % pattern,
                     compat_type="error")

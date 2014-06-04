@@ -740,6 +740,9 @@ GLOBAL_ENTITIES = {
 
     u"XPCOMUtils":
         {"value": {u"categoryManager": {"value": CATEGORY_MANAGER}}},
+    u"gPropertiesButton": entity("gPropertiesButton"),
+    u"gComposeButton": entity("gComposeButton"),
+    u"onAbSearchReset": entity("onAbSearchReset"),
 }
 
 CONTENT_DOCUMENT = GLOBAL_ENTITIES[u"content"]["value"][u"document"]
