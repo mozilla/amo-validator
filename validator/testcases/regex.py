@@ -14,7 +14,7 @@ from validator.compat import (
     TB13_DEFINITION, TB14_DEFINITION, TB15_DEFINITION, TB16_DEFINITION,
     TB17_DEFINITION, TB18_DEFINITION, TB19_DEFINITION, TB20_DEFINITION,
     TB21_DEFINITION, TB22_DEFINITION, TB23_DEFINITION, TB24_DEFINITION,
-    TB25_DEFINITION, TB26_DEFINITION, TB27_DEFINITION)
+    TB25_DEFINITION, TB26_DEFINITION, TB27_DEFINITION, TB28_DEFINITION)
 from validator.contextgenerator import ContextGenerator
 from markup.csstester import UNPREFIXED_MESSAGE
 
@@ -2255,4 +2255,40 @@ class Thunderbird27RegexTests(CompatRegexTestHelper):
                     "Removed labels in use.",
                     "Some string matched the pattern `%s`, which has been "
                     "flagged as having been removed in Thunderbird 27." % pattern,
+                    compat_type="error")
+
+@register_generator
+class Thunderbird28RegexTests(CompatRegexTestHelper):
+
+    VERSION = TB28_DEFINITION
+
+    def tests(self):
+        """String changes for Thunderbird 28 update."""
+        patterns = {r"junkBarMessage2\.label": 562048,
+                    r"junkBarButton1\.label": 562048,
+                    r"junkInfoButton\.label": 562048,
+                    r"remoteContentMessage2\.label": 562048,
+                    r"loadRemoteContentButton3\.label": 562048,
+                    r"phishingBarMessage2\.label": 562048,
+                    r"removePhishingBarButton1\.label": 562048,
+                    r"disablePhishingWarning1\.label": 562048,
+                    r"reportPhishingError1\.label": 562048,
+                    r"mdnBarIgnoreButton2\.label": 562048,
+                    r"mdnBarIgnoreButton2\.accesskey": 562048,
+                    r"mdnBarSendButton2\.label": 562048,
+                    r"mdnBarSendButton2\.accesskey": 562048,
+                    r"editMessageDescription\.label": 939982,
+                    r"editMessageButton\.label": 939982,
+                    r"downloadMessagesNow": 924876,
+                    r"sendMessagesNow": 924876,
+                    r"processMessagesLater": 924876,
+                    r"accountExists": 40012,}
+
+        for pattern, bug in patterns.iteritems():
+            yield self.get_test_bug(
+                    bug, pattern,
+                    "Removed labels in use.",
+                    "Some string matched the pattern `%s`, which has been "
+                    "flagged as having been removed or renamed "
+                    "in Thunderbird 28." % pattern,
                     compat_type="error")

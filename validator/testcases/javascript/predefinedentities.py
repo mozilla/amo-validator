@@ -420,6 +420,39 @@ INTERFACES = {
     u"nsIAbLDAPAutoCompFormatter": entity("nsIAbLDAPAutoCompFormatter"),
     u"nsILDAPAutoCompFormatter": entity("nsILDAPAutoCompFormatter"),
     u"nsILDAPAutoCompleteSession": entity("nsILDAPAutoCompleteSession"),
+    u"nsINewsBlogFeedDownloader":
+        {"value":
+             {u"updateSubscriptionsDS": entity("nsINewsBlogFeedDownloader.updateSubscriptionsDS")}},
+    u"nsMsgFolderFlags":
+        {"value":
+             {u"NewsHost": entity("nsMsgFolderFlags.NewsHost")}},
+    u"nsMsgFolderFlags":
+        {"value":
+             {u"Subscribed": entity("nsMsgFolderFlags.Subscribed")}},
+    u"nsMsgFolderFlags":
+        {"value":
+             {u"ImapServer": entity("nsMsgFolderFlags.ImapServer")}},
+    u"gMessageNotificationBar":
+        {"value":
+             {u"mBarStatus": entity("gMessageNotificationBar.mBarStatus")}},
+    u"gMessageNotificationBar":
+        {"value":
+             {u"mBarFlagValues": entity("gMessageNotificationBar.mBarFlagValues")}},
+    u"gMessageNotificationBar":
+        {"value":
+             {u"mMsgNotificationBar": entity("gMessageNotificationBar.mMsgNotificationBar")}},
+    u"gMessageNotificationBar":
+        {"value":
+             {u"isFlagSet": entity("gMessageNotificationBar.isFlagSet")}},
+    u"gMessageNotificationBar":
+        {"value":
+             {u"updateMsgNotificationBar": entity("gMessageNotificationBar.updateMsgNotificationBar")}},
+    u"FeedUtils":
+        {"value":
+             {u"addFeed": entity("FeedUtils.addFeed")}},
+    u"FeedUtils":
+        {"value":
+             {u"updateFolderFeedUrl": entity("FeedUtils.updateFolderFeedUrl")}},
     }
 
 INTERFACE_ENTITIES = {u"nsIXMLHttpRequest":
@@ -746,6 +779,17 @@ GLOBAL_ENTITIES = {
     u"startDebugger": entity("startDebugger"),
     u"stopDebugger": entity("stopDebugger"),
     u"onRecipientsInput": entity("onRecipientsInput"),
+    u"kMsgNotificationPhishingBar": entity("kMsgNotificationPhishingBar"),
+    u"kMsgNotificationJunkBar": entity("kMsgNotificationJunkBar"),
+    u"kMsgNotificationRemoteImages": entity("kMsgNotificationRemoteImages"),
+    u"kMsgNotificationMDN": entity("kMsgNotificationMDN"),
+    u"gRemindLater": entity("gRemindLater"),
+    u"onRecipientsInput": entity("onRecipientsInput"),
+    u"gSendOrSaveOperationInProgress": entity("gSendOrSaveOperationInProgress"),
+    u"ShowEditMessageBox": entity("ShowEditMessageBox"),
+    u"ClearEditMessageBox": entity("ClearEditMessageBox"),
+    u"updateCharsetPopupMenu": entity("updateCharsetPopupMenu"),
+    u"EditorSetDocumentCharacterSet": entity("EditorSetDocumentCharacterSet"),
 }
 
 CONTENT_DOCUMENT = GLOBAL_ENTITIES[u"content"]["value"][u"document"]
