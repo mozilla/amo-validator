@@ -127,7 +127,8 @@ INTERFACES = {
                 {"return": call_definitions.TB12_nsIImapProtocol_changed}}},
     u"nsIImportMail":
         {"value":
-            {u"ImportMailbox": entity("nsIImportMail.ImportMailbox")}},
+            {u"ImportMailbox": entity("nsIImportMail.ImportMailbox"),
+             u"FindMailboxes": entity("nsIImportMail.FindMailboxes")}},
     u"nsIImportMailboxDescriptor":
         {"value":
             {u"file": entity("nsIImportMailboxDescriptor.file")}},
@@ -372,7 +373,8 @@ INTERFACES = {
                        call_definitions.webbrowserpersist_saveuri}}},
     u"prplIAccount":
         {"value":
-             {u"noNewlines": entity("prplIAccount.noNewlines")}},
+             {u"noNewlines": entity("prplIAccount.noNewlines"),
+              u"maxMessageLength": entity("prplIAccount.maxMessageLength")}},
     u"nsIMsgCompFields":
         {"value":
              {u"newshost": entity("nsIMsgCompFields.newshost"),
@@ -453,6 +455,54 @@ INTERFACES = {
     u"FeedUtils":
         {"value":
              {u"updateFolderFeedUrl": entity("FeedUtils.updateFolderFeedUrl")}},
+    u"nsIMsgSearchTerm":
+        {"value":
+             {u"matchRfc822String": entity("nsIMsgSearchTerm.matchRfc822String")}},
+    u"nsIMsgDBHdr":
+        {"value":
+             {u"setRecipientsArray": entity("nsIMsgDBHdr.setRecipientsArray")}},
+    u"nsIMsgDBHdr":
+        {"value":
+             {u"setCCListArray": entity("nsIMsgDBHdr.setCCListArray")}},
+    u"nsIMsgDBHdr":
+        {"value":
+             {u"setBCCListArray": entity("nsIMsgDBHdr.setBCCListArray")}},
+    u"imICommand":
+        {"value":
+             {u"CONTEXT_IM": entity("imICommand.CONTEXT_IM")}},
+    u"imICommand":
+        {"value":
+             {u"CONTEXT_CHAT": entity("imICommand.CONTEXT_CHAT")}},
+    u"imICommand":
+        {"value":
+             {u"CONTEXT_ALL": entity("imICommand.CONTEXT_ALL")}},
+    u"imICommand":
+        {"value":
+             {u"PRIORITY_LOW": entity("imICommand.PRIORITY_LOW")}},
+    u"imICommand":
+        {"value":
+             {u"PRIORITY_DEFAULT": entity("imICommand.PRIORITY_DEFAULT")}},
+    u"imICommand":
+        {"value":
+             {u"PRIORITY_PRPL": entity("imICommand.PRIORITY_PRPL")}},
+    u"imICommand":
+        {"value":
+             {u"PRIORITY_HIGH": entity("imICommand.PRIORITY_HIGH")}},
+    u"nsIImportAddressBooks":
+        {"value":
+             {u"FindAddressBooks": entity("nsIImportAddressBooks.FindAddressBooks")}},
+    u"prplIConversation":
+        {"value":
+             {u"sendTyping": entity("prplIConversation.sendTyping")}},
+    u"nsINewsBlogFeedDownloader":
+        {"value":
+             {u"downloadFeed": entity("nsINewsBlogFeedDownloader.downloadFeed")}},
+    u"nsIMsgHeaderParser":
+        {"value":
+             {u"removeDuplicateAddresses": entity("nsIMsgHeaderParser.removeDuplicateAddresses")}},
+    u"nsIMsgHeaderParser":
+        {"value":
+             {u"makeMimeAddress": entity("nsIMsgHeaderParser.makeMimeAddress")}},
     }
 
 INTERFACE_ENTITIES = {u"nsIXMLHttpRequest":
@@ -790,6 +840,10 @@ GLOBAL_ENTITIES = {
     u"ClearEditMessageBox": entity("ClearEditMessageBox"),
     u"updateCharsetPopupMenu": entity("updateCharsetPopupMenu"),
     u"EditorSetDocumentCharacterSet": entity("EditorSetDocumentCharacterSet"),
+    u"DisablePhishingWarning": entity("DisablePhishingWarning"),
+    u"RoomInfo": entity("RoomInfo"),
+    u"FillInHTMLTooltip": entity("FillInHTMLTooltip"),
+    u"escapeXMLchars": entity("escapeXMLchars"),
 }
 
 CONTENT_DOCUMENT = GLOBAL_ENTITIES[u"content"]["value"][u"document"]

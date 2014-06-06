@@ -14,7 +14,8 @@ from validator.compat import (
     TB13_DEFINITION, TB14_DEFINITION, TB15_DEFINITION, TB16_DEFINITION,
     TB17_DEFINITION, TB18_DEFINITION, TB19_DEFINITION, TB20_DEFINITION,
     TB21_DEFINITION, TB22_DEFINITION, TB23_DEFINITION, TB24_DEFINITION,
-    TB25_DEFINITION, TB26_DEFINITION, TB27_DEFINITION, TB28_DEFINITION)
+    TB25_DEFINITION, TB26_DEFINITION, TB27_DEFINITION, TB28_DEFINITION,
+    TB29_DEFINITION)
 from validator.contextgenerator import ContextGenerator
 from markup.csstester import UNPREFIXED_MESSAGE
 
@@ -2291,4 +2292,91 @@ class Thunderbird28RegexTests(CompatRegexTestHelper):
                     "Some string matched the pattern `%s`, which has been "
                     "flagged as having been removed or renamed "
                     "in Thunderbird 28." % pattern,
+                    compat_type="error")
+
+@register_generator
+class Thunderbird29RegexTests(CompatRegexTestHelper):
+
+    VERSION = TB29_DEFINITION
+
+    def tests(self):
+        """String changes for Thunderbird 29 update."""
+        patterns = {r"update\.checkingAddonCompat": 707489,
+                    r"columnChooser\.tooltip": 881073,
+                    r"threadColumn\.tooltip": 881073,
+                    r"fromColumn\.tooltip": 881073,
+                    r"recipientColumn\.tooltip": 881073,
+                    r"attachmentColumn\.tooltip": 881073,
+                    r"subjectColumn\.tooltip": 881073,
+                    r"dateColumn\.tooltip": 881073,
+                    r"priorityColumn\.tooltip": 881073,
+                    r"tagsColumn\.tooltip": 881073,
+                    r"accountColumn\.tooltip": 881073,
+                    r"statusColumn\.tooltip": 881073,
+                    r"sizeColumn\.tooltip": 881073,
+                    r"junkStatusColumn\.tooltip": 881073,
+                    r"unreadColumn\.tooltip": 881073,
+                    r"totalColumn\.tooltip": 881073,
+                    r"readColumn\.tooltip": 881073,
+                    r"receivedColumn\.tooltip": 881073,
+                    r"flagColumn\.tooltip": 881073,
+                    r"starredColumn\.tooltip": 881073,
+                    r"locationColumn\.tooltip": 881073,
+                    r"idColumn\.tooltip": 881073,
+                    r"phishingOptionDisableDetection\.label": 926473,
+                    r"phishingOptionDisableDetection\.accesskey": 926473,
+                    r"contextEditAsNew\.label": 956481,
+                    r"contextEditAsNew\.accesskey": 956481,
+                    r"EditContact\.label": 956481,
+                    r"EditContact\.accesskey": 956481,
+                    r"choosethisnewsserver\.label": 878805,
+                    r"moveHereMenu\.label": 878805,
+                    r"moveHereMenu\.accesskey": 878805,
+                    r"newfolderchoosethis\.label": 878805,
+                    r"thisFolder\.label": 878805,
+                    r"thisFolder\.accesskey": 878805,
+                    r"fileHereMenu\.label": 878805,
+                    r"fileHereMenu\.accesskey": 878805,
+                    r"copyHereMenu\.label": 878805,
+                    r"copyHereMenu\.accesskey": 878805,
+                    r"autoCheck\.label": 958850,
+                    r"enableAppUpdate\.label": 958850,
+                    r"enableAppUpdate\.accesskey": 958850,
+                    r"enableAddonsUpdate\.label": 958850,
+                    r"enableAddonsUpdate\.accesskey": 958850,
+                    r"whenUpdatesFound\.label": 958850,
+                    r"modeAskMe\.label": 958850,
+                    r"modeAskMe\.accesskey": 958850,
+                    r"modeAutomatic\.label": 958850,
+                    r"modeAutomatic\.accesskey": 958850,
+                    r"modeAutoAddonWarn\.label": 958850,
+                    r"modeAutoAddonWarn\.accesskey": 958850,
+                    r"showUpdates\.label": 958850,
+                    r"showUpdates\.accesskey": 958850,
+                    r"update\.checkInsideButton\.label": 707489,
+                    r"update\.checkInsideButton\.accesskey": 707489,
+                    r"update\.resumeButton\.label": 707489,
+                    r"update\.resumeButton\.accesskey": 707489,
+                    r"update\.openUpdateUI\.applyButton\.label": 707489,
+                    r"update\.openUpdateUI\.applyButton\.accesskey": 707489,
+                    r"update\.restart\.updateButton\.label": 707489,
+                    r"update\.restart\.updateButton\.accesskey": 707489,
+                    r"update\.restart\.restartButton\.label": 707489,
+                    r"update\.restart\.restartButton\.accesskey": 707489,
+                    r"update\.openUpdateUI\.upgradeButton\.label": 707489,
+                    r"update\.openUpdateUI\.upgradeButton\.accesskey": 707489,
+                    r"update\.restart\.upgradeButton\.label": 707489,
+                    r"update\.restart\.upgradeButton\.accesskey": 707489,
+                    r"command\.invite": 920801,
+                    r"ctcp\.ping": 957918,
+                    r"vkontakte\.usernameHint": 957918,
+                    r"dateformat": 544315,}
+
+        for pattern, bug in patterns.iteritems():
+            yield self.get_test_bug(
+                    bug, pattern,
+                    "Removed labels in use.",
+                    "Some string matched the pattern `%s`, which has been "
+                    "flagged as having been removed or renamed "
+                    "in Thunderbird 29." % pattern,
                     compat_type="error")
