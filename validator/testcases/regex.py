@@ -15,7 +15,7 @@ from validator.compat import (
     TB17_DEFINITION, TB18_DEFINITION, TB19_DEFINITION, TB20_DEFINITION,
     TB21_DEFINITION, TB22_DEFINITION, TB23_DEFINITION, TB24_DEFINITION,
     TB25_DEFINITION, TB26_DEFINITION, TB27_DEFINITION, TB28_DEFINITION,
-    TB29_DEFINITION)
+    TB29_DEFINITION, TB30_DEFINITION)
 from validator.contextgenerator import ContextGenerator
 from markup.csstester import UNPREFIXED_MESSAGE
 
@@ -2379,4 +2379,33 @@ class Thunderbird29RegexTests(CompatRegexTestHelper):
                     "Some string matched the pattern `%s`, which has been "
                     "flagged as having been removed or renamed "
                     "in Thunderbird 29." % pattern,
+                    compat_type="error")
+
+@register_generator
+class Thunderbird30RegexTests(CompatRegexTestHelper):
+
+    VERSION = TB30_DEFINITION
+
+    def tests(self):
+        """String changes for Thunderbird 30 update."""
+        patterns = {r"log\.lastWeek": 863226,
+                    r"log\.twoWeeksAgo": 863226,
+                    r"filemessageschoosethis\.label": 964425,
+                    r"recentfolders\.label": 964425,
+                    r"protocolNotFound\.title": 973368,
+                    r"protocolNotFound\.longDesc": 973368,
+                    r"quickFilterBar\.barLabel\.label": 592248,
+                    r"updateOthers\.label": 978563,
+                    r"enableAddonsUpdate3\.label": 978563,
+                    r"enableAddonsUpdate3\.accesskey": 978563,
+                    r"bounceSystemDockIcon\.label": 601263,
+                    r"bounceSystemDockIcon\.accesskey": 601263,}
+
+        for pattern, bug in patterns.iteritems():
+            yield self.get_test_bug(
+                    bug, pattern,
+                    "Removed labels in use.",
+                    "Some string matched the pattern `%s`, which has been "
+                    "flagged as having been removed or renamed "
+                    "in Thunderbird 30." % pattern,
                     compat_type="error")

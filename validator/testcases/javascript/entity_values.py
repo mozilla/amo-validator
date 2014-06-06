@@ -8,7 +8,8 @@ from validator.compat import (FX10_DEFINITION, FX14_DEFINITION,
                               TB21_DEFINITION, TB22_DEFINITION,
                               TB24_DEFINITION, TB25_DEFINITION,
                               TB26_DEFINITION, TB27_DEFINITION,
-                              TB28_DEFINITION, TB29_DEFINITION)
+                              TB28_DEFINITION, TB29_DEFINITION,
+                              TB30_DEFINITION)
 from validator.constants import BUGZILLA_BUG
 
 
@@ -854,3 +855,34 @@ TB29_JS_ENTITIES = [
 register_changed_entities(version_definition=TB29_DEFINITION,
     entities=TB29_JS_ENTITIES, version_string="Thunderbird 29")
 
+# Thunderbird 30 IDL changes
+TB30_ENTITIES = [
+    {"name":"nsIMsgDatabase.forceFolderDBClosed",
+     "status": "moved to nsIMsgDBService",
+     "bug": 876548,
+     "compat_type": "error"},
+    {"name":"nsIMsgCompose.checkAndPopulateRecipients",
+     "status": "removed",
+     "bug": 970118,
+     "compat_type": "error"},
+]
+register_changed_entities(version_definition=TB30_DEFINITION,
+    entities=TB30_ENTITIES, version_string="Thunderbird 30")
+
+# Thunderbird 30 JS changes
+TB30_JS_ENTITIES = [
+    {"name":"GlodaMsgSearcher.retrievalLimit",
+     "status": "removed",
+     "bug": 742236,
+     "compat_type": "error"},
+    {"name":"GlodaIMSearcher.retrievalLimit",
+     "status": "removed",
+     "bug": 742236,
+     "compat_type": "error"},
+    {"name":"getNonHtmlRecipients",
+     "status": "removed",
+     "bug": 970118,
+     "compat_type": "error"},
+]
+register_changed_entities(version_definition=TB30_DEFINITION,
+    entities=TB30_JS_ENTITIES, version_string="Thunderbird 30")

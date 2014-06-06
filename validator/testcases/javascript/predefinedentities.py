@@ -173,7 +173,9 @@ INTERFACES = {
         {"value":
             {u"Open":
                 {"return": call_definitions.nsIMsgDatabase_changed}},
-             u"openMailDBFromFile": entity("nsIMsgDatabase.openMailDBFromFile")},
+             u"openMailDBFromFile": entity("nsIMsgDatabase.openMailDBFromFile"),
+             u"forceFolderDBClosed": entity("nsIMsgDatabase.forceFolderDBClosed"),
+             u"checkAndPopulateRecipients": entity("nsIMsgDatabase.checkAndPopulateRecipients")},
     u"nsIMsgDBService":
       {"value":
         {u"openMailDBFromFile":
@@ -503,6 +505,9 @@ INTERFACES = {
     u"nsIMsgHeaderParser":
         {"value":
              {u"makeMimeAddress": entity("nsIMsgHeaderParser.makeMimeAddress")}},
+    u"nsIMsgCompose":
+        {"value":
+             {u"checkAndPopulateRecipients": entity("nsIMsgCompose.checkAndPopulateRecipients")}},
     }
 
 INTERFACE_ENTITIES = {u"nsIXMLHttpRequest":
@@ -844,6 +849,7 @@ GLOBAL_ENTITIES = {
     u"RoomInfo": entity("RoomInfo"),
     u"FillInHTMLTooltip": entity("FillInHTMLTooltip"),
     u"escapeXMLchars": entity("escapeXMLchars"),
+    u"getNonHtmlRecipients": entity("getNonHtmlRecipients"),
 }
 
 CONTENT_DOCUMENT = GLOBAL_ENTITIES[u"content"]["value"][u"document"]
