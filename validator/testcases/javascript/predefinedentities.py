@@ -117,7 +117,8 @@ INTERFACES = {
     u"nsIImapMailFolderSink":
         {"value":
             {u"setUrlState":
-                {"return": call_definitions.nsIImapMailFolderSink_changed}}},
+                {"return": call_definitions.nsIImapMailFolderSink_changed},
+             u"progressStatus": entity("nsIImapMailFolderSink.progressStatus")}},
     u"nsIImapProtocol":
         {"value":
             {u"NotifyHdrsToDownload":
@@ -126,7 +127,8 @@ INTERFACES = {
                 {"return": call_definitions.TB12_nsIImapProtocol_changed}}},
     u"nsIImportMail":
         {"value":
-            {u"ImportMailbox": entity("nsIImportMail.ImportMailbox")}},
+            {u"ImportMailbox": entity("nsIImportMail.ImportMailbox"),
+             u"FindMailboxes": entity("nsIImportMail.FindMailboxes")}},
     u"nsIImportMailboxDescriptor":
         {"value":
             {u"file": entity("nsIImportMailboxDescriptor.file")}},
@@ -171,7 +173,9 @@ INTERFACES = {
         {"value":
             {u"Open":
                 {"return": call_definitions.nsIMsgDatabase_changed}},
-             u"openMailDBFromFile": entity("nsIMsgDatabase.openMailDBFromFile")},
+             u"openMailDBFromFile": entity("nsIMsgDatabase.openMailDBFromFile"),
+             u"forceFolderDBClosed": entity("nsIMsgDatabase.forceFolderDBClosed"),
+             u"checkAndPopulateRecipients": entity("nsIMsgDatabase.checkAndPopulateRecipients")},
     u"nsIMsgDBService":
       {"value":
         {u"openMailDBFromFile":
@@ -371,10 +375,13 @@ INTERFACES = {
                        call_definitions.webbrowserpersist_saveuri}}},
     u"prplIAccount":
         {"value":
-             {u"noNewlines": entity("prplIAccount.noNewlines")}},
+             {u"noNewlines": entity("prplIAccount.noNewlines"),
+              u"maxMessageLength": entity("prplIAccount.maxMessageLength")}},
     u"nsIMsgCompFields":
         {"value":
-             {u"newshost": entity("nsIMsgCompFields.newshost")}},
+             {u"newshost": entity("nsIMsgCompFields.newshost"),
+              u"temporaryFiles": entity("nsIMsgCompFields.temporaryFiles")}},
+
     u"nsIMsgSearchAdapter":
         {"value":
              {u"CurrentUrlDone": entity("nsIMsgSearchAdapter.CurrentUrlDone")}},
@@ -401,6 +408,106 @@ INTERFACES = {
     u"nsIImportService":
         {"value":
             {u"CreateRFC822Message": entity("nsIImportService.CreateRFC822Message")}},
+    u"nsIImapServerSink":
+        {"value":
+         {u"getImapStringByID": entity("nsIImapServerSink.getImapStringByID"),
+          u"fEAlertWithID": entity("nsIImapServerSink.fEAlertWithID")}},
+    u"nsIImportFieldMap":
+        {"value":
+         {u"SetFieldMapByDescription": entity("nsIImportFieldMap.SetFieldMapByDescription"),
+          u"SetFieldValueByDescription": entity("nsIImportFieldMap.SetFieldValueByDescription"),
+          u"GetFieldValue": entity("nsIImportFieldMap.GetFieldValue"),
+          u"GetFieldValueByDescription": entity("nsIImportFieldMap.GetFieldValueByDescription")}},
+    u"nsILocalMailIncomingServer":
+        {"value":
+         {u"createDefaultMailboxes": entity("nsILocalMailIncomingServer.createDefaultMailboxes")}},
+    u"nsIAbLDAPAutoCompFormatter": entity("nsIAbLDAPAutoCompFormatter"),
+    u"nsILDAPAutoCompFormatter": entity("nsILDAPAutoCompFormatter"),
+    u"nsILDAPAutoCompleteSession": entity("nsILDAPAutoCompleteSession"),
+    u"nsINewsBlogFeedDownloader":
+        {"value":
+             {u"updateSubscriptionsDS": entity("nsINewsBlogFeedDownloader.updateSubscriptionsDS")}},
+    u"nsMsgFolderFlags":
+        {"value":
+             {u"NewsHost": entity("nsMsgFolderFlags.NewsHost")}},
+    u"nsMsgFolderFlags":
+        {"value":
+             {u"Subscribed": entity("nsMsgFolderFlags.Subscribed")}},
+    u"nsMsgFolderFlags":
+        {"value":
+             {u"ImapServer": entity("nsMsgFolderFlags.ImapServer")}},
+    u"gMessageNotificationBar":
+        {"value":
+             {u"mBarStatus": entity("gMessageNotificationBar.mBarStatus")}},
+    u"gMessageNotificationBar":
+        {"value":
+             {u"mBarFlagValues": entity("gMessageNotificationBar.mBarFlagValues")}},
+    u"gMessageNotificationBar":
+        {"value":
+             {u"mMsgNotificationBar": entity("gMessageNotificationBar.mMsgNotificationBar")}},
+    u"gMessageNotificationBar":
+        {"value":
+             {u"isFlagSet": entity("gMessageNotificationBar.isFlagSet")}},
+    u"gMessageNotificationBar":
+        {"value":
+             {u"updateMsgNotificationBar": entity("gMessageNotificationBar.updateMsgNotificationBar")}},
+    u"FeedUtils":
+        {"value":
+             {u"addFeed": entity("FeedUtils.addFeed")}},
+    u"FeedUtils":
+        {"value":
+             {u"updateFolderFeedUrl": entity("FeedUtils.updateFolderFeedUrl")}},
+    u"nsIMsgSearchTerm":
+        {"value":
+             {u"matchRfc822String": entity("nsIMsgSearchTerm.matchRfc822String")}},
+    u"nsIMsgDBHdr":
+        {"value":
+             {u"setRecipientsArray": entity("nsIMsgDBHdr.setRecipientsArray")}},
+    u"nsIMsgDBHdr":
+        {"value":
+             {u"setCCListArray": entity("nsIMsgDBHdr.setCCListArray")}},
+    u"nsIMsgDBHdr":
+        {"value":
+             {u"setBCCListArray": entity("nsIMsgDBHdr.setBCCListArray")}},
+    u"imICommand":
+        {"value":
+             {u"CONTEXT_IM": entity("imICommand.CONTEXT_IM")}},
+    u"imICommand":
+        {"value":
+             {u"CONTEXT_CHAT": entity("imICommand.CONTEXT_CHAT")}},
+    u"imICommand":
+        {"value":
+             {u"CONTEXT_ALL": entity("imICommand.CONTEXT_ALL")}},
+    u"imICommand":
+        {"value":
+             {u"PRIORITY_LOW": entity("imICommand.PRIORITY_LOW")}},
+    u"imICommand":
+        {"value":
+             {u"PRIORITY_DEFAULT": entity("imICommand.PRIORITY_DEFAULT")}},
+    u"imICommand":
+        {"value":
+             {u"PRIORITY_PRPL": entity("imICommand.PRIORITY_PRPL")}},
+    u"imICommand":
+        {"value":
+             {u"PRIORITY_HIGH": entity("imICommand.PRIORITY_HIGH")}},
+    u"nsIImportAddressBooks":
+        {"value":
+             {u"FindAddressBooks": entity("nsIImportAddressBooks.FindAddressBooks")}},
+    u"prplIConversation":
+        {"value":
+             {u"sendTyping": entity("prplIConversation.sendTyping")}},
+    u"nsINewsBlogFeedDownloader":
+        {"value":
+             {u"downloadFeed": entity("nsINewsBlogFeedDownloader.downloadFeed")}},
+    u"nsIMsgHeaderParser":
+        {"value":
+             {u"removeDuplicateAddresses": entity("nsIMsgHeaderParser.removeDuplicateAddresses")}},
+    u"nsIMsgHeaderParser":
+        {"value":
+             {u"makeMimeAddress": entity("nsIMsgHeaderParser.makeMimeAddress")}},
+    u"nsIMsgCompose":
+        {"value":
+             {u"checkAndPopulateRecipients": entity("nsIMsgCompose.checkAndPopulateRecipients")}},
     }
 
 INTERFACE_ENTITIES = {u"nsIXMLHttpRequest":
@@ -721,6 +828,28 @@ GLOBAL_ENTITIES = {
 
     u"XPCOMUtils":
         {"value": {u"categoryManager": {"value": CATEGORY_MANAGER}}},
+    u"gPropertiesButton": entity("gPropertiesButton"),
+    u"gComposeButton": entity("gComposeButton"),
+    u"onAbSearchReset": entity("onAbSearchReset"),
+    u"startDebugger": entity("startDebugger"),
+    u"stopDebugger": entity("stopDebugger"),
+    u"onRecipientsInput": entity("onRecipientsInput"),
+    u"kMsgNotificationPhishingBar": entity("kMsgNotificationPhishingBar"),
+    u"kMsgNotificationJunkBar": entity("kMsgNotificationJunkBar"),
+    u"kMsgNotificationRemoteImages": entity("kMsgNotificationRemoteImages"),
+    u"kMsgNotificationMDN": entity("kMsgNotificationMDN"),
+    u"gRemindLater": entity("gRemindLater"),
+    u"onRecipientsInput": entity("onRecipientsInput"),
+    u"gSendOrSaveOperationInProgress": entity("gSendOrSaveOperationInProgress"),
+    u"ShowEditMessageBox": entity("ShowEditMessageBox"),
+    u"ClearEditMessageBox": entity("ClearEditMessageBox"),
+    u"updateCharsetPopupMenu": entity("updateCharsetPopupMenu"),
+    u"EditorSetDocumentCharacterSet": entity("EditorSetDocumentCharacterSet"),
+    u"DisablePhishingWarning": entity("DisablePhishingWarning"),
+    u"RoomInfo": entity("RoomInfo"),
+    u"FillInHTMLTooltip": entity("FillInHTMLTooltip"),
+    u"escapeXMLchars": entity("escapeXMLchars"),
+    u"getNonHtmlRecipients": entity("getNonHtmlRecipients"),
 }
 
 CONTENT_DOCUMENT = GLOBAL_ENTITIES[u"content"]["value"][u"document"]
