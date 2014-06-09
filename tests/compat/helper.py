@@ -20,7 +20,7 @@ class CompatTestCase(JSTestCase, RegexTestCase):
         self._run_member_for_compat(
             lambda: self.run_script(script, expose_pollution))
 
-    def run_xpcom_for_compat(self, interface, methods=None):
+    def run_xpcom_for_compat(self, interface, methods):
         """Yields after each method has been run as a script. Used to test that
         XPCOM members are properly flagged for compatibility tests.
 
@@ -30,9 +30,6 @@ class CompatTestCase(JSTestCase, RegexTestCase):
           `foo('bar')` or `foo["bar"] = "zap"`).
 
         """
-
-        if not methods:
-            return
 
         script = """
         var x = Components.classes[""].createInstance(Components.interfaces.%s);
