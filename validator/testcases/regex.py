@@ -15,7 +15,7 @@ from validator.compat import (
     TB17_DEFINITION, TB18_DEFINITION, TB19_DEFINITION, TB20_DEFINITION,
     TB21_DEFINITION, TB22_DEFINITION, TB23_DEFINITION, TB24_DEFINITION,
     TB25_DEFINITION, TB26_DEFINITION, TB27_DEFINITION, TB28_DEFINITION,
-    TB29_DEFINITION, TB30_DEFINITION)
+    TB29_DEFINITION, TB30_DEFINITION, TB31_DEFINITION)
 from validator.contextgenerator import ContextGenerator
 from markup.csstester import UNPREFIXED_MESSAGE
 
@@ -2408,4 +2408,99 @@ class Thunderbird30RegexTests(CompatRegexTestHelper):
                     "Some string matched the pattern `%s`, which has been "
                     "flagged as having been removed or renamed "
                     "in Thunderbird 30." % pattern,
+                    compat_type="error")
+
+@register_generator
+class Thunderbird31RegexTests(CompatRegexTestHelper):
+
+    VERSION = TB31_DEFINITION
+
+    def tests(self):
+        """String changes for Thunderbird 31 update."""
+        patterns = {r"youSendItMgmt\.viewSettings": 894306,
+                    r"youSendItSettings\.username": 894306,
+                    r"youSendItMgmt\.needAnAccount": 894306,
+                    r"youSendItMgmt\.learnMore": 894306,
+                    r"preferencesCmd\.label": 992643,
+                    r"preferencesCmd\.accesskey": 992643,
+                    r"proxy\.label": 992643,
+                    r"proxy\.accesskey": 992643,
+                    r"folderPropsCmd\.label": 992643,
+                    r"folderPropsFolderCmd\.label": 992643,
+                    r"folderPropsNewsgroupCmd\.label": 992643,
+                    r"filtersCmd\.label": 992643,
+                    r"filtersCmd\.accesskey": 992643,
+                    r"accountManagerCmd\.accesskey": 992643,
+                    r"accountManagerCmdUnix\.accesskey": 992643,
+                    r"accountManagerCmd\.label": 992643,
+                    r"accountManagerCmd\.accesskey": 992643,
+                    r"accountManagerCmdUnix\.accesskey": 992643,
+                    r"preferencesCmd\.label": 992643,
+                    r"preferencesCmd\.accesskey": 992643,
+                    r"preferencesCmdUnix\.label": 992643,
+                    r"preferencesCmdUnix\.accesskey": 992643,
+                    r"findCmd\.label": 530629,
+                    r"findCmd\.key": 530629,
+                    r"findCmd\.accesskey": 530629,
+                    r"ubuntuOneMgmt\.viewSettings": 991220,
+                    r"UbuntuOneSettings\.emailAddress": 991220,
+                    r"UbuntuOneSettings\.needAnAccount": 991220,
+                    r"UbuntuOneSettings\.learnMore": 991220,
+                    r"propertiesCmd\.label": 992643,
+                    r"propertiesCmd\.accesskey": 992643,
+                    r"settingsOfflineCmd\.label": 992643,
+                    r"settingsOfflineCmd\.accesskey": 992643,
+                    r"folderContextProperties\.label": 992643,
+                    r"folderContextProperties\.accesskey": 992643,
+                    r"folderContextSettings\.label": 992643,
+                    r"folderContextSettings\.accesskey": 992643,
+                    r"itemCookies\.label": 953426,
+                    r"cookies\.intro": 953426,
+                    r"doNotTrack\.label": 953426,
+                    r"doNotTrack\.accesskey": 953426,
+                    r"allowRemoteContent1\.label": 457296,
+                    r"allowRemoteContent1\.accesskey": 457296,
+                    r"allowRemoteContent1\.tooltip": 457296,
+                    r"remoteContentOptionAllowForAddress\.label": 457296,
+                    r"remoteContentOptionAllowForAddress\.accesskey": 457296,
+                    r"\b12504\b": 802266,
+                    r"\b12505\b": 802266,
+                    r"\b12507\b": 802266,
+                    r"\b12522\b": 802266,
+                    r"\b12508\b": 802266,
+                    r"\b12509\b": 802266,
+                    r"\b12521\b": 802266,
+                    r"\b12523\b": 802266,
+                    r"\b12533\b": 802266,
+                    r"\b12534\b": 802266,
+                    r"\b12535\b": 802266,
+                    r"\b12536\b": 802266,
+                    r"\b12537\b": 802266,
+                    r"\b12538\b": 802266,
+                    r"\b12539\b": 802266,
+                    r"\b12540\b": 802266,
+                    r"\b12541\b": 802266,
+                    r"\b12550\b": 802266,
+                    r"\b12551\b": 802266,
+                    r"\b12556\b": 802266,
+                    r"\b12557\b": 802266,
+                    r"\b12558\b": 802266,
+                    r"\b12559\b": 802266,
+                    r"\b12562\b": 802266,
+                    r"\b12566\b": 802266,
+                    r"tooltip\.idleTime": 987577,
+                    r"receivingMsgs": 86233,
+                    r"hostContacted": 86233,
+                    r"noMessages": 86233,
+                    r"receivedMessages": 86233,
+                    r"mailnews\.reply_header_authorwrote": 995797,
+                    r"mailnews\.reply_header_ondate": 995797,}
+
+        for pattern, bug in patterns.iteritems():
+            yield self.get_test_bug(
+                    bug, pattern,
+                    "Removed labels in use.",
+                    "Some string matched the pattern `%s`, which has been "
+                    "flagged as having been removed or renamed "
+                    "in Thunderbird 31." % pattern,
                     compat_type="error")
