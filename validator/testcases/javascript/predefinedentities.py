@@ -508,6 +508,15 @@ INTERFACES = {
     u"nsIMsgCompose":
         {"value":
              {u"checkAndPopulateRecipients": entity("nsIMsgCompose.checkAndPopulateRecipients")}},
+    u"nsIFolderLookupService":
+        {"value":
+             {u"getFolderById": entity("nsIFolderLookupService.getFolderById")}},
+    u"nsIAbCard":
+        {"value":
+             {u"kAllowRemoteContentProperty": entity("nsIAbCard.kAllowRemoteContentProperty")}},
+    u"nsIAddrDatabase":
+        {"value":
+             {u"addAllowRemoteContent": entity("nsIAddrDatabase.addAllowRemoteContent")}},
     }
 
 INTERFACE_ENTITIES = {u"nsIXMLHttpRequest":
@@ -850,6 +859,14 @@ GLOBAL_ENTITIES = {
     u"FillInHTMLTooltip": entity("FillInHTMLTooltip"),
     u"escapeXMLchars": entity("escapeXMLchars"),
     u"getNonHtmlRecipients": entity("getNonHtmlRecipients"),
+    u"updateCharsetPopupMenu": entity("updateCharsetPopupMenu"),
+    u"EditorSetDocumentCharacterSet": entity("EditorSetDocumentCharacterSet"),
+    u"awArrowHit": entity("awArrowHit"),
+    u"UpdateMailEditCharset": entity("UpdateMailEditCharset"),
+    u"InitCharsetMenuCheckMark": entity("InitCharsetMenuCheckMark"),
+    u"allowRemoteContentForSender": entity("allowRemoteContentForSender"),
+    u"allowRemoteContentForSite": entity("allowRemoteContentForSite"),
+    u"createNewHeaderView": entity("createNewHeaderView"),
 }
 
 CONTENT_DOCUMENT = GLOBAL_ENTITIES[u"content"]["value"][u"document"]
