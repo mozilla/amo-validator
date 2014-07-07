@@ -10,13 +10,10 @@ node
     the current node being evaluated
 """
 
-import types
-
 import actions
-from validator.compat import (FX10_DEFINITION, FX14_DEFINITION,
-                              FX29_DEFINITION, FX30_DEFINITION)
+from validator.compat import (FX10_DEFINITION, FX29_DEFINITION,
+                              FX30_DEFINITION, FX31_DEFINITION)
 from validator.constants import BUGZILLA_BUG, MDN_DOC
-from jstypes import *
 from instanceproperties import _set_HTML_property
 
 
@@ -37,10 +34,10 @@ def addEventListener(args, traverser, node, wrapper):
             description="A truthy fourth argument indicates code that "
                         "accesses untrusted code. This code should be "
                         "further investigated.",
-        filename=traverser.filename,
-        line=traverser.line,
-        column=traverser.position,
-        context=traverser.context)
+            filename=traverser.filename,
+            line=traverser.line,
+            column=traverser.position,
+            context=traverser.context)
 
 
 def createElement(args, traverser, node, wrapper):
@@ -73,6 +70,21 @@ def createElementNS(args, traverser, node, wrapper):
         _create_variable_element(traverser)
 
 
+def createEvent(args, traverser, node, wrapper):
+    """Handles createEvent calls."""
+
+    if len(args) == 1 and args[0].get("value") == "DataContainerEvent":
+        traverser.warning(
+            err_id=("js", "instanceactions", "createEvent_DataContainerEvent"),
+            warning="`DataContainerEvent` is no longer available",
+            description="`DataContainerEvent` is no longer available. You "
+                        "should use `MessageEvent` or `CustomEvent` instead. "
+                        "See %s for more information." % BUGZILLA_BUG % 980134,
+            for_appversions=FX31_DEFINITION,
+            compatibility_type="error",
+            tier=5)
+
+
 def QueryInterface(args, traverser, node, wrapper):
     """Handles QueryInterface calls"""
 
@@ -81,9 +93,10 @@ def QueryInterface(args, traverser, node, wrapper):
 
     from call_definitions import xpcom_constructor
     return xpcom_constructor("QueryInterface", True, True)(
-                wrapper=node,
-                arguments=args,
-                traverser=traverser)
+        wrapper=node,
+        arguments=args,
+        traverser=traverser)
+
 
 def getInterface(args, traverser, node, wrapper):
     """Handles getInterface calls"""
@@ -99,15 +112,16 @@ def getInterface(args, traverser, node, wrapper):
 
     from call_definitions import xpcom_constructor
     return xpcom_constructor("getInterface")(
-                wrapper=node,
-                arguments=args,
-                traverser=traverser)
+        wrapper=node,
+        arguments=args,
+        traverser=traverser)
+
 
 def _create_script_tag(traverser):
     """Raises a warning that the dev is creating a script tag"""
     traverser.err.warning(
         err_id=("testcases_javascript_instanceactions", "_call_expression",
-                    "called_createelement"),
+                "called_createelement"),
         warning="createElement() used to create script tag",
         description="The createElement() function was used to create a script "
                     "tag in a JavaScript file. Add-ons are not allowed to "
@@ -123,12 +137,12 @@ def _create_variable_element(traverser):
     """Raises a warning that the dev is creating an arbitrary element"""
     traverser.err.warning(
         err_id=("testcases_javascript_instanceactions", "_call_expression",
-                    "createelement_variable"),
+                "createelement_variable"),
         warning="Variable element type being created",
         description=["createElement or createElementNS were used with a "
-                     "variable rather than a raw string. Literal values should "
-                     "be used when taking advantage of the element creation "
-                     "functions.",
+                     "variable rather than a raw string. Literal values "
+                     "should be used when taking advantage of the element "
+                     "creation functions.",
                      "E.g.: createElement('foo') rather than "
                      "createElement(el_type)"],
         filename=traverser.filename,
@@ -149,7 +163,7 @@ def setAttribute(args, traverser, node, wrapper):
     if first_as_str.lower().startswith("on"):
         traverser.err.notice(
             err_id=("testcases_javascript_instanceactions", "setAttribute",
-                        "setting_on*"),
+                    "setting_on*"),
             notice="on* attribute being set using setAttribute",
             description="To prevent vulnerabilities, event handlers (like "
                         "'onclick' and 'onhover') should always be defined "
@@ -246,8 +260,8 @@ def PageMod(args, traverser, node, wrapper):
 
     import validator.testcases.scripting as sub_scripting
     sub_scripting.test_js_file(
-            traverser.err, traverser.filename, content_script,
-            line=traverser.line, context=traverser.context)
+        traverser.err, traverser.filename, content_script,
+        line=traverser.line, context=traverser.context)
 
 
 def bind(args, traverser, node, wrapper):
@@ -301,6 +315,7 @@ INSTANCE_DEFINITIONS = {
     "bind": bind,
     "createElement": createElement,
     "createElementNS": createElementNS,
+    "createEvent": createEvent,
     "getAsBinary": nsIDOMFile_deprec,
     "getAsDataURL": nsIDOMFile_deprec,
     "getInterface": getInterface,
