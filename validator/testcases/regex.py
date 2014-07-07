@@ -1339,14 +1339,23 @@ class Gecko31RegexTests(CompatRegexTestHelper):
     """Regex tests for Gecko 31 updates."""
 
     VERSION = FX31_DEFINITION
-    BUG_ID = 1033705
 
     def tests(self):
         yield self.get_test_bug(
-            self.BUG_ID,
+            1033705,
             "browser\.tabs\.closeButtons",
             'The "browser.tabs.closeButtons" preference has been removed.',
             'The "browser.tabs.closeButtons" preference has been removed.',
+            compat_type="warning",
+            log_function=self.err.warning)
+
+        mdn_article = "How_to_implement_custom_autocomplete_search_component"
+        yield self.get_test(
+            "nsIAutoCompleteResult",
+            "`nsIAutoCompleteResult` has changed",
+            "The `nsIAutoCompleteResult` interfaces were changed, introducing "
+            "the getFinalCompleteValueAt function. See %s for more "
+            "information." % MDN_DOC % mdn_article,
             compat_type="warning",
             log_function=self.err.warning)
 
