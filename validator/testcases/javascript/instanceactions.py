@@ -310,6 +310,19 @@ def setPrototypeOfCallback(arguments, traverser, node, wrapper):
         tier=5)
 
 
+def sendAsBinary(arguments, traverser, node, wrapper):
+    traverser.warning(
+        err_id=("testcases_javascript_instanceproperties", "sendAsBinary"),
+        warning="`sendAsBinary` is deprecated",
+        description="`sendAsBinary` is deprecated and will be removed in a "
+                    "future version of Firefox. Setting the appropriate "
+                    "content-type or passing a Blob are possible alternatives."
+                    "See bug %s for more information." % BUGZILLA_BUG % 939323,
+        for_appversions=FX31_DEFINITION,
+        compatibility_type="warning",
+        tier=5)
+
+
 INSTANCE_DEFINITIONS = {
     "addEventListener": addEventListener,
     "bind": bind,
@@ -330,4 +343,5 @@ INSTANCE_DEFINITIONS = {
     "removeLivemark": livemarkCallback,
     "getLivemark": livemarkCallback,
     "setPrototypeOf": setPrototypeOfCallback,
+    "sendAsBinary": sendAsBinary,
 }

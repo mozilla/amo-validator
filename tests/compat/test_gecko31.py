@@ -36,3 +36,11 @@ class TestFX31Compat(CompatTestCase):
             'window.getShortcutOrURIAndPostData("something", cb);')
         self.assert_silent()
         self.assert_compat_silent()
+
+    def test_sendAsBinary(self):
+        self.run_script_for_compat('''
+            var xhr = new XMLHttpRequest();
+            xhr.sendAsBinary("some-data");
+        ''')
+        self.assert_silent()
+        self.assert_compat_warning(type_="warning")
