@@ -2,6 +2,7 @@ from call_definitions import open_in_chrome_context
 from instanceproperties import _set_HTML_property
 from validator.compat import (FX10_DEFINITION, FX14_DEFINITION,
                               FX16_DEFINITION, FX19_DEFINITION,
+                              FX31_DEFINITION,
                               TB14_DEFINITION, TB15_DEFINITION,
                               TB16_DEFINITION, TB18_DEFINITION,
                               TB19_DEFINITION, TB20_DEFINITION,
@@ -978,3 +979,22 @@ TB31_JS_ENTITIES = [
 ]
 register_changed_entities(version_definition=TB31_DEFINITION,
     entities=TB31_JS_ENTITIES, version_string="Thunderbird 31")
+
+
+@register_entity("getShortcutOrURIAndPostData")
+def getShortcutOrURIAndPostData(traverser):
+    def getShortcutOrURIAndPostData_called(wrapper, arguments, traverser):
+        if len(arguments) == 1:
+            traverser.warning(
+                err_id=("js", "entities", "getShortcutOrURIAndPostData"),
+                warning="`getShortcutOrURIAndPostData` no longer returns a "
+                        "promise",
+                description="getShortcutOrURIAndPostData now takes a "
+                            "callback as a second argument, instead of "
+                            "returning a Promise. See %s for more "
+                            "information." % BUGZILLA_BUG % 989984,
+                for_appversions=FX31_DEFINITION,
+                compatibility_type="error",
+                tier=5)
+
+    return {"return": getShortcutOrURIAndPostData_called}
