@@ -44,3 +44,8 @@ class TestFX31Compat(CompatTestCase):
         ''')
         self.assert_silent()
         self.assert_compat_warning(type_="warning")
+
+    def test_browser_tabs_closeButtons_pref(self):
+        self.run_regex_for_compat('pref("browser.tabs.closeButtons", 3)')
+        self.assert_silent()
+        self.assert_compat_warning(type_="warning")
