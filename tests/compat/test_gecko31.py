@@ -19,6 +19,15 @@ class TestFX31Compat(CompatTestCase):
         self.assert_silent()
         self.assert_compat_error()
 
+    def test_getShortcutOrURIAndPostData_promise_yield(self):
+        self.run_script_for_compat('''
+            function urlAndPostData() {
+                yield getShortcutOrURIAndPostData("a string");
+            }
+        ''')
+        self.assert_silent()
+        self.assert_compat_error()
+
     def test_getShortcutOrURIAndPostData_promise_window(self):
         self.run_script_for_compat(
             'var p = window.getShortcutOrURIAndPostData("something");')

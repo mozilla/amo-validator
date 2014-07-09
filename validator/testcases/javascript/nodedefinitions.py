@@ -75,7 +75,7 @@ DEFINITIONS = {
                            action=actions._call_expression, returns=True),
     "MemberExpression": node(branches=("object", "property"),
                              action=actions.trace_member, returns=True),
-    "YieldExpression": node(branches=("argument"), returns=True),
+    "YieldExpression": node(branches=("argument",), returns=True),
     "ComprehensionExpression": node(branches=("body", "filter"), returns=True),
     "GeneratorExpression": node(branches=("body", "filter"), returns=True),
 
