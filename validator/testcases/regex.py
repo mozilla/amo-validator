@@ -9,7 +9,7 @@ from validator.compat import (
     FX17_DEFINITION, FX18_DEFINITION, FX19_DEFINITION, FX20_DEFINITION,
     FX21_DEFINITION, FX22_DEFINITION, FX23_DEFINITION, FX24_DEFINITION,
     FX25_DEFINITION, FX26_DEFINITION, FX27_DEFINITION, FX28_DEFINITION,
-    FX30_DEFINITION,
+    FX30_DEFINITION, FX31_DEFINITION,
     TB7_DEFINITION, TB10_DEFINITION, TB11_DEFINITION, TB12_DEFINITION,
     TB13_DEFINITION, TB14_DEFINITION, TB15_DEFINITION, TB16_DEFINITION,
     TB17_DEFINITION, TB18_DEFINITION, TB19_DEFINITION, TB20_DEFINITION,
@@ -1333,6 +1333,31 @@ class Gecko30RegexTests(CompatRegexTestHelper):
                 .format(name=filename),
                 compat_type="error", log_function=self.err.warning)
 
+
+@register_generator
+class Gecko31RegexTests(CompatRegexTestHelper):
+    """Regex tests for Gecko 31 updates."""
+
+    VERSION = FX31_DEFINITION
+
+    def tests(self):
+        yield self.get_test_bug(
+            1033705,
+            "browser\.tabs\.closeButtons",
+            'The "browser.tabs.closeButtons" preference has been removed.',
+            'The "browser.tabs.closeButtons" preference has been removed.',
+            compat_type="warning",
+            log_function=self.err.warning)
+
+        mdn_article = "How_to_implement_custom_autocomplete_search_component"
+        yield self.get_test(
+            "nsIAutoCompleteResult",
+            "`nsIAutoCompleteResult` has changed",
+            "The `nsIAutoCompleteResult` interfaces were changed, introducing "
+            "the getFinalCompleteValueAt function. See %s for more "
+            "information." % MDN_DOC % mdn_article,
+            compat_type="warning",
+            log_function=self.err.warning)
 
 #############################
 #  Thunderbird Regex Tests  #

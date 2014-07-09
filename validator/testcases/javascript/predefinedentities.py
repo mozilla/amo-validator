@@ -867,6 +867,7 @@ GLOBAL_ENTITIES = {
     u"allowRemoteContentForSender": entity("allowRemoteContentForSender"),
     u"allowRemoteContentForSite": entity("allowRemoteContentForSite"),
     u"createNewHeaderView": entity("createNewHeaderView"),
+    u"getShortcutOrURIAndPostData": entity("getShortcutOrURIAndPostData"),
 }
 
 CONTENT_DOCUMENT = GLOBAL_ENTITIES[u"content"]["value"][u"document"]

@@ -88,8 +88,9 @@ class CompatTestCase(JSTestCase, RegexTestCase):
                               "warning": self.compat_err.warnings,
                               "notice": self.compat_err.notices}[type_]
         assert message_collection, \
-                "No %ss were raised in the compatibility test." % type_
-        assert any(m["compatibility_type"] == compat_type for
-                   m in message_collection), \
-                ("No %ss that raise a compatibility %s were found." %
-                     (type_, compat_type))
+            "No %ss were raised in the compatibility test." % type_
+        is_error = any(
+            m["compatibility_type"] == compat_type
+            for m in message_collection)
+        assert is_error, ("No %ss that raise a compatibility %s were found." %
+                          (type_, compat_type))
