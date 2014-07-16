@@ -71,7 +71,9 @@ your environment.
 
 ### Or with docker:
 
+```
 docker run --rm -v <path-to-dir-of-file.xpi>:/xpi marceloandrader/amo-validator /xpi/file.xpi -t extension [other args]
+```
 
 ## Running
 
