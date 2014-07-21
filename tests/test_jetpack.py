@@ -46,6 +46,15 @@ def test_not_jetpack():
     eq_(err.metadata.get('is_jetpack', False), False)
 
 
+def test_package_json_jetpack():
+    """Test that add-ons with the new package.json are treated as jetpack."""
+    err = _do_test(MockXPI({"bootstrap.js": "", "package.json": ""}))
+    assert not err.errors
+    assert not err.warnings
+    assert not err.notices
+    eq_(err.metadata.get('is_jetpack'), True)
+
+
 def test_bad_harnessoptions():
     """Test that a malformed harness-options.json file is warned against."""
 
@@ -78,6 +87,38 @@ def test_pass_jetpack():
     pretested_files = err.get_resource("pretested_files")
     assert pretested_files
     assert "bootstrap.js" in pretested_files
+
+
+def test_package_json_pass_jetpack():
+    """Test that a minimalistic package.json Jetpack setup will pass."""
+
+    with open("tests/resources/bootstrap.js") as bootstrap_file:
+        bootstrap = bootstrap_file.read()
+    err = _do_test(MockXPI({"bootstrap.js": bootstrap,
+                            "package.json": "{}"}))
+    print err.print_summary(verbose=True)
+    assert not err.failed()
+    assert "is_jetpack" in err.metadata and err.metadata["is_jetpack"]
+
+    # Test that all files are marked as pretested.
+    pretested_files = err.get_resource("pretested_files")
+    assert pretested_files
+    assert "bootstrap.js" in pretested_files
+
+
+def test_package_json_different_bootstrap():
+    """Test that a minimalistic package.json Jetpack setup will pass."""
+
+    err = _do_test(MockXPI({"bootstrap.js": "var foo = 'bar';",
+                            "package.json": "{}"}))
+    print err.print_summary(verbose=True)
+    assert not err.failed()
+    assert "is_jetpack" in err.metadata and err.metadata["is_jetpack"]
+
+    # Test that all files are not marked as pretested.
+    pretested_files = err.get_resource("pretested_files")
+    assert not pretested_files
+    assert "bootstrap.js" not in pretested_files
 
 
 def test_missing_elements():

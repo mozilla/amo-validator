@@ -3,7 +3,7 @@ from mock import patch
 from nose.tools import raises
 
 import validator.testcases.installrdf as installrdf
-from validator.constants import *
+from validator.constants import PACKAGE_THEME
 from validator.errorbundler import ErrorBundle
 from validator.rdf import RDFParser
 
@@ -15,10 +15,17 @@ def _test_value(value, test, failure=True):
 
     test(err, value)
 
-    if failure:
-        return err.failed()
+    if hasattr(test, 'func'):
+        func = test.func
     else:
-        return not err.failed()
+        func = test
+
+    if failure:
+        assert err.failed(), "{value} did not fail {func}".format(
+            value=value, func=func.__name__)
+    else:
+        assert not err.failed(), "{value} did not pass {func}".format(
+            value=value, func=func.__name__)
 
 
 def test_pass_id():
@@ -38,28 +45,22 @@ def test_pass_id():
 def test_fail_id():
     "Tests that invalid IDs will not be accepted."
 
-    _test_value("{1234567-1234-1234-1234-123456789012}",
-                installrdf._test_id)
-    _test_value("!@foo.bar",
-                installrdf._test_id)
+    _test_value("{1234567-1234-1234-1234-123456789012}", installrdf._test_id)
+    _test_value("!@foo.bar", installrdf._test_id)
 
 
 def test_pass_version():
     "Tests that valid versions will be accepted."
 
-    _test_value("1.2.3.4",
-                installrdf._test_version,
-                False)
-    _test_value("1a.2.3b+*.-_",
-                installrdf._test_version,
-                False)
+    _test_value("1.2.3.4", installrdf._test_version, False)
+    _test_value("1a.2.3b+*.-_", installrdf._test_version, False)
+    _test_value("twenty", installrdf._test_version, False)
 
 
 def test_fail_version():
     "Tests that invalid versions will not be accepted."
 
     _test_value("2.0 alpha", installrdf._test_version)
-    _test_value("whatever", installrdf._test_version)
     _test_value("123456789012345678901234567890123", installrdf._test_version)
     _test_value("1.2.3%", installrdf._test_version)
 
@@ -89,6 +90,7 @@ def _run_test(filename, failure=True, detected_type=0, listed=True,
     return _run_test_raw(open(filename).read(), failure, detected_type,
                          listed, overrides, compat)
 
+
 def _run_test_raw(data, failure=True, detected_type=0, listed=True,
                   overrides=None, compat=False):
     "Runs a test on an install.rdf snippet"
@@ -109,7 +111,7 @@ def _run_test_raw(data, failure=True, detected_type=0, listed=True,
 
     print err.print_summary(verbose=True)
 
-    if failure: # pragma: no cover
+    if failure:  # pragma: no cover
         assert err.failed() or err.notices
     else:
         assert not err.failed() and not err.notices
@@ -129,7 +131,7 @@ def test_has_rdf(install_rdf):
     err.save_resource("install_rdf", RDFParser(err, "<rdf></rdf>"))
     err.save_resource("has_install_rdf", True)
 
-    result = installrdf.test_install_rdf_params(err, None)
+    installrdf.test_install_rdf_params(err, None)
     assert install_rdf.called
 
 
@@ -221,23 +223,19 @@ def test_overrides():
 <?xml version="1.0"?>
 
 <RDF xmlns="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
-		xmlns:em="http://www.mozilla.org/2004/em-rdf#">
-
-	<Description about="urn:mozilla:install-manifest">
-
-	<em:id>bastatestapp1@basta.mozilla.com</em:id>
-	<em:version>1.2.3.4</em:version>
-    <!-- NOTE THAT NAME IS MISSING -->
-	<em:targetApplication>
-		<Description>
-		<em:id>{ec8030f7-c20a-464f-9b0e-13a3a9e97384}</em:id>
-		<em:minVersion>3.7a5pre</em:minVersion>
-		<em:maxVersion>0.3</em:maxVersion>
-		</Description>
-	</em:targetApplication>
-
+     xmlns:em="http://www.mozilla.org/2004/em-rdf#">
+    <Description about="urn:mozilla:install-manifest">
+        <em:id>bastatestapp1@basta.mozilla.com</em:id>
+        <em:version>1.2.3.4</em:version>
+        <!-- NOTE THAT NAME IS MISSING -->
+        <em:targetApplication>
+            <Description>
+                <em:id>{ec8030f7-c20a-464f-9b0e-13a3a9e97384}</em:id>
+                <em:minVersion>3.7a5pre</em:minVersion>
+                <em:maxVersion>0.3</em:maxVersion>
+            </Description>
+        </em:targetApplication>
     </Description>
-
 </RDF>
     """, failure=False, overrides={"ignore_empty_name": True})
 
@@ -248,24 +246,20 @@ def test_optionsType():
     assert _run_test_raw(data="""
 <?xml version="1.0"?>
 <RDF xmlns="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
-		xmlns:em="http://www.mozilla.org/2004/em-rdf#">
-	<Description about="urn:mozilla:install-manifest">
-
-	<em:id>bastatestapp1@basta.mozilla.com</em:id>
-	<em:version>1.2.3.4</em:version>
-    <em:name>foo bar</em:name>
-	<em:targetApplication>
-		<Description>
-		<em:id>{ec8030f7-c20a-464f-9b0e-13a3a9e97384}</em:id>
-		<em:minVersion>3.7a5pre</em:minVersion>
-		<em:maxVersion>0.3</em:maxVersion>
-		</Description>
-	</em:targetApplication>
-
-    <em:optionsType>2</em:optionsType>
-
+     xmlns:em="http://www.mozilla.org/2004/em-rdf#">
+    <Description about="urn:mozilla:install-manifest">
+        <em:id>bastatestapp1@basta.mozilla.com</em:id>
+        <em:version>1.2.3.4</em:version>
+        <em:name>foo bar</em:name>
+        <em:targetApplication>
+            <Description>
+                <em:id>{ec8030f7-c20a-464f-9b0e-13a3a9e97384}</em:id>
+                <em:minVersion>3.7a5pre</em:minVersion>
+                <em:maxVersion>0.3</em:maxVersion>
+            </Description>
+        </em:targetApplication>
+        <em:optionsType>2</em:optionsType>
     </Description>
-
 </RDF>
     """, failure=False)
 
@@ -276,24 +270,20 @@ def test_optionsType_fail():
     assert _run_test_raw(data="""
 <?xml version="1.0"?>
 <RDF xmlns="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
-		xmlns:em="http://www.mozilla.org/2004/em-rdf#">
-	<Description about="urn:mozilla:install-manifest">
-
-	<em:id>bastatestapp1@basta.mozilla.com</em:id>
-	<em:version>1.2.3.4</em:version>
-    <em:name>foo bar</em:name>
-	<em:targetApplication>
-		<Description>
-		<em:id>{ec8030f7-c20a-464f-9b0e-13a3a9e97384}</em:id>
-		<em:minVersion>3.7a5pre</em:minVersion>
-		<em:maxVersion>0.3</em:maxVersion>
-		</Description>
-	</em:targetApplication>
-
-    <em:optionsType>5</em:optionsType>
-
+     xmlns:em="http://www.mozilla.org/2004/em-rdf#">
+    <Description about="urn:mozilla:install-manifest">
+        <em:id>bastatestapp1@basta.mozilla.com</em:id>
+        <em:version>1.2.3.4</em:version>
+        <em:name>foo bar</em:name>
+        <em:targetApplication>
+            <Description>
+                <em:id>{ec8030f7-c20a-464f-9b0e-13a3a9e97384}</em:id>
+                <em:minVersion>3.7a5pre</em:minVersion>
+                <em:maxVersion>0.3</em:maxVersion>
+            </Description>
+        </em:targetApplication>
+        <em:optionsType>5</em:optionsType>
     </Description>
-
 </RDF>
     """, failure=True)
 

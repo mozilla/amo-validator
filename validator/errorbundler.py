@@ -369,7 +369,7 @@ class ErrorBundle(object):
                                "Identified files:")
             if "jetpack_identified_files" in self.metadata:
                 for filename, data in \
-                    self.metadata["jetpack_identified_files"].items():
+                        self.metadata["jetpack_identified_files"].items():
                     self.handler.write((" %s\n" % filename) +
                                        ("  %s : %s" % data))
 
