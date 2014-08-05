@@ -69,11 +69,9 @@ If you don't want to put the `js` executable in your `$PATH` or you want it
 in a custom path, you can define it as `$SPIDERMONKEY_INSTALLATION` in
 your environment.
 
-### Or with docker:
+### Using amo-validator as a contained app using docker
 
-```
-docker run --rm -v <path-to-dir-of-file.xpi>:/xpi marceloandrader/amo-validator /xpi/file.xpi -t extension [other args]
-```
+Check this instructions from [marceloandrader](https://github.com/marceloandrader/dockerfiles/blob/master/amo-validator/README.md)
 
 ## Running
 
