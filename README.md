@@ -69,6 +69,9 @@ If you don't want to put the `js` executable in your `$PATH` or you want it
 in a custom path, you can define it as `$SPIDERMONKEY_INSTALLATION` in
 your environment.
 
+### Using amo-validator as a contained app using docker
+
+Check this instructions from [marceloandrader](https://github.com/marceloandrader/dockerfiles/blob/master/amo-validator/README.md)
 
 ## Running
 
