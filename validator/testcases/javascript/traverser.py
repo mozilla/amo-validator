@@ -101,7 +101,7 @@ class Traverser(object):
                     not self.err.get_resource("em:bootstrap") == "true"):
                     self.err.warning(
                         err_id=("testcases_javascript_traverser", "run",
-                                "namepsace_pollution"),
+                                "namespace_pollution"),
                         warning="JavaScript namespace pollution",
                         description=[
                             "Your add-on contains a large number of global "
