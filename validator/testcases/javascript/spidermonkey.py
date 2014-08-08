@@ -16,7 +16,7 @@ def get_tree(code, err=None, filename=None, shell=None):
 
     try:
         return _get_tree(code, shell)
-    except JSReflectException as exc:
+    except JSReflectError as exc:
         str_exc = str(exc).strip("'\"")
         if ("SyntaxError" in str_exc or
             "ReferenceError" in str_exc):
@@ -48,6 +48,16 @@ def get_tree(code, err=None, filename=None, shell=None):
                        "being properly read by the Spidermonkey JS engine.",
                        str(exc)],
                       filename=filename)
+    except JSReflectWarning as exc:
+        str_exc = str(exc).strip("'\"")
+        err.warning(("testcases_scripting",
+                     "test_js_file",
+                     "syntax_warning"),
+                     "JavaScript Compile-Time Warning",
+                     ["A compile-time warning in the JavaScript has raised "
+                      "during validation of that file.",
+                      "Message: %s" % str_exc.split(":", 1)[-1].strip()],
+                     filename=filename)
 
 
 class JSReflectException(Exception):
@@ -64,6 +74,14 @@ class JSReflectException(Exception):
         "Set the line number and return self for chaining"
         self.line = int(line_num)
         return self
+
+
+class JSReflectWarning(JSReflectException):
+    pass
+
+
+class JSReflectError(JSReflectException):
+    pass
 
 
 BOOTSTRAP_SCRIPT = """
@@ -94,11 +112,8 @@ def _get_tree(code, shell):
     code = json.dumps(JS_ESCAPE.sub("u", unicodehelper.decode(code)))
     data, stderr = shell_obj.communicate(code)
 
-    if stderr:
-        raise JSReflectException(stderr)
-
     if not data:
-        raise JSReflectException("Reflection failed")
+        raise JSReflectError("Reflection failed")
 
     data = unicodehelper.decode(data)
     parsed = json.loads(data, strict=False)
@@ -110,8 +125,10 @@ def _get_tree(code, shell):
                                "spidermonkey='%s'" % (parsed["error_message"],
                                                       shell))
         else:
-            raise JSReflectException(parsed["error_message"]).line_num(
+            raise JSReflectError(parsed["error_message"]).line_num(
                     parsed["line_number"])
 
-    return parsed
+    if stderr:
+        raise JSReflectWarning(stderr)
 
+    return parsed

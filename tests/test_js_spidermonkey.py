@@ -7,7 +7,6 @@ from js_helper import _do_test_raw
 from validator.errorbundler import ErrorBundle
 import validator.testcases.scripting as scripting
 import validator.testcases.javascript.spidermonkey as spidermonkey
-from validator.errorbundler import ErrorBundle
 
 
 def test_scripting_disabled():
@@ -80,3 +79,43 @@ def test_compiletime_errors():
 
     # Reference error
     assert _do_test_raw("x - y = 4;").failed()
+
+
+class MockSubprocessWithStderr(object):
+    "A class to mock subprocess giving stderr"
+
+    PIPE = True
+
+    def Popen(self, command, shell, stderr, stdout, stdin):
+        return MockSubprocessObjectWithStderr()
+
+
+class MockSubprocessObjectWithStderr(object):
+    "A class to mock a subprocess object giving stderr"
+
+    def communicate(self, data):
+        return json.dumps({}), "stderr"
+
+
+@mock.patch("validator.testcases.javascript.spidermonkey.subprocess",
+            MockSubprocessWithStderr())
+def test_stderr_raise_warning():
+    "Tests that when Spidermonkey issue a stderr with no error, a warning is raised"
+
+    try:
+        spidermonkey._get_tree("foo bar", "[path]")
+    except spidermonkey.JSReflectWarning as err:
+        assert err.value == "stderr", err
+    except Exception:
+        raise
+
+
+@mock.patch("validator.testcases.javascript.spidermonkey.subprocess",
+            MockSubprocessWithStderr())
+def test_get_tree_add_warning():
+    "Ensures that Spidermonkey is not run if it is set to be disabled"
+
+    err = ErrorBundle()
+    assert len(err.warnings) == 0
+    spidermonkey.get_tree("foo bar", err=err, shell="[path]")
+    assert len(err.warnings) == 1
