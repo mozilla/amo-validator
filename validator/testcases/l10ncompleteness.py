@@ -487,7 +487,7 @@ def _aggregate_results(err, results, locale, similar=False, base="en-US"):
     if agg_unchanged:
         err.notice(("testcases_l10ncompleteness",
                     "_aggregate_results",
-                    "unchnged_entities"),
+                    "unchanged_entities"),
                    "Unchanged translation entities",
                    ["Localizations must include a translated copy of each "
                     "entity from each file in the reference locale. These "
