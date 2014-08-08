@@ -86,7 +86,8 @@ def _get_tree(code, shell):
     if not code:
         return None
 
-    cmd = [shell, "-e", BOOTSTRAP_SCRIPT]
+    # -W means --nowarnings, see bug 934388
+    cmd = [shell, "-W", "-e", BOOTSTRAP_SCRIPT]
     shell_obj = subprocess.Popen(
         cmd, shell=False, stdin=subprocess.PIPE, stderr=subprocess.PIPE,
         stdout=subprocess.PIPE)
