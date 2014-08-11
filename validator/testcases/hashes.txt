@@ -161,6 +161,8 @@ ba0103f765802f299bc7dca5c35d9a00359a0abb10cac136f43caf9c0bf98b7c jqueryui.1.10.3
 9671f8be70ad94a5362e60f4656d5d53ba214d32ab70a3f9d1603d7dadf9d1c1 jqueryui.1.10.3.jquery-ui.min.js
 b69f1567863d760ef4dabec3eb29f349abca4b007dce36ab8926784a7babbe6c jqueryui.1.10.4.jquery-ui.js
 a13c96acd88fe907edbb8becda0d113c22abde0d5ae904e5213360a1e6f145ce jqueryui.1.10.4.jquery-ui.min.js
+cfcb2af9fc17cbac57d472c1259e5da32ad698506143d946de9fc02a88a928ab jqueryui.1.11.0.jquery-ui.js
+94217ee7990c505fb77ceff70625ee8b87a250a7109adafb79c29278b543c484 jqueryui.1.11.0.jquery-ui.min.js
 1fe9f3c8639b6216131ac0b459e8520fb777e2d0de74154578b5d0f434bf5564 jqueryui.1.5.2.jquery-ui.js
 1944959d8351f098ef17c575f3479fab48a8c3c52da6a63d3fc59be3db512d96 jqueryui.1.5.2.jquery-ui.min.js
 496be6b4b6ae257267a34dceb16e0934c4d369361dd3661fc33a7e9aef0bc56b jqueryui.1.5.3.jquery-ui.js
