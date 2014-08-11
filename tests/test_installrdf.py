@@ -216,6 +216,23 @@ def test_obsolete():
     assert err.notices and not err.failed()
 
 
+def test_invalid_id():
+    """Test that invalid ids get a nice error message."""
+
+    err = _run_test_raw(data="""
+<?xml version="1.0"?>
+
+<RDF xmlns="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+     xmlns:em="http://www.mozilla.org/2004/em-rdf#">
+    <Description about="urn:mozilla:install-manifest">
+        <em:id>invalid</em:id>
+    </Description>
+</RDF>
+""")
+    assert err.failed()
+    assert any('<em:id> is invalid' in msg['message']
+               for msg in err.errors)
+
 def test_overrides():
     """Test that overrides will work on the install.rdf file."""
 
