@@ -220,19 +220,38 @@ def test_has_installrdfs():
     rules are respected."""
 
     # Test package to make sure has_install_rdf is set to True.
-    assert not _do_installrdfs(packagelayout.test_layout_all)
-    assert _do_installrdfs(packagelayout.test_layout_all, False)
+    assert not _do_config_test(packagelayout.test_layout_all)
+    assert _do_config_test(
+        packagelayout.test_layout_all, has_install_rdf=False)
 
     mock_xpi_subpack = MockXPI({}, subpackage=True)
 
     # Makes sure the above test is ignored if the package is a
     # subpackage.
-    assert not _do_installrdfs(packagelayout.test_layout_all,
-                               False,
-                               mock_xpi_subpack)
-    assert not _do_installrdfs(packagelayout.test_layout_all,
-                               True,
-                               mock_xpi_subpack)
+    assert not _do_config_test(packagelayout.test_layout_all,
+                               has_install_rdf=False,
+                               xpi=mock_xpi_subpack)
+    assert not _do_config_test(packagelayout.test_layout_all,
+                               has_install_rdf=True,
+                               xpi=mock_xpi_subpack)
+
+
+def test_has_package_json():
+    """Tests that having an install.rdf is not require with a package.json."""
+    assert not _do_config_test(
+        packagelayout.test_layout_all,
+        has_install_rdf=False,
+        has_package_json=True), 'errors when only package.json present'
+
+
+def test_no_package_json():
+    """Tests that there are errors when there is not an install.rdf or a
+    package.json"""
+    assert _do_config_test(
+        packagelayout.test_layout_all,
+        has_install_rdf=False,
+        has_package_json=False), (
+        'no errors and no install.rdf and package.json')
 
 
 class MockDupeZipFile(object):
@@ -259,20 +278,22 @@ def test_duplicate_files():
     assert err.failed()
 
 
-def _do_installrdfs(function, has_install_rdf=True, xpi=None):
+def _do_config_test(function, has_install_rdf=True, has_package_json=False,
+                    xpi=None):
     "Helps to test that install.rdf files are present"
 
     err = ErrorBundle()
 
+    content = {}
     if has_install_rdf:
-        content = {"install.rdf" : True}
+        content["install.rdf"] = True
         err.save_resource("has_install_rdf", True)
-    else:
-        content = {}
+    if has_package_json:
+        content["package.json"] = True
+        err.save_resource("has_package_json", True)
 
     if xpi is None:
         xpi = MockXPI(content)
     function(err, xpi)
 
     return err.failed()
-

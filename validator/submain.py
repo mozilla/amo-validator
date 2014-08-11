@@ -1,4 +1,5 @@
 import logging
+import json
 import os
 import signal
 from zipfile import BadZipfile
@@ -127,8 +128,16 @@ def test_package(err, file_, name, expectation=PACKAGE_ANY,
     try:
         package = XPIManager(file_, mode="r", name=name)
 
-        # Test the install.rdf file to see if we can get the type that way.
+        has_package_json = "package.json" in package
         has_install_rdf = "install.rdf" in package
+
+        # install.rdf? | package.json? | error | use-file
+        # Yes          | No            | No    | install.rdf
+        # Yes          | Yes           | No    | install.rdf
+        # No           | No            | Yes   | install.rdf
+        # No           | Yes           | No    | package.json
+        if has_package_json:
+            _load_package_json(err, package, expectation)
         if has_install_rdf:
             _load_install_rdf(err, package, expectation)
     except IOError:
@@ -223,6 +232,23 @@ def _load_install_rdf(err, package, expectation):
                          "the expected type.",
                          'Type "%s" expected, found "%s"' %
                              (types[expectation], types[results])])
+
+
+def _load_package_json(err, package, expectation):
+    raw_package_json = package.read("package.json")
+    try:
+        package_json = json.loads(raw_package_json)
+    except ValueError:
+        err.error(
+            err_id=("main", "test_package", "parse_error"),
+            error="Could not parse `package.json`.",
+            description="The JSON parser was unable to parse the "
+                        "package.json file included with this add-on.",
+            filename="package.json")
+    else:
+        err.save_resource("has_package_json", True, pushable=True)
+        err.save_resource("package_json", package_json, pushable=True)
+        err.detected_type = PACKAGE_EXTENSION
 
 
 def populate_chrome_manifest(err, xpi_package):
