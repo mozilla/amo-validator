@@ -1,8 +1,8 @@
 from call_definitions import open_in_chrome_context
 from instanceproperties import _set_HTML_property
 from validator.compat import (FX10_DEFINITION, FX14_DEFINITION,
-                              FX16_DEFINITION, FX19_DEFINITION,
-                              FX31_DEFINITION,
+                              FX16_DEFINITION, FX31_DEFINITION,
+                              FX32_DEFINITION,
                               TB14_DEFINITION, TB15_DEFINITION,
                               TB16_DEFINITION, TB18_DEFINITION,
                               TB19_DEFINITION, TB20_DEFINITION,
@@ -998,3 +998,22 @@ def getShortcutOrURIAndPostData(traverser):
                 tier=5)
 
     return {"return": getShortcutOrURIAndPostData_called}
+
+
+FX32_ENTITIES = [
+    "nsICacheEntryDescriptor",
+    "nsICacheListener",
+    "nsICacheService",
+    "nsICacheSession",
+    "nsICacheVisitor",
+]
+FX32_BLOG = "http://www.janbambas.cz/http-cache-v1-api-disabled/"
+FX32_MDN = "https://developer.mozilla.org/docs/HTTP_Cache"
+
+for name in FX32_ENTITIES:
+    deprecated_entity(
+        name=name,
+        version=FX32_DEFINITION,
+        message="{name} has been removed. Read more at {blog} and {mdn}."
+                .format(name=name, blog=FX32_BLOG, mdn=FX32_MDN),
+        bug=999577)

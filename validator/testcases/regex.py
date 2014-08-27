@@ -3,13 +3,13 @@ from functools import wraps
 
 from validator.constants import BUGZILLA_BUG, MDN_DOC
 from validator.compat import (
-    FX4_DEFINITION, FX5_DEFINITION, FX6_DEFINITION, FX7_DEFINITION,
-    FX8_DEFINITION, FX9_DEFINITION, FX11_DEFINITION, FX12_DEFINITION,
-    FX13_DEFINITION, FX14_DEFINITION, FX15_DEFINITION, FX16_DEFINITION,
-    FX17_DEFINITION, FX18_DEFINITION, FX19_DEFINITION, FX20_DEFINITION,
-    FX21_DEFINITION, FX22_DEFINITION, FX23_DEFINITION, FX24_DEFINITION,
-    FX25_DEFINITION, FX26_DEFINITION, FX27_DEFINITION, FX28_DEFINITION,
-    FX30_DEFINITION, FX31_DEFINITION,
+    FX5_DEFINITION, FX6_DEFINITION, FX7_DEFINITION, FX8_DEFINITION,
+    FX9_DEFINITION, FX11_DEFINITION, FX12_DEFINITION, FX13_DEFINITION,
+    FX14_DEFINITION, FX15_DEFINITION, FX16_DEFINITION, FX17_DEFINITION,
+    FX18_DEFINITION, FX19_DEFINITION, FX20_DEFINITION, FX21_DEFINITION,
+    FX22_DEFINITION, FX23_DEFINITION, FX24_DEFINITION, FX25_DEFINITION,
+    FX26_DEFINITION, FX27_DEFINITION, FX28_DEFINITION, FX30_DEFINITION,
+    FX31_DEFINITION, FX32_DEFINITION,
     TB7_DEFINITION, TB10_DEFINITION, TB11_DEFINITION, TB12_DEFINITION,
     TB13_DEFINITION, TB14_DEFINITION, TB15_DEFINITION, TB16_DEFINITION,
     TB17_DEFINITION, TB18_DEFINITION, TB19_DEFINITION, TB20_DEFINITION,
@@ -1358,6 +1358,25 @@ class Gecko31RegexTests(CompatRegexTestHelper):
             "information." % MDN_DOC % mdn_article,
             compat_type="warning",
             log_function=self.err.warning)
+
+
+@register_generator
+class Gecko32RegexTests(CompatRegexTestHelper):
+    """Regex tests for Gecko 32 updates."""
+
+    VERSION = FX32_DEFINITION
+
+    def tests(self):
+        from validator.testcases.javascript.entity_values import (
+            FX32_BLOG, FX32_MDN)
+        yield self.get_test(
+            r'\bnsICache\b',
+            "nsICache has been removed",
+            "nsICache has been removed. See {blog} and {mdn} for more "
+            "information.".format(blog=FX32_BLOG, mdn=FX32_MDN),
+            log_function=self.err.warning,
+            compat_type="error")
+
 
 #############################
 #  Thunderbird Regex Tests  #
