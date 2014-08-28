@@ -517,6 +517,11 @@ INTERFACES = {
     u"nsIAddrDatabase":
         {"value":
              {u"addAllowRemoteContent": entity("nsIAddrDatabase.addAllowRemoteContent")}},
+    "nsICacheService": entity("nsICacheService"),
+    "nsICacheSession": entity("nsICacheSession"),
+    "nsICacheEntryDescriptor": entity("nsICacheEntryDescriptor"),
+    "nsICacheListener": entity("nsICacheListener"),
+    "nsICacheVisitor": entity("nsICacheVisitor"),
     }
 
 INTERFACE_ENTITIES = {u"nsIXMLHttpRequest":
