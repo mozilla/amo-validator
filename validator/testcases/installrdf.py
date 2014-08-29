@@ -47,6 +47,7 @@ def _test_rdf(err, install):
                       "icon64URL",
                       "homepageURL",
                       "creator",
+                      "multiprocessCompatible",
                       "optionsType",
                       "type",
                       "updateInfoURL",
