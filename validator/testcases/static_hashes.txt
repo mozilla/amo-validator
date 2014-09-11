@@ -373,3 +373,4 @@ c53d2954ac3cfb644bc34862162ef723c6e0e7fdbb5202e9d66236f9be84bdbb  kango-1.3.7/ka
 037660c8a8ccdf1d87900ae32357424ef43776185e4f7e0e6dde2ef5a738d974  kango-1.3.7/kango/userscript_engine.js
 f4ffbd0a06d3888df233f726fe2805b8aa0c6d0fd9ca7985c053f11420a9314b  kango-1.3.7/kango/utils.js
 9545f0960a858c5ce9506ca24966751c2676238358198f19d29486b67621ba4a  kango-1.3.7/kango/xhr.js
+2bf3b6ec709c89de2c7ef31df9a317bd7d565105d676e58c6d66cb2ba9aa01f3  besttoolbars/chrome/content/framework.js
