@@ -141,6 +141,7 @@ JQUERYUI_VERSIONS = [
     "1.10.3",
     "1.10.4",
     "1.11.0",
+    "1.11.1",
 ]
 MOOTOOLS_VERSIONS = [
     "1.1.1",
@@ -180,6 +181,7 @@ SWFOBJECT_VERSIONS = [
 ]
 UNDERSCORE_VERSIONS = [
     "1.6.0",
+    "1.7.0",
     "1.5.2",
     "1.5.1",
     "1.5.0",
