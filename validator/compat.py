@@ -55,6 +55,13 @@ FX30_DEFINITION = _build_definition(30)
 FX31_DEFINITION = _build_definition(31)
 FX32_DEFINITION = _build_definition(32)
 FX33_DEFINITION = _build_definition(33)
+FX34_DEFINITION = _build_definition(34)
+FX35_DEFINITION = _build_definition(35)
+FX36_DEFINITION = _build_definition(36)
+FX37_DEFINITION = _build_definition(37)
+FX38_DEFINITION = _build_definition(38)
+FX39_DEFINITION = _build_definition(39)
+FX40_DEFINITION = _build_definition(40)
 
 _tb_definition = (lambda ver:
     _build_definition(ver, firefox=False, fennec=False, android=False))

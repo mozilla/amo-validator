@@ -2,7 +2,7 @@ from call_definitions import open_in_chrome_context
 from instanceproperties import _set_HTML_property
 from validator.compat import (FX10_DEFINITION, FX14_DEFINITION,
                               FX16_DEFINITION, FX31_DEFINITION,
-                              FX32_DEFINITION,
+                              FX32_DEFINITION, FX33_DEFINITION,
                               TB14_DEFINITION, TB15_DEFINITION,
                               TB16_DEFINITION, TB18_DEFINITION,
                               TB19_DEFINITION, TB20_DEFINITION,
@@ -1017,3 +1017,35 @@ for name in FX32_ENTITIES:
         message="{name} has been removed. Read more at {blog} and {mdn}."
                 .format(name=name, blog=FX32_BLOG, mdn=FX32_MDN),
         bug=999577)
+
+
+def setup_nsISessionStoreFunc(name, arg_count, full_name):
+    @register_entity(full_name)
+    def nsISessionStoreFunc(traverser):
+        def was_called(wrapper, arguments, traverser):
+            if len(arguments) == arg_count:
+                string_arg = arguments[-1]
+                var = traverser._seek_variable(string_arg['name'])
+                if not isinstance(var.output(), (str, unicode)):
+                    traverser.warning(
+                        err_id=("js", "entities", full_name),
+                        warning="`{name}` must take a string as the last "
+                                "argument".format(name=name),
+                        description="`%s` now only accepts a string as "
+                                    "the last argument. See %s for more "
+                                    "information." % (name, BUGZILLA_BUG)
+                                                   % 996053,
+                        for_appversions=FX33_DEFINITION,
+                        compatibility_type="error",
+                        tier=5)
+        return {"return": was_called}
+
+nsISessionStoreFuncs = [
+    ("setTabValue", 3),
+    ("setWindowValue", 3),
+    ("setGlobalValue", 2),
+]
+
+for name, arg_count in nsISessionStoreFuncs:
+    setup_nsISessionStoreFunc(
+        name, arg_count, "nsISessionStore.{name}".format(name=name))

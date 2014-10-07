@@ -3,7 +3,7 @@ from validator.compat import FX32_DEFINITION
 
 
 class TestFX32Compat(CompatTestCase):
-    """Test that compatibility tests for Gecko 30 are properly executed."""
+    """Test that compatibility tests for Gecko 32 are properly executed."""
 
     VERSION = FX32_DEFINITION
 

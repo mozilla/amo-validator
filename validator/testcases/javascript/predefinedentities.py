@@ -522,6 +522,12 @@ INTERFACES = {
     "nsICacheEntryDescriptor": entity("nsICacheEntryDescriptor"),
     "nsICacheListener": entity("nsICacheListener"),
     "nsICacheVisitor": entity("nsICacheVisitor"),
+    "nsISessionStore":
+        {"value":
+            {"setTabValue": entity("nsISessionStore.setTabValue"),
+             "setWindowValue": entity("nsISessionStore.setWindowValue"),
+             "setGlobalValue": entity("nsISessionStore.setGlobalValue"),
+            }},
     }
 
 INTERFACE_ENTITIES = {u"nsIXMLHttpRequest":
