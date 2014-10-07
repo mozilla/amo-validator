@@ -1025,8 +1025,11 @@ def setup_nsISessionStoreFunc(name, arg_count, full_name):
         def was_called(wrapper, arguments, traverser):
             if len(arguments) == arg_count:
                 string_arg = arguments[-1]
-                var = traverser._seek_variable(string_arg['name'])
-                if not isinstance(var.output(), (str, unicode)):
+                if string_arg['type'] == 'Identifier':
+                    value = traverser._seek_variable(string_arg['name']).output()
+                else:
+                    value = string_arg['value']
+                if not isinstance(value, (str, unicode)):
                     traverser.warning(
                         err_id=("js", "entities", full_name),
                         warning="`{name}` must take a string as the last "
@@ -1036,7 +1039,7 @@ def setup_nsISessionStoreFunc(name, arg_count, full_name):
                                     "information." % (name, BUGZILLA_BUG)
                                                    % 996053,
                         for_appversions=FX33_DEFINITION,
-                        compatibility_type="error",
+                        compatibility_type="warning",
                         tier=5)
         return {"return": was_called}
 

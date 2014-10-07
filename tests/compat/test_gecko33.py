@@ -7,6 +7,26 @@ class TestFX33Compat(CompatTestCase):
 
     VERSION = FX33_DEFINITION
 
+    def test_setTabValue_literal_string(self):
+        self.run_script_for_compat("""
+            var ss = Components.classes["@mozilla.org/browser/sessionstore;1"]
+                               .getService(Components.interfaces.nsISessionStore);
+            var currentTab = gBrowser.selectedTab;
+            ss.setTabValue(currentTab, "key-name-here", "dataToAttach");
+        """)
+        self.assert_silent()
+        self.assert_compat_silent()
+
+    def test_setTabValue_literal_int(self):
+        self.run_script_for_compat("""
+            var ss = Components.classes["@mozilla.org/browser/sessionstore;1"]
+                               .getService(Components.interfaces.nsISessionStore);
+            var currentTab = gBrowser.selectedTab;
+            ss.setTabValue(currentTab, "key-name-here", 12345);
+        """)
+        self.assert_silent()
+        self.assert_compat_warning(type_="warning")
+
     def test_setTabValue_string(self):
         self.run_script_for_compat("""
             var ss = Components.classes["@mozilla.org/browser/sessionstore;1"]
@@ -48,7 +68,7 @@ class TestFX33Compat(CompatTestCase):
             ss.setTabValue(currentTab, "key-name-here", dataToAttach);
         """)
         self.assert_silent()
-        self.assert_compat_error()
+        self.assert_compat_warning(type_="warning")
 
     def test_setWindowValue_int(self):
         self.run_script_for_compat("""
@@ -59,7 +79,7 @@ class TestFX33Compat(CompatTestCase):
             ss.setWindowValue(currentTab, "key-name-here", dataToAttach);
         """)
         self.assert_silent()
-        self.assert_compat_error()
+        self.assert_compat_warning(type_="warning")
 
     def test_setGlobalValue_int(self):
         self.run_script_for_compat("""
@@ -69,4 +89,4 @@ class TestFX33Compat(CompatTestCase):
             ss.setGlobalValue("key-name-here", dataToAttach);
         """)
         self.assert_silent()
-        self.assert_compat_error()
+        self.assert_compat_warning(type_="warning")
