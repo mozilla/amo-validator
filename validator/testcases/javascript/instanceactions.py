@@ -12,7 +12,8 @@ node
 
 import actions
 from validator.compat import (FX10_DEFINITION, FX29_DEFINITION,
-                              FX30_DEFINITION, FX31_DEFINITION)
+                              FX30_DEFINITION, FX31_DEFINITION,
+                              FX33_DEFINITION)
 from validator.constants import BUGZILLA_BUG, MDN_DOC
 from instanceproperties import _set_HTML_property
 
@@ -323,6 +324,34 @@ def sendAsBinary(arguments, traverser, node, wrapper):
         tier=5)
 
 
+def setup_nsISessionStoreFunc(name, arg_count, full_name):
+    def was_called(arguments, traverser, node, wrapper):
+        if len(arguments) == arg_count:
+            string_arg = arguments[-1]
+            if string_arg['type'] == 'Identifier':
+                variable = traverser._seek_variable(string_arg['name'])
+                value = variable.get_literal_value()
+                if value == '[object Object]':
+                    value = None  # Not a string, show warning.
+            elif string_arg['type'] == 'Literal':
+                value = string_arg['value']
+            else:
+                value = None  # We don't know what it is, warn the user.
+            if not isinstance(value, (str, unicode)):
+                traverser.warning(
+                    err_id=("js", "entities", full_name),
+                    warning="`{name}` must take a string as the last "
+                            "argument".format(name=name),
+                    description="`%s` now only accepts a string as "
+                                "the last argument. See %s for more "
+                                "information." % (name, BUGZILLA_BUG)
+                                               % 996053,
+                    for_appversions=FX33_DEFINITION,
+                    compatibility_type="warning",
+                    tier=5)
+    return was_called
+
+
 INSTANCE_DEFINITIONS = {
     "addEventListener": addEventListener,
     "bind": bind,
@@ -344,4 +373,10 @@ INSTANCE_DEFINITIONS = {
     "getLivemark": livemarkCallback,
     "setPrototypeOf": setPrototypeOfCallback,
     "sendAsBinary": sendAsBinary,
+    "setTabValue": setup_nsISessionStoreFunc(
+        "setTabValue", 3, "nsISessionStore.setTabValue"),
+    "setWindowValue": setup_nsISessionStoreFunc(
+        "setWindowValue", 3, "nsISessionStore.setWindowValue"),
+    "setGlobalValue": setup_nsISessionStoreFunc(
+        "setGlobalValue", 2, "nsISessionStore.setGlobalValue"),
 }

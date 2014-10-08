@@ -1017,38 +1017,3 @@ for name in FX32_ENTITIES:
         message="{name} has been removed. Read more at {blog} and {mdn}."
                 .format(name=name, blog=FX32_BLOG, mdn=FX32_MDN),
         bug=999577)
-
-
-def setup_nsISessionStoreFunc(name, arg_count, full_name):
-    @register_entity(full_name)
-    def nsISessionStoreFunc(traverser):
-        def was_called(wrapper, arguments, traverser):
-            if len(arguments) == arg_count:
-                string_arg = arguments[-1]
-                if string_arg['type'] == 'Identifier':
-                    value = traverser._seek_variable(string_arg['name']).output()
-                else:
-                    value = string_arg['value']
-                if not isinstance(value, (str, unicode)):
-                    traverser.warning(
-                        err_id=("js", "entities", full_name),
-                        warning="`{name}` must take a string as the last "
-                                "argument".format(name=name),
-                        description="`%s` now only accepts a string as "
-                                    "the last argument. See %s for more "
-                                    "information." % (name, BUGZILLA_BUG)
-                                                   % 996053,
-                        for_appversions=FX33_DEFINITION,
-                        compatibility_type="warning",
-                        tier=5)
-        return {"return": was_called}
-
-nsISessionStoreFuncs = [
-    ("setTabValue", 3),
-    ("setWindowValue", 3),
-    ("setGlobalValue", 2),
-]
-
-for name, arg_count in nsISessionStoreFuncs:
-    setup_nsISessionStoreFunc(
-        name, arg_count, "nsISessionStore.{name}".format(name=name))
