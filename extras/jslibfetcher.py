@@ -26,6 +26,12 @@ process("https://addons.cdn.mozilla.net/en-US/firefox/files/browse/149703/"
         "PersonasInteractive_bootstrap.js")
 
 
+BACKBONE_VERSIONS = [
+    "1.0.0",
+    "1.1.0",
+    "1.1.1",
+    "1.1.2",
+]
 DOJO_VERSIONS = [
     "1.4.0",
     "1.4.1",
@@ -229,6 +235,14 @@ YUI_NEW_VERSIONS = [
     "3.6.0",
 ]
 
+
+# Backbone
+get_pattern("backbone",
+            "https://raw.githubusercontent.com/jashkenas/backbone/%s/backbone.js",
+            BACKBONE_VERSIONS)
+get_pattern("backbone",
+            "https://raw.githubusercontent.com/jashkenas/backbone/%s/backbone-min.js",
+            BACKBONE_VERSIONS)
 
 # Dojo Toolkit
 get_pattern("dojo",
