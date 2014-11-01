@@ -142,6 +142,7 @@ JQUERYUI_VERSIONS = [
     "1.10.4",
     "1.11.0",
     "1.11.1",
+    "1.11.2",
 ]
 MOOTOOLS_VERSIONS = [
     "1.1.1",
