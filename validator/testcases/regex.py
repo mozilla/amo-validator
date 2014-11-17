@@ -1405,6 +1405,17 @@ class Gecko34RegexTests(CompatRegexTestHelper):
             log_function=self.err.warning,
             compat_type="error")
 
+        yield self.get_test(
+            r"['\"][^'\"]*GreD[^'\"]*['\"]",
+            "The \"GreD\" directory was split in two on Mac OS X.",
+            "The \"GreD\" directory was split in two on Mac OS X, so some "
+            "files are no longer accessible through that reference. If you "
+            "used this directory to access binary files, you need to use "
+            "\"GreBinD\" instead. See {bug} for more information.".format(
+                bug=BUGZILLA_BUG % 1077099),
+            log_function=self.err.warning,
+            compat_type="warning")
+
 
 #############################
 #  Thunderbird Regex Tests  #

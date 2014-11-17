@@ -27,3 +27,10 @@ class TestFX34Compat(CompatTestCase):
         """)
         self.assert_silent()
         self.assert_compat_error(type_="warning")
+
+    def test_GreD(self):
+        self.run_script_for_compat("""
+            var it = getFile('GreD/some-file.json');
+        """)
+        self.assert_silent()
+        self.assert_compat_warning(type_="warning")
