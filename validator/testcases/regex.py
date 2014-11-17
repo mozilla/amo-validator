@@ -9,7 +9,7 @@ from validator.compat import (
     FX18_DEFINITION, FX19_DEFINITION, FX20_DEFINITION, FX21_DEFINITION,
     FX22_DEFINITION, FX23_DEFINITION, FX24_DEFINITION, FX25_DEFINITION,
     FX26_DEFINITION, FX27_DEFINITION, FX28_DEFINITION, FX30_DEFINITION,
-    FX31_DEFINITION, FX32_DEFINITION,
+    FX31_DEFINITION, FX32_DEFINITION, FX34_DEFINITION,
     TB7_DEFINITION, TB10_DEFINITION, TB11_DEFINITION, TB12_DEFINITION,
     TB13_DEFINITION, TB14_DEFINITION, TB15_DEFINITION, TB16_DEFINITION,
     TB17_DEFINITION, TB18_DEFINITION, TB19_DEFINITION, TB20_DEFINITION,
@@ -1376,6 +1376,24 @@ class Gecko32RegexTests(CompatRegexTestHelper):
             "information.".format(blog=FX32_BLOG, mdn=FX32_MDN),
             log_function=self.err.warning,
             compat_type="error")
+
+
+@register_generator
+class Gecko34RegexTests(CompatRegexTestHelper):
+    """Regex tests for Gecko 34 updates."""
+
+    VERSION = FX34_DEFINITION
+
+    def tests(self):
+        yield self.get_test(
+            r'\bnsICommandParams\b',
+            "nsICommandParams instances no longer support enumeration.",
+            "nsICommandParams instances no longer support enumeration. If "
+            "you're using hasMoreElements(), first() or getNext(), you'll "
+            "need to change your code to use the other getter functions. See "
+            "{bug} for more information.".format(bug=BUGZILLA_BUG % 1057914),
+            log_function=self.err.warning,
+            compat_type="warning")
 
 
 #############################
