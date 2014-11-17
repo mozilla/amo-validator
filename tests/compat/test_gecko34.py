@@ -55,3 +55,10 @@ class TestFX34Compat(CompatTestCase):
         """)
         self.assert_silent()
         self.assert_compat_error(type_="warning")
+
+    def test_createStorage(self):
+        self.run_script_for_compat("""
+            var storage = Services.domStorageManager.createStorage();
+        """)
+        self.assert_silent()
+        self.assert_compat_error(type_="warning")

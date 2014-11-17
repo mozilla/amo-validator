@@ -1437,6 +1437,16 @@ class Gecko34RegexTests(CompatRegexTestHelper):
             log_function=self.err.warning,
             compat_type="error")
 
+        yield self.get_test(
+            r"\bcreateStorage\b",
+            "The createStorage function in nsIDOMStorage now expects a window "
+            "as its first argument.",
+            "The createStorage function in nsIDOMStorage now expects a window "
+            "as its first argument. See {bug}#c43 for more "
+            "information.".format(bug=BUGZILLA_BUG % 660237),
+            log_function=self.err.warning,
+            compat_type="error")
+
 
 #############################
 #  Thunderbird Regex Tests  #
