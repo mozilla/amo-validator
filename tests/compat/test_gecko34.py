@@ -41,3 +41,17 @@ class TestFX34Compat(CompatTestCase):
         """)
         self.assert_silent()
         self.assert_compat_error(type_="warning")
+
+    def test_setCharsetForURI(self):
+        self.run_script_for_compat("""
+            history.setCharsetForURI('foo', 'bar');
+        """)
+        self.assert_silent()
+        self.assert_compat_error(type_="warning")
+
+    def test_getCharsetForURI(self):
+        self.run_script_for_compat("""
+            var charset = history.getCharsetForURI('foo');
+        """)
+        self.assert_silent()
+        self.assert_compat_error(type_="warning")

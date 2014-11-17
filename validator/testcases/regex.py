@@ -1426,6 +1426,17 @@ class Gecko34RegexTests(CompatRegexTestHelper):
             log_function=self.err.warning,
             compat_type="error")
 
+        yield self.get_test(
+            r"\b(set|get)CharsetForURI\b",
+            "The setCharsetForURI and getCharsetForURI functions have been "
+            "removed from the history service.",
+            "The setCharsetForURI and getCharsetForURI functions have been "
+            "removed from the history service. You can use the equivalent "
+            "functions in the PlacesUtils module instead. See {bug}#c3 for "
+            "more information.".format(bug=BUGZILLA_BUG % 854925),
+            log_function=self.err.warning,
+            compat_type="error")
+
 
 #############################
 #  Thunderbird Regex Tests  #
