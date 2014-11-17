@@ -1416,6 +1416,16 @@ class Gecko34RegexTests(CompatRegexTestHelper):
             log_function=self.err.warning,
             compat_type="warning")
 
+        yield self.get_test(
+            r"\bnsIMarkupDocumentViewer\b",
+            "The nsIMarkupDocumentViewer interface has been removed.",
+            "The nsIMarkupDocumentViewer interface has been removed. All of "
+            "its functionality has been moved to the nsIContentViewer "
+            "interface. See {bug} for more information.".format(
+                bug=BUGZILLA_BUG % 1036694),
+            log_function=self.err.warning,
+            compat_type="error")
+
 
 #############################
 #  Thunderbird Regex Tests  #

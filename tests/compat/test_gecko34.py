@@ -34,3 +34,10 @@ class TestFX34Compat(CompatTestCase):
         """)
         self.assert_silent()
         self.assert_compat_warning(type_="warning")
+
+    def test_nsIMarkupDocumentViewer(self):
+        self.run_script_for_compat("""
+            var markupDV = Components.interfaces.nsIMarkupDocumentViewer;
+        """)
+        self.assert_silent()
+        self.assert_compat_error(type_="warning")
