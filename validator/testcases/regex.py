@@ -1386,7 +1386,7 @@ class Gecko34RegexTests(CompatRegexTestHelper):
 
     def tests(self):
         yield self.get_test(
-            r'\bnsICommandParams\b',
+            r"\bnsICommandParams\b",
             "nsICommandParams instances no longer support enumeration.",
             "nsICommandParams instances no longer support enumeration. If "
             "you're using hasMoreElements(), first() or getNext(), you'll "
@@ -1394,6 +1394,16 @@ class Gecko34RegexTests(CompatRegexTestHelper):
             "{bug} for more information.".format(bug=BUGZILLA_BUG % 1057914),
             log_function=self.err.warning,
             compat_type="warning")
+
+        hg = "https://hg.mozilla.org/mozilla-central/rev/25c918c5f3e1#l18.3"
+        yield self.get_test(
+            "(['\"]rdf:local-store['\"]|PlacesUIUtils.localStore)",
+            "The RDF implementation of local storage has been removed.",
+            "The RDF implementation of local storage has been removed. You "
+            "can use the nsIXULStore component instead. See {hg} and {bug} "
+            "for more information.".format(hg=hg, bug=BUGZILLA_BUG % 559505),
+            log_function=self.err.warning,
+            compat_type="error")
 
 
 #############################

@@ -13,3 +13,17 @@ class TestFX34Compat(CompatTestCase):
         """)
         self.assert_silent()
         self.assert_compat_warning(type_="warning")
+
+    def test_rdf_local_store(self):
+        self.run_script_for_compat("""
+            var something = iDunno["rdf:local-store"];
+        """)
+        self.assert_silent()
+        self.assert_compat_error(type_="warning")
+
+    def test_PlacesUIUtils_localStore(self):
+        self.run_script_for_compat("""
+            var it = PlacesUIUtils.localStore["key"];
+        """)
+        self.assert_silent()
+        self.assert_compat_error(type_="warning")
