@@ -265,7 +265,7 @@ class PasswordsInPrefsRegexTests(RegexTestGenerator):
                 "password",
                 "Passwords may be stored in `defaults/preferences/*.js`",
                 "Storing passwords in the preferences JavaScript files is "
-                "insecure. The Login Manager should be used insted.")
+                "insecure. The Login Manager should be used instead.")
 
 
 @register_generator
