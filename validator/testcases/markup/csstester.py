@@ -113,8 +113,8 @@ def _run_css_tests(err, tokens, filename, line_start=0, context=None):
                 # We need to make sure the URI is not remote.
                 err.warning(
                     err_id=("css", "_run_css_tests", "-moz-binding_external"),
-                    warning="Cannot reference external scripts",
-                    description="`-moz-binding` cannot reference external "
+                    warning="Illegal reference to external scripts",
+                    description="`-moz-binding` may not reference external "
                                 "scripts in CSS. This is considered to be a "
                                 "security issue. The script file must be "
                                 "placed in the /content/ directory of the "

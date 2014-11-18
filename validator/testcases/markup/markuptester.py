@@ -295,8 +295,8 @@ class MarkupParser(HTMLParser):
                                  line=self.line,
                                  context=self.context)
 
-        elif tag == "script" and self.extension == "xul":
-            # Per the Addon Validator Spec (v2), scripts in XUL
+        elif tag == "script":
+            # Per the Addon Validator Spec (v2), scripts
             # must not be remote.
 
             src = None
@@ -310,10 +310,9 @@ class MarkupParser(HTMLParser):
                     self.err.warning(
                         err_id=("markup", "starttag",
                                 "banned_remote_scripts"),
-                        warning="Scripts must not be remote in XUL",
-                        description="In XUL, <script> tags must not be "
-                                    "referenced to script files that are "
-                                    "hosted remotely.",
+                        warning="Scripts must not be remote",
+                        description="<script> tags must not be referenced to "
+                                    "script files that are hosted remotely.",
                         filename=self.filename,
                         line=self.line,
                         context=self.context)
@@ -377,10 +376,11 @@ class MarkupParser(HTMLParser):
                         err_id=("markup", "starttag",
                                 "dom_manipulation_handler"),
                         warning="DOM Mutation Events Prohibited",
-                        description="DOM mutation events are flagged because "
-                                    "of their deprecated status, as well as "
-                                    "their extreme inefficiency. Consider "
-                                    "using a different event.",
+                        description="DOM mutation events are deprecated and "
+                                    "have severe performance implications. "
+                                    "Please use mutation observers instead: "
+                                    "https://developer.mozilla.org/docs/Web/"
+                                    "API/MutationObserver",
                         filename=self.filename,
                         line=self.line,
                         context=self.context)
@@ -405,9 +405,8 @@ class MarkupParser(HTMLParser):
                                 "pointing to menuitems that have been moved "
                                 "to a different menu item. Your overlay items "
                                 "may appear in unexpected locations because "
-                                "of this. See "
-                        "https://bugzilla.mozilla.org/show_bug.cgi?id=653221"
-                                " for more information.",
+                                "of this. See https://bugzil.lz/653221 "
+                                "for more information.",
                     filename=self.filename,
                     line=self.line,
                     context=self.context,

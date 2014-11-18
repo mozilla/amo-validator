@@ -32,9 +32,9 @@ def addEventListener(args, traverser, node, wrapper):
         traverser.err.notice(
             err_id=("js", "instanceactions", "addEventListener_fourth"),
             notice="`addEventListener` called with truthy fourth argument.",
-            description="A truthy fourth argument indicates code that "
-                        "accesses untrusted code. This code should be "
-                        "further investigated.",
+            description="When called with a truthy forth argument, listeners "
+                        "can be triggered potentially unsafely by untrusted "
+                        "code. This requires careful review.",
             filename=traverser.filename,
             line=traverser.line,
             column=traverser.position,
@@ -124,10 +124,9 @@ def _create_script_tag(traverser):
         err_id=("testcases_javascript_instanceactions", "_call_expression",
                 "called_createelement"),
         warning="createElement() used to create script tag",
-        description="The createElement() function was used to create a script "
-                    "tag in a JavaScript file. Add-ons are not allowed to "
-                    "create script tags or load code dynamically from the "
-                    "web.",
+        description="Dynamic creation of script nodes can be unsafe if "
+                    "contents are not static or are otherwise unsafe, "
+                    "or if `src` is remote.",
         filename=traverser.filename,
         line=traverser.line,
         column=traverser.position,

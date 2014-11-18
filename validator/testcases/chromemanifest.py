@@ -30,9 +30,11 @@ def test_categories(err):
             err.warning(("testcases_chromemanifest",
                          "test_categories",
                          "js_categories"),
-                        "Add-on should not add JavaScript categories",
-                        "Add-ons should not specify categories which define "
-                        "properties on JavaScript globals.",
+                        "Potentially dangerous category entry",
+                        "Add-ons definining global properties via category "
+                        "entries require careful review by an administrative "
+                        "reviewer.",
+                        editors_only=True,
                         filename=triple["filename"],
                         line=triple["line"],
                         context=triple["context"])

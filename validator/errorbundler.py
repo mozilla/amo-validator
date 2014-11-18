@@ -88,6 +88,8 @@ class ErrorBundle(object):
                                    args[4] if len(args) > 4 else None),
                 "column": kwargs.get("column",
                                      args[5] if len(args) > 5 else None),
+                # If true, the message should only be shown to editors.
+                "editors_only": kwargs.get("editors_only", False),
             }
             for field in ("tier", "for_appversions", "compatibility_type", ):
                 message[field] = kwargs.get(field)

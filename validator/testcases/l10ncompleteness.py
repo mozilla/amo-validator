@@ -139,10 +139,10 @@ def test_xpi(err, xpi_package):
             err.notice(("testcases_l10ncompleteness",
                         "test_xpi",
                         "no_locales"),
-                       "Add-on cannot be localized",
+                       "Add-on appears not to be localized",
                        "The add-on doesn't have any locale entries in its "
-                       "chrome.manifest file, making it difficult to "
-                       "localize.",
+                       "chrome.manifest file, which suggests that it may "
+                       "not be localized.",
                        filename="chrome.manifest")
         return
 

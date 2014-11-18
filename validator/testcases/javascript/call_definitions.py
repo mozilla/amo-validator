@@ -30,10 +30,9 @@ def amp_rp_bug660359(wrapper, arguments, traverser):
                 "amp_rp_bug660359"),
         notice="Custom add-on types may not work properly in Gecko 6",
         description="This add-on appears to register custom add-on types, "
-                    "which are affected and may not work properly due to "
+                    "which are affected by, and may not work properly due to, "
                     "changes made on Gecko 6. For more information, "
-                    "please refer to "
-                    "https://bugzilla.mozilla.org/show_bug.cgi?id=595848",
+                    "please refer to %s" % BUGZILLA_BUG % 595848,
         filename=traverser.filename,
         line=traverser.line,
         column=traverser.position,
@@ -409,7 +408,7 @@ def nsIJSON_deprec(wrapper, arguments, traverser):
         err_id=("testcases_javascript_calldefinitions", "nsIJSON",
                 "deprec"),
         notice="Deprecated nsIJSON methods in use.",
-        description=("The encode and decode methods in nsIJSON have been "
+        description=("The `encode` and `decode` methods in nsIJSON have been "
                      "deprecated in Gecko 7. You can use the methods in the "
                      "global JSON object instead. See %s for more "
                      "information.") %
@@ -433,8 +432,7 @@ def nsIImapMailFolderSink_changed(wrapper, arguments, traverser):
         description="This add-on appears to use nsIImapMailFolderSink.setUrlState, "
                     "which may no longer work correctly due to  "
                     "changes made in Thunderbird 6. For more information, "
-                    "please refer to "
-                    "https://bugzilla.mozilla.org/show_bug.cgi?id=464126",
+                    "please refer to %s" % BUGZILLA_BUG % 464126,
         filename=traverser.filename,
         line=traverser.line,
         column=traverser.position,
@@ -454,8 +452,7 @@ def nsIImapProtocol_removed(wrapper, arguments, traverser):
         description="This add-on appears to use nsIImapProtocol.NotifyHdrsToDownload, "
                     "which may no longer work correctly due to  "
                     "changes made in Thunderbird 6. For more information, "
-                    "please refer to "
-                    "https://bugzilla.mozilla.org/show_bug.cgi?id=464126",
+                    "please refer to %s" % BUGZILLA_BUG % 464126,
         filename=traverser.filename,
         line=traverser.line,
         column=traverser.position,
@@ -500,8 +497,7 @@ def nsIMsgThread_removed(wrapper, arguments, traverser):
         description="This add-on appears to use nsIMsgThread.GetChildAt, "
                     "which may no longer work correctly due to  "
                     "changes made in Thunderbird 7. For more information, "
-                    "please refer to "
-                    "https://bugzilla.mozilla.org/show_bug.cgi?id=617839",
+                    "please refer to %s" % BUGZILLA_BUG % 617839,
         filename=traverser.filename,
         line=traverser.line,
         column=traverser.position,
@@ -523,8 +519,7 @@ def mail_attachment_api(wrapper, arguments, traverser):
                     "attachmentIsEmpty, cloneAttachment, createNewAttachmentInfo "
                     "detachAttachment, openAttachment or saveAttachment, "
                     "which were removed in Thunderbird 7. For more information, "
-                    "please refer to "
-                    "https://bugzilla.mozilla.org/show_bug.cgi?id=657856",
+                    "please refer to %s" % BUGZILLA_BUG % 657856,
         filename=traverser.filename,
         line=traverser.line,
         column=traverser.position,
@@ -545,8 +540,7 @@ def nsIMsgSearchScopeTerm_removed(wrapper, arguments, traverser):
         description="This add-on appears to use nsIMsgSearchScopeTerm.mailFile or, "
                     "nsIMsgSearchScopeTerm.inputStream, both of which have been removed"
                     "as part of changes made in Thunderbird 8. For more information, "
-                    "please refer to "
-                    "https://bugzilla.mozilla.org/show_bug.cgi?id=668700",
+                    "please refer to %s" % BUGZILLA_BUG % 668700,
         filename=traverser.filename,
         line=traverser.line,
         column=traverser.position,
@@ -566,8 +560,7 @@ def gComposeBundle_removed(wrapper, arguments, traverser):
         notice="Removed gComposeBundle global variable in use.",
         description="This add-on appears to use gComposeBundle which has been removed "
                     "as part of changes made in Thunderbird 9. For more information, "
-                    "please refer to "
-                    "https://bugzilla.mozilla.org/show_bug.cgi?id=670639",
+                    "please refer to %s" % BUGZILLA_BUG % 670639,
         filename=traverser.filename,
         line=traverser.line,
         column=traverser.position,
@@ -591,8 +584,7 @@ def TB9FocusFunctions_removed(wrapper, arguments, traverser):
         description="This add-on appears to use WhichPaneHasFocus "
                     "or FocusOnFirstAttachment which have been removed "
                     "as part of changes made in Thunderbird 9. For more information, "
-                    "please refer to "
-                    "https://bugzilla.mozilla.org/show_bug.cgi?id=581932",
+                    "please refer to %s" % BUGZILLA_BUG % 581932,
         filename=traverser.filename,
         line=traverser.line,
         column=traverser.position,
@@ -616,8 +608,8 @@ def TB10Function_removed(wrapper, arguments, traverser):
         description="This add-on appears to use MsgDeleteMessageFromMessageWindow "
                     "or goToggleSplitter which have been removed "
                     "as part of changes made in Thunderbird 10. For more information, "
-                    "please refer to https://bugzilla.mozilla.org/show_bug.cgi?id=702201 and "
-                    "https://bugzilla.mozilla.org/show_bug.cgi?id=609245",
+                    "please refer to %s and %s"
+                    % (BUGZILLA_BUG % 702201, BUGZILLA_BUG % 609245),
         filename=traverser.filename,
         line=traverser.line,
         column=traverser.position,
@@ -642,7 +634,7 @@ def TB10Function_renamed(wrapper, arguments, traverser):
                     "RemoveMessageComposeOfflineObserver which have been renamed to "
                     "AddMessageComposeOfflineQuitObserver and RemoveMessageComposeOfflineQuitObserver "
                     "respectively as part of changes made in Thunderbird 10. For more information, "
-                    "please refer to https://bugzilla.mozilla.org/show_bug.cgi?id=682581",
+                    "please refer to %s" % BUGZILLA_BUG % 682581,
         filename=traverser.filename,
         line=traverser.line,
         column=traverser.position,
@@ -664,7 +656,7 @@ def nsIMsgQuote_changed(wrapper, arguments, traverser):
         notice="Altered nsIMsgQuote.quoteMessage function in use.",
         description="This add-on appears to use nsIMsgQuote.quoteMessage which had the argument aOrigHdr"
                     "added as part of changes made in Thunderbird 11. For more information, "
-                    "please refer to https://bugzilla.mozilla.org/show_bug.cgi?id=351109",
+                    "please refer to %s" % BUGZILLA_BUG % 351109,
         filename=traverser.filename,
         line=traverser.line,
         column=traverser.position,

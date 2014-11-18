@@ -77,10 +77,11 @@ def _set_HTML_property(function, new_value, traverser):
                     "variable_assignment"),
             warning="Markup should not be passed to `%s` dynamically." %
                         function,
-            description="Due to both security and performance reasons, "
-                        "%s should not be set using dynamic "
-                        "values. This can lead to security issues or "
-                        "fairly serious performance degradation." % function,
+            description="Due to both security and performance concerns, "
+                        "%s may not be set using dynamic values which have "
+                        "not been adequately sanitized. This can lead to "
+                        "security issues or fairly serious performance "
+                        "degradation." % function,
             filename=traverser.filename,
             line=traverser.line,
             column=traverser.position,

@@ -105,7 +105,7 @@ class Traverser(object):
                         warning="JavaScript namespace pollution",
                         description=[
                             "Your add-on contains a large number of global "
-                            "variables, which can conflict with other add-ons. "
+                            "variables, which may conflict with other add-ons. "
                             "For more information, see "
                             "http://blog.mozilla.com/addons/2009/01/16/"
                             "firefox-extensions-global-namespace-pollution/"
@@ -282,17 +282,25 @@ class Traverser(object):
             if dang:
                 actions.call_dangerous_function(self, entity, name)
 
-                self._debug("DANGEROUS")
-                self.err.warning(
-                    ("js", "traverser", "dangerous_global"),
-                    "Illegal or deprecated access to the `%s` global" % name,
-                    [dang if isinstance(dang, DESCRIPTION_TYPES)
-                     else "Access to the `%s` property is deprecated "
-                          "for security or other reasons." % name],
+                kwargs = dict(
+                    err_id=("js", "traverser", "dangerous_global"),
+                    warning="Access to the `%s` global" % name,
                     filename=self.filename,
                     line=self.line,
                     column=self.position,
                     context=self.context)
+
+                if isinstance(dang, DESCRIPTION_TYPES):
+                    kwargs["description"] = dang
+                elif isinstance(dang, dict):
+                    kwargs.update(dang)
+                else:
+                    kwargs["description"] = ("Access to the `%s` property is "
+                                             "deprecated for security or "
+                                             "other reasons." % name)
+
+                self._debug("DANGEROUS")
+                self.err.warning(**kwargs)
 
         entity.setdefault("name", name)
 
