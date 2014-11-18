@@ -9,7 +9,7 @@ from validator.compat import (
     FX18_DEFINITION, FX19_DEFINITION, FX20_DEFINITION, FX21_DEFINITION,
     FX22_DEFINITION, FX23_DEFINITION, FX24_DEFINITION, FX25_DEFINITION,
     FX26_DEFINITION, FX27_DEFINITION, FX28_DEFINITION, FX30_DEFINITION,
-    FX31_DEFINITION, FX32_DEFINITION,
+    FX31_DEFINITION, FX32_DEFINITION, FX34_DEFINITION,
     TB7_DEFINITION, TB10_DEFINITION, TB11_DEFINITION, TB12_DEFINITION,
     TB13_DEFINITION, TB14_DEFINITION, TB15_DEFINITION, TB16_DEFINITION,
     TB17_DEFINITION, TB18_DEFINITION, TB19_DEFINITION, TB20_DEFINITION,
@@ -1374,6 +1374,76 @@ class Gecko32RegexTests(CompatRegexTestHelper):
             "nsICache has been removed",
             "nsICache has been removed. See {blog} and {mdn} for more "
             "information.".format(blog=FX32_BLOG, mdn=FX32_MDN),
+            log_function=self.err.warning,
+            compat_type="error")
+
+
+@register_generator
+class Gecko34RegexTests(CompatRegexTestHelper):
+    """Regex tests for Gecko 34 updates."""
+
+    VERSION = FX34_DEFINITION
+
+    def tests(self):
+        yield self.get_test(
+            r"\bnsICommandParams\b",
+            "nsICommandParams instances no longer support enumeration.",
+            "nsICommandParams instances no longer support enumeration. If "
+            "you're using hasMoreElements(), first() or getNext(), you'll "
+            "need to change your code to use the other getter functions. See "
+            "{bug} for more information.".format(bug=BUGZILLA_BUG % 1057914),
+            log_function=self.err.warning,
+            compat_type="warning")
+
+        hg = "https://hg.mozilla.org/mozilla-central/rev/25c918c5f3e1#l18.3"
+        yield self.get_test(
+            "(['\"]rdf:local-store['\"]|PlacesUIUtils.localStore)",
+            "The RDF implementation of local storage has been removed.",
+            "The RDF implementation of local storage has been removed. You "
+            "can use the nsIXULStore component instead. See {hg} and {bug} "
+            "for more information.".format(hg=hg, bug=BUGZILLA_BUG % 559505),
+            log_function=self.err.warning,
+            compat_type="error")
+
+        yield self.get_test(
+            r"['\"][^'\"]*GreD[^'\"]*['\"]",
+            "The \"GreD\" directory was split in two on Mac OS X.",
+            "The \"GreD\" directory was split in two on Mac OS X, so some "
+            "files are no longer accessible through that reference. If you "
+            "used this directory to access binary files, you need to use "
+            "\"GreBinD\" instead. See {bug} for more information.".format(
+                bug=BUGZILLA_BUG % 1077099),
+            log_function=self.err.warning,
+            compat_type="warning")
+
+        yield self.get_test(
+            r"\bnsIMarkupDocumentViewer\b",
+            "The nsIMarkupDocumentViewer interface has been removed.",
+            "The nsIMarkupDocumentViewer interface has been removed. All of "
+            "its functionality has been moved to the nsIContentViewer "
+            "interface. See {bug} for more information.".format(
+                bug=BUGZILLA_BUG % 1036694),
+            log_function=self.err.warning,
+            compat_type="error")
+
+        yield self.get_test(
+            r"\b(set|get)CharsetForURI\b",
+            "The setCharsetForURI and getCharsetForURI functions have been "
+            "removed from the history service.",
+            "The setCharsetForURI and getCharsetForURI functions have been "
+            "removed from the history service. You can use the equivalent "
+            "functions in the PlacesUtils module instead. See {bug}#c3 for "
+            "more information.".format(bug=BUGZILLA_BUG % 854925),
+            log_function=self.err.warning,
+            compat_type="error")
+
+        yield self.get_test(
+            r"\bcreateStorage\b",
+            "The createStorage function in nsIDOMStorage now expects a window "
+            "as its first argument.",
+            "The createStorage function in nsIDOMStorage now expects a window "
+            "as its first argument. See {bug}#c43 for more "
+            "information.".format(bug=BUGZILLA_BUG % 660237),
             log_function=self.err.warning,
             compat_type="error")
 
