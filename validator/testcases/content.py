@@ -258,6 +258,23 @@ def test_packed_scripts(err, xpi_package):
             err.pop_state()
 
 
+@decorator.register_test(tier=2)
+def test_signed_xpi(err, xpi_package):
+    """Checks if XPI is signed."""
+    search = set([
+        'META-INF/manifest.mf',
+        'META-INF/zigbert.rsa',
+        'META-INF/zigbert.sf'])
+
+    if search.issubset(set(xpi_package)):
+        err.warning(
+            err_id=("testcases_content", "signed_xpi"),
+            warning="Package already signed",
+            description="Add-ons which are already signed will be re-signed "
+                        "when published on AMO. This will replace any "
+                        "existing signatures on the add-on.")
+
+
 def _process_file(err, xpi_package, name, file_data, name_lower,
                   pollutable=False):
     """Process a single file's content tests."""
