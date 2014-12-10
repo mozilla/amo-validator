@@ -389,9 +389,13 @@ INTERFACES = {
               u"execCommandShowHelp": entity("nsIDOMHTMLDocument")}},
     u"nsIWebBrowserPersist":
         {"value":
-             {u"saveURI":
+             {u"saveChannel":
+                  {"return": call_definitions.webbrowserpersist},
+              u"saveURI":
                   {"return":
-                       call_definitions.webbrowserpersist_saveuri}}},
+                       call_definitions.webbrowserpersist_saveuri},
+              u"savePrivacyAwareURI":
+                  {"return": call_definitions.webbrowserpersist}}},
     u"prplIAccount":
         {"value":
              {u"noNewlines": entity("prplIAccount.noNewlines"),
