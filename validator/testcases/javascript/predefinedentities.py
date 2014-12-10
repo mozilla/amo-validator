@@ -280,7 +280,13 @@ INTERFACES = {
                         e.get_resource("em:bootstrap") and
                         "Authors of bootstrapped add-ons must take care "
                         "to remove any added observers "
-                        "at shutdown."}}},
+                        "at shutdown."}},
+         "dangerous": lambda a, t, e:
+            lambda t, e: (
+                e.metadata.get("is_jetpack") and
+                "The observer service should not be used directly in SDK "
+                "add-ons. Please use the 'sdk/system/events' module "
+                "instead.")},
     u"nsIResProtocolHandler":
         {"value":
             {u"setSubstitution":

@@ -400,6 +400,17 @@ def test_absolute_uris_in_js():
     assert err.compat_summary["errors"]
 
 
+def test_observer_service_flagged():
+    assert _js_test("""
+    var {Ci} = require("chrome");
+    thing.QueryInterface(Ci.nsIObserverService);
+    """, jetpack=True).failed()
+
+    assert not _js_test("""
+    thing.QueryInterface(Ci.nsIObserverService);
+    """).failed()
+
+
 def test_absolute_uris_in_markup():
     """
     Test that a warning is thrown for absolute URIs within markup files.
