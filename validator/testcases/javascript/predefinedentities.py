@@ -780,7 +780,10 @@ GLOBAL_ENTITIES = {
                              u"import":
                                  {"dangerous":
                                       lambda a, t, e:
-                                          a and "ctypes.jsm" in _get_as_str(t(a[0]))}}},
+                                          a and "ctypes.jsm" in _get_as_str(t(a[0]))},
+
+                             u"waiveXrays":
+                                 {"return": call_definitions.js_unwrap}}},
               u"interfaces": {"value": INTERFACE_ENTITIES}}},
     u"extensions": {"dangerous": True},
     u"xpcnativewrappers": {"dangerous": True},
