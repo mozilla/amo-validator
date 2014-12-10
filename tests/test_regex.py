@@ -101,6 +101,20 @@ def test_processNextEvent_banned():
     """).failed()
 
 
+def test_extension_manager_api():
+    assert _do_test_raw("""
+    Cc["@mozilla.org/extensions/manager;1"].getService();
+    """).failed()
+
+    assert _do_test_raw("""
+    if (topic == "em-action-requested") true;
+    """).failed()
+
+    assert _do_test_raw("""
+    thing.QueryInterface(Ci.nsIExtensionManager);
+    """).failed()
+
+
 def test_bug_652575():
     """Ensure that capability.policy gets flagged."""
     assert _do_test_raw("var x = 'capability.policy.';").failed()

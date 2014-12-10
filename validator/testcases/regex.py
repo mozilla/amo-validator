@@ -357,6 +357,23 @@ class WidgetModuleRegexTests(RegexTestGenerator):
 
 
 @register_generator
+class ExtensionManagerRegexTests(RegexTestGenerator):
+    """
+    Tests for uses of the old extension manager API, which should not be
+    referenced in new extensions.
+    """
+
+    def js_tests(self):
+        yield self.get_test(
+                r"@mozilla\.org/extensions/manager;1|"
+                r"em-action-requested",
+                "Obsolete Extension Manager API",
+                "The old Extension Manager API is not available in any "
+                "remotely modern version of Firefox and should not be "
+                "referenced in any code.")
+
+
+@register_generator
 class JSPrototypeExtRegexTests(RegexTestGenerator):
     """
     These regex tests will ensure that the developer is not modifying the

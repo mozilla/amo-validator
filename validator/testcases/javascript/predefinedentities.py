@@ -67,7 +67,19 @@ CATEGORY_MANAGER = {
                  "any added category entries at shutdown.")}}
 
 
+OBSOLETE_EXTENSION_MANAGER = {
+    "value": {},
+    "dangerous": "This interface is part of the obsolete extension manager "
+                 "interface, which is not available in any remotely modern "
+                 "version of Firefox. It should not be referenced in any "
+                 "code."}
+
 INTERFACES = {
+    u"nsIExtensionManager": OBSOLETE_EXTENSION_MANAGER,
+    u"nsIUpdateItem": OBSOLETE_EXTENSION_MANAGER,
+    u"nsIInstallLocation": OBSOLETE_EXTENSION_MANAGER,
+    u"nsIAddonInstallListener": OBSOLETE_EXTENSION_MANAGER,
+    u"nsIAddonUpdateCheckListener": OBSOLETE_EXTENSION_MANAGER,
     u"imIUserStatusInfo":
         {"value":
             {u"setUserIcon": entity("imIUserStatusInfo.setUserIcon")}},
@@ -85,7 +97,8 @@ INTERFACES = {
         {"dangerous":
             "Using the nsIAccessibleRetrieval interface causes significant "
             "performance degradation in Gecko. It should only be used in "
-            "accessibility-related add-ons."},
+            "accessibility-related add-ons.",
+         "value": {}},
     u"nsIBrowserSearchService":
         {"value":
             {u"currentEngine": {"readonly": True},
@@ -573,7 +586,6 @@ GLOBAL_ENTITIES = {
     u"Ci": {"readonly": False,
             "value":
                 lambda t: GLOBAL_ENTITIES["Components"]["value"]["interfaces"]},
-
     u"Cu": {"readonly": False,
             "value":
                 lambda t: GLOBAL_ENTITIES["Components"]["value"]["utils"]},
