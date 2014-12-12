@@ -4,11 +4,10 @@
 .DS_Store
 .coverage
 .figleaf
-*.swp
+.*.sw?
 /validator/constants_local.py
 /src
-/extras/jslibs
-/extras/language_controls
+/metadata/jslibs
 dist/
 amo_validator.egg-info/
 nosetests.xml

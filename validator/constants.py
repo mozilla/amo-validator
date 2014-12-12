@@ -19,6 +19,11 @@ PACKAGE_MULTI = 1  # A multi extension is an extension
 PACKAGE_SUBPACKAGE = 7
 PACKAGE_WEBAPP = 8
 
+# Library/framework deprecation levels
+DEPRECATED_SOFT = 5
+DEPRECATED_HARD = 10
+DEPRECATED_MAX = 10
+
 # The "earliest" version number for Firefox 4
 FF4_MIN = "3.7a1pre"
 
@@ -43,6 +48,9 @@ APPLICATIONS = {
 
 with open(os.path.join(os.path.dirname(__file__), "app_versions.json")) as avs:
     APPROVED_APPLICATIONS = json.load(avs)
+
+with open(os.path.join(os.path.dirname(__file__), "libraries.json")) as f:
+    LIBRARY_METADATA = json.load(f)
 
 SPIDERMONKEY_INSTALLATION = os.environ.get("SPIDERMONKEY_INSTALLATION")
 

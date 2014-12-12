@@ -1,57 +1,56 @@
 from nose.tools import eq_
 
 import hashlib
-import json
-import nose
 
-from js_helper import _do_real_test_raw as _js_test
-from validator.testcases.markup.markuptester import MarkupParser
-import validator.testcases.jetpack as jetpack
+from js_helper import _do_real_test_raw as _js_test, _test_xpi
+from tests.test_frameworks import (MockXPI, accepted_version,
+                                   assert_framework_files)
 from validator.errorbundler import ErrorBundle
+from validator.testcases.markup.markuptester import MarkupParser
 from validator.xpi import XPIManager
 
 
+# These files are a subset of the framework tests which are specific
+# to Jetpack. They're currently split into a separate file since
+# they're considerably more comprehensive than any other framework
+# tests, and mostly predate the current generalized tests.
+
+with open("tests/resources/bootstrap.js") as bootstrap_file:
+    bootstrap = bootstrap_file.read()
+with open("tests/resources/bootstrap-jpm.js") as bootstrap_file:
+    bootstrap_jpm = bootstrap_file.read()
+
+
 def _do_test(xpi_package, allow_old_sdk=True):
+    err = _test_xpi(xpi_package)
 
-    err = ErrorBundle()
-    jetpack.inspect_jetpack(err, xpi_package, allow_old_sdk=allow_old_sdk)
+    if allow_old_sdk:
+        err_id = ("testcases_frameworks", "validate_jetpack_cfx",
+                  "outdated_version")
+
+        err.warnings = [e for e in err.warnings if e["id"] != err_id]
+
+    print err.print_summary(verbose=True)
     return err
-
-
-class MockXPI(object):
-
-    def __init__(self, resources):
-        self.resources = resources
-
-    def read(self, name):
-        if isinstance(self.resources[name], bool):
-            return ""
-        return self.resources[name]
-
-    def __iter__(self):
-        for name in self.resources.keys():
-            yield name
-
-    def __contains__(self, name):
-        return name in self.resources
 
 
 def test_not_jetpack():
     """Test that add-ons which do not match the Jetpack pattern are ignored."""
 
     err = _do_test(MockXPI({"foo": True, "bar": True}))
-    assert not err.errors
-    assert not err.warnings
-    assert not err.notices
+    eq_(err.errors, [])
+    eq_(err.warnings, [])
+    eq_(err.notices, [])
     eq_(err.metadata.get('is_jetpack', False), False)
 
 
 def test_package_json_jetpack():
     """Test that add-ons with the new package.json are treated as jetpack."""
-    err = _do_test(MockXPI({"bootstrap.js": "", "package.json": ""}))
-    assert not err.errors
-    assert not err.warnings
-    assert not err.notices
+    err = _do_test(MockXPI({"bootstrap.js": bootstrap_jpm,
+                            "package.json": "{}"}))
+    eq_(err.errors, [])
+    eq_(err.warnings, [])
+    eq_(err.notices, [])
     eq_(err.metadata.get('is_jetpack'), True)
 
 
@@ -62,111 +61,93 @@ def test_bad_harnessoptions():
                             "components/harness.js": True,
                             "harness-options.json": "foo bar"}))
     assert err.failed()
-    assert err.warnings
-    print err.warnings
-    assert err.warnings[0]["id"][-1] == "bad_harness-options.json"
+    assert err.errors
+    assert err.errors[0]["id"][-1] == "invalid_metadata"
 
 
 def test_pass_jetpack():
     """Test that a minimalistic Jetpack setup will pass."""
 
-    harnessoptions = {"sdkVersion": "1.8-dev",
+    harnessoptions = {"sdkVersion": "1.7",
                       "jetpackID": "",
                       "manifest": {}}
 
-    with open("tests/resources/bootstrap.js") as bootstrap_file:
-        bootstrap = bootstrap_file.read()
-    err = _do_test(MockXPI({"bootstrap.js": bootstrap,
-                            "harness-options.json":
-                                json.dumps(harnessoptions)}))
-    print err.print_summary(verbose=True)
-    assert not err.failed()
-    assert "is_jetpack" in err.metadata and err.metadata["is_jetpack"]
+    with accepted_version("frameworks", "jetpack", "versions", "1.7"):
+        err = _do_test(MockXPI({"bootstrap.js": bootstrap,
+                                "harness-options.json": harnessoptions}))
 
-    # Test that all files are marked as pretested.
-    pretested_files = err.get_resource("pretested_files")
-    assert pretested_files
-    assert "bootstrap.js" in pretested_files
+    eq_(err.notices, [])
+    eq_(err.warnings, [])
+    eq_(err.errors, [])
+
+    assert err.metadata.get("is_jetpack")
+
+    assert_framework_files(err, ["bootstrap.js"])
 
 
 def test_package_json_pass_jetpack():
     """Test that a minimalistic package.json Jetpack setup will pass."""
 
-    with open("tests/resources/bootstrap.js") as bootstrap_file:
-        bootstrap = bootstrap_file.read()
-    err = _do_test(MockXPI({"bootstrap.js": bootstrap,
+    err = _do_test(MockXPI({"bootstrap.js": bootstrap_jpm,
                             "package.json": "{}"}))
-    print err.print_summary(verbose=True)
-    assert not err.failed()
-    assert "is_jetpack" in err.metadata and err.metadata["is_jetpack"]
 
-    # Test that all files are marked as pretested.
-    pretested_files = err.get_resource("pretested_files")
-    assert pretested_files
-    assert "bootstrap.js" in pretested_files
+    assert not err.failed()
+    assert err.metadata.get("is_jetpack")
+
+    assert_framework_files(err, ["bootstrap.js"])
 
 
 def test_package_json_different_bootstrap():
     """Test that a minimalistic package.json Jetpack setup will pass."""
 
-    err = _do_test(MockXPI({"bootstrap.js": "var foo = 'bar';",
+    err = _do_test(MockXPI({"bootstrap.js": bootstrap_jpm,
                             "package.json": "{}"}))
-    print err.print_summary(verbose=True)
     assert not err.failed()
-    assert "is_jetpack" in err.metadata and err.metadata["is_jetpack"]
+    assert err.metadata.get("is_jetpack")
 
-    # Test that all files are not marked as pretested.
-    pretested_files = err.get_resource("pretested_files")
-    assert not pretested_files
-    assert "bootstrap.js" not in pretested_files
+    assert_framework_files(err, ["bootstrap.js"])
 
 
 def test_missing_elements():
     """Test that missing elements in harness-options will fail."""
 
-    harnessoptions = {"sdkVersion": "1.8-dev",
+    harnessoptions = {"sdkVersion": "1.7",
                       "jetpackID": ""}
 
-    with open("tests/resources/bootstrap.js") as bootstrap_file:
-        bootstrap = bootstrap_file.read()
-
     err = _do_test(MockXPI({"bootstrap.js": bootstrap,
-                            "harness-options.json":
-                                json.dumps(harnessoptions)}))
+                            "harness-options.json": harnessoptions}))
     assert err.failed()
 
 
 def test_skip_safe_files():
-    """Test that missing elements in harness-options will fail."""
+    """
+    Tests that errors aren't triggered by the presence of certain files.
+    I'm not actually certain what the purpose of this test is, but the previous
+    docstring was for a different test.
+    """
 
-    harnessoptions = {"sdkVersion": "1.8-dev",
+    harnessoptions = {"sdkVersion": "1.7",
                       "jetpackID": "",
                       "manifest": {}}
 
-    with open("tests/resources/bootstrap.js") as bootstrap_file:
-        bootstrap = bootstrap_file.read()
-
-    err = _do_test(MockXPI({"bootstrap.js": bootstrap,
-                            "harness-options.json":
-                                json.dumps(harnessoptions),
-                            "foo.png": True,
-                            "bar.JpG": True,
-                            "safe.GIF": True,
-                            "icon.ico": True,
-                            "foo/.DS_Store": True}))
+    with accepted_version("frameworks", "jetpack", "versions", "1.7"):
+        err = _do_test(MockXPI({"bootstrap.js": bootstrap,
+                                "harness-options.json": harnessoptions,
+                                "foo.png": True,
+                                "bar.JpG": True,
+                                "safe.GIF": True,
+                                "icon.ico": True}))
     assert not err.failed()
 
 
 def test_pass_manifest_elements():
     """Test that proper elements in harness-options will pass."""
 
-    with open("tests/resources/bootstrap.js") as bootstrap_file:
-        bootstrap = bootstrap_file.read()
-        bootstrap_hash = hashlib.sha256(bootstrap).hexdigest()
+    bootstrap_hash = hashlib.sha256(bootstrap).hexdigest()
 
     harnessoptions = {
             "jetpackID": "foobar",
-            "sdkVersion": "1.8-dev",
+            "sdkVersion": "1.7",
             "manifest": {
                 "bootstrap.js":
                     {"requirements": {},
@@ -176,34 +157,32 @@ def test_pass_manifest_elements():
                      "jsSHA256": bootstrap_hash,
                      "docsSHA256": bootstrap_hash}}}
 
-    err = _do_test(MockXPI({"bootstrap.js": bootstrap,
-                            "harness-options.json":
-                                json.dumps(harnessoptions),
-                            "resources/bootstrap.js": bootstrap}))
-    print err.print_summary(verbose=True)
+    with accepted_version("frameworks", "jetpack", "versions", "1.7"):
+        err = _do_test(MockXPI({"bootstrap.js": bootstrap,
+                                "harness-options.json": harnessoptions,
+                                "resources/bootstrap.js": bootstrap}))
     assert not err.failed()
     assert "jetpack_loaded_modules" in err.metadata
-    nose.tools.eq_(err.metadata["jetpack_loaded_modules"],
-                   ["addon-kit-lib/drawing.js"])
-    assert "jetpack_identified_files" in err.metadata
-    assert "identified_files" in err.metadata
-    assert "bootstrap.js" in err.metadata["jetpack_identified_files"]
-    assert "bootstrap.js" in err.metadata["identified_files"]
+    eq_(err.metadata["jetpack_loaded_modules"],
+        ["addon-kit-lib/drawing.js"])
+    assert_framework_files(err, ["bootstrap.js"])
 
-    assert "jetpack_unknown_files" in err.metadata
-    assert not err.metadata["jetpack_unknown_files"]
+    if False:
+        # Might want to implement an equivalent for this. Might not.
+        # This information is already gleanable by checking both
+        # "identified_files" and "framework_files".
+        assert "jetpack_unknown_files" in err.metadata
+        assert not err.metadata["jetpack_unknown_files"]
 
 
 def test_ok_resource():
     """Test that resource:// URIs aren't flagged."""
 
-    with open("tests/resources/bootstrap.js") as bootstrap_file:
-        bootstrap = bootstrap_file.read()
-        bootstrap_hash = hashlib.sha256(bootstrap).hexdigest()
+    bootstrap_hash = hashlib.sha256(bootstrap).hexdigest()
 
     harnessoptions = {
             "jetpackID": "foobar",
-            "sdkVersion": "1.8-dev",
+            "sdkVersion": "1.7",
             "manifest": {
                 "resource://bootstrap.js":
                     {"requirements": {},
@@ -213,23 +192,20 @@ def test_ok_resource():
                      "jsSHA256": bootstrap_hash,
                      "docsSHA256": bootstrap_hash}}}
 
-    err = _do_test(MockXPI({"bootstrap.js": bootstrap,
-                            "resources/bootstrap.js": bootstrap,
-                            "harness-options.json":
-                                json.dumps(harnessoptions)}))
-    print err.print_summary(verbose=True)
+    with accepted_version("frameworks", "jetpack", "versions", "1.7"):
+        err = _do_test(MockXPI({"bootstrap.js": bootstrap,
+                                "resources/bootstrap.js": bootstrap,
+                                "harness-options.json": harnessoptions}))
     assert not err.failed()
 
 
 def test_bad_resource():
     """Test for failure on non-resource:// modules."""
 
-    with open("tests/resources/bootstrap.js") as bootstrap_file:
-        bootstrap = bootstrap_file.read()
-        bootstrap_hash = hashlib.sha256(bootstrap).hexdigest()
+    bootstrap_hash = hashlib.sha256(bootstrap).hexdigest()
 
     harnessoptions = {
-            "sdkVersion": "1.8-dev",
+            "sdkVersion": "1.7",
             "jetpackID": "foobar",
             "manifest":
                 {"http://foo.com/bar/bootstrap.js":
@@ -242,21 +218,17 @@ def test_bad_resource():
 
     err = _do_test(MockXPI({"bootstrap.js": bootstrap,
                             "resources/bootstrap.js": bootstrap,
-                            "harness-options.json":
-                                json.dumps(harnessoptions)}))
-    print err.print_summary(verbose=True)
+                            "harness-options.json": harnessoptions}))
     assert err.failed()
 
 
 def test_missing_manifest_elements():
     """Test that missing manifest elements in harness-options will fail."""
 
-    with open("tests/resources/bootstrap.js") as bootstrap_file:
-        bootstrap = bootstrap_file.read()
-        bootstrap_hash = hashlib.sha256(bootstrap).hexdigest()
+    bootstrap_hash = hashlib.sha256(bootstrap).hexdigest()
 
     harnessoptions = {
-            "sdkVersion": "1.8-dev",
+            "sdkVersion": "1.7",
             "jetpackID": "foobar",
             "manifest":
                 {"resource://bootstrap.js":
@@ -268,9 +240,7 @@ def test_missing_manifest_elements():
 
     err = _do_test(MockXPI({"bootstrap.js": bootstrap,
                             "resources/bootstrap.js": bootstrap,
-                            "harness-options.json":
-                                json.dumps(harnessoptions)}))
-    print err.print_summary(verbose=True)
+                            "harness-options.json": harnessoptions}))
     assert err.failed()
 
 
@@ -281,7 +251,7 @@ def test_mismatched_hash():
     """
 
     harnessoptions = {
-            "sdkVersion": "1.8-dev",
+            "sdkVersion": "1.7",
             "jetpackID": "foobar",
             "manifest":
                 {"resource://bootstrap.js":
@@ -291,14 +261,9 @@ def test_mismatched_hash():
                      "jsSHA256": "",
                      "docsSHA256": ""}}}
 
-    with open("tests/resources/bootstrap.js") as bootstrap_file:
-        bootstrap = bootstrap_file.read()
-
     err = _do_test(MockXPI({"bootstrap.js": bootstrap,
                             "resources/bootstrap.js": bootstrap,
-                            "harness-options.json":
-                                json.dumps(harnessoptions)}))
-    print err.print_summary(verbose=True)
+                            "harness-options.json": harnessoptions}))
     assert err.failed()
 
 
@@ -308,14 +273,12 @@ def test_mismatched_db_hash():
     Jetpack known file database.
     """
 
-    with open("tests/resources/bootstrap.js") as bootstrap_file:
-        bootstrap = bootstrap_file.read()
-        # Break the hash with this.
-        bootstrap = "function() {}; %s" % bootstrap
-        bootstrap_hash = hashlib.sha256(bootstrap).hexdigest()
+    # Break the hash with this.
+    bootstrap = "function() {}; %s" % globals()["bootstrap"]
+    bootstrap_hash = hashlib.sha256(bootstrap).hexdigest()
 
     harnessoptions = {
-            "sdkVersion": "1.8-dev",
+            "sdkVersion": "1.7",
             "jetpackID": "foobar",
             "manifest":
                 {"resource://bootstrap.js":
@@ -328,20 +291,23 @@ def test_mismatched_db_hash():
 
     err = _do_test(MockXPI({"bootstrap.js": bootstrap,
                             "resources/bootstrap.js": bootstrap,
-                            "harness-options.json":
-                                json.dumps(harnessoptions)}))
-    print err.print_summary(verbose=True)
-    assert not err.failed()
+                            "harness-options.json": harnessoptions}))
+    assert err.failed()
+    assert (("testcases_frameworks", "unknown_file") in
+            (e["id"] for e in err.errors))
 
-    assert "jetpack_loaded_modules" in err.metadata
-    assert not err.metadata["jetpack_loaded_modules"]
-    assert "jetpack_identified_files" in err.metadata
+    assert "jetpack_loaded_modules" not in err.metadata
 
-    assert "jetpack_unknown_files" in err.metadata
-    unknown_files = err.metadata['jetpack_unknown_files']
-    nose.tools.eq_(len(unknown_files), 2)
-    nose.tools.ok_('bootstrap.js' in unknown_files)
-    nose.tools.ok_('resources/bootstrap.js' in unknown_files)
+    # There is currently no analog for this. Restore if we decide to
+    # create one.
+    # assert "jetpack_unknown_files" in err.metadata
+
+    identified_files = err.metadata.get("identified_files")
+    framework_files = err.metadata.get("framework_files")
+    eq_(identified_files, {})
+    eq_(framework_files,
+        ["bootstrap.js",
+         "harness-options.json"])
 
 
 def test_mismatched_module_version():
@@ -350,11 +316,14 @@ def test_mismatched_module_version():
     other than the version they claim.
     """
 
-    xpi = XPIManager("tests/resources/jetpack/jetpack-1.8-pretending-1.8.1.xpi")
-    err = _do_test(xpi)
+    with accepted_version("frameworks", "jetpack", "versions", "1.8.1"):
+        xpi = XPIManager("tests/resources/jetpack/"
+                         "jetpack-1.8-pretending-1.8.1.xpi")
+        err = _do_test(xpi)
 
     assert err.failed()
-    assert any(w["id"][2] == "mismatched_version" for w in err.warnings)
+    assert (("testcases_frameworks", "incorrect_file_version") in
+            (e["id"] for e in err.errors))
 
 
 def test_new_module_location_spec():
@@ -431,21 +400,20 @@ def test_absolute_uris_in_markup():
 
 
 def test_bad_sdkversion():
-    """Test that a redacted SDK version is not used."""
+    """Test that a deprecated SDK version is not used."""
 
     harnessoptions = {"sdkVersion": "1.4",
                       "jetpackID": "",
                       "manifest": {}}
 
-    with open("tests/resources/bootstrap.js") as bootstrap_file:
-        bootstrap = bootstrap_file.read()
     with open("jetpack/addon-sdk/packages/test-harness/lib/"
                   "harness.js") as harness_file:
         harness = harness_file.read()
-    err = _do_test(MockXPI({"bootstrap.js": bootstrap,
-                            "components/harness.js": harness,
-                            "harness-options.json":
-                                json.dumps(harnessoptions)}))
+
+    with accepted_version("frameworks", "jetpack", "versions", "1.4"):
+        err = _do_test(MockXPI({"bootstrap.js": bootstrap,
+                                "components/harness.js": harness,
+                                "harness-options.json": harnessoptions}))
     assert err.failed() and err.errors
 
 
@@ -456,23 +424,11 @@ def test_outdated_sdkversion():
     """
 
     xpi = XPIManager("tests/resources/jetpack/jetpack-1.8-outdated.xpi")
-    err = _do_test(xpi, allow_old_sdk=False)
+    with accepted_version("frameworks", "jetpack", "versions", "1.8"):
+        err = _do_test(xpi, allow_old_sdk=False)
 
     assert err.failed()
     # Make sure we don't have any version mismatch warnings
+    eq_(err.errors, [])
     eq_(len(err.warnings), 1)
     eq_(err.warnings[0]["id"][2], "outdated_version")
-
-
-def test_future_sdkversion():
-    """
-    Test that if the developer is using a verison of the SDK that's newer than
-    the latest recognized version, we don't throw an error.
-    """
-
-    xpi = XPIManager("tests/resources/jetpack/jetpack-1.8-future.xpi")
-    err = _do_test(xpi, allow_old_sdk=False)
-
-    print err.print_summary(verbose=True)
-    assert not err.failed()
-

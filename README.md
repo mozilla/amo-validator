@@ -44,10 +44,10 @@ so that you get all of the goodies inside.
 ### Spidermonkey
 
 A working copy of Spidermonkey (debug or non-debug is fine) is required.  The
-easiest way to do this is to just [download the binary](http://ftp.mozilla.org/pub/mozilla.org/firefox/nightly/latest-trunk/jsshell-linux-x86_64.zip).
+easiest way to do this is to just [download the binary](https://ftp.mozilla.org/pub/mozilla.org/firefox/nightly/latest-mozilla-aurora/jsshell-linux-x86_64.zip).
 
-If you want to build it from scratch, [clone](http://hg.mozilla.org/mozilla-central/) 
-the mozilla-central repo or 
+If you want to build it from scratch, [clone](http://hg.mozilla.org/mozilla-central/)
+the mozilla-central repo or
 [download the tip](http://hg.mozilla.org/mozilla-central/archive/tip.tar.bz2)
 (which is faster). Then build it from source like this
 
@@ -55,7 +55,7 @@ the mozilla-central repo or
 cd mozilla-central
 cd js/src
 autoconf2.13
-./configure
+./configure --without-intl-api
 make
 sudo cp dist/bin/js /usr/local/bin/js
 ```
@@ -335,41 +335,81 @@ make sure that the results are accurate.
 
 A list of Mozilla `<em:targetApplication>` values is stored in the
 `validator/app_versions.json` file. This must be updated to include the latest
-application versions. This information can be found on AMO:
+application versions.
 
-    https://addons.mozilla.org/en-US/firefox/pages/appversions/
+The official version of this data can be found at:
 
-
-### JS Libraries
-
-A list of JS library hashes is kept to allow for whitelisting. This must be
-regenerated with each new library version. To update:
-
-```bash
-cd extras
-mkdir jslibs
-python jslibfetcher.py
-python build_whitelist.py jslibs/
-mv whitelist_hashes.txt ../validator/testcases/hashes.txt
-```
-
-To add new libraries to the mix, edit `extras/jslibfetcher.py` and add the
-version number to the appropriate tuple.
+    http://addons.mozilla.org/pages/appversions/format:json
 
 
-### Jetpack
+### JS Libraries and Frameworks
 
-In order to maintain Jetpack compatibility, the whitelist hashes need to be
-regenerated with each successive Jetpack version. To rebuild the hash library,
-simply run:
+Comprehensive metadata regarding known JavaScript libraries and
+add-on frameworks is stored in `validator/libraries.json`. This data
+includes cryptographic hashes of accepted files, informational
+messages about certain libraries and versions, and information about
+whether certain libraries may be accepted.
 
-```bash
-cd jetpack
-./generate_jp_whitelist.sh
-```
+The structure of this file is as follows:
 
-That's it!
+    {
+        "libraries": <library_data>,
+        "frameworks": <library_data>,
+        "hashes": <hash_data>
+    }
 
+    <library_data> ::= {
+        "<library_id>": {                      // An arbitrary ID for the library, used internally.
+            "name": "<library_name>",          // The display name of the library. Optional. Defaults to capitalized ID.
+            "messages": <message_list>,        // Optional.
+            "deprecated": <deprecation_level>, // Optional.
+            "versions": <versions_data>,
+            "framework_files": ["<file_path>", // File paths which, if present, belong to the framework.
+                                ...]           // Optional. Only applicable to frameworks.
+        },
+        ...
+    }
+
+    <version_data> ::= {
+        "<version_number>": {
+            "messages": <message_list>,        // Optional.
+            "deprecated": <deprecation_level>, // Optional.
+        },
+        ...
+    }
+
+    <message_list> ::= [
+        "<message>", // An arbitrary message to be displayed when the library or version is used.
+        ...
+    ]
+
+    <hash_data> ::= {
+        "<sha256_hash>": { // The sha256 hash of the file.
+            "messages": <message_list>,       // Optional.
+            "sources": [<source_info>, ...],
+        ],
+        ...
+    }
+
+    <source_id> ::= [
+        "<library_id>", // The ID of the library, as defined in the "libraries" or "frameworks" data above.
+        "<version>",    // The version of the library the file comes from, which must exist in appropriate "versions" property above.
+        "<path>"        // The path to the file within the library or framework sources.
+    ]
+
+    <deprecation_level> ::= integer 0 <= deprecation_level <= 10
+        Values of 5 or less are guaranteed to indicate soft
+        deprecation, and to issue only a warning.
+
+        A value of 10 is guaranteed to indicate hard deprecation,
+        and to result in a hard error.
+
+        The behavior of other values is currently undefined.
+
+
+The official version of this data can be found at:
+
+    http://addons.mozilla.org/developers/known-libraries/format:json
 
 ### Language Packs
 

@@ -77,6 +77,11 @@ class ErrorBundle(object):
 
     def _message(type_, message_type):
         def wrap(self, *args, **kwargs):
+            # Accept `message=foo` in place of, e.g., `warning=foo`
+            if "message" in kwargs:
+                assert message_type not in kwargs
+                kwargs[message_type] = kwargs["message"]
+
             message = {
                 "id": kwargs.get("err_id") or args[0],
                 "message": kwargs.get(message_type) or args[1],
@@ -400,20 +405,28 @@ class ErrorBundle(object):
                                     message=notice,
                                     verbose=verbose)
 
-        if "is_jetpack" in self.metadata and verbose:
-            self.handler.write("\n")
-            self.handler.write("<<GREEN>>Jetpack add-on detected.<<NORMAL>>\n"
-                               "Identified files:")
-            if "jetpack_identified_files" in self.metadata:
-                for filename, data in \
-                        self.metadata["jetpack_identified_files"].items():
-                    self.handler.write((" %s\n" % filename) +
-                                       ("  %s : %s" % data))
+        if verbose:
+            if "framework" in self.metadata:
+                framework = self.metadata["framework"]
 
-            if "jetpack_unknown_files" in self.metadata:
-                self.handler.write("Unknown files:")
-                for filename in self.metadata["jetpack_unknown_files"]:
+                self.handler.write("\n")
+                self.handler.write("<<GREEN>>%s %s framework add-on detected."
+                                   "<<NORMAL>>\n" % (framework["name"],
+                                                     framework["version"]))
+
+            if self.metadata.get("framework_files"):
+                self.handler.write("Framework files:")
+                for filename in self.metadata["framework_files"]:
                     self.handler.write(" %s" % filename)
+                self.handler.write("")
+
+            if self.metadata.get("identified_files"):
+                self.handler.write("Identified files:")
+                for name, data in (self.metadata["identified_files"]
+                                   .iteritems()):
+                    self.handler.write(" %s:" % name)
+                    self.handler.write("\n".join("  %s %s (%s)" % tuple(src)
+                                                 for src in data["sources"]))
 
         self.handler.write("\n")
         if self.unfinished:

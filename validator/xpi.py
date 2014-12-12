@@ -21,7 +21,10 @@ class XPIManager(object):
         self.zf = ZipFile(package, mode=mode)
 
         # Store away the filename for future use.
-        self.filename = name or package
+        if name or isinstance(package, basestring):
+            self.filename = name or package
+        else:
+            self.filename = package.name
         self.extension = self.filename.split(".")[-1]
         self.subpackage = subpackage
 
