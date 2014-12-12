@@ -5,6 +5,7 @@ from actions import _get_as_str
 import call_definitions
 from call_definitions import xpcom_constructor as xpcom_const, python_wrap
 from entity_values import entity
+import instanceactions
 from jstypes import JSWrapper
 
 
@@ -75,6 +76,12 @@ OBSOLETE_EXTENSION_MANAGER = {
                  "code."}
 
 INTERFACES = {
+    u"mozIStorageBaseStatement":
+        {"value":
+            {u"execute":
+                {"dangerous": instanceactions.SYNCHRONOUS_SQL_DESCRIPTION},
+             u"executeStep":
+                {"dangerous": instanceactions.SYNCHRONOUS_SQL_DESCRIPTION}}},
     u"nsIExtensionManager": OBSOLETE_EXTENSION_MANAGER,
     u"nsIUpdateItem": OBSOLETE_EXTENSION_MANAGER,
     u"nsIInstallLocation": OBSOLETE_EXTENSION_MANAGER,
@@ -574,14 +581,14 @@ for interface in INTERFACES:
     INTERFACE_ENTITIES[interface] = {"xpcom_map": construct(interface)}
 
 
-def build_quick_xpcom(method, interface, traverser):
+def build_quick_xpcom(method, interface, traverser, wrapper=False):
     """A shortcut to quickly build XPCOM objects on the fly."""
     constructor = xpcom_const(method, pretraversed=True)
     interface_obj = traverser._build_global(
                         name=method,
                         entity={"xpcom_map": lambda: INTERFACES[interface]})
     obj = constructor(None, [interface_obj], traverser)
-    if isinstance(obj, JSWrapper):
+    if isinstance(obj, JSWrapper) and not wrapper:
         obj = obj.value
     return obj
 

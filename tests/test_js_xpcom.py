@@ -247,6 +247,21 @@ def test_xpcom_nsibrowsersearchservice():
     """).failed()
 
 
+def test_synchronous_sql():
+    """Test that uses of synchronous SQL are flagged."""
+
+    assert _do_test_raw("database.executeSimpleSQL('foo');").failed()
+
+    assert not _do_test_raw("database.createStatement();").failed()
+
+    for meth in "execute", "executeStep":
+        assert _do_test_raw("database.createStatement().%s();" % meth).failed()
+
+    assert not _do_test_raw("""
+        database.createStatement().executeAsync()
+    """).failed()
+
+
 def test_nsisound_play():
     """Test that nsISound.play is flagged."""
 
