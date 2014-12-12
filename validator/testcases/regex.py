@@ -304,6 +304,34 @@ REQUIRE_PATTERN = (r"""(?<!['"])require\s*\(\s*['"]"""
 
 
 @register_generator
+class UnsafeTemplateRegexTests(RegexTestGenerator):
+    """
+    Checks for the use of unsafe template escape sequences.
+    """
+
+    @classmethod
+    def applicable(cls, err, filename, document):
+        # Perhaps this should just run on all non-binary files, but
+        # we'll try to be more selective for the moment.
+        return bool(re.match(r".*\.(js(|m)|handlebars|mustache|"
+                             r"(t|)htm(|l)|tm?pl)",
+                             filename))
+
+    def tests(self):
+        for unsafe, safe in (('<%=', '<%-'),
+                             ('{{{', '{{'),
+                             ('ng-bind-html-unsafe=', 'ng-bind-html')):
+            yield self.get_test(
+                    re.escape(unsafe),
+                    "Potentially unsafe template escape sequence",
+                    "The use of non-HTML-escaping template escape sequences is "
+                    "potentially dangerous and highly discouraged. Non-escaped "
+                    "HTML may only be used when properly sanitized, and in most "
+                    "cases safer escape sequences such as `%s` must be used "
+                    "instead." % safe)
+
+
+@register_generator
 class ChromePatternRegexTests(RegexTestGenerator):
     """
     Test that an Add-on SDK (Jetpack) add-on doesn't use interfaces that are

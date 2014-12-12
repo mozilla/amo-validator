@@ -132,3 +132,10 @@ def test_number_global_conversions():
     eq_(_get_var(err, "f"), _get_var(err, "nan"))
     eq_(_get_var(err, "g"), _get_var(err, "nan"))
 
+
+def test_unsafe_template_methods():
+    """Test that the use of unsafe template methods is flagged."""
+
+    assert _do_test_raw("""bar = Handlebars.SafeString(foo)""").failed()
+    assert _do_test_raw("""bar = $sce.trustAsHTML(foo)""").failed()
+    assert _do_test_raw("""bar = $sce.trustAs("html", foo)""").failed()

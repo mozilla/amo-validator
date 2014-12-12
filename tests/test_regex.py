@@ -169,6 +169,15 @@ def test_preference_extension_regex():
     assert _do_test_raw('"foo.extensions.update.bar"').failed()
 
 
+def test_template_escape():
+    """Tests that the use of unsafe template escape sequences is flagged."""
+
+    assert _do_test_raw("<%= foo %>").failed()
+    assert _do_test_raw("{{{ foo }}}").failed()
+
+    assert _do_test_raw("ng-bind-html-unsafe='foo'").failed()
+
+
 def test_tb11_strings():
     """Flag changed or removed strings in add-on code"""
 

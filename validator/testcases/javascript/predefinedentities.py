@@ -586,6 +586,12 @@ def build_quick_xpcom(method, interface, traverser):
     return obj
 
 
+UNSAFE_TEMPLATE_METHOD = (
+    "The use of `%s` can lead to unsafe "
+    "remote code execution, and therefore must be done with "
+    "great care, and only with sanitized data.")
+
+
 # GLOBAL_ENTITIES is also representative of the `window` object.
 GLOBAL_ENTITIES = {
     u"window": {"value": lambda t: {"value": GLOBAL_ENTITIES}},
@@ -917,6 +923,20 @@ GLOBAL_ENTITIES = {
     u"allowRemoteContentForSite": entity("allowRemoteContentForSite"),
     u"createNewHeaderView": entity("createNewHeaderView"),
     u"getShortcutOrURIAndPostData": entity("getShortcutOrURIAndPostData"),
+
+    # Common third-party libraries
+    "Handlebars": {
+        "value": {
+            "SafeString":
+                {"dangerous":
+                    UNSAFE_TEMPLATE_METHOD % 'Handlebars.SafeString'}}},
+    # Angular
+    "$sce": {
+        "value": {
+            "trustAs": {"dangerous":
+                            UNSAFE_TEMPLATE_METHOD % '$sce.trustAs'},
+            "trustAsHTML": {"dangerous":
+                                UNSAFE_TEMPLATE_METHOD % '$sce.trustAsHTML'}}},
 }
 
 CONTENT_DOCUMENT = GLOBAL_ENTITIES[u"content"]["value"][u"document"]
