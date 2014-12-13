@@ -19,32 +19,45 @@ BANNED_IDENTIFIERS = {
                          "instead wherever possible",
 }
 
-BANNED_PREF_BRANCHES = [
-    u"browser.newtab.url",
-    u"browser.newtabpage.enabled",
-    u"browser.preferences.instantApply",
-    u"browser.search.defaultenginename",
-    u"browser.search.searchEnginesURL",
-    u"browser.startup.homepage",
-    u"capability.policy.",
-    u"extensions.alwaysUnpack",
-    u"extensions.blocklist.",
-    u"extensions.bootstrappedAddons",
-    u"extensions.checkCompatibility",
-    u"extensions.dss.",
-    u"extensions.getAddons.",
-    u"extensions.getMoreThemesURL",
-    u"extensions.installCache",
-    u"extensions.lastAppVersion",
-    u"extensions.pendingOperations",
-    u"extensions.update.",
-    u"general.useragent.",
-    u"keyword.URL",
-    u"keyword.enabled",
-    u"network.http.",
-    u"network.websocket.",
-    u"nglayout.debug.disable_xul_cache",
-]
+CUSTOMIZATION_PREF_MESSAGE = (
+    "Extensions must not alter user preferences such as the current home "
+    "page, new tab page, or search engine, without explicit user consent, "
+    "in which a user takes a non-default action. Such changes must also "
+    "be reverted when the extension is disabled or uninstalled.")
+
+BANNED_PREF_BRANCHES = (
+    (u"browser.newtab.url", CUSTOMIZATION_PREF_MESSAGE),
+    (u"browser.newtabpage.enabled", CUSTOMIZATION_PREF_MESSAGE),
+    (u"browser.preferences.instantApply", None),
+    (u"browser.search.defaultenginename", CUSTOMIZATION_PREF_MESSAGE),
+    (u"browser.search.searchEnginesURL", CUSTOMIZATION_PREF_MESSAGE),
+    (u"browser.startup.homepage", CUSTOMIZATION_PREF_MESSAGE),
+    (u"capability.policy.", None),
+    (u"extensions.alwaysUnpack", None),
+    (u"extensions.blocklist.", None),
+    (u"extensions.bootstrappedAddons", None),
+    (u"extensions.checkCompatibility", None),
+    (u"extensions.dss.", None),
+    (u"extensions.getAddons.", None),
+    (u"extensions.getMoreThemesURL", None),
+    (u"extensions.installCache", None),
+    (u"extensions.lastAppVersion", None),
+    (u"extensions.pendingOperations", None),
+    (u"extensions.update.", None),
+    (u"general.useragent.", None),
+    (u"keyword.URL", CUSTOMIZATION_PREF_MESSAGE),
+    (u"keyword.enabled", CUSTOMIZATION_PREF_MESSAGE),
+    (u"network.proxy.autoconfig_url",
+        "As many add-ons have reason to change the proxy autoconfig URL, and "
+        "only one at a time may do so without conflict, extensions must "
+        "make proxy changes using other mechanisms. Installing a proxy "
+        "filter is the recommended alternative: "
+        "https://developer.mozilla.org/en-US/docs/Mozilla/Tech/XPCOM/"
+        "Reference/Interface/nsIProtocolProxyService#registerFilter()"),
+    (u"network.http.", None),
+    (u"network.websocket.", None),
+    (u"nglayout.debug.disable_xul_cache", None),
+)
 
 BANNED_PREF_REGEXPS = [
     r"extensions\..*\.update\.(url|enabled|interval)",

@@ -476,22 +476,25 @@ def _call_create_pref(a, t, e):
     value = str(t(a[0]).get_literal_value())
 
     from predefinedentities import BANNED_PREF_BRANCHES, BANNED_PREF_REGEXPS
-    for banned in BANNED_PREF_BRANCHES:
+    for banned, reason in BANNED_PREF_BRANCHES:
         if value.startswith(banned):
-            return ("Extensions should not alter preferences in the '%s' "
-                    "preference branch" % banned)
+            return reason or ("Extensions should not alter preferences in "
+                              "the '%s' preference branch" % banned)
 
     for banned in BANNED_PREF_REGEXPS:
         if re.match(banned, value):
             return ("Extensions should not alter preferences matching /%s/"
                         % banned)
 
-    if not value.startswith("extensions.") or value.rindex(".") < len("extensions."):
-        return ("Extensions should not alter preferences outside of the "
-                "'extensions.' preference branch. Please make sure that "
-                "all of your extension's preferences are prefixed with "
-                "'extensions.add-on-name.', where 'add-on-name' is a "
-                "distinct string unique to and indicative of your add-on.")
+    for branch in "extensions.", "services.sync.prefs.sync.extensions.":
+        if value.startswith(branch) and value.rindex(".") > len(branch):
+            return
+
+    return ("Extensions should not alter preferences outside of the "
+            "'extensions.' preference branch. Please make sure that "
+            "all of your extension's preferences are prefixed with "
+            "'extensions.add-on-name.', where 'add-on-name' is a "
+            "distinct string unique to and indicative of your add-on.")
 
 
 def _readonly_top(t, r, rn):

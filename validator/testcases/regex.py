@@ -291,12 +291,12 @@ class BannedPrefRegexTests(RegexTestGenerator):
                     "Extensions should not alter preferences matching /%s/."
                         % pattern)
 
-        for branch in BANNED_PREF_BRANCHES:
+        for branch, reason in BANNED_PREF_BRANCHES:
             yield self.get_test(
                     branch.replace(r".", r"\."),
                     "Potentially unsafe preference branch referenced",
-                    "Extensions should not alter preferences in the `%s` "
-                    "preference branch" % branch)
+                    reason or ("Extensions should not alter preferences in "
+                               "the `%s` preference branch" % branch))
 
 
 REQUIRE_PATTERN = (r"""(?<!['"])require\s*\(\s*['"]"""
