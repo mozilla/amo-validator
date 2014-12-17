@@ -1,0 +1,21 @@
+language: python
+sudo: false
+python:
+  - "2.6"
+env:
+  - TOX_ENV=py26
+  - TOX_ENV=py27
+  - TOX_ENV=functional-tests
+before_install:
+  - wget http://ftp.mozilla.org/pub/mozilla.org/firefox/nightly/latest-mozilla-esr31/jsshell-linux-x86_64.zip
+  - unzip -o jsshell-linux-x86_64.zip -d spidermonkey
+install:
+  - pip install tox
+script:
+  - SPIDERMONKEY_INSTALLATION=`pwd`/spidermonkey/js tox -v -e $TOX_ENV --recreate
+notifications:
+  irc:
+    channels:
+      - "irc.mozilla.org#amo-bots"
+    on_success: change
+    on_failure: always

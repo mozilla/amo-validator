@@ -338,9 +338,10 @@ def test_mismatched_db_hash():
     assert "jetpack_identified_files" in err.metadata
 
     assert "jetpack_unknown_files" in err.metadata
-    nose.tools.eq_(err.metadata["jetpack_unknown_files"],
-                   ["bootstrap.js",
-                    "resources/bootstrap.js"])
+    unknown_files = err.metadata['jetpack_unknown_files']
+    nose.tools.eq_(len(unknown_files), 2)
+    nose.tools.ok_('bootstrap.js' in unknown_files)
+    nose.tools.ok_('resources/bootstrap.js' in unknown_files)
 
 
 def test_mismatched_module_version():
