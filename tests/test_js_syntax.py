@@ -46,6 +46,13 @@ def test_spidermonkey_warning():
     """
     Test that stderr warnings in Spidermonkey do not trip runtime errors.
     """
+    # The following is attempting to store the octal "999999999999" in x, but
+    # this is an invalid octal obviously. We need to "use strict" here because
+    # the latest versions of spidermonkey simply accept that as a base 10
+    # number, despite the "0" prefix.
+    # We need spidermonkey to choke on this code, and this test makes sure that
+    # when spidermonkey does, it doesn't break the validator.
     assert _do_test_raw("""
+    "use strict";
     var x = 0999999999999;
     """).failed()

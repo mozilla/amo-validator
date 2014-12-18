@@ -1,5 +1,5 @@
 include validator/testcases/hashes.txt
 include validator/app_versions.json
 include validator/testcases/jetpack_data.txt
-include README.rst
+include README.md
 include requirements.txt

@@ -11,4 +11,5 @@
 /extras/language_controls
 dist/
 amo_validator.egg-info/
-
+nosetests.xml
+.tox/
