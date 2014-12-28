@@ -230,6 +230,18 @@ YUI_NEW_VERSIONS = [
     "3.6.0",
 ]
 
+# qTip2
+QTIP2_VERSIONS = [
+    "2.2.0",
+    "2.2.1",
+]
+
+# Dropbox
+DROPBOX_VERSIONS = [
+    "1.0.0",
+    "1.1.0",
+]
+
 
 # Dojo Toolkit
 get_pattern("dojo",
@@ -323,3 +335,22 @@ CRYPTO_FILES = ["aes", "cipher-core", "core", "enc-base64", "enc-utf16",
 get_pattern(
     "crypto_js", "http://crypto-js.googlecode.com/svn/tags/3.0.2/src/%s.js",
     CRYPTO_FILES)
+
+# qTip2
+get_pattern("qtip2",
+            "http://cdn.jsdelivr.net/qtip2/%s/jquery.qtip.min.js",
+            QTIP2_VERSIONS)
+get_pattern("qtip2",
+            "http://cdn.jsdelivr.net/qtip2/%s/jquery.qtip.js",
+            QTIP2_VERSIONS)
+get_pattern("qtip2-basic",
+            "http://cdn.jsdelivr.net/qtip2/%s/basic/jquery.qtip.min.js",
+            QTIP2_VERSIONS)
+get_pattern("qtip2-basic",
+            "http://cdn.jsdelivr.net/qtip2/%s/basic/jquery.qtip.js",
+            QTIP2_VERSIONS)
+
+# Dropbox
+get_pattern("dropbox",
+            "https://www.dropbox.com/static/api/dropbox-datastores-%s.js",
+            DROPBOX_VERSIONS)
