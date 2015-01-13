@@ -299,6 +299,10 @@ class BannedPrefRegexTests(RegexTestGenerator):
                     "preference branch" % branch)
 
 
+REQUIRE_PATTERN = (r"""(?<!['"])require\s*\(\s*['"]"""
+                   r"""(?:sdk/)?(%s)['"]\s*\)""")
+
+
 @register_generator
 class ChromePatternRegexTests(RegexTestGenerator):
     """
@@ -322,8 +326,7 @@ class ChromePatternRegexTests(RegexTestGenerator):
         # going to set the `requires_chrome` metadata value to `True`.
         def rewrap():
             wrapper = self.get_test(
-                    r"(?<![\'\"])require\s*\(\s*[\'\"]"
-                    r"(%s)[\'\"]\s*\)" % self.INTERFACES,
+                    REQUIRE_PATTERN % self.INTERFACES,
                     "Usage of flagged or non-SDK interface",
                     "This SDK-based add-on uses interfaces that aren't part "
                     "of the SDK or are flagged as sensitive.")
@@ -331,6 +334,26 @@ class ChromePatternRegexTests(RegexTestGenerator):
                 self.err.metadata["requires_chrome"] = True
 
         yield rewrap
+
+
+@register_generator
+class WidgetModuleRegexTests(RegexTestGenerator):
+    """
+    Tests whether an Add-on SDK add-on is using the deprecated widget
+    interface.
+    """
+
+    def js_tests(self):
+        yield self.get_test(
+            REQUIRE_PATTERN % "widget",
+            "Use of deprecated SDK module",
+            "The 'widget' module has been deprecated due to a number of "
+            "performance and usability issues, and is slated to be removed "
+            "from the SDK in the near future. Please use the "
+            "'sdk/ui/button/action' or 'sdk/ui/button/toggle' module "
+            "instead. See "
+            "https://developer.mozilla.org/Add-ons/SDK/High-Level_APIs/ui "
+            "for more information.")
 
 
 @register_generator
