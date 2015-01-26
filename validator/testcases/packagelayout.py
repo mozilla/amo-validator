@@ -78,6 +78,7 @@ def test_blacklisted_files(err, xpi_package=None):
                              "unauthorized scripts, etc.).",
                              u"The file \"%s\" contains flagged content" %
                                  name],
+                editors_only=True,
                 filename=name)
 
     if flagged_files:
@@ -107,6 +108,7 @@ def test_blacklisted_files(err, xpi_package=None):
                              " for more information on the binary content "
                              "review process.",
                              "\n".join(flagged_files)],
+                editors_only=True,
                 filename=name)
 
 
@@ -153,7 +155,9 @@ def test_compatibility_binary(err, xpi_package):
                         "disallowed_file_type"),
                 notice="Flagged file type found",
                 description=["A file (%s) was registered as a binary "
-                             "component." % triple["predicate"],
+                             "component. Binary files may not be submitted to "
+                             "AMO unless accompanied by source code."
+                                % triple["predicate"],
                              description],
                 filename=triple["predicate"],
                 compatibility_type="error")

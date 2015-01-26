@@ -78,7 +78,7 @@ def test_packed_packages(err, xpi_package=None):
                 err_id=("testcases_content", "test_packed_packages",
                         "hidden_files"),
                 warning="Hidden files and folders flagged",
-                description="Hidden files and folders difficult the review "
+                description="Hidden files and folders complicate the review "
                             "process and can contain sensitive information "
                             "about the system that generated the XPI. Please "
                             "modify the packaging process so that these files "

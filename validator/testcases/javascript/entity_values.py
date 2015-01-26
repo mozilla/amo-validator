@@ -214,7 +214,7 @@ def nsISoundPlay(traverser):
         warning="`nsISound.play` should not be used.",
         description="The `nsISound.play` function is synchronous, and thus "
                     "freezes the interface while the sound is playing. It "
-                    "be avoided in favor of the HTML5 audio APIs.",
+                    "should be avoided in favor of the HTML5 audio APIs.",
         filename=traverser.filename,
         line=traverser.line,
         column=traverser.position,
@@ -281,8 +281,9 @@ def nsITransferable_init(traverser):
             warning="`init` should not be called with a null first argument",
             description="Calling `nsITransferable.init()` with a null first "
                         "argument has the potential to leak data across "
-                        "private browsing mode sessions. `null` may be "
-                        "appropriate sometimes, but it is not universally.",
+                        "private browsing mode sessions. `null` is  "
+                        "appropriate only when reading data or writing data "
+                        "which is not associated with a particular window.",
             filename=traverser.filename,
             line=traverser.line,
             column=traverser.position,

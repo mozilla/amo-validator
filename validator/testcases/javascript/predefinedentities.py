@@ -527,9 +527,22 @@ INTERFACES = {
 INTERFACE_ENTITIES = {u"nsIXMLHttpRequest":
                           {"xpcom_map":
                                lambda: GLOBAL_ENTITIES["XMLHttpRequest"]},
-                      u"nsIProcess": {"dangerous": True},
-                      u"nsIDOMGeoGeolocation": {"dangerous": True},
-                      u"nsIX509CertDB": {"dangerous": True}}
+                      u"nsIProcess": {"dangerous": {
+                        "warning": "The use of nsIProcess is potentially "
+                                   "dangerous and requires careful review "
+                                   "by an administrative reviewer.",
+                        "editors_only": True,
+                      }},
+                      u"nsIDOMGeoGeolocation": {"dangerous":
+                         "Use of the geolocation API by add-ons requires "
+                         "prompting users for consent."},
+                      u"nsIX509CertDB": {"dangerous": {
+                          "description": "Access to the X509 certificate "
+                                         "database is potentially dangerous "
+                                         "and requires careful review by an "
+                                         "administrative reviewer.",
+                          "editors_only": True,
+                      }}}
 for interface in INTERFACES:
     def construct(interface):
         def wrap():
@@ -585,11 +598,17 @@ GLOBAL_ENTITIES = {
               u"createElement":
                   {"dangerous":
                        lambda a, t, e:
-                           not a or _get_as_str(t(a[0])).lower() == "script"},
+                           not a or _get_as_str(t(a[0])).lower() == "script"
+                           and "Dynamic creation of script nodes can be "
+                               "unsafe if contents are not static or are "
+                               "otherwise unsafe, or if `src` is remote."},
               u"createElementNS":
                   {"dangerous":
                        lambda a, t, e:
-                           not a or _get_as_str(t(a[0])).lower() == "script"},
+                           not a or _get_as_str(t(a[0])).lower() == "script"
+                           and "Dynamic creation of script nodes can be "
+                               "unsafe if contents are not static or are "
+                               "otherwise unsafe, or if `src` is remote."},
               u"getSelection":
                   {"return": call_definitions.document_getSelection},
               u"loadOverlay":

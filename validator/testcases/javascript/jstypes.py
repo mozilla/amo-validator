@@ -306,7 +306,7 @@ class JSWrapper(object):
                 err_id=("testcases_js_jstypes", "del_value",
                         "global_member_deletion"),
                 warning="Global member deletion",
-                description="Members of global object cannot be deleted.",
+                description="Members of global object may not be deleted.",
                 filename=self.traverser.filename,
                 line=self.traverser.line,
                 column=self.traverser.position,
