@@ -1,7 +1,7 @@
 language: python
 sudo: false
 python:
-  - "2.6"
+  - '2.6'
 env:
   - TOX_ENV=py26
   - TOX_ENV=py27
@@ -16,6 +16,15 @@ script:
 notifications:
   irc:
     channels:
-      - "irc.mozilla.org#amo-bots"
+      - irc.mozilla.org#amo-bots
     on_success: change
     on_failure: always
+deploy:
+  provider: pypi
+  user: marketplacedevsinternal
+  password:
+    secure: kYcPvTPRAPw4lXKgHqEPQr/df6+MppYn30u4POo/uciefp7362FP/88KU4fV87fo+6gwFuHktsVtCiYAOmQp/d0ajhqLv3ZIDGYr9kesFl5CtRuh/LDsx1Matasm0BKDepqY02r9eMJV0FweB9Lpz0vw79Ow6cgU2CH7f9GfgY4=
+  on:
+    tags: true
+    all-branches: true
+  distributions: "sdist bdist_wheel"
