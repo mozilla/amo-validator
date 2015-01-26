@@ -18,6 +18,21 @@ from validator.constants import BUGZILLA_BUG, MDN_DOC
 from instanceproperties import _set_HTML_property
 
 
+def _warn_synchronous_sql(traverser):
+    traverser.err.warning(
+        err_id=("js", "instanceactions", "synchronous_sql"),
+        warning="Synchronous SQL access should be avoided.",
+        description="The use of synchronous SQL is known to cause significant "
+                    "IO pauses and general responsiveness issues. Please use "
+                    "asynchronous Storage APIs, particularly "
+                    "http://mzl.la/sqlite-jsm or `createAsyncStatement`, where "
+                    "possible.",
+        filename=traverser.filename,
+        line=traverser.line,
+        column=traverser.position,
+        context=traverser.context)
+
+
 def addEventListener(args, traverser, node, wrapper):
     """
     Handle calls to addEventListener and make sure that the fourth argument is
@@ -84,6 +99,37 @@ def createEvent(args, traverser, node, wrapper):
             for_appversions=FX31_DEFINITION,
             compatibility_type="error",
             tier=5)
+
+
+def createStatement(args, traverser, node, wrapper):
+    """Handles createStatement calls."""
+
+    _warn_synchronous_sql(traverser)
+
+
+def executeSimpleSQL(args, traverser, node, wrapper):
+    """Handles executeSimpleSQL calls."""
+
+    _warn_synchronous_sql(traverser)
+
+    simple_args = map(traverser._traverse_node, args)
+
+    if len(args) >= 1 and not simple_args[0].is_literal():
+        traverser.warning(
+            err_id=("js", "instanceactions", "executeSimpleSQL_dynamic"),
+            warning="`executeSimpleSQL` should not be used with dynamic "
+                    "SQL.",
+            description=["For dynamic SQL statements, especially those with "
+                         "parameters, Sqlite.jsm wrappers, or "
+                         "`createAsyncStatement`, should be used with "
+                         "dynamic parameter binding.",
+                         "See http://mzl.la/sqlite-jsm and "
+                         "https://developer.mozilla.org/en-US/docs"
+                         "/Storage#Binding_parameters for more information"],
+            filename=traverser.filename,
+            line=traverser.line,
+            column=traverser.position,
+            context=traverser.context)
 
 
 def QueryInterface(args, traverser, node, wrapper):
@@ -358,9 +404,11 @@ INSTANCE_DEFINITIONS = {
     "createElement": createElement,
     "createElementNS": createElementNS,
     "createEvent": createEvent,
+    "createStatement": createStatement,
     "getAsBinary": nsIDOMFile_deprec,
     "getAsDataURL": nsIDOMFile_deprec,
     "getInterface": getInterface,
+    "executeSimpleSQL": executeSimpleSQL,
     "insertAdjacentHTML": insertAdjacentHTML,
     "isSameNode": isSameNode,
     "openDialog": openDialog,
