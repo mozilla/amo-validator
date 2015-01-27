@@ -26,5 +26,5 @@ deploy:
     secure: kYcPvTPRAPw4lXKgHqEPQr/df6+MppYn30u4POo/uciefp7362FP/88KU4fV87fo+6gwFuHktsVtCiYAOmQp/d0ajhqLv3ZIDGYr9kesFl5CtRuh/LDsx1Matasm0BKDepqY02r9eMJV0FweB9Lpz0vw79Ow6cgU2CH7f9GfgY4=
   on:
     tags: true
-    all-branches: true
+    all_branches: true
   distributions: "sdist bdist_wheel"
