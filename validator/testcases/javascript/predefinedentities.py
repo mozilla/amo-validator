@@ -5,6 +5,7 @@ from actions import _get_as_str
 import call_definitions
 from call_definitions import xpcom_constructor as xpcom_const, python_wrap
 from entity_values import entity
+import instanceactions
 from jstypes import JSWrapper
 
 
@@ -18,32 +19,45 @@ BANNED_IDENTIFIERS = {
                          "instead wherever possible",
 }
 
-BANNED_PREF_BRANCHES = [
-    u"browser.newtab.url",
-    u"browser.newtabpage.enabled",
-    u"browser.preferences.instantApply",
-    u"browser.search.defaultenginename",
-    u"browser.search.searchEnginesURL",
-    u"browser.startup.homepage",
-    u"capability.policy.",
-    u"extensions.alwaysUnpack",
-    u"extensions.blocklist.",
-    u"extensions.bootstrappedAddons",
-    u"extensions.checkCompatibility",
-    u"extensions.dss.",
-    u"extensions.getAddons.",
-    u"extensions.getMoreThemesURL",
-    u"extensions.installCache",
-    u"extensions.lastAppVersion",
-    u"extensions.pendingOperations",
-    u"extensions.update.",
-    u"general.useragent.",
-    u"keyword.URL",
-    u"keyword.enabled",
-    u"network.http.",
-    u"network.websocket.",
-    u"nglayout.debug.disable_xul_cache",
-]
+CUSTOMIZATION_PREF_MESSAGE = (
+    "Extensions must not alter user preferences such as the current home "
+    "page, new tab page, or search engine, without explicit user consent, "
+    "in which a user takes a non-default action. Such changes must also "
+    "be reverted when the extension is disabled or uninstalled.")
+
+BANNED_PREF_BRANCHES = (
+    (u"browser.newtab.url", CUSTOMIZATION_PREF_MESSAGE),
+    (u"browser.newtabpage.enabled", CUSTOMIZATION_PREF_MESSAGE),
+    (u"browser.preferences.instantApply", None),
+    (u"browser.search.defaultenginename", CUSTOMIZATION_PREF_MESSAGE),
+    (u"browser.search.searchEnginesURL", CUSTOMIZATION_PREF_MESSAGE),
+    (u"browser.startup.homepage", CUSTOMIZATION_PREF_MESSAGE),
+    (u"capability.policy.", None),
+    (u"extensions.alwaysUnpack", None),
+    (u"extensions.blocklist.", None),
+    (u"extensions.bootstrappedAddons", None),
+    (u"extensions.checkCompatibility", None),
+    (u"extensions.dss.", None),
+    (u"extensions.getAddons.", None),
+    (u"extensions.getMoreThemesURL", None),
+    (u"extensions.installCache", None),
+    (u"extensions.lastAppVersion", None),
+    (u"extensions.pendingOperations", None),
+    (u"extensions.update.", None),
+    (u"general.useragent.", None),
+    (u"keyword.URL", CUSTOMIZATION_PREF_MESSAGE),
+    (u"keyword.enabled", CUSTOMIZATION_PREF_MESSAGE),
+    (u"network.proxy.autoconfig_url",
+        "As many add-ons have reason to change the proxy autoconfig URL, and "
+        "only one at a time may do so without conflict, extensions must "
+        "make proxy changes using other mechanisms. Installing a proxy "
+        "filter is the recommended alternative: "
+        "https://developer.mozilla.org/en-US/docs/Mozilla/Tech/XPCOM/"
+        "Reference/Interface/nsIProtocolProxyService#registerFilter()"),
+    (u"network.http.", None),
+    (u"network.websocket.", None),
+    (u"nglayout.debug.disable_xul_cache", None),
+)
 
 BANNED_PREF_REGEXPS = [
     r"extensions\..*\.update\.(url|enabled|interval)",
@@ -67,7 +81,25 @@ CATEGORY_MANAGER = {
                  "any added category entries at shutdown.")}}
 
 
+OBSOLETE_EXTENSION_MANAGER = {
+    "value": {},
+    "dangerous": "This interface is part of the obsolete extension manager "
+                 "interface, which is not available in any remotely modern "
+                 "version of Firefox. It should not be referenced in any "
+                 "code."}
+
 INTERFACES = {
+    u"mozIStorageBaseStatement":
+        {"value":
+            {u"execute":
+                {"dangerous": instanceactions.SYNCHRONOUS_SQL_DESCRIPTION},
+             u"executeStep":
+                {"dangerous": instanceactions.SYNCHRONOUS_SQL_DESCRIPTION}}},
+    u"nsIExtensionManager": OBSOLETE_EXTENSION_MANAGER,
+    u"nsIUpdateItem": OBSOLETE_EXTENSION_MANAGER,
+    u"nsIInstallLocation": OBSOLETE_EXTENSION_MANAGER,
+    u"nsIAddonInstallListener": OBSOLETE_EXTENSION_MANAGER,
+    u"nsIAddonUpdateCheckListener": OBSOLETE_EXTENSION_MANAGER,
     u"imIUserStatusInfo":
         {"value":
             {u"setUserIcon": entity("imIUserStatusInfo.setUserIcon")}},
@@ -85,7 +117,8 @@ INTERFACES = {
         {"dangerous":
             "Using the nsIAccessibleRetrieval interface causes significant "
             "performance degradation in Gecko. It should only be used in "
-            "accessibility-related add-ons."},
+            "accessibility-related add-ons.",
+         "value": {}},
     u"nsIBrowserSearchService":
         {"value":
             {u"currentEngine": {"readonly": True},
@@ -267,7 +300,13 @@ INTERFACES = {
                         e.get_resource("em:bootstrap") and
                         "Authors of bootstrapped add-ons must take care "
                         "to remove any added observers "
-                        "at shutdown."}}},
+                        "at shutdown."}},
+         "dangerous": lambda a, t, e:
+            lambda t, e: (
+                e.metadata.get("is_jetpack") and
+                "The observer service should not be used directly in SDK "
+                "add-ons. Please use the 'sdk/system/events' module "
+                "instead.")},
     u"nsIResProtocolHandler":
         {"value":
             {u"setSubstitution":
@@ -370,9 +409,13 @@ INTERFACES = {
               u"execCommandShowHelp": entity("nsIDOMHTMLDocument")}},
     u"nsIWebBrowserPersist":
         {"value":
-             {u"saveURI":
+             {u"saveChannel":
+                  {"return": call_definitions.webbrowserpersist},
+              u"saveURI":
                   {"return":
-                       call_definitions.webbrowserpersist_saveuri}}},
+                       call_definitions.webbrowserpersist_saveuri},
+              u"savePrivacyAwareURI":
+                  {"return": call_definitions.webbrowserpersist}}},
     u"prplIAccount":
         {"value":
              {u"noNewlines": entity("prplIAccount.noNewlines"),
@@ -551,16 +594,22 @@ for interface in INTERFACES:
     INTERFACE_ENTITIES[interface] = {"xpcom_map": construct(interface)}
 
 
-def build_quick_xpcom(method, interface, traverser):
+def build_quick_xpcom(method, interface, traverser, wrapper=False):
     """A shortcut to quickly build XPCOM objects on the fly."""
     constructor = xpcom_const(method, pretraversed=True)
     interface_obj = traverser._build_global(
                         name=method,
                         entity={"xpcom_map": lambda: INTERFACES[interface]})
     obj = constructor(None, [interface_obj], traverser)
-    if isinstance(obj, JSWrapper):
+    if isinstance(obj, JSWrapper) and not wrapper:
         obj = obj.value
     return obj
+
+
+UNSAFE_TEMPLATE_METHOD = (
+    "The use of `%s` can lead to unsafe "
+    "remote code execution, and therefore must be done with "
+    "great care, and only with sanitized data.")
 
 
 # GLOBAL_ENTITIES is also representative of the `window` object.
@@ -573,7 +622,6 @@ GLOBAL_ENTITIES = {
     u"Ci": {"readonly": False,
             "value":
                 lambda t: GLOBAL_ENTITIES["Components"]["value"]["interfaces"]},
-
     u"Cu": {"readonly": False,
             "value":
                 lambda t: GLOBAL_ENTITIES["Components"]["value"]["utils"]},
@@ -780,7 +828,10 @@ GLOBAL_ENTITIES = {
                              u"import":
                                  {"dangerous":
                                       lambda a, t, e:
-                                          a and "ctypes.jsm" in _get_as_str(t(a[0]))}}},
+                                          a and "ctypes.jsm" in _get_as_str(t(a[0]))},
+
+                             u"waiveXrays":
+                                 {"return": call_definitions.js_unwrap}}},
               u"interfaces": {"value": INTERFACE_ENTITIES}}},
     u"extensions": {"dangerous": True},
     u"xpcnativewrappers": {"dangerous": True},
@@ -892,6 +943,20 @@ GLOBAL_ENTITIES = {
     u"allowRemoteContentForSite": entity("allowRemoteContentForSite"),
     u"createNewHeaderView": entity("createNewHeaderView"),
     u"getShortcutOrURIAndPostData": entity("getShortcutOrURIAndPostData"),
+
+    # Common third-party libraries
+    "Handlebars": {
+        "value": {
+            "SafeString":
+                {"dangerous":
+                    UNSAFE_TEMPLATE_METHOD % 'Handlebars.SafeString'}}},
+    # Angular
+    "$sce": {
+        "value": {
+            "trustAs": {"dangerous":
+                            UNSAFE_TEMPLATE_METHOD % '$sce.trustAs'},
+            "trustAsHTML": {"dangerous":
+                                UNSAFE_TEMPLATE_METHOD % '$sce.trustAsHTML'}}},
 }
 
 CONTENT_DOCUMENT = GLOBAL_ENTITIES[u"content"]["value"][u"document"]

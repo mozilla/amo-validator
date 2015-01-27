@@ -291,16 +291,44 @@ class BannedPrefRegexTests(RegexTestGenerator):
                     "Extensions should not alter preferences matching /%s/."
                         % pattern)
 
-        for branch in BANNED_PREF_BRANCHES:
+        for branch, reason in BANNED_PREF_BRANCHES:
             yield self.get_test(
                     branch.replace(r".", r"\."),
                     "Potentially unsafe preference branch referenced",
-                    "Extensions should not alter preferences in the `%s` "
-                    "preference branch" % branch)
+                    reason or ("Extensions should not alter preferences in "
+                               "the `%s` preference branch" % branch))
 
 
 REQUIRE_PATTERN = (r"""(?<!['"])require\s*\(\s*['"]"""
                    r"""(?:sdk/)?(%s)['"]\s*\)""")
+
+
+@register_generator
+class UnsafeTemplateRegexTests(RegexTestGenerator):
+    """
+    Checks for the use of unsafe template escape sequences.
+    """
+
+    @classmethod
+    def applicable(cls, err, filename, document):
+        # Perhaps this should just run on all non-binary files, but
+        # we'll try to be more selective for the moment.
+        return bool(re.match(r".*\.(js(|m)|handlebars|mustache|"
+                             r"(t|)htm(|l)|tm?pl)",
+                             filename))
+
+    def tests(self):
+        for unsafe, safe in (('<%=', '<%-'),
+                             ('{{{', '{{'),
+                             ('ng-bind-html-unsafe=', 'ng-bind-html')):
+            yield self.get_test(
+                    re.escape(unsafe),
+                    "Potentially unsafe template escape sequence",
+                    "The use of non-HTML-escaping template escape sequences is "
+                    "potentially dangerous and highly discouraged. Non-escaped "
+                    "HTML may only be used when properly sanitized, and in most "
+                    "cases safer escape sequences such as `%s` must be used "
+                    "instead." % safe)
 
 
 @register_generator
@@ -354,6 +382,23 @@ class WidgetModuleRegexTests(RegexTestGenerator):
             "instead. See "
             "https://developer.mozilla.org/Add-ons/SDK/High-Level_APIs/ui "
             "for more information.")
+
+
+@register_generator
+class ExtensionManagerRegexTests(RegexTestGenerator):
+    """
+    Tests for uses of the old extension manager API, which should not be
+    referenced in new extensions.
+    """
+
+    def js_tests(self):
+        yield self.get_test(
+                r"@mozilla\.org/extensions/manager;1|"
+                r"em-action-requested",
+                "Obsolete Extension Manager API",
+                "The old Extension Manager API is not available in any "
+                "remotely modern version of Firefox and should not be "
+                "referenced in any code.")
 
 
 @register_generator

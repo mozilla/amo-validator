@@ -166,6 +166,26 @@ def spellcheck_updatecurrentdictionary(wrapper, arguments, traverser):
             tier=5)
 
 
+def webbrowserpersist(wrapper, arguments, traverser):
+    """
+    Most nsIWebBrowserPersist should no longer be used, in favor of the new
+    Downloads.jsm interfaces.
+    """
+    traverser.err.warning(
+        err_id=("testcases_javascript_call_definititions",
+                "webbrowserpersist"),
+        warning="nsIWebBrowserPersist should no longer be used",
+        description=("Most nsIWebBrowserPersist methods have been "
+                     "superseded by simpler methods in Downloads.jsm, namely "
+                     "`Downloads.fetch` and `Downloads.createDownload`. See "
+                     "http://mzl.la/downloads-jsm for more information."),
+        filename=traverser.filename,
+        line=traverser.line,
+        column=traverser.position,
+        context=traverser.context,
+        tier=4)
+
+
 def webbrowserpersist_saveuri(wrapper, arguments, traverser):
     """
     nsIWebBrowserPersist.saveURI requires a valid privacy context as
@@ -176,7 +196,7 @@ def webbrowserpersist_saveuri(wrapper, arguments, traverser):
         if load_context.get_literal_value() is None:
             traverser.err.warning(
                 err_id=("testcases_javascript_call_definititions",
-                 "webbrowserpersist_saveuri"),
+                        "webbrowserpersist_saveuri"),
                 warning=("saveURI should not be called with a null load "
                          "context"),
                 description=("While nsIWebBrowserPersist.saveURI accepts null "
@@ -188,6 +208,8 @@ def webbrowserpersist_saveuri(wrapper, arguments, traverser):
                 column=traverser.position,
                 context=traverser.context,
                 tier=4)
+
+    webbrowserpersist(wrapper, arguments, traverser)
 
 
 def xpcom_constructor(method, extend=False, mutate=False, pretraversed=False):

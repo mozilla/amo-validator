@@ -18,21 +18,6 @@ from validator.constants import BUGZILLA_BUG, MDN_DOC
 from instanceproperties import _set_HTML_property
 
 
-def _warn_synchronous_sql(traverser):
-    traverser.err.warning(
-        err_id=("js", "instanceactions", "synchronous_sql"),
-        warning="Synchronous SQL access should be avoided.",
-        description="The use of synchronous SQL is known to cause significant "
-                    "IO pauses and general responsiveness issues. Please use "
-                    "asynchronous Storage APIs, particularly "
-                    "http://mzl.la/sqlite-jsm or `createAsyncStatement`, where "
-                    "possible.",
-        filename=traverser.filename,
-        line=traverser.line,
-        column=traverser.position,
-        context=traverser.context)
-
-
 def addEventListener(args, traverser, node, wrapper):
     """
     Handle calls to addEventListener and make sure that the fourth argument is
@@ -99,37 +84,6 @@ def createEvent(args, traverser, node, wrapper):
             for_appversions=FX31_DEFINITION,
             compatibility_type="error",
             tier=5)
-
-
-def createStatement(args, traverser, node, wrapper):
-    """Handles createStatement calls."""
-
-    _warn_synchronous_sql(traverser)
-
-
-def executeSimpleSQL(args, traverser, node, wrapper):
-    """Handles executeSimpleSQL calls."""
-
-    _warn_synchronous_sql(traverser)
-
-    simple_args = map(traverser._traverse_node, args)
-
-    if len(args) >= 1 and not simple_args[0].is_literal():
-        traverser.warning(
-            err_id=("js", "instanceactions", "executeSimpleSQL_dynamic"),
-            warning="`executeSimpleSQL` should not be used with dynamic "
-                    "SQL.",
-            description=["For dynamic SQL statements, especially those with "
-                         "parameters, Sqlite.jsm wrappers, or "
-                         "`createAsyncStatement`, should be used with "
-                         "dynamic parameter binding.",
-                         "See http://mzl.la/sqlite-jsm and "
-                         "https://developer.mozilla.org/en-US/docs"
-                         "/Storage#Binding_parameters for more information"],
-            filename=traverser.filename,
-            line=traverser.line,
-            column=traverser.position,
-            context=traverser.context)
 
 
 def QueryInterface(args, traverser, node, wrapper):
@@ -318,6 +272,66 @@ def bind(args, traverser, node, wrapper):
         return obj
 
 
+SYNCHRONOUS_SQL_DESCRIPTION = (
+    "The use of synchronous SQL via the storage system leads to severe "
+    "responsiveness issues, and should be avoided at all costs. Please "
+    "use asynchronous SQL via Sqlite.jsm (http://mzl.la/sqlite-jsm) or "
+    "the `executeAsync` method, or otherwise switch to a simpler database "
+    "such as JSON files or IndexedDB.")
+
+
+def _check_dynamic_sql(args, traverser, node=None, wrapper=None):
+    """
+    Checks for the use of non-static strings when creating/exeucting SQL
+    statements.
+    """
+
+    simple_args = map(traverser._traverse_node, args)
+    if len(args) >= 1 and not simple_args[0].is_literal():
+        traverser.warning(
+            err_id=("js", "instanceactions", "executeSimpleSQL_dynamic"),
+            warning="SQL statements should be static strings",
+            description=["Dynamic SQL statement should be constucted via "
+                         "static strings, in combination with dynamic "
+                         "parameter binding via Sqlite.jsm wrappers "
+                         "(http://mzl.la/sqlite-jsm) or "
+                         "`createAsyncStatement` "
+                         "(https://developer.mozilla.org/en-US/docs"
+                         "/Storage#Binding_parameters)"],
+            filename=traverser.filename,
+            line=traverser.line,
+            column=traverser.position,
+            context=traverser.context)
+
+
+def createStatement(args, traverser, node, wrapper):
+    """
+    Handles calls to `createStatement`, returning an object which emits
+    warnings upon calls to `execute` and `executeStep` rather than
+    `executeAsync`.
+    """
+    _check_dynamic_sql(args, traverser)
+    from predefinedentities import build_quick_xpcom
+    return build_quick_xpcom("createInstance", "mozIStorageBaseStatement",
+                             traverser, wrapper=True)
+
+
+def executeSimpleSQL(args, traverser, node, wrapper):
+    """
+    Handles calls to `executeSimpleSQL`, warning that asynchronous methods
+    should be used instead.
+    """
+    _check_dynamic_sql(args, traverser)
+    traverser.err.warning(
+        err_id=("js", "instanceactions", "executeSimpleSQL"),
+        warning="Synchronous SQL should not be used",
+        description=SYNCHRONOUS_SQL_DESCRIPTION,
+        filename=traverser.filename,
+        line=traverser.line,
+        column=traverser.position,
+        context=traverser.context)
+
+
 def livemarkCallback(arguments, traverser, node, wrapper):
     """
     Handle calls to addLivemark, removeLivemark and getLivemark that pass
@@ -403,11 +417,12 @@ INSTANCE_DEFINITIONS = {
     "createElement": createElement,
     "createElementNS": createElementNS,
     "createEvent": createEvent,
+    "createAsyncStatement": _check_dynamic_sql,
     "createStatement": createStatement,
+    "executeSimpleSQL": executeSimpleSQL,
     "getAsBinary": nsIDOMFile_deprec,
     "getAsDataURL": nsIDOMFile_deprec,
     "getInterface": getInterface,
-    "executeSimpleSQL": executeSimpleSQL,
     "insertAdjacentHTML": insertAdjacentHTML,
     "isSameNode": isSameNode,
     "openDialog": openDialog,

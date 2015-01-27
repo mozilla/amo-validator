@@ -247,6 +247,21 @@ def test_xpcom_nsibrowsersearchservice():
     """).failed()
 
 
+def test_synchronous_sql():
+    """Test that uses of synchronous SQL are flagged."""
+
+    assert _do_test_raw("database.executeSimpleSQL('foo');").failed()
+
+    assert not _do_test_raw("database.createStatement();").failed()
+
+    for meth in "execute", "executeStep":
+        assert _do_test_raw("database.createStatement().%s();" % meth).failed()
+
+    assert not _do_test_raw("""
+        database.createStatement().executeAsync()
+    """).failed()
+
+
 def test_nsisound_play():
     """Test that nsISound.play is flagged."""
 
@@ -281,20 +296,45 @@ def test_xpcom_nsiwebbrowserpersist():
     with a null load context.
     """
 
-    assert _do_test_raw("""
+    def test(js, want_pass):
+        err = _do_test_raw(js)
+        if err.warnings:
+            result = err.warnings[0]["id"][-1] != "webbrowserpersist_saveuri"
+            eq_(result, want_pass)
+        else:
+            assert want_pass
+
+    test("""
     var foo = Cc["foo"].getService(Components.interfaces.nsIWebBrowserPersist);
     foo.saveURI(null, null, null, null, null, null, null);
-    """).failed()
+    """, False)
 
-    assert _do_test_raw("""
+    test("""
     var foo = Cc["foo"].getService(Components.interfaces.nsIWebBrowserPersist);
     var thing = null;
     foo.saveURI(null, null, null, null, null, null, thing);
-    """).failed()
+    """, False)
 
-    assert not _do_test_raw("""
+    test("""
     var foo = Cc["foo"].getService(Components.interfaces.nsIWebBrowserPersist);
     foo.saveURI(null, null, null, null, null, null, thing);
+    """, True)
+
+
+
+def test_xpcom_nsiwebbrowserpersist_deprecation():
+    """Tests that nsIWebBrowserPersist emits deprecation warnings."""
+
+    assert _do_test_raw("""
+    thing.QueryInterface(Ci.nsIWebBrowserPersist).saveChannel()
+    """).failed()
+
+    assert _do_test_raw("""
+    thing.QueryInterface(Ci.nsIWebBrowserPersist).saveURI(1, 2, 3, 4, 5, 6, 7);
+    """).failed()
+
+    assert _do_test_raw("""
+    thing.QueryInterface(Ci.nsIWebBrowserPersist).savePrivacyAwareURI()
     """).failed()
 
 

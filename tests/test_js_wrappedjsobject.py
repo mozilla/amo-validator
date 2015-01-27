@@ -13,6 +13,7 @@ class TestWrappedJSObject(TestCase):
         self.run_script("""
             var x = foo.wrappedJSObject;
             var y = XPCNativeWrapper.unwrap(foo);
+            var z = Cu.waiveXrays(foo);
         """)
         self.assert_silent()
 
@@ -56,6 +57,17 @@ class TestWrappedJSObject(TestCase):
         """
         self.run_script("""
             var x = XPCNativeWrapper.unwrap(foo);
+            x.foo = "asdf";
+        """)
+        self.assert_wrappedjs_failure()
+
+    def test_cant_assign_waive(self):
+        """
+        Test that properties can't be assigned to JS objects that were
+        unwrapped via XPCNativeWrapper.unwrap().
+        """
+        self.run_script("""
+            var x = Cu.waiveXrays(foo);
             x.foo = "asdf";
         """)
         self.assert_wrappedjs_failure()

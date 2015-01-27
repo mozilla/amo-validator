@@ -65,20 +65,19 @@ def test_sql_methods():
     """Tests that warnings on SQL methods are emitted properly"""
 
     err = _do_test_raw("""
-        x.createStatement("foo");
-    """)
-    eq_(err.warnings[0]["id"][-1], "synchronous_sql")
-
-    err = _do_test_raw("""
-        x.executeSimpleSQL("foo");
-    """)
-    eq_(err.warnings[0]["id"][-1], "synchronous_sql")
-
-    err = _do_test_raw("""
         x.executeSimpleSQL("foo " + y);
     """)
-    eq_(err.warnings[0]["id"][-1], "synchronous_sql")
-    eq_(err.warnings[1]["id"][-1], "executeSimpleSQL_dynamic")
+    eq_(err.warnings[0]["id"][-1], "executeSimpleSQL_dynamic")
+
+    err = _do_test_raw("""
+        x.createStatement("foo " + y);
+    """)
+    eq_(err.warnings[0]["id"][-1], "executeSimpleSQL_dynamic")
+
+    err = _do_test_raw("""
+        x.createAsyncStatement("foo " + y);
+    """)
+    eq_(err.warnings[0]["id"][-1], "executeSimpleSQL_dynamic")
 
 def test_setAttribute():
     """Tests that setAttribute calls are blocked successfully"""
