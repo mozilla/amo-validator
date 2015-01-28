@@ -50,3 +50,10 @@ class TestFX35Compat(CompatTestCase):
         """)
         self.assert_silent()
         self.assert_compat_silent()
+
+    def test_at_at_iterator(self):
+        self.run_script_for_compat("""
+            var iterator = something['@@iterator'];
+        """)
+        self.assert_silent()
+        self.assert_compat_error()

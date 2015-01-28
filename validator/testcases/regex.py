@@ -1535,6 +1535,16 @@ class Gecko35RegexTests(CompatRegexTestHelper):
             log_function=self.err.warning,
             compat_type="error")
 
+        iterator_link = (MDN_DOC % "Web/JavaScript/Reference/Global_Objects"
+                                   "/String/@@iterator")
+        yield self.get_test(
+            """['"]@@iterator['"]""",
+            "The syntax for @@iterator has changed.",
+            "The syntax for @@iterator has changed. See {link} for more "
+            "information.".format(link=iterator_link),
+            log_function=self.err.warning,
+            compat_type="error")
+
 
 #############################
 #  Thunderbird Regex Tests  #
