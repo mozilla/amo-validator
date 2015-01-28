@@ -57,3 +57,22 @@ class TestFX35Compat(CompatTestCase):
         """)
         self.assert_silent()
         self.assert_compat_error()
+
+    def test_OS_File_readTo(self):
+        self.run_script_for_compat("""
+            function yieldMustBeInAFunction() {
+                let f = yield OS.File.open('path/to/file.txt', {read: true});
+                let numBytes;
+                let array = new Uint8Array(0x8000);
+                numBytes = yield f.readTo(array);
+            }
+        """)
+        self.assert_silent()
+        self.assert_compat_error()
+
+    def test_global_readTo(self):
+        self.run_script_for_compat("""
+            var something = readTo("something to read into, or something");
+        """)
+        self.assert_silent()
+        self.assert_compat_silent()
