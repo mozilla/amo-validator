@@ -13,7 +13,7 @@ node
 import actions
 from validator.compat import (FX10_DEFINITION, FX29_DEFINITION,
                               FX30_DEFINITION, FX31_DEFINITION,
-                              FX33_DEFINITION)
+                              FX33_DEFINITION, FX35_DEFINITION)
 from validator.constants import BUGZILLA_BUG, MDN_DOC
 from instanceproperties import _set_HTML_property
 
@@ -411,6 +411,17 @@ def setup_nsISessionStoreFunc(name, arg_count, full_name):
     return was_called
 
 
+def os_file_readTo_callback(argument, traverser, node, wrapper):
+    traverser.warning(
+        err_id=("js", "entities", "os_file_readto"),
+        warning="The readTo function in OS.File has been removed.",
+        description="The readTo function in OS.File has been removed. "
+                    "See %s for more information." % BUGZILLA_BUG % 1075438,
+        for_appversions=FX35_DEFINITION,
+        compatibility_type="error",
+        tier=5)
+
+
 INSTANCE_DEFINITIONS = {
     "addEventListener": addEventListener,
     "bind": bind,
@@ -441,4 +452,5 @@ INSTANCE_DEFINITIONS = {
         "setWindowValue", 3, "nsISessionStore.setWindowValue"),
     "setGlobalValue": setup_nsISessionStoreFunc(
         "setGlobalValue", 2, "nsISessionStore.setGlobalValue"),
+    "readTo": os_file_readTo_callback,
 }
