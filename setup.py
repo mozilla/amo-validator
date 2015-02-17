@@ -3,7 +3,7 @@ from setuptools import setup, find_packages
 
 setup(
     name='amo-validator',
-    version='1.5.1',
+    version='1.5.2',
     description='Validates add-ons for Mozilla products.',
     long_description=open('README.md').read(),
     author='Matt Basta',
