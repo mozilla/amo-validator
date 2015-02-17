@@ -1,11 +1,11 @@
 from helper import CompatTestCase
-from validator.compat import FX35_DEFINITION
+from validator.compat import FX36_DEFINITION
 
 
-class TestFX35Compat(CompatTestCase):
-    """Test that compatibility tests for Gecko 35 are properly executed."""
+class TestFX36Compat(CompatTestCase):
+    """Test that compatibility tests for Gecko 36 are properly executed."""
 
-    VERSION = FX35_DEFINITION
+    VERSION = FX36_DEFINITION
 
     def nsIBoxObject_changed(self, interface):
         self.run_script_for_compat("""
