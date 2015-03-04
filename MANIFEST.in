@@ -3,5 +3,6 @@ include validator/testcases/static_hashes.txt
 include validator/app_versions.json
 include validator/testcases/jetpack_data.txt
 include validator/testcases/jetpack_data.txt.pickle
+include validator/testcases/langpacks/*
 include README.md
 include requirements.txt
