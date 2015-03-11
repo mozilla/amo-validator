@@ -30,3 +30,11 @@ class TestFX37Compat(CompatTestCase):
         """)
         self.assert_silent()
         self.assert_compat_error()
+
+    def test_nsIDownloadManagerUI(self):
+        self.run_script_for_compat("""
+            var downloads = Cc["@mozilla.org/download-manager-ui;1"]
+                .getService(Ci.nsIDownloadManagerUI);
+        """)
+        self.assert_silent()
+        self.assert_compat_error()
