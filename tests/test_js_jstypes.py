@@ -75,6 +75,35 @@ def test_jsarray_contsructor():
     """).failed()
 
 
+def test_jsobject_computed_properties():
+    """
+    Tests that computed property names work as expected.
+    """
+
+    ID = ("testcases_javascript_instancetypes", "set_on_event",
+          "on*_str_assignment")
+
+    err1 = _do_test_raw("""
+        var foo = {};
+        foo["onthing"] = "stuff";
+    """)
+    err2 = _do_test_raw("""
+        var foo = {
+            ["onthing"]: "stuff",
+        };
+    """)
+
+    eq_(err1.warnings[0]["id"], ID)
+    eq_(err2.warnings[0]["id"], ID)
+
+    assert not _do_test_raw("""
+        var foo = {
+            [Symbol.iterator]: function* () {},
+            ["foo" + bar]: "baz",
+        };
+    """).failed()
+
+
 def test_jsobject_get_wrap():
     """Test that JSObject always returns a JSWrapper."""
 
@@ -95,4 +124,3 @@ def test_jsarray_get_wrap():
     out = x.get("1")
     assert isinstance(out, jstypes.JSWrapper)
     eq_(out.get_literal_value(), "bar")
-

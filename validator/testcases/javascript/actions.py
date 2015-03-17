@@ -317,12 +317,21 @@ def _define_obj(traverser, node):
 
     var = JSObject()
     for prop in node["properties"]:
-        var_name = ""
-        key = prop["key"]
-        if key["type"] == "Literal":
-            var_name = key["value"]
+        if prop["type"] == "PrototypeMutation":
+            var_name = "prototype"
         else:
-            var_name = key["name"]
+            key = prop["key"]
+            if key["type"] == "Literal":
+                var_name = key["value"]
+            elif isinstance(key["name"], basestring):
+                var_name = key["name"]
+            else:
+                if "property" in key["name"]:
+                    name = key["name"]
+                else:
+                    name = {"property": key["name"]}
+                var_name = _get_member_exp_property(traverser, name)
+
         var_value = traverser._traverse_node(prop["value"])
         var.set(var_name, var_value, traverser)
 
