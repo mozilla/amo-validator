@@ -10,6 +10,7 @@ from validator.compat import (
     FX22_DEFINITION, FX23_DEFINITION, FX24_DEFINITION, FX25_DEFINITION,
     FX26_DEFINITION, FX27_DEFINITION, FX28_DEFINITION, FX30_DEFINITION,
     FX31_DEFINITION, FX32_DEFINITION, FX34_DEFINITION, FX36_DEFINITION,
+    FX37_DEFINITION,
     TB7_DEFINITION, TB10_DEFINITION, TB11_DEFINITION, TB12_DEFINITION,
     TB13_DEFINITION, TB14_DEFINITION, TB15_DEFINITION, TB16_DEFINITION,
     TB17_DEFINITION, TB18_DEFINITION, TB19_DEFINITION, TB20_DEFINITION,
@@ -1515,8 +1516,8 @@ class Gecko34RegexTests(CompatRegexTestHelper):
 
 
 @register_generator
-class Gecko35RegexTests(CompatRegexTestHelper):
-    """Regex tests for Gecko 35 updates."""
+class Gecko36RegexTests(CompatRegexTestHelper):
+    """Regex tests for Gecko 36 updates."""
 
     VERSION = FX36_DEFINITION
 
@@ -1540,6 +1541,23 @@ class Gecko35RegexTests(CompatRegexTestHelper):
             "The syntax for @@iterator has changed.",
             "The syntax for @@iterator has changed. See {link} for more "
             "information.".format(link=iterator_link),
+            log_function=self.err.warning,
+            compat_type="error")
+
+
+@register_generator
+class Gecko37RegexTests(CompatRegexTestHelper):
+    """Regex tests for Gecko 37 updates."""
+
+    VERSION = FX37_DEFINITION
+
+    def tests(self):
+        yield self.get_test(
+            r"\bnsIDownloadManagerUI\b",
+            "The nsIDownloadManagerUI interface has been removed",
+            "The nsIDownloadManagerUI interface has been removed. See %s for "
+            "more information on the Download Manager." % MDN_DOC
+            % "Mozilla/JavaScript_code_modules/Downloads.jsm",
             log_function=self.err.warning,
             compat_type="error")
 

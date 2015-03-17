@@ -13,7 +13,8 @@ node
 import actions
 from validator.compat import (FX10_DEFINITION, FX29_DEFINITION,
                               FX30_DEFINITION, FX31_DEFINITION,
-                              FX33_DEFINITION, FX36_DEFINITION)
+                              FX33_DEFINITION, FX36_DEFINITION,
+                              FX37_DEFINITION)
 from validator.constants import BUGZILLA_BUG, MDN_DOC
 from instanceproperties import _set_HTML_property
 
@@ -422,6 +423,18 @@ def os_file_readTo_callback(argument, traverser, node, wrapper):
         tier=5)
 
 
+def quote_callback(argument, traverser, node, wrapper):
+    traverser.warning(
+        err_id=("js", "string", "quote"),
+        warning="The quote method has been removed from String",
+        description="The quote method has been removed from String. See %s "
+                    "for more information."
+                    % BUGZILLA_BUG % 1103181,
+        for_appversions=FX37_DEFINITION,
+        compatibility_type="error",
+        tier=5)
+
+
 INSTANCE_DEFINITIONS = {
     "addEventListener": addEventListener,
     "bind": bind,
@@ -444,6 +457,7 @@ INSTANCE_DEFINITIONS = {
     "addLivemark": livemarkCallback,
     "removeLivemark": livemarkCallback,
     "getLivemark": livemarkCallback,
+    "quote": quote_callback,
     "setPrototypeOf": setPrototypeOfCallback,
     "sendAsBinary": sendAsBinary,
     "setTabValue": setup_nsISessionStoreFunc(
