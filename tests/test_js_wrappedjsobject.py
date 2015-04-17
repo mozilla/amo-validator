@@ -1,5 +1,3 @@
-from validator.errorbundler import ErrorBundle
-
 from js_helper import TestCase
 
 
@@ -19,9 +17,10 @@ class TestWrappedJSObject(TestCase):
 
     def assert_wrappedjs_failure(self):
         """A set of assertions for wrappedJSObject-related errors."""
-        self.assert_failed(with_warnings=True)
-        self.assert_got_errid(("testcases_javascript_jstypes", "JSObject_set",
-                               "unwrapped_js_object"))
+        warning = {"id": ("testcases_javascript_jstypes", "JSObject_set",
+                          "unwrapped_js_object"),
+                   "signing_severity": "high"}
+        self.assert_failed(with_warnings=[warning])
 
     def test_cant_assign(self):
         """Test that properties can't be assigned to unwrapped JS objects."""
@@ -135,5 +134,6 @@ class TestWrappedJSObject(TestCase):
         self.run_script("""
             XPCNativeWrapper(unsafeWindow, "foo");
         """)
-        self.assert_got_errid(("testcases_js_xpcom", "xpcnativewrapper",
-                               "shallow"))
+        self.assert_failed(with_warnings=[
+            {"id": ("testcases_js_xpcom", "xpcnativewrapper", "shallow"),
+             "signing_severity": "medium"}])

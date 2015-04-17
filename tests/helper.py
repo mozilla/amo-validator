@@ -1,3 +1,4 @@
+import collections
 import sys
 
 from validator.submain import populate_chrome_manifest
@@ -78,30 +79,45 @@ class TestCase(object):
             self.err.detected_Type = self.detected_type
 
     def assert_failed(self, with_errors=False, with_warnings=None):
-        """First, asserts that the error bundle registers a failure
-        (recognizing whether warnings are acknowledged). Second, if
-        `with_errors`is True, the presence of errors is asserted. If it is not
-        true (default), it is tested that errors are not present. If
-        `with_warnings` is not None, the presence of warnings is tested just
-        like `with_errors`.
+        """
+        Asserts that the error bundle has registered a failure. If
+        `with_warnings` is any true value, or `None`, a warning is
+        considered a failure.
 
+        `with_warnings` or `with_errors` may be any of the following:
+
+        * True: Messages of this type must be present.
+        * False: Messages of this type must not be present.
+        * None: Messages of this type may or may not be present.
+        * Iterable of dicts: For dict returned by the iterator, at least
+        one message must have a matching item for every key/value pair in the
+        dict.
         """
         assert self.err.failed(
             fail_on_warnings=with_warnings or with_warnings is None), \
-                "Test did not fail; failure was expected."
+            "Test did not fail; failure was expected."
 
-        if with_errors:
-            assert self.err.errors, "Errors were expected."
-        elif self.err.errors:
-            raise AssertionError("Tests found unexpected errors: %s" %
-                                self.err.print_summary(verbose=True))
+        def find_message(messages, props):
+            # Returns true if any message in messages has all of the
+            # key/value pairs in props.
+            return any(set(props.iteritems()) <= set(message.iteritems())
+                       for message in messages)
 
-        if with_warnings is not None:
-            if with_warnings:
-                assert self.err.warnings, "Warnings were expected."
-            elif self.err.warnings:
-                raise ("Tests found unexpected warnings: %s" %
-                           self.err.print_summary())
+        def test_messages(mtype, expected):
+            messages = getattr(self.err, mtype)
+
+            if isinstance(expected, collections.Iterable):
+                assert all(find_message(messages, props)
+                           for props in expected)
+            elif expected:
+                assert messages, "Expected %s." % mtype
+            elif expected is not None:
+                assert not messages, ("Tests found unexpected %s: %s" %
+                                      mtype,
+                                      self.err.print_summary(verbose=True))
+
+        test_messages('errors', with_errors)
+        test_messages('warnings', with_warnings)
 
     def assert_notices(self):
         """Assert that notices have been generated during the validation

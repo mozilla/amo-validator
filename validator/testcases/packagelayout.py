@@ -73,12 +73,13 @@ def test_blacklisted_files(err, xpi_package=None):
                         "test_blacklisted_files",
                         "disallowed_file_type"),
                 warning="Flagged file type found",
-                description=["A file was found to contain flagged content "
+                description=("A file was found to contain flagged content "
                              "(i.e.: executable data, potentially "
                              "unauthorized scripts, etc.).",
                              u"The file \"%s\" contains flagged content" %
-                                 name],
+                                 name),
                 editors_only=True,
+                signing_severity="high",
                 filename=name)
 
     if flagged_files:
@@ -98,7 +99,7 @@ def test_blacklisted_files(err, xpi_package=None):
                         "test_blacklisted_files",
                         "disallowed_extension"),
                 warning="Flagged file extensions found.",
-                description=["Files whose names end with flagged extensions "
+                description=("Files whose names end with flagged extensions "
                              "have been found in the add-on.",
                              "The extension of these files are flagged because "
                              "they usually identify binary components. Please "
@@ -107,8 +108,9 @@ def test_blacklisted_files(err, xpi_package=None):
                                  "policies/reviews#section-binary"
                              " for more information on the binary content "
                              "review process.",
-                             "\n".join(flagged_files)],
+                             "\n".join(flagged_files)),
                 editors_only=True,
+                signing_severity="medium",
                 filename=name)
 
 
@@ -154,11 +156,11 @@ def test_compatibility_binary(err, xpi_package):
                         "test_compatibility_binary",
                         "disallowed_file_type"),
                 notice="Flagged file type found",
-                description=["A file (%s) was registered as a binary "
+                description=("A file (%s) was registered as a binary "
                              "component. Binary files may not be submitted to "
                              "AMO unless accompanied by source code."
                                 % triple["predicate"],
-                             description],
+                             description),
                 filename=triple["predicate"],
                 compatibility_type="error")
 

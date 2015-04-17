@@ -1,3 +1,5 @@
+from nose.tools import eq_
+
 import validator.testcases.chromemanifest as tc_chromemanifest
 from validator.errorbundler import ErrorBundle
 from validator.chromemanifest import ChromeManifest
@@ -36,6 +38,15 @@ def test_js_categories_gecko2():
 
     tc_chromemanifest.test_categories(err)
     assert err.failed()
+
+    warning = {"id": ("testcases_chromemanifest", "test_resourcemodules",
+                      "resource_modules"),
+               "message": "Potentially dangerous category entry",
+               "signing_severity": "medium",
+               "editors_only": True}
+    msg = err.warnings[0]
+    for key, value in warning.iteritems():
+        eq_(msg[key], value)
 
 
 def test_js_categories_gecko1():

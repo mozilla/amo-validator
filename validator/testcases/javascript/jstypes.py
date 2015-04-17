@@ -62,7 +62,7 @@ class JSObject(object):
                     value = modified_value
 
             if self.is_unwrapped:
-                traverser.err.warning(
+                traverser.warning(
                     err_id=("testcases_javascript_jstypes", "JSObject_set",
                             "unwrapped_js_object"),
                     warning="Assignment of unwrapped JS Object's properties.",
@@ -70,10 +70,7 @@ class JSObject(object):
                                 "result in serious security vulnerabilities. "
                                 "Please reconsider your use of unwrapped "
                                 "JS objects.",
-                    filename=traverser.filename,
-                    line=traverser.line,
-                    column=traverser.position,
-                    context=traverser.context)
+                    signing_severity="high")
 
         self.data[name] = value
 
@@ -385,10 +382,10 @@ class JSWrapper(object):
                     err_id=("javascript_js_jstypes", "jswrapper",
                             "jetpack_abs_uri"),
                     warning="Absolute URIs in Jetpack 1.4 are disallowed",
-                    description=["As of Jetpack 1.4, absolute URIs are no "
+                    description=("As of Jetpack 1.4, absolute URIs are no "
                                  "longer allowed within add-ons.",
                                  "See %s for more information." %
-                                     JETPACK_URI_URL],
+                                     JETPACK_URI_URL),
                     filename=self.traverser.filename,
                     line=self.traverser.line,
                     column=self.traverser.position,

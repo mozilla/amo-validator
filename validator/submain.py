@@ -168,10 +168,10 @@ def test_package(err, file_, name, expectation=PACKAGE_ANY,
         err.error(
                 err_id=("main", "test_package", "timeout"),
                 error="Validation timed out",
-                description=["The validation process took too long to "
+                description=("The validation process took too long to "
                              "complete. Contact an addons.mozilla.org editor "
                              "for more information.",
-                             str(ex)])
+                             str(ex)))
         output = None
 
     return output
@@ -192,9 +192,9 @@ def _load_install_rdf(err, package, expectation):
         err.error(
                 err_id=("main", "test_package", "parse_error"),
                 error="Could not parse `install.rdf`.",
-                description=["The RDF parser was unable to parse the "
+                description=("The RDF parser was unable to parse the "
                              "install.rdf file included with this add-on.",
-                             reason],
+                             reason),
                 filename="install.rdf",
                 line=line)
         return
@@ -228,10 +228,10 @@ def _load_install_rdf(err, package, expectation):
         err.warning(
             err_id=("main", "test_package", "extension_type_mismatch"),
             warning="Extension Type Mismatch",
-            description=["We detected that the add-on's type does not match "
+            description=("We detected that the add-on's type does not match "
                          "the expected type.",
                          'Type "%s" expected, found "%s"' %
-                             (types[expectation], types[results])])
+                             (types[expectation], types[results])))
 
 
 def _load_package_json(err, package, expectation):
@@ -279,9 +279,9 @@ def populate_chrome_manifest(err, xpi_package):
                 err.notice(
                     err_id=("submain", "populate_chrome_manifest", "linkerr"),
                     notice="Linked manifest could not be found.",
-                    description=["A linked manifest file could not be found "
+                    description=("A linked manifest file could not be found "
                                  "in the package.",
-                                 "Path: %s" % path],
+                                 "Path: %s" % path),
                     filename=from_path,
                     line=from_triple["line"],
                     context=from_chrome.context)

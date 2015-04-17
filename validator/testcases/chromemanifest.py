@@ -1,8 +1,27 @@
 from validator import decorator
-from validator.chromemanifest import ChromeManifest
 
 
 MANIFEST_URI = "https://developer.mozilla.org/en/XUL_Tutorial/Manifest_Files"
+
+DANGEROUS_CATEGORIES = ("JavaScript-global-constructor",
+                        "JavaScript-global-constructor-prototype-alias",
+                        "JavaScript-global-property",
+                        "JavaScript-global-privileged-property",
+                        "JavaScript-global-static-nameset",
+                        "JavaScript-global-dynamic-nameset",
+                        "JavaScript-DOM-class",
+                        "JavaScript-DOM-interface")
+
+DANGEROUS_CATEGORY_WARNING = {
+    "err_id": ("testcases_chromemanifest", "test_resourcemodules",
+               "resource_modules"),
+    "warning": "Potentially dangerous category entry",
+    "description": "Add-ons definining global properties via category "
+                   "entries require careful review by an administrative "
+                   "reviewer.",
+    "signing_severity": "medium",
+    "editors_only": True}
+
 
 @decorator.register_test(tier=2, simple=True)
 def test_categories(err):
@@ -13,31 +32,15 @@ def test_categories(err):
         return
 
     for triple in chrome.triples:
-
         if (triple["subject"] == "category" and
-            (triple["predicate"] in
-                ("JavaScript-global-constructor",
-                 "JavaScript-global-constructor-prototype-alias",
-                 "JavaScript-global-property",
-                 "JavaScript-global-privileged-property",
-                 "JavaScript-global-static-nameset",
-                 "JavaScript-global-dynamic-nameset",
-                 "JavaScript-DOM-class",
-                 "JavaScript-DOM-interface") or
+            (triple["predicate"] in DANGEROUS_CATEGORIES or
              (triple["predicate"] == "JavaScript" and
               (triple["object"].startswith("global ") or
                triple["object"].startswith("DOM "))))):
-            err.warning(("testcases_chromemanifest",
-                         "test_categories",
-                         "js_categories"),
-                        "Potentially dangerous category entry",
-                        "Add-ons definining global properties via category "
-                        "entries require careful review by an administrative "
-                        "reviewer.",
-                        editors_only=True,
-                        filename=triple["filename"],
+            err.warning(filename=triple["filename"],
                         line=triple["line"],
-                        context=triple["context"])
+                        context=triple["context"],
+                        **DANGEROUS_CATEGORY_WARNING)
 
 
 @decorator.register_test(tier=2, simple=True)

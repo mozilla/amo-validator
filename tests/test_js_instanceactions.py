@@ -92,7 +92,7 @@ def test_setAttribute():
     assert _do_test_raw("""
     var x = "foo";
     x.setAttribute("onfoo", "bar");
-    """).notices
+    """).failed()
 
 
 def test_callexpression_argument_traversal():

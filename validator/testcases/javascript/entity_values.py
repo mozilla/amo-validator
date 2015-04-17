@@ -43,8 +43,8 @@ def deprecated_entity(name, version, message, bug, status="deprecated",
         traverser.err.warning(
             err_id=("js", "entities", name),
             warning="`%s` has been %s." % (name, status),
-            description=[message,
-                         "See %s for more information." % BUGZILLA_BUG % bug],
+            description=(message,
+                         "See %s for more information." % BUGZILLA_BUG % bug),
             filename=traverser.filename,
             line=traverser.line,
             column=traverser.position,
@@ -89,11 +89,11 @@ def document_write(traverser):
         traverser.err.warning(
             err_id=("js", "document.write", "evil"),
             warning="Use of `document.write` strongly discouraged.",
-            description=["`document.write` will fail in many circumstances ",
+            description=("`document.write` will fail in many circumstances ",
                          "when used in extensions, and has potentially severe "
                          "security repercussions when used improperly. "
                          "Therefore, it should not be used. See %s for more "
-                         "information." % DOC_WRITE_MSG],
+                         "information." % DOC_WRITE_MSG),
             filename=traverser.filename,
             line=traverser.line,
             column=traverser.position,

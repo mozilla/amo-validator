@@ -2,13 +2,12 @@ import itertools
 import re
 import types
 
-from validator.compat import FX15_DEFINITION
 from validator.constants import DESCRIPTION_TYPES
 
 from . import actions
 from .jstypes import *
 from .nodedefinitions import DEFINITIONS
-from .predefinedentities import GLOBAL_ENTITIES, BANNED_IDENTIFIERS
+from .predefinedentities import GLOBAL_ENTITIES
 
 
 DEBUG = False
@@ -103,7 +102,7 @@ class Traverser(object):
                         err_id=("testcases_javascript_traverser", "run",
                                 "namespace_pollution"),
                         warning="JavaScript namespace pollution",
-                        description=[
+                        description=(
                             "Your add-on contains a large number of global "
                             "variables, which may conflict with other add-ons. "
                             "For more information, see "
@@ -111,7 +110,7 @@ class Traverser(object):
                             "firefox-extensions-global-namespace-pollution/"
                             ", or use JavaScript modules.",
                             "List of entities: %s" %
-                                ", ".join(self.contexts[0].data.keys())],
+                                ", ".join(self.contexts[0].data.keys())),
                        filename=self.filename)
 
     def _traverse_node(self, node):
@@ -285,22 +284,17 @@ class Traverser(object):
                 kwargs = dict(
                     err_id=("js", "traverser", "dangerous_global"),
                     warning="Access to the `%s` global" % name,
-                    filename=self.filename,
-                    line=self.line,
-                    column=self.position,
-                    context=self.context)
+                    description="Access to the `%s` property is "
+                                "deprecated for security or "
+                                "other reasons." % name)
 
                 if isinstance(dang, DESCRIPTION_TYPES):
                     kwargs["description"] = dang
                 elif isinstance(dang, dict):
                     kwargs.update(dang)
-                else:
-                    kwargs["description"] = ("Access to the `%s` property is "
-                                             "deprecated for security or "
-                                             "other reasons." % name)
 
                 self._debug("DANGEROUS")
-                self.err.warning(**kwargs)
+                self.warning(**kwargs)
 
         entity.setdefault("name", name)
 

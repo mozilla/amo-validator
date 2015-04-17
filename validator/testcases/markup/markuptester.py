@@ -140,8 +140,8 @@ class MarkupParser(HTMLParser):
                 self.err.warning(
                     err_id=("markup", "_feed", "parse_error"),
                     warning="Markup parsing error",
-                    description=["There was an error parsing a markup "
-                                 "file.", str(inst)],
+                    description=("There was an error parsing a markup "
+                                 "file.", str(inst)),
                     filename=self.filename,
                     line=self.line,
                     context=self.context)
@@ -191,9 +191,9 @@ class MarkupParser(HTMLParser):
                         err_id=("markup", "starttag",
                                 "unsafe_theme_xbl_element"),
                         warning="Banned XBL element in theme.",
-                        description=["Certain XBL elements are disallowed in "
+                        description=("Certain XBL elements are disallowed in "
                                      "full themes.",
-                                     "Element: <xbl:%s>" % tag],
+                                     "Element: <xbl:%s>" % tag),
                         filename=self.filename,
                         line=self.line,
                         context=self.context)
@@ -217,11 +217,11 @@ class MarkupParser(HTMLParser):
                 self.err.warning(
                     err_id=("markup", "starttag", "unsafe_langpack_theme"),
                     warning="Unsafe tag for add-on type",
-                    description=["A tag in your markup has been marked as "
+                    description=("A tag in your markup has been marked as "
                                  "being potentially unsafe. Consider "
                                  "alternate means of accomplishing what the "
                                  "code executed by this tag performs.",
-                                 'Tag "%s" is disallowed.' % tag],
+                                 'Tag "%s" is disallowed.' % tag),
                     filename=self.filename,
                     line=self.line,
                     context=self.context)
@@ -340,10 +340,10 @@ class MarkupParser(HTMLParser):
                         err_id=("markup", "starttag",
                                 "jetpack_abs_uri"),
                         warning="Absolute URI referenced in Jetpack 1.4",
-                        description=["As of Jetpack 1.4, absolute URIs are no "
+                        description=("As of Jetpack 1.4, absolute URIs are no "
                                      "longer allowed within add-ons.",
                                      "See %s for more information." %
-                                         JETPACK_URI_URL],
+                                         JETPACK_URI_URL),
                         filename=self.filename,
                         line=self.line,
                         context=self.context,
@@ -356,10 +356,10 @@ class MarkupParser(HTMLParser):
                         err_id=("markup", "starttag",
                                 "theme_attr_prefix"),
                         warning="Attribute contains banned prefix",
-                        description=["A mark element's attribute contains a "
+                        description=("A mark element's attribute contains a "
                                      "prefix which is not allowed in full "
                                      "themes.",
-                                     "Attribute: %s" % attr_name],
+                                     "Attribute: %s" % attr_name),
                         filename=self.filename,
                         line=self.line,
                         context=self.context)
