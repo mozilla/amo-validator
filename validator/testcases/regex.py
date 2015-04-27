@@ -10,7 +10,7 @@ from validator.compat import (
     FX22_DEFINITION, FX23_DEFINITION, FX24_DEFINITION, FX25_DEFINITION,
     FX26_DEFINITION, FX27_DEFINITION, FX28_DEFINITION, FX30_DEFINITION,
     FX31_DEFINITION, FX32_DEFINITION, FX34_DEFINITION, FX36_DEFINITION,
-    FX37_DEFINITION,
+    FX37_DEFINITION, FX38_DEFINITION,
     TB7_DEFINITION, TB10_DEFINITION, TB11_DEFINITION, TB12_DEFINITION,
     TB13_DEFINITION, TB14_DEFINITION, TB15_DEFINITION, TB16_DEFINITION,
     TB17_DEFINITION, TB18_DEFINITION, TB19_DEFINITION, TB20_DEFINITION,
@@ -1558,6 +1558,22 @@ class Gecko37RegexTests(CompatRegexTestHelper):
             "The nsIDownloadManagerUI interface has been removed. See %s for "
             "more information on the Download Manager." % MDN_DOC
             % "Mozilla/JavaScript_code_modules/Downloads.jsm",
+            log_function=self.err.warning,
+            compat_type="error")
+
+
+@register_generator
+class Gecko38RegexTests(CompatRegexTestHelper):
+    """Regex tests for Gecko 38 updates."""
+
+    VERSION = FX38_DEFINITION
+
+    def tests(self):
+        yield self.get_test(
+            r"\bmozIndexedDB\b",
+            "mozIndexedDB has been removed.",
+            "mozIndexedDB has been removed. You should use indexedDB instead. "
+            "See %s for more information." % BUGZILLA_BUG % 975699,
             log_function=self.err.warning,
             compat_type="error")
 
