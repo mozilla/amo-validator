@@ -20,3 +20,31 @@ class TestFX38Compat(CompatTestCase):
         """)
         self.assert_silent()
         self.assert_compat_silent()
+
+    def test_nsICompositionStringSynthesizer(self):
+        self.run_script_for_compat("""
+            var syn = Components.interfaces.nsICompositionStringSynthesizer;
+        """)
+        self.assert_silent()
+        self.assert_compat_error()
+
+    def test_sendCompositionEvent(self):
+        self.run_script_for_compat("""
+            var domWindowUtils = window
+                .QueryInterface(Components.interfaces.nsIInterfaceRequestor)
+                .getInterface(Components.interfaces.nsIDOMWindowUtils);
+            domWindowUtils.sendCompositionEvent("compositionstart", "", "");
+        """)
+        self.assert_silent()
+        self.assert_compat_error()
+
+    def test_createCompositionStringSynthesizer(self):
+        self.run_script_for_compat("""
+            var domWindowUtils = window
+                .QueryInterface(Components.interfaces.nsIInterfaceRequestor)
+                .getInterface(Components.interfaces.nsIDOMWindowUtils);
+            var compositionStringSynthesizer = domWindowUtils
+                .createCompositionStringSynthesizer();
+        """)
+        self.assert_silent()
+        self.assert_compat_error()

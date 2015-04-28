@@ -1577,6 +1577,20 @@ class Gecko38RegexTests(CompatRegexTestHelper):
             log_function=self.err.warning,
             compat_type="error")
 
+        yield self.get_test(
+            r"\b(nsICompositionStringSynthesizer|"
+            r"sendCompositionEvent|"
+            r"createCompositionStringSynthesizer)\b",
+            "nsICompositionStringSynthesizer, sendCompositionEvent and "
+            "createCompositionStringSynthesizer were removed.",
+            "The nsICompositionStringSynthesizer interface and the "
+            "sendCompositionEvent and createCompositionStringSynthesizer "
+            "functions have been removed. See %s for more information."
+            % MDN_DOC
+            % "Mozilla/Tech/XPCOM/Reference/Interface/nsITextInputProcessor",
+            log_function=self.err.warning,
+            compat_type="error")
+
 
 #############################
 #  Thunderbird Regex Tests  #
