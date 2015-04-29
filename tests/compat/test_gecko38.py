@@ -98,3 +98,17 @@ class TestFX38Compat(CompatTestCase):
         """)
         self.assert_silent()
         self.assert_compat_silent()
+
+    def test_onProxyAvailable(self):
+        self.run_script_for_compat("""
+            onProxyAvailable(nsIChannel);
+        """)
+        self.assert_silent()
+        self.assert_compat_error()
+
+    def test_asyncResolve(self):
+        self.run_script_for_compat("""
+            asyncResolve(nsIChannel);
+        """)
+        self.assert_silent()
+        self.assert_compat_error()

@@ -1599,6 +1599,15 @@ class Gecko38RegexTests(CompatRegexTestHelper):
             % BUGZILLA_BUG % 1125618,
             compat_type="warning")
 
+        yield self.get_test(
+            r"\b(onProxyAvailable|asyncResolve)\b",
+            "The onProxyAvailable and asyncResolve functions have changed.",
+            "The onProxyAvailable and asyncResolve functions have changed. "
+            "They now take an nsIChannel instead of an nsIURI as an argument. "
+            "See %s for more information." % BUGZILLA_BUG % 436344,
+            log_function=self.err.warning,
+            compat_type="error")
+
 
 #############################
 #  Thunderbird Regex Tests  #
