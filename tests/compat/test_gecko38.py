@@ -48,3 +48,53 @@ class TestFX38Compat(CompatTestCase):
         """)
         self.assert_silent()
         self.assert_compat_error()
+
+    def test_asyncFetch2(self):
+        self.run_script_for_compat("""
+            NetUtil.asyncFetch2(
+                NetUtil.newURI(download.source.url),
+                null,
+                null,
+                null,      // aLoadingNode
+                Services.scriptSecurityManager.getSystemPrincipal(),
+                null,      // aTriggeringPrincipal
+                Ci.nsILoadInfo.SEC_NORMAL,
+                Ci.nsIContentPolicy.TYPE_OTHER);
+        """)
+        self.assert_silent()
+        self.assert_compat_warning(type_="warning")
+
+    def test_asyncFetch(self):
+        self.run_script_for_compat("""
+            NetUtil.asyncFetch({
+                uri: "http://localhost:5555/test",
+                loadUsingSystemPrincipal: true,
+            });
+        """)
+        self.assert_silent()
+        self.assert_compat_silent()
+
+    def test_newChannel2(self):
+        self.run_script_for_compat("""
+            NetUtil.newChannel2(
+                NetUtil.newURI(download.source.url),
+                null,
+                null,
+                null,      // aLoadingNode
+                Services.scriptSecurityManager.getSystemPrincipal(),
+                null,      // aTriggeringPrincipal
+                Ci.nsILoadInfo.SEC_NORMAL,
+                Ci.nsIContentPolicy.TYPE_OTHER);
+        """)
+        self.assert_silent()
+        self.assert_compat_warning(type_="warning")
+
+    def test_newChannel(self):
+        self.run_script_for_compat("""
+            NetUtil.newChannel({
+                uri: "data:text/plain,",
+                loadUsingSystemPrincipal: true,
+            });
+        """)
+        self.assert_silent()
+        self.assert_compat_silent()

@@ -1591,6 +1591,14 @@ class Gecko38RegexTests(CompatRegexTestHelper):
             log_function=self.err.warning,
             compat_type="error")
 
+        yield self.get_test(
+            r"\b(newChannel2|asyncFetch2)\b",
+            "asyncFetch2 and newChannel2 are now deprecated.",
+            "asyncFetch2 and newChannel2 are now deprecated. Use asyncFetch "
+            "or newChannel instead. See %s for more information."
+            % BUGZILLA_BUG % 1125618,
+            compat_type="warning")
+
 
 #############################
 #  Thunderbird Regex Tests  #
