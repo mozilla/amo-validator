@@ -11,7 +11,7 @@ before_install:
 install:
   - pip install tox
 script:
-  - SPIDERMONKEY_INSTALLATION=`pwd`/spidermonkey/js tox -v -e $TOX_ENV --recreate
+  - tox -v -e $TOX_ENV --recreate
 notifications:
   irc:
     channels:

@@ -18,6 +18,8 @@ from validator.compat import (
     TB25_DEFINITION, TB26_DEFINITION, TB27_DEFINITION, TB28_DEFINITION,
     TB29_DEFINITION, TB30_DEFINITION, TB31_DEFINITION)
 from validator.contextgenerator import ContextGenerator
+from validator.testcases.chromemanifest import (DANGEROUS_CATEGORIES,
+                                                DANGEROUS_CATEGORY_WARNING)
 from markup.csstester import UNPREFIXED_MESSAGE
 
 
@@ -97,16 +99,21 @@ class RegexTestGenerator(object):
         def wrapper():
             matched = False
             for match in re.finditer(pattern, self.document, flags):
-                log_function(
-                    **{'err_id': ("testcases_regex", "generic", "_generated"),
-                       log_function.__name__: title,
-                       'description': message,
-                       'filename': self.filename,
-                       'line': self.context.get_line(match.start()),
-                       'context': self.context,
-                       'compatibility_type': compat_type,
-                       'for_appversions': app_versions,
-                       'tier': self.err.tier if app_versions is None else 5})
+                kw = {'err_id': ("testcases_regex", "generic", "_generated"),
+                      log_function.__name__: title,
+                      'filename': self.filename,
+                      'line': self.context.get_line(match.start()),
+                      'context': self.context,
+                      'compatibility_type': compat_type,
+                      'for_appversions': app_versions,
+                      'tier': self.err.tier if app_versions is None else 5}
+
+                if isinstance(message, dict):
+                    kw.update(message)
+                else:
+                    kw["description"] = message
+
+                log_function(**kw)
                 matched = True
             return matched
 
@@ -148,40 +155,6 @@ class GenericRegexTests(RegexTestGenerator):
                 "discouraged. These events are dispatched with high frequency "
                 "and can cause severe performance issues.",
                 log_function=self.err.warning)
-
-
-@register_generator
-class CategoryRegexTests(RegexTestGenerator):
-    """
-    These tests will flag JavaScript category registration. Category
-    registration is not permitted in add-ons.
-
-    Added from bug 635423
-    """
-
-    # This generates the regular expressions for all combinations of JS
-    # categories. Note that all of them begin with "JavaScript". Capitalization
-    # matters.
-    PATTERNS = map(lambda r: '''"%s"|'%s'|%s''' % (r, r, r.replace(" ", "-")),
-                   ["JavaScript %s" % pattern for pattern in
-                    ("global constructor",
-                     "global constructor prototype alias",
-                     "global property",
-                     "global privileged property",
-                     "global static nameset",
-                     "global dynamic nameset",
-                     "DOM class",
-                     "DOM interface", )])
-
-    def js_tests(self):
-        for pattern in self.PATTERNS:
-            yield self.get_test(
-                    pattern,
-                    "Potential JavaScript category registration",
-                    "Add-ons should not register JavaScript categories. It "
-                    "appears that a JavaScript category was registered via a "
-                    "script to attach properties to JavaScript globals. This "
-                    "is not allowed.")
 
 
 @register_generator
@@ -296,6 +269,37 @@ class BannedPrefRegexTests(RegexTestGenerator):
                     "Potentially unsafe preference branch referenced",
                     reason or ("Extensions should not alter preferences in "
                                "the `%s` preference branch" % branch))
+
+
+
+@register_generator
+class NewTabRegexTests(RegexTestGenerator):
+    """
+    Attempts to code using roundabout methods of overriding the new tab page.
+    """
+
+    PATTERN = r"""
+        (?x)
+        == \s* ["']about:(newtab|blank)["'] |
+        ["']about:(newtab|blank)["'] \s* == |
+        /\^?about:newtab\$?/ \s* \. test\b |
+        \?what=newtab
+    """
+
+    def tests(self):
+        yield self.get_test(
+            self.PATTERN,
+            "Possible attempt to override new tab page",
+            {"description": (
+                "The new tab page should be changed only by writing "
+                "to the appropriate preference in the default preferences "
+                "branch. Such changes may only be made after an explicit "
+                "user opt-in, unless the add-on was explicitly and directly "
+                "installed by the user, and changing the new tab page is its "
+                "primary purpose.",
+                "If this code does not change the behavior of the new tab "
+                "page, it may be ignored."),
+             "signing_severity": "low"})
 
 
 REQUIRE_PATTERN = (r"""(?<!['"])require\s*\(\s*['"]"""
@@ -2779,3 +2783,116 @@ class Thunderbird31RegexTests(CompatRegexTestHelper):
                     "flagged as having been removed or renamed "
                     "in Thunderbird 31." % pattern,
                     compat_type="error")
+
+
+class RegexTest(object):
+    """
+    Compiles a list of regular expressions (or iterables of literal strings)
+    into a singular regular expression, and emits warnings for each match.
+    """
+
+    def __init__(self, regexps):
+        key = "test_%d"
+
+        self.tests = {key % i: data
+                      for i, (regexp, data) in enumerate(regexps)}
+
+        # Used in tests.
+        self.regex_source = "|".join(
+            r"(?P<%s>%s)" % (key % i, self.process_key(regexp))
+            for i, (regexp, data) in enumerate(regexps))
+
+        self.regex = re.compile(self.regex_source)
+
+    def process_key(self, key):
+        """Processes a key into a regular expression. Currently turns an
+        enumerable value into a regexp which matches a string which is
+        exactly equal to any included value."""
+
+        if isinstance(key, basestring):
+            return key
+
+        return r"^(?:%s)$" % "|".join(map(re.escape, key))
+
+    def test(self, string, traverser):
+        for match in self.regex.finditer(string):
+            for key, val in match.groupdict().iteritems():
+                if val is not None and key in self.tests:
+                    kw = {"err_id": ("testcases_regex", "string", "generic")}
+                    kw.update(self.tests[key])
+
+                    traverser.warning(**kw)
+
+
+PROFILE_FILENAMES = (
+    "SiteSecurityServiceState.txt",
+    "addons.json",
+    "addons.sqlite",
+    "blocklist.xml",
+    "cert8.db",
+    "compatibility.ini",
+    "compreg.dat",
+    "content-prefs.sqlite",
+    "cookies.sqlite",
+    "directoryLinks.json",
+    "extensions.ini",
+    "extensions.json",
+    "extensions.sqlite",
+    "formhistory.sqlite",
+    "healthreport/*",
+    "healthreport.sqlite",
+    "httpDataUsage.dat",
+    "key3.db",
+    "localstore.rdf",
+    "logins.json",
+    "permissions.sqlite",
+    "places.sqlite",
+    "places.sqlite-shm",
+    "places.sqlite-wal",
+    "pluginreg.dat",
+    "prefs.js",
+    "user.js",
+    "safebrowsing/*",
+    "search-metadata.json",
+    "search.json",
+    "search.sqlite",
+    "searchplugins/*",
+    "secmod.db",
+    "sessionCheckpoints.json",
+    "sessionstore.js",
+    "signons.sqlite",
+    "startupCache/*",
+    "storage/*",
+    "urlclassifier.pset",
+    "urlclassifier3.sqlite",
+    "urlclassifierkey3.txt",
+    "webapps/*",
+    "webappsstore.sqlite",
+    "xpti.dat",
+    "xulstore.json")
+
+
+def munge_filename(name):
+    # Changes filenames ending with `/*` into a regular expression which
+    # will also match sub-paths across platforms. Escapes regex metacharacters
+    # in other strings.
+    if name.endswith("/*"):
+        return r"%s(?:[/\\].*)?" % re.escape(name[:-2])
+    return re.escape(name)
+
+PROFILE_REGEX = r"(?:^|[/\\])(?:%s)$" % "|".join(map(munge_filename,
+                                                     PROFILE_FILENAMES))
+
+STRING_REGEXPS = (
+    (PROFILE_REGEX, {
+        "err_id": ("testcases_regex", "string", "profile_filenames"),
+        "warning": "Reference to critical user profile data",
+        "description": "Critical files in the user profile should not be "
+                       "directly accessed by add-ons. In many cases, an "
+                       "equivalent API is available and should be used "
+                       "instead.",
+        "signing_severity": "low"}),
+    (DANGEROUS_CATEGORIES, DANGEROUS_CATEGORY_WARNING),
+)
+
+validate_string = RegexTest(STRING_REGEXPS).test

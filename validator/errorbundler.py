@@ -1,8 +1,6 @@
 import json
-import sys
 import types
 import uuid
-from functools import partial
 from StringIO import StringIO
 
 from outputhandlers.shellcolors import OutputHandler
@@ -46,6 +44,7 @@ class ErrorBundle(object):
         self.compat_summary = {"errors": 0,
                                "warnings": 0,
                                "notices": 0}
+        self.signing_summary = {s: 0 for s in self.SEVERITIES}
 
         self.ending_tier = 1
         self.tier = 1
@@ -74,6 +73,8 @@ class ErrorBundle(object):
 
         self.supported_versions = self.for_appversions = for_appversions
 
+    SEVERITIES = {"trivial", "low", "medium", "high"}
+
     def _message(type_, message_type):
         def wrap(self, *args, **kwargs):
             message = {
@@ -93,6 +94,13 @@ class ErrorBundle(object):
             }
             for field in ("tier", "for_appversions", "compatibility_type", ):
                 message[field] = kwargs.get(field)
+            if "signing_severity" in kwargs:
+                severity = kwargs["signing_severity"]
+
+                assert severity in self.SEVERITIES
+
+                self.signing_summary[severity] += 1
+                message["signing_severity"] = severity
 
             self._save_message(getattr(self, type_), type_, message,
                                context=kwargs.get("context"))
@@ -304,6 +312,7 @@ class ErrorBundle(object):
                   "notices": len(self.notices),
                   "message_tree": self.message_tree,
                   "compatibility_summary": self.compat_summary,
+                  "signing_summary": self.signing_summary,
                   "metadata": self.metadata}
 
         messages = output["messages"]
@@ -417,6 +426,11 @@ class ErrorBundle(object):
                 verbose_output.append(
                     self._flatten_list(message["description"]))
 
+            if message.get("signing_severity"):
+                verbose_output.append(
+                    ("\tAutomated signing severity: %s" %
+                     message["signing_severity"]))
+
             # Show the user what tier we're on
             verbose_output.append("\tTier:\t%d" % message["tier"])
 
@@ -439,7 +453,7 @@ class ErrorBundle(object):
             if message["column"] and message["column"] != 0:
                 verbose_output.append("\tColumn:\t%d" % message["column"])
 
-            if "context" in message and message["context"]:
+            if message.get("context"):
                 verbose_output.append("\tContext:")
                 verbose_output.extend([("\t> %s" % x
                                         if x is not None

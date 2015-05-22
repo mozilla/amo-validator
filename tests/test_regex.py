@@ -1,3 +1,4 @@
+from mock import Mock
 from nose.tools import eq_
 
 from helper import MockXPI
@@ -5,8 +6,9 @@ from js_helper import _do_real_test_raw as _do_test_raw
 from validator.decorator import version_range
 from validator.errorbundler import ErrorBundle
 from validator.compat import (TB11_DEFINITION, TB12_DEFINITION)
+from validator.testcases import regex
+from validator.testcases.regex import RegexTest
 import validator.testcases.content
-import validator.testcases.regex as regex_tests
 
 
 def test_valid():
@@ -54,13 +56,6 @@ def test_basic_regex_fail():
         "foo.css")
     assert result
     assert err.failed()
-
-
-def test_js_category_regex_fail():
-    "Tests that JS category registration causes a warning"
-
-    assert _do_test_raw("addCategory('JavaScript global property')").failed()
-    assert _do_test_raw("addCategory('JavaScript-global-property')").failed()
 
 
 def test_dom_mutation_fail():
@@ -126,14 +121,12 @@ def test_app_update_timer():
     err = _do_test_raw("""
     var f = app.update.timer;
     """)
-    assert not err.failed()
     assert not any(err.compat_summary.values())
 
     err = _do_test_raw("""
     var f = app.update.timer;
     """, versions={"{ec8030f7-c20a-464f-9b0e-13a3a9e97384}":
                        version_range("firefox", "6.0a1")})
-    assert not err.failed(fail_on_warnings=False)
     assert err.warnings
     assert err.compat_summary["errors"]
 
@@ -223,3 +216,60 @@ def test_mouseevents():
 
     err = _do_test_raw("window.addEventListener('mousemove', func);")
     assert err.warnings
+
+
+def test_munge_filename():
+    """Tests that the munge_filename function has the expected results."""
+
+    eq_(regex.munge_filename("foo.bar"), r"foo\.bar"),
+    eq_(regex.munge_filename("foo.bar/*"), r"foo\.bar(?:[/\\].*)?")
+
+
+class TestRegexTest(object):
+    def test_process_key(self):
+        """Tests that the process_key method behaves as expected."""
+
+        key = RegexTest(()).process_key
+
+        # Test that plain strings stay unmolested
+        string = r"foo\*+?.|{}[]()^$"
+        eq_(key(string), string)
+
+        # Test that tuples are converted to expected full-string regexps
+        eq_(key(("foo",)), r"^(?:foo)$")
+
+        eq_(key(("foo", "bar")), r"^(?:foo|bar)$")
+
+        eq_(key((r"foo\*+?.|{}[]()^$", "bar")),
+            r"^(?:foo\\\*\+\?\.\|\{\}\[\]\(\)\^\$|bar)$")
+
+    def test_glomming(self):
+        """Tests that multiple regular expressions are glommed together
+        properly."""
+
+        def expect(keys, val):
+            eq_(RegexTest(tuple((key, {}) for key in keys)).regex_source,
+                val)
+
+        expect(["foo"], r"(?P<test_0>foo)")
+
+        expect([r"foo\|\**"], r"(?P<test_0>foo\|\**)")
+
+        expect(("foo", "bar"), r"(?P<test_0>foo)|(?P<test_1>bar)")
+
+        expect((r"foo\|\**", "bar"), r"(?P<test_0>foo\|\**)|(?P<test_1>bar)")
+
+    def test_multiple_warnings(self):
+        """Tests that multiple warnings are emitted where appropriate."""
+
+        traverser = Mock()
+
+        inst = RegexTest((("f.o", {"thing": "foo"}),
+                          ("b.r", {"thing": "bar"})))
+
+        eq_(inst.regex_source, r"(?P<test_0>f.o)|(?P<test_1>b.r)")
+
+        inst.test("foo bar baz fxo", traverser)
+
+        eq_([args[1]["thing"] for args in traverser.warning.call_args_list],
+            ["foo", "bar", "foo"])

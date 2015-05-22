@@ -32,20 +32,17 @@ def _set_HTML_property(function, new_value, traverser):
 
             # Test for on* attributes and script tags.
             if EVENT_ASSIGNMENT.search(literal_value.lower()):
-                traverser.err.warning(
+                traverser.warning(
                     err_id=("testcases_javascript_instancetypes",
                             "set_%s" % function, "event_assignment"),
                     warning="Event handler assignment via %s" % function,
-                    description=["When assigning event handlers, %s "
+                    description=("When assigning event handlers, %s "
                                  "should never be used. Rather, use a "
                                  "proper technique, like addEventListener." %
                                      function,
                                  "Event handler code: %s" %
-                                     literal_value.encode("ascii", "replace")],
-                    filename=traverser.filename,
-                    line=traverser.line,
-                    column=traverser.position,
-                    context=traverser.context)
+                                     literal_value.encode("ascii", "replace")),
+                    signing_severity="medium")
             elif ("<script" in literal_value or
                   JS_URL.search(literal_value)):
                 traverser.err.warning(
@@ -57,10 +54,7 @@ def _set_HTML_property(function, new_value, traverser):
                                 "pages via script tags or JavaScript URLs. "
                                 "Instead, use event listeners and external "
                                 "JavaScript." % function,
-                    filename=traverser.filename,
-                    line=traverser.line,
-                    column=traverser.position,
-                    context=traverser.context)
+                    signing_severity="medium")
             else:
                 # Everything checks out, but we still want to pass it through
                 # the markup validator. Turn off strict mode so we don't get
@@ -95,7 +89,7 @@ def set_on_event(new_value, traverser):
 
     if (is_literal and
         isinstance(new_value.get_literal_value(), types.StringTypes)):
-        traverser.err.warning(
+        traverser.warning(
             err_id=("testcases_javascript_instancetypes", "set_on_event",
                     "on*_str_assignment"),
             warning="on* property being assigned string",
@@ -103,23 +97,16 @@ def set_on_event(new_value, traverser):
                         "assigned by setting an on* property to a "
                         "string of JS code. Rather, consider using "
                         "addEventListener.",
-            filename=traverser.filename,
-            line=traverser.line,
-            column=traverser.position,
-            context=traverser.context)
+            signing_severity="medium")
     elif (not is_literal and isinstance(new_value.value, jstypes.JSObject) and
           "handleEvent" in new_value.value.data):
-        traverser.err.warning(
+        traverser.warning(
             err_id=("js", "on*", "handleEvent"),
             warning="`handleEvent` no longer implemented in Gecko 18.",
             description="As of Gecko 18, objects with `handleEvent` methods "
                         "may no longer be assigned to `on*` properties. Doing "
                         "so will be equivalent to assigning `null` to the "
-                        "property.",
-            filename=traverser.filename,
-            line=traverser.line,
-            column=traverser.position,
-            context=traverser.context)
+                        "property.")
 
 
 def get_isElementContentWhitespace(traverser):
@@ -184,12 +171,22 @@ def set__proto__(new_value, traverser):
         err_id=("testcases_javascript_instanceproperties", "__proto__"),
         warning="Using __proto__ or setPrototypeOf to set a prototype is now "
                 "deprecated.",
-        description="Using __proto__ or setPrototypeOf to set a prototype is "
-                    "now deprecated. You should use Object.create instead. "
-                    "See bug %s for more information." % BUGZILLA_BUG % 948227,
-        for_appversions=FX30_DEFINITION,
-        compatibility_type="warning",
-        tier=5)
+        description="Use of __proto__ or setPrototypeOf to set a prototype "
+                    "causes severe performance degredation, and is "
+                    "deprecated. You should use Object.create instead. "
+                    "See bug %s for more information." % BUGZILLA_BUG % 948227)
+
+
+def set__exposedProps__(new_value, traverser):
+    traverser.warning(
+        err_id=("testcases_javascript_instanceproperties", "__exposedProps__"),
+        warning="Use of deprecated __exposedProps__ declaration",
+        description=(
+            "The use of __exposedProps__ to expose objects to unprivileged "
+            "scopes is dangerous, and has been deprecated. If objects "
+            "must be exposed to unprivileged scopes, `cloneInto` or "
+            "`exportFunction` should be used instead."),
+        signing_severity="high")
 
 
 def get_DOM_VK_ENTER(traverser):
@@ -217,6 +214,7 @@ OBJECT_DEFINITIONS = {
     "xmlStandalone": _get_xml("xmlStandalone"),
     "xmlVersion": _get_xml("xmlVersion"),
     "__proto__": {"set": set__proto__},
+    "__exposedProps__": {"set": set__exposedProps__},
     "DOM_VK_ENTER": {"get": get_DOM_VK_ENTER},
 }
 

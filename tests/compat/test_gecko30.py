@@ -28,11 +28,6 @@ class TestFX30Compat(CompatTestCase):
         yield (test_pattern, self,
                "resource://gre/modules/SpellCheckDictionaryBootstrap.js")
 
-    def test_setting__proto__(self):
-        self.run_script_for_compat("var myObj = {}; myObj.__proto__ = {};")
-        self.assert_silent()
-        self.assert_compat_warning(type_="warning")
-
     def test_reading__proto__(self):
         self.run_script_for_compat("console.log(myObj.__proto__.foo);")
         self.assert_silent()

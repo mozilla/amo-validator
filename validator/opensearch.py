@@ -199,11 +199,11 @@ def detect_opensearch(err, package, listed=False):
                     err_id=("opensearch", "template_not_found"),
                     error="OpenSearch: <Url> element missing template "
                           "placeholder",
-                    description=["`<Url>` elements of OpenSearch providers "
+                    description=("`<Url>` elements of OpenSearch providers "
                                  "must include a template attribute or "
                                  "specify a placeholder with "
                                  "`{searchTerms}`.",
-                                 "Missing template: %s" % tpl])
+                                 "Missing template: %s" % tpl))
 
     # Make sure there are no updateURL elements
     if srch_prov.getElementsByTagName("updateURL"):

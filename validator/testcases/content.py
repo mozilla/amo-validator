@@ -119,10 +119,10 @@ def test_packed_packages(err, xpi_package=None):
                             "test_packed_packages",
                             "blacklisted_js_library"),
                     notice="JS Library Detected",
-                    description=["JavaScript libraries are discouraged for "
+                    description=("JavaScript libraries are discouraged for "
                                  "simple add-ons, but are generally "
                                  "accepted.",
-                                 "File %r is a known JS library" % name],
+                                 "File %r is a known JS library" % name),
                     filename=name)
                 continue
 

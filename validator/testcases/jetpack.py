@@ -123,11 +123,11 @@ def inspect_jetpack(err, xpi_package, allow_old_sdk=False):
                             "inspect_jetpack",
                             "mismatched_version"),
                     warning="Jetpack module version mismatch",
-                    description=["A file in the Jetpack add-on does not match "
+                    description=("A file in the Jetpack add-on does not match "
                                  "the SDK version specified in harness-options"
                                  ".json.",
                                  "Module: %s" % zip_path,
-                                 "Versions: %s/%s" % (sdk_version, version)],
+                                 "Versions: %s/%s" % (sdk_version, version)),
                     filename=zip_path)
 
     # We've got hashes left over
@@ -135,10 +135,10 @@ def inspect_jetpack(err, xpi_package, allow_old_sdk=False):
         err.warning(
             err_id=("testcases_jetpack", "inspect_jetpack", "extra_hashes"),
             warning="Extra hashes registered in harness-options.",
-            description=["This Jetpack add-on registers modules in the "
+            description=("This Jetpack add-on registers modules in the "
                          "harness-options.json file that do not exist in the "
                          "package.",
-                         "Hashes: %s" % ", ".join(found_hashes)],
+                         "Hashes: %s" % ", ".join(found_hashes)),
             filename="harness-options.json")
 
     # Store the collected information in the output metadata.
@@ -209,11 +209,11 @@ class HarnessOptionsValidator(object):
                         "inspect_jetpack",
                         "harness-options_missing_elements"),
                 warning="Elements are missing from harness-options.json",
-                description=["The harness-options.json file seems to be "
+                description=("The harness-options.json file seems to be "
                              "missing elements. It may have been tampered "
                              "with or is corrupt.",
                              "Missing elements: %s"
-                             % ", ".join(missing_elements)],
+                             % ", ".join(missing_elements)),
                 filename="harness-options.json")
             return
 
@@ -267,9 +267,9 @@ class HarnessOptionsValidator(object):
                             "inspect_jetpack",
                             "irregular_module_location"),
                     warning="Irregular Jetpack module location",
-                    description=["A Jetpack module is referenced with a "
+                    description=("A Jetpack module is referenced with a "
                                  "remote URI.",
-                                 "Referenced URI: %s" % uri],
+                                 "Referenced URI: %s" % uri),
                     filename="harness-options.json")
                 continue
 
@@ -280,9 +280,9 @@ class HarnessOptionsValidator(object):
                             "inspect_jetpack",
                             "irregular_module_elements"),
                     warning="Irregular Jetpack module elements",
-                    description=["A Jetpack module in harness-options.json is "
+                    description=("A Jetpack module in harness-options.json is "
                                  "missing some of its required JSON elements.",
-                                 "Module: %s" % uri],
+                                 "Module: %s" % uri),
                     filename="harness-options.json")
                 continue
 
@@ -304,10 +304,10 @@ class HarnessOptionsValidator(object):
                             "inspect_jetpack",
                             "missing_jetpack_module"),
                     warning="Missing Jetpack module",
-                    description=["A Jetpack module listed in "
+                    description=("A Jetpack module listed in "
                                  "harness-options.json could not be found in "
                                  "the add-on.",
-                                 "Path: %s" % zip_path],
+                                 "Path: %s" % zip_path),
                     filename="harness-options.json")
                 continue
 
@@ -324,12 +324,12 @@ class HarnessOptionsValidator(object):
                             "inspect_jetpack",
                             "mismatched_checksum"),
                     warning="Jetpack module hash mismatch",
-                    description=["A file in the Jetpack add-on does not match "
+                    description=("A file in the Jetpack add-on does not match "
                                  "the corresponding hash listed in "
                                  "harness-options.json.",
                                  "Module: %s" % zip_path,
                                  "Hashes: %s/%s"
-                                 % (blob_hash, module["jsSHA256"])],
+                                 % (blob_hash, module["jsSHA256"])),
                     filename=zip_path)
 
             # We aren't going to keep track of anything that isn't an official

@@ -1,3 +1,4 @@
+from functools import partial
 import math
 
 import actions
@@ -11,57 +12,121 @@ from jstypes import JSWrapper
 
 # A list of identifiers and member values that may not be used.
 BANNED_IDENTIFIERS = {
-    u"newThread": "Creating threads from JavaScript is a common cause "
-                  "of crashes and is unsupported in recent versions of the platform",
-    u"processNextEvent": "Spinning the event loop with processNextEvent is a common "
-                         "cause of deadlocks, crashes, and other errors due to "
-                         "unintended reentrancy. Please use asynchronous callbacks "
-                         "instead wherever possible",
+    u"newThread":
+        "Creating threads from JavaScript is a common cause "
+        "of crashes and is unsupported in recent versions of the platform",
+    u"processNextEvent":
+        "Spinning the event loop with processNextEvent is a common cause of "
+        "deadlocks, crashes, and other errors due to unintended reentrancy. "
+        "Please use asynchronous callbacks instead wherever possible",
 }
 
-CUSTOMIZATION_PREF_MESSAGE = (
-    "Extensions must not alter user preferences such as the current home "
-    "page, new tab page, or search engine, without explicit user consent, "
-    "in which a user takes a non-default action. Such changes must also "
-    "be reverted when the extension is disabled or uninstalled.")
+CUSTOMIZATION_PREF_MESSAGE = {
+    "description": (
+        "Extensions must not alter user preferences such as the current home "
+        "page, new tab page, or search engine, without explicit user consent, "
+        "in which a user takes a non-default action. Such changes must also "
+        "be reverted when the extension is disabled or uninstalled.",
+        "In nearly all cases, new values for these preferences should be "
+        "set in the default preference branch, rather than the user branch."),
+    "signing_severity": "high",
+}
+
+NETWORK_PREF_MESSAGE = {
+    "description":
+        "Changing network preferences may be dangerous, and often leads to "
+        "performance costs.",
+    "signing_severity": "low",
+}
+
+SEARCH_PREF_MESSAGE = {
+    "description":
+        "Search engine preferences may not be changed by add-ons directly. "
+        "All such changes must be made only via the browser search service, "
+        "and only after an explicit opt-in from the user. All such changes "
+        "must be reverted when the extension is disabled or uninstalled.",
+    "signing_severity": "high",
+}
+
+SECURITY_PREF_MESSAGE = {
+    "description":
+        "Changing this preference may have severe security implications, and "
+        "is forbidden under most circumstances.",
+    "editors_only": True,
+    "signing_severity": "high",
+}
 
 BANNED_PREF_BRANCHES = (
+    # Security and update preferences
+    (u"app.update.", SECURITY_PREF_MESSAGE),
+    (u"browser.addon-watch.", SECURITY_PREF_MESSAGE),
+    (u"capability.policy.", None),
+    (u"datareporting.", SECURITY_PREF_MESSAGE),
+
+    (u"extensions.blocklist.", SECURITY_PREF_MESSAGE),
+    (u"extensions.checkCompatibility", None),
+    (u"extensions.getAddons.", SECURITY_PREF_MESSAGE),
+    (u"extensions.update.", SECURITY_PREF_MESSAGE),
+
+    # Let's see if we can get away with this...
+    # Changing any preference in this branch should result in a
+    # warning. However, this substring may turn out to be too
+    # generic, and lead to spurious warnings, in which case we'll
+    # have to single out sub-branches.
+    (u"security.", SECURITY_PREF_MESSAGE),
+
+    # Search, homepage, and ustomization preferences
     (u"browser.newtab.url", CUSTOMIZATION_PREF_MESSAGE),
     (u"browser.newtabpage.enabled", CUSTOMIZATION_PREF_MESSAGE),
-    (u"browser.preferences.instantApply", None),
-    (u"browser.search.defaultenginename", CUSTOMIZATION_PREF_MESSAGE),
-    (u"browser.search.searchEnginesURL", CUSTOMIZATION_PREF_MESSAGE),
+    (u"browser.search.defaultenginename", SEARCH_PREF_MESSAGE),
+    (u"browser.search.searchEnginesURL", SEARCH_PREF_MESSAGE),
     (u"browser.startup.homepage", CUSTOMIZATION_PREF_MESSAGE),
-    (u"capability.policy.", None),
-    (u"extensions.alwaysUnpack", None),
-    (u"extensions.blocklist.", None),
-    (u"extensions.bootstrappedAddons", None),
-    (u"extensions.checkCompatibility", None),
-    (u"extensions.dss.", None),
-    (u"extensions.getAddons.", None),
     (u"extensions.getMoreThemesURL", None),
+    (u"keyword.URL", SEARCH_PREF_MESSAGE),
+    (u"keyword.enabled", SEARCH_PREF_MESSAGE),
+
+    # Network
+    (u"network.proxy.autoconfig_url", {
+        "description":
+            "As many add-ons have reason to change the proxy autoconfig URL, "
+            "and only one at a time may do so without conflict, extensions "
+            "must make proxy changes using other mechanisms. Installing a "
+            "proxy filter is the recommended alternative: "
+            "https://developer.mozilla.org/en-US/docs/Mozilla/Tech/XPCOM/"
+            "Reference/Interface/nsIProtocolProxyService#registerFilter()",
+        "signing_severity": "low"}),
+    (u"network.proxy.", NETWORK_PREF_MESSAGE),
+    (u"network.http.", NETWORK_PREF_MESSAGE),
+    (u"network.websocket.", NETWORK_PREF_MESSAGE),
+
+    # Other
+    (u"browser.preferences.instantApply", None),
+
+    (u"extensions.alwaysUnpack", None),
+    (u"extensions.bootstrappedAddons", None),
+    (u"extensions.dss.", None),
     (u"extensions.installCache", None),
     (u"extensions.lastAppVersion", None),
     (u"extensions.pendingOperations", None),
-    (u"extensions.update.", None),
+
     (u"general.useragent.", None),
-    (u"keyword.URL", CUSTOMIZATION_PREF_MESSAGE),
-    (u"keyword.enabled", CUSTOMIZATION_PREF_MESSAGE),
-    (u"network.proxy.autoconfig_url",
-        "As many add-ons have reason to change the proxy autoconfig URL, and "
-        "only one at a time may do so without conflict, extensions must "
-        "make proxy changes using other mechanisms. Installing a proxy "
-        "filter is the recommended alternative: "
-        "https://developer.mozilla.org/en-US/docs/Mozilla/Tech/XPCOM/"
-        "Reference/Interface/nsIProtocolProxyService#registerFilter()"),
-    (u"network.http.", None),
-    (u"network.websocket.", None),
+
     (u"nglayout.debug.disable_xul_cache", None),
 )
 
 BANNED_PREF_REGEXPS = [
     r"extensions\..*\.update\.(url|enabled|interval)",
 ]
+
+
+def is_shared_scope(traverser, right=None, node_right=None):
+    """Returns true if the traverser `t` is traversing code loaded into
+    a shared scope, such as a browser window. Particularly used for
+    detecting when global overwrite warnings should be issued."""
+
+    # FIXME(Kris): This is not a great heuristic.
+    return not (traverser.is_jsm or
+                traverser.err.get_resource("em:bootstrap") == "true")
 
 
 # See https://github.com/mattbasta/amo-validator/wiki/JS-Predefined-Entities
@@ -88,7 +153,62 @@ OBSOLETE_EXTENSION_MANAGER = {
                  "version of Firefox. It should not be referenced in any "
                  "code."}
 
+
+ADDON_INSTALL_METHOD = {
+    "value": {},
+    "dangerous": {
+        "description": (
+            "Add-ons may install other add-ons only by user consent. Any "
+            "such installations must be carefully reviewed to ensure "
+            "their safety."),
+        "editors_only": True,
+        "signing_severity": "high"},
+}
+
+
+SEARCH_MESSAGE = "Potentially dangerous use of the search service"
+SEARCH_DESCRIPTION = (
+    "Changes to the default and currently-selected search engine settings "
+    "may only take place after users have explicitly opted-in, by taking "
+    "a non-default action. Any such changes must be reverted when the add-on "
+    "making them is disabled or uninstalled.")
+
+def search_warning(severity="medium", editors_only=False,
+                   message=SEARCH_MESSAGE,
+                   description=SEARCH_DESCRIPTION):
+    return {"err_id": ("testcases_javascript_actions",
+                       "search_service",
+                       "changes"),
+            "signing_severity": severity,
+            "editors_only": editors_only,
+            "warning": message,
+            "description": description}
+
+
+REGISTRY_WRITE = {"dangerous": {
+    "err_id": ("testcases_javascript_actions",
+               "windows_registry",
+               "write"),
+    "warning": "Writes to the registry may be dangerous",
+    "description": ("Writing to the registry can have many system-level "
+                    "consequences and requires careful review."),
+    "signing_severity": "medium",
+    "editors_only": True}}
+
+
+def registry_key(write=False):
+    """Represents a function which returns a registry key object."""
+    res = {"return": lambda wrapper, arguments, traverser: (
+        build_quick_xpcom("createInstance", "nsIWindowMediator",
+                          traverser, wrapper=True))}
+    if write:
+        res.update(REGISTRY_WRITE)
+
+    return res
+
+
 INTERFACES = {
+    u"nsISupports": {"value": {}},
     u"mozIStorageBaseStatement":
         {"value":
             {u"execute":
@@ -121,8 +241,18 @@ INTERFACES = {
          "value": {}},
     u"nsIBrowserSearchService":
         {"value":
-            {u"currentEngine": {"readonly": True},
-             u"defaultEngine": {"readonly": True}}},
+            {u"currentEngine":
+                {"readonly": search_warning(severity="high")},
+             u"defaultEngine":
+                {"readonly": search_warning(severity="high")},
+             u"addEngine":
+                {"dangerous": search_warning()},
+             u"addEngineWithDetails":
+                {"dangerous": search_warning()},
+             u"removeEngine":
+                {"dangerous": search_warning()},
+             u"moveEngine":
+                {"dangerous": search_warning()}}},
 
     u"nsIComm4xProfile":
         {"return": call_definitions.nsIComm4xProfile_removed},
@@ -307,6 +437,12 @@ INTERFACES = {
                 "The observer service should not be used directly in SDK "
                 "add-ons. Please use the 'sdk/system/events' module "
                 "instead.")},
+    u"nsIPrefBranch":
+        {"value": {method: {"return": instanceactions.set_preference}
+                   for method in (u"setBoolPref",
+                                  u"setCharPref",
+                                  u"setComplexValue",
+                                  u"setIntPref")}},
     u"nsIResProtocolHandler":
         {"value":
             {u"setSubstitution":
@@ -367,6 +503,19 @@ INTERFACES = {
                         "Authors of bootstrapped add-ons must take care "
                         "to remove any added observers at shutdown."},
              u"openWindow": entity("nsIWindowWatcher.openWindow")}},
+    u"nsIProtocolProxyService": {"value": {
+        u"registerFilter": {"dangerous": {
+            "err_id": ("testcases_javascript_actions",
+                       "predefinedentities", "proxy_filter"),
+            "description": (
+                "Proxy filters can be used to direct arbitrary network "
+                "traffic through remote servers, and may potentially "
+                "be abused.",
+                "Additionally, to prevent conflicts, the `applyFilter` "
+                "method should always return its third argument in cases "
+                "when it is not supplying a specific proxy."),
+            "editors_only": True,
+            "signing_severity": "low"}}}},
     u"nsIURLParser":
         {"value":
              {u"parsePath":
@@ -565,6 +714,15 @@ INTERFACES = {
     "nsICacheEntryDescriptor": entity("nsICacheEntryDescriptor"),
     "nsICacheListener": entity("nsICacheListener"),
     "nsICacheVisitor": entity("nsICacheVisitor"),
+
+    "nsIWindowsRegKey": {"value": {u"create": REGISTRY_WRITE,
+                                   u"createChild": registry_key(write=True),
+                                   u"openChild": registry_key(),
+                                   u"writeBinaryValue": REGISTRY_WRITE,
+                                   u"writeInt64Value": REGISTRY_WRITE,
+                                   u"writeIntValue": REGISTRY_WRITE,
+                                   u"writeStringValue": REGISTRY_WRITE,
+                                  }},
     }
 
 INTERFACE_ENTITIES = {u"nsIXMLHttpRequest":
@@ -575,32 +733,81 @@ INTERFACE_ENTITIES = {u"nsIXMLHttpRequest":
                                    "dangerous and requires careful review "
                                    "by an administrative reviewer.",
                         "editors_only": True,
+                        "signing_severity": "high",
                       }},
                       u"nsIDOMGeoGeolocation": {"dangerous":
                          "Use of the geolocation API by add-ons requires "
                          "prompting users for consent."},
-                      u"nsIX509CertDB": {"dangerous": {
-                          "description": "Access to the X509 certificate "
-                                         "database is potentially dangerous "
-                                         "and requires careful review by an "
-                                         "administrative reviewer.",
+                      u"nsIWindowsRegKey": {"dangerous": {
+                          "signing_severity": "low",
                           "editors_only": True,
-                      }}}
+                          "description": (
+                              "Access to the registry is potentially "
+                              "dangerous, and should be reviewed with special "
+                              "care.")}},
+                      }
+
+DANGEROUS_CERT_DB = {
+    "err_id": ("javascript", "predefinedentities", "cert_db"),
+    "description": "Access to the X509 certificate "
+                   "database is potentially dangerous "
+                   "and requires careful review by an "
+                   "administrative reviewer.",
+    "editors_only": True,
+    "signing_severity": "high",
+}
+
+INTERFACE_ENTITIES.update(
+    (interface, {"dangerous": DANGEROUS_CERT_DB})
+    for interface in ("nsIX509CertDB", "nsIX509CertDB2", "nsIX509CertList",
+                      "nsICertOverrideService"))
+
+CONTRACT_ENTITIES = {
+    contract: DANGEROUS_CERT_DB
+    for contract in ("@mozilla.org/security/x509certdb;1",
+                     "@mozilla.org/security/x509certlist;1",
+                     "@mozilla.org/security/certoverride;1")}
+
 for interface in INTERFACES:
     def construct(interface):
         def wrap():
             return INTERFACES[interface]
         return wrap
-    INTERFACE_ENTITIES[interface] = {"xpcom_map": construct(interface)}
+    if interface not in INTERFACE_ENTITIES:
+        INTERFACE_ENTITIES[interface] = {}
+    INTERFACE_ENTITIES[interface]["xpcom_map"] = construct(interface)
 
 
 def build_quick_xpcom(method, interface, traverser, wrapper=False):
     """A shortcut to quickly build XPCOM objects on the fly."""
+    extra = ()
+    if isinstance(interface, (list, tuple)):
+        interface, extra = interface[0], interface[1:]
+
+    def interface_obj(iface):
+        return traverser._build_global(
+            name=method,
+            entity={"xpcom_map":
+                lambda: INTERFACES.get(iface, INTERFACES["nsISupports"])})
+
     constructor = xpcom_const(method, pretraversed=True)
-    interface_obj = traverser._build_global(
-                        name=method,
-                        entity={"xpcom_map": lambda: INTERFACES[interface]})
-    obj = constructor(None, [interface_obj], traverser)
+    obj = constructor(None, [interface_obj(interface)], traverser)
+
+    for iface in extra:
+        # `xpcom_constructor` really needs to be cleaned up so we can avoid
+        # this duplication.
+        iface = interface_obj(iface)
+        iface = traverser._build_global("QueryInterface",
+                                        iface.value["xpcom_map"]())
+
+        obj.value = obj.value.copy()
+
+        value = obj.value.copy()
+        value.update(iface.value["value"])
+
+        obj.value.update(iface.value)
+        obj.value["value"] = value
+
     if isinstance(obj, JSWrapper) and not wrapper:
         obj = obj.value
     return obj
@@ -610,6 +817,51 @@ UNSAFE_TEMPLATE_METHOD = (
     "The use of `%s` can lead to unsafe "
     "remote code execution, and therefore must be done with "
     "great care, and only with sanitized data.")
+
+
+SERVICES = {
+    "appinfo": ("nsIXULAppInfo", "nsIXULRuntime"),
+    "appShell": "nsIAppShellService",
+    "blocklist": "nsIBlocklistService",
+    "cache": "nsICacheService",
+    "cache2": "nsICacheStorageService",
+    "clipboard": "nsIClipboard",
+    "console": "nsIConsoleService",
+    "contentPrefs": "nsIContentPrefService",
+    "cookies": ("nsICookieManager", "nsICookieManager2", "nsICookieService"),
+    "dirsvc": ("nsIDirectoryService", "nsIProperties"),
+    "DOMRequest": "nsIDOMRequestService",
+    "domStorageManager": "nsIDOMStorageManager",
+    "downloads": "nsIDownloadManager",
+    "droppedLinkHandler": "nsIDroppedLinkHandler",
+    "eTLD": "nsIEffectiveTLDService",
+    "focus": "nsIFocusManager",
+    "io": ("nsIIOService", "nsIIOService2"),
+    "locale": "nsILocaleService",
+    "logins": "nsILoginManager",
+    "obs": "nsIObserverService",
+    "perms": "nsIPermissionManager",
+    "prefs": ("nsIPrefBranch2", "nsIPrefService", "nsIPrefBranch"),
+    "prompt": "nsIPromptService",
+    "scriptloader": "mozIJSSubScriptLoader",
+    "scriptSecurityManager": "nsIScriptSecurityManager",
+    "search": "nsIBrowserSearchService",
+    "startup": "nsIAppStartup",
+    "storage": "mozIStorageService",
+    "strings": "nsIStringBundleService",
+    "sysinfo": "nsIPropertyBag2",
+    "telemetry": "nsITelemetry",
+    "tm": "nsIThreadManager",
+    "uriFixup": "nsIURIFixup",
+    "urlFormatter": "nsIURLFormatter",
+    "vc": "nsIVersionComparator",
+    "wm": "nsIWindowMediator",
+    "ww": "nsIWindowWatcher",
+}
+
+for key, value in SERVICES.items():
+    SERVICES[key] = {"value": partial(build_quick_xpcom,
+                                      "getService", value)}
 
 
 # GLOBAL_ENTITIES is also representative of the `window` object.
@@ -625,16 +877,28 @@ GLOBAL_ENTITIES = {
     u"Cu": {"readonly": False,
             "value":
                 lambda t: GLOBAL_ENTITIES["Components"]["value"]["utils"]},
-    u"Services":
-        {"value":
-            {u"wm":
-                {"value":
-                    lambda t: build_quick_xpcom(
-                        "getService", "nsIWindowMediator", t)},
-             u"ww":
-                {"value":
-                    lambda t: build_quick_xpcom(
-                        "getService", "nsIWindowWatcher", t)}}},
+    u"Services": {"value": SERVICES},
+
+    u"AddonManager": {
+        "readonly": False,
+        "value": {
+            u"autoUpdateDefault": {"readonly": SECURITY_PREF_MESSAGE},
+            u"checkUpdateSecurity": {"readonly": SECURITY_PREF_MESSAGE},
+            u"checkUpdateSecurityDefault": {"readonly": SECURITY_PREF_MESSAGE},
+            u"updateEnabled": {"readonly": SECURITY_PREF_MESSAGE},
+            u"getInstallForFile": ADDON_INSTALL_METHOD,
+            u"getInstallForURL": ADDON_INSTALL_METHOD,
+            u"installAddonsFromWebpage": ADDON_INSTALL_METHOD}},
+
+    u"ctypes": {"dangerous": {
+        "description": (
+            "Insufficiently meticulous use of ctypes can lead to serious, "
+            "and often exploitable, errors. The use of bundled binary code, "
+            "or access to system libraries, may allow for add-ons to "
+            "perform unsafe operations. All ctypes use must be carefully "
+            "reviewed by a qualified reviewer."),
+        "editors_only": True,
+        "signing_severity": "high"}},
 
     u"document":
         {"value":
@@ -706,26 +970,30 @@ GLOBAL_ENTITIES = {
     u"parseFloat": {"readonly": True},
     u"parseInt": {"readonly": True},
 
-    u"eval": {"dangerous": True},
+    u"eval": {"dangerous": {"err_id": ("javascript", "dangerous_global",
+                                       "eval"),
+                            "signing_severity": "high"}},
+    u"Function": {"dangerous": {"err_id": ("javascript", "dangerous_global",
+                                           "eval"),
+                                "signing_severity": "high"}},
 
-    u"Function": {"dangerous": True},
     u"Object":
         {"value":
-             {u"prototype": {"readonly": True},
+             {u"prototype": {"readonly": is_shared_scope},
               u"constructor":  # Just an experiment for now
                   {"value": lambda t: GLOBAL_ENTITIES["Function"]}}},
     u"String":
         {"value":
-             {u"prototype": {"readonly": True}},
+             {u"prototype": {"readonly": is_shared_scope}},
          "return": call_definitions.string_global},
     u"Array":
         {"value":
-             {u"prototype": {"readonly": True}},
+             {u"prototype": {"readonly": is_shared_scope}},
          "return": call_definitions.array_global},
     u"Number":
         {"value":
              {u"prototype":
-                  {"readonly": True},
+                  {"readonly": is_shared_scope},
               u"POSITIVE_INFINITY":
                   {"value": lambda t: JSWrapper(float('inf'), traverser=t)},
               u"NEGATIVE_INFINITY":
@@ -733,11 +1001,11 @@ GLOBAL_ENTITIES = {
          "return": call_definitions.number_global},
     u"Boolean":
         {"value":
-             {u"prototype": {"readonly": True}},
+             {u"prototype": {"readonly": is_shared_scope}},
          "return": call_definitions.boolean_global},
-    u"RegExp": {"value": {u"prototype": {"readonly": True}}},
-    u"Date": {"value": {u"prototype": {"readonly": True}}},
-    u"File": {"value": {u"prototype": {"readonly": True}}},
+    u"RegExp": {"value": {u"prototype": {"readonly": is_shared_scope}}},
+    u"Date": {"value": {u"prototype": {"readonly": is_shared_scope}}},
+    u"File": {"value": {u"prototype": {"readonly": is_shared_scope}}},
 
     u"Math":
         {"value":
@@ -806,7 +1074,14 @@ GLOBAL_ENTITIES = {
                        {u"PrivilegeManager":
                             {"value":
                                  {u"enablePrivilege":
-                                      {"dangerous": True}}}}}}},
+                                      {"dangerous": {
+                                          "signing_severity": "high",
+                                          "description": (
+                                            "enablePrivilege is extremely "
+                                            "dangerous, and nearly always "
+                                            "unnecessary. It should not be "
+                                            "used under any circumstances."),
+                                      }}}}}}}},
     u"navigator":
         {"value": {u"wifi": {"dangerous": True},
                    u"geolocation": {"dangerous": True}}},
@@ -824,7 +1099,27 @@ GLOBAL_ENTITIES = {
                            {"return": xpcom_const("getService")}}},
               "utils":
                   {"value": {u"evalInSandbox":
-                                 {"dangerous": True},
+                                 {"dangerous": {
+                                     "editors_only": "true",
+                                     "signing_severity": "low"}},
+                             u"cloneInto":
+                                 {"dangerous": {
+                                     "editors_only": True,
+                                     "signing_severity": "low",
+                                     "description": (
+                                         "Can be used to expose privileged "
+                                         "functionality to unprivileged scopes. "
+                                         "Care should be taken to ensure that "
+                                         "this is done safely.")}},
+                             u"exportFunction":
+                                 {"dangerous": {
+                                     "editors_only": True,
+                                     "signing_severity": "low",
+                                     "description": (
+                                         "Can be used to expose privileged "
+                                         "functionality to unprivileged scopes. "
+                                         "Care should be taken to ensure that "
+                                         "this is done safely.")}},
                              u"import":
                                  {"dangerous":
                                       lambda a, t, e:

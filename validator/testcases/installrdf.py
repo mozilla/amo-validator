@@ -53,7 +53,6 @@ def _test_rdf(err, install):
                       "updateInfoURL",
                       "updateKey",
                       "updateURL",
-                      "updateLink",  # Banned, but if not, pass it once.
                       "updateHash",
                       "signature",
                       "skinnable",
@@ -82,17 +81,21 @@ def _test_rdf(err, install):
 
     top_id = install.get_root_subject()
 
+    predicates = {}
+
     for pred_raw in install.rdf.predicates(top_id, None):
         predicate = pred_raw.split("#")[-1]
 
+        value = install.get_object(top_id, pred_raw)
+        predicates[predicate] = value
+
         # Mark that the unpack element has been supplied
         if predicate == "unpack":
-            value = install.get_object(predicate=pred_raw)
             err.save_resource("em:unpack", value, pushable=True)
 
         if predicate == "bootstrap":
-            value = install.get_object(predicate=pred_raw)
             err.save_resource("em:bootstrap", value)
+            err.metadata["bootstrapped"] = value == "true"
 
         # Test if the predicate is banned
         if predicate in shouldnt_exist:
@@ -122,35 +125,28 @@ def _test_rdf(err, install):
 
         # Remove the predicate from must_exist_once if it's there.
         if predicate in must_exist_once:
-
-            object_value = install.get_object(top_id, pred_raw)
-
             # Test the predicate for specific values.
             if predicate == "id":
-                _test_id(err, object_value)
+                _test_id(err, value)
             elif predicate == "version":
-                _test_version(err, object_value)
+                _test_version(err, value)
             elif predicate == "name":
-                _test_name(err, object_value)
+                _test_name(err, value)
 
             must_exist_once.remove(predicate)
             continue
 
         # Do the same for may_exist_once.
         if predicate in may_exist_once:
-
-            object_value = install.get_object(top_id, pred_raw)
-
             if (predicate == "optionsType" and
-                    str(object_value) not in OPTIONS_TYPE_VALUES):
+                    str(value) not in OPTIONS_TYPE_VALUES):
                 err.warning(
                     err_id=("testcases_installrdf", "_test_rdf",
                             "optionsType"),
                     warning="<em:optionsType> has bad value.",
-                    description=[
-                        "The value of <em:optionsType> must be either "
+                    description=("The value of <em:optionsType> must be either "
                         "%s." % ", ".join(OPTIONS_TYPE_VALUES),
-                        "Value found: %s" % object_value],
+                        "Value found: %s" % value),
                     filename="install.rdf")
 
             may_exist_once.remove(predicate)
@@ -172,6 +168,33 @@ def _test_rdf(err, install):
                     "the current configuration.",
                     "Detected element: <em:%s>" % predicate],
                    "install.rdf")
+
+    if not err.get_resource("listed"):
+        if "updateURL" in predicates:
+            if not (str(predicates["updateURL"]).lower().startswith("https:")
+                    or "updateKey" in predicates):
+                # TODO: Validate updateKey value
+                err.warning(("testcases_installrdf",
+                             "_test_rdf",
+                             "missing_updateKey"),
+                            "Missing updateKey element",
+                            "Your updateURL is not served over a secure "
+                            "connection, and your install.rdf does not "
+                            "specify an update key. This means that serving "
+                            "updates for this version will not be possible.",
+                            "install.rdf",
+                            signing_severity="trivial")
+        else:
+            err.warning(("testcases_installrdf",
+                         "_test_rdf",
+                         "missing_updateURL"),
+                        "Missing updateURL element",
+                        "Your add-on does not specify an update URL. This "
+                        "means that it will be impossible for you to serve "
+                        "updates to this add-on which are not listed publicly "
+                        "on addons.mozilla.org.",
+                        "install.rdf",
+                        signing_severity="trivial")
 
     # Once all of the predicates have been tested, make sure there are
     # no mandatory elements that haven't been found.

@@ -57,6 +57,38 @@ def test_createElement():
     document.createElement();
     """)
 
+def test_enablePrivilege():
+    """Tests that enablePrivilege throws a warning."""
+
+    err = _do_test_raw("""
+        netscape.security.PrivilegeManager.enablePrivilege()
+    """)
+    assert err.warnings
+
+    eq_(err.warnings[0]["id"],
+        ("js", "traverser", "dangerous_global"))
+    eq_(err.warnings[0]["signing_severity"], "high")
+
+def test_privileged_unprivileged_interaction():
+    """Tests that functions which may lead to privilege escalation are
+    detected."""
+
+    for meth in "cloneInto", "exportFunction":
+        err = _do_test_raw("""
+            Cu.%s(foo)
+        """ % meth)
+        assert err.warnings
+
+        eq_(err.warnings[0]["id"],
+            ("js", "traverser", "dangerous_global"))
+        eq_(err.warnings[0]["signing_severity"], "low")
+
+    for form in ("var obj = { __exposedProps__: {} };",
+                 "var obj = {}; obj.__exposedProps__ = {};"):
+        err = _do_test_raw(form)
+        assert err.warnings
+        eq_(err.warnings[0]["signing_severity"], "high")
+
 def test_synchronous_xhr():
     "Tests that syncrhonous AJAX requests are marked as dangerous"
 

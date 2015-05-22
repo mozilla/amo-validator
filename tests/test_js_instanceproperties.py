@@ -1,4 +1,5 @@
 from mock import patch
+from nose.tools import eq_
 
 from validator.compat import FX18_DEFINITION
 
@@ -98,10 +99,11 @@ def test_on_event():
     x.onclick = function() {};
     """).failed()
 
-    assert _do_test_raw("""
-    var x = foo();
-    x.onclick = "bar";
-    """).failed()
+    err = _do_test_raw("""
+    x.attr({ onclick: "bar" });
+    """)
+    assert err.failed()
+    eq_(err.warnings[0]["signing_severity"], "medium")
 
 
 def test_on_event_null():

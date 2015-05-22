@@ -1,15 +1,14 @@
-import math
 import re
 import types
 
-import spidermonkey
+# Global import of predefinedentities will cause an import loop
 import instanceactions
-import instanceproperties
 from validator.compat import FX17_DEFINITION
 from validator.constants import (BUGZILLA_BUG, DESCRIPTION_TYPES, FENNEC_GUID,
                                  FIREFOX_GUID, MAX_STR_SIZE)
 from validator.decorator import version_range
 from validator.python import copy
+from validator.testcases.regex import validate_string
 from jstypes import *
 
 
@@ -50,7 +49,7 @@ def _expand_globals(traverser, node):
     """Expands a global object that has a lambda value."""
 
     if node.is_global and callable(node.value.get("value")):
-        result = node.value["value"](t=traverser)
+        result = node.value["value"](traverser)
         if isinstance(result, dict):
             output = traverser._build_global("--", result)
         elif isinstance(result, JSWrapper):
@@ -81,16 +80,26 @@ def trace_member(traverser, node, instantiate=False):
         base = trace_member(traverser, node["object"], instantiate)
         base = _expand_globals(traverser, base)
 
+        identifier = _get_member_exp_property(traverser, node)
+
         # Handle the various global entity properties.
         if base.is_global:
             # If we've got an XPCOM wildcard, return a copy of the entity.
             if "xpcom_wildcard" in base.value:
                 traverser._debug("MEMBER_EXP>>XPCOM_WILDCARD")
+
+                from predefinedentities import CONTRACT_ENTITIES
+                if identifier in CONTRACT_ENTITIES:
+                    kw = dict(err_id=("js", "actions", "dangerous_contract"),
+                              warning="Dangerous XPCOM contract ID")
+                    kw.update(CONTRACT_ENTITIES[identifier])
+
+                    traverser.warning(**kw)
+
                 base.value = base.value.copy()
                 del base.value["xpcom_wildcard"]
                 return base
 
-        identifier = _get_member_exp_property(traverser, node)
         test_identifier(traverser, identifier)
 
         traverser._debug("MEMBER_EXP>>PROPERTY: %s" % identifier)
@@ -358,8 +367,18 @@ def _define_literal(traverser, node):
     value = node["value"]
     if isinstance(value, dict):
         return JSWrapper(JSObject(), traverser=traverser, dirty=True)
+    test_literal(traverser, value)
     return JSWrapper(value if value is not None else JSLiteral(None),
                      traverser=traverser)
+
+
+def test_literal(traverser, value):
+    """
+    Test the value of a literal, in particular only a string literal at the
+    moment, against possibly dangerous patterns.
+    """
+    if isinstance(value, basestring):
+        validate_string(value, traverser)
 
 
 def call_dangerous_function(traverser, member, name):
@@ -367,12 +386,12 @@ def call_dangerous_function(traverser, member, name):
         traverser.err.notice(
             err_id=("js", "actions", "_call_expression", "eval_compat"),
             notice="`toString` for function objects has changed.",
-            description=["The `toString` implementation for function objects "
+            description=("The `toString` implementation for function objects "
                          "have changed. If you are using `eval` or `Function` "
                          "to change the behavior of 'native' functions, it is "
                          "probably not working correctly in Firefox 17 and "
                          "above.",
-                         "See %s for details." % BUGZILLA_BUG % 761723],
+                         "See %s for details." % BUGZILLA_BUG % 761723),
             filename=traverser.filename,
             line=traverser.line,
             column=traverser.position,
@@ -417,20 +436,22 @@ def _call_expression(traverser, node):
             ## Generate a string representation of the params
             #params = u", ".join([_get_as_str(t(p).get_literal_value()) for
             #                     p in args])
-            traverser.err.warning(
-                err_id=("testcases_javascript_actions", "_call_expression",
-                        "called_dangerous_global"),
-                warning="`%s` called in potentially dangerous manner" %
-                            member.value["name"],
-                description=result if isinstance(result,
-                                                 DESCRIPTION_TYPES) else
-                            "The global `%s` function was called using a set "
-                            "of dangerous parameters. Calls of this nature "
-                            "are deprecated." % member.value["name"],
-                filename=traverser.filename,
-                line=traverser.line,
-                column=traverser.position,
-                context=traverser.context)
+            kwargs = {
+                "err_id": ("testcases_javascript_actions", "_call_expression",
+                           "called_dangerous_global"),
+                "warning": "`%s` called in potentially dangerous manner" %
+                           member.value["name"],
+                "description":
+                    "The global `%s` function was called using a set "
+                    "of dangerous parameters. Calls of this nature "
+                    "are deprecated." % member.value["name"]}
+
+            if isinstance(result, DESCRIPTION_TYPES):
+                kwargs["description"] = result
+            elif isinstance(result, dict):
+                kwargs.update(result)
+
+            traverser.warning(**kwargs)
 
     elif (node["callee"]["type"] == "MemberExpression" and
           node["callee"]["property"]["type"] == "Identifier"):
@@ -445,6 +466,9 @@ def _call_expression(traverser, node):
             return result
 
     if member.is_global and "return" in member.value:
+        if "object" in node["callee"]:
+            member.parent = trace_member(traverser, node["callee"]["object"])
+
         return member.value["return"](wrapper=member, arguments=args,
                                       traverser=traverser)
     return JSWrapper(JSObject(), dirty=True, traverser=traverser)
@@ -467,9 +491,12 @@ def _call_settimeout(a, t, e):
     if t(a[0]).callable:
         return
 
-    return ("In order to prevent vulnerabilities, the `setTimeout` "
-            "and `setInterval` functions should be called only with "
-            "function expressions as their first argument.")
+    return {"err_id": ("javascript", "dangerous_global", "eval"),
+            "description":
+                "In order to prevent vulnerabilities, the `setTimeout` "
+                "and `setInterval` functions should be called only with "
+                "function expressions as their first argument.",
+            "signing_severity": "high"}
 
 
 def _call_create_pref(a, t, e):
@@ -483,7 +510,10 @@ def _call_create_pref(a, t, e):
         return
 
     value = str(t(a[0]).get_literal_value())
+    return test_preference(value)
 
+
+def test_preference(value):
     from predefinedentities import BANNED_PREF_BRANCHES, BANNED_PREF_REGEXPS
     for banned, reason in BANNED_PREF_BRANCHES:
         if value.startswith(banned):
@@ -506,9 +536,9 @@ def _call_create_pref(a, t, e):
             "distinct string unique to and indicative of your add-on.")
 
 
-def _readonly_top(t, r, rn):
+def _readonly_top(traverser, right, node_right):
     """Handle the readonly callback for window.top."""
-    t.err.notice(
+    traverser.notice(
         err_id=("testcases_javascript_actions",
                 "_readonly_top"),
         notice="window.top is a reserved variable",
@@ -516,10 +546,6 @@ def _readonly_top(t, r, rn):
                     "assigned any values starting with Gecko 6. Review your "
                     "code for any uses of the `top` global, and refer to "
                     "%s for more information." % BUGZILLA_BUG % 654137,
-        filename=t.filename,
-        line=t.line,
-        column=t.position,
-        context=t.context,
         for_appversions={FIREFOX_GUID:
                              version_range("firefox", "6.0a1", "7.0a1"),
                          FENNEC_GUID:
@@ -593,9 +619,10 @@ def _expr_assignment(traverser, node):
 
     # Treat direct assignment different than augmented assignment.
     if node["operator"] == "=":
+        from predefinedentities import GLOBAL_ENTITIES, is_shared_scope
 
         global_overwrite = False
-        readonly_value = True
+        readonly_value = is_shared_scope(traverser)
 
         node_left = node["left"]
         traverser._debug("ASSIGNMENT:DIRECT(%s)" % node_left["type"])
@@ -607,11 +634,9 @@ def _expr_assignment(traverser, node):
 
             # Get the readonly attribute and store its value if is_global
             if global_overwrite:
-                from predefinedentities import GLOBAL_ENTITIES
                 global_dict = GLOBAL_ENTITIES[node_left["name"]]
-                readonly_value = (global_dict["readonly"] if
-                                  "readonly" in global_dict else
-                                  True)
+                if "readonly" in global_dict:
+                    readonly_value = global_dict["readonly"]
 
             traverser._declare_variable(node_left["name"], right, type_="glob")
         elif node_left["type"] == "MemberExpression":
@@ -625,7 +650,7 @@ def _expr_assignment(traverser, node):
             traverser._debug("ASSIGNMENT:GLOB_OV::%s" % global_overwrite)
 
             # Don't do the assignment if we're facing a global.
-            if not global_overwrite:
+            if not member_object.is_global:
                 if member_object.value is None:
                     member_object.value = JSObject()
 
@@ -643,33 +668,34 @@ def _expr_assignment(traverser, node):
                     # If it's a global and the actual member exists, test
                     # whether it can be safely overwritten.
                     member = member_object_value["value"][member_property]
-                    readonly_value = (member["readonly"] if
-                                      "readonly" in member else
-                                      True)
+                    if "readonly" in member:
+                        global_overwrite = True
+                        readonly_value = member["readonly"]
 
         traverser._debug("ASSIGNMENT:DIRECT:GLOB_OVERWRITE %s" %
-                             global_overwrite)
+                         global_overwrite)
+        traverser._debug("ASSIGNMENT:DIRECT:READONLY %r" %
+                         readonly_value)
 
-        if (global_overwrite and
-            not traverser.is_jsm and
-            not traverser.err.get_resource("em:bootstrap") and
-            readonly_value == True):
+        if callable(readonly_value):
+            readonly_value = readonly_value(traverser, right, node["right"])
 
-            traverser.err.warning(
+        if readonly_value and global_overwrite:
+
+            kwargs = dict(
                 err_id=("testcases_javascript_actions",
                         "_expr_assignment",
                         "global_overwrite"),
                 warning="Global variable overwrite",
                 description="An attempt was made to overwrite a global "
-                            "variable in some JavaScript code.",
-                filename=traverser.filename,
-                line=traverser.line,
-                column=traverser.position,
-                context=traverser.context)
+                            "variable in some JavaScript code.")
 
-        if callable(readonly_value):
-            # The readonly attribute supports a lambda function that accepts
-            readonly_value(t=traverser, r=right, rn=node["right"])
+            if isinstance(readonly_value, DESCRIPTION_TYPES):
+                kwargs["description"] = readonly_value
+            elif isinstance(readonly_value, dict):
+                kwargs.update(readonly_value)
+
+            traverser.warning(**kwargs)
 
         return right
 
@@ -805,13 +831,13 @@ def _expr_binary(traverser, node):
     # Dirty l or r values mean we can skip the expression. A dirty value
     # indicates that a lazy operation took place that introduced some
     # nondeterminacy.
+    # FIXME(Kris): We should process these as if they're strings anyway.
     if left.dirty:
         return left
     elif right.dirty:
         return right
 
     # Binary expressions are only executed on literals.
-    left_wrap = left
     left = left.get_literal_value()
     right_wrap = right
     right = right.get_literal_value()
@@ -839,6 +865,7 @@ def _expr_binary(traverser, node):
         "%": lambda: 0 if gright == 0 else (gleft % gright),
         "in": lambda: right_wrap.contains(left),
         # TODO : implement instanceof
+        # FIXME(Kris): Treat instanceof the same as `QueryInterface`
     }
 
     output = None
@@ -872,6 +899,11 @@ def _expr_binary(traverser, node):
         if (isinstance(output, types.StringTypes)
                 and len(output) > MAX_STR_SIZE):
             output = output[:MAX_STR_SIZE]
+
+        # Test the newly-created literal for dangerous values.
+        # This may cause duplicate warnings for strings which
+        # already match a dangerous value prior to concatenation.
+        test_literal(traverser, output)
 
     return JSWrapper(output, traverser=traverser)
 
@@ -939,7 +971,7 @@ def _get_as_num(value):
             return value
         else:
             return int(value)
-    except ValueError, TypeError:
+    except (ValueError, TypeError):
         return 0
 
 

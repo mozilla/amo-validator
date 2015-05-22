@@ -892,18 +892,15 @@ def js_wrap(wrapper, arguments, traverser):
         return JSWrapper(JSObject(), traverser=traverser)
 
     if len(arguments) > 1:
-        traverser.err.warning(
+        traverser.warning(
             err_id=("testcases_js_xpcom", "xpcnativewrapper", "shallow"),
             warning="Shallow XPCOM wrappers should not be used",
             description="Shallow XPCOM wrappers are seldom necessary and "
                         "should not be used. Please use deep wrappers "
                         "instead.",
-            filename=traverser.filename,
-            line=traverser.line,
-            column=traverser.position,
-            context=traverser.context)
+            signing_severity="medium")
         # Do not mark shallow wrappers as not unwrapped.
-        return obj;
+        return obj
 
     if obj.is_global:
         # Why are we changing the original object? XPCNativeWrapper

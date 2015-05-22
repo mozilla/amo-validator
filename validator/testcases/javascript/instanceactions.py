@@ -121,17 +121,14 @@ def getInterface(args, traverser, node, wrapper):
 
 def _create_script_tag(traverser):
     """Raises a warning that the dev is creating a script tag"""
-    traverser.err.warning(
+    traverser.warning(
         err_id=("testcases_javascript_instanceactions", "_call_expression",
                 "called_createelement"),
         warning="createElement() used to create script tag",
         description="Dynamic creation of script nodes can be unsafe if "
                     "contents are not static or are otherwise unsafe, "
                     "or if `src` is remote.",
-        filename=traverser.filename,
-        line=traverser.line,
-        column=traverser.position,
-        context=traverser.context)
+        signing_severity="medium")
 
 
 def _create_variable_element(traverser):
@@ -140,12 +137,12 @@ def _create_variable_element(traverser):
         err_id=("testcases_javascript_instanceactions", "_call_expression",
                 "createelement_variable"),
         warning="Variable element type being created",
-        description=["createElement or createElementNS were used with a "
+        description=("createElement or createElementNS were used with a "
                      "variable rather than a raw string. Literal values "
                      "should be used when taking advantage of the element "
                      "creation functions.",
                      "E.g.: createElement('foo') rather than "
-                     "createElement(el_type)"],
+                     "createElement(el_type)"),
         filename=traverser.filename,
         line=traverser.line,
         column=traverser.position,
@@ -162,17 +159,14 @@ def setAttribute(args, traverser, node, wrapper):
 
     first_as_str = actions._get_as_str(simple_args[0].get_literal_value())
     if first_as_str.lower().startswith("on"):
-        traverser.err.notice(
+        traverser.warning(
             err_id=("testcases_javascript_instanceactions", "setAttribute",
                     "setting_on*"),
-            notice="on* attribute being set using setAttribute",
+            warning="on* attribute being set using setAttribute",
             description="To prevent vulnerabilities, event handlers (like "
                         "'onclick' and 'onhover') should always be defined "
                         "using addEventListener.",
-            filename=traverser.filename,
-            line=traverser.line,
-            column=traverser.position,
-            context=traverser.context)
+            signing_severity="medium")
 
 
 def nsIDOMFile_deprec(args, traverser, node, wrapper):
@@ -292,13 +286,13 @@ def _check_dynamic_sql(args, traverser, node=None, wrapper=None):
         traverser.warning(
             err_id=("js", "instanceactions", "executeSimpleSQL_dynamic"),
             warning="SQL statements should be static strings",
-            description=["Dynamic SQL statement should be constucted via "
+            description=("Dynamic SQL statement should be constucted via "
                          "static strings, in combination with dynamic "
                          "parameter binding via Sqlite.jsm wrappers "
                          "(http://mzl.la/sqlite-jsm) or "
                          "`createAsyncStatement` "
                          "(https://developer.mozilla.org/en-US/docs"
-                         "/Storage#Binding_parameters)"],
+                         "/Storage#Binding_parameters)"),
             filename=traverser.filename,
             line=traverser.line,
             column=traverser.position,
@@ -435,6 +429,48 @@ def quote_callback(argument, traverser, node, wrapper):
         tier=5)
 
 
+def create_preference_branch(arguments, traverser, node, wrapper):
+    """Creates a preference branch, which can be used for testing composed
+    preference names."""
+
+    if arguments:
+        arg = traverser._traverse_node(arguments[0])
+        if arg.is_literal():
+            # Avoid import loop
+            from predefinedentities import build_quick_xpcom
+            res = build_quick_xpcom("createInstance", "nsIPrefBranch",
+                                    traverser, wrapper=True)
+            res.value["preference_branch"] = actions._get_as_str(arg)
+            return res
+
+
+def set_preference(wrapper, arguments, traverser):
+    """Tests set preference calls for non-root preferences branches against
+    dangerous values."""
+
+    parent = getattr(wrapper, "parent")
+    if not (arguments and parent and parent.is_global and
+            parent.value.get("preference_branch")):
+        return
+
+    arg = traverser._traverse_node(arguments[0])
+    if arg.is_literal():
+        pref = (parent.value["preference_branch"] +
+                actions._get_as_str(arg))
+
+        msg = actions.test_preference(pref)
+        if msg:
+            kw = {"err_id": ("testcases_javascript_actions",
+                             "_call_expression", "called_set_preference"),
+                  "warning": "Attempt to set a dangerous preference"}
+            if isinstance(msg, dict):
+                kw.update(msg)
+            else:
+                kw["description"] = msg
+
+            traverser.warning(**kw)
+
+
 INSTANCE_DEFINITIONS = {
     "addEventListener": addEventListener,
     "bind": bind,
@@ -446,6 +482,8 @@ INSTANCE_DEFINITIONS = {
     "executeSimpleSQL": executeSimpleSQL,
     "getAsBinary": nsIDOMFile_deprec,
     "getAsDataURL": nsIDOMFile_deprec,
+    "getBranch": create_preference_branch,
+    "getDefaultBranch": create_preference_branch,
     "getInterface": getInterface,
     "insertAdjacentHTML": insertAdjacentHTML,
     "isSameNode": isSameNode,
