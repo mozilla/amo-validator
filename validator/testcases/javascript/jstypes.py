@@ -485,16 +485,11 @@ class JSArray(JSObject):
     def set(self, index, value, traverser=None):
         try:
             index = int(index)
-            f_index = float(index)
             # Ignore floating point indexes
-            if index != float(index):
+            if index != float(index) or index < 0:
                 return super(JSArray, self).set(value, traverser)
         except ValueError:
             return super(JSArray, self).set(index, value, traverser)
-
-        # JS ignores indexes less than 0
-        if index < 0:
-            return
 
         if len(self.elements) > index:
             self.elements[index] = JSWrapper(value=value, traverser=traverser)

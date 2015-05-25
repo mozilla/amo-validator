@@ -1,6 +1,6 @@
 from nose.tools import eq_
 
-from js_helper import _do_test_raw
+from .js_helper import TestCase, _do_test_raw
 
 from validator.testcases.javascript.jstypes import JSWrapper
 from validator.testcases.javascript.actions import _get_as_num
@@ -56,3 +56,38 @@ def test_spidermonkey_warning():
     "use strict";
     var x = 0999999999999;
     """).failed()
+
+
+class TestTemplateString(TestCase):
+    WARNING = {"id": ("testcases_chromemanifest", "test_resourcemodules",
+                      "resource_modules")}
+
+    def test_template_string(self):
+        """Tests that plain template strings trigger warnings like normal
+        strings."""
+
+        self.run_script("`JavaScript-global-property`")
+        self.assert_failed(with_warnings=[self.WARNING])
+
+    def test_template_complex_string(self):
+        """Tests that complex template strings trigger warnings like normal
+        strings."""
+
+        self.run_script("`JavaS${'cript-'}glob${'al-pro'}perty`")
+        self.assert_failed(with_warnings=[self.WARNING])
+
+    def test_tagged_template_string(self):
+        """Tests that tagged template strings are treated as calls."""
+
+        warning = {"id": ("testcases_javascript_instanceactions",
+                          "_call_expression", "called_createelement")}
+
+        assert not _do_test_raw("""
+            d.createElement(); "script";
+            d.createElement; "script";
+        """).failed()
+
+        self.run_script("""
+            d.createElement`script`
+        """)
+        self.assert_failed(with_warnings=[warning])

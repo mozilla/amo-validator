@@ -1,3 +1,4 @@
+from collections import defaultdict
 import itertools
 import re
 import types
@@ -43,10 +44,6 @@ class Traverser(object):
         # For debugging
         self.debug_level = 0
 
-        # If we're not debugging, don't waste more cycles than we need to.
-        if not DEBUG:
-            self._debug = lambda *args, **kwargs: None
-
     def _debug(self, data, indent=0):
         """Write a message to the console if debugging is enabled."""
         if DEBUG:
@@ -57,6 +54,14 @@ class Traverser(object):
             output = unicode(output)
             print (". " * (self.debug_level + indent) +
                    output.encode("ascii", "replace"))
+
+        class DebugLevel(object):
+            def __enter__(self_):
+                self.debug_level += 1
+
+            def __exit__(self_, type, value, traceback):
+                self.debug_level -= 1
+        return DebugLevel()
 
     def run(self, data):
         if DEBUG:
@@ -130,6 +135,13 @@ class Traverser(object):
             self.position = int(node["loc"]["start"]["column"])
 
         if node.get("type") not in DEFINITIONS:
+            if node.get("type"):
+                key = "unknown_node_types"
+                if key not in self.err.metadata:
+                    self.err.metadata[key] = defaultdict(int)
+
+                self.err.metadata[key][node["type"]] += 1
+
             return JSWrapper(JSObject(), traverser=self, dirty=True)
 
         self._debug("TRAVERSE>>%s" % node["type"])
