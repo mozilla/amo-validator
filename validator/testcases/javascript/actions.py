@@ -1,3 +1,4 @@
+from functools import partial
 import re
 import types
 
@@ -357,6 +358,24 @@ def _define_array(traverser, node):
     arr = JSArray()
     arr.elements = map(traverser._traverse_node, node["elements"])
     return arr
+
+
+def _define_template_strings(traverser, node):
+    """Instantiate an array of raw and cooked template strings."""
+    cooked = JSArray()
+    cooked.elements = map(traverser._traverse_node, node["cooked"])
+    raw = JSArray()
+    raw.elements = map(traverser._traverse_node, node["raw"])
+
+    cooked.set("raw", raw, traverser)
+    return cooked
+
+
+def _define_template(traverser, node):
+    """Instantiate a template literal."""
+    elements = map(traverser._traverse_node, node["elements"])
+
+    return reduce(partial(_binary_op, "+", traverser=traverser), elements)
 
 
 def _define_literal(traverser, node):
@@ -799,34 +818,33 @@ def _expr_binary(traverser, node):
     traverser._debug("BIN_OPERATOR>>%s" % operator)
 
     # Traverse the left half of the binary expression.
-    traverser._debug("BIN_EXP>>l-value")
-    traverser.debug_level += 1
-
-    if (node["left"]["type"] == "BinaryExpression" and
-        "__traversal" not in node["left"]):
-        # Process the left branch of the binary expression directly. This keeps
-        # the recursion cap in line and speeds up processing of large chains
-        # of binary expressions.
-        left = _expr_binary(traverser, node["left"])
-        node["left"]["__traversal"] = left
-    else:
-        left = traverser._traverse_node(node["left"])
+    with traverser._debug("BIN_EXP>>l-value"):
+        if (node["left"]["type"] == "BinaryExpression" and
+            "__traversal" not in node["left"]):
+            # Process the left branch of the binary expression directly. This
+            # keeps the recursion cap in line and speeds up processing of
+            # large chains of binary expressions.
+            left = _expr_binary(traverser, node["left"])
+            node["left"]["__traversal"] = left
+        else:
+            left = traverser._traverse_node(node["left"])
 
     # Traverse the right half of the binary expression.
-    traverser._debug("BIN_EXP>>r-value", -1)
+    with traverser._debug("BIN_EXP>>r-value"):
+        if (operator == "instanceof" and
+                node["right"]["type"] == "Identifier" and
+                node["right"]["name"] == "Function"):
+            # We make an exception for instanceof's r-value if it's a
+            # dangerous global, specifically Function.
+            return JSWrapper(True, traverser=traverser)
+        else:
+            right = traverser._traverse_node(node["right"])
+            traverser._debug("Is dirty? %r" % right.dirty, 1)
 
-    if (operator == "instanceof" and
-            node["right"]["type"] == "Identifier" and
-            node["right"]["name"] == "Function"):
-        # We make an exception for instanceof's r-value if it's a dangerous
-        # global, specifically Function.
-        traverser.debug_level -= 1
-        return JSWrapper(True, traverser=traverser)
-    else:
-        right = traverser._traverse_node(node["right"])
-        traverser._debug("Is dirty? %r" % right.dirty, 1)
+    return _binary_op(operator, left, right, traverser)
 
-    traverser.debug_level -= 1
+def _binary_op(operator, left, right, traverser):
+    """Perform a binary operation on two pre-traversed nodes."""
 
     # Dirty l or r values mean we can skip the expression. A dirty value
     # indicates that a lazy operation took place that introduced some
@@ -880,8 +898,7 @@ def _expr_binary(traverser, node):
                 left = ""
             if right is None:
                 right = ""
-            if (isinstance(left, types.StringTypes) or
-                    isinstance(right, types.StringTypes)):
+            if isinstance(left, basestring) or isinstance(right, basestring):
                 left = _get_as_str(left)
                 right = _get_as_str(right)
 
