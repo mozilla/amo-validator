@@ -263,8 +263,8 @@ def test_signed_xpi(err, xpi_package):
     """Checks if XPI is signed."""
     search = set([
         'META-INF/manifest.mf',
-        'META-INF/zigbert.rsa',
-        'META-INF/zigbert.sf'])
+        'META-INF/mozilla.rsa',
+        'META-INF/mozilla.sf'])
 
     if search.issubset(set(xpi_package)):
         err.warning(

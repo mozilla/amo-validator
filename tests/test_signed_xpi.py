@@ -22,8 +22,8 @@ def test_signed_xpi():
     """Test that signed packages raise warning"""
     x = MockXPI({
         'META-INF/manifest.mf': 'tests/resources/main/foo.bar',
-        'META-INF/zigbert.rsa': 'tests/resources/main/foo.bar',
-        'META-INF/zigbert.sf': 'tests/resources/main/foo.bar',
+        'META-INF/mozilla.rsa': 'tests/resources/main/foo.bar',
+        'META-INF/mozilla.sf': 'tests/resources/main/foo.bar',
     })
 
     err = ErrorBundle()
