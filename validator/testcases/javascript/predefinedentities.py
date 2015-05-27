@@ -907,20 +907,6 @@ GLOBAL_ENTITIES = {
                    "readonly": False},
               u"defaultView":
                   {"value": lambda t: {"value": GLOBAL_ENTITIES}},
-              u"createElement":
-                  {"dangerous":
-                       lambda a, t, e:
-                           not a or _get_as_str(t(a[0])).lower() == "script"
-                           and "Dynamic creation of script nodes can be "
-                               "unsafe if contents are not static or are "
-                               "otherwise unsafe, or if `src` is remote."},
-              u"createElementNS":
-                  {"dangerous":
-                       lambda a, t, e:
-                           not a or _get_as_str(t(a[0])).lower() == "script"
-                           and "Dynamic creation of script nodes can be "
-                               "unsafe if contents are not static or are "
-                               "otherwise unsafe, or if `src` is remote."},
               u"getSelection":
                   {"return": call_definitions.document_getSelection},
               u"loadOverlay":
