@@ -260,13 +260,12 @@ def test_packed_scripts(err, xpi_package):
 
 @decorator.register_test(tier=2)
 def test_signed_xpi(err, xpi_package):
-    """Checks if XPI is signed."""
-    search = set([
-        'META-INF/manifest.mf',
-        'META-INF/mozilla.rsa',
-        'META-INF/mozilla.sf'])
+    """Checks if XPI is signed.
 
-    if search.issubset(set(xpi_package)):
+    We don't want to specifically test for mozilla.* or zigbert.* filenames
+    here, because the filenames could be just anything. Testing the presence of
+    the manifest.mf file should be a good indicator that the file is signed."""
+    if 'META-INF/manifest.mf' in xpi_package:
         err.warning(
             err_id=("testcases_content", "signed_xpi"),
             warning="Package already signed",
