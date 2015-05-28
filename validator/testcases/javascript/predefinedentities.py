@@ -802,7 +802,7 @@ def build_quick_xpcom(method, interface, traverser, wrapper=False):
 
         obj.value = obj.value.copy()
 
-        value = obj.value.copy()
+        value = obj.value["value"].copy()
         value.update(iface.value["value"])
 
         obj.value.update(iface.value)
