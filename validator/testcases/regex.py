@@ -10,7 +10,7 @@ from validator.compat import (
     FX22_DEFINITION, FX23_DEFINITION, FX24_DEFINITION, FX25_DEFINITION,
     FX26_DEFINITION, FX27_DEFINITION, FX28_DEFINITION, FX30_DEFINITION,
     FX31_DEFINITION, FX32_DEFINITION, FX34_DEFINITION, FX36_DEFINITION,
-    FX37_DEFINITION, FX38_DEFINITION,
+    FX37_DEFINITION, FX38_DEFINITION, FX39_DEFINITION,
     TB7_DEFINITION, TB10_DEFINITION, TB11_DEFINITION, TB12_DEFINITION,
     TB13_DEFINITION, TB14_DEFINITION, TB15_DEFINITION, TB16_DEFINITION,
     TB17_DEFINITION, TB18_DEFINITION, TB19_DEFINITION, TB20_DEFINITION,
@@ -1607,6 +1607,23 @@ class Gecko38RegexTests(CompatRegexTestHelper):
             "See %s for more information." % BUGZILLA_BUG % 436344,
             log_function=self.err.warning,
             compat_type="error")
+
+
+@register_generator
+class Gecko39RegexTests(CompatRegexTestHelper):
+    """Regex tests for Gecko 39 updates."""
+
+    VERSION = FX39_DEFINITION
+
+    def tests(self):
+        yield self.get_test(
+            r"\b__noSuchMethod__\b",
+            "The __noSuchMethod__ property has been deprecated.",
+            "The __noSuchMethod__ property has been deprecated. See %s for "
+            "more information." % MDN_DOC
+            % "Web/JavaScript/Reference/Global_Objects/Object/noSuchMethod",
+            log_function=self.err.warning,
+            compat_type="warning")
 
 
 #############################
