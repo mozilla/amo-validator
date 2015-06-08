@@ -1625,6 +1625,15 @@ class Gecko39RegexTests(CompatRegexTestHelper):
             log_function=self.err.warning,
             compat_type="warning")
 
+        yield self.get_test(
+            r"\bsendAsBinary\b",
+            "The function sendAsBinary() in XMLHttpRequest has been removed.",
+            "The function sendAsBinary() in XMLHttpRequest has been removed. "
+            "You can use send() with a Blob instead. See %s for more "
+            "information." % BUGZILLA_BUG % 853162,
+            log_function=self.err.warning,
+            compat_type="error")
+
 
 #############################
 #  Thunderbird Regex Tests  #

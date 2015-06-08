@@ -37,3 +37,11 @@ class TestFX39Compat(CompatTestCase):
         """)
         self.assert_silent()
         self.assert_compat_warning(type_="warning")
+
+    def test_sendAsBinary(self):
+        self.run_script_for_compat("""
+           var xhr = new XMLHttpRequest();
+           xhr.sendAsBinary('foo');
+        """)
+        self.assert_silent()
+        self.assert_compat_error()
