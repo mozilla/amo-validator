@@ -45,3 +45,17 @@ class TestFX39Compat(CompatTestCase):
         """)
         self.assert_silent()
         self.assert_compat_error()
+
+    def test_lightweightThemes_usedThemes(self):
+        self.run_script_for_compat("""
+           var value = getPermission('lightweightThemes.usedThemes');
+        """)
+        self.assert_silent()
+        self.assert_compat_error()
+
+    def test_lightweightThemes_isThemeSelected(self):
+        self.run_script_for_compat("""
+           var value = getPermission('lightweightThemes.isThemeSelected');
+        """)
+        self.assert_silent()
+        self.assert_compat_error()

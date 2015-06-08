@@ -1634,6 +1634,14 @@ class Gecko39RegexTests(CompatRegexTestHelper):
             log_function=self.err.warning,
             compat_type="error")
 
+        yield self.get_test(
+            r"\blightweightThemes\.(usedThemes|isThemeSelected)\b",
+            "The preferences used to store theme selection have changed.",
+            "The preferences used to store theme selection have changed. See "
+            "%s for more information." % (BUGZILLA_BUG % 1094821 + '#c39'),
+            log_function=self.err.warning,
+            compat_type="error")
+
 
 #############################
 #  Thunderbird Regex Tests  #
