@@ -99,10 +99,12 @@ class ErrorBundle(object):
 
                 assert severity in self.SEVERITIES
 
-                self.signing_summary[severity] += 1
+                if not kwargs.get("from_merge"):
+                    self.signing_summary[severity] += 1
                 message["signing_severity"] = severity
 
             self._save_message(getattr(self, type_), type_, message,
+                               from_merge=kwargs.get("from_merge"),
                                context=kwargs.get("context"))
             return self
 
@@ -124,7 +126,8 @@ class ErrorBundle(object):
     def message_count(self):
         return len(self.errors) + len(self.warnings) + len(self.notices)
 
-    def _save_message(self, stack, type_, message, context=None):
+    def _save_message(self, stack, type_, message, context=None,
+                      from_merge=False):
         "Stores a message in the appropriate message stack."
 
         uid = uuid.uuid4().hex
@@ -167,7 +170,7 @@ class ErrorBundle(object):
             message["tier"] = self.tier
 
         # Build out the compatibility summary if possible.
-        if message["compatibility_type"]:
+        if message["compatibility_type"] and not from_merge:
             self.compat_summary["%ss" % message["compatibility_type"]] += 1
 
         # Build out the message tree entry.
@@ -280,18 +283,25 @@ class ErrorBundle(object):
             else:
                 trace.append(message["file"])
 
+            keys = ("column",
+                    "compatibility_type",
+                    "context",
+                    "description",
+                    "editors_only",
+                    "for_appversions",
+                    "line",
+                    "signing_severity",
+                    "tier")
+
+            kw = {key: message[key] for key in keys if key in message}
+
             # Write the errors with the file structure delimited by
             # right carets.
             callback(message["id"],
                      message["message"],
-                     description=message["description"],
+                     from_merge=True,
                      filename=trace,
-                     line=message["line"],
-                     column=message["column"],
-                     context=message["context"],
-                     tier=message["tier"],
-                     for_appversions=message["for_appversions"],
-                     compatibility_type=message["compatibility_type"])
+                     **kw)
 
     def render_json(self):
         "Returns a JSON summary of the validation operation."
