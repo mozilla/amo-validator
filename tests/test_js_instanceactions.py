@@ -147,6 +147,12 @@ def test_insertAdjacentHTML():
     """).failed()
 
 
+def test_nsIFile_launch():
+    """Test that `nsIFile.launch()` is flagged."""
+
+    assert _do_test_raw("foo.launch()").failed()
+
+
 class TestInstanceActions(TestCase):
 
     def test_openDialog_pass(self):

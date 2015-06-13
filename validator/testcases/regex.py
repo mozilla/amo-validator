@@ -130,13 +130,6 @@ class GenericRegexTests(RegexTestGenerator):
         # globalStorage.(.+)password test removed for bug 752740
 
         yield self.get_test(
-                r"launch\(\)",
-                "`launch()` disallowed",
-                "Use of `launch()` is disallowed because of restrictions on "
-                "`nsIFile` and `nsILocalFile`. If the code does not use "
-                "those namespaces, consider using a different function name.")
-
-        yield self.get_test(
                 r"resource://services-sync",
                 "Sync services objects are not intended to be re-used",
                 "The Sync services objects are not intended to be re-used, and "
