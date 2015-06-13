@@ -3,7 +3,6 @@ from nose.tools import eq_
 
 from helper import MockXPI
 from js_helper import _do_real_test_raw as _do_test_raw
-from validator.decorator import version_range
 from validator.errorbundler import ErrorBundle
 from validator.testcases import regex
 from validator.testcases.regex import RegexTest
@@ -111,30 +110,6 @@ def test_extension_manager_api():
 def test_bug_652575():
     """Ensure that capability.policy gets flagged."""
     assert _do_test_raw("var x = 'capability.policy.';").failed()
-
-
-def test_chrome_usage():
-
-    def base_case():
-        err = _do_test_raw("""var foo = require("bar");""")
-        eq_(err.metadata['requires_chrome'], False)
-    yield base_case
-
-    interfaces = ["chrome", "window-utils", "observer-service"]
-
-    def interface_cases(interface):
-        err = _do_test_raw("""var {cc, ci} = require("%s")""" % interface)
-        print err.print_summary(verbose=True)
-
-        first_message = err.warnings[0]['message']
-        assert 'non-SDK interface' in first_message, ('unexpected: %s' %
-                                                          first_message)
-        assert 'requires_chrome' in err.metadata, \
-                'unexpected: "requires_chrome" should be in metadata'
-        eq_(err.metadata['requires_chrome'], True)
-
-    for case in interfaces:
-        yield lambda: interface_cases(case)
 
 
 def test_preference_extension_regex():

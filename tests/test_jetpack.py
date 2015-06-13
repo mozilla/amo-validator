@@ -380,6 +380,39 @@ def test_components_flagged():
     assert _js_test(js, jetpack=True).failed()
 
 
+def test_safe_require():
+    """Test that requiring an innocuous module does not add the
+    requires_chrome flag."""
+
+    def base_case():
+        err = _js_test("""var foo = require("bar");""",
+                       jetpack=True)
+        eq_(err.metadata['requires_chrome'], False)
+    yield base_case
+
+
+def test_unsafe_safe_require():
+    """Test that requiring low-level modules does add the requires_chrome
+    flag."""
+
+    interfaces = ["chrome", "window-utils", "observer-service"]
+
+    def interface_cases(interface):
+        err = _js_test("""var {cc, ci} = require("%s")""" % interface,
+                       jetpack=True)
+        print err.print_summary(verbose=True)
+
+        first_message = err.warnings[0]['message']
+        assert 'non-SDK interface' in first_message, ('unexpected: %s' %
+                                                          first_message)
+        assert 'requires_chrome' in err.metadata, \
+                'unexpected: "requires_chrome" should be in metadata'
+        eq_(err.metadata['requires_chrome'], True)
+
+    for case in interfaces:
+        yield interface_cases, case
+
+
 def test_absolute_uris_in_js():
     """
     Test that a warning is thrown for absolute URIs within JS files.

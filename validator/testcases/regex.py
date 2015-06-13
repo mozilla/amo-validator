@@ -246,10 +246,6 @@ class NewTabRegexTests(RegexTestGenerator):
              "signing_severity": "low"})
 
 
-REQUIRE_PATTERN = (r"""(?<!['"])require\s*\(\s*['"]"""
-                   r"""(?:sdk/)?(%s)['"]\s*\)""")
-
-
 @register_generator
 class UnsafeTemplateRegexTests(RegexTestGenerator):
     """
@@ -276,59 +272,6 @@ class UnsafeTemplateRegexTests(RegexTestGenerator):
                     "HTML may only be used when properly sanitized, and in most "
                     "cases safer escape sequences such as `%s` must be used "
                     "instead." % safe)
-
-
-@register_generator
-class ChromePatternRegexTests(RegexTestGenerator):
-    """
-    Test that an Add-on SDK (Jetpack) add-on doesn't use interfaces that are
-    not part of the SDK.
-
-    Added from bugs 689340, 731109, 845492
-    """
-
-    INTERFACES = "|".join([
-        # Added from bugs 689340, 731109
-        "chrome", "window-utils", "observer-service",
-        # Added from bug 845492
-        "window/utils", "sdk/window/utils", "sdk/deprecated/window-utils",
-        "tab/utils", "sdk/tab/utils",
-        "system/events", "sdk/system/events",
-    ])
-
-    def tests(self):
-        # We want to re-wrap the test because if it detects something, we're
-        # going to set the `requires_chrome` metadata value to `True`.
-        def rewrap():
-            wrapper = self.get_test(
-                    REQUIRE_PATTERN % self.INTERFACES,
-                    "Usage of flagged or non-SDK interface",
-                    "This SDK-based add-on uses interfaces that aren't part "
-                    "of the SDK or are flagged as sensitive.")
-            if wrapper():
-                self.err.metadata["requires_chrome"] = True
-
-        yield rewrap
-
-
-@register_generator
-class WidgetModuleRegexTests(RegexTestGenerator):
-    """
-    Tests whether an Add-on SDK add-on is using the deprecated widget
-    interface.
-    """
-
-    def js_tests(self):
-        yield self.get_test(
-            REQUIRE_PATTERN % "widget",
-            "Use of deprecated SDK module",
-            "The 'widget' module has been deprecated due to a number of "
-            "performance and usability issues, and is slated to be removed "
-            "from the SDK in the near future. Please use the "
-            "'sdk/ui/button/action' or 'sdk/ui/button/toggle' module "
-            "instead. See "
-            "https://developer.mozilla.org/Add-ons/SDK/High-Level_APIs/ui "
-            "for more information.")
 
 
 @register_generator

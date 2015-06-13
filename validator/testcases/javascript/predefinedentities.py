@@ -605,6 +605,8 @@ GLOBAL_ENTITIES = {
     u"setTimeout": {"dangerous": actions._call_settimeout},
     u"setInterval": {"dangerous": actions._call_settimeout},
 
+    u"require": {"dangerous": actions._call_require},
+
     u"encodeURI": {"readonly": True},
     u"decodeURI": {"readonly": True},
     u"encodeURIComponent": {"readonly": True},
