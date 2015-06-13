@@ -203,6 +203,12 @@ class ErrorBundle(object):
         else:
             message["context"] = None
 
+        if self.package_stack:
+            if not isinstance(message["file"], list):
+                message["file"] = [message["file"]]
+
+            message["file"] = self.package_stack + message["file"]
+
         # Test that if for_appversions is set that we're only applying to
         # supported add-ons. THIS IS THE LAST FILTER BEFORE THE MESSAGE IS
         # ADDED TO THE STACK!
@@ -282,17 +288,11 @@ class ErrorBundle(object):
     def push_state(self, new_file=""):
         "Saves the current error state to parse subpackages"
 
-        self.subpackages.append({"errors": self.errors,
-                                 "warnings": self.warnings,
-                                 "notices": self.notices,
-                                 "detected_type": self.detected_type,
+        self.subpackages.append({"detected_type": self.detected_type,
                                  "message_tree": self.message_tree,
                                  "resources": self.pushable_resources,
                                  "metadata": self.metadata})
 
-        self.errors = []
-        self.warnings = []
-        self.notices = []
         self.message_tree = {}
         self.pushable_resources = {}
         self.metadata = {"requires_chrome": False,
@@ -305,16 +305,10 @@ class ErrorBundle(object):
 
         # Save a copy of the current state.
         state = self.subpackages.pop()
-        errors = self.errors
-        warnings = self.warnings
-        notices = self.notices
         metadata = self.metadata
         # We only rebuild message_tree anyway. No need to restore.
 
         # Copy the existing state back into place
-        self.errors = state["errors"]
-        self.warnings = state["warnings"]
-        self.notices = state["notices"]
         self.detected_type = state["detected_type"]
         self.message_tree = state["message_tree"]
         self.pushable_resources = state["resources"]
@@ -322,44 +316,7 @@ class ErrorBundle(object):
 
         name = self.package_stack.pop()
 
-        self._merge_messages(errors, self.error, name)
-        self._merge_messages(warnings, self.warning, name)
-        self._merge_messages(notices, self.notice, name)
-
         self.metadata.setdefault("sub_packages", {})[name] = metadata
-
-    def _merge_messages(self, messages, callback, name):
-        "Merges a stack of messages into another stack of messages"
-
-        # Overlay the popped warnings onto the existing ones.
-        for message in messages:
-            trace = [name]
-            # If there are sub-sub-packages, they'll be in a list.
-            if isinstance(message["file"], list):
-                trace.extend(message["file"])
-            else:
-                trace.append(message["file"])
-
-            keys = ("column",
-                    "compatibility_type",
-                    "context",
-                    "description",
-                    "editors_only",
-                    "for_appversions",
-                    "line",
-                    "signing_help",
-                    "signing_severity",
-                    "tier")
-
-            kw = {key: message[key] for key in keys if key in message}
-
-            # Write the errors with the file structure delimited by
-            # right carets.
-            callback(message["id"],
-                     message["message"],
-                     from_merge=True,
-                     filename=trace,
-                     **kw)
 
     def render_json(self):
         "Returns a JSON summary of the validation operation."
