@@ -1,7 +1,7 @@
-from validator.compat import FX16_DEFINITION, FX27_DEFINITION
 from validator.constants import PACKAGE_THEME
 import validator.testcases.markup.csstester as csstester
 from validator.errorbundler import ErrorBundle
+
 
 def _do_test(path, should_fail=False, detected_type=None):
 
@@ -63,76 +63,3 @@ def test_remote_urls():
 
     assert not t("UrL(/abc.def)")
     assert t("url(HTTP://foo.bar/)")
-
-
-def test_unprefixed_patterns():
-    """
-    Test that add-ons that use prefixed CSS descriptors get a compat warning.
-    """
-
-    def test_descriptor(descriptor):
-        err = ErrorBundle(for_appversions=FX16_DEFINITION)
-        csstester.test_css_snippet(err, "x.css", "x {%s: 0;}" % descriptor, 0)
-        assert err.warnings
-        assert any(err.compat_summary.values())
-
-    yield test_descriptor, "-moz-transition-foo"
-    yield test_descriptor, "-moz-keyframes"
-    yield test_descriptor, "-moz-animation-keyframes"
-    yield test_descriptor, "-moz-transform-stuff"
-    yield test_descriptor, "-moz-perspective-stuff"
-    yield test_descriptor, "-moz-backface-visibility"
-    yield test_descriptor, "-moz-super-gradient"
-
-
-def test_unprefixed_moz_calc():
-    err = ErrorBundle(for_appversions=FX16_DEFINITION)
-    csstester.test_css_snippet(
-        err, "x.css", "x {foo: -moz-calc(40% + 100px);}", 0)
-    assert err.warnings
-    assert any(err.compat_summary.values())
-
-
-def test_unprefixed_patterns_unchanged():
-    """
-    Test that patterns that haven't been unprefixed don't get flagged.
-    """
-
-    def test_descriptor(descriptor):
-        err = ErrorBundle(for_appversions=FX16_DEFINITION)
-        csstester.test_css_snippet(err, "x.css", "x {%s: 0;}" % descriptor, 0)
-        assert not err.failed()
-        assert not any(err.compat_summary.values())
-
-    yield test_descriptor, "-moz-gradient"
-    yield test_descriptor, "calc"
-
-
-def test_downloads_indicator_gecko_16():
-    """Test that #downloads-indicator is allowed for an old Gecko."""
-
-    err = ErrorBundle(for_appversions=FX16_DEFINITION)
-    csstester.test_css_file(err, "x.css",
-                            "#downloads-indicator { display: none; }", 0)
-    assert not err.failed()
-    assert all(val == 0 for val in err.compat_summary.values())
-
-
-def test_downloads_indicator_unused():
-    """Test that #downloads-indicator is not used."""
-
-    err = ErrorBundle(for_appversions=FX27_DEFINITION)
-    csstester.test_css_file(err, "x.css",
-                            "#downloads-indicator { display: none; }", 0)
-    assert err.failed()
-    assert err.compat_summary['errors'] == 1
-
-
-def test_downloads_indicator_icon_allowed():
-    """Test that #downloads-indicator-icon is allowed."""
-
-    err = ErrorBundle(for_appversions=FX27_DEFINITION)
-    csstester.test_css_file(err, "x.css",
-                            "#downloads-indicator-icon { display: none; }", 0)
-    assert not err.failed()
-    assert all(val == 0 for val in err.compat_summary.values())

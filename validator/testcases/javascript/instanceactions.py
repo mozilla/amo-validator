@@ -11,11 +11,6 @@ node
 """
 
 import actions
-from validator.compat import (FX10_DEFINITION, FX29_DEFINITION,
-                              FX30_DEFINITION, FX31_DEFINITION,
-                              FX33_DEFINITION, FX36_DEFINITION,
-                              FX37_DEFINITION)
-from validator.constants import BUGZILLA_BUG, MDN_DOC
 from instanceproperties import _set_HTML_property
 
 
@@ -70,21 +65,6 @@ def createElementNS(args, traverser, node, wrapper):
         _create_script_tag(traverser)
     elif not simple_args[1].is_literal():
         _create_variable_element(traverser)
-
-
-def createEvent(args, traverser, node, wrapper):
-    """Handles createEvent calls."""
-
-    if len(args) == 1 and args[0].get("value") == "DataContainerEvent":
-        traverser.warning(
-            err_id=("js", "instanceactions", "createEvent_DataContainerEvent"),
-            warning="`DataContainerEvent` is no longer available",
-            description="`DataContainerEvent` is no longer available. You "
-                        "should use `MessageEvent` or `CustomEvent` instead. "
-                        "See %s for more information." % BUGZILLA_BUG % 980134,
-            for_appversions=FX31_DEFINITION,
-            compatibility_type="error",
-            tier=5)
 
 
 def QueryInterface(args, traverser, node, wrapper):
@@ -188,23 +168,6 @@ def insertAdjacentHTML(args, traverser, node, wrapper):
     _set_HTML_property("insertAdjacentHTML", content, traverser)
 
 
-def isSameNode(args, traverser, node, wrapper):
-    """Raise an error when an add-on uses node.isSameNode(foo)."""
-    traverser.err.error(
-        err_id=("testcases_javascript_instanceactions", "isSameNode"),
-        error="isSameNode function has been removed in Gecko 10.",
-        description='The "isSameNode" function has been removed. You can use '
-                    'the === operator as an alternative. See %s for more '
-                    'information.' % BUGZILLA_BUG % 687400,
-        filename=traverser.filename,
-        line=traverser.line,
-        column=traverser.position,
-        context=traverser.context,
-        for_appversions=FX10_DEFINITION,
-        compatibility_type="error",
-        tier=5)
-
-
 def openDialog(args, traverser, node, wrapper):
     """Raise an error if the first argument is a remote URL."""
     if not args:
@@ -212,22 +175,6 @@ def openDialog(args, traverser, node, wrapper):
     uri = traverser._traverse_node(args[0])
     from call_definitions import open_in_chrome_context
     open_in_chrome_context(uri, "openDialog", traverser)
-
-
-def replaceWholeText(args, traverser, node, wrapper):
-    """Raise an error when an add-on uses node.replaceWholeText(foo)."""
-    traverser.err.error(
-        err_id=("testcases_javascript_instanceactions", "replaceWholeText"),
-        error="replaceWholeText function has been removed in Gecko 10.",
-        description='The "replaceWholeText" function has been removed. See '
-                    '%s for more information.' % BUGZILLA_BUG % 683482,
-        filename=traverser.filename,
-        line=traverser.line,
-        column=traverser.position,
-        context=traverser.context,
-        for_appversions=FX10_DEFINITION,
-        compatibility_type="error",
-        tier=5)
 
 
 def bind(args, traverser, node, wrapper):
@@ -296,108 +243,6 @@ def executeSimpleSQL(args, traverser, node, wrapper):
         line=traverser.line,
         column=traverser.position,
         context=traverser.context)
-
-
-def livemarkCallback(arguments, traverser, node, wrapper):
-    """
-    Handle calls to addLivemark, removeLivemark and getLivemark that pass
-    callbacks.
-    """
-    bug = BUGZILLA_BUG % 896193
-    mdn = MDN_DOC % "Mozilla/JavaScript_code_modules/Promise.jsm"
-    if len(arguments) > 1:
-        traverser.err.warning(
-            err_id=("js", "instanceactions", "livemark_callback"),
-            warning="Passing a callback to `addLivemark`, `removeLivemark` or "
-                    "`getLivemark` is deprecated.",
-            description="The asynchronous callbacks in these livemark "
-                        "functions are now deprecated. The functions now "
-                        "return promises that should be used instead. See {b} "
-                        "and {m} for more information.".format(b=bug, m=mdn),
-            compatibility_type='warning',
-            for_appversions=FX29_DEFINITION,
-            tier=3,
-            filename=traverser.filename,
-            line=traverser.line,
-            column=traverser.position,
-            context=traverser.context)
-
-
-def setPrototypeOfCallback(arguments, traverser, node, wrapper):
-    traverser.warning(
-        err_id=("testcases_javascript_instanceproperties", "setPrototypeOf"),
-        warning="Using __proto__ or setPrototypeOf to set a prototype is now "
-                "deprecated.",
-        description="Using __proto__ or setPrototypeOf to set a prototype is "
-                    "now deprecated. You should use Object.create instead. "
-                    "See bug %s for more information." % BUGZILLA_BUG % 948227,
-        for_appversions=FX30_DEFINITION,
-        compatibility_type="warning",
-        tier=5)
-
-
-def sendAsBinary(arguments, traverser, node, wrapper):
-    traverser.warning(
-        err_id=("testcases_javascript_instanceproperties", "sendAsBinary"),
-        warning="`sendAsBinary` is deprecated",
-        description="`sendAsBinary` is deprecated and will be removed in a "
-                    "future version of Firefox. Setting the appropriate "
-                    "content-type or passing a Blob are possible alternatives."
-                    "See bug %s for more information." % BUGZILLA_BUG % 939323,
-        for_appversions=FX31_DEFINITION,
-        compatibility_type="warning",
-        tier=5)
-
-
-def setup_nsISessionStoreFunc(name, arg_count, full_name):
-    def was_called(arguments, traverser, node, wrapper):
-        if len(arguments) == arg_count:
-            string_arg = arguments[-1]
-            if string_arg['type'] == 'Identifier':
-                variable = traverser._seek_variable(string_arg['name'])
-                value = variable.get_literal_value()
-                if value == '[object Object]':
-                    value = None  # Not a string, show warning.
-            elif string_arg['type'] == 'Literal':
-                value = string_arg['value']
-            else:
-                value = None  # We don't know what it is, warn the user.
-            if not isinstance(value, (str, unicode)):
-                traverser.warning(
-                    err_id=("js", "entities", full_name),
-                    warning="`{name}` must take a string as the last "
-                            "argument".format(name=name),
-                    description="`%s` now only accepts a string as "
-                                "the last argument. See %s for more "
-                                "information." % (name, BUGZILLA_BUG)
-                                               % 996053,
-                    for_appversions=FX33_DEFINITION,
-                    compatibility_type="warning",
-                    tier=5)
-    return was_called
-
-
-def os_file_readTo_callback(argument, traverser, node, wrapper):
-    traverser.warning(
-        err_id=("js", "entities", "os_file_readto"),
-        warning="The readTo function in OS.File has been removed.",
-        description="The readTo function in OS.File has been removed. "
-                    "See %s for more information." % BUGZILLA_BUG % 1075438,
-        for_appversions=FX36_DEFINITION,
-        compatibility_type="error",
-        tier=5)
-
-
-def quote_callback(argument, traverser, node, wrapper):
-    traverser.warning(
-        err_id=("js", "string", "quote"),
-        warning="The quote method has been removed from String",
-        description="The quote method has been removed from String. See %s "
-                    "for more information."
-                    % BUGZILLA_BUG % 1103181,
-        for_appversions=FX37_DEFINITION,
-        compatibility_type="error",
-        tier=5)
 
 
 def create_preference_branch(arguments, traverser, node, wrapper):
@@ -482,7 +327,6 @@ INSTANCE_DEFINITIONS = {
     "bind": bind,
     "createElement": createElement,
     "createElementNS": createElementNS,
-    "createEvent": createEvent,
     "createAsyncStatement": _check_dynamic_sql,
     "createStatement": createStatement,
     "executeSimpleSQL": executeSimpleSQL,
@@ -492,22 +336,7 @@ INSTANCE_DEFINITIONS = {
     "getDefaultBranch": create_preference_branch,
     "getInterface": getInterface,
     "insertAdjacentHTML": insertAdjacentHTML,
-    "isSameNode": isSameNode,
     "openDialog": openDialog,
     "QueryInterface": QueryInterface,
-    "replaceWholeText": replaceWholeText,
     "setAttribute": setAttribute,
-    "addLivemark": livemarkCallback,
-    "removeLivemark": livemarkCallback,
-    "getLivemark": livemarkCallback,
-    "quote": quote_callback,
-    "setPrototypeOf": setPrototypeOfCallback,
-    "sendAsBinary": sendAsBinary,
-    "setTabValue": setup_nsISessionStoreFunc(
-        "setTabValue", 3, "nsISessionStore.setTabValue"),
-    "setWindowValue": setup_nsISessionStoreFunc(
-        "setWindowValue", 3, "nsISessionStore.setWindowValue"),
-    "setGlobalValue": setup_nsISessionStoreFunc(
-        "setGlobalValue", 2, "nsISessionStore.setGlobalValue"),
-    "readTo": os_file_readTo_callback,
 }

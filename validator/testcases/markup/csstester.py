@@ -2,7 +2,6 @@ import re
 from functools import partial
 import cssutils
 
-from validator.compat import FX16_DEFINITION, FX27_DEFINITION
 from validator.constants import BUGZILLA_BUG, PACKAGE_THEME
 from validator.contextgenerator import ContextGenerator
 
@@ -13,13 +12,6 @@ REM_URL = re.compile("url\(['\"]?(\/\/|ht|f)tps?:\/\/.*['\"]?\)", re.I)
 
 SKIP_TYPES = ("S", "COMMENT")
 
-UNPREFIXED_LINK1 = ("https://developer.mozilla.org/en-US/docs/"
-                    "Firefox_16_for_developers")
-UNPREFIXED_LINK2 = "https://hacks.mozilla.org/2012/07/aurora-16-is-out/"
-UNPREFIXED_MESSAGE = ["Several CSS properties have been unprefixed in Firefox "
-                      "16 and may no longer work in their prefixed form.",
-                      "For more information, see %s and %s" %
-                          (UNPREFIXED_LINK1, UNPREFIXED_LINK2)]
 DOWNLOADS_INDICATOR_BUG = 845408
 
 
@@ -92,18 +84,8 @@ def _run_css_tests(err, tokens, filename, line_start=0, context=None):
 
         # Save the last descriptor for reference.
         if tok_type in ("IDENT", "FUNCTION"):
-            value_lower = value.lower()
             if tok_type == "IDENT":
-                last_descriptor = value_lower
-            else:
-                value_lower = value_lower[:-1]
-
-            reporter = partial(err.warning,
-                               description=UNPREFIXED_MESSAGE,
-                               filename=filename, line=line, column=position,
-                               for_appversions=FX16_DEFINITION, tier=5,
-                               compatibility_type="warning")
-            _test_unprefixed_identifier(reporter, value_lower)
+                last_descriptor = value.lower()
 
         elif tok_type == "URI":
 
@@ -161,40 +143,3 @@ def _run_css_tests(err, tokens, filename, line_start=0, context=None):
                   "encountered, causing some problems.",
                   "Lines: %s" % ", ".join(unicode_errors)],
                  filename)
-    if downloads_indicator_selectors:
-        title = "The `#downloads-indicator` node was removed from the DOM."
-        err.warning(("testcases_markup_csstester",
-                     "test_css_file",
-                     "downloads_indicator"),
-                    title,
-                    [title + " You should be able to use `#downloads-button` "
-                     "instead. See %s for more information."
-                     % BUGZILLA_BUG % DOWNLOADS_INDICATOR_BUG,
-                     "Lines: %s" % ", ".join(downloads_indicator_selectors)],
-                    filename,
-                    compatibility_type="error",
-                    tier=5,
-                    for_appversions=FX27_DEFINITION)
-
-
-UNPREFIXED_WARNING = "`%s` is no longer prefixed in Gecko 16."
-
-UNPREFIXED_PATTERNS = map(re.compile, ['-moz-[a-z]+-gradient'])
-
-
-def _test_unprefixed_identifier(reporter, identifier):
-    if identifier in ("-moz-keyframes", "-moz-calc",
-                      "-moz-backface-visibility"):
-        reporter(
-            err_id=("css", "prefixes", "match"),
-            warning=UNPREFIXED_WARNING % identifier)
-    elif identifier.startswith(("-moz-transition", "-moz-animation",
-                                "-moz-animation", "-moz-transform",
-                                "-moz-perspective")):
-        reporter(
-            err_id=("css", "prefixes", "startswith"),
-            warning=UNPREFIXED_WARNING % identifier)
-    elif any(pat.match(identifier) for pat in UNPREFIXED_PATTERNS):
-        reporter(
-            err_id=("css", "prefixes", "pattern"),
-            warning=UNPREFIXED_WARNING % identifier)

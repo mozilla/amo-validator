@@ -1,8 +1,6 @@
 from mock import patch
 from nose.tools import eq_
 
-from validator.compat import FX18_DEFINITION
-
 from js_helper import _do_test_raw, TestCase
 
 
@@ -68,6 +66,7 @@ def _mock_html_error(self, *args, **kwargs):
     self.err.error(("foo", "bar"),
                    "Does not pass validation.")
 
+
 @patch('validator.testcases.markup.markuptester.MarkupParser.process',
        _mock_html_error)
 def test_complex_innerHTML():
@@ -128,32 +127,3 @@ class TestHandleEvent(TestCase):
         foo.onclick = {handleEvent: function() {alert("bar");}};
         """)
         self.assert_failed(with_warnings=True)
-
-    def test_on_event_handleEvent_fail(self):
-        """
-        Objects with `handleEvent` methods should be flagged as errors when add-ons
-        target Gecko version 18.
-        """
-
-        self.setup_err(for_appversions=FX18_DEFINITION)
-
-        self.run_script("""
-        foo.onclick = {handleEvent: function() {alert("bar");}};
-        """)
-        self.assert_failed(with_warnings=True)
-
-    def test_on_event_handleEvent_ignore(self):
-        """
-        Test that dirty objects don't trigger handleEvent errors.
-        """
-
-        self.setup_err(for_appversions=FX18_DEFINITION)
-
-        self.run_script("""
-        var dirty = this_creates_a_dirty_object();
-        foo.onclick = dirty;
-        """)
-        self.assert_silent()
-
-
-

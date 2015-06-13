@@ -296,8 +296,6 @@ class Traverser(object):
                 dang = dang(self._traverse_node, self.err)
 
             if dang:
-                actions.call_dangerous_function(self, entity, name)
-
                 kwargs = dict(
                     err_id=("js", "traverser", "dangerous_global"),
                     warning="Access to the `%s` global" % name,

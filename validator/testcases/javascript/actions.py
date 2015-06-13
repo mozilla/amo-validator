@@ -3,7 +3,6 @@ import types
 
 # Global import of predefinedentities will cause an import loop
 import instanceactions
-from validator.compat import FX17_DEFINITION
 from validator.constants import (BUGZILLA_BUG, DESCRIPTION_TYPES, FENNEC_GUID,
                                  FIREFOX_GUID, MAX_STR_SIZE)
 from validator.decorator import version_range
@@ -415,26 +414,6 @@ def test_literal(traverser, wrapper):
         validate_string(value, traverser, wrapper=wrapper)
 
 
-def call_dangerous_function(traverser, member, name):
-    if name in ("eval", "Function", ):
-        traverser.err.notice(
-            err_id=("js", "actions", "_call_expression", "eval_compat"),
-            notice="`toString` for function objects has changed.",
-            description=("The `toString` implementation for function objects "
-                         "have changed. If you are using `eval` or `Function` "
-                         "to change the behavior of 'native' functions, it is "
-                         "probably not working correctly in Firefox 17 and "
-                         "above.",
-                         "See %s for details." % BUGZILLA_BUG % 761723),
-            filename=traverser.filename,
-            line=traverser.line,
-            column=traverser.position,
-            context=traverser.context,
-            for_appversions=FX17_DEFINITION,
-            compatibility_type="error",
-            tier=5)
-
-
 def _call_expression(traverser, node):
     args = node["arguments"]
     for arg in args:
@@ -463,9 +442,6 @@ def _call_expression(traverser, node):
         result = member.value["dangerous"](a=args, t=traverser._traverse_node,
                                            e=traverser.err)
         name = member.value.get("name", "")
-
-        if result:
-            call_dangerous_function(traverser, member, name)
 
         if result and name:
             kwargs = {
