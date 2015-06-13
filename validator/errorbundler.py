@@ -60,7 +60,7 @@ class ErrorBundle(object):
         self.pushable_resources = {}
         self.final_context = None
 
-        self.metadata = {'requires_chrome': False}
+        self.metadata = {'requires_chrome': False, 'listed': listed}
         if listed:
             self.resources["listed"] = True
         self.instant = instant
@@ -239,7 +239,8 @@ class ErrorBundle(object):
         self.notices = []
         self.message_tree = {}
         self.pushable_resources = {}
-        self.metadata = {'requires_chrome': False}
+        self.metadata = {"requires_chrome": False,
+                         "listed": self.metadata.get("listed")}
 
         self.package_stack.append(new_file)
 
@@ -398,7 +399,6 @@ class ErrorBundle(object):
                 self.handler.write("Unknown files:")
                 for filename in self.metadata["jetpack_unknown_files"]:
                     self.handler.write(" %s" % filename)
-
 
         self.handler.write("\n")
         if self.unfinished:

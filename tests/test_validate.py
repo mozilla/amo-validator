@@ -50,6 +50,7 @@ class TestValidate(TestCase):
                  determined=False)
         assert not self.output.determined
         assert self.output.get_resource("listed")
+        eq_(self.output.metadata['listed'], True)
 
     def test_unlisted(self):
         """
@@ -60,6 +61,7 @@ class TestValidate(TestCase):
                  listed=False)
         assert self.output.determined
         assert not self.output.get_resource("listed")
+        eq_(self.output.metadata['listed'], False)
 
     def test_overrides(self):
         """
