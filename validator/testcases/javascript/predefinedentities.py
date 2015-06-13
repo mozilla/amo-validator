@@ -56,6 +56,12 @@ SECURITY_PREF_MESSAGE = {
     "signing_severity": "high",
 }
 
+MARIONETTE_MESSAGE = {
+    "warning": "Marionette should not be accessed by extensions",
+    "description": "References to the Marionette service are not acceptable "
+                   "in extensions. Please remove them.",
+}
+
 BANNED_PREF_BRANCHES = (
     # Security and update preferences
     (u"app.update.", SECURITY_PREF_MESSAGE),
@@ -112,6 +118,11 @@ BANNED_PREF_BRANCHES = (
     (u"general.useragent.", None),
 
     (u"nglayout.debug.disable_xul_cache", None),
+
+    # Marionette
+    (u"marionette.force-local", MARIONETTE_MESSAGE),
+    (u"marionette.defaultPrefs.enabled", MARIONETTE_MESSAGE),
+    (u"marionette.defaultPrefs.port", MARIONETTE_MESSAGE),
 )
 
 BANNED_PREF_REGEXPS = [
@@ -863,6 +874,10 @@ GLOBAL_ENTITIES = {
     u"allowRemoteContentForSender": entity("allowRemoteContentForSender"),
     u"allowRemoteContentForSite": entity("allowRemoteContentForSite"),
     u"createNewHeaderView": entity("createNewHeaderView"),
+
+
+    u"MarionetteComponent": {"dangerous_on_read": MARIONETTE_MESSAGE},
+    u"MarionetteServer": {"dangerous_on_read": MARIONETTE_MESSAGE},
 
     # Common third-party libraries
     "Handlebars": {

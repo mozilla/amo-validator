@@ -8,7 +8,8 @@ from validator.constants import BUGZILLA_BUG, MDN_DOC
 from validator.contextgenerator import ContextGenerator
 from .chromemanifest import DANGEROUS_CATEGORIES, DANGEROUS_CATEGORY_WARNING
 from .javascript.predefinedentities import (BANNED_PREF_BRANCHES,
-                                            BANNED_PREF_REGEXPS)
+                                            BANNED_PREF_REGEXPS,
+                                            MARIONETTE_MESSAGE)
 
 
 registered_regex_tests = []
@@ -170,43 +171,6 @@ class DOMMutationRegexTests(RegexTestGenerator):
                     "DOM mutation events are flagged because of their "
                     "deprecated status as well as their extreme inefficiency. "
                     "Consider using a different event.")
-
-
-@register_generator
-class MarionetteInPrefsRegexTests(RegexTestGenerator):
-    """
-    These regex tests will ensure that the developer is not switching on
-    Marionette prefs
-
-    Added from bug 741812
-    """
-
-    MARIONETTE_REFERENCES = {r"@mozilla\.org/marionette;1": 741812,
-                        r"\{786a1369\-dca5\-4adc-8486\-33d23c88010a\}": 741812,
-                        "MarionetteComponent": 741812,
-                        "MarionetteServer": 741812}
-
-    MARIONETTE_PREFS = {r"marionette\.force\-local": 741812,
-                        r"marionette\.defaultPrefs\.enabled": 741812,
-                        r"marionette\.defaultPrefs\.port": 741812}
-    @classmethod
-    def applicable(cls, err, filename, document):
-        return bool(re.match(r"defaults/preferences/.+\.js", filename))
-
-    def js_tests(self):
-        title = "Marionette access is disallowed"
-        for ref, bug in self.MARIONETTE_REFERENCES.items():
-            yield self.get_test_bug(
-                    bug, ref, title,
-                    "Marionette references are not allowed as it could lead to"
-                    "the browser not being secure. Please remove them.")
-
-        for ref, bug in self.MARIONETTE_PREFS.items():
-            yield self.get_test_bug(
-                    bug, ref, title,
-                    "Marionette preferences are not allowed as it could lead to"
-                    "the browser not being secure. Please remove them.")
-
 
 
 @register_generator
@@ -711,6 +675,7 @@ PROFILE_REGEX = r"(?:^|[/\\])(?:%s)$" % "|".join(map(munge_filename,
                                                      PROFILE_FILENAMES))
 
 STRING_REGEXPS = (
+    # Unsafe files in the profile directory.
     (PROFILE_REGEX, {
         "err_id": ("testcases_regex", "string", "profile_filenames"),
         "warning": "Reference to critical user profile data",
@@ -720,14 +685,21 @@ STRING_REGEXPS = (
                        "instead.",
         "signing_severity": "low"}),
 
+    # The names of potentially dangerous category names for the
+    # category manager.
     (DANGEROUS_CATEGORIES, DANGEROUS_CATEGORY_WARNING),
 
+    # References to the obsolete extension manager API.
     (r"@mozilla\.org/extensions/manager;1|"
      r"em-action-requested",
      {"warning": "Obsolete Extension Manager API",
       "description": "The old Extension Manager API is not available in any "
                      "remotely modern version of Firefox and should not be "
                      "referenced in any code."}),
+
+    # References to the Marionette service.
+    (r"@mozilla\.org/marionette;1", MARIONETTE_MESSAGE),
+    (r"\{786a1369-dca5-4adc-8486-33d23c88010a\}", MARIONETTE_MESSAGE),
 )
 
 PREFERENCE_ERROR_ID = "testcases_regex", "string", "preference"
