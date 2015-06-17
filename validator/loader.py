@@ -1,4 +1,6 @@
 import validator.testcases.chromemanifest
+# Import this before content to avoid import loops.
+import validator.testcases.javascript.traverser
 import validator.testcases.content
 import validator.testcases.installrdf
 import validator.testcases.jetpack

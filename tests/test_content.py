@@ -74,8 +74,7 @@ class MockTestEndpoint(object):
 
         print self.expectations
         assert name in self.expectations
-        print self.expectations[name][type_]
-        assert self.expectations[name][type_] == count
+        eq_(self.expectations[name][type_], count)
 
 
 class MockMarkupEndpoint(MockTestEndpoint):

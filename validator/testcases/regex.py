@@ -1,7 +1,6 @@
 import re
 from functools import wraps
 
-from validator.constants import BUGZILLA_BUG, MDN_DOC
 from validator.compat import (
     FX5_DEFINITION, FX6_DEFINITION, FX7_DEFINITION, FX8_DEFINITION,
     FX9_DEFINITION, FX11_DEFINITION, FX12_DEFINITION, FX13_DEFINITION,
@@ -17,10 +16,12 @@ from validator.compat import (
     TB21_DEFINITION, TB22_DEFINITION, TB23_DEFINITION, TB24_DEFINITION,
     TB25_DEFINITION, TB26_DEFINITION, TB27_DEFINITION, TB28_DEFINITION,
     TB29_DEFINITION, TB30_DEFINITION, TB31_DEFINITION)
+from validator.constants import BUGZILLA_BUG, MDN_DOC
 from validator.contextgenerator import ContextGenerator
-from validator.testcases.chromemanifest import (DANGEROUS_CATEGORIES,
-                                                DANGEROUS_CATEGORY_WARNING)
-from markup.csstester import UNPREFIXED_MESSAGE
+from .chromemanifest import DANGEROUS_CATEGORIES, DANGEROUS_CATEGORY_WARNING
+from .javascript.predefinedentities import (BANNED_PREF_BRANCHES,
+                                            BANNED_PREF_REGEXPS)
+from .markup.csstester import UNPREFIXED_MESSAGE
 
 
 registered_regex_tests = []
@@ -64,6 +65,15 @@ def run_regex_tests(document, err, filename, context=None, is_js=False,
 def register_generator(cls):
     registered_regex_tests.append(cls)
     return cls
+
+
+def merge_description(base, description):
+    base = base.copy()
+    if isinstance(description, dict):
+        base.update(description)
+    else:
+        base["description"] = description
+    return base
 
 
 class RegexTestGenerator(object):
@@ -113,12 +123,7 @@ class RegexTestGenerator(object):
                       'for_appversions': app_versions,
                       'tier': self.err.tier if app_versions is None else 5}
 
-                if isinstance(message, dict):
-                    kw.update(message)
-                else:
-                    kw["description"] = message
-
-                log_function(**kw)
+                log_function(**merge_description(kw, message))
                 matched = True
             return matched
 
@@ -222,58 +227,6 @@ class MarionetteInPrefsRegexTests(RegexTestGenerator):
                     bug, ref, title,
                     "Marionette preferences are not allowed as it could lead to"
                     "the browser not being secure. Please remove them.")
-
-
-@register_generator
-class PasswordsInPrefsRegexTests(RegexTestGenerator):
-    """
-    These regex tests will ensure that the developer is not storing passwords
-    in the `/defaults/preferences` JS files.
-
-    Added from bug 647109
-    """
-
-    @classmethod
-    def applicable(cls, err, filename, document):
-        return bool(re.match(r"defaults/preferences/.+\.js", filename))
-
-    def js_tests(self):
-        yield self.get_test(
-                "password",
-                "Passwords may be stored in `defaults/preferences/*.js`",
-                "Storing passwords in the preferences JavaScript files is "
-                "insecure. The Login Manager should be used instead.")
-
-
-@register_generator
-class BannedPrefRegexTests(RegexTestGenerator):
-    """
-    These regex tests will find whether banned preference branches are being
-    referenced from outside preference JS files.
-
-    Added from bug 676815
-    """
-
-    @classmethod
-    def applicable(cls, err, filename, document):
-        return not filename.startswith("defaults/preferences/")
-
-    def tests(self):
-        from javascript.predefinedentities import (BANNED_PREF_BRANCHES,
-                                                   BANNED_PREF_REGEXPS)
-        for pattern in BANNED_PREF_REGEXPS:
-            yield self.get_test(
-                    r"[\"']" + pattern,
-                    "Potentially unsafe preference branch referenced",
-                    "Extensions should not alter preferences matching /%s/."
-                        % pattern)
-
-        for branch, reason in BANNED_PREF_BRANCHES:
-            yield self.get_test(
-                    branch.replace(r".", r"\."),
-                    "Potentially unsafe preference branch referenced",
-                    reason or ("Extensions should not alter preferences in "
-                               "the `%s` preference branch" % branch))
 
 
 
@@ -390,23 +343,6 @@ class WidgetModuleRegexTests(RegexTestGenerator):
             "instead. See "
             "https://developer.mozilla.org/Add-ons/SDK/High-Level_APIs/ui "
             "for more information.")
-
-
-@register_generator
-class ExtensionManagerRegexTests(RegexTestGenerator):
-    """
-    Tests for uses of the old extension manager API, which should not be
-    referenced in new extensions.
-    """
-
-    def js_tests(self):
-        yield self.get_test(
-                r"@mozilla\.org/extensions/manager;1|"
-                r"em-action-requested",
-                "Obsolete Extension Manager API",
-                "The old Extension Manager API is not available in any "
-                "remotely modern version of Firefox and should not be "
-                "referenced in any code.")
 
 
 @register_generator
@@ -2853,12 +2789,14 @@ class RegexTest(object):
 
         return r"^(?:%s)$" % "|".join(map(re.escape, key))
 
-    def test(self, string, traverser):
+    def test(self, string, traverser, properties=None):
         for match in self.regex.finditer(string):
             for key, val in match.groupdict().iteritems():
                 if val is not None and key in self.tests:
                     kw = {"err_id": ("testcases_regex", "string", "generic")}
                     kw.update(self.tests[key])
+                    if properties:
+                        kw.update(properties)
 
                     traverser.warning(**kw)
 
@@ -2931,7 +2869,41 @@ STRING_REGEXPS = (
                        "equivalent API is available and should be used "
                        "instead.",
         "signing_severity": "low"}),
+
     (DANGEROUS_CATEGORIES, DANGEROUS_CATEGORY_WARNING),
+
+    (r"@mozilla\.org/extensions/manager;1|"
+     r"em-action-requested",
+     {"warning": "Obsolete Extension Manager API",
+      "description": "The old Extension Manager API is not available in any "
+                     "remotely modern version of Firefox and should not be "
+                     "referenced in any code."}),
+)
+
+PREF_REGEXPS = (
+    tuple(
+        (pattern,
+         {"warning": "Potentially unsafe preference branch referenced",
+          "description": "Extensions should not alter preferences "
+                         "matching /%s/." % pattern})
+        for pattern in BANNED_PREF_REGEXPS) +
+    tuple(
+        ("^%s" % re.escape(branch),
+         merge_description(
+             {"warning": "Potentially unsafe preference branch referenced"},
+             reason or ("Extensions should not alter preferences in "
+                        "the `%s` preference branch" % branch)))
+        for branch, reason in BANNED_PREF_BRANCHES))
+
+STRING_REGEXPS += PREF_REGEXPS
+
+# We only want to test this one when we're certain it's a preference.
+PREF_REGEXPS += (
+    (r".*password.*",
+     {"warning": "Passwords should not be stored in preferences",
+      "description": "Storing passwords in preferences is insecure. "
+                     "The Login Manager should be used instead."}),
 )
 
 validate_string = RegexTest(STRING_REGEXPS).test
+validate_pref = RegexTest(PREF_REGEXPS).test

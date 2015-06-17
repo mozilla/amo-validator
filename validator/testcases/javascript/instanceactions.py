@@ -458,17 +458,13 @@ def set_preference(wrapper, arguments, traverser):
         pref = (parent.value["preference_branch"] +
                 actions._get_as_str(arg))
 
-        msg = actions.test_preference(pref)
-        if msg:
-            kw = {"err_id": ("testcases_javascript_actions",
-                             "_call_expression", "called_set_preference"),
-                  "warning": "Attempt to set a dangerous preference"}
-            if isinstance(msg, dict):
-                kw.update(msg)
-            else:
-                kw["description"] = msg
+        kw = {"err_id": ("testcases_javascript_actions",
+                         "_call_expression", "called_set_preference"),
+              "warning": "Attempt to set a dangerous preference"}
 
-            traverser.warning(**kw)
+        # Local import to prevent import loop.
+        from validator.testcases.regex import validate_pref
+        validate_pref(pref, traverser, kw)
 
 
 INSTANCE_DEFINITIONS = {

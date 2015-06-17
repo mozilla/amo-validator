@@ -158,7 +158,7 @@ def test_preference_extension_regex():
     """Test that preference extension regexes pick up the proper strings."""
 
     assert not _do_test_raw('"chrome://mozapps/skin/extensions/update1.png"').failed()
-    assert _do_test_raw('"foo.extensions.update.bar"').failed()
+    assert _do_test_raw('"extensions.update.bar"').failed()
 
 
 def test_template_escape():

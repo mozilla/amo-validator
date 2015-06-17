@@ -1,1 +1,1 @@
-var x = function() {var y = "password";};
+pref("foo.password", "bar");
