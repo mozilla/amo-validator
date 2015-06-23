@@ -504,7 +504,7 @@ def _call_settimeout(a, t, e):
     if not a:
         return
 
-    if a[0]["type"] == "FunctionExpression":
+    if a[0]["type"] in ("FunctionExpression", "ArrowFunctionExpression"):
         return
 
     if t(a[0]).callable:

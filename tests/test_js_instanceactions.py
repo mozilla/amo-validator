@@ -101,19 +101,26 @@ def test_callexpression_argument_traversal():
     traversed.
     """
 
-    assert not _do_test_raw("""
-    function foo(x){}
-    foo({"bar":function(){
-        bar();
-    }});
-    """).failed()
+    DECLARATIONS = (
+        "function foo(x){}",
+        "var foo = function foo(x){}",
+        "var foo = (x) => {}",
+        "var foo = (x) => undefined",
+    )
+    for declaration in DECLARATIONS:
+        assert not _do_test_raw("""
+        %s;
+        foo({"bar":function(){
+            bar();
+        }});
+        """ % declaration).failed()
 
-    assert _do_test_raw("""
-    function foo(x){}
-    foo({"bar":function(){
-        eval("evil");
-    }});
-    """).failed()
+        assert _do_test_raw("""
+        %s;
+        foo({"bar":function(){
+            eval("evil");
+        }});
+        """ % declaration).failed()
 
 
 def test_insertAdjacentHTML():

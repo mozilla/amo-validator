@@ -58,6 +58,43 @@ def test_spidermonkey_warning():
     """).failed()
 
 
+def test_blocks_evaluated():
+    """
+    Tests that blocks of code are actually evaluated under normal
+    circumstances.
+    """
+
+    ID = ("javascript", "dangerous_global", "eval")
+
+    EVIL = "eval(evilStuff)"
+    BLOCKS = (
+        "function foo() { %s; }",
+        "function foo() { %s; yield 1; }",
+        "function foo() { yield %s; }",
+        "var foo = function () { %s; }",
+        "var foo = function () { %s; yield 1; }",
+        "function* foo() { %s; }",
+        "var foo = function* () { %s; }",
+        "var foo = function () %s",
+        "var foo = () => %s",
+        "var foo = () => { %s }",
+        "if (true) { %s }",
+        "if (true) ; else { %s }",
+        "while (true) { %s }",
+        "do { %s } while (true)",
+        "for (;;) { %s }",
+        "try { %s } catch (e) {}",
+        "try {} catch (e) { %s }",
+        "try {} finally { %s }",
+        "try {} catch (e if %s) {}",
+    )
+
+    for block in BLOCKS:
+        err = _do_test_raw(block % EVIL)
+        eq_(err.message_count, 1)
+        eq_(err.warnings[0]["id"], ID)
+
+
 class TestTemplateString(TestCase):
     WARNING = {"id": ("testcases_chromemanifest", "test_resourcemodules",
                       "resource_modules")}
