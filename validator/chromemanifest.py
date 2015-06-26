@@ -1,3 +1,5 @@
+import os.path
+
 from validator.contextgenerator import ContextGenerator
 
 
@@ -214,13 +216,13 @@ class ChromeManifest(object):
                     continue
 
                 path_location = "/%s/" % path_location.strip("/")
-                if not path.startswith(path_location):
+                rel_path = os.path.relpath(path, path_location)
+
+                if rel_path.startswith("../") or rel_path == "..":
                     continue
 
-                sliced_path = "/%s" % path[len(path_location):]
-
                 return "chrome://%s" % self._url_chunk_join(chrome_name,
-                                                            sliced_path)
+                                                            rel_path)
 
         return None
 
