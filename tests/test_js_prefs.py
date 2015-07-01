@@ -23,6 +23,17 @@ def test_pref_innocuous_branch():
     pref("extensions.foo-bar.baz", true);
     """, path="defaults/preferences/prefs.js").failed()
 
+def test_unicode_pref():
+    """Tests that non-ASCII preferences do not cause errors."""
+
+    assert not _do_test_raw("""
+    pref("extensions.foo-bar.\u263a", true);
+    """, path="defaults/preferences/prefs.js").failed()
+
+    assert not _do_test_raw("""
+    pref("extensions.foo-bar.\\u263a", true);
+    """, path="defaults/preferences/prefs.js").failed()
+
 def test_pref_dangerous_branch():
     """
     Test that preferences created in dangerous branches from

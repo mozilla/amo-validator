@@ -528,7 +528,7 @@ def _call_create_pref(a, t, e):
     if not t.im_self.filename.startswith("defaults/preferences/") or not a:
         return
 
-    value = str(t(a[0]).get_literal_value())
+    value = _get_as_str(t(a[0]))
     return test_preference(value)
 
 
