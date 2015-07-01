@@ -18,18 +18,17 @@ def get_tree(code, err=None, filename=None, shell=None):
         return _get_tree(code, shell)
     except JSReflectException as exc:
         str_exc = str(exc).strip("'\"")
-        if ("SyntaxError" in str_exc or
-            "ReferenceError" in str_exc):
+        if "SyntaxError" in str_exc or "ReferenceError" in str_exc:
             err.warning(("testcases_scripting",
                          "test_js_file",
                          "syntax_error"),
-                         "JavaScript Compile-Time Error",
-                         ["A compile-time error in the JavaScript halted "
-                          "validation of that file.",
-                          "Message: %s" % str_exc.split(":", 1)[-1].strip()],
-                         filename=filename,
-                         line=exc.line,
-                         context=ContextGenerator(code))
+                        "JavaScript Compile-Time Error",
+                        ["A compile-time error in the JavaScript halted "
+                         "validation of that file.",
+                         "Message: %s" % str_exc.split(":", 1)[-1].strip()],
+                        filename=filename,
+                        line=exc.line,
+                        context=ContextGenerator(code))
         elif "InternalError: too much recursion" in str_exc:
             err.notice(("testcases_scripting",
                         "test_js_file",
@@ -114,4 +113,3 @@ def _get_tree(code, shell):
                     parsed["line_number"])
 
     return parsed
-
