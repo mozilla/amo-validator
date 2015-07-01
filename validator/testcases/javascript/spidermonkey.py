@@ -5,8 +5,6 @@ import subprocess
 from validator.contextgenerator import ContextGenerator
 import validator.unicodehelper as unicodehelper
 
-JS_ESCAPE = re.compile("\\\\+[ux]", re.I)
-
 
 def get_tree(code, err=None, filename=None, shell=None):
     "Retrieves the parse tree for a JS snippet"
@@ -76,7 +74,6 @@ try{
         "line_number":e.lineNumber
     }));
 }"""
-BOOTSTRAP_SCRIPT = re.sub("\n +", "", BOOTSTRAP_SCRIPT)
 
 
 def _get_tree(code, shell):
@@ -90,7 +87,7 @@ def _get_tree(code, shell):
         cmd, shell=False, stdin=subprocess.PIPE, stderr=subprocess.PIPE,
         stdout=subprocess.PIPE)
 
-    code = json.dumps(JS_ESCAPE.sub("u", unicodehelper.decode(code)))
+    code = json.dumps(unicodehelper.decode(code))
     data, stderr = shell_obj.communicate(code)
 
     if stderr:

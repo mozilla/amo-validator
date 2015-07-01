@@ -1,10 +1,10 @@
 import json
 
+from nose.tools import eq_
 import mock
 
-from js_helper import _do_test_raw
+from js_helper import _do_test_raw, _get_var
 
-from validator.errorbundler import ErrorBundle
 import validator.testcases.scripting as scripting
 import validator.testcases.javascript.spidermonkey as spidermonkey
 from validator.errorbundler import ErrorBundle
@@ -80,3 +80,14 @@ def test_compiletime_errors():
 
     # Reference error
     assert _do_test_raw("x - y = 4;").failed()
+
+
+def test_unicode_escapes():
+    """Tests that unicode/hex escapes are passed through to Spidermonkey."""
+
+    result = _do_test_raw("var foo = '\\u263a\\u0027\\x27'")
+
+    assert not result.failed()
+
+    eq_(_get_var(result, "foo"),
+        u"\u263a''")
