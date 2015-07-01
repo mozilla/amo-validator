@@ -1,5 +1,6 @@
 import fnmatch
 import hashlib
+import os
 import re
 from StringIO import StringIO
 
@@ -14,7 +15,8 @@ import validator.testcases.markup.csstester as testendpoint_css
 import validator.testcases.scripting as testendpoint_js
 import validator.testcases.langpack as testendpoint_langpack
 from validator.xpi import XPIManager
-from validator.constants import *
+from validator.constants import (PACKAGE_LANGPACK, PACKAGE_SUBPACKAGE,
+                                 PACKAGE_THEME)
 
 
 FLAGGED_FILES = set([".DS_Store", "Thumbs.db"])
@@ -72,8 +74,7 @@ def test_packed_packages(err, xpi_package=None):
     for name in xpi_package:
 
         # Warn for things like __MACOSX directories and .old files.
-        if ("__MACOSX" in name or
-            name.split("/")[-1].startswith(".")):
+        if "__MACOSX" in name or name.split("/")[-1].startswith("."):
             err.warning(
                 err_id=("testcases_content", "test_packed_packages",
                         "hidden_files"),
@@ -248,8 +249,8 @@ def test_packed_scripts(err, xpi_package):
                 # Run the standard script tests on the script, but mark the
                 # script as pollutable if its chrome URL is marked as being so.
                 testendpoint_js.test_js_file(
-                        err, script, file_data,
-                        pollutable=reversed_script in marked_scripts)
+                    err, script, file_data,
+                    pollutable=reversed_script in marked_scripts)
             else:
                 # Run the standard script tests on the scripts.
                 testendpoint_js.test_js_file(err, script, file_data)
