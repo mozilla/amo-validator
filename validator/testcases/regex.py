@@ -31,16 +31,26 @@ EUP_WARNING = "Extension update settings may not be modified."
 NSINHS_LINK = MDN_DOC % "XPCOM_Interface_Reference/nsINavHistoryService"
 
 
-def run_regex_tests(document, err, filename, context=None, is_js=False):
+def run_regex_tests(document, err, filename, context=None, is_js=False,
+                    explicit=False):
     """Run all of the regex-based JS tests."""
+
+    # When `explicit` is true, only run tests which explicitly
+    # specify which files they're applicable to.
 
     if context is None:
         context = ContextGenerator(document)
 
     # Run all of the registered tests.
     for cls in registered_regex_tests:
-        if not cls.applicable(err, filename, document):
-            continue
+        if not hasattr(cls, "applicable"):
+            if explicit:
+                continue
+        else:
+            if not cls.applicable(err, filename, document):
+                continue
+
+        found = True
         t = cls(err, document, filename, context)
         # Run standard tests.
         for test in t.tests():
@@ -70,11 +80,6 @@ class RegexTestGenerator(object):
         self.context = context
 
         self.app_versions_fallback = None
-
-    @classmethod
-    def applicable(cls, err, filename, document):
-        """Return whether the tests apply to the current file."""
-        return True  # Default to always applicable.
 
     def tests(self):
         """Override this with a generator that produces the regex tests."""
@@ -316,7 +321,7 @@ class UnsafeTemplateRegexTests(RegexTestGenerator):
     def applicable(cls, err, filename, document):
         # Perhaps this should just run on all non-binary files, but
         # we'll try to be more selective for the moment.
-        return bool(re.match(r".*\.(js(|m)|handlebars|mustache|"
+        return bool(re.match(r".*\.(js(|m)|hbs|handlebars|mustache|"
                              r"(t|)htm(|l)|tm?pl)",
                              filename))
 

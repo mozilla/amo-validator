@@ -50,11 +50,10 @@ def test_basic_regex_fail():
 
     err = ErrorBundle()
     err.supported_versions = {}
-    result = validator.testcases.content._process_file(
-        err, MockXPI(), "foo.css",
-        "All I wanna do is browser.preferences.instantApply() to you",
-        "foo.css")
-    assert result
+    validator.testcases.content._process_file(
+        err, MockXPI(), "foo.hbs",
+        "All I wanna do is <%= interpolate %> to you",
+        "foo.hbs")
     assert err.failed()
 
 
