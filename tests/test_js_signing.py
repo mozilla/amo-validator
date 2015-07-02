@@ -121,6 +121,13 @@ class TestSearchService(TestCase, RegexTestCase):
         """)
         self.assert_failed(with_warnings=warnings)
 
+        self.setUp()
+        self.run_script("""
+            let set = Services.prefs.getBranch('browser.star').setCharPref;
+            set('tup.homepage', 'http://evil.com');
+        """)
+        self.assert_failed(with_warnings=warnings)
+
 
     def test_profile_filenames(self):
         """
