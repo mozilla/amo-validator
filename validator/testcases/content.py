@@ -1,10 +1,8 @@
-import fnmatch
 import hashlib
 import re
 from StringIO import StringIO
 
 from regex import run_regex_tests
-from validator.contextgenerator import ContextGenerator
 from validator.constants import MAX_JS_THRESHOLD
 from validator import decorator
 from validator import submain as testendpoint_validator
