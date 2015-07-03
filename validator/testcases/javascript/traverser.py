@@ -15,6 +15,7 @@ DEBUG = False
 IGNORE_POLLUTION = False
 POLLUTION_COMPONENTS_PATH = re.compile(r"/?components/.*\.jsm?")
 POLLUTION_EXCEPTIONS = set(["Cc", "Ci", "Cu", ])
+MAX_LINE_COMPLEXITY = 100
 
 
 class Traverser(object):
@@ -33,6 +34,7 @@ class Traverser(object):
         self.line = 1  # Line number
         self.position = 0  # Column number
         self.context = context
+        self.complexity = defaultdict(lambda: 0)
 
         # Can use the `this` object
         self.can_use_this = False
@@ -83,6 +85,24 @@ class Traverser(object):
             raise
         self._debug("END>>")
 
+        # Sort the keys so that the warnings appear in order of the
+        # line numbers they appear on.
+        for line in sorted(self.complexity.keys()):
+            if self.complexity[line] > MAX_LINE_COMPLEXITY:
+                self.err.warning(
+                    err_id=("testcases_javascript_traverser", "run",
+                            "minified_code"),
+                    warning="Minified code detected",
+                    description=
+                        "This file appears to contain minified code. "
+                        "Add-ons containing obfuscated or minified code "
+                        "may not be submitted without accompanying sources. "
+                        "Minified code should be avoided whenever possible, "
+                        "and may not be included in the same file as other "
+                        "sources under any circumstances.",
+                    filename=self.filename,
+                    line=line)
+
         if self.contexts:
             # If we're in debug mode, save a copy of the global context for
             # analysis during unit tests.
@@ -116,7 +136,7 @@ class Traverser(object):
                             ", or use JavaScript modules.",
                             "List of entities: %s" %
                                 ", ".join(self.contexts[0].data.keys())),
-                       filename=self.filename)
+                        filename=self.filename)
 
     def _traverse_node(self, node):
         if node is None:
@@ -149,7 +169,10 @@ class Traverser(object):
 
         # Extract properties about the node that we're traversing
         (branches, establish_context, action, returns,
-             block_level) = DEFINITIONS[node["type"]]
+             block_level, complexity) = DEFINITIONS[node["type"]]
+
+        # Increase the complexity for this line number as appropriate.
+        self.complexity[self.line] += complexity
 
         # If we're supposed to establish a context, do it now
         if establish_context:
