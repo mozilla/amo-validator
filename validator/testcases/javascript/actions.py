@@ -107,6 +107,12 @@ def trace_member(traverser, node, instantiate=False):
         output = base.get(
             traverser=traverser, instantiate=instantiate, name=identifier)
         output.context = base.context
+
+        if base.is_global:
+            # In the cases of XPCOM objects, methods generally
+            # remain bound to their parent objects, even when called
+            # indirectly.
+            output.parent = base
         return output
 
     elif node["type"] == "Identifier":

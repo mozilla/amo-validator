@@ -448,7 +448,7 @@ def set_preference(wrapper, arguments, traverser):
     """Tests set preference calls for non-root preferences branches against
     dangerous values."""
 
-    parent = getattr(wrapper, "parent")
+    parent = getattr(wrapper, "parent", None)
     if not (arguments and parent and parent.is_global and
             parent.value.get("preference_branch")):
         return
