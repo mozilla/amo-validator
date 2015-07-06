@@ -5,8 +5,6 @@ import subprocess
 from validator.contextgenerator import ContextGenerator
 import validator.unicodehelper as unicodehelper
 
-JS_ESCAPE = re.compile("\\\\+[ux]", re.I)
-
 
 def get_tree(code, err=None, filename=None, shell=None):
     "Retrieves the parse tree for a JS snippet"
@@ -18,18 +16,17 @@ def get_tree(code, err=None, filename=None, shell=None):
         return _get_tree(code, shell)
     except JSReflectException as exc:
         str_exc = str(exc).strip("'\"")
-        if ("SyntaxError" in str_exc or
-            "ReferenceError" in str_exc):
+        if "SyntaxError" in str_exc or "ReferenceError" in str_exc:
             err.warning(("testcases_scripting",
                          "test_js_file",
                          "syntax_error"),
-                         "JavaScript Compile-Time Error",
-                         ["A compile-time error in the JavaScript halted "
-                          "validation of that file.",
-                          "Message: %s" % str_exc.split(":", 1)[-1].strip()],
-                         filename=filename,
-                         line=exc.line,
-                         context=ContextGenerator(code))
+                        "JavaScript Compile-Time Error",
+                        ["A compile-time error in the JavaScript halted "
+                         "validation of that file.",
+                         "Message: %s" % str_exc.split(":", 1)[-1].strip()],
+                        filename=filename,
+                        line=exc.line,
+                        context=ContextGenerator(code))
         elif "InternalError: too much recursion" in str_exc:
             err.notice(("testcases_scripting",
                         "test_js_file",
@@ -77,7 +74,6 @@ try{
         "line_number":e.lineNumber
     }));
 }"""
-BOOTSTRAP_SCRIPT = re.sub("\n +", "", BOOTSTRAP_SCRIPT)
 
 
 def _get_tree(code, shell):
@@ -91,7 +87,7 @@ def _get_tree(code, shell):
         cmd, shell=False, stdin=subprocess.PIPE, stderr=subprocess.PIPE,
         stdout=subprocess.PIPE)
 
-    code = json.dumps(JS_ESCAPE.sub("u", unicodehelper.decode(code)))
+    code = json.dumps(unicodehelper.decode(code))
     data, stderr = shell_obj.communicate(code)
 
     if stderr:
@@ -114,4 +110,3 @@ def _get_tree(code, shell):
                     parsed["line_number"])
 
     return parsed
-
