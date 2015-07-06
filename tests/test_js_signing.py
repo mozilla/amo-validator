@@ -35,7 +35,6 @@ class TestSearchService(TestCase, RegexTestCase):
                          "removeEngine", "moveEngine"):
                 yield test, obj, meth, "(foo, bar, baz)", warnings
 
-
     def test_registry_write(self):
         """Tests that Windows registry writes trigger warnings."""
 
@@ -63,7 +62,6 @@ class TestSearchService(TestCase, RegexTestCase):
             Cu.evalInSandbox("foobar()", sandbox);
         """)
         self.assert_failed(with_warnings=[{"signing_severity": "low"}])
-
 
     def test_pref_branches(self):
         """
@@ -104,7 +102,6 @@ class TestSearchService(TestCase, RegexTestCase):
         for pref, severity in PREFS:
             yield test, pref, severity
 
-
     def test_pref_composed_branches(self):
         """
         Tests that preference warnings still happen when branches are composed
@@ -127,7 +124,6 @@ class TestSearchService(TestCase, RegexTestCase):
             set('tup.homepage', 'http://evil.com');
         """)
         self.assert_failed(with_warnings=warnings)
-
 
     def test_profile_filenames(self):
         """
@@ -160,7 +156,6 @@ class TestSearchService(TestCase, RegexTestCase):
 
         yield fail, "'addons' + '.json'"
 
-
     def test_categories(self):
         """Tests that dangerous category names are flagged in JS strings."""
 
@@ -172,7 +167,6 @@ class TestSearchService(TestCase, RegexTestCase):
 
         self.run_script("'JavaScript-global-property'")
         self.assert_failed(with_warnings=[warning])
-
 
     def test_proxy_filter(self):
         """Tests that registering a proxy filter generates a warning."""
@@ -187,7 +181,6 @@ class TestSearchService(TestCase, RegexTestCase):
                  .registerFilter(foo, 0);
         """)
         self.assert_failed(with_warnings=[warning])
-
 
     def test_addon_install(self):
         """Tests attempts to install an add-on are flagged."""
@@ -206,7 +199,6 @@ class TestSearchService(TestCase, RegexTestCase):
         for method in (u"getInstallForFile",
                        u"getInstallForURL"):
             yield test, method
-
 
     def test_addon_settings(self):
         """Tests that attempts to change add-on settings via the
@@ -232,7 +224,6 @@ class TestSearchService(TestCase, RegexTestCase):
         for prop in props:
             yield test, prop
 
-
     def test_ctypes(self):
         """Tests that usage of `ctypes` generates warnings."""
 
@@ -244,7 +235,6 @@ class TestSearchService(TestCase, RegexTestCase):
              "editors_only": True,
              "signing_severity": "high"}])
 
-
     def test_nsIProcess(self):
         """Tests that usage of `nsIProcess` generates warnings."""
 
@@ -255,7 +245,6 @@ class TestSearchService(TestCase, RegexTestCase):
             {"id": ("js", "traverser", "dangerous_global"),
              "editors_only": True,
              "signing_severity": "high"}])
-
 
     def test_eval(self):
         """Tests that usage of eval-related functions generates warnings."""
@@ -275,7 +264,6 @@ class TestSearchService(TestCase, RegexTestCase):
 
         for func in functions:
             yield test, func
-
 
     def test_cert_service(self):
         """Tests that changes to certificate trust leads to warnings."""
@@ -304,7 +292,6 @@ class TestSearchService(TestCase, RegexTestCase):
         for contract in contracts:
             yield fail, "Cc['%s'].getService()" % contract
 
-
     def test_new_tab_page(self):
         """Tests that attempts to replace about:newtab are flagged."""
 
@@ -327,7 +314,6 @@ class TestSearchService(TestCase, RegexTestCase):
         for pattern in patterns:
             yield fail, pattern
 
-
     def test_script_creation(self):
         """Tests that creation of script tags generates warnings."""
 
@@ -340,7 +326,6 @@ class TestSearchService(TestCase, RegexTestCase):
         """)
         self.assert_failed(with_warnings=[warning])
 
-
     def test_event_attributes(self):
         """Tests that creation of event handler attributes is flagged."""
 
@@ -352,7 +337,6 @@ class TestSearchService(TestCase, RegexTestCase):
             elem.setAttribute("onhover", "doStuff();" + with_stuff);
         """)
         self.assert_failed(with_warnings=[warning])
-
 
     def test_event_attributes_innerhtml(self):
         """Tests that creation of event handler attributes via innerHTML

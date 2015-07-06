@@ -50,11 +50,10 @@ def test_basic_regex_fail():
 
     err = ErrorBundle()
     err.supported_versions = {}
-    result = validator.testcases.content._process_file(
-        err, MockXPI(), "foo.css",
-        "All I wanna do is browser.preferences.instantApply() to you",
-        "foo.css")
-    assert result
+    validator.testcases.content._process_file(
+        err, MockXPI(), "foo.hbs",
+        "All I wanna do is <%= interpolate %> to you",
+        "foo.hbs")
     assert err.failed()
 
 
@@ -159,7 +158,7 @@ def test_preference_extension_regex():
     """Test that preference extension regexes pick up the proper strings."""
 
     assert not _do_test_raw('"chrome://mozapps/skin/extensions/update1.png"').failed()
-    assert _do_test_raw('"foo.extensions.update.bar"').failed()
+    assert _do_test_raw('"extensions.update.bar"').failed()
 
 
 def test_template_escape():

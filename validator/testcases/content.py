@@ -1,10 +1,8 @@
-import fnmatch
 import hashlib
 import re
 from StringIO import StringIO
 
 from regex import run_regex_tests
-from validator.contextgenerator import ContextGenerator
 from validator.constants import MAX_JS_THRESHOLD
 from validator import decorator
 from validator import submain as testendpoint_validator
@@ -340,19 +338,23 @@ def _process_file(err, xpi_package, name, file_data, name_lower,
 
         # Convert the file data to unicode
         file_data = unicodehelper.decode(file_data)
-        is_js = False
+        is_js = name_lower.endswith((".js", ".jsm"))
 
         if name_lower.endswith(".css"):
             testendpoint_css.test_css_file(err, name, file_data)
 
-        elif name_lower.endswith((".js", ".jsm")):
-            is_js = True
+        elif is_js:
             testendpoint_js.test_js_file(err, name, file_data,
                                          pollutable=pollutable)
 
         run_regex_tests(file_data, err, name, is_js=is_js)
 
         return True
+
+    else:
+        if file_data:
+            file_data = unicodehelper.decode(file_data)
+            run_regex_tests(file_data, err, name, explicit=True)
 
     return False
 

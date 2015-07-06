@@ -9,7 +9,6 @@ from validator.constants import (BUGZILLA_BUG, DESCRIPTION_TYPES, FENNEC_GUID,
                                  FIREFOX_GUID, MAX_STR_SIZE)
 from validator.decorator import version_range
 from validator.python import copy
-from validator.testcases.regex import validate_string
 from jstypes import *
 
 
@@ -403,6 +402,8 @@ def test_literal(traverser, value):
     moment, against possibly dangerous patterns.
     """
     if isinstance(value, basestring):
+        # Local import to prevent import loop.
+        from validator.testcases.regex import validate_string
         validate_string(value, traverser)
 
 
@@ -539,17 +540,6 @@ def _call_create_pref(a, t, e):
 
 
 def test_preference(value):
-    from predefinedentities import BANNED_PREF_BRANCHES, BANNED_PREF_REGEXPS
-    for banned, reason in BANNED_PREF_BRANCHES:
-        if value.startswith(banned):
-            return reason or ("Extensions should not alter preferences in "
-                              "the '%s' preference branch" % banned)
-
-    for banned in BANNED_PREF_REGEXPS:
-        if re.match(banned, value):
-            return ("Extensions should not alter preferences matching /%s/"
-                        % banned)
-
     for branch in "extensions.", "services.sync.prefs.sync.extensions.":
         if value.startswith(branch) and value.rindex(".") > len(branch):
             return
