@@ -1,5 +1,3 @@
-from functools import partial
-
 from validator import decorator
 from validator.constants import PACKAGE_THEME
 from validator import metadata_helpers
@@ -30,16 +28,16 @@ def _test_rdf(err, install):
     """Wrapper for install.rdf testing to make unit testing so much
     easier."""
 
-    shouldnt_exist = ("hidden", )
+    shouldnt_exist = {"hidden"}
     if err.get_resource("listed"):
-        shouldnt_exist += ("updateURL", "updateKey", )
-    obsolete = ("file", "skin", "requires", )
-    must_exist_once = ["id",
+        shouldnt_exist |= {"updateURL", "updateKey"}
+    obsolete = {"file", "skin", "requires"}
+    must_exist_once = {"id",
                        "version",
                        "name",
-                       "targetApplication"]
+                       "targetApplication"}
 
-    may_exist_once = ["about",  # For <Description> element
+    may_exist_once = {"about",  # For <Description> element
                       "bootstrap",
                       "optionsURL",
                       "aboutURL",
@@ -50,21 +48,18 @@ def _test_rdf(err, install):
                       "multiprocessCompatible",
                       "optionsType",
                       "type",
-                      "updateInfoURL",
                       "updateKey",
                       "updateURL",
-                      "updateHash",
-                      "signature",
                       "skinnable",
                       "strictCompatibility",
-                      "unpack"]  # This has other rules; CAUTION!
+                      "unpack"}  # This has other rules; CAUTION!
 
     # Support a name requirement override.
     if err.overrides and err.overrides.get("ignore_empty_name"):
         must_exist_once.remove("name")
-        may_exist_once.append("name")
+        may_exist_once.add("name")
 
-    may_exist = ("targetApplication",
+    may_exist = {"targetApplication",
                  "localized",
                  "description",
                  "creator",
@@ -72,12 +67,12 @@ def _test_rdf(err, install):
                  "contributor",
                  "targetPlatform",
                  "requires",
-                 "developer",)
+                 "developer"}
 
     if (err.detected_type == PACKAGE_THEME or
         (err.subpackages and
          err.subpackages[0]["detected_type"] == PACKAGE_THEME)):
-        must_exist_once.append("internalName")
+        must_exist_once.add("internalName")
 
     top_id = install.get_root_subject()
 
@@ -126,12 +121,8 @@ def _test_rdf(err, install):
         # Remove the predicate from must_exist_once if it's there.
         if predicate in must_exist_once:
             # Test the predicate for specific values.
-            if predicate == "id":
-                _test_id(err, value)
-            elif predicate == "version":
-                _test_version(err, value)
-            elif predicate == "name":
-                _test_name(err, value)
+            if predicate in PREDICATE_TESTS:
+                PREDICATE_TESTS[predicate](err, value, source="install.rdf")
 
             must_exist_once.remove(predicate)
             continue
@@ -144,9 +135,9 @@ def _test_rdf(err, install):
                     err_id=("testcases_installrdf", "_test_rdf",
                             "optionsType"),
                     warning="<em:optionsType> has bad value.",
-                    description=("The value of <em:optionsType> must be either "
-                        "%s." % ", ".join(OPTIONS_TYPE_VALUES),
-                        "Value found: %s" % value),
+                    description=("The value of <em:optionsType> must be one "
+                                 "of: %s." % ", ".join(OPTIONS_TYPE_VALUES),
+                                 "Value found: %s" % value),
                     filename="install.rdf")
 
             may_exist_once.remove(predicate)
@@ -209,7 +200,8 @@ def _test_rdf(err, install):
                   "install.rdf")
 
 
-_test_id = partial(metadata_helpers.validate_id, source="install.rdf")
-_test_version = partial(
-    metadata_helpers.validate_version, source="install.rdf")
-_test_name = partial(metadata_helpers.validate_name, source="install.rdf")
+PREDICATE_TESTS = {
+    "id": metadata_helpers.validate_id,
+    "version": metadata_helpers.validate_version,
+    "name": metadata_helpers.validate_name,
+}

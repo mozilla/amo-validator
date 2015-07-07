@@ -8,12 +8,13 @@ from validator.errorbundler import ErrorBundle
 from validator.rdf import RDFParser
 
 
-def _test_value(value, test, failure=True):
+def _test_value(key, value, failure=True):
     "Tests a value against a test."
 
     err = ErrorBundle()
 
-    test(err, value)
+    test = installrdf.PREDICATE_TESTS[key]
+    test(err, value, source="install.rdf")
 
     if hasattr(test, 'func'):
         func = test.func
@@ -31,56 +32,46 @@ def _test_value(value, test, failure=True):
 def test_pass_id():
     "Tests that valid IDs will be accepted."
 
-    _test_value("{12345678-1234-1234-1234-123456789012}",
-                installrdf._test_id,
-                False)
-    _test_value("abc@foo.bar",
-                installrdf._test_id,
-                False)
-    _test_value("a+bc@foo.bar",
-                installrdf._test_id,
-                False)
+    _test_value("id", "{12345678-1234-1234-1234-123456789012}", False)
+    _test_value("id", "abc@foo.bar", False)
+    _test_value("id", "a+bc@foo.bar", False)
 
 
 def test_fail_id():
     "Tests that invalid IDs will not be accepted."
 
-    _test_value("{1234567-1234-1234-1234-123456789012}", installrdf._test_id)
-    _test_value("!@foo.bar", installrdf._test_id)
+    _test_value("id", "{1234567-1234-1234-1234-123456789012}")
+    _test_value("id", "!@foo.bar")
 
 
 def test_pass_version():
     "Tests that valid versions will be accepted."
 
-    _test_value("1.2.3.4", installrdf._test_version, False)
-    _test_value("1a.2.3b+*.-_", installrdf._test_version, False)
-    _test_value("twenty", installrdf._test_version, False)
+    _test_value("version", "1.2.3.4", False)
+    _test_value("version", "1a.2.3b+*.-_", False)
+    _test_value("version", "twenty", False)
 
 
 def test_fail_version():
     "Tests that invalid versions will not be accepted."
 
-    _test_value("2.0 alpha", installrdf._test_version)
-    _test_value("123456789012345678901234567890123", installrdf._test_version)
-    _test_value("1.2.3%", installrdf._test_version)
+    _test_value("version", "2.0 alpha")
+    _test_value("version", "123456789012345678901234567890123")
+    _test_value("version", "1.2.3%")
 
 
 def test_pass_name():
     "Tests that valid names will be accepted."
 
-    _test_value("Joe Schmoe's Feed Aggregator",
-                installrdf._test_name,
-                False)
-    _test_value("Ozilla of the M",
-                installrdf._test_name,
-                False)
+    _test_value("name", "Joe Schmoe's Feed Aggregator", False)
+    _test_value("name", "Ozilla of the M", False)
 
 
 def test_fail_name():
     "Tests that invalid names will not be accepted."
 
-    _test_value("Love of the Firefox", installrdf._test_name)
-    _test_value("Mozilla Feed Aggregator", installrdf._test_name)
+    _test_value("name", "Love of the Firefox")
+    _test_value("name", "Mozilla Feed Aggregator")
 
 
 def _run_test(filename, failure=True, detected_type=0, listed=True,
