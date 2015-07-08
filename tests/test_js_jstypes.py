@@ -100,6 +100,7 @@ def test_jsobject_computed_properties():
         var foo = {
             [Symbol.iterator]: function* () {},
             ["foo" + bar]: "baz",
+            [thing]: "quux",
         };
     """).failed()
 

@@ -1,5 +1,4 @@
 from functools import partial
-import re
 import types
 
 # Global import of predefinedentities will cause an import loop
@@ -38,7 +37,7 @@ def get_NaN(traverser):
 def _get_member_exp_property(traverser, node):
     """Return the string value of a member expression's property."""
 
-    if node["property"]["type"] == "Identifier" and not node["computed"]:
+    if node["property"]["type"] == "Identifier" and not node.get("computed"):
         return unicode(node["property"]["name"])
     else:
         eval_exp = traverser._traverse_node(node["property"])
