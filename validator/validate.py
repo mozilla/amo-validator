@@ -18,7 +18,7 @@ def validate(path, format="json",
              expectation=PACKAGE_ANY,
              for_appversions=None,
              overrides=None,
-             timeout=None,
+             timeout=-1,
              compat_test=False,
              **kw):
     """
@@ -51,7 +51,8 @@ def validate(path, format="json",
         A dict of app GUIDs referencing lists of versions. Determines which
         version-dependant tests should be run.
     `timeout`:
-        Number of seconds before aborting addon validation.
+        Number of seconds before aborting addon validation, or -1 for to
+        run with no timeout.
     `compat_tests`:
         A flag to signal the validator to skip tests which should not be run
         during compatibility bumps. Defaults to `False`.

@@ -39,15 +39,12 @@ class ValidationTimeout(Exception):
 
 
 def prepare_package(err, path, expectation=0, for_appversions=None,
-                    timeout=None):
+                    timeout=-1):
     """Prepares a file-based package for validation.
 
     timeout is the number of seconds before validation is aborted.
     If timeout is -1 then no timeout checking code will run.
     """
-    if not timeout:
-        timeout = 60  # seconds
-
     # Test that the package actually exists. I consider this Tier 0
     # since we may not even be dealing with a real file.
     if err and not os.path.isfile(path):
@@ -80,10 +77,6 @@ def prepare_package(err, path, expectation=0, for_appversions=None,
     validation_state = {'complete': False}
 
     def timeout_handler(signum, frame):
-        if validation_state['complete']:
-            # There is no need for a timeout. This might be the result of
-            # sequential validators, like in the test suite.
-            return
         ex = ValidationTimeout(timeout)
         log.error("%s; Package: %s" % (str(ex), path))
         raise ex
@@ -91,8 +84,17 @@ def prepare_package(err, path, expectation=0, for_appversions=None,
     if timeout != -1:
         signal.signal(signal.SIGALRM, timeout_handler)
         signal.setitimer(signal.ITIMER_REAL, timeout)
-    output = test_package(err, package, path, expectation,
-                          for_appversions)
+
+    try:
+        output = test_package(err, package, path, expectation,
+                              for_appversions)
+    finally:
+        # Remove timers and signal handlers regardless of whether
+        # we've completed successfully or the timer has fired.
+        if timeout != -1:
+            signal.setitimer(signal.ITIMER_REAL, 0)
+            signal.signal(signal.SIGALRM, signal.SIG_DFL)
+
     validation_state['complete'] = True
     package.close()
 
