@@ -4,8 +4,10 @@ import types
 
 from . import constants
 from .constants import PACKAGE_ANY
-from errorbundler import ErrorBundle
-import loader
+from .errorbundler import ErrorBundle
+# This is necessary. Do not remove it unless you know exactly what
+# you are doing.
+import loader  # noqa
 import submain
 
 
@@ -44,14 +46,14 @@ def validate(path, format="json",
         Whether the app is headed for the app marketplace or AMO. Defaults to
         `True`.
     `expectation`:
-        The type of package that should be expected. Must be a symbolic constant
-        from validator.constants (i.e.: validator.constants.PACKAGE_*). Defaults
-        to PACKAGE_ANY.
+        The type of package that should be expected. Must be a symbolic
+        constant from validator.constants (i.e.:
+        validator.constants.PACKAGE_*). Defaults to PACKAGE_ANY.
     `for_appversions`:
         A dict of app GUIDs referencing lists of versions. Determines which
         version-dependant tests should be run.
     `timeout`:
-        Number of seconds before aborting addon validation, or -1 for to
+        Number of seconds before aborting addon validation, or -1 to
         run with no timeout.
     `compat_tests`:
         A flag to signal the validator to skip tests which should not be run

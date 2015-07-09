@@ -14,7 +14,8 @@ from validator.rdf import RDFException, RDFParser
 from validator.xpi import XPIManager
 from validator import decorator
 
-from constants import *
+from constants import (PACKAGE_ANY, PACKAGE_EXTENSION, PACKAGE_SEARCHPROV,
+                       PACKAGE_THEME, PACKAGE_WEBAPP)
 
 types = {0: "Unknown",
          1: "Extension/Multi-Extension",
@@ -158,7 +159,7 @@ def test_package(err, file_, name, expectation=PACKAGE_ANY,
     if package.extension in assumed_extensions:
         assumed_type = assumed_extensions[package.extension]
         # Is the user expecting a different package type?
-        if not expectation in (PACKAGE_ANY, assumed_type):
+        if expectation not in (PACKAGE_ANY, assumed_type):
             err.error(("main",
                        "test_package",
                        "unexpected_type"),
@@ -226,14 +227,14 @@ def _load_install_rdf(err, package, expectation):
 
     # Compare the results of the low-level type detection to
     # that of the expectation and the assumption.
-    if not expectation in (PACKAGE_ANY, results):
+    if expectation not in (PACKAGE_ANY, results):
         err.warning(
             err_id=("main", "test_package", "extension_type_mismatch"),
             warning="Extension Type Mismatch",
             description=("We detected that the add-on's type does not match "
                          "the expected type.",
                          'Type "%s" expected, found "%s"' %
-                             (types[expectation], types[results])))
+                         (types[expectation], types[results])))
 
 
 def _load_package_json(err, package, expectation):
