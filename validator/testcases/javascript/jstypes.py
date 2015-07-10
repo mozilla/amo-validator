@@ -165,8 +165,8 @@ class JSWrapper(object):
 
         if self.const and not overwrite_const:
             traverser.err.warning(
-                err_id=("testcases_javascript_traverser", "JSWrapper_set_value",
-                        "const_overwrite"),
+                err_id=("testcases_javascript_traverser",
+                        "JSWrapper_set_value", "const_overwrite"),
                 warning="Overwritten constant value",
                 description="A variable declared as constant has been "
                             "overwritten in some JS code.",
@@ -177,7 +177,7 @@ class JSWrapper(object):
 
         # Process any setter/modifier
         if self.setter:
-            traverser._debug("Running setter on JSWrapper...");
+            traverser._debug("Running setter on JSWrapper...")
             value = self.setter(value, traverser) or value or None
 
         if value == self.value:
@@ -374,22 +374,18 @@ class JSWrapper(object):
 
         if isinstance(value, types.StringTypes):
             if ("is_jetpack" in self.traverser.err.metadata and
-                value.startswith("resource://") and
-                "-data/" in value):
+                    value.startswith("resource://") and
+                    "-data/" in value):
                 # Since Jetpack files are ignored, this should not be scanning
                 # anything inside the jetpack directories.
-                self.traverser.err.warning(
+                self.traverser.warning(
                     err_id=("javascript_js_jstypes", "jswrapper",
                             "jetpack_abs_uri"),
                     warning="Absolute URIs in Jetpack 1.4 are disallowed",
                     description=("As of Jetpack 1.4, absolute URIs are no "
                                  "longer allowed within add-ons.",
-                                 "See %s for more information." %
-                                     JETPACK_URI_URL),
-                    filename=self.traverser.filename,
-                    line=self.traverser.line,
-                    column=self.traverser.position,
-                    context=self.traverser.context,
+                                 "See %s for more information."
+                                 % JETPACK_URI_URL),
                     compatibility_type="error")
 
     def __unicode__(self):

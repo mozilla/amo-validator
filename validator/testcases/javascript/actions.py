@@ -1,5 +1,4 @@
 from functools import partial
-import re
 import types
 
 # Global import of predefinedentities will cause an import loop
@@ -9,7 +8,7 @@ from validator.constants import (BUGZILLA_BUG, DESCRIPTION_TYPES, FENNEC_GUID,
                                  FIREFOX_GUID, MAX_STR_SIZE)
 from validator.decorator import version_range
 from validator.python import copy
-from jstypes import *
+from jstypes import JSArray, JSContext, JSLiteral, JSObject, JSWrapper
 
 
 NUMERIC_TYPES = (int, long, float, complex)
@@ -220,8 +219,7 @@ def _define_with(traverser, node):
     "Handles `with` statements"
 
     object_ = traverser._traverse_node(node["object"])
-    if (isinstance(object_, JSWrapper) and
-        isinstance(object_.value, JSObject)):
+    if isinstance(object_, JSWrapper) and isinstance(object_.value, JSObject):
         traverser.contexts[-1] = object_.value
         traverser.contexts.append(JSContext("block"))
     return
@@ -459,9 +457,6 @@ def _call_expression(traverser, node):
             call_dangerous_function(traverser, member, name)
 
         if result and name:
-            ## Generate a string representation of the params
-            #params = u", ".join([_get_as_str(t(p).get_literal_value()) for
-            #                     p in args])
             kwargs = {
                 "err_id": ("testcases_javascript_actions", "_call_expression",
                            "called_dangerous_global"),
@@ -561,10 +556,10 @@ def _readonly_top(traverser, right, node_right):
                     "assigned any values starting with Gecko 6. Review your "
                     "code for any uses of the `top` global, and refer to "
                     "%s for more information." % BUGZILLA_BUG % 654137,
-        for_appversions={FIREFOX_GUID:
-                             version_range("firefox", "6.0a1", "7.0a1"),
-                         FENNEC_GUID:
-                             version_range("fennec", "6.0a1", "7.0a1")},
+        for_appversions={FIREFOX_GUID: version_range("firefox",
+                                                     "6.0a1", "7.0a1"),
+                         FENNEC_GUID: version_range("fennec",
+                                                    "6.0a1", "7.0a1")},
         compatibility_type="warning",
         tier=5)
 
@@ -661,7 +656,8 @@ def _expr_assignment(traverser, node):
                                 not ("overwritable" in member_object.value and
                                      member_object.value["overwritable"]))
             member_property = _get_member_exp_property(traverser, node_left)
-            traverser._debug("ASSIGNMENT:MEMBER_PROPERTY(%s)" % member_property)
+            traverser._debug("ASSIGNMENT:MEMBER_PROPERTY(%s)"
+                             % member_property)
             traverser._debug("ASSIGNMENT:GLOB_OV::%s" % global_overwrite)
 
             # Don't do the assignment if we're facing a global.
@@ -791,8 +787,8 @@ def _expr_assignment(traverser, node):
             new_value = None
 
         # Cap the length of analyzed strings.
-        if (isinstance(new_value, types.StringTypes)
-                and len(new_value) > MAX_STR_SIZE):
+        if (isinstance(new_value, types.StringTypes) and
+                len(new_value) > MAX_STR_SIZE):
             new_value = new_value[:MAX_STR_SIZE]
 
         traverser._debug("ASSIGNMENT::New value >> %s" % new_value, 1)
@@ -816,7 +812,7 @@ def _expr_binary(traverser, node):
     # Traverse the left half of the binary expression.
     with traverser._debug("BIN_EXP>>l-value"):
         if (node["left"]["type"] == "BinaryExpression" and
-            "__traversal" not in node["left"]):
+                "__traversal" not in node["left"]):
             # Process the left branch of the binary expression directly. This
             # keeps the recursion cap in line and speeds up processing of
             # large chains of binary expressions.
@@ -838,6 +834,7 @@ def _expr_binary(traverser, node):
             traverser._debug("Is dirty? %r" % right.dirty, 1)
 
     return _binary_op(operator, left, right, traverser)
+
 
 def _binary_op(operator, left, right, traverser):
     """Perform a binary operation on two pre-traversed nodes."""
@@ -909,8 +906,8 @@ def _binary_op(operator, left, right, traverser):
             output = None
 
         # Cap the length of analyzed strings.
-        if (isinstance(output, types.StringTypes)
-                and len(output) > MAX_STR_SIZE):
+        if (isinstance(output, types.StringTypes) and
+                len(output) > MAX_STR_SIZE):
             output = output[:MAX_STR_SIZE]
 
         # Test the newly-created literal for dangerous values.

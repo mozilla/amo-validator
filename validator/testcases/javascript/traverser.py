@@ -6,7 +6,7 @@ import types
 from validator.constants import DESCRIPTION_TYPES
 
 from . import actions
-from .jstypes import *
+from .jstypes import JSContext, JSLiteral, JSObject, JSWrapper
 from .nodedefinitions import DEFINITIONS
 from .predefinedentities import GLOBAL_ENTITIES
 
@@ -101,22 +101,22 @@ class Traverser(object):
                 self._debug("Final context size: %d" % global_context_size)
 
                 if (global_context_size > 3 and not self.is_jsm and
-                    not "is_jetpack" in self.err.metadata and
-                    not self.err.get_resource("em:bootstrap") == "true"):
+                        "is_jetpack" not in self.err.metadata and
+                        self.err.get_resource("em:bootstrap") != "true"):
                     self.err.warning(
                         err_id=("testcases_javascript_traverser", "run",
                                 "namespace_pollution"),
                         warning="JavaScript namespace pollution",
                         description=(
                             "Your add-on contains a large number of global "
-                            "variables, which may conflict with other add-ons. "
-                            "For more information, see "
+                            "variables, which may conflict with other "
+                            "add-ons. For more information, see "
                             "http://blog.mozilla.com/addons/2009/01/16/"
                             "firefox-extensions-global-namespace-pollution/"
                             ", or use JavaScript modules.",
-                            "List of entities: %s" %
-                                ", ".join(self.contexts[0].data.keys())),
-                       filename=self.filename)
+                            "List of entities: %s"
+                            % ", ".join(self.contexts[0].data.keys())),
+                        filename=self.filename)
 
     def _traverse_node(self, node):
         if node is None:
@@ -149,7 +149,7 @@ class Traverser(object):
 
         # Extract properties about the node that we're traversing
         (branches, establish_context, action, returns,
-             block_level) = DEFINITIONS[node["type"]]
+         block_level) = DEFINITIONS[node["type"]]
 
         # If we're supposed to establish a context, do it now
         if establish_context:
@@ -284,7 +284,7 @@ class Traverser(object):
         "Builds an object based on an entity from the predefined entity list"
 
         if (not callable(entity.get("dangerous")) or
-            "dangerous_on_read" in entity):
+                "dangerous_on_read" in entity):
             dang = entity.get("dangerous", entity.get("dangerous_on_read"))
 
             if callable(dang):
