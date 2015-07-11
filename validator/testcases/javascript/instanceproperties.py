@@ -1,10 +1,11 @@
 import re
 import types
 
+import actions
+import jstypes
 from validator.compat import (FX10_DEFINITION, FX13_DEFINITION,
                               FX30_DEFINITION)
 from validator.constants import BUGZILLA_BUG, EVENT_ASSIGNMENT
-import jstypes
 
 
 JS_URL = re.compile("href=[\'\"]javascript:")
@@ -203,6 +204,30 @@ def get_DOM_VK_ENTER(traverser):
         tier=5)
 
 
+def set_contentScript(value, traverser):
+    """Warns when values are assigned to the `contentScript` properties,
+    which are essentially the same as calling `eval`."""
+
+    if value.is_literal():
+        content_script = actions._get_as_str(value)
+
+        # Avoid import loop.
+        from validator.testcases.scripting import test_js_file
+        test_js_file(
+            traverser.err, traverser.filename, content_script,
+            line=traverser.line, context=traverser.context)
+    else:
+        traverser.warning(
+            err_id=("testcases_javascript_instanceproperties",
+                    "contentScript", "set_non_literal"),
+            warning="`contentScript` properties should not be used",
+            description="Creating content scripts from dynamic values "
+                        "is dangerous and error-prone. Please use a separate "
+                        "JavaScript file, along with the "
+                        "`contentScriptFile` property instead.",
+            signing_severity="high")
+
+
 OBJECT_DEFINITIONS = {
     "_endMarker": {"get": startendMarker,
                    "set": startendMarker},
@@ -210,6 +235,7 @@ OBJECT_DEFINITIONS = {
                      "set": startendMarker},
     "innerHTML": {"set": set_innerHTML},
     "outerHTML": {"set": set_outerHTML},
+    "contentScript": {"set": set_contentScript},
     "isElementContentWhitespace": {"get": get_isElementContentWhitespace},
     "xmlEncoding": _get_xml("xmlEncoding"),
     "xmlStandalone": _get_xml("xmlStandalone"),

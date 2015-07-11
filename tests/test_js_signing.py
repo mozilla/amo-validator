@@ -350,3 +350,37 @@ class TestSearchService(TestCase, RegexTestCase):
             elem.innerHTML = '<a onhover="doEvilStuff()"></a>';
         """)
         self.assert_failed(with_warnings=[warning])
+
+    def test_contentScript_dynamic_values(self):
+        """Tests that dynamic values passed as contentScript properties
+        trigger signing warnings."""
+
+        warning = {"id": ("testcases_javascript_instanceproperties",
+                          "contentScript", "set_non_literal"),
+                   "signing_severity": "high"}
+
+        self.run_script("""
+            tab.attach({ contentScript: evil })
+        """)
+        self.assert_failed(with_warnings=[warning])
+
+    def test_contentScript_static_values(self):
+        """Tests that static, verifiable values passed as contentScripts
+        trigger no warnings, but unsafe static values do."""
+
+        # Test safe value.
+        self.run_script("""
+            tab.attach({ contentScript: "everythingIsCool()" })
+        """)
+        self.assert_silent()
+
+        # Test unsafe value.
+        warning = {"id": ("testcases_javascript_instanceactions",
+                          "_call_expression", "called_createelement"),
+                   "signing_severity": "medium"}
+
+        self.setUp()
+        self.run_script("""
+            tab.attach({ contentScript: 'doc.createElement("script")' });
+        """)
+        self.assert_failed(with_warnings=[warning])

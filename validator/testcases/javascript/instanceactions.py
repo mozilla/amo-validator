@@ -230,35 +230,6 @@ def replaceWholeText(args, traverser, node, wrapper):
         tier=5)
 
 
-def PageMod(args, traverser, node, wrapper):
-    """
-    This is the function that is called in Jetpack to modify the contents of a
-    page with a "content script". This function needs to analyze he first
-    parameter. If it is an object and if that object contains a "contentScript"
-    string, that string needs to be passed to the validator.testcases.scripting
-    library for testing as its own JS script file.
-    """
-
-    if not args:
-        return
-
-    pm_properties = traverser._traverse_node(args[0])
-    if not pm_properties.has_property("contentScript"):
-        return
-
-    content_script = pm_properties.get(traverser, "contentScript")
-    if not content_script.is_literal():
-        return
-    content_script = actions._get_as_str(content_script.get_literal_value())
-    if not content_script.strip():
-        return
-
-    import validator.testcases.scripting as sub_scripting
-    sub_scripting.test_js_file(
-        traverser.err, traverser.filename, content_script,
-        line=traverser.line, context=traverser.context)
-
-
 def bind(args, traverser, node, wrapper):
     if "callee" not in node and "object" not in node["callee"]:
         return
@@ -484,7 +455,6 @@ INSTANCE_DEFINITIONS = {
     "insertAdjacentHTML": insertAdjacentHTML,
     "isSameNode": isSameNode,
     "openDialog": openDialog,
-    "PageMod": PageMod,
     "QueryInterface": QueryInterface,
     "replaceWholeText": replaceWholeText,
     "setAttribute": setAttribute,
