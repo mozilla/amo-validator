@@ -2789,7 +2789,7 @@ class RegexTest(object):
 
         return r"^(?:%s)$" % "|".join(map(re.escape, key))
 
-    def test(self, string, traverser, properties=None):
+    def test(self, string, traverser, properties=None, wrapper=None):
         for match in self.regex.finditer(string):
             for key, val in match.groupdict().iteritems():
                 if val is not None and key in self.tests:
@@ -2798,7 +2798,9 @@ class RegexTest(object):
                     if properties:
                         kw.update(properties)
 
-                    traverser.warning(**kw)
+                    msg = traverser.warning(**kw)
+                    if wrapper:
+                        wrapper.value.messages.append(msg)
 
 
 PROFILE_FILENAMES = (
@@ -2880,17 +2882,21 @@ STRING_REGEXPS = (
                      "referenced in any code."}),
 )
 
+PREFERENCE_ERROR_ID = "testcases_regex", "string", "preference"
+
 PREF_REGEXPS = (
     tuple(
         (pattern,
-         {"warning": "Potentially unsafe preference branch referenced",
+         {"err_id": PREFERENCE_ERROR_ID,
+          "warning": "Potentially unsafe preference branch referenced",
           "description": "Extensions should not alter preferences "
                          "matching /%s/." % pattern})
         for pattern in BANNED_PREF_REGEXPS) +
     tuple(
         ("^%s" % re.escape(branch),
          merge_description(
-             {"warning": "Potentially unsafe preference branch referenced"},
+             {"err_id": PREFERENCE_ERROR_ID,
+              "warning": "Potentially unsafe preference branch referenced"},
              reason or ("Extensions should not alter preferences in "
                         "the `%s` preference branch" % branch)))
         for branch, reason in BANNED_PREF_BRANCHES))
@@ -2900,7 +2906,8 @@ STRING_REGEXPS += PREF_REGEXPS
 # We only want to test this one when we're certain it's a preference.
 PREF_REGEXPS += (
     (r".*password.*",
-     {"warning": "Passwords should not be stored in preferences",
+     {"err_id": PREFERENCE_ERROR_ID,
+      "warning": "Passwords should not be stored in preferences",
       "description": "Storing passwords in preferences is insecure. "
                      "The Login Manager should be used instead."}),
 )

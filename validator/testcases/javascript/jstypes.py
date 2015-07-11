@@ -15,6 +15,7 @@ class JSObject(object):
         self.data = {u"prototype": lambda: JSPrototype()}
         if data:
             self.data.update(data)
+        self.messages = []
         self.is_unwrapped = unwrapped
 
         self.recursing = False
@@ -399,6 +400,7 @@ class JSLiteral(JSObject):
     def __init__(self, value=None, unwrapped=False):
         super(JSLiteral, self).__init__(unwrapped=unwrapped)
         self.value = value
+        self.source = None
 
     def set_value(self, value):
         self.value = value

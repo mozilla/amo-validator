@@ -389,20 +389,23 @@ def _define_literal(traverser, node):
     value = node["value"]
     if isinstance(value, dict):
         return JSWrapper(JSObject(), traverser=traverser, dirty=True)
-    test_literal(traverser, value)
-    return JSWrapper(value if value is not None else JSLiteral(None),
-                     traverser=traverser)
+
+    wrapper = JSWrapper(value if value is not None else JSLiteral(None),
+                        traverser=traverser)
+    test_literal(traverser, wrapper)
+    return wrapper
 
 
-def test_literal(traverser, value):
+def test_literal(traverser, wrapper):
     """
     Test the value of a literal, in particular only a string literal at the
     moment, against possibly dangerous patterns.
     """
+    value = wrapper.get_literal_value()
     if isinstance(value, basestring):
         # Local import to prevent import loop.
         from validator.testcases.regex import validate_string
-        validate_string(value, traverser)
+        validate_string(value, traverser, wrapper=wrapper)
 
 
 def call_dangerous_function(traverser, member, name):
@@ -427,7 +430,8 @@ def call_dangerous_function(traverser, member, name):
 
 def _call_expression(traverser, node):
     args = node["arguments"]
-    map(traverser._traverse_node, args)
+    for arg in args:
+        traverser._traverse_node(arg, source="arguments")
 
     member = traverser._traverse_node(node["callee"])
 
@@ -527,8 +531,15 @@ def _call_create_pref(a, t, e):
     branch.
     """
 
-    if not t.im_self.filename.startswith("defaults/preferences/") or not a:
+    # We really need to clean up the arguments passed to these functions.
+    traverser = t.im_self
+
+    if not traverser.filename.startswith("defaults/preferences/") or not a:
         return
+
+    instanceactions.set_preference(JSWrapper(JSLiteral(None),
+                                             traverser=traverser),
+                                   a, traverser)
 
     value = _get_as_str(t(a[0]))
     return test_preference(value)
@@ -589,7 +600,7 @@ def _new(traverser, node):
     args = node["arguments"]
     if isinstance(args, list):
         for arg in args:
-            traverser._traverse_node(arg)
+            traverser._traverse_node(arg, source="arguments")
     else:
         traverser._traverse_node(args)
 
@@ -910,10 +921,14 @@ def _binary_op(operator, left, right, traverser):
                 len(output) > MAX_STR_SIZE):
             output = output[:MAX_STR_SIZE]
 
+        wrapper = JSWrapper(output, traverser=traverser)
+
         # Test the newly-created literal for dangerous values.
         # This may cause duplicate warnings for strings which
         # already match a dangerous value prior to concatenation.
-        test_literal(traverser, output)
+        test_literal(traverser, wrapper)
+
+        return wrapper
 
     return JSWrapper(output, traverser=traverser)
 

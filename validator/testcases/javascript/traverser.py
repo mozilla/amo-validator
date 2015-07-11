@@ -118,7 +118,7 @@ class Traverser(object):
                             % ", ".join(self.contexts[0].data.keys())),
                         filename=self.filename)
 
-    def _traverse_node(self, node):
+    def _traverse_node(self, node, source=None):
         if node is None:
             return JSWrapper(JSObject(), traverser=self, dirty=True)
 
@@ -163,6 +163,11 @@ class Traverser(object):
         action_result = None
         if action is not None:
             action_result = action(self, node)
+            # Special case, for immediate literals, define a source property.
+            # Used for determining when literals are passed directly
+            # as arguments.
+            if node["type"] == "Literal":
+                action_result.value.source = source
 
             if DEBUG:
                 action_debug = "continue"
@@ -312,7 +317,7 @@ class Traverser(object):
 
         # Build out the wrapper object from the global definition.
         result = JSWrapper(is_global=True, traverser=self, lazy=True)
-        result.value = entity
+        result.value = entity.copy()
         result = actions._expand_globals(self, result)
 
         if "context" in entity:
@@ -362,12 +367,12 @@ class Traverser(object):
 
     def error(self, **kwargs):
         err_kwargs = self._err_kwargs(kwargs)
-        self.err.error(**err_kwargs)
+        return self.err.error(**err_kwargs)
 
     def warning(self, **kwargs):
         err_kwargs = self._err_kwargs(kwargs)
-        self.err.warning(**err_kwargs)
+        return self.err.warning(**err_kwargs)
 
     def notice(self, **kwargs):
         err_kwargs = self._err_kwargs(kwargs)
-        self.err.notice(**err_kwargs)
+        return self.err.notice(**err_kwargs)

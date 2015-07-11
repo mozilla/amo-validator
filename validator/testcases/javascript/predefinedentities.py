@@ -438,11 +438,24 @@ INTERFACES = {
                 "add-ons. Please use the 'sdk/system/events' module "
                 "instead.")},
     u"nsIPrefBranch":
-        {"value": {method: {"return": instanceactions.set_preference}
+        {"value": dict(
+            tuple((method, {"return": instanceactions.set_preference})
                    for method in (u"setBoolPref",
                                   u"setCharPref",
                                   u"setComplexValue",
-                                  u"setIntPref")}},
+                                  u"setIntPref",
+                                  u"clearUserPref",
+                                  u"deleteBranch",
+                                  u"resetBranch")) +
+            tuple((method, {"return": instanceactions.get_preference})
+                   for method in (u"getBoolPref",
+                                  u"getCharPref",
+                                  u"getChildList",
+                                  u"getComplexValue",
+                                  u"getFloatPref",
+                                  u"getIntPref",
+                                  u"getPrefType",
+                                  u"prefHasUserValue")))},
     u"nsIResProtocolHandler":
         {"value":
             {u"setSubstitution":
@@ -877,7 +890,18 @@ GLOBAL_ENTITIES = {
     u"Cu": {"readonly": False,
             "value":
                 lambda t: GLOBAL_ENTITIES["Components"]["value"]["utils"]},
+
+    # From Services.jsm.
     u"Services": {"value": SERVICES},
+
+    # From Preferences.jsm.
+    # TODO: Support calls that return instances of this object which
+    # operate on non-root branches.
+    u"Preferences": {"value": {
+        u"get": {"return": instanceactions.get_preference},
+        u"reset": {"return": instanceactions.set_preference},
+        u"resetBranch": {"return": instanceactions.set_preference},
+        u"set": {"return": instanceactions.set_preference}}},
 
     u"AddonManager": {
         "readonly": False,
