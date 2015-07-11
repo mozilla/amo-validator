@@ -42,12 +42,15 @@ DEFINITIONS = {
     "ForStatement": node(branches=("init", "test", "update", "body"),
                          is_block=True),
     "ForInStatement": node(branches=("left", "right", "body"), is_block=True),
+    "ForOfStatement": node(branches=("left", "right", "body"), is_block=True),
 
     "FunctionDeclaration": node(branches=("body", ), dynamic=True,
                                 action=actions._define_function,
                                 is_block=True),
     "VariableDeclaration": node(branches=("declarations", ),
                                 action=actions._define_var),
+    "LetStatement": node(branches=("head", "body"),
+                         action=actions._define_var),
 
     "ThisExpression": node(action=actions._get_this, returns=True),
     "ArrayExpression": node(branches=("elements", ),

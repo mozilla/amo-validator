@@ -233,7 +233,11 @@ def _define_var(traverser, node):
     traverser._debug("VARIABLE_DECLARATION")
     traverser.debug_level += 1
 
-    for declaration in node["declarations"]:
+    declarations = (node["declarations"] if "declarations" in node
+                    else node["head"])
+
+    kind = node.get("kind", "let")
+    for declaration in declarations:
 
         # It could be deconstruction of variables :(
         if declaration["id"]["type"] == "ArrayPattern":
@@ -313,13 +317,16 @@ def _define_var(traverser, node):
 
             if not isinstance(var_value, JSWrapper):
                 var = JSWrapper(value=var_value,
-                                const=node["kind"] == "const",
+                                const=kind == "const",
                                 traverser=traverser)
             else:
                 var = var_value
-                var.const = node["kind"] == "const"
+                var.const = kind == "const"
 
-            traverser._declare_variable(var_name, var, type_=node["kind"])
+            traverser._declare_variable(var_name, var, type_=kind)
+
+    if "body" in node:
+        traverser._traverse_node(node["body"])
 
     traverser.debug_level -= 1
 

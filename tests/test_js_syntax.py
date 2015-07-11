@@ -82,17 +82,42 @@ def test_blocks_evaluated():
         "if (true) ; else { %s }",
         "while (true) { %s }",
         "do { %s } while (true)",
+
         "for (;;) { %s }",
+
+        "for (x=%s;;) {}",
+        "for (let x=%s;;) {}",
+        "for (var x=%s;;) {}",
+        "for (const x=%s;;) {}",
+
+        "for (let x=foo;;) { %s }",
+        "for (var x=foo;;) { %s }",
+
+        "for (; %s;) {}",
+        "for (;; %s) {}",
+
+        "for (let x in y) { %s }",
+        "for (let x of y) { %s }",
+        "for (let x in (%s)) {}",
+        "for (let x of (%s)) {}",
+
         "try { %s } catch (e) {}",
         "try {} catch (e) { %s }",
         "try {} finally { %s }",
         "try {} catch (e if %s) {}",
+        "let x = %s",
+        "var x = %s",
+        "const x = %s",
     )
 
-    for block in BLOCKS:
+    def test(block):
         err = _do_test_raw(block % EVIL)
-        eq_(err.message_count, 1)
+        assert err.message_count == 1, \
+            "Missing expected failure for block: %s" % block
         eq_(err.warnings[0]["id"], ID)
+
+    for block in BLOCKS:
+        yield test, block
 
 
 class TestTemplateString(TestCase):
