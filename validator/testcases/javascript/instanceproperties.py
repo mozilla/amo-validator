@@ -1,10 +1,11 @@
 import re
 import types
 
-from validator.compat import (FX10_DEFINITION, FX13_DEFINITION,
-                              FX18_DEFINITION, FX30_DEFINITION)
-from validator.constants import BUGZILLA_BUG, EVENT_ASSIGNMENT
+import actions
 import jstypes
+from validator.compat import (FX10_DEFINITION, FX13_DEFINITION,
+                              FX30_DEFINITION)
+from validator.constants import BUGZILLA_BUG, EVENT_ASSIGNMENT
 
 
 JS_URL = re.compile("href=[\'\"]javascript:")
@@ -38,18 +39,18 @@ def _set_HTML_property(function, new_value, traverser):
                     warning="Event handler assignment via %s" % function,
                     description=("When assigning event handlers, %s "
                                  "should never be used. Rather, use a "
-                                 "proper technique, like addEventListener." %
-                                     function,
-                                 "Event handler code: %s" %
-                                     literal_value.encode("ascii", "replace")),
+                                 "proper technique, like addEventListener."
+                                 % function,
+                                 "Event handler code: %s"
+                                 % literal_value.encode("ascii", "replace")),
                     signing_severity="medium")
             elif ("<script" in literal_value or
                   JS_URL.search(literal_value)):
                 traverser.err.warning(
                     err_id=("testcases_javascript_instancetypes",
                             "set_%s" % function, "script_assignment"),
-                    warning="Scripts should not be created with `%s`" %
-                                function,
+                    warning="Scripts should not be created with `%s`"
+                            % function,
                     description="`%s` should not be used to add scripts to "
                                 "pages via script tags or JavaScript URLs. "
                                 "Instead, use event listeners and external "
@@ -69,8 +70,8 @@ def _set_HTML_property(function, new_value, traverser):
         traverser.err.warning(
             err_id=("testcases_javascript_instancetypes", "set_%s" % function,
                     "variable_assignment"),
-            warning="Markup should not be passed to `%s` dynamically." %
-                        function,
+            warning="Markup should not be passed to `%s` dynamically."
+                    % function,
             description="Due to both security and performance concerns, "
                         "%s may not be set using dynamic values which have "
                         "not been adequately sanitized. This can lead to "
@@ -88,7 +89,7 @@ def set_on_event(new_value, traverser):
     is_literal = new_value.is_literal()
 
     if (is_literal and
-        isinstance(new_value.get_literal_value(), types.StringTypes)):
+            isinstance(new_value.get_literal_value(), types.StringTypes)):
         traverser.warning(
             err_id=("testcases_javascript_instancetypes", "set_on_event",
                     "on*_str_assignment"),
@@ -114,8 +115,8 @@ def get_isElementContentWhitespace(traverser):
         err_id=("testcases_javascript_instanceproperties", "get_iECW"),
         error="isElementContentWhitespace property removed in Gecko 10.",
         description='The "isElementContentWhitespace" property has been '
-                    'removed. See %s for more information.' %
-                        BUGZILLA_BUG % 687422,
+                    'removed. See %s for more information.'
+                    % BUGZILLA_BUG % 687422,
         filename=traverser.filename,
         line=traverser.line,
         column=traverser.position,
@@ -149,6 +150,7 @@ def _get_xml(name):
     bugs = {"xmlEncoding": 687426,
             "xmlStandalone": 693154,
             "xmlVersion": 693162}
+
     def wrapper(traverser):
         traverser.err.error(
             err_id=("testcases_javascript_instanceproperties", "_get_xml",
@@ -202,6 +204,30 @@ def get_DOM_VK_ENTER(traverser):
         tier=5)
 
 
+def set_contentScript(value, traverser):
+    """Warns when values are assigned to the `contentScript` properties,
+    which are essentially the same as calling `eval`."""
+
+    if value.is_literal():
+        content_script = actions._get_as_str(value)
+
+        # Avoid import loop.
+        from validator.testcases.scripting import test_js_file
+        test_js_file(
+            traverser.err, traverser.filename, content_script,
+            line=traverser.line, context=traverser.context)
+    else:
+        traverser.warning(
+            err_id=("testcases_javascript_instanceproperties",
+                    "contentScript", "set_non_literal"),
+            warning="`contentScript` properties should not be used",
+            description="Creating content scripts from dynamic values "
+                        "is dangerous and error-prone. Please use a separate "
+                        "JavaScript file, along with the "
+                        "`contentScriptFile` property instead.",
+            signing_severity="high")
+
+
 OBJECT_DEFINITIONS = {
     "_endMarker": {"get": startendMarker,
                    "set": startendMarker},
@@ -209,6 +235,7 @@ OBJECT_DEFINITIONS = {
                      "set": startendMarker},
     "innerHTML": {"set": set_innerHTML},
     "outerHTML": {"set": set_outerHTML},
+    "contentScript": {"set": set_contentScript},
     "isElementContentWhitespace": {"get": get_isElementContentWhitespace},
     "xmlEncoding": _get_xml("xmlEncoding"),
     "xmlStandalone": _get_xml("xmlStandalone"),
@@ -219,20 +246,17 @@ OBJECT_DEFINITIONS = {
 }
 
 
-def get_operation(mode, property):
+def get_operation(mode, prop):
     """
     This returns the object definition function for a particular property
     or mode. mode should either be 'set' or 'get'.
     """
 
-    if (property in OBJECT_DEFINITIONS and
-        mode in OBJECT_DEFINITIONS[property]):
+    if prop in OBJECT_DEFINITIONS and mode in OBJECT_DEFINITIONS[prop]:
+        return OBJECT_DEFINITIONS[prop][mode]
 
-        return OBJECT_DEFINITIONS[property][mode]
-
-    elif mode == "set" and unicode(property).startswith("on"):
+    elif mode == "set" and unicode(prop).startswith("on"):
         # We can't match all of them manually, so grab all the "on*" properties
         # and funnel them through the set_on_event function.
 
         return set_on_event
-
