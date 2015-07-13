@@ -1,25 +1,22 @@
 import argparse
 import json
-import os
 import sys
-import zipfile
-from StringIO import StringIO
 
+from validator import constants
 from validator.validate import validate
-from constants import *
 
 
 def main():
     "Main function. Handles delegation to other functions."
 
-    expectations = {"any": PACKAGE_ANY,
-                    "extension": PACKAGE_EXTENSION,
-                    "theme": PACKAGE_THEME,
-                    "dictionary": PACKAGE_DICTIONARY,
-                    "languagepack": PACKAGE_LANGPACK,
-                    "search": PACKAGE_SEARCHPROV,
-                    "multi": PACKAGE_MULTI,
-                    "webapp": PACKAGE_WEBAPP}
+    type_choices = {"any": constants.PACKAGE_ANY,
+                    "extension": constants.PACKAGE_EXTENSION,
+                    "theme": constants.PACKAGE_THEME,
+                    "dictionary": constants.PACKAGE_DICTIONARY,
+                    "languagepack": constants.PACKAGE_LANGUAGEPACK,
+                    "search": constants.PACKAGE_SEARCH,
+                    "multi": constants.PACKAGE_MULTI,
+                    "webapp": constants.PACKAGE_WEBAPP}
 
     # Parse the arguments that
     parser = argparse.ArgumentParser(
@@ -30,7 +27,7 @@ def main():
     parser.add_argument("-t",
                         "--type",
                         default="any",
-                        choices=expectations.keys(),
+                        choices=type_choices.keys(),
                         help="Type of addon you assume you're testing",
                         required=False)
     parser.add_argument("-o",
@@ -98,7 +95,7 @@ def main():
 
     # We want to make sure that the output is expected. Parse out the expected
     # type for the add-on and pass it in for validation.
-    if args.type not in expectations:
+    if args.type not in type_choices:
         # Fail if the user provided invalid input.
         print "Given expectation (%s) not valid. See --help for details" % \
                 args.type
@@ -106,9 +103,9 @@ def main():
 
     overrides = {}
     if args.target_minversion:
-       overrides['targetapp_minVersion'] = json.loads(args.target_minversion)
+        overrides['targetapp_minVersion'] = json.loads(args.target_minversion)
     if args.target_maxversion:
-       overrides['targetapp_maxVersion'] = json.loads(args.target_maxversion)
+        overrides['targetapp_maxVersion'] = json.loads(args.target_maxversion)
 
     for_appversions = None
     if args.for_appversions:
@@ -120,14 +117,14 @@ def main():
         print "Invalid timeout. Integer expected."
         sys.exit(1)
 
-    expectation = expectations[args.type]
+    expectation = type_choices[args.type]
     error_bundle = validate(args.package,
                             format=None,
                             approved_applications=args.approved_applications,
                             determined=args.determined,
                             listed=not args.selfhosted,
                             overrides=overrides,
-                            spidermonkey=SPIDERMONKEY_INSTALLATION,
+                            spidermonkey=constants.SPIDERMONKEY_INSTALLATION,
                             for_appversions=for_appversions,
                             expectation=expectation,
                             timeout=timeout)

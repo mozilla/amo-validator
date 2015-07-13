@@ -14,7 +14,8 @@ from validator.rdf import RDFException, RDFParser
 from validator.xpi import XPIManager
 from validator import decorator
 
-from constants import *
+from constants import (PACKAGE_ANY, PACKAGE_EXTENSION, PACKAGE_SEARCHPROV,
+                       PACKAGE_THEME, PACKAGE_WEBAPP)
 
 types = {0: "Unknown",
          1: "Extension/Multi-Extension",
@@ -39,15 +40,12 @@ class ValidationTimeout(Exception):
 
 
 def prepare_package(err, path, expectation=0, for_appversions=None,
-                    timeout=None):
+                    timeout=-1):
     """Prepares a file-based package for validation.
 
     timeout is the number of seconds before validation is aborted.
     If timeout is -1 then no timeout checking code will run.
     """
-    if not timeout:
-        timeout = 60  # seconds
-
     # Test that the package actually exists. I consider this Tier 0
     # since we may not even be dealing with a real file.
     if err and not os.path.isfile(path):
@@ -80,10 +78,6 @@ def prepare_package(err, path, expectation=0, for_appversions=None,
     validation_state = {'complete': False}
 
     def timeout_handler(signum, frame):
-        if validation_state['complete']:
-            # There is no need for a timeout. This might be the result of
-            # sequential validators, like in the test suite.
-            return
         ex = ValidationTimeout(timeout)
         log.error("%s; Package: %s" % (str(ex), path))
         raise ex
@@ -91,8 +85,17 @@ def prepare_package(err, path, expectation=0, for_appversions=None,
     if timeout != -1:
         signal.signal(signal.SIGALRM, timeout_handler)
         signal.setitimer(signal.ITIMER_REAL, timeout)
-    output = test_package(err, package, path, expectation,
-                          for_appversions)
+
+    try:
+        output = test_package(err, package, path, expectation,
+                              for_appversions)
+    finally:
+        # Remove timers and signal handlers regardless of whether
+        # we've completed successfully or the timer has fired.
+        if timeout != -1:
+            signal.setitimer(signal.ITIMER_REAL, 0)
+            signal.signal(signal.SIGALRM, signal.SIG_DFL)
+
     validation_state['complete'] = True
     package.close()
 
@@ -156,7 +159,7 @@ def test_package(err, file_, name, expectation=PACKAGE_ANY,
     if package.extension in assumed_extensions:
         assumed_type = assumed_extensions[package.extension]
         # Is the user expecting a different package type?
-        if not expectation in (PACKAGE_ANY, assumed_type):
+        if expectation not in (PACKAGE_ANY, assumed_type):
             err.error(("main",
                        "test_package",
                        "unexpected_type"),
@@ -224,14 +227,14 @@ def _load_install_rdf(err, package, expectation):
 
     # Compare the results of the low-level type detection to
     # that of the expectation and the assumption.
-    if not expectation in (PACKAGE_ANY, results):
+    if expectation not in (PACKAGE_ANY, results):
         err.warning(
             err_id=("main", "test_package", "extension_type_mismatch"),
             warning="Extension Type Mismatch",
             description=("We detected that the add-on's type does not match "
                          "the expected type.",
                          'Type "%s" expected, found "%s"' %
-                             (types[expectation], types[results])))
+                         (types[expectation], types[results])))
 
 
 def _load_package_json(err, package, expectation):
