@@ -2,8 +2,12 @@
 Various tests related to validation for automated signing.
 """
 
+from nose.tools import eq_
+
 from .helper import RegexTestCase
 from .js_helper import TestCase
+
+from validator.testcases import regex
 
 
 class TestSearchService(TestCase, RegexTestCase):
@@ -70,7 +74,7 @@ class TestSearchService(TestCase, RegexTestCase):
 
         def test(pref, severity):
             warnings = [
-                {"message": "Potentially unsafe preference branch referenced",
+                {"message": "Attempt to set a dangerous preference",
                  "signing_severity": severity}]
 
             self.setUp()
@@ -124,6 +128,86 @@ class TestSearchService(TestCase, RegexTestCase):
             set('tup.homepage', 'http://evil.com');
         """)
         self.assert_failed(with_warnings=warnings)
+
+    def test_pref_literals_reported_once(self):
+        """Tests that warnings for preference literals are reported only when
+        necessary."""
+
+        CALL_WARNING = {"id": ("testcases_javascript_actions",
+                               "_call_expression", "called_set_preference")}
+
+        LITERAL_WARNING = {"id": regex.PREFERENCE_ERROR_ID}
+
+        SUMMARY = {"trivial": 0,
+                   "low": 0,
+                   "medium": 0,
+                   "high": 1}
+
+        # Literal without pref set call.
+        self.run_script("""
+            frob('browser.startup.homepage');
+        """)
+
+        self.assert_failed(with_warnings=[LITERAL_WARNING])
+        eq_(len(self.err.warnings), 1)
+        eq_(self.err.signing_summary, SUMMARY)
+
+        # Literal with pref set call.
+        for method in ("Services.prefs.setCharPref", "Preferences.set"):
+            self.setUp()
+            self.run_script("""
+                %s('browser.startup.homepage', '');
+            """ % method)
+
+            self.assert_failed(with_warnings=[CALL_WARNING])
+            eq_(len(self.err.warnings), 1)
+            eq_(self.err.signing_summary, SUMMARY)
+
+        # Literal with pref set call on different line.
+        self.setUp()
+        self.run_script("""
+            let bsh = 'browser.startup.homepage';
+            Services.prefs.setCharPref(bsh, '');
+        """)
+
+        SUMMARY["high"] += 1
+        self.assert_failed(with_warnings=[CALL_WARNING, LITERAL_WARNING])
+        eq_(len(self.err.warnings), 2)
+        eq_(self.err.signing_summary, SUMMARY)
+
+    def test_get_preference_calls_ignored(self):
+        """Tests that string literals provably used only to read, but not
+        write, preferences do not cause warnings."""
+
+        LITERAL_WARNING = {"id": regex.PREFERENCE_ERROR_ID}
+
+        # Literal without pref get or set call.
+        self.run_script("""
+            frob('browser.startup.homepage');
+        """)
+
+        self.assert_failed(with_warnings=[LITERAL_WARNING])
+        eq_(len(self.err.warnings), 1)
+
+        # Literal passed directly pref get call.
+        for method in ("Services.prefs.getCharPref",
+                       "Preferences.get"):
+            self.setUp()
+            self.run_script("""
+                let thing = %s('browser.startup.homepage');
+            """ % method)
+
+            eq_(len(self.err.warnings), 0)
+
+        # Literal passed indirectly pref get call.
+        self.setUp()
+        self.run_script("""
+            let bsh = 'browser.sta' + 'rtup.homepage';
+            let thing = Services.prefs.getCharPref(bsh);
+        """)
+
+        self.assert_failed(with_warnings=[LITERAL_WARNING])
+        eq_(len(self.err.warnings), 1)
 
     def test_profile_filenames(self):
         """

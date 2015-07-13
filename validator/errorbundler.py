@@ -31,6 +31,8 @@ class ErrorBundle(object):
         version-dependant tests should be run.
     """
 
+    SEVERITIES = {"trivial", "low", "medium", "high"}
+
     def __init__(self, determined=True, listed=True, instant=False,
                  overrides=None, spidermonkey=False, for_appversions=None):
 
@@ -73,8 +75,6 @@ class ErrorBundle(object):
 
         self.supported_versions = self.for_appversions = for_appversions
 
-    SEVERITIES = {"trivial", "low", "medium", "high"}
-
     def _message(type_, message_type):
         def wrap(self, *args, **kwargs):
             message = {
@@ -106,7 +106,7 @@ class ErrorBundle(object):
             self._save_message(getattr(self, type_), type_, message,
                                from_merge=kwargs.get("from_merge"),
                                context=kwargs.get("context"))
-            return self
+            return message
 
         wrap.__name__ = message_type
         return wrap
@@ -115,6 +115,21 @@ class ErrorBundle(object):
     error = _message("errors", "error")
     warning = _message("warnings", "warning")
     notice = _message("notices", "notice")
+
+    def drop_message(self, message):
+        """Drop the given message object from the appropriate message list.
+
+        Returns True if the message was found, otherwise False."""
+
+        for type_ in "errors", "warnings", "notices":
+            list_ = getattr(self, type_)
+            if message in list_:
+                list_.remove(message)
+                if "signing_severity" in message:
+                    self.signing_summary[message["signing_severity"]] -= 1
+                return True
+
+        return False
 
     def set_tier(self, tier):
         "Updates the tier and ending tier"

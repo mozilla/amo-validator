@@ -444,19 +444,58 @@ def create_preference_branch(arguments, traverser, node, wrapper):
             return res
 
 
+def drop_pref_messages(wrapper):
+    """Drop any preference-related messages for the given wrapper, if that
+    wrapper is an immediate literal that was passed as an argument, and the
+    messages are on the same line as the traverser.
+
+    Used to ignore preference warnings when the strings are provably being
+    read rather than written, or when they're provably being written and
+    have a more useful, redundant warning already.
+    """
+
+    traverser = wrapper.traverser
+
+    if wrapper.value.source == "arguments":
+        # Avoid import loop.
+        from validator.testcases.regex import PREFERENCE_ERROR_ID
+
+        for msg in wrapper.value.messages:
+            if (msg["id"] == PREFERENCE_ERROR_ID and
+                    (msg["file"], msg["line"]) == (
+                        traverser.filename, traverser.line)):
+                traverser.err.drop_message(msg)
+
+
+def get_preference(wrapper, arguments, traverser):
+    """Tests get preference calls, and removes preference write warnings
+    when they are not necessary."""
+
+    if len(arguments) >= 1:
+        arg = traverser._traverse_node(arguments[0])
+        if arg.is_literal():
+            drop_pref_messages(arg)
+
+
 def set_preference(wrapper, arguments, traverser):
     """Tests set preference calls for non-root preferences branches against
     dangerous values."""
 
-    parent = getattr(wrapper, "parent", None)
-    if not (arguments and parent and parent.is_global and
-            parent.value.get("preference_branch")):
+    if len(arguments) < 1:
         return
 
+    parent = getattr(wrapper, "parent", None)
     arg = traverser._traverse_node(arguments[0])
     if arg.is_literal():
-        pref = (parent.value["preference_branch"] +
-                actions._get_as_str(arg))
+        pref = actions._get_as_str(arg)
+
+        # If we're being called on a preference branch other than the root,
+        # prepend its branch name to the passed preference name.
+        if (parent and parent.is_global and
+                parent.value.get("preference_branch")):
+            pref = parent.value["preference_branch"] + pref
+        else:
+            drop_pref_messages(arg)
 
         kw = {"err_id": ("testcases_javascript_actions",
                          "_call_expression", "called_set_preference"),
@@ -464,7 +503,7 @@ def set_preference(wrapper, arguments, traverser):
 
         # Local import to prevent import loop.
         from validator.testcases.regex import validate_pref
-        validate_pref(pref, traverser, kw)
+        validate_pref(pref, traverser, kw, wrapper=arg)
 
 
 INSTANCE_DEFINITIONS = {
