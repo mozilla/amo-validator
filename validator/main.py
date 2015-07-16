@@ -13,8 +13,8 @@ def main():
                     "extension": constants.PACKAGE_EXTENSION,
                     "theme": constants.PACKAGE_THEME,
                     "dictionary": constants.PACKAGE_DICTIONARY,
-                    "languagepack": constants.PACKAGE_LANGUAGEPACK,
-                    "search": constants.PACKAGE_SEARCH,
+                    "languagepack": constants.PACKAGE_LANGPACK,
+                    "search": constants.PACKAGE_SEARCHPROV,
                     "multi": constants.PACKAGE_MULTI,
                     "webapp": constants.PACKAGE_WEBAPP}
 
