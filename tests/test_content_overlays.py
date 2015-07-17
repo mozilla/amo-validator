@@ -27,8 +27,32 @@ def test_marking_overlays():
     assert not err.failed()
 
     marked_scripts = err.get_resource("marked_scripts")
-    print marked_scripts
-    assert marked_scripts
+
+    eq_(marked_scripts, set(["chrome://ns1/foo.js",
+                             "chrome://ns1/bar.js",
+                             "chrome://asdf/foo.js"]))
+
+
+def test_marking_overlays_root_package():
+    """
+    Tests that '/' resolves correctly as a chrome content package.
+    """
+
+    err = ErrorBundle()
+    err.supported_versions = {}
+    manifest = ChromeManifest("""
+    content ns1 /
+    overlay chrome://foo chrome://ns1/content/main.xul
+    """, "chrome.manifest")
+    err.save_resource("chrome.manifest", manifest)
+    err.save_resource("chrome.manifest_nopush", manifest)
+
+    xpi = MockXPI({"main.xul": "tests/resources/content/script_list.xul"})
+
+    content.test_packed_packages(err, xpi)
+    assert not err.failed()
+
+    marked_scripts = err.get_resource("marked_scripts")
 
     eq_(marked_scripts, set(["chrome://ns1/foo.js",
                              "chrome://ns1/bar.js",

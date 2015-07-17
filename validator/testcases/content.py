@@ -1,4 +1,5 @@
 import hashlib
+import os
 import re
 from StringIO import StringIO
 
@@ -12,7 +13,8 @@ import validator.testcases.markup.csstester as testendpoint_css
 import validator.testcases.scripting as testendpoint_js
 import validator.testcases.langpack as testendpoint_langpack
 from validator.xpi import XPIManager
-from validator.constants import *
+from validator.constants import (PACKAGE_LANGPACK, PACKAGE_SUBPACKAGE,
+                                 PACKAGE_THEME)
 
 
 FLAGGED_FILES = set([".DS_Store", "Thumbs.db"])
@@ -70,8 +72,7 @@ def test_packed_packages(err, xpi_package=None):
     for name in xpi_package:
 
         # Warn for things like __MACOSX directories and .old files.
-        if ("__MACOSX" in name or
-            name.split("/")[-1].startswith(".")):
+        if "__MACOSX" in name or name.split("/")[-1].startswith("."):
             err.warning(
                 err_id=("testcases_content", "test_packed_packages",
                         "hidden_files"),
@@ -148,9 +149,20 @@ def test_packed_packages(err, xpi_package=None):
                 for script in parser.found_scripts:
                     # Change the URL to an absolute URL.
                     script = _make_script_absolute(reversed_chrome_url, script)
-                    # Mark the script as potentially pollutable.
-                    marked_scripts.add(script)
-                    err.save_resource("marked_scripts", marked_scripts)
+                    if script:
+                        # Mark the script as potentially pollutable.
+                        marked_scripts.add(script)
+                        err.save_resource("marked_scripts", marked_scripts)
+                    else:
+                        err.warning(
+                            err_id=("testcases_content",
+                                    "test_packed_packages",
+                                    "invalid_chrome_url"),
+                            warning="Invalid chrome URL",
+                            description="The referenced chrome: URL "
+                                        "could not be resolved to a "
+                                        "script file.",
+                            filename=name)
 
         else:
             # For all other files, simply throw it at _process_file.
@@ -246,8 +258,8 @@ def test_packed_scripts(err, xpi_package):
                 # Run the standard script tests on the script, but mark the
                 # script as pollutable if its chrome URL is marked as being so.
                 testendpoint_js.test_js_file(
-                        err, script, file_data,
-                        pollutable=reversed_script in marked_scripts)
+                    err, script, file_data,
+                    pollutable=reversed_script in marked_scripts)
             else:
                 # Run the standard script tests on the scripts.
                 testendpoint_js.test_js_file(err, script, file_data)
@@ -362,13 +374,12 @@ def _process_file(err, xpi_package, name, file_data, name_lower,
 def _make_script_absolute(xul_path, script):
     """Returns the absolute chrome URL for a script's URL."""
 
-    if not xul_path:
-        raise Exception("Reference URL not provided for script root "
-                        "resolution.")
-
     # Ignore absolute URLs.
-    if script.startswith("chrome://"):
+    if re.match(r"[a-z-]+:", script, re.IGNORECASE):
         return script
+
+    if not xul_path:
+        return
 
     if script.startswith("/"):
         xul_path_base = xul_path[9:]
