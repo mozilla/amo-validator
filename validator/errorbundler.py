@@ -94,6 +94,7 @@ class ErrorBundle(object):
             }
             for field in ("tier", "for_appversions", "compatibility_type", ):
                 message[field] = kwargs.get(field)
+
             if "signing_severity" in kwargs:
                 severity = kwargs["signing_severity"]
 
@@ -102,6 +103,8 @@ class ErrorBundle(object):
                 if not kwargs.get("from_merge"):
                     self.signing_summary[severity] += 1
                 message["signing_severity"] = severity
+            if "signing_help" in kwargs:
+                message["signing_help"] = kwargs["signing_help"]
 
             self._save_message(getattr(self, type_), type_, message,
                                from_merge=kwargs.get("from_merge"),
@@ -306,6 +309,7 @@ class ErrorBundle(object):
                     "editors_only",
                     "for_appversions",
                     "line",
+                    "signing_help",
                     "signing_severity",
                     "tier")
 
@@ -455,6 +459,12 @@ class ErrorBundle(object):
                 verbose_output.append(
                     ("\tAutomated signing severity: %s" %
                      message["signing_severity"]))
+
+            if message.get("signing_help"):
+                verbose_output.append(
+                    "\tSuggestions for passing automated signing:")
+                verbose_output.append(
+                    self._flatten_list(message["signing_help"]))
 
             # Show the user what tier we're on
             verbose_output.append("\tTier:\t%d" % message["tier"])

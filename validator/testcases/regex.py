@@ -200,6 +200,14 @@ class NewTabRegexTests(RegexTestGenerator):
                 "primary purpose.",
                 "If this code does not change the behavior of the new tab "
                 "page, it may be ignored."),
+             "signing_help":
+                "Extensions may not programmatically override the new tab "
+                "page. If this code has another purpose, we nonetheless "
+                "recommend against testing URLs for these values, since "
+                "results can be unpredictable, and better options usually "
+                "exist. If you cannot avoid making these tests, please leave "
+                "this code unchanged, and it will be ignored in future "
+                "submissions.",
              "signing_severity": "low"})
 
 
@@ -630,7 +638,6 @@ PROFILE_FILENAMES = (
     "extensions.json",
     "extensions.sqlite",
     "formhistory.sqlite",
-    "healthreport/*",
     "healthreport.sqlite",
     "httpDataUsage.dat",
     "key3.db",
@@ -642,7 +649,6 @@ PROFILE_FILENAMES = (
     "places.sqlite-wal",
     "pluginreg.dat",
     "prefs.js",
-    "user.js",
     "safebrowsing/*",
     "search-metadata.json",
     "search.json",
@@ -653,14 +659,17 @@ PROFILE_FILENAMES = (
     "sessionstore.js",
     "signons.sqlite",
     "startupCache/*",
-    "storage/*",
     "urlclassifier.pset",
     "urlclassifier3.sqlite",
     "urlclassifierkey3.txt",
-    "webapps/*",
+    "user.js",
     "webappsstore.sqlite",
     "xpti.dat",
     "xulstore.json")
+# These tests have proved too generic, and will need fine tuning:
+#   "healthreport/*",
+#   "storage/*",
+#   "webapps/*",
 
 
 def munge_filename(name):
@@ -683,6 +692,11 @@ STRING_REGEXPS = (
                        "directly accessed by add-ons. In many cases, an "
                        "equivalent API is available and should be used "
                        "instead.",
+        "signing_help": "Please avoid touching files in the user profile "
+                        "which do not belong to your add-on. If the effects "
+                        "that you are trying to achieve cannot be replicated "
+                        "with a built-in API, we strongly encourage you to "
+                        "remove this functionality.",
         "signing_severity": "low"}),
 
     # The names of potentially dangerous category names for the
@@ -721,9 +735,37 @@ PREF_REGEXPS = (
                         "the `%s` preference branch" % branch)))
         for branch, reason in BANNED_PREF_BRANCHES))
 
-STRING_REGEXPS += PREF_REGEXPS
+# For tests in literal strings, add help text suggesting passing the
+# preference directly to reference getter functions.
+PREF_STRING_HELP = (
+    "If you are reading, but not writing, this preference, please consider "
+    "passing a string literal directly to `Preferences.get()` or "
+    "`nsIPrefBranch.get*Pref`.")
 
-# We only want to test this one when we're certain it's a preference.
+
+def maybe_tuple(value):
+    """Return `value` as a tuple. If it is already a tuple, return it
+    unchanged. Otherwise return a 1-element tuple containing `value`."""
+
+    if isinstance(value, tuple):
+        return value
+    return (value,)
+
+
+def add_pref_help(desc):
+    desc = desc.copy()
+    for key in "description", "signing_help":
+        if key in desc:
+            desc[key] = maybe_tuple(desc[key]) + maybe_tuple(PREF_STRING_HELP)
+
+    return desc
+
+STRING_REGEXPS += tuple((pattern, add_pref_help(desc))
+                        for pattern, desc in PREF_REGEXPS)
+
+# The following patterns should only be flagged in strings we're certain are
+# being passed to preference setter functions, so add them after appending
+# the others to the literal string tests.
 PREF_REGEXPS += (
     (r".*password.*",
      {"err_id": PREFERENCE_ERROR_ID,

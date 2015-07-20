@@ -8,6 +8,7 @@ from .helper import RegexTestCase
 from .js_helper import TestCase
 
 from validator.testcases import regex
+from validator.testcases.regex import maybe_tuple
 
 
 class TestSearchService(TestCase, RegexTestCase):
@@ -208,6 +209,32 @@ class TestSearchService(TestCase, RegexTestCase):
 
         self.assert_failed(with_warnings=[LITERAL_WARNING])
         eq_(len(self.err.warnings), 1)
+
+    def test_pref_help_added_to_bare_strings(self):
+        """Test that a help messages about passing literals directly to
+        APIs is added only to bare strings."""
+
+        self.run_script("""
+            'browser.startup.homepage';
+            Preferences.set('browser.startup.homepage');
+        """)
+
+        warnings = self.err.warnings
+        assert warnings[0]['id'] == regex.PREFERENCE_ERROR_ID
+        assert warnings[1]['id'] == ("testcases_javascript_actions",
+                                     "_call_expression",
+                                     "called_set_preference")
+
+        # Check that descriptions and help are the same, except for
+        # an added message in the bare string.
+        for key in "description", "signing_help":
+            val1 = maybe_tuple(warnings[0][key])
+            val2 = maybe_tuple(warnings[1][key])
+
+            eq_(val2, val1[:len(val2)])
+
+            # And that the added message is what we expect.
+            assert "Preferences.get" in val1[-1]
 
     def test_profile_filenames(self):
         """

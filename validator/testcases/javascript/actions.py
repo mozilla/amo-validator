@@ -504,6 +504,12 @@ def _call_settimeout(a, t, e):
                 "In order to prevent vulnerabilities, the `setTimeout` "
                 "and `setInterval` functions should be called only with "
                 "function expressions as their first argument.",
+            "signing_help": (
+                "Please do not ever call `setTimeout` or `setInterval` with "
+                "string arguments. If you are passing a function which is "
+                "not being correctly detected as such, please consider "
+                "passing a closure or arrow function, which in turn calls "
+                "the original function."),
             "signing_severity": "high"}
 
 

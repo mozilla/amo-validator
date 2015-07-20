@@ -29,6 +29,19 @@ def _set_HTML_property(function, new_value, traverser):
         if isinstance(literal_value, types.StringTypes):
             # Static string assignments
 
+            HELP = ("Please avoid including JavaScript fragments in "
+                    "HTML stored in JavaScript strings. Event listeners "
+                    "should be added via `addEventListener` after the HTML "
+                    "has been injected.",
+                    "Injecting <script> nodes should be avoided when at all "
+                    "possible. If you cannot avoid loading a script directly "
+                    "into a content document, please consider doing so via "
+                    "the subscript loader (http://mzl.la/1VGxOPC) instead. "
+                    "If the subscript loader is not available, then the "
+                    "script nodes should be created using `createElement`, "
+                    "and should use a `src` attribute pointing to a "
+                    "`resource:` URL within your extension.")
+
             # Test for on* attributes and script tags.
             if EVENT_ASSIGNMENT.search(literal_value.lower()):
                 traverser.warning(
@@ -41,6 +54,7 @@ def _set_HTML_property(function, new_value, traverser):
                                  % function,
                                  "Event handler code: %s"
                                  % literal_value.encode("ascii", "replace")),
+                    signing_help=HELP,
                     signing_severity="medium")
             elif ("<script" in literal_value or
                   JS_URL.search(literal_value)):
@@ -53,6 +67,7 @@ def _set_HTML_property(function, new_value, traverser):
                                 "pages via script tags or JavaScript URLs. "
                                 "Instead, use event listeners and external "
                                 "JavaScript." % function,
+                    signing_help=HELP,
                     signing_severity="medium")
             else:
                 # Everything checks out, but we still want to pass it through
@@ -96,6 +111,10 @@ def set_on_event(new_value, traverser):
                         "assigned by setting an on* property to a "
                         "string of JS code. Rather, consider using "
                         "addEventListener.",
+            signing_help="Please add event listeners using the "
+                         "`addEventListener` API. If the property you are "
+                         "assigning to is not an event listener, please "
+                         "consider renaming it, if at all possible.",
             signing_severity="medium")
     elif (not is_literal and isinstance(new_value.value, jstypes.JSObject) and
           "handleEvent" in new_value.value.data):
@@ -128,6 +147,14 @@ def set__exposedProps__(new_value, traverser):
             "scopes is dangerous, and has been deprecated. If objects "
             "must be exposed to unprivileged scopes, `cloneInto` or "
             "`exportFunction` should be used instead."),
+        signing_help="If you are using this API to expose APIs to content, "
+                     "please use `Components.utils.cloneInto`, or "
+                     "`Components.utils.exportFunction` "
+                     "(http://mzl.la/1fvvgm9). If you are using it "
+                     "for other purposes, please consider using a built-in "
+                     "message passing interface instead. Extensions which "
+                     "expose APIs to content will be required to go through "
+                     "manual code review for at least one submission.",
         signing_severity="high")
 
 
@@ -152,6 +179,8 @@ def set_contentScript(value, traverser):
                         "is dangerous and error-prone. Please use a separate "
                         "JavaScript file, along with the "
                         "`contentScriptFile` property instead.",
+            signing_help="Please do not use the `contentScript` property "
+                         "in any add-ons submitted for automated signing.",
             signing_severity="high")
 
 

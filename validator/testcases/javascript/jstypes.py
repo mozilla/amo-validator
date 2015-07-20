@@ -71,6 +71,15 @@ class JSObject(object):
                                 "result in serious security vulnerabilities. "
                                 "Please reconsider your use of unwrapped "
                                 "JS objects.",
+                    signing_help="Please avoid assigning to properties of "
+                                 "unwrapped objects from unprivileged scopes, "
+                                 "unless you are using an export API "
+                                 "(http://mzl.la/1fvvgm9) to expose API "
+                                 "functions to content scopes. "
+                                 "In this case, however, please note that "
+                                 "your add-on will be required to undergo "
+                                 "manual code review for at least one "
+                                 "submission.",
                     signing_severity="high")
 
         self.data[name] = value

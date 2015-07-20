@@ -9,7 +9,6 @@ import validator.unicodehelper as unicodehelper
 from validator.testcases.markup import csstester
 from validator.contextgenerator import ContextGenerator
 from validator.constants import *
-from validator.decorator import version_range
 
 DEBUG = False
 
@@ -77,7 +76,6 @@ class MarkupParser(HTMLParser):
         lines = data.split("\n")
 
         buffering = False
-        pline = 0
         for line in lines:
             self.line += 1
 
@@ -312,6 +310,14 @@ class MarkupParser(HTMLParser):
                         warning="Scripts must not be remote",
                         description="<script> tags must not be referenced to "
                                     "script files that are hosted remotely.",
+                        signing_help="Please do not attempt to load remote "
+                                     "scripts into any privileged contexts. "
+                                     "If you cannot avoid using remote "
+                                     "scripts, please consider loading a "
+                                     "remote document into an iframe, and "
+                                     "allow that document to load the "
+                                     "remote scripts that you need.",
+                        signing_severity="high",
                         filename=self.filename,
                         line=self.line,
                         context=self.context)

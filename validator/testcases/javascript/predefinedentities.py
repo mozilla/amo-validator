@@ -21,6 +21,12 @@ BANNED_IDENTIFIERS = {
         "Please use asynchronous callbacks instead wherever possible",
 }
 
+CUSTOMIZATION_API_HELP = (
+    "We are currently working to provide libraries and APIs to allow "
+    "extensions to modify these settings in ways that we can guarantee are "
+    "in-policy. In the interim, we recommend that you avoid changing these "
+    "settings altogether, if at all possible.")
+
 CUSTOMIZATION_PREF_MESSAGE = {
     "description": (
         "Extensions must not alter user preferences such as the current home "
@@ -29,6 +35,10 @@ CUSTOMIZATION_PREF_MESSAGE = {
         "be reverted when the extension is disabled or uninstalled.",
         "In nearly all cases, new values for these preferences should be "
         "set in the default preference branch, rather than the user branch."),
+    "signing_help":
+        "Add-ons which directly change these preferences must undergo at "
+        "manual code review for at least one submission. " +
+        CUSTOMIZATION_API_HELP,
     "signing_severity": "high",
 }
 
@@ -36,6 +46,11 @@ NETWORK_PREF_MESSAGE = {
     "description":
         "Changing network preferences may be dangerous, and often leads to "
         "performance costs.",
+    "signing_help":
+        "Changes to these preferences are strongly discouraged. If at all "
+        "possible, you should remove any reference to them from "
+        "your extension. Extensions which do modify these preferences "
+        "must undergo light manual code review for at least one submission.",
     "signing_severity": "low",
 }
 
@@ -45,6 +60,15 @@ SEARCH_PREF_MESSAGE = {
         "All such changes must be made only via the browser search service, "
         "and only after an explicit opt-in from the user. All such changes "
         "must be reverted when the extension is disabled or uninstalled.",
+    "signing_help": (
+        "You should remove all references to these preferences from your "
+        "code, and interact with search settings only via the "
+        "`Services.search` interface. Extensions which interact with these "
+        "preferences directly are not acceptable within the Firefox add-on "
+        "ecosystem.",
+        "Note, however, that extensions which change search settings even via "
+        "the search service must undergo manual code review for at least "
+        "one submission. " + CUSTOMIZATION_API_HELP),
     "signing_severity": "high",
 }
 
@@ -53,6 +77,11 @@ SECURITY_PREF_MESSAGE = {
         "Changing this preference may have severe security implications, and "
         "is forbidden under most circumstances.",
     "editors_only": True,
+    "signing_help": ("Extensions which alter these settings are allowed "
+                     "within the Firefox add-on ecosystem by exception "
+                     "only, and under extremely limited circumstances.",
+                     "Please remove any reference to these preference names "
+                     "from your add-on."),
     "signing_severity": "high",
 }
 
@@ -81,7 +110,7 @@ BANNED_PREF_BRANCHES = (
     # have to single out sub-branches.
     (u"security.", SECURITY_PREF_MESSAGE),
 
-    # Search, homepage, and ustomization preferences
+    # Search, homepage, and customization preferences
     (u"browser.newtab.url", CUSTOMIZATION_PREF_MESSAGE),
     (u"browser.newtabpage.enabled", CUSTOMIZATION_PREF_MESSAGE),
     (u"browser.search.defaultenginename", SEARCH_PREF_MESSAGE),
@@ -100,6 +129,10 @@ BANNED_PREF_BRANCHES = (
             "proxy filter is the recommended alternative: "
             "https://developer.mozilla.org/en-US/docs/Mozilla/Tech/XPCOM/"
             "Reference/Interface/nsIProtocolProxyService#registerFilter()",
+        "signing_help":
+            "Dynamic proxy configuration should be implemented via proxy "
+            "filters, as described above. This preference should not be "
+            "set, except directly by end users.",
         "signing_severity": "low"}),
     (u"network.proxy.", NETWORK_PREF_MESSAGE),
     (u"network.http.", NETWORK_PREF_MESSAGE),
@@ -173,6 +206,14 @@ ADDON_INSTALL_METHOD = {
             "such installations must be carefully reviewed to ensure "
             "their safety."),
         "editors_only": True,
+        "signing_help": (
+            "Rather than directly install other add-ons, you should offer "
+            "users the opportunity to install them via the normal web install "
+            "process, using an install link or button connected to the "
+            "`InstallTrigger` API: "
+            "https://developer.mozilla.org/en-US/docs/Web/API/InstallTrigger",
+            "Updates to existing add-ons should be provided via the "
+            "install.rdf `updateURL` mechanism."),
         "signing_severity": "high"},
 }
 
@@ -190,6 +231,10 @@ def search_warning(severity="medium", editors_only=False,
     return {"err_id": ("testcases_javascript_actions",
                        "search_service",
                        "changes"),
+            "signing_help":
+                "Add-ons which directly change search settings must undergo "
+                "manual code review for at least one submission. " +
+                CUSTOMIZATION_API_HELP,
             "signing_severity": severity,
             "editors_only": editors_only,
             "warning": message,
@@ -201,8 +246,15 @@ REGISTRY_WRITE = {"dangerous": {
                "windows_registry",
                "write"),
     "warning": "Writes to the registry may be dangerous",
-    "description": ("Writing to the registry can have many system-level "
-                    "consequences and requires careful review."),
+    "description": "Writing to the registry can have many system-level "
+                   "consequences and requires careful review.",
+    "signing_help": (
+        "Please store any settings relevant to your add-on within the "
+        "current Firefox profile, ideally using the preferences service."
+        "If you are intentionally changing system settings, consider "
+        "searching for a Firefox API which has a similar effect. If no such "
+        "API exists, we strongly discourage making any changes which affect "
+        "the system outside of the browser."),
     "signing_severity": "medium",
     "editors_only": True}}
 
@@ -378,6 +430,9 @@ INTERFACES = {
                 "method should always return its third argument in cases "
                 "when it is not supplying a specific proxy."),
             "editors_only": True,
+            "signing_help": "Due to the potential for unintended effects, "
+                            "any add-on which uses this API must undergo "
+                            "manual code review for at least one submission.",
             "signing_severity": "low"}}}},
     u"nsIWebBrowserPersist":
         {"value":
@@ -419,12 +474,27 @@ INTERFACE_ENTITIES = {u"nsIXMLHttpRequest":
                                    "dangerous and requires careful review "
                                    "by an administrative reviewer.",
                         "editors_only": True,
+                        "signing_help":
+                          "Consider alternatives to directly launching "
+                          "executables, such as loading a URL with an "
+                          "appropriate external protocol handler, making "
+                          "network requests to a local service, or using "
+                          "the (as a last resort) `nsIFile.launch()` method "
+                          "to open a file with the appropriate application.",
                         "signing_severity": "high",
                       }},
                       u"nsIDOMGeoGeolocation": {"dangerous":
                          "Use of the geolocation API by add-ons requires "
                          "prompting users for consent."},
                       u"nsIWindowsRegKey": {"dangerous": {
+                          "signing_help":
+                            "The information stored in many standard registry "
+                            "keys is available via built-in Firefox APIs, "
+                            "such as `Services.sysinfo`, `Services.dirsvc`, "
+                            "and the environment service "
+                            "(http://mzl.la/1OGgCF3). We strongly discourage "
+                            "extensions from reading registry information "
+                            "which is not available via other Firefox APIs.",
                           "signing_severity": "low",
                           "editors_only": True,
                           "description": (
@@ -440,6 +510,10 @@ DANGEROUS_CERT_DB = {
                    "and requires careful review by an "
                    "administrative reviewer.",
     "editors_only": True,
+    "signing_help": "Please avoid interacting with the certificate and trust "
+                    "databases if at all possible. Any add-ons which interact "
+                    "with these databases must undergo manual code review "
+                    "prior to signing.",
     "signing_severity": "high",
 }
 
@@ -549,6 +623,33 @@ for key, value in SERVICES.items():
     SERVICES[key] = {"value": partial(build_quick_xpcom,
                                       "getService", value)}
 
+DANGEROUS_EVAL = {
+    "err_id": ("javascript", "dangerous_global", "eval"),
+    "description": ("Evaluation of strings as code can lead to security "
+                    "vulnerabilities and performance issues, even in the "
+                    "most innocuous of circumstances. Please avoid using ",
+                    "`eval` and the `Function` constructor when at all "
+                    "possible.",
+                    "Alternatives are available for most use cases. See "
+                    "https://developer.mozilla.org/en-US/Add-ons/"
+                    "Overlay_Extensions/XUL_School/"
+                    "Appendix_C:_Avoid_using_eval_in_Add-ons "
+                    "for more information."),
+    "signing_help":
+        "Please try to avoid evaluating strings as code wherever possible. "
+        "Read over the linked document for suggested alternatives. "
+        "If you are referencing the `Function` constructor without calling "
+        "it, and cannot avoid continuing to do so, consider alternatives "
+        "such as calling `Object.getPrototypeOf` on an existing function "
+        "object.",
+    "signing_severity": "high"}
+
+FUNCTION_EXPORT_HELP = (
+    "Given the potential security risks of exposing APIs to unprivileged "
+    "code, extensions which use these APIs must undergo manual review for at "
+    "least one submission. If you are not using these APIs to interact with "
+    "content code, please consider alternatives, such as built-in "
+    "message passing functionality.")
 
 # GLOBAL_ENTITIES is also representative of the `window` object.
 GLOBAL_ENTITIES = {
@@ -595,6 +696,16 @@ GLOBAL_ENTITIES = {
             "perform unsafe operations. All ctypes use must be carefully "
             "reviewed by a qualified reviewer."),
         "editors_only": True,
+        "signing_help": ("Please try to avoid interacting with or bundling "
+                         "native binaries whenever possible. If you are "
+                         "bundling binaries for performance reasons, please "
+                         "consider alternatives such as Emscripten "
+                         "(http://mzl.la/1KrSUh2), JavaScript typed arrays "
+                         "(http://mzl.la/1Iw02sr), and Worker threads "
+                         "(http://mzl.la/1OGfAcc).",
+                         "Any code which makes use of the `ctypes` API "
+                         "must undergo manual code review for at least one "
+                         "submission."),
         "signing_severity": "high"}},
 
     u"document":
@@ -629,12 +740,8 @@ GLOBAL_ENTITIES = {
     u"parseFloat": {"readonly": True},
     u"parseInt": {"readonly": True},
 
-    u"eval": {"dangerous": {"err_id": ("javascript", "dangerous_global",
-                                       "eval"),
-                            "signing_severity": "high"}},
-    u"Function": {"dangerous": {"err_id": ("javascript", "dangerous_global",
-                                           "eval"),
-                                "signing_severity": "high"}},
+    u"eval": {"dangerous": DANGEROUS_EVAL},
+    u"Function": {"dangerous": DANGEROUS_EVAL},
 
     u"Object":
         {"value":
@@ -734,6 +841,11 @@ GLOBAL_ENTITIES = {
                             {"value":
                                  {u"enablePrivilege":
                                       {"dangerous": {
+                                          "signing_help":
+                                            "Any references to this API must "
+                                            "be removed from your extension. "
+                                            "Add-ons using this API will not "
+                                            "be accepted for signing.",
                                           "signing_severity": "high",
                                           "description": (
                                             "enablePrivilege is extremely "
@@ -760,10 +872,13 @@ GLOBAL_ENTITIES = {
                   {"value": {u"evalInSandbox":
                                  {"dangerous": {
                                      "editors_only": "true",
+                                     "signing_help":
+                                     DANGEROUS_EVAL["signing_help"],
                                      "signing_severity": "low"}},
                              u"cloneInto":
                                  {"dangerous": {
                                      "editors_only": True,
+                                     "signing_help": FUNCTION_EXPORT_HELP,
                                      "signing_severity": "low",
                                      "description": (
                                          "Can be used to expose privileged "
@@ -773,6 +888,7 @@ GLOBAL_ENTITIES = {
                              u"exportFunction":
                                  {"dangerous": {
                                      "editors_only": True,
+                                     "signing_help": FUNCTION_EXPORT_HELP,
                                      "signing_severity": "low",
                                      "description": (
                                          "Can be used to expose privileged "
