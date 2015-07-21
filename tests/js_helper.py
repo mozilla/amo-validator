@@ -1,14 +1,39 @@
 import sys
 
+import mock
 from nose.tools import eq_
 
 import helper
 from helper import MockXPI
+
+import validator.testcases.scripting
+from validator import constants
+from validator.testcases import content
 from validator.errorbundler import ErrorBundle
 from validator.outputhandlers.shellcolors import OutputHandler
-import validator.testcases.content
-import validator.testcases.scripting
+from validator.testcases import libraries
+from validator.xpi import XPIManager
 validator.testcases.scripting.traverser.DEBUG = True
+
+metadata = constants.LIBRARY_METADATA
+
+# We want this for testing, but not in the production metadata file.
+metadata["libraries"].update({
+    "fake-library": {
+        "name": "Validator test library",
+        "versions": {
+            "null": {
+                "files": {
+                    ("This file is a false script to facilitate testing of "
+                     "library blacklisting."):
+                        ("2c424ecc3b35a0b11f3492452645a3e0"
+                         "c949f313cf3c36e2307ebcaef2f135bc")
+                }
+            }
+        }
+    },
+})
+metadata["hashes"] = libraries.build_hashes(metadata)
 
 
 def _do_test(path):
@@ -38,6 +63,17 @@ def _do_test_raw(script, path="foo.js", bootstrap=False, ignore_pollution=True,
             err, MockXPI(), path, script, path.lower(), not ignore_pollution)
     if err.final_context is not None:
         print err.final_context.output()
+
+    return err
+
+
+def _test_xpi(package):
+    if not hasattr(package, 'info'):
+        # Not already a MockXPI. Create XPIManager.
+        package = XPIManager(package)
+    err = ErrorBundle()
+    err.supports_version = mock.Mock(return_value=False)
+    content.test_packed_packages(err, package)
 
     return err
 

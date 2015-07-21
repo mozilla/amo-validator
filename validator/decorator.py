@@ -74,3 +74,22 @@ def version_range(guid, version, before=None, app_versions=None):
         before_pos = all_versions.index(before)
     return all_versions[version_pos:before_pos]
 
+
+class cached_property(property):
+    _n = 0
+
+    def __init__(self, *args, **kw):
+        super(cached_property, self).__init__(*args, **kw)
+
+        self.name = '_cached_property_%d' % cached_property._n
+        cached_property._n += 1
+
+    def __get__(self, obj, objtype=None):
+        if obj is not None:
+            if not hasattr(obj, self.name):
+                setattr(obj, self.name, self.fget(obj))
+            return getattr(obj, self.name)
+
+    def __set__(self, obj, value):
+        setattr(obj, self.name, value)
+

@@ -1,5 +1,3 @@
-import hashlib
-import os
 import re
 from StringIO import StringIO
 
@@ -8,6 +6,8 @@ from validator.constants import MAX_JS_THRESHOLD
 from validator import decorator
 from validator import submain as testendpoint_validator
 from validator import unicodehelper
+from validator.testcases import libraries
+from validator.testcases.frameworks import Framework
 import validator.testcases.markup.markuptester as testendpoint_markup
 import validator.testcases.markup.csstester as testendpoint_css
 import validator.testcases.scripting as testendpoint_js
@@ -20,11 +20,6 @@ from validator.constants import (PACKAGE_LANGPACK, PACKAGE_SUBPACKAGE,
 FLAGGED_FILES = set([".DS_Store", "Thumbs.db"])
 FLAGGED_EXTENSIONS = set([".orig", ".old", "~"])
 OSX_REGEX = re.compile("__MACOSX")
-
-hash_library = {}
-for hash_list in "hashes.txt", "static_hashes.txt":
-    with open(os.path.join(os.path.dirname(__file__), hash_list)) as f:
-        hash_library.update(s.strip().split(None, 1) for s in f)
 
 
 @decorator.register_test(tier=1)
@@ -56,7 +51,6 @@ def test_packed_packages(err, xpi_package=None):
     "Tests XPI and JAR files for naughty content."
 
     processed_files = 0
-    pretested_files = err.get_resource("pretested_files") or []
 
     scripts = set()
     chrome = err.get_resource("chrome.manifest_nopush")
@@ -67,6 +61,9 @@ def test_packed_packages(err, xpi_package=None):
         marked_scripts = set()
 
     identified_files = err.metadata.setdefault("identified_files", {})
+
+    libraries.detect_libraries(err, xpi_package)
+    Framework.detect_framework(err, xpi_package)
 
     # Iterate each item in the package.
     for name in xpi_package:
@@ -96,9 +93,9 @@ def test_packed_packages(err, xpi_package=None):
                 filename=name)
             continue
 
-        # Skip the file if it's in the pre-tested files resource. This skips
-        # things like Jetpack files.
-        if name in pretested_files:
+        # Skip the file if it's a known and approved third-party
+        # library.
+        if name in identified_files:
             continue
 
         # Read the file from the archive if possible.
@@ -107,23 +104,6 @@ def test_packed_packages(err, xpi_package=None):
             file_data = xpi_package.read(name)
         except KeyError:  # pragma: no cover
             pass
-
-        if not err.for_appversions:
-            hash = hashlib.sha256(file_data).hexdigest()
-            identified = hash_library.get(hash)
-            if identified is not None:
-                identified_files[name] = {"path": identified}
-                err.notice(
-                    err_id=("testcases_content",
-                            "test_packed_packages",
-                            "blacklisted_js_library"),
-                    notice="JS Library Detected",
-                    description=("JavaScript libraries are discouraged for "
-                                 "simple add-ons, but are generally "
-                                 "accepted.",
-                                 "File %r is a known JS library" % name),
-                    filename=name)
-                continue
 
         # Process the file.
         processed = False
