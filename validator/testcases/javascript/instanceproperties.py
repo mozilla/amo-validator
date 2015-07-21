@@ -3,8 +3,6 @@ import types
 
 import actions
 import jstypes
-from validator.compat import (FX10_DEFINITION, FX13_DEFINITION,
-                              FX30_DEFINITION)
 from validator.constants import BUGZILLA_BUG, EVENT_ASSIGNMENT
 
 
@@ -60,8 +58,8 @@ def _set_HTML_property(function, new_value, traverser):
                 # Everything checks out, but we still want to pass it through
                 # the markup validator. Turn off strict mode so we don't get
                 # warnings about malformed HTML.
-                from validator.testcases.markup.markuptester import \
-                                                                MarkupParser
+                from validator.testcases.markup.markuptester import (
+                    MarkupParser)
                 parser = MarkupParser(traverser.err, strict=False, debug=True)
                 parser.process(traverser.filename, literal_value, "xul")
 
@@ -110,64 +108,6 @@ def set_on_event(new_value, traverser):
                         "property.")
 
 
-def get_isElementContentWhitespace(traverser):
-    traverser.err.error(
-        err_id=("testcases_javascript_instanceproperties", "get_iECW"),
-        error="isElementContentWhitespace property removed in Gecko 10.",
-        description='The "isElementContentWhitespace" property has been '
-                    'removed. See %s for more information.'
-                    % BUGZILLA_BUG % 687422,
-        filename=traverser.filename,
-        line=traverser.line,
-        column=traverser.position,
-        context=traverser.context,
-        for_appversions=FX10_DEFINITION,
-        compatibility_type="error",
-        tier=5)
-
-
-def startendMarker(*args):
-    traverser = args[0] if len(args) == 1 else args[1]
-    traverser.err.notice(
-        err_id=("testcases_javascript_instanceproperties",
-                "get_startendMarker"),
-        notice="`_startMarker` and `_endMarker` changed in Gecko 13",
-        description="The `_startMarker` and `_endMarker` variables have "
-                    "changed in a backward-incompatible way in Gecko 13. They "
-                    "are now element references instead of numeric indices. "
-                    "See %s for more information." % BUGZILLA_BUG % 731563,
-        filename=traverser.filename,
-        line=traverser.line,
-        column=traverser.position,
-        context=traverser.context,
-        for_appversions=FX13_DEFINITION,
-        compatibility_type="error",
-        tier=5)
-
-
-def _get_xml(name):
-    """Handle all of the xml* compatibility problems introduced in Gecko 10."""
-    bugs = {"xmlEncoding": 687426,
-            "xmlStandalone": 693154,
-            "xmlVersion": 693162}
-
-    def wrapper(traverser):
-        traverser.err.error(
-            err_id=("testcases_javascript_instanceproperties", "_get_xml",
-                    name),
-            error="%s has been removed in Gecko 10" % name,
-            description='The "%s" property has been removed. See %s for more '
-                        'information.' % (name, BUGZILLA_BUG % bugs[name]),
-            filename=traverser.filename,
-            line=traverser.line,
-            column=traverser.position,
-            context=traverser.context,
-            for_appversions=FX10_DEFINITION,
-            compatibility_type="error",
-            tier=5)
-    return {"get": wrapper}
-
-
 def set__proto__(new_value, traverser):
     traverser.warning(
         err_id=("testcases_javascript_instanceproperties", "__proto__"),
@@ -189,19 +129,6 @@ def set__exposedProps__(new_value, traverser):
             "must be exposed to unprivileged scopes, `cloneInto` or "
             "`exportFunction` should be used instead."),
         signing_severity="high")
-
-
-def get_DOM_VK_ENTER(traverser):
-    traverser.warning(
-        err_id=("testcases_javascript_instanceproperties", "__proto__"),
-        warning="DOM_VK_ENTER has been removed.",
-        description="DOM_VK_ENTER has been removed. Removing it from your "
-                    "code shouldn't have any impact since it was never "
-                    "triggered in Firefox anyway. See bug %s for more "
-                    "information." % BUGZILLA_BUG % 969247,
-        for_appversions=FX30_DEFINITION,
-        compatibility_type="warning",
-        tier=5)
 
 
 def set_contentScript(value, traverser):
@@ -229,20 +156,11 @@ def set_contentScript(value, traverser):
 
 
 OBJECT_DEFINITIONS = {
-    "_endMarker": {"get": startendMarker,
-                   "set": startendMarker},
-    "_startMarker": {"get": startendMarker,
-                     "set": startendMarker},
     "innerHTML": {"set": set_innerHTML},
     "outerHTML": {"set": set_outerHTML},
     "contentScript": {"set": set_contentScript},
-    "isElementContentWhitespace": {"get": get_isElementContentWhitespace},
-    "xmlEncoding": _get_xml("xmlEncoding"),
-    "xmlStandalone": _get_xml("xmlStandalone"),
-    "xmlVersion": _get_xml("xmlVersion"),
     "__proto__": {"set": set__proto__},
     "__exposedProps__": {"set": set__exposedProps__},
-    "DOM_VK_ENTER": {"get": get_DOM_VK_ENTER},
 }
 
 

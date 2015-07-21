@@ -1,7 +1,8 @@
 from nose.tools import eq_
 
 import validator.testcases.content as test_content
-from validator.compat import FX9_DEFINITION
+from validator.constants import FIREFOX_GUID
+from validator.decorator import version_range
 from validator.errorbundler import ErrorBundle
 from validator.xpi import XPIManager
 
@@ -46,7 +47,9 @@ def test_validate_libs_in_compat_mode():
     xpi = "tests/resources/libraryblacklist/addon_with_mootools.xpi"
     with open(xpi) as data:
         package = XPIManager(data, mode="r", name="addon_with_mootools.xpi")
-        err = ErrorBundle(for_appversions=FX9_DEFINITION)
+        appversions = {FIREFOX_GUID: version_range("firefox",
+                                                   "39.0a1", "39.*")}
+        err = ErrorBundle(for_appversions=appversions)
         test_content.test_packed_packages(err, package)
     assert err.get_resource("scripts"), (
                     "expected mootools scripts to be marked for proessing")

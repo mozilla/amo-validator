@@ -220,19 +220,8 @@ INTERFACES = {
     u"nsIInstallLocation": OBSOLETE_EXTENSION_MANAGER,
     u"nsIAddonInstallListener": OBSOLETE_EXTENSION_MANAGER,
     u"nsIAddonUpdateCheckListener": OBSOLETE_EXTENSION_MANAGER,
-    u"imIUserStatusInfo":
-        {"value":
-            {u"setUserIcon": entity("imIUserStatusInfo.setUserIcon")}},
     u"nsICategoryManager":
         {"value": CATEGORY_MANAGER},
-    u"nsIAbLDAPDirectory":
-        {"value":
-            {u"replicationFile": entity("nsIAbLDAPDirectory.replicationFile"),
-             u"databaseFile": entity("nsIAbLDAPDirectory.databaseFile")}},
-    u"nsIAbManager":
-        {"value":
-            {u"userProfileDirectory":
-                entity("nsIAbManager.userProfileDirectory")}},
     u"nsIAccessibleRetrieval":
         {"dangerous":
             "Using the nsIAccessibleRetrieval interface causes significant "
@@ -254,8 +243,6 @@ INTERFACES = {
              u"moveEngine":
                 {"dangerous": search_warning()}}},
 
-    u"nsIComm4xProfile":
-        {"return": call_definitions.nsIComm4xProfile_removed},
     u"nsIComponentRegistrar":
         {"value":
             {u"autoRegister":
@@ -270,158 +257,16 @@ INTERFACES = {
                         e.get_resource("em:bootstrap") and
                         "Authors of bootstrapped add-ons must take care to "
                         "clean up any component registrations at shutdown."}}},
-    u"nsIDOMNSHTMLElement": entity("nsIDOMNSHTMLElement"),
-    u"nsIDOMNSHTMLFrameElement": entity("nsIDOMNSHTMLFrameElement"),
     u"nsIDNSService": {"value": {u"resolve": entity("nsIDNSService.resolve")}},
-    u"nsIImapIncomingServer":
-        {"value":
-            {u"GetImapConnectionAndLoadUrl":
-                {"return": call_definitions.TB12_nsIImapProtocol_changed}}},
-    u"nsIImapMailFolderSink":
-        {"value":
-            {u"setUrlState":
-                {"return": call_definitions.nsIImapMailFolderSink_changed},
-             u"progressStatus": entity("nsIImapMailFolderSink.progressStatus")}},
-    u"nsIImapProtocol":
-        {"value":
-            {u"NotifyHdrsToDownload":
-                {"return": call_definitions.nsIImapProtocol_removed},
-             u"Initialize":
-                {"return": call_definitions.TB12_nsIImapProtocol_changed}}},
-    u"nsIImportMail":
-        {"value":
-            {u"ImportMailbox": entity("nsIImportMail.ImportMailbox"),
-             u"FindMailboxes": entity("nsIImportMail.FindMailboxes")}},
-    u"nsIImportMailboxDescriptor":
-        {"value":
-            {u"file": entity("nsIImportMailboxDescriptor.file")}},
     u"nsIJSON":
         {"value":
             {u"encode":
                 {"return": call_definitions.nsIJSON_deprec},
              u"decode":
                 {"return": call_definitions.nsIJSON_deprec}}},
-    u"nsIMailboxService":
-        {"value":
-            {u"ParseMailbox": entity("nsIMailboxService.ParseMailbox")}},
-    u"nsIMailtoUrl":
-        {"value":
-            {u"GetMessageContents":
-                {"return": call_definitions.nsIMailtoUrl_changed}}},
-    u"nsIMessenger":
-        {"value":
-            {u"saveAttachmentToFolder":
-                entity("nsIMessenger.saveAttachmentToFolder")}},
-    u"nsIMsgAccountManager":
-        {"value":
-            {u"folderUriForPath": entity("nsIMsgAccountManager.folderUriForPath"),
-             u"allIdentities": entity("nsIMsgAccountManager.allIdentities"),
-             u"GetIdentitiesForServer": entity("nsIMsgAccountManager.GetIdentitiesForServer"),
-             u"accounts": entity("nsIMsgAccountManager.accounts"),
-             u"GetServersForIdentity": entity("nsIMsgAccountManager.GetServersForIdentity"),
-             u"allServers": entity("nsIMsgAccountManager.allServers")}},
-    u"nsIMsgLocalMailFolder":
-        {"value":
-            {u"addMessage":
-                {"return": call_definitions.TB13_nsIMsgLocalMailFolder_changed},
-             u"addMessageBatch":
-                {"return": call_definitions.TB13_nsIMsgLocalMailFolder_changed}}},
-    u"nsIMsgCloudFileProvider":
-        {"value":
-            {u"uploadFile": entity("nsIMsgCloudFileProvider.uploadFile"),
-             u"urlForFile": entity("nsIMsgCloudFileProvider.urlForFile"),
-             u"cancelFileUpload": entity("nsIMsgCloudFileProvider.cancelFileUpload"),
-             u"deleteFile": entity("nsIMsgCloudFileProvider.deleteFile")}},
     u"nsIMsgDatabase":
         {"value":
-            {u"Open":
-                {"return": call_definitions.nsIMsgDatabase_changed}},
-             u"openMailDBFromFile": entity("nsIMsgDatabase.openMailDBFromFile"),
-             u"forceFolderDBClosed": entity("nsIMsgDatabase.forceFolderDBClosed"),
-             u"checkAndPopulateRecipients": entity("nsIMsgDatabase.checkAndPopulateRecipients")},
-    u"nsIMsgDBService":
-      {"value":
-        {u"openMailDBFromFile":
-            {"return": call_definitions.nsIMsgDatabase_changed}}},
-    u"nsIMsgFilterPlugin":
-        {"value":
-            {u"updateData": entity("nsIMsgFilterPlugin.updateData")}},
-    u"nsIMsgFilterList":
-        {"value":
-            {u"defaultFile": entity("nsIMsgFilterList.defaultFile")}},
-    u"nsIMsgFilterService":
-        {"value":
-            {u"OpenFilterList": entity("nsIMsgFilterService.OpenFilterList"),
-             u"SaveFilterList": entity("nsIMsgFilterService.SaveFilterList"),
-             u"applyFiltersToFolders": entity("nsIMsgFilterService.applyFiltersToFolders"),
-             u"requiresCleanup": entity("nsIMsgFilterService.requiresCleanup"),
-             u"clearRequiresCleanup": entity("nsIMsgFilterService.clearRequiresCleanup")}},
-    u"nsIMsgFolder":
-        {"value":
-            {u"offlineStoreOutputStream":
-                {"value": call_definitions.nsIMsgFolder_changed},
-             u"filePath": entity("nsIMsgFolder.filePath"),
-             u"getExpansionArray": entity("nsIMsgFolder.getExpansionArray"),
-             u"ListDescendants": entity("nsIMsgFolder.ListDescendants"),
-             u"knowsSearchNntpExtension": entity("nsIMsgFolder.knowsSearchNntpExtension"),
-             u"allowsPosting": entity("nsIMsgFolder.allowsPosting")}},
-    u"nsIMsgIdentity":
-        {"value":
-            {u"signature": entity("nsIMsgIdentity.signature")}},
-    u"nsIMsgIncomingServer":
-        {"value":
-            {u"setDefaultLocalPath": entity("nsIMsgIncomingServer.setDefaultLocalPath"),
-             u"getFileValue": entity("nsIMsgIncomingServer.getFileValue"),
-             u"setFileValue": entity("nsIMsgIncomingServer.setFileValue"),
-             u"localPath": entity("nsIMsgIncomingServer.localPath")}},
-    u"nsIMsgLocalMailFolder":
-        {"value":
-            {u"addMessage":
-                {"return": call_definitions.TB13_nsIMsgLocalMailFolder_changed},
-             u"addMessageBatch":
-                {"return": call_definitions.TB13_nsIMsgLocalMailFolder_changed}}},
-    u"nsIMsgNewsFolder":
-        {"value":
-            {u"getGroupPasswordWithUI":
-                {"return": call_definitions.TB13_nsIMsgNewsFolder_changed},
-             u"getGroupUsernameWithUI":
-                {"return": call_definitions.TB13_nsIMsgNewsFolder_changed},
-             u"forgetGroupUsername":
-                {"return": call_definitions.TB13_nsIMsgNewsFolder_changed},
-             u"forgetGroupPassword":
-                {"return": call_definitions.TB13_nsIMsgNewsFolder_changed}}},
-    u"nsIMsgPluggableStore":
-        {"value":
-            {u"copyMessages": entity("nsIMsgPluggableStore.copyMessages"),
-             u"getSummaryFile": entity("nsIMsgPluggableStore.getSummaryFile")}},
-    u"nsIMsgProtocolInfo":
-        {"value":
-            {u"defaultLocalPath": entity("nsIMsgProtocolInfo.defaultLocalPath")}},
-    u"nsIMsgOutputStream":
-        {"value":
-            {u"folderStream":
-                {"value": call_definitions.nsIMsgDatabase_changed}}},
-    u"nsIMsgQuote":
-        {"value":
-            {u"quoteMessage":
-                {"return": call_definitions.nsIMsgQuote_changed}}},
-    u"nsIMsgSearchScopeTerm":
-        {"value":
-            {u"mailFile":
-                {"return": call_definitions.nsIMsgSearchScopeTerm_removed},
-             u"inputStream":
-                {"return": call_definitions.nsIMsgSearchScopeTerm_removed}}},
-   u"nsIMsgSend":
-        {"value":
-            {u"tmpFile": entity("nsIMsgSend.tmpFile")}},
-    u"nsIMsgThread":
-        {"value":
-            {u"GetChildAt":
-                {"return": call_definitions.nsIMsgThread_removed}}},
-    u"nsINoIncomingServer":
-        {"value":
-            {u"copyDefaultMessages":
-                entity("nsINoIncomingServer.copyDefaultMessages")}},
+            {u"forceFolderDBClosed": entity("nsIMsgDatabase.forceFolderDBClosed")}},
     u"nsIObserverService":
         {"value":
             {u"addObserver":
@@ -466,12 +311,6 @@ INTERFACES = {
                         "Authors of bootstrapped add-ons must take care "
                         "to clean up any added resource substitutions "
                         "at shutdown."}}},
-    u"nsIRssIncomingServer":
-        {"value":
-            {u"subscriptionsDataSourcePath":
-                entity("nsIRssIncomingServer.subscriptionsDataSourcePath"),
-             u"feedItemsDataSourcePath":
-                entity("nsIRssIncomingServer.feedItemsDataSourcePath")}},
     u"nsISound": {"value": {"play": entity("nsISound.play")}},
     u"nsIStringBundleService":
         {"value":
@@ -529,46 +368,6 @@ INTERFACES = {
                 "when it is not supplying a specific proxy."),
             "editors_only": True,
             "signing_severity": "low"}}}},
-    u"nsIURLParser":
-        {"value":
-             {u"parsePath":
-                  {"return": call_definitions.urlparser_parsepath_bug691588}}},
-    u"nsIURL":
-        {"value":
-             {u"param":
-                  {"value": call_definitions.url_param_bug691588}}},
-    u"nsIUrlFetcher":
-        {"value":
-            {u"fireUrlRequest": entity("nsIUrlFetcher.fireUrlRequest"),
-             u"initialize": entity("nsIUrlFetcher.initialize")}},
-    u"nsIBrowserHistory":
-        {"value":
-             {u"lastPageVisited": entity("nsIBrowserHistory.lastPageVisited"),
-              u"removePages":
-                  {"return": call_definitions.browserhistory_removepages},
-              u"registerOpenPage":
-                  {"value": call_definitions.browserhistory_registeropenpage},
-              u"unregisterOpenPage":
-                  {"value":
-                       call_definitions.browserhistory_unregisteropenpage},
-              }
-         },
-    u"nsIEditorSpellCheck":
-        {"value":
-             {u"UpdateCurrentDictionary":
-                  {"return":
-                       call_definitions.spellcheck_updatecurrentdictionary},
-              u"saveDefaultDictionary":
-                  {"value":
-                       call_definitions.spellcheck_savedefaultdictionary}}},
-    u"nsIPlacesImportExportService":
-        {"value":
-             {u"importHTMLFromFile": entity("importHTMLFromFile"),
-              u"importHTMLFromURI": entity("importHTMLFromURI"),}},
-    u"nsIDOMHTMLDocument":
-        {"value":
-             {u"queryCommandText": entity("nsIDOMHTMLDocument"),
-              u"execCommandShowHelp": entity("nsIDOMHTMLDocument")}},
     u"nsIWebBrowserPersist":
         {"value":
              {u"saveChannel":
@@ -578,138 +377,6 @@ INTERFACES = {
                        call_definitions.webbrowserpersist_saveuri},
               u"savePrivacyAwareURI":
                   {"return": call_definitions.webbrowserpersist}}},
-    u"prplIAccount":
-        {"value":
-             {u"noNewlines": entity("prplIAccount.noNewlines"),
-              u"maxMessageLength": entity("prplIAccount.maxMessageLength")}},
-    u"nsIMsgCompFields":
-        {"value":
-             {u"newshost": entity("nsIMsgCompFields.newshost"),
-              u"temporaryFiles": entity("nsIMsgCompFields.temporaryFiles")}},
-
-    u"nsIMsgSearchAdapter":
-        {"value":
-             {u"CurrentUrlDone": entity("nsIMsgSearchAdapter.CurrentUrlDone")}},
-    u"nsIMsgAccount":
-        {"value":
-             {u"identities": entity("nsIMsgAccount.identities")}},
-    u"nsIMsgFilter":
-        {"value":
-             {u"getSortedActionList": entity("nsIMsgFilter.getSortedActionList"),
-              u"actionList": entity("nsIMsgFilter.actionList")}},
-    u"nsIMimeHeaders":
-        {"value":
-            {u"initialize": entity("nsIMimeHeaders.initialize")}},
-    u"nsISmtpService":
-        {"value":
-            {u"GetSmtpServerByIdentity": entity("nsISmtpService.GetSmtpServerByIdentity"),
-             u"smtpServers": entity("nsISmtpService.smtpServers"),
-             u"createSmtpServer": entity("nsISmtpService.createSmtpServer"),
-             u"deleteSmtpServer": entity("nsISmtpService.deleteSmtpServer")}},
-    u"nsIMsgSend":
-        {"value":
-            {u"createAndSendMessage": entity("nsIMsgSend.createAndSendMessage"),
-             u"createRFC822Message": entity("nsIMsgSend.createRFC822Message")}},
-    u"nsIImportService":
-        {"value":
-            {u"CreateRFC822Message": entity("nsIImportService.CreateRFC822Message")}},
-    u"nsIImapServerSink":
-        {"value":
-         {u"getImapStringByID": entity("nsIImapServerSink.getImapStringByID"),
-          u"fEAlertWithID": entity("nsIImapServerSink.fEAlertWithID")}},
-    u"nsIImportFieldMap":
-        {"value":
-         {u"SetFieldMapByDescription": entity("nsIImportFieldMap.SetFieldMapByDescription"),
-          u"SetFieldValueByDescription": entity("nsIImportFieldMap.SetFieldValueByDescription"),
-          u"GetFieldValue": entity("nsIImportFieldMap.GetFieldValue"),
-          u"GetFieldValueByDescription": entity("nsIImportFieldMap.GetFieldValueByDescription")}},
-    u"nsILocalMailIncomingServer":
-        {"value":
-         {u"createDefaultMailboxes": entity("nsILocalMailIncomingServer.createDefaultMailboxes")}},
-    u"nsIAbLDAPAutoCompFormatter": entity("nsIAbLDAPAutoCompFormatter"),
-    u"nsILDAPAutoCompFormatter": entity("nsILDAPAutoCompFormatter"),
-    u"nsILDAPAutoCompleteSession": entity("nsILDAPAutoCompleteSession"),
-    u"nsINewsBlogFeedDownloader":
-        {"value":
-             {u"updateSubscriptionsDS": entity("nsINewsBlogFeedDownloader.updateSubscriptionsDS")}},
-    u"nsMsgFolderFlags":
-        {"value":
-             {u"NewsHost": entity("nsMsgFolderFlags.NewsHost")}},
-    u"nsMsgFolderFlags":
-        {"value":
-             {u"Subscribed": entity("nsMsgFolderFlags.Subscribed")}},
-    u"nsMsgFolderFlags":
-        {"value":
-             {u"ImapServer": entity("nsMsgFolderFlags.ImapServer")}},
-    u"gMessageNotificationBar":
-        {"value":
-             {u"mBarStatus": entity("gMessageNotificationBar.mBarStatus")}},
-    u"gMessageNotificationBar":
-        {"value":
-             {u"mBarFlagValues": entity("gMessageNotificationBar.mBarFlagValues")}},
-    u"gMessageNotificationBar":
-        {"value":
-             {u"mMsgNotificationBar": entity("gMessageNotificationBar.mMsgNotificationBar")}},
-    u"gMessageNotificationBar":
-        {"value":
-             {u"isFlagSet": entity("gMessageNotificationBar.isFlagSet")}},
-    u"gMessageNotificationBar":
-        {"value":
-             {u"updateMsgNotificationBar": entity("gMessageNotificationBar.updateMsgNotificationBar")}},
-    u"FeedUtils":
-        {"value":
-             {u"addFeed": entity("FeedUtils.addFeed")}},
-    u"FeedUtils":
-        {"value":
-             {u"updateFolderFeedUrl": entity("FeedUtils.updateFolderFeedUrl")}},
-    u"nsIMsgSearchTerm":
-        {"value":
-             {u"matchRfc822String": entity("nsIMsgSearchTerm.matchRfc822String")}},
-    u"nsIMsgDBHdr":
-        {"value":
-             {u"setRecipientsArray": entity("nsIMsgDBHdr.setRecipientsArray")}},
-    u"nsIMsgDBHdr":
-        {"value":
-             {u"setCCListArray": entity("nsIMsgDBHdr.setCCListArray")}},
-    u"nsIMsgDBHdr":
-        {"value":
-             {u"setBCCListArray": entity("nsIMsgDBHdr.setBCCListArray")}},
-    u"imICommand":
-        {"value":
-             {u"CONTEXT_IM": entity("imICommand.CONTEXT_IM")}},
-    u"imICommand":
-        {"value":
-             {u"CONTEXT_CHAT": entity("imICommand.CONTEXT_CHAT")}},
-    u"imICommand":
-        {"value":
-             {u"CONTEXT_ALL": entity("imICommand.CONTEXT_ALL")}},
-    u"imICommand":
-        {"value":
-             {u"PRIORITY_LOW": entity("imICommand.PRIORITY_LOW")}},
-    u"imICommand":
-        {"value":
-             {u"PRIORITY_DEFAULT": entity("imICommand.PRIORITY_DEFAULT")}},
-    u"imICommand":
-        {"value":
-             {u"PRIORITY_PRPL": entity("imICommand.PRIORITY_PRPL")}},
-    u"imICommand":
-        {"value":
-             {u"PRIORITY_HIGH": entity("imICommand.PRIORITY_HIGH")}},
-    u"nsIImportAddressBooks":
-        {"value":
-             {u"FindAddressBooks": entity("nsIImportAddressBooks.FindAddressBooks")}},
-    u"prplIConversation":
-        {"value":
-             {u"sendTyping": entity("prplIConversation.sendTyping")}},
-    u"nsINewsBlogFeedDownloader":
-        {"value":
-             {u"downloadFeed": entity("nsINewsBlogFeedDownloader.downloadFeed")}},
-    u"nsIMsgHeaderParser":
-        {"value":
-             {u"removeDuplicateAddresses": entity("nsIMsgHeaderParser.removeDuplicateAddresses")}},
-    u"nsIMsgHeaderParser":
-        {"value":
-             {u"makeMimeAddress": entity("nsIMsgHeaderParser.makeMimeAddress")}},
     u"nsIMsgCompose":
         {"value":
              {u"checkAndPopulateRecipients": entity("nsIMsgCompose.checkAndPopulateRecipients")}},
@@ -722,11 +389,6 @@ INTERFACES = {
     u"nsIAddrDatabase":
         {"value":
              {u"addAllowRemoteContent": entity("nsIAddrDatabase.addAllowRemoteContent")}},
-    "nsICacheService": entity("nsICacheService"),
-    "nsICacheSession": entity("nsICacheSession"),
-    "nsICacheEntryDescriptor": entity("nsICacheEntryDescriptor"),
-    "nsICacheListener": entity("nsICacheListener"),
-    "nsICacheVisitor": entity("nsICacheVisitor"),
 
     "nsIWindowsRegKey": {"value": {u"create": REGISTRY_WRITE,
                                    u"createChild": registry_key(write=True),
@@ -931,43 +593,17 @@ GLOBAL_ENTITIES = {
                    "readonly": False},
               u"defaultView":
                   {"value": lambda t: {"value": GLOBAL_ENTITIES}},
-              u"getSelection":
-                  {"return": call_definitions.document_getSelection},
               u"loadOverlay":
                   {"dangerous":
                        lambda a, t, e:
                            not a or not _get_as_str(t(a[0])).lower()
                                .startswith(("chrome:", "resource:"))},
               u"write": entity("document.write"),
-              u"writeln": entity("document.write"),
-              u"xmlEncoding": entity("document.xmlEncoding"),
-              u"xmlVersion": entity("document.xmlVersion"),
-              u"xmlStandalone": entity("document.xmlStandalone")}},
+              u"writeln": entity("document.write")}},
 
     # The nefariuos timeout brothers!
     u"setTimeout": {"dangerous": actions._call_settimeout},
     u"setInterval": {"dangerous": actions._call_settimeout},
-
-    u"requestAnimationFrame": {"return":
-                                   call_definitions.requestAnimationFrame},
-
-    # mail Attachment API Functions
-    u"createNewAttachmentInfo": {"return": call_definitions.mail_attachment_api},
-    u"saveAttachment": {"return": call_definitions.mail_attachment_api},
-    u"attachmentIsEmpty": {"return": call_definitions.mail_attachment_api},
-    u"openAttachment": {"return": call_definitions.mail_attachment_api},
-    u"detachAttachment": {"return": call_definitions.mail_attachment_api},
-    u"cloneAttachment": {"return": call_definitions.mail_attachment_api},
-    u"FocusOnFirstAttachment": {"return": call_definitions.TB9FocusFunctions_removed},
-
-    u"gComposeBundle": {"return": call_definitions.gComposeBundle_removed},
-    u"WhichPaneHasFocus": {"return": call_definitions.TB9FocusFunctions_removed},
-
-    # Thunderbird 10 global functions changed/removed
-    u"MsgDeleteMessageFromMessageWindow": {"return": call_definitions.TB10Function_removed},
-    u"goToggleSplitter": {"return": call_definitions.TB10Function_removed},
-    u"AddMessageComposeOfflineObserver": {"return": call_definitions.TB10Function_renamed},
-    u"RemoveMessageComposeOfflineObserver": {"return": call_definitions.TB10Function_renamed},
 
     u"encodeURI": {"readonly": True},
     u"decodeURI": {"readonly": True},
@@ -1141,10 +777,6 @@ GLOBAL_ENTITIES = {
     u"extensions": {"dangerous": True},
     u"xpcnativewrappers": {"dangerous": True},
 
-    u"AddonManagerPrivate":
-        {"value":
-            {u"registerProvider": {"return": call_definitions.amp_rp_bug660359}}},
-
     u"XMLHttpRequest":
         {"value":
              {u"open":
@@ -1212,26 +844,8 @@ GLOBAL_ENTITIES = {
                                    "available in order to achieve similar "
                                    "functionality."},
 
-    u"java": entity("java"),
-    u"Packages": entity("Packages"),
-
     u"XPCOMUtils":
         {"value": {u"categoryManager": {"value": CATEGORY_MANAGER}}},
-    u"gPropertiesButton": entity("gPropertiesButton"),
-    u"gComposeButton": entity("gComposeButton"),
-    u"onAbSearchReset": entity("onAbSearchReset"),
-    u"startDebugger": entity("startDebugger"),
-    u"stopDebugger": entity("stopDebugger"),
-    u"onRecipientsInput": entity("onRecipientsInput"),
-    u"kMsgNotificationPhishingBar": entity("kMsgNotificationPhishingBar"),
-    u"kMsgNotificationJunkBar": entity("kMsgNotificationJunkBar"),
-    u"kMsgNotificationRemoteImages": entity("kMsgNotificationRemoteImages"),
-    u"kMsgNotificationMDN": entity("kMsgNotificationMDN"),
-    u"gRemindLater": entity("gRemindLater"),
-    u"onRecipientsInput": entity("onRecipientsInput"),
-    u"gSendOrSaveOperationInProgress": entity("gSendOrSaveOperationInProgress"),
-    u"ShowEditMessageBox": entity("ShowEditMessageBox"),
-    u"ClearEditMessageBox": entity("ClearEditMessageBox"),
     u"updateCharsetPopupMenu": entity("updateCharsetPopupMenu"),
     u"EditorSetDocumentCharacterSet": entity("EditorSetDocumentCharacterSet"),
     u"DisablePhishingWarning": entity("DisablePhishingWarning"),
@@ -1247,7 +861,6 @@ GLOBAL_ENTITIES = {
     u"allowRemoteContentForSender": entity("allowRemoteContentForSender"),
     u"allowRemoteContentForSite": entity("allowRemoteContentForSite"),
     u"createNewHeaderView": entity("createNewHeaderView"),
-    u"getShortcutOrURIAndPostData": entity("getShortcutOrURIAndPostData"),
 
     # Common third-party libraries
     "Handlebars": {

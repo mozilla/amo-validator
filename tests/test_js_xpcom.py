@@ -129,28 +129,6 @@ def test_overwritability():
     """).failed(fail_on_warnings=False)
 
 
-def test_banned_interfaces():
-    """Test that banned XPCOM interfaces are flagged."""
-
-    err = _do_real_test_raw("""
-    Components.classes[""].createInstance(
-        Components.interfaces.nsIDOMDocumentTraversal);
-    """)
-    print err.print_summary(verbose=True)
-    print err.compat_summary
-    assert not err.failed(fail_on_warnings=False)
-    assert not any(err.compat_summary.values())
-
-    err = _do_real_test_raw("""
-    Components.classes[""].createInstance(
-        Components.interfaces.nsIDOMDocumentTraversal);
-    """, versions={"{ec8030f7-c20a-464f-9b0e-13a3a9e97384}": ["6.0a1"]})
-    print err.print_summary(verbose=True)
-    print err.compat_summary
-    assert not err.failed(fail_on_warnings=False)
-    assert err.compat_summary["errors"]
-
-
 def _test_when_bootstrapped(code, fail_bootstrapped=True, fail=False):
     """Tests a chunk of code when the add-on is bootstrapped."""
 

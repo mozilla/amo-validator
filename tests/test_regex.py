@@ -5,7 +5,6 @@ from helper import MockXPI
 from js_helper import _do_real_test_raw as _do_test_raw
 from validator.decorator import version_range
 from validator.errorbundler import ErrorBundle
-from validator.compat import (TB11_DEFINITION, TB12_DEFINITION)
 from validator.testcases import regex
 from validator.testcases.regex import RegexTest
 import validator.testcases.content
@@ -114,22 +113,6 @@ def test_bug_652575():
     assert _do_test_raw("var x = 'capability.policy.';").failed()
 
 
-def test_app_update_timer():
-    """Flag instances of app.update.timer in compatibility."""
-
-    err = _do_test_raw("""
-    var f = app.update.timer;
-    """)
-    assert not any(err.compat_summary.values())
-
-    err = _do_test_raw("""
-    var f = app.update.timer;
-    """, versions={"{ec8030f7-c20a-464f-9b0e-13a3a9e97384}":
-                       version_range("firefox", "6.0a1")})
-    assert err.warnings
-    assert err.compat_summary["errors"]
-
-
 def test_chrome_usage():
 
     def base_case():
@@ -168,32 +151,6 @@ def test_template_escape():
     assert _do_test_raw("{{{ foo }}}").failed()
 
     assert _do_test_raw("ng-bind-html-unsafe='foo'").failed()
-
-
-def test_tb11_strings():
-    """Flag changed or removed strings in add-on code"""
-
-    err = _do_test_raw("""
-    var f = "newToolbarCmd.tooltip";
-    var x = "onViewToolbarCommand";
-    """, versions=TB11_DEFINITION)
-    assert err.failed()
-    assert err.warnings
-    assert err.notices
-    assert err.compat_summary["errors"]
-
-
-def test_tb12_strings():
-    """Flag changed or removed strings in add-on code"""
-
-    err = _do_test_raw("""
-    var f = "editImageMapButton.label";
-    var x = "haveSmtp1.suffix2";
-    """, versions=TB12_DEFINITION)
-    assert err.failed()
-    assert err.warnings
-    assert err.notices
-    assert err.compat_summary["errors"]
 
 
 def test_servicessync():

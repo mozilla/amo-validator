@@ -9,7 +9,6 @@ import validator.unicodehelper as unicodehelper
 from validator.testcases.markup import csstester
 from validator.contextgenerator import ContextGenerator
 from validator.constants import *
-from validator.compat import FX6_DEFINITION
 from validator.decorator import version_range
 
 DEBUG = False
@@ -389,29 +388,6 @@ class MarkupParser(HTMLParser):
                     err=self.err, data=attr_value,
                     filename=self.filename, line=self.line,
                     context=self.context)
-
-            elif (self.extension == "xul" and
-                  attr_name in ("insertbefore", "insertafter") and
-                  any((id in attr_value) for id in ("menu_pageSource",
-                                                    "menu_pageinspect",
-                                                    "javascriptConsole",
-                                                    "webConsole"))):
-                self.err.notice(
-                    err_id=("markup", "starttag",
-                            "incompatible_menu_items"),
-                    notice="Menu item has been moved",
-                    description="Your add-on has an overlay that uses the "
-                                "insertbefore or insertafter attribute "
-                                "pointing to menuitems that have been moved "
-                                "to a different menu item. Your overlay items "
-                                "may appear in unexpected locations because "
-                                "of this. See https://bugzil.lz/653221 "
-                                "for more information.",
-                    filename=self.filename,
-                    line=self.line,
-                    context=self.context,
-                    for_appversions=FX6_DEFINITION,
-                    compatibility_type="warning")
 
 
             # Test for generic IDs
