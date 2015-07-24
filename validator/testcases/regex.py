@@ -8,7 +8,8 @@ from validator.constants import BUGZILLA_BUG, MDN_DOC
 from validator.contextgenerator import ContextGenerator
 from .chromemanifest import DANGEROUS_CATEGORIES, DANGEROUS_CATEGORY_WARNING
 from .javascript.predefinedentities import (BANNED_PREF_BRANCHES,
-                                            BANNED_PREF_REGEXPS)
+                                            BANNED_PREF_REGEXPS,
+                                            MARIONETTE_MESSAGE)
 
 
 registered_regex_tests = []
@@ -130,13 +131,6 @@ class GenericRegexTests(RegexTestGenerator):
         # globalStorage.(.+)password test removed for bug 752740
 
         yield self.get_test(
-                r"launch\(\)",
-                "`launch()` disallowed",
-                "Use of `launch()` is disallowed because of restrictions on "
-                "`nsIFile` and `nsILocalFile`. If the code does not use "
-                "those namespaces, consider using a different function name.")
-
-        yield self.get_test(
                 r"resource://services-sync",
                 "Sync services objects are not intended to be re-used",
                 "The Sync services objects are not intended to be re-used, and "
@@ -180,43 +174,6 @@ class DOMMutationRegexTests(RegexTestGenerator):
 
 
 @register_generator
-class MarionetteInPrefsRegexTests(RegexTestGenerator):
-    """
-    These regex tests will ensure that the developer is not switching on
-    Marionette prefs
-
-    Added from bug 741812
-    """
-
-    MARIONETTE_REFERENCES = {r"@mozilla\.org/marionette;1": 741812,
-                        r"\{786a1369\-dca5\-4adc-8486\-33d23c88010a\}": 741812,
-                        "MarionetteComponent": 741812,
-                        "MarionetteServer": 741812}
-
-    MARIONETTE_PREFS = {r"marionette\.force\-local": 741812,
-                        r"marionette\.defaultPrefs\.enabled": 741812,
-                        r"marionette\.defaultPrefs\.port": 741812}
-    @classmethod
-    def applicable(cls, err, filename, document):
-        return bool(re.match(r"defaults/preferences/.+\.js", filename))
-
-    def js_tests(self):
-        title = "Marionette access is disallowed"
-        for ref, bug in self.MARIONETTE_REFERENCES.items():
-            yield self.get_test_bug(
-                    bug, ref, title,
-                    "Marionette references are not allowed as it could lead to"
-                    "the browser not being secure. Please remove them.")
-
-        for ref, bug in self.MARIONETTE_PREFS.items():
-            yield self.get_test_bug(
-                    bug, ref, title,
-                    "Marionette preferences are not allowed as it could lead to"
-                    "the browser not being secure. Please remove them.")
-
-
-
-@register_generator
 class NewTabRegexTests(RegexTestGenerator):
     """
     Attempts to code using roundabout methods of overriding the new tab page.
@@ -246,10 +203,6 @@ class NewTabRegexTests(RegexTestGenerator):
              "signing_severity": "low"})
 
 
-REQUIRE_PATTERN = (r"""(?<!['"])require\s*\(\s*['"]"""
-                   r"""(?:sdk/)?(%s)['"]\s*\)""")
-
-
 @register_generator
 class UnsafeTemplateRegexTests(RegexTestGenerator):
     """
@@ -276,59 +229,6 @@ class UnsafeTemplateRegexTests(RegexTestGenerator):
                     "HTML may only be used when properly sanitized, and in most "
                     "cases safer escape sequences such as `%s` must be used "
                     "instead." % safe)
-
-
-@register_generator
-class ChromePatternRegexTests(RegexTestGenerator):
-    """
-    Test that an Add-on SDK (Jetpack) add-on doesn't use interfaces that are
-    not part of the SDK.
-
-    Added from bugs 689340, 731109, 845492
-    """
-
-    INTERFACES = "|".join([
-        # Added from bugs 689340, 731109
-        "chrome", "window-utils", "observer-service",
-        # Added from bug 845492
-        "window/utils", "sdk/window/utils", "sdk/deprecated/window-utils",
-        "tab/utils", "sdk/tab/utils",
-        "system/events", "sdk/system/events",
-    ])
-
-    def tests(self):
-        # We want to re-wrap the test because if it detects something, we're
-        # going to set the `requires_chrome` metadata value to `True`.
-        def rewrap():
-            wrapper = self.get_test(
-                    REQUIRE_PATTERN % self.INTERFACES,
-                    "Usage of flagged or non-SDK interface",
-                    "This SDK-based add-on uses interfaces that aren't part "
-                    "of the SDK or are flagged as sensitive.")
-            if wrapper():
-                self.err.metadata["requires_chrome"] = True
-
-        yield rewrap
-
-
-@register_generator
-class WidgetModuleRegexTests(RegexTestGenerator):
-    """
-    Tests whether an Add-on SDK add-on is using the deprecated widget
-    interface.
-    """
-
-    def js_tests(self):
-        yield self.get_test(
-            REQUIRE_PATTERN % "widget",
-            "Use of deprecated SDK module",
-            "The 'widget' module has been deprecated due to a number of "
-            "performance and usability issues, and is slated to be removed "
-            "from the SDK in the near future. Please use the "
-            "'sdk/ui/button/action' or 'sdk/ui/button/toggle' module "
-            "instead. See "
-            "https://developer.mozilla.org/Add-ons/SDK/High-Level_APIs/ui "
-            "for more information.")
 
 
 @register_generator
@@ -775,6 +675,7 @@ PROFILE_REGEX = r"(?:^|[/\\])(?:%s)$" % "|".join(map(munge_filename,
                                                      PROFILE_FILENAMES))
 
 STRING_REGEXPS = (
+    # Unsafe files in the profile directory.
     (PROFILE_REGEX, {
         "err_id": ("testcases_regex", "string", "profile_filenames"),
         "warning": "Reference to critical user profile data",
@@ -784,14 +685,21 @@ STRING_REGEXPS = (
                        "instead.",
         "signing_severity": "low"}),
 
+    # The names of potentially dangerous category names for the
+    # category manager.
     (DANGEROUS_CATEGORIES, DANGEROUS_CATEGORY_WARNING),
 
+    # References to the obsolete extension manager API.
     (r"@mozilla\.org/extensions/manager;1|"
      r"em-action-requested",
      {"warning": "Obsolete Extension Manager API",
       "description": "The old Extension Manager API is not available in any "
                      "remotely modern version of Firefox and should not be "
                      "referenced in any code."}),
+
+    # References to the Marionette service.
+    (r"@mozilla\.org/marionette;1", MARIONETTE_MESSAGE),
+    (r"\{786a1369-dca5-4adc-8486-33d23c88010a\}", MARIONETTE_MESSAGE),
 )
 
 PREFERENCE_ERROR_ID = "testcases_regex", "string", "preference"

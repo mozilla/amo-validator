@@ -507,6 +507,53 @@ def _call_settimeout(a, t, e):
             "signing_severity": "high"}
 
 
+def _call_require(a, t, e):
+    """
+    Tests for unsafe uses of `require()` in SDK add-ons.
+    """
+
+    args, traverse, err = a, t, e
+
+    if not err.metadata.get("is_jetpack") and len(args):
+        return
+
+    module = traverse(args[0]).get_literal_value()
+    if not isinstance(module, basestring):
+        return
+
+    if module.startswith("sdk/"):
+        module = module[len("sdk/"):]
+
+    LOW_LEVEL = {
+        # Added from bugs 689340, 731109
+        "chrome", "window-utils", "observer-service",
+        # Added from bug 845492
+        "window/utils", "sdk/window/utils", "sdk/deprecated/window-utils",
+        "tab/utils", "sdk/tab/utils",
+        "system/events", "sdk/system/events",
+    }
+
+    if module in LOW_LEVEL:
+        err.metadata["requires_chrome"] = True
+        return {"warning": "Usage of low-level or non-SDK interface",
+                "description": "Your add-on uses an interface which bypasses "
+                               "the high-level protections of the add-on SDK. "
+                               "This interface should be avoided, and its use "
+                               "may significantly complicate your review "
+                               "process."}
+
+    if module == "widget":
+        return {"warning": "Use of deprecated SDK module",
+                "description":
+                    "The 'widget' module has been deprecated due to a number "
+                    "of performance and usability issues, and has been "
+                    "removed from the SDK as of Firefox 40. Please use the "
+                    "'sdk/ui/button/action' or 'sdk/ui/button/toggle' module "
+                    "instead. See "
+                    "https://developer.mozilla.org/Add-ons/SDK/High-Level_APIs"
+                    "/ui for more information."}
+
+
 def _call_create_pref(a, t, e):
     """
     Handler for pref() and user_pref() calls in defaults/preferences/*.js files

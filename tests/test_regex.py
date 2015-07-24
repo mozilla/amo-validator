@@ -3,7 +3,6 @@ from nose.tools import eq_
 
 from helper import MockXPI
 from js_helper import _do_real_test_raw as _do_test_raw
-from validator.decorator import version_range
 from validator.errorbundler import ErrorBundle
 from validator.testcases import regex
 from validator.testcases.regex import RegexTest
@@ -17,26 +16,14 @@ def test_valid():
 def test_marionette_preferences_and_references_fail():
     "Tests that check for marionette. Added in bug 741812"
 
-    _dtr = lambda script: _do_test_raw(script, path='defaults/preferences/foo.js')
-
+    _dtr = _do_test_raw
     assert _dtr("var x = 'marionette.defaultPrefs.port';").failed()
     assert _dtr("var x = 'marionette.defaultPrefs.enabled';").failed()
     assert _dtr("var x = 'marionette.force-local';").failed()
     assert _dtr("var x = '@mozilla.org/marionette;1';").failed()
     assert _dtr("var x = '{786a1369-dca5-4adc-8486-33d23c88010a}';").failed()
-    assert _dtr("var x = 'MarionetteComponent';").failed()
-    assert _dtr("var x = 'MarionetteServer';").failed()
-
-def test_not_marionette_preferences_and_references_pass():
-    "Tests that check for marionette. Added in bug 741812"
-
-    assert not _do_test_raw("var x = 'marionette.defaultPrefs.port';").failed()
-    assert not _do_test_raw("var x = 'marionette.defaultPrefs.enabled';").failed()
-    assert not _do_test_raw("var x = 'marionette.force-local';").failed()
-    assert not _do_test_raw("var x = '@mozilla.org/marionette;1';").failed()
-    assert not _do_test_raw("var x = '{786a1369-dca5-4adc-8486-33d23c88010a}';").failed()
-    assert not _do_test_raw("var x = 'MarionetteComponent';").failed()
-    assert not _do_test_raw("var x = 'MarionetteServer';").failed()
+    assert _dtr("var x = MarionetteComponent;").failed()
+    assert _dtr("var x = MarionetteServer;").failed()
 
 def test_basic_regex_fail():
     "Tests that a simple Regex match causes a warning"
@@ -111,30 +98,6 @@ def test_extension_manager_api():
 def test_bug_652575():
     """Ensure that capability.policy gets flagged."""
     assert _do_test_raw("var x = 'capability.policy.';").failed()
-
-
-def test_chrome_usage():
-
-    def base_case():
-        err = _do_test_raw("""var foo = require("bar");""")
-        eq_(err.metadata['requires_chrome'], False)
-    yield base_case
-
-    interfaces = ["chrome", "window-utils", "observer-service"]
-
-    def interface_cases(interface):
-        err = _do_test_raw("""var {cc, ci} = require("%s")""" % interface)
-        print err.print_summary(verbose=True)
-
-        first_message = err.warnings[0]['message']
-        assert 'non-SDK interface' in first_message, ('unexpected: %s' %
-                                                          first_message)
-        assert 'requires_chrome' in err.metadata, \
-                'unexpected: "requires_chrome" should be in metadata'
-        eq_(err.metadata['requires_chrome'], True)
-
-    for case in interfaces:
-        yield lambda: interface_cases(case)
 
 
 def test_preference_extension_regex():

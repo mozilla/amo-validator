@@ -168,6 +168,15 @@ def insertAdjacentHTML(args, traverser, node, wrapper):
     _set_HTML_property("insertAdjacentHTML", content, traverser)
 
 
+def launch(args, traverser, node, wrapper):
+    traverser.warning(
+        err_id=("testcases_javascript_instanceactions", "launch"),
+        warning="Potentially dangerous use of `launch()`",
+        description="Use of the `nsIFile.launch()` method can be dangerous, "
+                    "and requires careful review.",
+        editors_only=True)
+
+
 def openDialog(args, traverser, node, wrapper):
     """Raise an error if the first argument is a remote URL."""
     if not args:
@@ -336,6 +345,7 @@ INSTANCE_DEFINITIONS = {
     "getDefaultBranch": create_preference_branch,
     "getInterface": getInterface,
     "insertAdjacentHTML": insertAdjacentHTML,
+    "launch": launch,
     "openDialog": openDialog,
     "QueryInterface": QueryInterface,
     "setAttribute": setAttribute,
