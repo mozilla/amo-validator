@@ -1,21 +1,23 @@
-import logging
 import json
 import os
 import signal
+import sys
 from zipfile import BadZipfile
 from zlib import error as zlib_error
 
 from defusedxml.common import DefusedXmlException
 
+import validator
+from validator import decorator
 from validator.typedetection import detect_type
 from validator.opensearch import detect_opensearch
 from validator.chromemanifest import ChromeManifest
 from validator.rdf import RDFException, RDFParser
 from validator.xpi import XPIManager
-from validator import decorator
 
 from constants import (PACKAGE_ANY, PACKAGE_EXTENSION, PACKAGE_SEARCHPROV,
-                       PACKAGE_THEME, PACKAGE_WEBAPP)
+                       PACKAGE_THEME)
+
 
 types = {0: "Unknown",
          1: "Extension/Multi-Extension",
@@ -27,17 +29,6 @@ types = {0: "Unknown",
 assumed_extensions = {"jar": PACKAGE_THEME,
                       "xml": PACKAGE_SEARCHPROV}
 
-log = logging.getLogger()
-
-
-class ValidationTimeout(Exception):
-
-    def __init__(self, timeout):
-        self.timeout = timeout
-
-    def __str__(self):
-        return "Validation timeout after %d seconds" % self.timeout
-
 
 def prepare_package(err, path, expectation=0, for_appversions=None,
                     timeout=-1):
@@ -46,49 +37,50 @@ def prepare_package(err, path, expectation=0, for_appversions=None,
     timeout is the number of seconds before validation is aborted.
     If timeout is -1 then no timeout checking code will run.
     """
-    # Test that the package actually exists. I consider this Tier 0
-    # since we may not even be dealing with a real file.
-    if err and not os.path.isfile(path):
-        err.error(("main",
-                   "prepare_package",
-                   "not_found"),
-                  "The package could not be found")
-        return
 
-    # Pop the package extension.
-    package_extension = os.path.splitext(path)[1]
-    package_extension = package_extension.lower()
-
-    if package_extension == ".xml":
-        return test_search(err, path, expectation)
-    elif expectation == PACKAGE_WEBAPP:
-        raise NotImplementedError(
-            "Webapps are not supported in amo-validator.")
-
-    # Test that the package is an XPI.
-    if package_extension not in (".xpi", ".jar"):
-        if err:
-            err.error(("main",
-                       "prepare_package",
-                       "unrecognized"),
-                      "The package is not of a recognized type.")
-        return False
-
-    package = open(path, "rb")
-    validation_state = {'complete': False}
-
-    def timeout_handler(signum, frame):
-        ex = ValidationTimeout(timeout)
-        log.error("%s; Package: %s" % (str(ex), path))
-        raise ex
-
-    if timeout != -1:
-        signal.signal(signal.SIGALRM, timeout_handler)
-        signal.setitimer(signal.ITIMER_REAL, timeout)
-
+    package = None
     try:
-        output = test_package(err, package, path, expectation,
-                              for_appversions)
+        # Test that the package actually exists. I consider this Tier 0
+        # since we may not even be dealing with a real file.
+        if not os.path.isfile(path):
+            err.error(("main", "prepare_package", "not_found"),
+                      "The package could not be found")
+            return
+
+        # Pop the package extension.
+        package_extension = os.path.splitext(path)[1]
+        package_extension = package_extension.lower()
+
+        def timeout_handler(signum, frame):
+            raise validator.ValidationTimeout(timeout)
+
+        if timeout != -1:
+            signal.signal(signal.SIGALRM, timeout_handler)
+            signal.setitimer(signal.ITIMER_REAL, timeout)
+
+        if package_extension == ".xml":
+            test_search(err, path, expectation)
+        elif package_extension not in (".xpi", ".jar"):
+            err.error(("main", "prepare_package", "unrecognized"),
+                      "The package is not of a recognized type.")
+        else:
+            package = open(path, "rb")
+            test_package(err, package, path, expectation, for_appversions)
+
+    except validator.ValidationTimeout:
+        err.system_error(
+            msg_id="validation_timeout",
+            message="Validation has timed out",
+            description=("Validation was unable to complete in the allotted "
+                         "time. This is most likely due to the size or "
+                         "complexity of your add-on.",
+                         "This timeout has been logged, but please consider "
+                         "filing an issue report here: http://mzl.la/1DG0sFd"),
+            exc_info=sys.exc_info())
+
+    except Exception:
+        err.system_error(exc_info=sys.exc_info())
+
     finally:
         # Remove timers and signal handlers regardless of whether
         # we've completed successfully or the timer has fired.
@@ -96,10 +88,8 @@ def prepare_package(err, path, expectation=0, for_appversions=None,
             signal.setitimer(signal.ITIMER_REAL, 0)
             signal.signal(signal.SIGALRM, signal.SIG_DFL)
 
-    validation_state['complete'] = True
-    package.close()
-
-    return output
+        if package:
+            package.close()
 
 
 def test_search(err, package, expectation=0):
@@ -145,39 +135,24 @@ def test_package(err, file_, name, expectation=PACKAGE_ANY,
             _load_install_rdf(err, package, expectation)
     except IOError:
         # Die on this one because the file won't open.
-        return err.error(("main",
-                          "test_package",
-                          "unopenable"),
-                         "The XPI could not be opened.")
+        err.error(("main", "test_package", "unopenable"),
+                  "The XPI could not be opened.")
+        return
     except (BadZipfile, zlib_error):
         # Die if the zip file is corrupt.
-        return err.error(
-            ("submain", "_load_install_rdf", "badzipfile"),
-            error="Corrupt ZIP file",
-            description="We were unable to decompress the zip file.")
+        err.error(("submain", "_load_install_rdf", "badzipfile"),
+                  error="Corrupt ZIP file",
+                  description="We were unable to decompress the zip file.")
+        return
 
     if package.extension in assumed_extensions:
         assumed_type = assumed_extensions[package.extension]
         # Is the user expecting a different package type?
         if expectation not in (PACKAGE_ANY, assumed_type):
-            err.error(("main",
-                       "test_package",
-                       "unexpected_type"),
+            err.error(("main", "test_package", "unexpected_type"),
                       "Unexpected package type (found theme)")
 
-    try:
-        output = test_inner_package(err, package, for_appversions)
-    except ValidationTimeout as ex:
-        err.error(
-                err_id=("main", "test_package", "timeout"),
-                error="Validation timed out",
-                description=("The validation process took too long to "
-                             "complete. Contact an addons.mozilla.org editor "
-                             "for more information.",
-                             str(ex)))
-        output = None
-
-    return output
+    test_inner_package(err, package, for_appversions)
 
 
 def _load_install_rdf(err, package, expectation):

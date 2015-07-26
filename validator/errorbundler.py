@@ -1,10 +1,16 @@
 import json
+import logging
 import types
 import uuid
 from StringIO import StringIO
 
-from outputhandlers.shellcolors import OutputHandler
-import unicodehelper
+import validator
+from validator import unicodehelper
+from validator.constants import SIGNING_SEVERITIES
+from validator.outputhandlers.shellcolors import OutputHandler
+
+
+log = logging.getLogger('amo.validator')
 
 
 class ErrorBundle(object):
@@ -31,8 +37,6 @@ class ErrorBundle(object):
         version-dependant tests should be run.
     """
 
-    SEVERITIES = {"trivial", "low", "medium", "high"}
-
     def __init__(self, determined=True, listed=True, instant=False,
                  overrides=None, spidermonkey=False, for_appversions=None):
 
@@ -46,7 +50,7 @@ class ErrorBundle(object):
         self.compat_summary = {"errors": 0,
                                "warnings": 0,
                                "notices": 0}
-        self.signing_summary = {s: 0 for s in self.SEVERITIES}
+        self.signing_summary = {s: 0 for s in SIGNING_SEVERITIES}
 
         self.ending_tier = 1
         self.tier = 1
@@ -98,7 +102,7 @@ class ErrorBundle(object):
             if "signing_severity" in kwargs:
                 severity = kwargs["signing_severity"]
 
-                assert severity in self.SEVERITIES
+                assert severity in SIGNING_SEVERITIES
 
                 if not kwargs.get("from_merge"):
                     self.signing_summary[severity] += 1
@@ -118,6 +122,43 @@ class ErrorBundle(object):
     error = _message("errors", "error")
     warning = _message("warnings", "warning")
     notice = _message("notices", "notice")
+
+    def system_error(self, msg_id=None, message=None, description=None,
+                     validation_timeout=False, exc_info=None):
+        """Add an error message for an unexpected exception in validator
+        code, and move it to the front of the error message list. If
+        `exc_info` is supplied, the error will be logged.
+
+        If the error is a validation timeout, it is re-raised unless
+        `msg_id` is "validation_timeout"."""
+
+        if exc_info:
+            if (isinstance(exc_info[1], validator.ValidationTimeout) and
+                    msg_id != "validation_timeout"):
+                # These should always propagate to the top-level exception
+                # handler, and be reported only once.
+                raise exc_info[1]
+
+            log.error('Unexpected error during validation: %s: %s'
+                      % (exc_info[0].__name__, exc_info[1]),
+                      exc_info=exc_info)
+
+        full_id = ("validator", "unexpected_exception")
+        if msg_id:
+            full_id += (msg_id,)
+
+        self.error(full_id,
+                   message or "An unexpected error has occurred.",
+                   description or
+                   ("Validation was unable to complete successfully due "
+                    "to an unexpected error.",
+                    "The error has been logged, but please consider "
+                    "filing an issue report here: "
+                    "http://mzl.la/1DG0sFd"),
+                   tier=1)
+
+        # Move the error message to the beginning of the list.
+        self.errors.insert(0, self.errors.pop())
 
     def drop_message(self, message):
         """Drop the given message object from the appropriate message list.

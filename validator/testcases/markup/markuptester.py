@@ -1,8 +1,7 @@
 import re
-import sys
 import types
 
-from validator.python.HTMLParser import HTMLParser
+from validator.python.HTMLParser import HTMLParser, HTMLParseError
 
 import validator.testcases.scripting as scripting
 import validator.unicodehelper as unicodehelper
@@ -117,18 +116,15 @@ class MarkupParser(HTMLParser):
         line = unicodehelper.decode(line)
 
         try:
-            self.feed(line + "\n")
-        except UnicodeDecodeError, exc_instance:
-            exc_class, val, traceback = sys.exc_info()
             try:
+                self.feed(line + "\n")
+            except UnicodeDecodeError:
                 line = line.decode("ascii", "ignore")
                 self.feed(line + "\n")
-            except Exception:
-                raise exc_instance, None, traceback
 
-        except Exception as inst:
+        except HTMLParseError as err:
             if DEBUG:  # pragma: no cover
-                print self.xml_state, inst
+                print self.xml_state, err
 
             if "markup" in self.reported:
                 return
@@ -138,7 +134,7 @@ class MarkupParser(HTMLParser):
                     err_id=("markup", "_feed", "parse_error"),
                     warning="Markup parsing error",
                     description=("There was an error parsing a markup "
-                                 "file.", str(inst)),
+                                 "file.", str(err)),
                     filename=self.filename,
                     line=self.line,
                     context=self.context)

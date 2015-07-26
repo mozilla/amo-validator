@@ -1,13 +1,9 @@
 import math
 import re
-import types
 
 import actions
 import predefinedentities
-from jstypes import *
-from validator.constants import BUGZILLA_BUG
-from validator.decorator import version_range
-from validator.python import copy
+from jstypes import JSArray, JSObject, JSWrapper
 
 # Function prototypes should implement the following:
 #  wrapper : The JSWrapper instace that is being called

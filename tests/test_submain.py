@@ -1,47 +1,82 @@
+import mock
 import time
 
-from nose.tools import eq_, raises
+from nose.tools import eq_
 
-import validator.submain as submain
-from validator.errorbundler import ErrorBundle
+from validator import submain
 from validator.chromemanifest import ChromeManifest
-from validator.constants import *
-from helper import MockXPI
+from validator.errorbundler import ErrorBundle
+from .helper import MockXPI
 
 
-def test_prepare_package():
-    "Tests that the prepare_package function passes for valid data"
-
-    tp = submain.test_package
-    submain.test_package = lambda w, x, y, z, for_appversions: True
+@mock.patch("validator.submain.test_package")
+def test_prepare_package(test_package):
+    """Tests that the prepare_package does not raise any errors when given
+    a valid add-on."""
 
     err = ErrorBundle()
-    assert submain.prepare_package(err, "tests/resources/main/foo.xpi") == True
-    submain.test_package = tp
+    submain.prepare_package(err, "tests/resources/main/foo.xpi")
+    assert not err.failed()
 
 
-def test_validation_timeout():
-    tp = submain.test_inner_package
+@mock.patch("validator.submain.test_package")
+def test_validation_timeout(test_package):
     def slow(*args, **kw):
         time.sleep(1)
-    submain.test_inner_package = slow
+    test_package.side_effect = slow
+
     err = ErrorBundle()
-    submain.prepare_package(err, "tests/resources/main/foo.xpi",
-                            timeout=0.1)
-    submain.test_inner_package = tp
+    err.error(("an", "error"), "occurred")
 
-    assert len(err.errors) == 1
+    submain.prepare_package(err, "tests/resources/main/foo.xpi", timeout=0.1)
+
+    # Make sure that our error got moved to the front of the list.
+    eq_(len(err.errors), 2)
+    eq_(err.errors[0]["id"],
+        ("validator", "unexpected_exception", "validation_timeout"))
 
 
-def test_prepare_package_extension():
-    "Tests that bad extensions get outright rejections"
+@mock.patch("validator.submain.test_package")
+@mock.patch("validator.errorbundler.log")
+def test_validation_error(log, test_package):
+    """Test that an unexpected exception during validation is turned into
+    an error message and logged."""
 
-    assert submain.prepare_package(None, "foo/bar/test.foo") == False
+    test_package.side_effect = Exception
 
-    ts = submain.test_search
-    submain.test_search = lambda x, y, z: True
-    assert submain.prepare_package(None, "foo/bar/test.xml") == True
-    submain.test_search = ts
+    err = ErrorBundle()
+    err.error(("an", "error"), "occurred")
+
+    submain.prepare_package(err, "tests/resources/main/foo.xpi")
+
+    assert log.error.called
+
+    # Make sure that our error got moved to the front of the list.
+    eq_(len(err.errors), 2)
+    eq_(err.errors[0]["id"], ("validator", "unexpected_exception"))
+
+
+@mock.patch("validator.submain.test_search")
+def test_prepare_package_extension(test_search):
+    "Tests that bad extensions get outright rejections."
+
+    # Files with an invalid extension raise an error prior to
+    # calling `test_search`.
+    err = ErrorBundle()
+    submain.prepare_package(err, "foo/bar/test.foo")
+
+    assert not test_search.called
+
+    eq_(len(err.errors), 1)
+    eq_(err.errors[0]["id"], ("main", "prepare_package", "not_found"))
+
+    # Files which do not exist raise an error prior to calling `test_search`.
+    err = ErrorBundle()
+    submain.prepare_package(err, "foo/bar/test.xml")
+
+    assert not test_search.called
+    eq_(len(err.errors), 1)
+    eq_(err.errors[0]["id"], ("main", "prepare_package", "not_found"))
 
 
 def test_prepare_package_missing():
@@ -62,22 +97,20 @@ def test_prepare_package_bad_file():
     assert err.failed()
 
 
-def test_prepare_package_xml():
+@mock.patch("validator.submain.test_search")
+def test_prepare_package_xml(test_search):
     "Tests that the prepare_package function passes with search providers"
-
-    smts = submain.test_search
-    submain.test_search = lambda err, y, z: True
 
     err = ErrorBundle()
     submain.prepare_package(err, "tests/resources/main/foo.xml")
 
     assert not err.failed()
+    assert test_search.called
 
-    submain.test_search = lambda err, y, z: err.error(("x"), "Failed")
+    test_search.side_effect = lambda err, *args: err.error(("x"), "Failed")
     submain.prepare_package(err, "tests/resources/main/foo.xml")
 
     assert err.failed()
-    submain.test_search = smts
 
 
 # Test the function of the decorator iterator
@@ -85,38 +118,32 @@ def test_prepare_package_xml():
 def test_test_inner_package():
     "Tests that the test_inner_package function works properly"
 
-    smd = submain.decorator
-    decorator = MockDecorator()
-    submain.decorator = decorator
-    err = MockErrorHandler(decorator)
+    with patch_decorator():
+        err = MockErrorHandler()
 
-    submain.test_inner_package(err, "foo", "bar")
+        submain.test_inner_package(err, "foo", "bar")
 
-    assert not err.failed()
-    submain.decorator = smd
+        assert not err.failed()
 
 
 def test_test_inner_package_failtier():
     "Tests that the test_inner_package function fails at a failed tier"
 
-    smd = submain.decorator
-    decorator = MockDecorator(3)
-    submain.decorator = decorator
-    err = MockErrorHandler(decorator)
+    with patch_decorator(fail_tier=3):
+        err = MockErrorHandler()
 
-    submain.test_inner_package(err, "foo", "bar")
+        submain.test_inner_package(err, "foo", "bar")
 
-    assert err.failed()
-    submain.decorator = smd
+        assert err.failed()
 
 
 # Test chrome.manifest populator
 def test_populate_chrome_manifest():
     """Ensure that the chrome manifest is populated if available."""
 
-    err = MockErrorHandler(None)
-    package_contents = {"chrome.manifest":
-            "tests/resources/chromemanifest/chrome.manifest"}
+    err = MockErrorHandler()
+    package_contents = {
+        "chrome.manifest": "tests/resources/chromemanifest/chrome.manifest"}
     package = MockXPI(package_contents)
 
     submain.populate_chrome_manifest(err, MockXPI())
@@ -233,36 +260,38 @@ def test_linked_manifest_recursion():
 def test_test_inner_package_determined():
     "Tests that the determined test_inner_package function works properly"
 
-    smd = submain.decorator
-    decorator = MockDecorator(None, True)
-    submain.decorator = decorator
-    err = MockErrorHandler(decorator, True)
+    with patch_decorator(determined=True) as decorator:
+        err = MockErrorHandler(determined=True)
 
-    submain.test_inner_package(err, "foo", "bar")
+        submain.test_inner_package(err, "foo", "bar")
 
-    assert not err.failed()
-    assert decorator.last_tier == 5
-    submain.decorator = smd
+        assert not err.failed()
+        assert decorator.last_tier == 5
 
 
-def test_test_inner_package_failtier():
+def test_test_inner_package_determined_failtier():
     "Tests the test_inner_package function in determined mode while failing"
 
-    smd = submain.decorator
-    decorator = MockDecorator(3, True)
-    submain.decorator = decorator
-    err = MockErrorHandler(decorator, True)
+    with patch_decorator(fail_tier=3, determined=True) as decorator:
+        err = MockErrorHandler(determined=True)
 
-    submain.test_inner_package(err, "foo", "bar")
+        submain.test_inner_package(err, "foo", "bar")
 
-    assert err.failed()
-    assert decorator.last_tier == 5
-    submain.decorator = smd
+        assert err.failed()
+        assert decorator.last_tier == 5
 
 
-class MockDecorator:
+# These desparately need to be rewritten:
 
-    def __init__(self, fail_tier=None, determined=False):
+def patch_decorator(*args, **kw):
+    return mock.patch.object(submain, 'decorator', MockDecorator(*args, **kw))
+
+
+class MockDecorator(mock.MagicMock):
+
+    def __init__(self, fail_tier=None, determined=False, **kw):
+        super(MockDecorator, self).__init__(**kw)
+
         self.determined = determined
         self.ordering = [1]
         self.fail_tier = fail_tier
@@ -291,7 +320,10 @@ class MockDecorator:
 
         self.last_tier = tier
 
-        for x in range(1,10): # Ten times because we care
+        for x in range(1, 10):  # Ten times because we care
+            # ^ Very witty. However, it would be nice to actually know
+            # exactly why we're yielding these ten times.
+
             print "Yielding Complex"
             yield {"test": lambda x, z: x.report(tier),
                    "simple": False,
@@ -314,10 +346,11 @@ class MockDecorator:
         assert self.on_tier == self.fail_tier
 
 
-class MockErrorHandler:
+class MockErrorHandler(mock.MagicMock):
 
-    def __init__(self, mock_decorator, determined=False):
-        self.decorator = mock_decorator
+    def __init__(self, determined=False, **kw):
+        super(MockErrorHandler, self).__init__(**kw)
+
         self.detected_type = 0
         self.has_failed = False
         self.determined = determined
@@ -336,12 +369,12 @@ class MockErrorHandler:
 
     def report(self, tier):
         "Passes the tier back to the mock decorator to verify the tier"
-        self.decorator.report_tier(tier)
+        submain.decorator.report_tier(tier)
 
     def fail_tier(self):
         "Simulates a failure"
         self.has_failed = True
-        self.decorator.report_fail()
+        submain.decorator.report_fail()
 
     def test_simple(self, z):
         "Makes sure that the second two params of a simple test are respected"
@@ -350,4 +383,3 @@ class MockErrorHandler:
     def failed(self, fail_on_warnings=False):
         "Simple accessor because the standard error handler has one"
         return self.has_failed
-

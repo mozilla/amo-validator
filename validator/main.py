@@ -1,5 +1,6 @@
 import argparse
 import json
+import logging
 import sys
 
 from validator import constants
@@ -9,14 +10,15 @@ from validator.validate import validate
 def main():
     "Main function. Handles delegation to other functions."
 
+    logging.basicConfig()
+
     type_choices = {"any": constants.PACKAGE_ANY,
                     "extension": constants.PACKAGE_EXTENSION,
                     "theme": constants.PACKAGE_THEME,
                     "dictionary": constants.PACKAGE_DICTIONARY,
                     "languagepack": constants.PACKAGE_LANGPACK,
                     "search": constants.PACKAGE_SEARCHPROV,
-                    "multi": constants.PACKAGE_MULTI,
-                    "webapp": constants.PACKAGE_WEBAPP}
+                    "multi": constants.PACKAGE_MULTI}
 
     # Parse the arguments that
     parser = argparse.ArgumentParser(

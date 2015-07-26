@@ -1,91 +1,70 @@
-import validator.submain as submain
+import mock
+
+from nose.tools import eq_
+
+from validator import submain
 from validator.errorbundler import ErrorBundle
-from validator.constants import *
+from validator.constants import PACKAGE_ANY, PACKAGE_SEARCHPROV
 
 
-def test_package_pass():
+@mock.patch("validator.submain.test_inner_package")
+def test_package_pass(test_inner_package):
     "Tests the test_package function with simple data"
 
-    tip = submain.test_inner_package
-    submain.test_inner_package = lambda x, z, for_appversions: "success"
-
-    name = "tests/resources/submain/install_rdf.xpi"
-    pack = open(name)
     err = ErrorBundle()
-
-    result = submain.test_package(err, pack, name)
-
-    pack.close()
-
-    submain.test_inner_package = tip
+    with open("tests/resources/submain/install_rdf.xpi") as pkg:
+        submain.test_package(err, pkg, pkg.name)
 
     assert not err.failed()
     assert err.get_resource("has_install_rdf")
-    assert result == "success"
+    assert submain.test_inner_package.called
 
 
-def test_package_corrupt():
+@mock.patch("validator.submain.test_inner_package")
+def test_package_corrupt(test_inner_package):
     "Tests the test_package function fails with a non-zip"
 
-    tip = submain.test_inner_package
-    submain.test_inner_package = lambda x, z, for_appversions: "success"
-
-    name = "tests/resources/junk.xpi"
     err = ErrorBundle()
+    with open("tests/resources/junk.xpi") as pkg:
+        submain.test_package(err, pkg, pkg.name)
 
-    result = submain.test_package(err, name, name)
-    submain.test_inner_package = tip
-
-    err.print_summary(True);
+    assert not test_inner_package.called
     assert err.failed()
 
 
-def test_package_corrupt():
+@mock.patch("validator.submain.test_inner_package")
+def test_package_corrupt_again(test_inner_package):
     "Tests the test_package function fails with a corrupt file"
 
-    tip = submain.test_inner_package
-    submain.test_inner_package = lambda x, z, for_appversions: "success"
-
-    name = "tests/resources/corrupt.xpi"
     err = ErrorBundle()
+    with open("tests/resources/corrupt.xpi") as pkg:
+        submain.test_package(err, pkg, pkg.name)
 
-    result = submain.test_package(err, name, name)
-    submain.test_inner_package = tip
-
-    err.print_summary(True);
+    assert not test_inner_package.called
     assert err.failed()
 
 
-def test_package_extension_expectation():
+@mock.patch("validator.submain.test_inner_package")
+def test_package_extension_expectation(test_inner_package):
     "Tests the test_package function with an odd extension"
 
-    tip = submain.test_inner_package
-    submain.test_inner_package = lambda x, z, for_appversions: "success"
-
-    name = "tests/resources/submain/install_rdf.jar"
     err = ErrorBundle()
+    with open("tests/resources/submain/install_rdf.jar") as pkg:
+        submain.test_package(err, pkg, pkg.name, PACKAGE_ANY)
 
-    result = submain.test_package(err, name, name, PACKAGE_ANY)
-
-    submain.test_inner_package = tip
-
+    assert submain.test_inner_package.called
     assert not err.failed()
     assert err.get_resource("has_install_rdf")
-    assert result == "success"
 
 
-def test_package_extension_bad_expectation():
+@mock.patch("validator.submain.test_inner_package")
+def test_package_extension_bad_expectation(test_inner_package):
     "Tests the test_package function with an odd extension"
 
-    tip = submain.test_inner_package
-    submain.test_inner_package = lambda x, z, for_appversions: "success"
-
-    name = "tests/resources/submain/install_rdf.jar"
     err = ErrorBundle()
+    with open("tests/resources/submain/install_rdf.jar") as pkg:
+        submain.test_package(err, pkg, pkg.name, PACKAGE_SEARCHPROV)
 
-    result = submain.test_package(err, name, name, PACKAGE_SEARCHPROV)
-
-    submain.test_inner_package = tip
-
+    assert test_inner_package.called
     assert err.failed()
-
+    eq_(err.errors[0]["id"], ("main", "test_package", "unexpected_type"))

@@ -2,6 +2,7 @@ import hashlib
 import os
 import re
 from StringIO import StringIO
+from zipfile import BadZipfile
 
 from regex import run_regex_tests
 from validator.constants import MAX_JS_THRESHOLD
@@ -297,13 +298,13 @@ def _process_file(err, xpi_package, name, file_data, name_lower,
         try:
             sub_xpi = XPIManager(package, mode="r", name=name,
                                  subpackage=is_subpackage)
-        except Exception:
+        except BadZipfile:
             err.error(("testcases_content",
                        "test_packed_packages",
                        "jar_subpackage_corrupt"),
                       "Subpackage corrupt.",
-                      "The subpackage could not be opened due to issues "
-                      "with corruption. Ensure that the file is valid.",
+                      "The subpackage appears to be corrupt, and could not "
+                      "be opened.",
                       name)
             return None
 
