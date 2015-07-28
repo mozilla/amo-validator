@@ -1,4 +1,6 @@
+from copy import deepcopy
 from functools import partial
+import sys
 import types
 
 # Global import of predefinedentities will cause an import loop
@@ -6,7 +8,6 @@ import instanceactions
 from validator.constants import (BUGZILLA_BUG, DESCRIPTION_TYPES, FENNEC_GUID,
                                  FIREFOX_GUID, MAX_STR_SIZE)
 from validator.decorator import version_range
-from validator.python import copy
 from jstypes import JSArray, JSContext, JSLiteral, JSObject, JSWrapper
 
 
@@ -645,7 +646,7 @@ def _new(traverser, node):
         elem = JSWrapper(elem, traverser=traverser)
     if elem.is_global:
         traverser._debug("Making overwritable")
-        elem.value = copy.deepcopy(elem.value)
+        elem.value = deepcopy(elem.value)
         elem.value["overwritable"] = True
     return elem
 
@@ -831,6 +832,7 @@ def _expr_assignment(traverser, node):
         try:
             new_value = operators[token]()
         except Exception:
+            traverser.system_error(exc_info=sys.exc_info())
             new_value = None
 
         # Cap the length of analyzed strings.
@@ -950,6 +952,7 @@ def _binary_op(operator, left, right, traverser):
         try:
             output = operators[operator]()
         except Exception:
+            traverser.system_error(exc_info=sys.exc_info())
             output = None
 
         # Cap the length of analyzed strings.

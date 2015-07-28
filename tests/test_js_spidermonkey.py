@@ -68,8 +68,6 @@ def test_reflectparse_presence():
         spidermonkey._get_tree("foo bar", "[path]")
     except RuntimeError as err:
         assert str(err).startswith("Spidermonkey version too old"), err
-    except Exception:
-        raise
 
 
 def test_compiletime_errors():

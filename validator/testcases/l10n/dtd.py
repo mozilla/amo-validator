@@ -3,9 +3,9 @@ from StringIO import StringIO
 from validator.contextgenerator import ContextGenerator
 
 try:
-    from html.parser import HTMLParser
-except ImportError:  # pragma: no cover
-    from HTMLParser import HTMLParser
+    from html.parser import HTMLParser, HTMLParseError
+except ImportError:
+    from HTMLParser import HTMLParser, HTMLParseError
 
 
 class DTDParser(object):
@@ -46,7 +46,7 @@ class DTDParser(object):
         for split_line in data.split("\n"):
             try:
                 parser.feed(split_line + "\n")
-            except Exception as e:
+            except HTMLParseError:
                 parser = DTDXMLParser()
             else:
                 if parser.out_buffer:

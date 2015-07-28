@@ -1,6 +1,7 @@
 from collections import defaultdict
 import itertools
 import re
+import sys
 import types
 
 from validator.constants import DESCRIPTION_TYPES
@@ -78,9 +79,9 @@ class Traverser(object):
             for func in func_coll:
                 func()
         except Exception:
-            print "Exception in JS traversal; %s (%d;%d)" % (
-                      self.filename, self.line, self.position)
-            raise
+            self.system_error(exc_info=sys.exc_info())
+            return
+
         self._debug("END>>")
 
         if self.contexts:
@@ -374,3 +375,7 @@ class Traverser(object):
     def notice(self, **kwargs):
         err_kwargs = self._err_kwargs(kwargs)
         return self.err.notice(**err_kwargs)
+
+    def system_error(self, **kwargs):
+        err_kwargs = self._err_kwargs(kwargs)
+        return self.err.system_error(**err_kwargs)

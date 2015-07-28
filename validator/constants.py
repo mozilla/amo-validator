@@ -17,7 +17,6 @@ PACKAGE_LANGPACK = 4
 PACKAGE_SEARCHPROV = 5
 PACKAGE_MULTI = 1  # A multi extension is an extension
 PACKAGE_SUBPACKAGE = 7
-PACKAGE_WEBAPP = 8
 
 # The "earliest" version number for Firefox 4
 FF4_MIN = "3.7a1pre"
@@ -46,8 +45,6 @@ with open(os.path.join(os.path.dirname(__file__), "app_versions.json")) as avs:
 
 SPIDERMONKEY_INSTALLATION = os.environ.get("SPIDERMONKEY_INSTALLATION")
 
-DEFAULT_WEBAPP_MRKT_URLS = ["https://marketplace.mozilla.org",
-                            "https://marketplace-dev.allizom.org"]
 BUGZILLA_BUG = "https://bugzil.la/%d"
 MDN_DOC = "https://developer.mozilla.org/docs/%s"
 
@@ -60,6 +57,10 @@ MAX_STR_SIZE = 1024 * 24  # 24KB
 # The maximum number of JS files that can be exhaustively validated in one
 # package.
 MAX_JS_THRESHOLD = 900
+
+
+# Severities of signing-related messages, from least severe to most.
+SIGNING_SEVERITIES = ("trivial", "low", "medium", "high")
 
 # The pattern that matches event assignments
 # TODO(valcom): Move this to valcom when that's a thing.

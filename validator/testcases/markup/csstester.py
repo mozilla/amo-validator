@@ -1,12 +1,12 @@
 import re
-from functools import partial
 import cssutils
 
-from validator.constants import BUGZILLA_BUG, PACKAGE_THEME
+from validator.constants import PACKAGE_THEME
 from validator.contextgenerator import ContextGenerator
 
 
-BAD_URL_PAT = "url\(['\"]?(?!(chrome:|resource:))(\/\/|(ht|f)tps?:\/\/|data:).*['\"]?\)"
+BAD_URL_PAT = ("url\(['\"]?(?!(chrome:|resource:))(\/\/|(ht|f)tps?:\/\/|data:)"
+               ".*['\"]?\)")
 BAD_URL = re.compile(BAD_URL_PAT, re.I)
 REM_URL = re.compile("url\(['\"]?(\/\/|ht|f)tps?:\/\/.*['\"]?\)", re.I)
 
@@ -26,23 +26,11 @@ def test_css_file(err, filename, data, line_start=1):
 
     token_generator = tokenizer.tokenize(data)
 
-    try:
-        _run_css_tests(err,
-                       tokens=token_generator,
-                       filename=filename,
-                       line_start=line_start - 1,
-                       context=context)
-    except Exception:  # pragma: no cover
-        # This happens because tokenize is a generator.
-        # Bravo, Mr. Bond, Bravo.
-        err.warning(("testcases_markup_csstester",
-                     "test_css_file",
-                     "could_not_parse"),
-                    "Could not parse CSS file",
-                    "CSS file could not be parsed by the tokenizer.",
-                    filename)
-        #raise
-        return
+    _run_css_tests(err,
+                   tokens=token_generator,
+                   filename=filename,
+                   line_start=line_start - 1,
+                   context=context)
 
 
 def test_css_snippet(err, filename, data, line):
@@ -125,15 +113,16 @@ def _run_css_tests(err, tokens, filename, line_start=0, context=None):
                 identity_box_mods.append(str(line + line_start))
             elif value == '#downloads-indicator':
                 downloads_indicator_selectors.append(str(line + line_start))
+
     if identity_box_mods and err.detected_type != PACKAGE_THEME:
-        err.warning(("testcases_markup_csstester",
-                    "_run_css_tests",
-                    "identity_box"),
+        err.warning(("testcases_markup_csstester", "_run_css_tests",
+                     "identity_box"),
                     "Modification to identity box.",
                     ["The identity box (#identity-box) is a sensitive piece "
                      "of the interface and should not be modified.",
                      "Lines: %s" % ", ".join(identity_box_mods)],
                     filename)
+
     if unicode_errors:
         err.info(("testcases_markup_csstester",
                   "test_css_file",
