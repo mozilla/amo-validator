@@ -16,9 +16,18 @@ DANGEROUS_CATEGORY_WARNING = {
     "err_id": ("testcases_chromemanifest", "test_resourcemodules",
                "resource_modules"),
     "warning": "Potentially dangerous category entry",
-    "description": "Add-ons definining global properties via category "
+    "description": "Add-ons defining global properties via category "
                    "entries require careful review by an administrative "
                    "reviewer.",
+    "signing_help": (
+        "Given the potential security risks of exposing APIs to unprivileged "
+        "code, extensions which use these APIs must undergo manual code "
+        "review for at least one submission. If you are not using these APIs "
+        "to interact with content code, please consider alternatives, such as "
+        "JavaScript modules (http://mzl.la/1HMH2m9), CommonJS modules "
+        "(http://mzl.la/1JBMjuU, http://mzl.la/1OBaE8u), the observer "
+        "service (http://mzl.la/1MLqWdJ), or window listeners which install "
+        "global properties on privileged windows."),
     "signing_severity": "medium",
     "editors_only": True}
 
@@ -53,7 +62,7 @@ def test_resourcemodules(err):
 
     for triple in chrome.triples:
         if (triple["subject"] == "resource" and
-            triple["predicate"].startswith("modules")):
+                triple["predicate"].startswith("modules")):
             err.error(
                 err_id=("testcases_chromemanifest", "test_resourcemodules",
                         "resource_modules"),
@@ -114,4 +123,3 @@ def test_content_instructions(err):
                 filename=triple["filename"],
                 line=triple["line"],
                 context=triple["context"])
-

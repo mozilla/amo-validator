@@ -108,6 +108,11 @@ def _create_script_tag(traverser):
         description="Dynamic creation of script nodes can be unsafe if "
                     "contents are not static or are otherwise unsafe, "
                     "or if `src` is remote.",
+        signing_help="Please avoid using <script> tags to load scripts. "
+                     "For potential alternatives, please see "
+                     "https://developer.mozilla.org/en-US/Add-ons/"
+                     "Overlay_Extensions/XUL_School/"
+                     "Appendix_D:_Loading_Scripts",
         signing_severity="medium")
 
 
@@ -146,6 +151,11 @@ def setAttribute(args, traverser, node, wrapper):
             description="To prevent vulnerabilities, event handlers (like "
                         "'onclick' and 'onhover') should always be defined "
                         "using addEventListener.",
+            signing_help="Please use `addEventListener` any place you might "
+                         "otherwise create event listener attributes. Event "
+                         "listener attributes will not be accepted in add-ons "
+                         "submitted for automated signing in any instance "
+                         "where they may be reasonably avoided.",
             signing_severity="medium")
 
 

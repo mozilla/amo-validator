@@ -136,4 +136,4 @@ class TestWrappedJSObject(TestCase):
         """)
         self.assert_failed(with_warnings=[
             {"id": ("testcases_js_xpcom", "xpcnativewrapper", "shallow"),
-             "signing_severity": "medium"}])
+             "signing_severity": "high"}])

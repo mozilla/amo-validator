@@ -287,7 +287,13 @@ def js_wrap(wrapper, arguments, traverser):
             description="Shallow XPCOM wrappers are seldom necessary and "
                         "should not be used. Please use deep wrappers "
                         "instead.",
-            signing_severity="medium")
+            signing_help="Extensions making use of shallow wrappers will not "
+                         "be accepted for automated signing. Please remove "
+                         "the second and subsequent arguments of any calls "
+                         "to `XPCNativeWrapper`, as well as any code which "
+                         "applies `XPCNativeWrapper` to properties obtained "
+                         "from these shallowly wrapped objects.",
+            signing_severity="high")
         # Do not mark shallow wrappers as not unwrapped.
         return obj
 

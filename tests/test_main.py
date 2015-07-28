@@ -1,6 +1,11 @@
+import mock
+import sys
+
 from validator.main import main
 
-def test_main():
+
+@mock.patch.object(sys, 'stderr')
+def test_main(stderr):
     """Test that `main()` initializes without errors."""
     try:
         main()

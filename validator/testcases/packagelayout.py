@@ -51,6 +51,17 @@ def test_blacklisted_files(err, xpi_package=None):
 
     flagged_files = []
 
+    HELP = ("Please try to avoid interacting with or bundling "
+            "native binaries whenever possible. If you are "
+            "bundling binaries for performance reasons, please "
+            "consider alternatives such as Emscripten "
+            "(http://mzl.la/1KrSUh2), JavaScript typed arrays "
+            "(http://mzl.la/1Iw02sr), and Worker threads "
+            "(http://mzl.la/1OGfAcc).",
+            "Any code which bundles native binaries must "
+            "submit full source code, and undergo manual code review "
+            "for at least one submission.")
+
     for name in xpi_package:
         file_ = xpi_package.info(name)
         # Simple test to ensure that the extension isn't blacklisted
@@ -69,16 +80,14 @@ def test_blacklisted_files(err, xpi_package=None):
             # Note that there is binary content in the metadata
             err.metadata["contains_binary_content"] = True
             err.warning(
-                err_id=("testcases_packagelayout",
-                        "test_blacklisted_files",
+                err_id=("testcases_packagelayout", "test_blacklisted_files",
                         "disallowed_file_type"),
                 warning="Flagged file type found",
-                description=("A file was found to contain flagged content "
-                             "(i.e.: executable data, potentially "
-                             "unauthorized scripts, etc.).",
-                             u"The file \"%s\" contains flagged content" %
-                                 name),
+                description="A file was found to contain flagged content "
+                            "(i.e.: executable data, potentially "
+                            "unauthorized scripts, etc.).",
                 editors_only=True,
+                signing_help=HELP,
                 signing_severity="high",
                 filename=name)
 
@@ -86,13 +95,14 @@ def test_blacklisted_files(err, xpi_package=None):
         # Detect Java JAR files:
         if (sum(1 for f in flagged_files if f.endswith(".class")) >
                 JAVA_JAR_THRESHOLD):
-            err.notice(
-                err_id=("testcases_packagelayout",
-                        "test_blacklisted_files",
+            err.warning(
+                err_id=("testcases_packagelayout", "test_blacklisted_files",
                         "java_jar"),
-                notice="Java JAR file detected.",
+                warning="Java JAR file detected.",
                 description="A Java JAR file was detected in the add-on.",
-                filename=xpi_package.filename)
+                filename=xpi_package.filename,
+                signing_help=HELP,
+                signing_severity="high")
         else:
             err.warning(
                 err_id=("testcases_packagelayout",
@@ -101,15 +111,16 @@ def test_blacklisted_files(err, xpi_package=None):
                 warning="Flagged file extensions found.",
                 description=("Files whose names end with flagged extensions "
                              "have been found in the add-on.",
-                             "The extension of these files are flagged because "
-                             "they usually identify binary components. Please "
-                             "see "
+                             "The extension of these files are flagged "
+                             "because they usually identify binary "
+                             "components. Please see "
                              "http://addons.mozilla.org/developers/docs/"
-                                 "policies/reviews#section-binary"
+                             "policies/reviews#section-binary"
                              " for more information on the binary content "
                              "review process.",
                              "\n".join(flagged_files)),
                 editors_only=True,
+                signing_help=HELP,
                 signing_severity="medium",
                 filename=name)
 
@@ -134,7 +145,7 @@ def test_godlikea(err, xpi_package):
         versions={FIREFOX_GUID: version_range("firefox", FF4_MIN),
                   TB_GUID: version_range("thunderbird", "3.3a4pre"),
                   FENNEC_GUID: version_range("fennec", "4.0"),
-                  ANDROID_GUID: version_range("android", "11.0a1"),})
+                  ANDROID_GUID: version_range("android", "11.0a1")})
 def test_compatibility_binary(err, xpi_package):
     """
     Flags only binary content as being incompatible with future app releases.
