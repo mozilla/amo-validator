@@ -15,14 +15,13 @@ JS_ESCAPE = re.compile(r"\\+[ux]", re.I)
 
 
 def test_js_file(err, filename, data, line=0, context=None, pollutable=False):
-    "Tests a JS file by parsing and analyzing its tokens"
+    "Test a JS file by parsing and analyzing its tokens."
 
     spidermonkey = err.get_resource("SPIDERMONKEY")
-
-    if spidermonkey is None:  # Default value is False
-        return
-    elif not spidermonkey:
+    if spidermonkey is False:  # False: Use default. None: Don't run.
         spidermonkey = SPIDERMONKEY_INSTALLATION
+    if spidermonkey is None:
+        return
 
     if err.detected_type == PACKAGE_THEME:
         err.warning(
@@ -51,8 +50,8 @@ def test_js_file(err, filename, data, line=0, context=None, pollutable=False):
         context = ContextGenerator(data)
 
     t = traverser.Traverser(err, filename, line, context=context,
-                            is_jsm=filename.endswith(".jsm") or
-                                   "EXPORTED_SYMBOLS" in data)
+                            is_jsm=(filename.endswith(".jsm") or
+                                    "EXPORTED_SYMBOLS" in data))
     t.pollutable = pollutable
     t.run(tree)
 

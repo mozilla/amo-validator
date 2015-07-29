@@ -1,24 +1,20 @@
-import json
-import re
+import simplejson as json
 import subprocess
 
+from validator import unicodehelper
 from validator.contextgenerator import ContextGenerator
-import validator.unicodehelper as unicodehelper
+from validator.decorator import register_cleanup
 
 
 def get_tree(code, err=None, filename=None, shell=None):
-    "Retrieves the parse tree for a JS snippet"
-
-    if not code or not shell:
-        return None
+    """Retrieve the parse tree for a JS snippet."""
 
     try:
-        return _get_tree(code, shell)
+        return JSShell.get_shell(shell).get_tree(code)
     except JSReflectException as exc:
-        str_exc = str(exc).strip("'\"")
+        str_exc = str(exc)
         if "SyntaxError" in str_exc or "ReferenceError" in str_exc:
-            err.warning(("testcases_scripting",
-                         "test_js_file",
+            err.warning(("testcases_scripting", "test_js_file",
                          "syntax_error"),
                         "JavaScript Compile-Time Error",
                         ["A compile-time error in the JavaScript halted "
@@ -28,8 +24,7 @@ def get_tree(code, err=None, filename=None, shell=None):
                         line=exc.line,
                         context=ContextGenerator(code))
         elif "InternalError: too much recursion" in str_exc:
-            err.notice(("testcases_scripting",
-                        "test_js_file",
+            err.notice(("testcases_scripting", "test_js_file",
                         "recursion_error"),
                        "JS too deeply nested for validation",
                        "A JS file was encountered that could not be valiated "
@@ -37,8 +32,7 @@ def get_tree(code, err=None, filename=None, shell=None):
                        "manually inspected.",
                        filename=filename)
         else:
-            err.error(("testcases_scripting",
-                       "test_js_file",
+            err.error(("testcases_scripting", "test_js_file",
                        "retrieving_tree"),
                       "JS reflection error prevented validation",
                       ["An error in the JavaScript file prevented it from "
@@ -47,66 +41,86 @@ def get_tree(code, err=None, filename=None, shell=None):
                       filename=filename)
 
 
+@register_cleanup
+class JSShell(object):
+    shells = {}
+
+    SCRIPT = """
+        function output(object) {
+            print(JSON.stringify(object));
+        }
+        var stdin;
+        while ((stdin = readline())) {
+            try{
+                stdin = JSON.parse(stdin);
+                output(Reflect.parse(stdin));
+            } catch(e) {
+                output({
+                    "error": true,
+                    "error_message": e.toString(),
+                    "line_number": e.lineNumber
+                });
+            }
+        }
+    """
+
+    def __init__(self, shell):
+        self.shell = shell
+
+        cmd = [shell, "-e", self.SCRIPT]
+        self.process = subprocess.Popen(
+            cmd, shell=False, stdin=subprocess.PIPE, stdout=subprocess.PIPE)
+
+    def __del__(self):
+        self.process.terminate()
+
+    @classmethod
+    def get_shell(cls, shell):
+        """Get a running JSShell instance for `shell`, or create a new one
+        if one does not already exist."""
+
+        if shell not in cls.shells:
+            cls.shells[shell] = JSShell(shell)
+
+        return cls.shells[shell]
+
+    @classmethod
+    def cleanup(cls):
+        """Clears any saved shells, and terminates their Spidermonkey processes
+        if there are no further references."""
+        cls.shells.clear()
+
+    def get_tree(self, code):
+        if isinstance(code, str):
+            code = unicodehelper.decode(code)
+
+        try:
+            self.process.stdin.write(json.dumps(code))
+            self.process.stdin.write("\n")
+
+            output = json.loads(self.process.stdout.readline(), strict=False)
+        except Exception:
+            if self.shell in self.shells:
+                del self.shells[self.shell]
+            raise
+
+        if output.get("error"):
+            raise JSReflectException(output["error_message"],
+                                     output["line_number"])
+
+        return output
+
+
 class JSReflectException(Exception):
     "An exception to indicate that tokenization has failed"
 
-    def __init__(self, value):
+    def __init__(self, value, line=None):
         self.value = value
-        self.line = None
+        self.line = line
 
     def __str__(self):
-        return repr(self.value)
+        return str(self.value)
 
-    def line_num(self, line_num):
-        "Set the line number and return self for chaining"
-        self.line = int(line_num)
-        return self
-
-
-BOOTSTRAP_SCRIPT = """
-var stdin = JSON.parse(readline());
-try{
-    print(JSON.stringify(Reflect.parse(stdin)));
-} catch(e) {
-    print(JSON.stringify({
-        "error":true,
-        "error_message":e.toString(),
-        "line_number":e.lineNumber
-    }));
-}"""
-
-
-def _get_tree(code, shell):
-    "Returns an AST tree of the JS passed in `code`."
-
-    if not code:
-        return None
-
-    cmd = [shell, "-e", BOOTSTRAP_SCRIPT]
-    shell_obj = subprocess.Popen(
-        cmd, shell=False, stdin=subprocess.PIPE, stderr=subprocess.PIPE,
-        stdout=subprocess.PIPE)
-
-    code = json.dumps(unicodehelper.decode(code))
-    data, stderr = shell_obj.communicate(code)
-
-    if stderr:
-        raise JSReflectException(stderr)
-
-    if not data:
-        raise JSReflectException("Reflection failed")
-
-    data = unicodehelper.decode(data)
-    parsed = json.loads(data, strict=False)
-
-    if parsed.get("error"):
-        if parsed["error_message"].startswith("ReferenceError: Reflect"):
-            raise RuntimeError("Spidermonkey version too old; "
-                               "1.8pre+ required; error='%s'; "
-                               "spidermonkey='%s'" % (parsed["error_message"],
-                                                      shell))
-        else:
-            raise JSReflectException(parsed["error_message"]).line_num(
-                    parsed["line_number"])
-
-    return parsed
+    def __repr__(self):
+        return '<JSReflectException (line {0}) {1!r}>'.format(
+            self.line, self.value)
