@@ -203,9 +203,6 @@ class ErrorBundle(object):
         else:
             message["context"] = None
 
-        message["message"] = unicodehelper.decode(message["message"])
-        message["description"] = unicodehelper.decode(message["description"])
-
         # Test that if for_appversions is set that we're only applying to
         # supported add-ons. THIS IS THE LAST FILTER BEFORE THE MESSAGE IS
         # ADDED TO THE STACK!

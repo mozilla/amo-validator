@@ -1,17 +1,7 @@
-import re
-import subprocess
-import tempfile
-from cStringIO import StringIO
-
-import validator.testcases.javascript.traverser as traverser
-from validator.testcases.javascript.spidermonkey import get_tree, \
-                                                        JSReflectException
 from validator.constants import PACKAGE_THEME, SPIDERMONKEY_INSTALLATION
 from validator.contextgenerator import ContextGenerator
-from validator.textfilter import *
-
-
-JS_ESCAPE = re.compile(r"\\+[ux]", re.I)
+from validator.testcases.javascript import traverser
+from validator.testcases.javascript.spidermonkey import get_tree
 
 
 def test_js_file(err, filename, data, line=0, context=None, pollutable=False):
@@ -71,4 +61,3 @@ def test_js_snippet(err, data, filename, line=0, context=None):
     data = "(function(){%s\n})()" % data
 
     test_js_file(err, filename, data, line, context, pollutable=False)
-
