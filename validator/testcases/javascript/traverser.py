@@ -45,6 +45,14 @@ class Traverser(object):
         # For debugging
         self.debug_level = 0
 
+        class DebugLevel(object):
+            def __enter__(self_):
+                self.debug_level += 1
+
+            def __exit__(self_, type, value, traceback):
+                self.debug_level -= 1
+        self._debug_level = DebugLevel()
+
     def _debug(self, data, indent=0):
         """Write a message to the console if debugging is enabled."""
         if DEBUG:
@@ -56,13 +64,7 @@ class Traverser(object):
             print (". " * (self.debug_level + indent) +
                    output.encode("ascii", "replace"))
 
-        class DebugLevel(object):
-            def __enter__(self_):
-                self.debug_level += 1
-
-            def __exit__(self_, type, value, traceback):
-                self.debug_level -= 1
-        return DebugLevel()
+        return self._debug_level
 
     def run(self, data):
         if DEBUG:
