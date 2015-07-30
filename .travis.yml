@@ -5,9 +5,6 @@ python:
 env:
   - TOX_ENV=py27
   - TOX_ENV=functional-tests
-before_install:
-  - wget https://ftp.mozilla.org/pub/mozilla.org/firefox/nightly/latest-mozilla-aurora/jsshell-linux-x86_64.zip
-  - unzip -o jsshell-linux-x86_64.zip -d spidermonkey
 install:
   - pip install tox
 script:

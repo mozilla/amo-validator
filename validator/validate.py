@@ -15,7 +15,6 @@ def validate(path, format='json',
              approved_applications=os.path.join(os.path.dirname(__file__),
                                                 'app_versions.json'),
              determined=True,
-             spidermonkey=False,
              listed=True,
              expectation=PACKAGE_ANY,
              for_appversions=None,
@@ -37,11 +36,6 @@ def validate(path, format='json',
     `determined`:
         If set to `False`, validation will halt at the end of the first tier
         that raises errors.
-    `spidermonkey`:
-        Path to the local spidermonkey installation. Defaults to `False`, which
-        uses the validator's built-in detection of Spidermonkey. Specifying
-        `None` will disable JavaScript tests. Any other value is treated as the
-        path.
     `listed`:
         Whether the app is headed for the app marketplace or AMO. Defaults to
         `True`.
@@ -61,8 +55,7 @@ def validate(path, format='json',
     """
 
     bundle = ErrorBundle(listed=listed, determined=determined,
-                         overrides=overrides, spidermonkey=spidermonkey,
-                         for_appversions=for_appversions)
+                         overrides=overrides, for_appversions=for_appversions)
     bundle.save_resource('is_compat_test', compat_test)
 
     if isinstance(approved_applications, types.StringTypes):

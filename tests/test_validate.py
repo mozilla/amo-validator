@@ -17,7 +17,7 @@ class TestValidate(TestCase):
 
     def test_metadata(self):
         """Test that the generated JSON has the appropriate metadata
-        valuees."""
+        values."""
         self.run('tests/resources/packagelayout/theme.jar')
         j = json.loads(self.output)
         eq_(j['metadata']['name'], 'name_value')
@@ -30,16 +30,13 @@ class TestValidate(TestCase):
         """
         self.run('tests/resources/packagelayout/theme.jar', format=None)
         eq_(self.output.metadata['name'], 'name_value')
-        eq_(self.output.get_resource('SPIDERMONKEY'), False)
 
     def test_spidermonkey(self):
         """
         Test that the appropriate path for Spidermonkey is set through the
         `validate()` function.
         """
-        self.run('tests/resources/packagelayout/theme.jar', format=None,
-                 spidermonkey='foospidermonkey')
-        eq_(self.output.get_resource('SPIDERMONKEY'), 'foospidermonkey')
+        self.run('tests/resources/packagelayout/theme.jar', format=None)
         assert self.output.determined
         assert self.output.get_resource('listed')
 

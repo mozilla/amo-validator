@@ -1,4 +1,4 @@
-from validator.constants import PACKAGE_THEME, SPIDERMONKEY_INSTALLATION
+from validator.constants import PACKAGE_THEME
 from validator.contextgenerator import ContextGenerator
 from validator.testcases.javascript import traverser
 from validator.testcases.javascript.jsshell import get_tree
@@ -6,12 +6,6 @@ from validator.testcases.javascript.jsshell import get_tree
 
 def test_js_file(err, filename, data, line=0, context=None, pollutable=False):
     'Test a JS file by parsing and analyzing its tokens.'
-
-    spidermonkey = err.get_resource('SPIDERMONKEY')
-    if spidermonkey is False:  # False: Use default. None: Don't run.
-        spidermonkey = SPIDERMONKEY_INSTALLATION
-    if spidermonkey is None:
-        return
 
     if err.detected_type == PACKAGE_THEME:
         err.warning(
@@ -29,7 +23,7 @@ def test_js_file(err, filename, data, line=0, context=None, pollutable=False):
         before_tier = err.tier
         err.set_tier(3)
 
-    tree = get_tree(data, filename=filename, shell=spidermonkey, err=err)
+    tree = get_tree(data, filename=filename, err=err)
     if not tree:
         if before_tier:
             err.set_tier(before_tier)
