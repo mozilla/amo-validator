@@ -3,6 +3,7 @@ import cssutils
 
 from validator.constants import PACKAGE_THEME
 from validator.contextgenerator import ContextGenerator
+from validator.unicodehelper import NON_ASCII_FILTER
 
 
 BAD_URL_PAT = ("url\(['\"]?(?!(chrome:|resource:))(\/\/|(ht|f)tps?:\/\/|data:)"
@@ -22,7 +23,8 @@ def test_css_file(err, filename, data, line_start=1):
     context = ContextGenerator(data)
 
     if data:
-        data = "".join(c for c in data if 8 < ord(c) < 127)
+        # Remove any characters which aren't printable, 7-bit ASCII.
+        data = NON_ASCII_FILTER.sub('', data)
 
     token_generator = tokenizer.tokenize(data)
 

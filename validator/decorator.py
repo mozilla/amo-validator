@@ -1,8 +1,14 @@
+import logging
+
 import validator.constants
-from validator.constants import *
+from validator.constants import APPLICATIONS
+
+
+log = logging.getLogger('amo.validator')
 
 
 TEST_TIERS = {}
+CLEANUP_FUNCTIONS = []
 
 
 def register_test(tier=1, expected_type=None, simple=False, versions=None):
@@ -26,6 +32,30 @@ def register_test(tier=1, expected_type=None, simple=False, versions=None):
 
     # Return the wrapping function (for use as a decorator)
     return wrap
+
+
+def register_cleanup(cleanup):
+    """Register a cleanup function to be called at the end of every validation
+    task. Takes either a callable (including a class with a __call_ method),
+    or a class with a `cleanup` class method."""
+
+    if not callable(cleanup):
+        # Allow decorating a class with a `cleanup` classm ethod.
+        cleanup = cleanup.cleanup
+
+    CLEANUP_FUNCTIONS.append(cleanup.cleanup)
+    return cleanup
+
+
+def cleanup():
+    """Call every cleanup function which has been registered via
+    @register_cleanup."""
+
+    for fn in CLEANUP_FUNCTIONS:
+        try:
+            fn()
+        except Exception, e:
+            log.exception('Error during cleanup: %s' % e)
 
 
 def get_tiers():
@@ -65,7 +95,8 @@ def version_range(guid, version, before=None, app_versions=None):
             break
 
     if not app_key or version not in app_versions[app_key]["versions"]:
-        raise Exception("Bad GUID or version provided for version range: %s" % version)
+        raise Exception("Bad GUID or version provided for version range: %s"
+                        % version)
 
     all_versions = app_versions[app_key]["versions"]
     version_pos = all_versions.index(version)
@@ -73,4 +104,3 @@ def version_range(guid, version, before=None, app_versions=None):
     if before is not None and before in all_versions:
         before_pos = all_versions.index(before)
     return all_versions[version_pos:before_pos]
-

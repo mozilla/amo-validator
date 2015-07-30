@@ -198,7 +198,7 @@ def _function(traverser, node):
             func()
 
     # Put the function off for traversal at the end of the current block scope.
-    traverser.function_collection[-1].append(lambda: wrap(traverser, node))
+    traverser.function_collection[-1].append(partial(wrap, traverser, node))
 
     return JSWrapper(traverser=traverser, callable=True, dirty=True)
 

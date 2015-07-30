@@ -1,15 +1,15 @@
 import os
-import fastchardet
-import fnmatch
 from StringIO import StringIO
 
-from validator import decorator
-from validator.xpi import XPIManager
-from validator.chromemanifest import ChromeManifest
-from validator.constants import *
+import fastchardet
+import fnmatch
 
-import validator.testcases.l10n.dtd as dtd
-import validator.testcases.l10n.properties as properties
+from validator import decorator
+from validator.chromemanifest import ChromeManifest
+from validator.constants import PACKAGE_EXTENSION, PACKAGE_LANGPACK
+from validator.xpi import XPIManager
+
+from .l10n import dtd, properties
 
 
 # The threshold that determines the number of entities that must not be
@@ -200,9 +200,6 @@ def test_xpi(err, xpi_package):
         similar = reference["name"].startswith(locale["name"].split("-")[0])
         _aggregate_results(err, results, locale, similar)
 
-    # Clear the cache at the end of the test
-    L10N_CACHE = {}
-
 
 @decorator.register_test(tier=4, expected_type=PACKAGE_LANGPACK)
 def test_lp_xpi(err, xpi_package):
@@ -212,7 +209,7 @@ def test_lp_xpi(err, xpi_package):
     if "chrome.manifest" not in xpi_package:
         return None
 
-    locales = _get_locales(err);
+    locales = _get_locales(err)
 
     # Get the reference packages.
     references = []
@@ -278,7 +275,7 @@ def test_lp_xpi(err, xpi_package):
             _aggregate_results(err, results, target_locale)
 
     # Clear the cache at the end of the test
-    LOCALE_CACHE = {}
+    LOCALE_CACHE.clear()
 
 
 def _compare_packages(reference, target, ref_base="", locale_base=""):
@@ -393,7 +390,13 @@ def _parse_l10n_doc(name, doc, no_encoding=False):
 
     # Allow the parse to specify files to skip for encoding checks
     if not no_encoding:
-        encoding = fastchardet.detect(doc)["encoding"].upper()
+        try:
+            # This is much faster than fastchardet, and succeeds more often
+            # than fails.
+            doc.decode('utf-8')
+            encoding = 'UTF_8'
+        except UnicodeDecodeError:
+            encoding = fastchardet.detect(doc)["encoding"].upper()
         loc_doc.expected_encoding = encoding in handler_formats
         loc_doc.suitable_encoding = handler_formats
 
@@ -405,7 +408,6 @@ def _aggregate_results(err, results, locale, similar=False, base="en-US"):
     error bundler errors and warnings."""
 
     total_entities = 0
-    unchanged_entities = 0
     unchanged_entity_list = {}
     entity_count = {}
     unexpected_encodings = []
@@ -439,7 +441,7 @@ def _aggregate_results(err, results, locale, similar=False, base="en-US"):
                         [locale["target"], rfilename])
         elif rtype == "unchanged_entity":
             filename = ritem["filename"]
-            if not filename in unchanged_entity_list:
+            if filename not in unchanged_entity_list:
                 unchanged_entity_list[filename] = {"count": 0,
                                                    "entities": []}
             unchanged = unchanged_entity_list[filename]

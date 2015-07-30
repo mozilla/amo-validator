@@ -33,6 +33,6 @@ def test_controlchars_ascii_warn():
     non ascii characters raise warnings.
     """
 
-    errs = _do_test("tests/resources/controlchars/controlchars_ascii_warn.js")
-    eq_(errs.message_count, 1)
-    eq_(errs.warnings[0]["id"][2], "syntax_error")
+    err = _do_test("tests/resources/controlchars/controlchars_ascii_warn.js")
+    eq_(len(err.warnings), 1)
+    eq_(err.warnings[0]["id"][2], "syntax_error")

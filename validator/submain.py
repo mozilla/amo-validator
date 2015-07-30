@@ -9,10 +9,10 @@ from defusedxml.common import DefusedXmlException
 
 import validator
 from validator import decorator
-from validator.typedetection import detect_type
-from validator.opensearch import detect_opensearch
 from validator.chromemanifest import ChromeManifest
+from validator.opensearch import detect_opensearch
 from validator.rdf import RDFException, RDFParser
+from validator.typedetection import detect_type
 from validator.xpi import XPIManager
 
 from constants import (PACKAGE_ANY, PACKAGE_EXTENSION, PACKAGE_SEARCHPROV,
@@ -90,6 +90,8 @@ def prepare_package(err, path, expectation=0, for_appversions=None,
 
         if package:
             package.close()
+
+        decorator.cleanup()
 
 
 def test_search(err, package, expectation=0):

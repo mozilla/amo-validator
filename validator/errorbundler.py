@@ -124,7 +124,7 @@ class ErrorBundle(object):
     notice = _message("notices", "notice")
 
     def system_error(self, msg_id=None, message=None, description=None,
-                     validation_timeout=False, exc_info=None):
+                     validation_timeout=False, exc_info=None, **kw):
         """Add an error message for an unexpected exception in validator
         code, and move it to the front of the error message list. If
         `exc_info` is supplied, the error will be logged.
@@ -155,7 +155,7 @@ class ErrorBundle(object):
                     "The error has been logged, but please consider "
                     "filing an issue report here: "
                     "http://mzl.la/1DG0sFd"),
-                   tier=1)
+                   tier=1, **kw)
 
         # Move the error message to the beginning of the list.
         self.errors.insert(0, self.errors.pop())
@@ -202,9 +202,6 @@ class ErrorBundle(object):
                                         column=message["column"]))
         else:
             message["context"] = None
-
-        message["message"] = unicodehelper.decode(message["message"])
-        message["description"] = unicodehelper.decode(message["description"])
 
         # Test that if for_appversions is set that we're only applying to
         # supported add-ons. THIS IS THE LAST FILTER BEFORE THE MESSAGE IS
