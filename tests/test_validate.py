@@ -3,11 +3,11 @@ import json
 from mock import patch
 from nose.tools import eq_
 
+import validator
+from validator import constants
 from validator.validate import validate
-from validator.errorbundler import ErrorBundle
-import validator.constants as constants
 
-from helper import TestCase
+from .helper import TestCase
 
 
 class TestValidate(TestCase):
@@ -16,10 +16,12 @@ class TestValidate(TestCase):
         self.output = validate(path=path, **kwargs)
 
     def test_metadata(self):
-        """Test that the generated JSON has the appropriate metadata valuees."""
+        """Test that the generated JSON has the appropriate metadata
+        valuees."""
         self.run("tests/resources/packagelayout/theme.jar")
         j = json.loads(self.output)
         eq_(j["metadata"]["name"], "name_value")
+        eq_(j["metadata"]["validator_version"], validator.__version__)
 
     def test_metadata_bundle(self):
         """
@@ -106,4 +108,3 @@ def test_is_compat():
     out = validate(path="tests/resources/junk.xpi", format=None,
                    compat_test=True)
     assert out.get_resource("is_compat_test")
-

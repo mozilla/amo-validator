@@ -1,9 +1,10 @@
 from setuptools import setup, find_packages
 
+from validator import __version__
 
 setup(
     name='amo-validator',
-    version='1.8.5',
+    version=__version__,  # noqa
     description='Validates add-ons for Mozilla products.',
     long_description=open('README.md').read(),
     author='Matt Basta',

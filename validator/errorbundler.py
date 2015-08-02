@@ -66,7 +66,8 @@ class ErrorBundle(object):
         self.pushable_resources = {}
         self.final_context = None
 
-        self.metadata = {'requires_chrome': False, 'listed': listed}
+        self.metadata = {"requires_chrome": False, "listed": listed,
+                         "validator_version": validator.__version__}
         if listed:
             self.resources["listed"] = True
         self.instant = instant
@@ -296,7 +297,8 @@ class ErrorBundle(object):
         self.message_tree = {}
         self.pushable_resources = {}
         self.metadata = {"requires_chrome": False,
-                         "listed": self.metadata.get("listed")}
+                         "listed": self.metadata.get("listed"),
+                         "validator_version": validator.__version__}
 
         self.package_stack.append(new_file)
 
