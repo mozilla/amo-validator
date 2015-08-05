@@ -388,6 +388,15 @@ class Gecko40RegexTests(CompatRegexTestHelper):
             log_function=self.err.warning,
             compat_type="warning")
 
+        yield self.get_test(
+            r"\bresource://gre/modules/Dict.jsm\b",
+            "The Dict.jsm module has been removed.",
+            "The Dict.jsm module has been removed. You can use the native Map "
+            "object instead. See %s for more information."
+            % MDN_DOC % "Web/JavaScript/Reference/Global_Objects/Map",
+            log_function=self.err.warning,
+            compat_type="error")
+
 
 #############################
 #  Thunderbird Regex Tests  #

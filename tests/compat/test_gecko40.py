@@ -52,3 +52,11 @@ class TestFX40Compat(CompatTestCase):
         """)
         self.assert_silent()
         self.assert_compat_warning(type_="warning")
+
+    def test_Dict_jsm(self):
+        self.run_script_for_compat("""
+            Components.utils.import("resource://gre/modules/Dict.jsm");
+            var newDict = new Dict();
+        """)
+        self.assert_silent()
+        self.assert_compat_error()
