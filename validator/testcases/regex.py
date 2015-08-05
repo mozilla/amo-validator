@@ -379,6 +379,15 @@ class Gecko40RegexTests(CompatRegexTestHelper):
             log_function=self.err.warning,
             compat_type="warning")
 
+        yield self.get_test(
+            r"\b(fuelIApplication|extIApplication|Application)\b",
+            "The FUEL library is now deprecated.",
+            "The FUEL library is now deprecated. You should use the add-ons "
+            "SDK or Services.jsm. See %s for more information."
+            % MDN_DOC % "Mozilla/Tech/Toolkit_API/FUEL",
+            log_function=self.err.warning,
+            compat_type="warning")
+
 
 #############################
 #  Thunderbird Regex Tests  #

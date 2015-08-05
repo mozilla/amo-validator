@@ -27,3 +27,28 @@ class TestFX40Compat(CompatTestCase):
         """)
         self.assert_silent()
         self.assert_compat_warning(type_="warning")
+
+    def test_fuelIApplication(self):
+        self.run_script_for_compat("""
+            var Application = Components
+                .classes["@mozilla.org/fuel/application;1"]
+                .getService(Components.interfaces.fuelIApplication);
+        """)
+        self.assert_silent()
+        self.assert_compat_warning(type_="warning")
+
+    def test_extIApplication(self):
+        self.run_script_for_compat("""
+            var Application = Components
+                .classes["@mozilla.org/fuel/application;1"]
+                .getService(Components.interfaces.extIApplication);
+        """)
+        self.assert_silent()
+        self.assert_compat_warning(type_="warning")
+
+    def test_Application(self):
+        self.run_script_for_compat("""
+            Application.restart();
+        """)
+        self.assert_silent()
+        self.assert_compat_warning(type_="warning")
