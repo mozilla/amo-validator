@@ -405,6 +405,14 @@ class Gecko40RegexTests(CompatRegexTestHelper):
             log_function=self.err.warning,
             compat_type="error")
 
+        yield self.get_test(
+            r"\bnsISSLErrorListener\b",
+            "The nsISSLErrorListener interface has been removed.",
+            "The nsISSLErrorListener interface has been removed. See %s for "
+            "more information." % BUGZILLA_BUG % 844351,
+            log_function=self.err.warning,
+            compat_type="error")
+
 
 #############################
 #  Thunderbird Regex Tests  #

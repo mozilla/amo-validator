@@ -73,3 +73,11 @@ class TestFX40Compat(CompatTestCase):
         """)
         self.assert_silent()
         self.assert_compat_error()
+
+    def test_nsISSLErrorListener_observer(self):
+        self.run_script_for_compat("""
+            // I don't know how this is used...
+            'nsISSLErrorListener';
+        """)
+        self.assert_silent()
+        self.assert_compat_error()
