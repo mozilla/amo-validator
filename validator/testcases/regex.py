@@ -2,7 +2,7 @@ import re
 from functools import wraps
 
 from validator.compat import (
-    FX38_DEFINITION, FX39_DEFINITION,
+    FX38_DEFINITION, FX39_DEFINITION, FX40_DEFINITION,
     TB29_DEFINITION, TB30_DEFINITION, TB31_DEFINITION)
 from validator.constants import BUGZILLA_BUG, MDN_DOC
 from validator.contextgenerator import ContextGenerator
@@ -361,6 +361,23 @@ class Gecko39RegexTests(CompatRegexTestHelper):
             "%s for more information." % (BUGZILLA_BUG % 1094821 + '#c39'),
             log_function=self.err.warning,
             compat_type="error")
+
+
+@register_generator
+class Gecko40RegexTests(CompatRegexTestHelper):
+    """Regex tests for Gecko 40 updates."""
+
+    VERSION = FX40_DEFINITION
+
+    def tests(self):
+        yield self.get_test(
+            r"\b([gs]etKeywordForBookmark|getURIForKeyword)\b",
+            "The old keywords API is deprecated.",
+            "The old keywords API is deprecated. You should use "
+            "PlacesUtils.keywords instead. See %s for more information."
+            % MDN_DOC % "Mozilla/Tech/Places/Using_the_Places_keywords_API",
+            log_function=self.err.warning,
+            compat_type="warning")
 
 
 #############################
