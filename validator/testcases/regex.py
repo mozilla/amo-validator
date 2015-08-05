@@ -397,6 +397,14 @@ class Gecko40RegexTests(CompatRegexTestHelper):
             log_function=self.err.warning,
             compat_type="error")
 
+        yield self.get_test(
+            r"\bsessionstore-state-write\b",
+            "The \"sessionstore-state-write\" notification has been removed.",
+            "The \"sessionstore-state-write\" notification has been removed. "
+            'See %s for more information.' % BUGZILLA_BUG % 1157235,
+            log_function=self.err.warning,
+            compat_type="error")
+
 
 #############################
 #  Thunderbird Regex Tests  #

@@ -60,3 +60,16 @@ class TestFX40Compat(CompatTestCase):
         """)
         self.assert_silent()
         self.assert_compat_error()
+
+    def test_sessionstore_state_write_observer(self):
+        self.run_script_for_compat("""
+            let observer = {
+                observe: function(subject, topic, data) {
+                    if (topic === 'sessionstore-state-write') {
+                        alert('this will not work anymore');
+                    }
+                }
+            };
+        """)
+        self.assert_silent()
+        self.assert_compat_error()
