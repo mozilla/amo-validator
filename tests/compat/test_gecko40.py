@@ -81,3 +81,25 @@ class TestFX40Compat(CompatTestCase):
         """)
         self.assert_silent()
         self.assert_compat_error()
+
+    def test_sdk_widget_double(self):
+        self.run_script_for_compat("""
+            require("sdk/widget").Widget({
+                id: "mozilla-icon",
+                label: "My Mozilla Widget",
+                contentURL: "http://www.mozilla.org/favicon.ico"
+            });
+        """)
+        self.assert_silent()
+        self.assert_compat_error()
+
+    def test_sdk_widget_single(self):
+        self.run_script_for_compat("""
+            require('sdk/widget').Widget({
+                id: "mozilla-icon",
+                label: "My Mozilla Widget",
+                contentURL: "http://www.mozilla.org/favicon.ico"
+            });
+        """)
+        self.assert_silent()
+        self.assert_compat_error()

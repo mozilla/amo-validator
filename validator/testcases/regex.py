@@ -413,6 +413,16 @@ class Gecko40RegexTests(CompatRegexTestHelper):
             log_function=self.err.warning,
             compat_type="error")
 
+        yield self.get_test(
+            r"""require\(['"]sdk/widget['"]\)""",
+            "The widget module has been removed.",
+            "The widget module has been removed. You can use ActionButton or "
+            "ToggleButton instead. See %s for more information."
+            % "https://developer.mozilla.org/en-US/Add-ons/SDK/"
+              "High-Level_APIs/widget",
+            log_function=self.err.warning,
+            compat_type="error")
+
 
 #############################
 #  Thunderbird Regex Tests  #
