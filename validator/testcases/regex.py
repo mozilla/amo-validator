@@ -2,7 +2,7 @@ import re
 from functools import wraps
 
 from validator.compat import (
-    FX38_DEFINITION, FX39_DEFINITION,
+    FX38_DEFINITION, FX39_DEFINITION, FX40_DEFINITION,
     TB29_DEFINITION, TB30_DEFINITION, TB31_DEFINITION)
 from validator.constants import BUGZILLA_BUG, MDN_DOC
 from validator.contextgenerator import ContextGenerator
@@ -359,6 +359,67 @@ class Gecko39RegexTests(CompatRegexTestHelper):
             "The preferences used to store theme selection have changed.",
             "The preferences used to store theme selection have changed. See "
             "%s for more information." % (BUGZILLA_BUG % 1094821 + '#c39'),
+            log_function=self.err.warning,
+            compat_type="error")
+
+
+@register_generator
+class Gecko40RegexTests(CompatRegexTestHelper):
+    """Regex tests for Gecko 40 updates."""
+
+    VERSION = FX40_DEFINITION
+
+    def tests(self):
+        yield self.get_test(
+            r"\b([gs]etKeywordForBookmark|getURIForKeyword)\b",
+            "The old keywords API is deprecated.",
+            "The old keywords API is deprecated. You should use "
+            "PlacesUtils.keywords instead. See %s for more information."
+            % MDN_DOC % "Mozilla/Tech/Places/Using_the_Places_keywords_API",
+            log_function=self.err.warning,
+            compat_type="warning")
+
+        yield self.get_test(
+            r"\b(fuelIApplication|extIApplication|Application)\b",
+            "The FUEL library is now deprecated.",
+            "The FUEL library is now deprecated. You should use the add-ons "
+            "SDK or Services.jsm. See %s for more information."
+            % MDN_DOC % "Mozilla/Tech/Toolkit_API/FUEL",
+            log_function=self.err.warning,
+            compat_type="warning")
+
+        yield self.get_test(
+            r"\bresource://gre/modules/Dict.jsm\b",
+            "The Dict.jsm module has been removed.",
+            "The Dict.jsm module has been removed. You can use the native Map "
+            "object instead. See %s for more information."
+            % MDN_DOC % "Web/JavaScript/Reference/Global_Objects/Map",
+            log_function=self.err.warning,
+            compat_type="error")
+
+        yield self.get_test(
+            r"\bsessionstore-state-write\b",
+            "The \"sessionstore-state-write\" notification has been removed.",
+            "The \"sessionstore-state-write\" notification has been removed. "
+            'See %s for more information.' % BUGZILLA_BUG % 1157235,
+            log_function=self.err.warning,
+            compat_type="error")
+
+        yield self.get_test(
+            r"\bnsISSLErrorListener\b",
+            "The nsISSLErrorListener interface has been removed.",
+            "The nsISSLErrorListener interface has been removed. See %s for "
+            "more information." % BUGZILLA_BUG % 844351,
+            log_function=self.err.warning,
+            compat_type="error")
+
+        yield self.get_test(
+            r"""require\(['"]sdk/widget['"]\)""",
+            "The widget module has been removed.",
+            "The widget module has been removed. You can use ActionButton or "
+            "ToggleButton instead. See %s for more information."
+            % "https://developer.mozilla.org/en-US/Add-ons/SDK/"
+              "High-Level_APIs/widget",
             log_function=self.err.warning,
             compat_type="error")
 
