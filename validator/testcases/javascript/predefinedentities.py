@@ -94,14 +94,16 @@ MARIONETTE_MESSAGE = {
 }
 
 
-def fuel_error(node, err):
-    err.warning("The FUEL library is now deprecated.",
-                "The FUEL library is now deprecated. You should use the "
-                "add-ons SDK or Services.jsm. See %s for more information."
-                % MDN_DOC % "Mozilla/Tech/Toolkit_API/FUEL",
-                for_appversions=FX40_DEFINITION,
-                tier=5,
-                compatibility_type="warning")
+def fuel_error(traverse_node, err):
+    traverse_node.im_self.warning(
+        err_id=("js", "traverser", "dangerous_global"),
+        warning="The FUEL library is now deprecated.",
+        description="The FUEL library is now deprecated. You should use the "
+                    "add-ons SDK or Services.jsm. See %s for more information."
+                    % MDN_DOC % "Mozilla/Tech/Toolkit_API/FUEL",
+        for_appversions=FX40_DEFINITION,
+        tier=5,
+        compatibility_type="warning")
 
 
 BANNED_PREF_BRANCHES = (
