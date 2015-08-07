@@ -380,7 +380,7 @@ class Gecko40RegexTests(CompatRegexTestHelper):
             compat_type="warning")
 
         yield self.get_test(
-            r"\b(fuelIApplication|extIApplication|Application)\b",
+            r"\b(fuelIApplication|extIApplication)\b",
             "The FUEL library is now deprecated.",
             "The FUEL library is now deprecated. You should use the add-ons "
             "SDK or Services.jsm. See %s for more information."

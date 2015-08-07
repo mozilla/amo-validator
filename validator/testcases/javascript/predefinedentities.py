@@ -8,6 +8,8 @@ from call_definitions import xpcom_constructor as xpcom_const, python_wrap
 from entity_values import entity
 import instanceactions
 from jstypes import JSWrapper
+from validator.compat import FX40_DEFINITION
+from validator.constants import MDN_DOC
 
 
 # A list of identifiers and member values that may not be used.
@@ -90,6 +92,17 @@ MARIONETTE_MESSAGE = {
     "description": "References to the Marionette service are not acceptable "
                    "in extensions. Please remove them.",
 }
+
+
+def fuel_error(node, err):
+    err.warning("The FUEL library is now deprecated.",
+                "The FUEL library is now deprecated. You should use the "
+                "add-ons SDK or Services.jsm. See %s for more information."
+                % MDN_DOC % "Mozilla/Tech/Toolkit_API/FUEL",
+                for_appversions=FX40_DEFINITION,
+                tier=5,
+                compatibility_type="warning")
+
 
 BANNED_PREF_BRANCHES = (
     # Security and update preferences
@@ -994,6 +1007,8 @@ GLOBAL_ENTITIES = {
 
     u"MarionetteComponent": {"dangerous_on_read": MARIONETTE_MESSAGE},
     u"MarionetteServer": {"dangerous_on_read": MARIONETTE_MESSAGE},
+
+    "Application": {"dangerous_on_read": fuel_error},
 
     # Common third-party libraries
     "Handlebars": {
