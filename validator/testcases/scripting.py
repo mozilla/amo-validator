@@ -1,7 +1,7 @@
 from validator.constants import PACKAGE_THEME, SPIDERMONKEY_INSTALLATION
 from validator.contextgenerator import ContextGenerator
 from validator.testcases.javascript import traverser
-from validator.testcases.javascript.spidermonkey import get_tree
+from validator.testcases.javascript.jsshell import get_tree
 
 
 def test_js_file(err, filename, data, line=0, context=None, pollutable=False):

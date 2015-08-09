@@ -8,7 +8,7 @@ from validator import decorator
 from validator.constants import SPIDERMONKEY_INSTALLATION
 from validator.errorbundler import ErrorBundle
 from validator.testcases import scripting
-from validator.testcases.javascript.spidermonkey import JSShell, get_tree
+from validator.testcases.javascript.jsshell import JSShell, get_tree
 
 
 def test_scripting_disabled():
