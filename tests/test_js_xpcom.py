@@ -12,12 +12,12 @@ def test_xmlhttprequest():
     var req = Components.classes["foo.bar"]
                         .createInstance(class_);
     """)
-    print "XHR Class:", err.final_context.get("class_").value
-    req = err.final_context.get("req").value
-    print "Req:", req
+    print 'XHR Class:', err.final_context.get('class_').value
+    req = err.final_context.get('req').value
+    print 'Req:', req
 
-    assert "value" in req
-    assert "open" in req["value"]
+    assert 'value' in req
+    assert 'open' in req['value']
 
 
 def test_nsiaccessibleretrieval():
@@ -204,10 +204,10 @@ def test_synchronous_sql():
 
     assert _do_test_raw("database.executeSimpleSQL('foo');").failed()
 
-    assert not _do_test_raw("database.createStatement();").failed()
+    assert not _do_test_raw('database.createStatement();').failed()
 
-    for meth in "execute", "executeStep":
-        assert _do_test_raw("database.createStatement().%s();" % meth).failed()
+    for meth in 'execute', 'executeStep':
+        assert _do_test_raw('database.createStatement().%s();' % meth).failed()
 
     assert not _do_test_raw("""
         database.createStatement().executeAsync()
@@ -251,7 +251,7 @@ def test_xpcom_nsiwebbrowserpersist():
     def test(js, want_pass):
         err = _do_test_raw(js)
         if err.warnings:
-            result = err.warnings[0]["id"][-1] != "webbrowserpersist_saveuri"
+            result = err.warnings[0]['id'][-1] != 'webbrowserpersist_saveuri'
             eq_(result, want_pass)
         else:
             assert want_pass
@@ -332,10 +332,10 @@ class TestnsIWindowWatcher(TestCase):
             self.assert_failed(with_warnings=True)
 
 
-        uris = ["http://foo/bar/",
-                "https://foo/bar/",
-                "ftp://foo/bar/",
-                "data:asdf"]
+        uris = ['http://foo/bar/',
+                'https://foo/bar/',
+                'ftp://foo/bar/',
+                'data:asdf']
         for uri in uris:
             yield test_uri, self, uri
 

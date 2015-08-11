@@ -28,7 +28,7 @@ def test_pollution_jsm():
     b = "foo";
     c = "foo";
     d = "foo";
-    """, path="foo.jsm", ignore_pollution=False).failed()
+    """, path='foo.jsm', ignore_pollution=False).failed()
 
 
 def test_pollution_components():
@@ -41,7 +41,7 @@ def test_pollution_components():
     b = "foo";
     c = "foo";
     d = "foo";
-    """, path="components/foo.jsm", ignore_pollution=False).failed()
+    """, path='components/foo.jsm', ignore_pollution=False).failed()
 
 
 def test_pollution_exceptions():
@@ -54,7 +54,7 @@ def test_pollution_exceptions():
     Ci = "foo";
     Cu = "foo";
     d = "foo";
-    """, path="foo.js", ignore_pollution=False).failed()
+    """, path='foo.js', ignore_pollution=False).failed()
 
 
 def test_pollution_jetpack_bootstrap():
@@ -69,8 +69,8 @@ def test_pollution_jetpack_bootstrap():
         b = "foo";
         c = "foo";
         d = "foo";
-        """, path="foo.js",
-        metadata={"is_jetpack": True}).failed()
+        """, path='foo.js',
+        metadata={'is_jetpack': True}).failed()
 
     assert not _do_real_test_raw(
         """
@@ -78,8 +78,8 @@ def test_pollution_jetpack_bootstrap():
         b = "foo";
         c = "foo";
         d = "foo";
-        """, path="foo.js",
-        resources={"em:bootstrap": "true"}).failed()
+        """, path='foo.js',
+        resources={'em:bootstrap': 'true'}).failed()
 
 
 def test_pollution_implicit_from_fun():

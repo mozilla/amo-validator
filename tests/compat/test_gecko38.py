@@ -62,7 +62,7 @@ class TestFX38Compat(CompatTestCase):
                 Ci.nsIContentPolicy.TYPE_OTHER);
         """)
         self.assert_silent()
-        self.assert_compat_warning(type_="warning")
+        self.assert_compat_warning(type_='warning')
 
     def test_asyncFetch(self):
         self.run_script_for_compat("""
@@ -87,7 +87,7 @@ class TestFX38Compat(CompatTestCase):
                 Ci.nsIContentPolicy.TYPE_OTHER);
         """)
         self.assert_silent()
-        self.assert_compat_warning(type_="warning")
+        self.assert_compat_warning(type_='warning')
 
     def test_newChannel(self):
         self.run_script_for_compat("""

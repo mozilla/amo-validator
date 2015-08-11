@@ -63,8 +63,8 @@ def test_document_write():
 
 
 def _mock_html_error(self, *args, **kwargs):
-    self.err.error(("foo", "bar"),
-                   "Does not pass validation.")
+    self.err.error(('foo', 'bar'),
+                   'Does not pass validation.')
 
 
 @patch('validator.testcases.markup.markuptester.MarkupParser.process',
@@ -102,7 +102,7 @@ def test_on_event():
     x.attr({ onclick: "bar" });
     """)
     assert err.failed()
-    eq_(err.warnings[0]["signing_severity"], "medium")
+    eq_(err.warnings[0]['signing_severity'], 'medium')
 
 
 def test_on_event_null():

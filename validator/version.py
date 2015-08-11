@@ -38,7 +38,7 @@ class VersionPart(object):
         if self.strB:
             if self.strB[0] == '+':
                 self.numA += 1
-                self.strB = "pre"
+                self.strB = 'pre'
             else:
                 match = re.match(r'([^\d+-]*)(.*)', self.strB)
 

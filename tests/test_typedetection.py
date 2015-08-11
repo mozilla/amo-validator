@@ -6,17 +6,17 @@ import validator.typedetection as typedetection
 
 
 def _test_type(file_, expectation, failure=False):
-    "Tests a file against the expectations"
+    'Tests a file against the expectations'
 
     err = ErrorBundle(None, True)
-    package = XPIManager(open(file_), mode="r", name=file_)
+    package = XPIManager(open(file_), mode='r', name=file_)
     contents = package.package_contents()
 
     # We need to have an install.rdf.
-    assert "install.rdf" in contents
+    assert 'install.rdf' in contents
 
     # Load up the install.rdf into an RDFParser
-    install_file = package.read("install.rdf")
+    install_file = package.read('install.rdf')
     install_rdf = RDFParser(err, install_file)
 
     results = typedetection.detect_type(err, install_rdf, package)
@@ -33,34 +33,34 @@ def _test_type(file_, expectation, failure=False):
 def test_extension():
     "Tests that type detection can detect an addon of type 'extension'"
 
-    err =_test_type("tests/resources/typedetection/td_notype_ext.xpi",
+    err =_test_type('tests/resources/typedetection/td_notype_ext.xpi',
                     PACKAGE_EXTENSION)
     assert err.notices
 
 
 def test_multipackage():
-    "Tests that type detection can detect multipackage add-ons"
+    'Tests that type detection can detect multipackage add-ons'
 
-    err = _test_type("tests/resources/typedetection/td_multipack.xpi",
+    err = _test_type('tests/resources/typedetection/td_multipack.xpi',
                      PACKAGE_MULTI)
-    assert err.get_resource("is_multipackage")
+    assert err.get_resource('is_multipackage')
 
 
 def test_theme():
     "Tests that type detection can detect an addon of type 'theme'"
 
-    _test_type("tests/resources/typedetection/td_notype_theme.jar",
+    _test_type('tests/resources/typedetection/td_notype_theme.jar',
                PACKAGE_THEME)
 
 
 def test_dictionary():
     "Tests that type detection can detect an addon of type 'dictionary'"
 
-    err =_test_type("tests/resources/typedetection/td_dictionary.xpi",
+    err =_test_type('tests/resources/typedetection/td_dictionary.xpi',
                     PACKAGE_DICTIONARY)
     assert not err.notices
 
-    err =_test_type("tests/resources/typedetection/td_notype_dictionary.xpi",
+    err =_test_type('tests/resources/typedetection/td_notype_dictionary.xpi',
                     PACKAGE_DICTIONARY)
     assert not err.notices
 
@@ -70,14 +70,14 @@ def test_langpack():
     As an added bonus, this test also verifies that the <em:type>
     element is correctly interpreted."""
 
-    _test_type("tests/resources/typedetection/td_langpack.xpi",
+    _test_type('tests/resources/typedetection/td_langpack.xpi',
                PACKAGE_LANGPACK)
 
 
 def test_bad_emtype():
     """Tests for a bad <em:type> value."""
 
-    _test_type("tests/resources/typedetection/td_bad_emtype.xpi",
+    _test_type('tests/resources/typedetection/td_bad_emtype.xpi',
                None,
                True)
 
@@ -98,11 +98,11 @@ def test_strange():
 
 
 class MockXPILangpack:
-    "Simulates a language pack XPI manager object"
+    'Simulates a language pack XPI manager object'
 
     def __init__(self, is_xpi=False):
         if is_xpi:
-            self.extension = "xpi"
+            self.extension = 'xpi'
         else:
-            self.extension = "foo" # Or anything else
+            self.extension = 'foo' # Or anything else
 

@@ -13,7 +13,7 @@ def test_jsm_global_overwrites():
 
     assert not _do_test_raw("""
     String.prototype.foo = "bar";
-    """, path="test.jsm").failed()
+    """, path='test.jsm').failed()
 
 
 def test_jsm_EXPORTED_SYMBOLS():

@@ -5,10 +5,10 @@ from validator.constants import *
 
 
 def test_pass():
-    "Test a package with localization that should pass validation."
+    'Test a package with localization that should pass validation.'
 
     l10n.LOCALE_CACHE = {}
-    output = _do_test("tests/resources/l10n/pass.xpi",
+    output = _do_test('tests/resources/l10n/pass.xpi',
                       l10n.test_xpi,
                       failure=False,
                       set_type=PACKAGE_EXTENSION)
@@ -16,10 +16,10 @@ def test_pass():
 
 
 def test_unlocalizable():
-    "Test a package without localization data."
+    'Test a package without localization data.'
 
     l10n.LOCALE_CACHE = {}
-    output = _do_test("tests/resources/l10n/unlocalizable.xpi",
+    output = _do_test('tests/resources/l10n/unlocalizable.xpi',
                       l10n.test_xpi,
                       failure=False,
                       set_type=PACKAGE_EXTENSION)
@@ -27,10 +27,10 @@ def test_unlocalizable():
 
 
 def test_localizable():
-    "Tests a package with minimal localization data."
+    'Tests a package with minimal localization data.'
 
     l10n.LOCALE_CACHE = {}
-    output = _do_test("tests/resources/l10n/localizable.xpi",
+    output = _do_test('tests/resources/l10n/localizable.xpi',
                       l10n.test_xpi,
                       failure=False,
                       set_type=PACKAGE_EXTENSION)
@@ -38,19 +38,19 @@ def test_localizable():
 
 
 def test_missing():
-    "Test a package with missing localization entities."
+    'Test a package with missing localization entities.'
 
     l10n.LOCALE_CACHE = {}
-    _do_test("tests/resources/l10n/l10n_incomplete.xpi",
+    _do_test('tests/resources/l10n/l10n_incomplete.xpi',
              l10n.test_xpi,
              set_type=PACKAGE_EXTENSION)
 
 
 def test_missingfiles():
-    "Test a package with missing localization files."
+    'Test a package with missing localization files.'
 
     l10n.LOCALE_CACHE = {}
-    _do_test("tests/resources/l10n/l10n_missingfiles.xpi",
+    _do_test('tests/resources/l10n/l10n_missingfiles.xpi',
              l10n.test_xpi,
              set_type=PACKAGE_EXTENSION)
 
@@ -62,7 +62,7 @@ def test_multiple_predicates():
     """
 
     l10n.LOCALE_CACHE = {}
-    _do_test("tests/resources/l10n/l10n_multpreds.xpi",
+    _do_test('tests/resources/l10n/l10n_multpreds.xpi',
              l10n.test_xpi,
              failure=False,
              set_type=PACKAGE_EXTENSION)
@@ -73,7 +73,7 @@ def test_unmodified():
     unmodified from the reference locale (en-US)"""
 
     l10n.LOCALE_CACHE = {}
-    err = _do_test("tests/resources/l10n/l10n_unmodified.xpi",
+    err = _do_test('tests/resources/l10n/l10n_unmodified.xpi',
                    l10n.test_xpi,
                    set_type=PACKAGE_EXTENSION,
                    failure=False)
@@ -81,7 +81,7 @@ def test_unmodified():
 
 
 def test_subpackage():
-    "Test a package with localization that should pass validation."
+    'Test a package with localization that should pass validation.'
 
     err = ErrorBundle()
     err.detected_type = PACKAGE_DICTIONARY

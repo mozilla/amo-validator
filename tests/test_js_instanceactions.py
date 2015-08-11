@@ -67,17 +67,17 @@ def test_sql_methods():
     err = _do_test_raw("""
         x.executeSimpleSQL("foo " + y);
     """)
-    eq_(err.warnings[0]["id"][-1], "executeSimpleSQL_dynamic")
+    eq_(err.warnings[0]['id'][-1], 'executeSimpleSQL_dynamic')
 
     err = _do_test_raw("""
         x.createStatement("foo " + y);
     """)
-    eq_(err.warnings[0]["id"][-1], "executeSimpleSQL_dynamic")
+    eq_(err.warnings[0]['id'][-1], 'executeSimpleSQL_dynamic')
 
     err = _do_test_raw("""
         x.createAsyncStatement("foo " + y);
     """)
-    eq_(err.warnings[0]["id"][-1], "executeSimpleSQL_dynamic")
+    eq_(err.warnings[0]['id'][-1], 'executeSimpleSQL_dynamic')
 
 def test_setAttribute():
     """Tests that setAttribute calls are blocked successfully"""
@@ -102,10 +102,10 @@ def test_callexpression_argument_traversal():
     """
 
     DECLARATIONS = (
-        "function foo(x){}",
-        "var foo = function foo(x){}",
-        "var foo = (x) => {}",
-        "var foo = (x) => undefined",
+        'function foo(x){}',
+        'var foo = function foo(x){}',
+        'var foo = (x) => {}',
+        'var foo = (x) => undefined',
     )
     for declaration in DECLARATIONS:
         assert not _do_test_raw("""
@@ -150,7 +150,7 @@ def test_insertAdjacentHTML():
 def test_nsIFile_launch():
     """Test that `nsIFile.launch()` is flagged."""
 
-    assert _do_test_raw("foo.launch()").failed()
+    assert _do_test_raw('foo.launch()').failed()
 
 
 class TestInstanceActions(TestCase):
@@ -189,10 +189,10 @@ class TestInstanceActions(TestCase):
             self.assert_failed(with_warnings=True)
 
 
-        uris = ["http://foo/bar/",
-                "https://foo/bar/",
-                "ftp://foo/bar/",
-                "data:asdf"]
+        uris = ['http://foo/bar/',
+                'https://foo/bar/',
+                'ftp://foo/bar/',
+                'data:asdf']
         for uri in uris:
             yield test_uri, self, uri
 

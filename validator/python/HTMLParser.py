@@ -63,9 +63,9 @@ class HTMLParseError(Exception):
     def __str__(self):
         result = self.msg
         if self.lineno is not None:
-            result = result + ", at line %d" % self.lineno
+            result = result + ', at line %d' % self.lineno
         if self.offset is not None:
-            result = result + ", column %d" % (self.offset + 1)
+            result = result + ', column %d' % (self.offset + 1)
         return result
 
 
@@ -89,7 +89,7 @@ class HTMLParser(markupbase.ParserBase):
     reference as the argument.
     """
 
-    CDATA_CONTENT_ELEMENTS = ("script", "style")
+    CDATA_CONTENT_ELEMENTS = ('script', 'style')
 
 
     def __init__(self):
@@ -156,16 +156,16 @@ class HTMLParser(markupbase.ParserBase):
             if startswith('<', i):
                 if starttagopen.match(rawdata, i): # < + letter
                     k = self.parse_starttag(i)
-                elif startswith("</", i):
+                elif startswith('</', i):
                     k = self.parse_endtag(i)
-                elif startswith("<!--", i):
+                elif startswith('<!--', i):
                     k = self.parse_comment(i)
-                elif startswith("<?", i):
+                elif startswith('<?', i):
                     k = self.parse_pi(i)
-                elif startswith("<!", i):
+                elif startswith('<!', i):
                     k = self.parse_html_declaration(i)
                 elif (i + 1) < n:
-                    self.handle_data("<")
+                    self.handle_data('<')
                     k = i + 1
                 else:
                     break
@@ -181,7 +181,7 @@ class HTMLParser(markupbase.ParserBase):
                         k += 1
                     self.handle_data(rawdata[i:k])
                 i = self.updatepos(i, k)
-            elif startswith("&#", i):
+            elif startswith('&#', i):
                 match = charref.match(rawdata, i)
                 if match:
                     name = match.group()[2:-1]
@@ -192,7 +192,7 @@ class HTMLParser(markupbase.ParserBase):
                     i = self.updatepos(i, k)
                     continue
                 else:
-                    if ";" in rawdata[i:]: #bail by consuming &#
+                    if ';' in rawdata[i:]: #bail by consuming &#
                         self.handle_data(rawdata[0:2])
                         i = self.updatepos(i, 2)
                     break
@@ -210,18 +210,18 @@ class HTMLParser(markupbase.ParserBase):
                 if match:
                     # match.group() will contain at least 2 chars
                     if end and match.group() == rawdata[i:]:
-                        self.error("EOF in middle of entity or char ref")
+                        self.error('EOF in middle of entity or char ref')
                     # incomplete
                     break
                 elif (i + 1) < n:
                     # not the end of the buffer, and can't be confused
                     # with some other construct
-                    self.handle_data("&")
+                    self.handle_data('&')
                     i = self.updatepos(i, i + 1)
                 else:
                     break
             else:
-                assert 0, "interesting.search() lied"
+                assert 0, 'interesting.search() lied'
         # end while
         if end and i < n and not self.cdata_elem:
             self.handle_data(rawdata[i:n])
@@ -307,12 +307,12 @@ class HTMLParser(markupbase.ParserBase):
             k = m.end()
 
         end = rawdata[k:endpos].strip()
-        if end not in (">", "/>"):
+        if end not in ('>', '/>'):
             lineno, offset = self.getpos()
-            if "\n" in self.__starttag_text:
-                lineno = lineno + self.__starttag_text.count("\n")
+            if '\n' in self.__starttag_text:
+                lineno = lineno + self.__starttag_text.count('\n')
                 offset = len(self.__starttag_text) \
-                         - self.__starttag_text.rfind("\n")
+                         - self.__starttag_text.rfind('\n')
             else:
                 offset = offset + len(self.__starttag_text)
             self.handle_data(rawdata[i:endpos])
@@ -334,22 +334,22 @@ class HTMLParser(markupbase.ParserBase):
         if m:
             j = m.end()
             next = rawdata[j:j+1]
-            if next == ">":
+            if next == '>':
                 return j + 1
-            if next == "/":
-                if rawdata.startswith("/>", j):
+            if next == '/':
+                if rawdata.startswith('/>', j):
                     return j + 2
-                if rawdata.startswith("/", j):
+                if rawdata.startswith('/', j):
                     # buffer boundary
                     return -1
                 # else bogus input
                 self.updatepos(i, j + 1)
-                self.error("malformed empty start tag")
-            if next == "":
+                self.error('malformed empty start tag')
+            if next == '':
                 # end of input
                 return -1
-            if next in ("abcdefghijklmnopqrstuvwxyz=/"
-                        "ABCDEFGHIJKLMNOPQRSTUVWXYZ"):
+            if next in ('abcdefghijklmnopqrstuvwxyz=/'
+                        'ABCDEFGHIJKLMNOPQRSTUVWXYZ'):
                 # end of input in or before attribute value, or we have the
                 # '/' from a '/>' ending
                 return -1
@@ -357,12 +357,12 @@ class HTMLParser(markupbase.ParserBase):
                 return j
             else:
                 return i + 1
-        raise AssertionError("we should not get here!")
+        raise AssertionError('we should not get here!')
 
     # Internal -- parse endtag, return end or -1 if incomplete
     def parse_endtag(self, i):
         rawdata = self.rawdata
-        assert rawdata[i:i+2] == "</", "unexpected call to parse_endtag"
+        assert rawdata[i:i+2] == '</', 'unexpected call to parse_endtag'
         match = endendtag.search(rawdata, i+1) # >
         if not match:
             return -1
@@ -447,7 +447,7 @@ class HTMLParser(markupbase.ParserBase):
         def replaceEntities(s):
             s = s.groups()[0]
             try:
-                if s[0] == "#":
+                if s[0] == '#':
                     s = s[1:]
                     if s[0] in ['x','X']:
                         c = int(s[1:], 16)
@@ -469,4 +469,4 @@ class HTMLParser(markupbase.ParserBase):
                 except KeyError:
                     return '&'+s+';'
 
-        return re.sub(r"&(#?[xX]?(?:[0-9a-fA-F]+|\w{1,8}));", replaceEntities, s)
+        return re.sub(r'&(#?[xX]?(?:[0-9a-fA-F]+|\w{1,8}));', replaceEntities, s)

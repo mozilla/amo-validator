@@ -12,12 +12,12 @@ class TestJSArrays(TestCase):
         var a = x[1],
             b = x.asdf;
         """)
-        self.assert_var_eq("a", "asdf")
-        self.assert_var_eq("b", "zxcv")
+        self.assert_var_eq('a', 'asdf')
+        self.assert_var_eq('b', 'zxcv')
 
     def test_stringification(self):
         self.run_script("""
         var x = [4];
         var a = x * 3;
         """)
-        self.assert_var_eq("a", 12)
+        self.assert_var_eq('a', 12)

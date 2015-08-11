@@ -17,7 +17,7 @@ def test_assignment_with_pollution():
 
 
 def test_basic_math():
-    "Tests that contexts work and that basic math is executed properly"
+    'Tests that contexts work and that basic math is executed properly'
 
     err = _do_test_raw("""
     var x = 1;
@@ -40,18 +40,18 @@ def test_basic_math():
     """)
     assert err.message_count == 0
 
-    assert _get_var(err, "x") == 1
-    assert _get_var(err, "y") == 2
-    assert _get_var(err, "z") == 3
+    assert _get_var(err, 'x') == 1
+    assert _get_var(err, 'y') == 2
+    assert _get_var(err, 'z') == 3
 
-    assert _get_var(err, "dbz") == 0  # Spidermonkey does this.
-    assert _get_var(err, "dbz1") == 0  # ...and this.
-    assert _get_var(err, "dbz2") == 0
-    assert _get_var(err, "dbz3") == 0
+    assert _get_var(err, 'dbz') == 0  # Spidermonkey does this.
+    assert _get_var(err, 'dbz1') == 0  # ...and this.
+    assert _get_var(err, 'dbz2') == 0
+    assert _get_var(err, 'dbz3') == 0
 
-    assert _get_var(err, "a") == 5
-    assert _get_var(err, "b") == 4
-    assert _get_var(err, "c") == 8
+    assert _get_var(err, 'a') == 5
+    assert _get_var(err, 'b') == 4
+    assert _get_var(err, 'c') == 8
 
 
 def test_in_operator():
@@ -71,11 +71,11 @@ def test_in_operator():
     """)
     assert err.message_count == 0
 
-    assert _get_var(err, "x") == True
-    assert _get_var(err, "y") == True
-    print _get_var(err, "a"), "<<<"
-    assert _get_var(err, "a") == False
-    assert _get_var(err, "b") == False
+    assert _get_var(err, 'x') == True
+    assert _get_var(err, 'y') == True
+    print _get_var(err, 'a'), '<<<'
+    assert _get_var(err, 'a') == False
+    assert _get_var(err, 'b') == False
 
 
 def test_function_instanceof():
@@ -123,31 +123,31 @@ def test_unary_typeof():
         x = typeof(function() {}),
         y = typeof(Math.abs);
     """)
-    eq_(_get_var(scope, "a"), "undefined")
-    eq_(_get_var(scope, "b"), "object")
-    eq_(_get_var(scope, "c"), "boolean")
-    eq_(_get_var(scope, "d"), "boolean")
-    eq_(_get_var(scope, "e"), "object")
-    eq_(_get_var(scope, "f"), "object")
-    eq_(_get_var(scope, "g"), "boolean")
-    eq_(_get_var(scope, "h"), "boolean")
-    eq_(_get_var(scope, "i"), "boolean")
+    eq_(_get_var(scope, 'a'), 'undefined')
+    eq_(_get_var(scope, 'b'), 'object')
+    eq_(_get_var(scope, 'c'), 'boolean')
+    eq_(_get_var(scope, 'd'), 'boolean')
+    eq_(_get_var(scope, 'e'), 'object')
+    eq_(_get_var(scope, 'f'), 'object')
+    eq_(_get_var(scope, 'g'), 'boolean')
+    eq_(_get_var(scope, 'h'), 'boolean')
+    eq_(_get_var(scope, 'i'), 'boolean')
     # TODO: Implement "typeof" for predefined entities
     # eq_(_get_var(scope, "j"), "number")
     # eq_(_get_var(scope, "k"), "number")
     # eq_(_get_var(scope, "l"), "number")
-    eq_(_get_var(scope, "m"), "number")
-    eq_(_get_var(scope, "n"), "number")
-    eq_(_get_var(scope, "o"), "number")
-    eq_(_get_var(scope, "p"), "number")
-    eq_(_get_var(scope, "q"), "string")
-    eq_(_get_var(scope, "r"), "number")
-    eq_(_get_var(scope, "s"), "number")
-    eq_(_get_var(scope, "t"), "object")
-    eq_(_get_var(scope, "u"), "object")
-    eq_(_get_var(scope, "v"), "object")
-    eq_(_get_var(scope, "x"), "function")
-    eq_(_get_var(scope, "y"), "function")
+    eq_(_get_var(scope, 'm'), 'number')
+    eq_(_get_var(scope, 'n'), 'number')
+    eq_(_get_var(scope, 'o'), 'number')
+    eq_(_get_var(scope, 'p'), 'number')
+    eq_(_get_var(scope, 'q'), 'string')
+    eq_(_get_var(scope, 'r'), 'number')
+    eq_(_get_var(scope, 's'), 'number')
+    eq_(_get_var(scope, 't'), 'object')
+    eq_(_get_var(scope, 'u'), 'object')
+    eq_(_get_var(scope, 'v'), 'object')
+    eq_(_get_var(scope, 'x'), 'function')
+    eq_(_get_var(scope, 'y'), 'function')
 
 
 # TODO(basta): Still working on the delete operator...should be done soon.
@@ -204,25 +204,25 @@ def test_logical_not():
         r = !('string'),
         s = !(new String('')); // This should cover all type globals.
     """)
-    eq_(_get_var(scope, "a"), True)
+    eq_(_get_var(scope, 'a'), True)
     # eq_(_get_var(scope, "b"), True)
-    eq_(_get_var(scope, "c"), True)
-    eq_(_get_var(scope, "d"), True)
-    eq_(_get_var(scope, "e"), False)
+    eq_(_get_var(scope, 'c'), True)
+    eq_(_get_var(scope, 'd'), True)
+    eq_(_get_var(scope, 'e'), False)
     # eq_(_get_var(scope, "f"), True)
-    eq_(_get_var(scope, "g"), True)
-    eq_(_get_var(scope, "h"), True)
+    eq_(_get_var(scope, 'g'), True)
+    eq_(_get_var(scope, 'h'), True)
     # eq_(_get_var(scope, "i"), True)
-    eq_(_get_var(scope, "j"), False)
-    eq_(_get_var(scope, "k"), False)
-    eq_(_get_var(scope, "l"), False)
-    eq_(_get_var(scope, "m"), False)
-    eq_(_get_var(scope, "n"), False)
-    eq_(_get_var(scope, "o"), True)
-    eq_(_get_var(scope, "p"), False)
-    eq_(_get_var(scope, "q"), False)
-    eq_(_get_var(scope, "r"), False)
-    eq_(_get_var(scope, "s"), False)
+    eq_(_get_var(scope, 'j'), False)
+    eq_(_get_var(scope, 'k'), False)
+    eq_(_get_var(scope, 'l'), False)
+    eq_(_get_var(scope, 'm'), False)
+    eq_(_get_var(scope, 'n'), False)
+    eq_(_get_var(scope, 'o'), True)
+    eq_(_get_var(scope, 'p'), False)
+    eq_(_get_var(scope, 'q'), False)
+    eq_(_get_var(scope, 'r'), False)
+    eq_(_get_var(scope, 's'), False)
 
 
 def test_concat_plus_infinity():
@@ -232,10 +232,10 @@ def test_concat_plus_infinity():
         b = (-Infinity) + "foo",
         c = "foo" + Infinity,
         d = "foo" + (-Infinity);
-    """, {"a": "Infinityfoo",
-          "b": "-Infinityfoo",
-          "c": "fooInfinity",
-          "d": "foo-Infinity"})
+    """, {'a': 'Infinityfoo',
+          'b': '-Infinityfoo',
+          'c': 'fooInfinity',
+          'd': 'foo-Infinity'})
 
 
 def test_simple_operators_when_dirty():

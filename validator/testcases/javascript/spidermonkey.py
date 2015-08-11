@@ -13,30 +13,30 @@ def get_tree(code, err=None, filename=None, shell=None):
         return JSShell.get_shell(shell).get_tree(code)
     except JSReflectException as exc:
         str_exc = str(exc)
-        if "SyntaxError" in str_exc or "ReferenceError" in str_exc:
-            err.warning(("testcases_scripting", "test_js_file",
-                         "syntax_error"),
-                        "JavaScript Compile-Time Error",
-                        ["A compile-time error in the JavaScript halted "
-                         "validation of that file.",
-                         "Message: %s" % str_exc.split(":", 1)[-1].strip()],
+        if 'SyntaxError' in str_exc or 'ReferenceError' in str_exc:
+            err.warning(('testcases_scripting', 'test_js_file',
+                         'syntax_error'),
+                        'JavaScript Compile-Time Error',
+                        ['A compile-time error in the JavaScript halted '
+                         'validation of that file.',
+                         'Message: %s' % str_exc.split(':', 1)[-1].strip()],
                         filename=filename,
                         line=exc.line,
                         context=ContextGenerator(code))
-        elif "InternalError: too much recursion" in str_exc:
-            err.notice(("testcases_scripting", "test_js_file",
-                        "recursion_error"),
-                       "JS too deeply nested for validation",
-                       "A JS file was encountered that could not be valiated "
-                       "due to limitations with Spidermonkey. It should be "
-                       "manually inspected.",
+        elif 'InternalError: too much recursion' in str_exc:
+            err.notice(('testcases_scripting', 'test_js_file',
+                        'recursion_error'),
+                       'JS too deeply nested for validation',
+                       'A JS file was encountered that could not be valiated '
+                       'due to limitations with Spidermonkey. It should be '
+                       'manually inspected.',
                        filename=filename)
         else:
-            err.error(("testcases_scripting", "test_js_file",
-                       "retrieving_tree"),
-                      "JS reflection error prevented validation",
-                      ["An error in the JavaScript file prevented it from "
-                       "being properly read by the Spidermonkey JS engine.",
+            err.error(('testcases_scripting', 'test_js_file',
+                       'retrieving_tree'),
+                      'JS reflection error prevented validation',
+                      ['An error in the JavaScript file prevented it from '
+                       'being properly read by the Spidermonkey JS engine.',
                        str(exc)],
                       filename=filename)
 
@@ -67,7 +67,7 @@ class JSShell(object):
     def __init__(self, shell):
         self.shell = shell
 
-        cmd = [shell, "-e", self.SCRIPT]
+        cmd = [shell, '-e', self.SCRIPT]
         self.process = subprocess.Popen(
             cmd, shell=False, stdin=subprocess.PIPE, stdout=subprocess.PIPE)
 
@@ -96,7 +96,7 @@ class JSShell(object):
 
         try:
             self.process.stdin.write(json.dumps(code))
-            self.process.stdin.write("\n")
+            self.process.stdin.write('\n')
 
             output = json.loads(self.process.stdout.readline(), strict=False)
         except Exception:
@@ -104,15 +104,15 @@ class JSShell(object):
                 del self.shells[self.shell]
             raise
 
-        if output.get("error"):
-            raise JSReflectException(output["error_message"],
-                                     output["line_number"])
+        if output.get('error'):
+            raise JSReflectException(output['error_message'],
+                                     output['line_number'])
 
         return output
 
 
 class JSReflectException(Exception):
-    "An exception to indicate that tokenization has failed"
+    'An exception to indicate that tokenization has failed'
 
     def __init__(self, value, line=None):
         self.value = value

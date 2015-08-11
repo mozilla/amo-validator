@@ -9,30 +9,30 @@ def test_pref_innocuous_branch():
 
     assert _do_test_raw("""
     pref("foo.bar", true);
-    """, path="defaults/preferences/prefs.js").failed()
+    """, path='defaults/preferences/prefs.js').failed()
 
     assert _do_test_raw("""
     user_pref("foo.bar", true);
-    """, path="defaults/preferences/prefs.js").failed()
+    """, path='defaults/preferences/prefs.js').failed()
 
     assert _do_test_raw("""
     pref("extensions.foo-bar", true);
-    """, path="defaults/preferences/prefs.js").failed()
+    """, path='defaults/preferences/prefs.js').failed()
 
     assert not _do_test_raw("""
     pref("extensions.foo-bar.baz", true);
-    """, path="defaults/preferences/prefs.js").failed()
+    """, path='defaults/preferences/prefs.js').failed()
 
 def test_unicode_pref():
     """Tests that non-ASCII preferences do not cause errors."""
 
     assert not _do_test_raw("""
     pref("extensions.foo-bar.\u263a", true);
-    """, path="defaults/preferences/prefs.js").failed()
+    """, path='defaults/preferences/prefs.js').failed()
 
     assert not _do_test_raw("""
     pref("extensions.foo-bar.\\u263a", true);
-    """, path="defaults/preferences/prefs.js").failed()
+    """, path='defaults/preferences/prefs.js').failed()
 
 def test_pref_dangerous_branch():
     """
@@ -42,11 +42,11 @@ def test_pref_dangerous_branch():
 
     assert _do_test_raw("""
     pref("extensions.getAddons.get.url", "http://evil.com/");
-    """, path="defaults/preferences/prefs.js").failed()
+    """, path='defaults/preferences/prefs.js').failed()
 
     assert _do_test_raw("""
     user_pref("extensions.getAddons.get.url", "http://evil.com/");
-    """, path="defaults/preferences/prefs.js").failed()
+    """, path='defaults/preferences/prefs.js').failed()
 
 
 def test_pref_complex_code():
@@ -59,13 +59,13 @@ def test_pref_complex_code():
     assert not _do_test_raw("""
     pref();
     user_pref();
-    """, path="defaults/preferences/prefs.js").failed()
+    """, path='defaults/preferences/prefs.js').failed()
 
     assert _do_test_raw("""
     foo();
-    """, path="defaults/preferences/prefs.js").failed()
+    """, path='defaults/preferences/prefs.js').failed()
 
     assert _do_test_raw("""
     foo.bar();
-    """, path="defaults/preferences/prefs.js").failed()
+    """, path='defaults/preferences/prefs.js').failed()
 

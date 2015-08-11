@@ -50,8 +50,8 @@ class TestFunctionTraversal(TestCase):
         }
         bar = foo;
         """)
-        self.assert_var_eq("bar", "first")
-        self.assert_var_eq("foo", "second")
+        self.assert_var_eq('bar', 'first')
+        self.assert_var_eq('foo', 'second')
 
     def test_function_expression_order(self):
         """Test that function expressions happen in the right time."""
@@ -63,8 +63,8 @@ class TestFunctionTraversal(TestCase):
         }
         bar = foo;
         """)
-        self.assert_var_eq("bar", "first")
-        self.assert_var_eq("foo", "second")
+        self.assert_var_eq('bar', 'first')
+        self.assert_var_eq('foo', 'second')
 
     def test_nested_functions(self):
         """Test that nested functions are considered in the right order."""
@@ -76,7 +76,7 @@ class TestFunctionTraversal(TestCase):
             foo = "third";
         }
         """)
-        self.assert_var_eq("foo", "second")
+        self.assert_var_eq('foo', 'second')
 
 
 class TestTooMuchJS(TestCase):
@@ -91,16 +91,16 @@ class TestTooMuchJS(TestCase):
     def run_mocked_scripts(self, count):
         self.setup_err()
 
-        scripts = dict(zip(imap(lambda i: "s%d.js" % i, xrange(count)),
-                           repeat("tests/resources/content/regex_error.js")))
+        scripts = dict(zip(imap(lambda i: 's%d.js' % i, xrange(count)),
+                           repeat('tests/resources/content/regex_error.js')))
 
         x = MockXPI(scripts)
 
         self.err.save_resource(
-            "scripts",
-            [{"scripts": scripts.keys(),
-              "package": x,
-              "state": []}])
+            'scripts',
+            [{'scripts': scripts.keys(),
+              'package': x,
+              'state': []}])
 
         content.test_packed_scripts(self.err, x)
 

@@ -2,7 +2,7 @@ from StringIO import StringIO
 import unicodehelper
 
 
-INFINITY = float("inf")
+INFINITY = float('inf')
 
 
 class ContextGenerator:
@@ -14,10 +14,10 @@ class ContextGenerator:
         if isinstance(data, StringIO):
             data = data.getvalue()
 
-        self.data = data.split("\n")
+        self.data = data.split('\n')
 
     def get_context(self, line=1, column=0):
-        "Returns a tuple containing the context for a line"
+        'Returns a tuple containing the context for a line'
 
         line -= 1  # The line is one-based
 
@@ -59,7 +59,7 @@ class ContextGenerator:
         # If all of the lines were skipped over, it means everything was
         # whitespace.
         if lstrip_count == INFINITY:
-            return ("", "", "")
+            return ('', '', '')
 
         for lnum in range(3):
             # Skip edge lines.
@@ -70,11 +70,11 @@ class ContextGenerator:
 
             # Empty lines stay empty.
             if not line:
-                build[lnum] = ""
+                build[lnum] = ''
                 continue
 
             line = self._format_line(line, column=column, rel_line=lnum)
-            line = "%s%s" % (" " * (leading_counts[lnum] - lstrip_count), line)
+            line = '%s%s' % (' ' * (leading_counts[lnum] - lstrip_count), line)
 
             build[lnum] = line
 
@@ -82,31 +82,31 @@ class ContextGenerator:
         return tuple(build)
 
     def _format_line(self, data, column=0, rel_line=1):
-        "Formats a line from the data to be the appropriate length"
+        'Formats a line from the data to be the appropriate length'
         line_length = len(data)
 
         if line_length > 140:
             if rel_line == 0:
                 # Trim from the beginning
-                data = "... %s" % data[-140:]
+                data = '... %s' % data[-140:]
             elif rel_line == 1:
                 # Trim surrounding the error position
                 if column < 70:
-                    data = "%s ..." % data[:140]
+                    data = '%s ...' % data[:140]
                 elif column > line_length - 70:
-                    data = "... %s" % data[-140:]
+                    data = '... %s' % data[-140:]
                 else:
-                    data = "... %s ..." % data[column - 70:column + 70]
+                    data = '... %s ...' % data[column - 70:column + 70]
 
             elif rel_line == 2:
                 # Trim from the end
-                data = "%s ..." % data[:140]
+                data = '%s ...' % data[:140]
 
         data = unicodehelper.decode(data)
         return data
 
     def get_line(self, position):
-        "Returns the line number that the given string position is found on"
+        'Returns the line number that the given string position is found on'
 
         datalen = len(self.data)
         count = len(self.data[0])

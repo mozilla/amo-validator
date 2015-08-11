@@ -32,7 +32,7 @@ class AddonRDFEntity(object):
         yield None
 
     def getSystemId(self):
-        return ""
+        return ''
 
 
 class AddonRDFEntityResolver(object):
@@ -45,25 +45,25 @@ class AddonRDFEntityResolver(object):
         self.err = err
 
     def resolveEntity(self, public, system):
-        if system.startswith("data:"):
+        if system.startswith('data:'):
             self.err.warning(
-                    err_id=("rdf", "entity_resolver", "data_uri"),
-                    warning="`data:` URIs are not permitted in `install.rdf`.",
-                    filename="install.rdf")
-        elif system.startswith("chrome://"):
+                    err_id=('rdf', 'entity_resolver', 'data_uri'),
+                    warning='`data:` URIs are not permitted in `install.rdf`.',
+                    filename='install.rdf')
+        elif system.startswith('chrome://'):
             self.err.warning(
-                    err_id=("rdf", "entity_resolver", "chrome_uri"),
-                    warning="`chrome://` URI referenced before initialization.",
-                    description="A chrome URI was referenced before the "
-                                "browser chrome was initialized.",
-                    filename="install.rdf")
+                    err_id=('rdf', 'entity_resolver', 'chrome_uri'),
+                    warning='`chrome://` URI referenced before initialization.',
+                    description='A chrome URI was referenced before the '
+                                'browser chrome was initialized.',
+                    filename='install.rdf')
         else:
             self.err.warning(
-                    err_id=("rdf", "entity_resolver", "remote_uri"),
-                    warning="Remote URI referenced from `install.rdf`.",
-                    description="Remote URIs should not be used within "
-                                "`install.rdf` files.",
-                    filename="install.rdf")
+                    err_id=('rdf', 'entity_resolver', 'remote_uri'),
+                    warning='Remote URI referenced from `install.rdf`.',
+                    description='Remote URIs should not be used within '
+                                '`install.rdf` files.',
+                    filename='install.rdf')
 
         return AddonRDFEntity()
 
@@ -73,8 +73,8 @@ class RDFParser(object):
 
     def __init__(self, err, data, namespace=None):
         self.err = err
-        self.manifest = u"urn:mozilla:install-manifest"
-        self.namespace = namespace or "http://www.mozilla.org/2004/em-rdf"
+        self.manifest = u'urn:mozilla:install-manifest'
+        self.namespace = namespace or 'http://www.mozilla.org/2004/em-rdf'
 
         if isinstance(data, types.StringTypes):
             data = StringIO(data)  # Wrap data in a pseudo-file
@@ -102,7 +102,7 @@ class RDFParser(object):
 
             # Load up and parse the file in XML format.
             graph = Graph()
-            graph.parse(data, format="xml")
+            graph.parse(data, format='xml')
             self.rdf = graph
 
         except ParserError as ex:
@@ -116,15 +116,15 @@ class RDFParser(object):
             rdfxml.create_parser = orig_create_parser
 
     def uri(self, element, namespace=None):
-        "Returns a URIRef object for use with the RDF document."
+        'Returns a URIRef object for use with the RDF document.'
 
         if namespace is None:
             namespace = self.namespace
 
-        return URIRef("%s#%s" % (namespace, element))
+        return URIRef('%s#%s' % (namespace, element))
 
     def get_root_subject(self):
-        "Returns the BNode which describes the topmost subject of the graph."
+        'Returns the BNode which describes the topmost subject of the graph.'
 
         manifest = URIRef(self.manifest)
 

@@ -31,10 +31,10 @@ def test_get_as_num():
 
     yield test, 1, 1
     yield test, 1.0, 1.0
-    yield test, "1", 1
-    yield test, "1.0", 1.0
+    yield test, '1', 1
+    yield test, '1.0', 1.0
     yield test, None, 0
-    yield test, "0xF", 15
+    yield test, '0xF', 15
     yield test, True, 1
     yield test, False, 0
 
@@ -64,71 +64,71 @@ def test_blocks_evaluated():
     circumstances.
     """
 
-    ID = ("javascript", "dangerous_global", "eval")
+    ID = ('javascript', 'dangerous_global', 'eval')
 
-    EVIL = "eval(evilStuff)"
+    EVIL = 'eval(evilStuff)'
     BLOCKS = (
-        "function foo() { %s; }",
-        "function foo() { %s; yield 1; }",
-        "function foo() { yield %s; }",
-        "var foo = function () { %s; }",
-        "var foo = function () { %s; yield 1; }",
-        "function* foo() { %s; }",
-        "var foo = function* () { %s; }",
-        "var foo = function () %s",
-        "var foo = () => %s",
-        "var foo = () => { %s }",
-        "if (true) { %s }",
-        "if (true) ; else { %s }",
-        "while (true) { %s }",
-        "do { %s } while (true)",
+        'function foo() { %s; }',
+        'function foo() { %s; yield 1; }',
+        'function foo() { yield %s; }',
+        'var foo = function () { %s; }',
+        'var foo = function () { %s; yield 1; }',
+        'function* foo() { %s; }',
+        'var foo = function* () { %s; }',
+        'var foo = function () %s',
+        'var foo = () => %s',
+        'var foo = () => { %s }',
+        'if (true) { %s }',
+        'if (true) ; else { %s }',
+        'while (true) { %s }',
+        'do { %s } while (true)',
 
-        "for (;;) { %s }",
+        'for (;;) { %s }',
 
-        "for (x=%s;;) {}",
-        "for (let x=%s;;) {}",
-        "for (var x=%s;;) {}",
-        "for (const x=%s;;) {}",
+        'for (x=%s;;) {}',
+        'for (let x=%s;;) {}',
+        'for (var x=%s;;) {}',
+        'for (const x=%s;;) {}',
 
-        "for (let x=foo;;) { %s }",
-        "for (var x=foo;;) { %s }",
+        'for (let x=foo;;) { %s }',
+        'for (var x=foo;;) { %s }',
 
-        "for (; %s;) {}",
-        "for (;; %s) {}",
+        'for (; %s;) {}',
+        'for (;; %s) {}',
 
-        "for (let x in y) { %s }",
-        "for (let x of y) { %s }",
-        "for (let x in (%s)) {}",
-        "for (let x of (%s)) {}",
+        'for (let x in y) { %s }',
+        'for (let x of y) { %s }',
+        'for (let x in (%s)) {}',
+        'for (let x of (%s)) {}',
 
-        "try { %s } catch (e) {}",
-        "try {} catch (e) { %s }",
-        "try {} finally { %s }",
-        "try {} catch (e if %s) {}",
-        "let x = %s",
-        "var x = %s",
-        "const x = %s",
+        'try { %s } catch (e) {}',
+        'try {} catch (e) { %s }',
+        'try {} finally { %s }',
+        'try {} catch (e if %s) {}',
+        'let x = %s',
+        'var x = %s',
+        'const x = %s',
     )
 
     def test(block):
         err = _do_test_raw(block % EVIL)
         assert err.message_count == 1, \
-            "Missing expected failure for block: %s" % block
-        eq_(err.warnings[0]["id"], ID)
+            'Missing expected failure for block: %s' % block
+        eq_(err.warnings[0]['id'], ID)
 
     for block in BLOCKS:
         yield test, block
 
 
 class TestTemplateString(TestCase):
-    WARNING = {"id": ("testcases_chromemanifest", "test_resourcemodules",
-                      "resource_modules")}
+    WARNING = {'id': ('testcases_chromemanifest', 'test_resourcemodules',
+                      'resource_modules')}
 
     def test_template_string(self):
         """Tests that plain template strings trigger warnings like normal
         strings."""
 
-        self.run_script("`JavaScript-global-property`")
+        self.run_script('`JavaScript-global-property`')
         self.assert_failed(with_warnings=[self.WARNING])
 
     def test_template_complex_string(self):
@@ -141,8 +141,8 @@ class TestTemplateString(TestCase):
     def test_tagged_template_string(self):
         """Tests that tagged template strings are treated as calls."""
 
-        warning = {"id": ("testcases_javascript_instanceactions",
-                          "_call_expression", "called_createelement")}
+        warning = {'id': ('testcases_javascript_instanceactions',
+                          '_call_expression', 'called_createelement')}
 
         assert not _do_test_raw("""
             d.createElement(); "script";

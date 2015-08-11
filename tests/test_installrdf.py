@@ -9,12 +9,12 @@ from validator.rdf import RDFParser
 
 
 def _test_value(key, value, failure=True):
-    "Tests a value against a test."
+    'Tests a value against a test.'
 
     err = ErrorBundle()
 
     test = installrdf.PREDICATE_TESTS[key]
-    test(err, value, source="install.rdf")
+    test(err, value, source='install.rdf')
 
     if hasattr(test, 'func'):
         func = test.func
@@ -22,61 +22,61 @@ def _test_value(key, value, failure=True):
         func = test
 
     if failure:
-        assert err.failed(), "{value} did not fail {func}".format(
+        assert err.failed(), '{value} did not fail {func}'.format(
             value=value, func=func.__name__)
     else:
-        assert not err.failed(), "{value} did not pass {func}".format(
+        assert not err.failed(), '{value} did not pass {func}'.format(
             value=value, func=func.__name__)
 
 
 def test_pass_id():
-    "Tests that valid IDs will be accepted."
+    'Tests that valid IDs will be accepted.'
 
-    _test_value("id", "{12345678-1234-1234-1234-123456789012}", False)
-    _test_value("id", "abc@foo.bar", False)
-    _test_value("id", "a+bc@foo.bar", False)
+    _test_value('id', '{12345678-1234-1234-1234-123456789012}', False)
+    _test_value('id', 'abc@foo.bar', False)
+    _test_value('id', 'a+bc@foo.bar', False)
 
 
 def test_fail_id():
-    "Tests that invalid IDs will not be accepted."
+    'Tests that invalid IDs will not be accepted.'
 
-    _test_value("id", "{1234567-1234-1234-1234-123456789012}")
-    _test_value("id", "!@foo.bar")
+    _test_value('id', '{1234567-1234-1234-1234-123456789012}')
+    _test_value('id', '!@foo.bar')
 
 
 def test_pass_version():
-    "Tests that valid versions will be accepted."
+    'Tests that valid versions will be accepted.'
 
-    _test_value("version", "1.2.3.4", False)
-    _test_value("version", "1a.2.3b+*.-_", False)
-    _test_value("version", "twenty", False)
+    _test_value('version', '1.2.3.4', False)
+    _test_value('version', '1a.2.3b+*.-_', False)
+    _test_value('version', 'twenty', False)
 
 
 def test_fail_version():
-    "Tests that invalid versions will not be accepted."
+    'Tests that invalid versions will not be accepted.'
 
-    _test_value("version", "2.0 alpha")
-    _test_value("version", "123456789012345678901234567890123")
-    _test_value("version", "1.2.3%")
+    _test_value('version', '2.0 alpha')
+    _test_value('version', '123456789012345678901234567890123')
+    _test_value('version', '1.2.3%')
 
 
 def test_pass_name():
-    "Tests that valid names will be accepted."
+    'Tests that valid names will be accepted.'
 
-    _test_value("name", "Joe Schmoe's Feed Aggregator", False)
-    _test_value("name", "Ozilla of the M", False)
+    _test_value('name', "Joe Schmoe's Feed Aggregator", False)
+    _test_value('name', 'Ozilla of the M', False)
 
 
 def test_fail_name():
-    "Tests that invalid names will not be accepted."
+    'Tests that invalid names will not be accepted.'
 
-    _test_value("name", "Love of the Firefox")
-    _test_value("name", "Mozilla Feed Aggregator")
+    _test_value('name', 'Love of the Firefox')
+    _test_value('name', 'Mozilla Feed Aggregator')
 
 
 def _run_test(filename, failure=True, detected_type=0, listed=True,
               overrides=None, compat=False):
-    "Runs a test on an install.rdf file"
+    'Runs a test on an install.rdf file'
 
     return _run_test_raw(open(filename).read(), failure, detected_type,
                          listed, overrides, compat)
@@ -84,20 +84,20 @@ def _run_test(filename, failure=True, detected_type=0, listed=True,
 
 def _run_test_raw(data, failure=True, detected_type=0, listed=True,
                   overrides=None, compat=False):
-    "Runs a test on an install.rdf snippet"
+    'Runs a test on an install.rdf snippet'
 
     data = data.strip()
 
     err = ErrorBundle()
     err.detected_type = detected_type
-    err.save_resource("listed", listed)
+    err.save_resource('listed', listed)
     err.overrides = overrides
 
     if compat:
-        err.save_resource("is_compat_test", True)
+        err.save_resource('is_compat_test', True)
 
-    err.save_resource("has_install_rdf", True)
-    err.save_resource("install_rdf", RDFParser(err, data))
+    err.save_resource('has_install_rdf', True)
+    err.save_resource('install_rdf', RDFParser(err, data))
     installrdf.test_install_rdf_params(err)
 
     print err.print_summary(verbose=True)
@@ -110,7 +110,7 @@ def _run_test_raw(data, failure=True, detected_type=0, listed=True,
     return err
 
 
-@patch("validator.testcases.installrdf._test_rdf")
+@patch('validator.testcases.installrdf._test_rdf')
 def test_has_rdf(install_rdf):
     "Tests that tests won't be run if there's no install.rdf"
 
@@ -119,91 +119,91 @@ def test_has_rdf(install_rdf):
     assert installrdf.test_install_rdf_params(err, None) is None
 
     err.detected_type = 0
-    err.save_resource("install_rdf", RDFParser(err, "<rdf></rdf>"))
-    err.save_resource("has_install_rdf", True)
+    err.save_resource('install_rdf', RDFParser(err, '<rdf></rdf>'))
+    err.save_resource('has_install_rdf', True)
 
     installrdf.test_install_rdf_params(err, None)
     assert install_rdf.called
 
 
 def test_passing():
-    "Tests a passing install.rdf package."
+    'Tests a passing install.rdf package.'
 
-    err = _run_test("tests/resources/installrdf/pass.rdf", False)
-    assert not err.get_resource("unpack")
+    err = _run_test('tests/resources/installrdf/pass.rdf', False)
+    assert not err.get_resource('unpack')
 
 
 def test_unpack():
-    err = _run_test("tests/resources/installrdf/unpack.rdf", False)
-    assert err.get_resource("em:unpack") == "true"
+    err = _run_test('tests/resources/installrdf/unpack.rdf', False)
+    assert err.get_resource('em:unpack') == 'true'
 
 
 def test_compat_flag():
-    "Tests that elements that must exist once only exist once."
+    'Tests that elements that must exist once only exist once.'
 
-    _run_test("tests/resources/installrdf/must_exist_once_missing.rdf",
+    _run_test('tests/resources/installrdf/must_exist_once_missing.rdf',
               compat=True, failure=False)
 
 
 def test_must_exist_once():
-    "Tests that elements that must exist once only exist once."
+    'Tests that elements that must exist once only exist once.'
 
-    _run_test("tests/resources/installrdf/must_exist_once_missing.rdf")
-    _run_test("tests/resources/installrdf/must_exist_once_extra.rdf")
+    _run_test('tests/resources/installrdf/must_exist_once_missing.rdf')
+    _run_test('tests/resources/installrdf/must_exist_once_extra.rdf')
 
 
 def test_may_exist_once():
-    "Tests that elements that may exist once only exist up to once."
+    'Tests that elements that may exist once only exist up to once.'
 
-    _run_test("tests/resources/installrdf/may_exist_once_missing.rdf",
+    _run_test('tests/resources/installrdf/may_exist_once_missing.rdf',
               False)
-    _run_test("tests/resources/installrdf/may_exist_once_extra.rdf")
+    _run_test('tests/resources/installrdf/may_exist_once_extra.rdf')
 
 
 def test_may_exist_once_theme():
-    "Tests that elements that may exist once in themes."
+    'Tests that elements that may exist once in themes.'
 
-    _run_test("tests/resources/installrdf/may_exist_once_theme.rdf",
+    _run_test('tests/resources/installrdf/may_exist_once_theme.rdf',
               False,
               PACKAGE_THEME)
-    _run_test("tests/resources/installrdf/may_exist_once_theme_fail.rdf",
+    _run_test('tests/resources/installrdf/may_exist_once_theme_fail.rdf',
               True,
               PACKAGE_THEME)
-    _run_test("tests/resources/installrdf/may_exist_once_extra.rdf",
+    _run_test('tests/resources/installrdf/may_exist_once_extra.rdf',
               True,
               PACKAGE_THEME)
 
 
 def test_may_exist():
-    "Tests that elements that may exist once only exist up to once."
+    'Tests that elements that may exist once only exist up to once.'
 
-    _run_test("tests/resources/installrdf/may_exist_missing.rdf",
+    _run_test('tests/resources/installrdf/may_exist_missing.rdf',
               False)
-    _run_test("tests/resources/installrdf/may_exist_extra.rdf", False)
+    _run_test('tests/resources/installrdf/may_exist_extra.rdf', False)
 
 
 def test_mustmay_exist():
-    "Tests that elements that may exist once only exist up to once."
+    'Tests that elements that may exist once only exist up to once.'
 
     # The first part of this is proven by test_must_exist_once
 
-    _run_test("tests/resources/installrdf/mustmay_exist_extra.rdf",
+    _run_test('tests/resources/installrdf/mustmay_exist_extra.rdf',
               False)
 
 
 def test_shouldnt_exist():
     "Tests that elements that shouldn't exist aren't there."
 
-    _run_test("tests/resources/installrdf/shouldnt_exist.rdf")
-    _run_test("tests/resources/installrdf/shouldnt_exist.rdf",
+    _run_test('tests/resources/installrdf/shouldnt_exist.rdf')
+    _run_test('tests/resources/installrdf/shouldnt_exist.rdf',
               listed=False,
               failure=False)
 
 
 def test_obsolete():
-    "Tests that obsolete elements are reported."
+    'Tests that obsolete elements are reported.'
 
-    err = _run_test("tests/resources/installrdf/obsolete.rdf")
+    err = _run_test('tests/resources/installrdf/obsolete.rdf')
     assert err.notices and not err.failed()
 
 
@@ -245,7 +245,7 @@ def test_overrides():
         </em:targetApplication>
     </Description>
 </RDF>
-    """, failure=False, overrides={"ignore_empty_name": True})
+    """, failure=False, overrides={'ignore_empty_name': True})
 
 
 def test_optionsType():
