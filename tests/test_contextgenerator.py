@@ -14,14 +14,14 @@ def test_load_data():
 
     # Through inductive reasoning, we can assert that every other line
     # is imported properly
-    assert c.data[0].strip() == "abc"
-    assert c.data[1].strip() == "def"
+    assert c.data[0].strip() == 'abc'
+    assert c.data[1].strip() == 'def'
 
 
 def test_get_context():
     """Test that contexts are generated properly."""
 
-    d = open("tests/resources/contextgenerator/data.txt").read()
+    d = open('tests/resources/contextgenerator/data.txt').read()
     c = ContextGenerator(d)
     print c.data
 
@@ -35,14 +35,14 @@ def test_get_context():
     assert len(c_end) == 3
     assert c_end[2] == None
 
-    assert c_start[1] == "0123456789"
-    assert c_end[0] == "9012345678"
-    assert c_end[1] == ""
+    assert c_start[1] == '0123456789'
+    assert c_end[0] == '9012345678'
+    assert c_end[1] == ''
 
     c_mid = c.get_context(line=5)
     assert len(c_mid) == 3
-    assert c_mid[0] == "3456789012"
-    assert c_mid[2] == "5678901234"
+    assert c_mid[0] == '3456789012'
+    assert c_mid[2] == '5678901234'
     print c_mid
 
 
@@ -51,7 +51,7 @@ def test_get_context_trimming():
     Test that contexts are generated properly when lines are >140 characters.
     """
 
-    d = open("tests/resources/contextgenerator/longdata.txt").read()
+    d = open('tests/resources/contextgenerator/longdata.txt').read()
     c = ContextGenerator(d)
     print c.data
 
@@ -70,22 +70,22 @@ def test_get_context_trimming_inverse():
     ignored if it is less than 140 characters.
     """
 
-    d = open("tests/resources/contextgenerator/longdata.txt").read()
+    d = open('tests/resources/contextgenerator/longdata.txt').read()
     c = ContextGenerator(d)
     print c.data
 
     trimmed = c.get_context(line=6, column=0)
     print trimmed
 
-    assert trimmed[1] == "This line should be entirely visible."
-    assert trimmed[0][0] != "X"
-    assert trimmed[2][-1] != "X"
+    assert trimmed[1] == 'This line should be entirely visible.'
+    assert trimmed[0][0] != 'X'
+    assert trimmed[2][-1] != 'X'
 
 
 def test_get_line():
     """Test that the context generator returns the proper line."""
 
-    d = open("tests/resources/contextgenerator/data.txt").read()
+    d = open('tests/resources/contextgenerator/data.txt').read()
     c = ContextGenerator(d)
     print c.data
 

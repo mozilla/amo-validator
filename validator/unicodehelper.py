@@ -4,14 +4,14 @@ import re
 # Many thanks to nmaier for inspiration and code in this module
 
 UNICODE_BOMS = [
-    (codecs.BOM_UTF8, "utf-8"),
-    (codecs.BOM_UTF32_LE, "utf-32-le"),
-    (codecs.BOM_UTF32_BE, "utf-32-be"),
-    (codecs.BOM_UTF16_LE, "utf-16-le"),
-    (codecs.BOM_UTF16_BE, "utf-16-be"),
+    (codecs.BOM_UTF8, 'utf-8'),
+    (codecs.BOM_UTF32_LE, 'utf-32-le'),
+    (codecs.BOM_UTF32_BE, 'utf-32-be'),
+    (codecs.BOM_UTF16_LE, 'utf-16-le'),
+    (codecs.BOM_UTF16_BE, 'utf-16-be'),
 ]
 
-COMMON_ENCODINGS = ("latin_1", "utf-16")
+COMMON_ENCODINGS = ('latin_1', 'utf-16')
 
 # Matches any non-ASCII characters, and any unprintable characters in the
 # 7-bit ASCII range. Accepts tab, return, newline, and any other character
@@ -31,11 +31,11 @@ def decode(data):
     # Detect standard unicode BOMs.
     for bom, encoding in UNICODE_BOMS:
         if data.startswith(bom):
-            return data[len(bom):].decode(encoding, errors="ignore")
+            return data[len(bom):].decode(encoding, errors='ignore')
 
     # Try straight UTF-8.
     try:
-        return data.decode("utf-8")
+        return data.decode('utf-8')
     except UnicodeDecodeError:
         pass
 
@@ -47,4 +47,4 @@ def decode(data):
             pass
 
     # Anything else gets filtered.
-    return NON_ASCII_FILTER.sub('', data).decode("ascii", errors="replace")
+    return NON_ASCII_FILTER.sub('', data).decode('ascii', errors='replace')

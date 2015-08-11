@@ -11,4 +11,4 @@ class ValidationTimeout(Exception):
         self.timeout = timeout
 
     def __str__(self):
-        return "Validation timeout after %d seconds" % self.timeout
+        return 'Validation timeout after %d seconds' % self.timeout

@@ -67,30 +67,30 @@ class CompatTestCase(JSTestCase, RegexTestCase):
     def assert_compat_silent(self):
         """Assert that no compatibility messages have been raised."""
         assert not any(self.compat_err.compat_summary.values()), \
-                "Got %s" % self.compat_err.compat_summary
+                'Got %s' % self.compat_err.compat_summary
 
-    def assert_compat_error(self, type_="warning"):
+    def assert_compat_error(self, type_='warning'):
         """Assert that a compat error was raised as a message of type `type_`.
 
         """
-        self._assert_compat_type("error", type_)
+        self._assert_compat_type('error', type_)
 
-    def assert_compat_warning(self, type_="notice"):
+    def assert_compat_warning(self, type_='notice'):
         """Assert that a compat warning was raised as a message of type
         `type_`.
 
         """
-        self._assert_compat_type("warning", type_)
+        self._assert_compat_type('warning', type_)
 
     def _assert_compat_type(self, compat_type, type_):
         print self.compat_err.print_summary()
-        message_collection = {"error": self.compat_err.errors,
-                              "warning": self.compat_err.warnings,
-                              "notice": self.compat_err.notices}[type_]
+        message_collection = {'error': self.compat_err.errors,
+                              'warning': self.compat_err.warnings,
+                              'notice': self.compat_err.notices}[type_]
         assert message_collection, \
-            "No %ss were raised in the compatibility test." % type_
+            'No %ss were raised in the compatibility test.' % type_
         is_error = any(
-            m["compatibility_type"] == compat_type
+            m['compatibility_type'] == compat_type
             for m in message_collection)
-        assert is_error, ("No %ss that raise a compatibility %s were found." %
+        assert is_error, ('No %ss that raise a compatibility %s were found.' %
                           (type_, compat_type))

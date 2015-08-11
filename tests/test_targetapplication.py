@@ -7,15 +7,15 @@ from helper import _do_test
 
 
 targetapp.APPROVED_APPLICATIONS = \
-        json.load(open("validator/app_versions.json"))
+        json.load(open('validator/app_versions.json'))
 
 
 def _do_test_raw(rdf, listed=True, overrides=None):
     err = ErrorBundle(listed=listed)
     err.overrides = overrides
     rdf = RDFParser(err, rdf.strip())
-    err.save_resource("has_install_rdf", True)
-    err.save_resource("install_rdf", rdf)
+    err.save_resource('has_install_rdf', True)
+    err.save_resource('install_rdf', rdf)
 
     targetapp.test_targetedapplications(err)
     print err.print_summary()
@@ -28,13 +28,13 @@ def test_valid_targetapps():
     applications.
     """
 
-    results = _do_test("tests/resources/targetapplication/pass.xpi",
+    results = _do_test('tests/resources/targetapplication/pass.xpi',
                        targetapp.test_targetedapplications,
                        False,
                        True)
-    supports = results.get_resource("supports")
+    supports = results.get_resource('supports')
     print supports
-    assert "firefox" in supports and "mozilla" in supports
+    assert 'firefox' in supports and 'mozilla' in supports
     assert len(supports) == 2
 
     supported_versions = results.supported_versions
@@ -49,12 +49,12 @@ def test_missing_min_max():
     targetApplication are present.
     """
 
-    _do_test("tests/resources/targetapplication/missing_min.xpi",
+    _do_test('tests/resources/targetapplication/missing_min.xpi',
              targetapp.test_targetedapplications,
              True,
              True)
 
-    _do_test("tests/resources/targetapplication/missing_max.xpi",
+    _do_test('tests/resources/targetapplication/missing_max.xpi',
              targetapp.test_targetedapplications,
              True,
              True)
@@ -63,12 +63,12 @@ def test_bad_min_max():
     """Tests that the lower/upper-bound version number for a
     targetApplication entry is indeed a valid version number"""
 
-    _do_test("tests/resources/targetapplication/bad_min.xpi",
+    _do_test('tests/resources/targetapplication/bad_min.xpi',
              targetapp.test_targetedapplications,
              True,
              True)
 
-    _do_test("tests/resources/targetapplication/bad_max.xpi",
+    _do_test('tests/resources/targetapplication/bad_max.xpi',
              targetapp.test_targetedapplications,
              True,
              True)
@@ -78,7 +78,7 @@ def test_bad_order():
     """Tests that the min and max versions are ordered correctly such
     that the earlier version is the min and vice-versa."""
 
-    _do_test("tests/resources/targetapplication/bad_order.xpi",
+    _do_test('tests/resources/targetapplication/bad_order.xpi',
              targetapp.test_targetedapplications,
              True,
              True)
@@ -87,7 +87,7 @@ def test_bad_order():
 def test_dup_targets():
     """Tests that there are no duplicate targetAppication elements."""
 
-    _do_test("tests/resources/targetapplication/dup_targapp.xpi",
+    _do_test('tests/resources/targetapplication/dup_targapp.xpi',
              targetapp.test_targetedapplications,
              True,
              True)
@@ -127,7 +127,7 @@ def test_supported_versions_not_overwritten():
     """
 
     err = ErrorBundle()
-    orig_value = err.supported_versions = {"foo": ["bar"]}
+    orig_value = err.supported_versions = {'foo': ['bar']}
 
     # Test package to make sure has_install_rdf is set to True.
     assert targetapp.test_targetedapplications(err, None) is None
@@ -140,14 +140,14 @@ def test_is_ff4():
     Firefox 4. This doesn't pass or fail a package, but it is used for
     other tests in other modules in higher tiers."""
 
-    results = _do_test("tests/resources/targetapplication/ff4.xpi",
+    results = _do_test('tests/resources/targetapplication/ff4.xpi',
                        targetapp.test_targetedapplications,
                        False,
                        True)
 
-    assert results.get_resource("ff4")
-    assert results.get_resource("supports")
-    assert "firefox" in results.get_resource("supports")
+    assert results.get_resource('ff4')
+    assert results.get_resource('supports')
+    assert 'firefox' in results.get_resource('supports')
 
 
 def test_no_supported_mozilla_apps():
@@ -223,15 +223,15 @@ def test_no_supported_mozilla_apps():
 
 
 MISSING_ANDROID_APPROVED_APPLICATIONS = {
-    "1": {
-        "name": "Firefox",
-        "guid": "{ec8030f7-c20a-464f-9b0e-13a3a9e97384}",
-        "versions": ["0.3", "29.*"]
+    '1': {
+        'name': 'Firefox',
+        'guid': '{ec8030f7-c20a-464f-9b0e-13a3a9e97384}',
+        'versions': ['0.3', '29.*']
     }
 }
 
 
-@patch.dict("validator.constants.APPROVED_APPLICATIONS",
+@patch.dict('validator.constants.APPROVED_APPLICATIONS',
             values=MISSING_ANDROID_APPROVED_APPLICATIONS,
             clear=True)
 def test_unsupported_mozilla_app_in_approved_apps():
@@ -296,10 +296,10 @@ def test_overrides():
             </em:targetApplication>
         </Description>
     </RDF>
-    """, overrides={"targetapp_minVersion":
-                        {"{ec8030f7-c20a-464f-9b0e-13a3a9e97384}": "1.5"},
-                    "targetapp_maxVersion":
-                        {"{ec8030f7-c20a-464f-9b0e-13a3a9e97384}": "3.6"}}
+    """, overrides={'targetapp_minVersion':
+                        {'{ec8030f7-c20a-464f-9b0e-13a3a9e97384}': '1.5'},
+                    'targetapp_maxVersion':
+                        {'{ec8030f7-c20a-464f-9b0e-13a3a9e97384}': '3.6'}}
             ).failed()
 
     # Make sure a test can be forced to fail.
@@ -317,9 +317,9 @@ def test_overrides():
             </em:targetApplication>
         </Description>
     </RDF>
-    """, overrides={"targetapp_minVersion":
-                        {"{ec8030f7-c20a-464f-9b0e-13a3a9e97384}": "foo"},
-                    "targetapp_maxVersion":
-                        {"{ec8030f7-c20a-464f-9b0e-13a3a9e97384}": "bar"}}
+    """, overrides={'targetapp_minVersion':
+                        {'{ec8030f7-c20a-464f-9b0e-13a3a9e97384}': 'foo'},
+                    'targetapp_maxVersion':
+                        {'{ec8030f7-c20a-464f-9b0e-13a3a9e97384}': 'bar'}}
             ).failed()
 

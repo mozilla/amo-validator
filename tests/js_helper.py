@@ -12,25 +12,25 @@ validator.testcases.scripting.traverser.DEBUG = True
 
 
 def _do_test(path):
-    "Performs a test on a JS file"
+    'Performs a test on a JS file'
 
     script = open(path).read()
     return _do_test_raw(script, path)
 
 
-def _do_test_raw(script, path="foo.js", bootstrap=False, ignore_pollution=True,
+def _do_test_raw(script, path='foo.js', bootstrap=False, ignore_pollution=True,
                  detected_type=None, jetpack=False):
-    "Performs a test on a JS file"
+    'Performs a test on a JS file'
 
     err = ErrorBundle(instant=True)
-    err.save_resource("SPIDERMONKEY", False)
+    err.save_resource('SPIDERMONKEY', False)
     if jetpack:
-        err.metadata["is_jetpack"] = True
+        err.metadata['is_jetpack'] = True
 
     err.handler = OutputHandler(sys.stdout, True)
     err.supported_versions = {}
     if bootstrap:
-        err.save_resource("em:bootstrap", True)
+        err.save_resource('em:bootstrap', True)
     if detected_type:
         err.detected_type = detected_type
 
@@ -42,7 +42,7 @@ def _do_test_raw(script, path="foo.js", bootstrap=False, ignore_pollution=True,
     return err
 
 
-def _do_real_test_raw(script, path="foo.js", versions=None, detected_type=None,
+def _do_real_test_raw(script, path='foo.js', versions=None, detected_type=None,
                       metadata=None, resources=None, jetpack=False):
     """Perform a JS test using a non-mock bundler."""
 
@@ -54,7 +54,7 @@ def _do_real_test_raw(script, path="foo.js", versions=None, detected_type=None,
     if resources is not None:
         err.resources = resources
     if jetpack:
-        err.metadata["is_jetpack"] = True
+        err.metadata['is_jetpack'] = True
 
     validator.testcases.content._process_file(err, MockXPI(), path, script,
                                               path.lower())
@@ -69,7 +69,7 @@ def _do_test_scope(script, vars):
     """Test the final scope of a script against a set of variables."""
     scope = _do_test_raw(script)
     for var, value in vars.items():
-        print "Testing %s" % var
+        print 'Testing %s' % var
         var_val = _get_var(scope, var)
         if isinstance(var_val, float):
             var_val *= 100000
@@ -82,7 +82,7 @@ class TestCase(helper.TestCase):
     """A TestCase object with specialized functions for JS testing."""
 
     def setUp(self):
-        self.file_path = "foo.js"
+        self.file_path = 'foo.js'
         self.final_context = None
         super(TestCase, self).setUp()
 
@@ -104,7 +104,7 @@ class TestCase(helper.TestCase):
         if self.err.supported_versions is None:
             self.err.supported_versions = {}
         if bootstrap:
-            self.err.save_resource("em:bootstrap", "true")
+            self.err.save_resource('em:bootstrap', 'true')
 
         validator.testcases.content._process_file(self.err, MockXPI(),
                                                   self.file_path, script,
@@ -121,7 +121,7 @@ class TestCase(helper.TestCase):
         try:
             return self.final_context.data[name].get_literal_value()
         except KeyError:
-            raise ("Test seeking variable (%s) not found in final context." %
+            raise ('Test seeking variable (%s) not found in final context.' %
                        name)
 
     def assert_var_eq(self, name, value):

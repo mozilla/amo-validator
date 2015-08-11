@@ -12,8 +12,8 @@ def _test_xul(path, should_fail=False, type_=None):
 
 
 def _test_xul_raw(data, path, should_fail=False, type_=None):
-    filename = path.split("/")[-1]
-    extension = filename.split(".")[-1]
+    filename = path.split('/')[-1]
+    extension = filename.split('.')[-1]
 
     err = ErrorBundle()
     err.supported_versions = {}
@@ -34,50 +34,50 @@ def _test_xul_raw(data, path, should_fail=False, type_=None):
 
 
 def test_local_url_detector():
-    "Tests that local URLs can be detected."
+    'Tests that local URLs can be detected.'
 
     err = ErrorBundle()
     mp = markuptester.MarkupParser(err)
     tester = mp._is_url_local
 
-    assert tester("chrome://xyz/content/abc")
-    assert tester("chrome://whatever/")
-    assert tester("local.xul")
-    assert not tester("http://foo.bar/")
-    assert not tester("https://abc.def/")
+    assert tester('chrome://xyz/content/abc')
+    assert tester('chrome://whatever/')
+    assert tester('local.xul')
+    assert not tester('http://foo.bar/')
+    assert not tester('https://abc.def/')
 
-    assert tester(u"chrome://xyz/content/abc")
-    assert tester(u"chrome://whatever/")
-    assert tester(u"local.xul")
-    assert not tester(u"http://foo.bar/")
-    assert not tester(u"https://abc.def/")
+    assert tester(u'chrome://xyz/content/abc')
+    assert tester(u'chrome://whatever/')
+    assert tester(u'local.xul')
+    assert not tester(u'http://foo.bar/')
+    assert not tester(u'https://abc.def/')
 
 
 def test_html_file():
-    "Tests a package with a valid HTML file."
+    'Tests a package with a valid HTML file.'
 
-    _test_xul("tests/resources/markup/markuptester/pass.html")
+    _test_xul('tests/resources/markup/markuptester/pass.html')
 
 
 def test_xml_file():
-    "Tests a package with a valid XML file."
+    'Tests a package with a valid XML file.'
 
-    _test_xul("tests/resources/markup/markuptester/pass.xml")
+    _test_xul('tests/resources/markup/markuptester/pass.xml')
 
 
 def test_xul_file():
-    "Tests a package with a valid XUL file."
-    _test_xul("tests/resources/markup/markuptester/pass.xul")
+    'Tests a package with a valid XUL file.'
+    _test_xul('tests/resources/markup/markuptester/pass.xul')
 
 
 def test_xml_bad_nesting():
-    "Tests an XML file that has badly nested elements."
-    _test_xul("tests/resources/markup/markuptester/bad_nesting.xml", True)
+    'Tests an XML file that has badly nested elements.'
+    _test_xul('tests/resources/markup/markuptester/bad_nesting.xml', True)
 
 
 def test_has_cdata():
-    "Tests that CDATA is good to go."
-    _test_xul("tests/resources/markup/markuptester/cdata.xml")
+    'Tests that CDATA is good to go.'
+    _test_xul('tests/resources/markup/markuptester/cdata.xml')
 
 
 def test_cdata_properly():
@@ -92,7 +92,7 @@ def test_cdata_properly():
     <><><><""><!><
     ]]>
     </script>
-    </foo>""", "foo.xul", should_fail=False)
+    </foo>""", 'foo.xul', should_fail=False)
 
     # Test that there are no problems if the CDATA element starts or ends on
     # the same line as the parent tag.
@@ -103,7 +103,7 @@ def test_cdata_properly():
     <selfclosing />
     <><><><""><!><
     ]]></script>
-    </foo>""", "foo.xul", should_fail=False)
+    </foo>""", 'foo.xul', should_fail=False)
 
     # Test that there are no problems if multiple CDATA elements open and
     # close on the same line.
@@ -111,7 +111,7 @@ def test_cdata_properly():
     <foo><![CDATA[</bar></foo>]]></foo><![CDATA[
     <![CDATA[ <-- Should be ignored since we're buffering.</bar><zap>
     ]]>
-    </foo>""", "foo.xul", should_fail=False)
+    </foo>""", 'foo.xul', should_fail=False)
 
     err = _test_xul_raw("""<foo>
     <![CDATA[
@@ -120,7 +120,7 @@ def test_cdata_properly():
     <selfclosing />
     <><><><""><!><
     ]]>
-    </foo>""", "foo.xul", should_fail=False)
+    </foo>""", 'foo.xul', should_fail=False)
 
     err = _test_xul_raw("""
     <![CDATA[
@@ -128,7 +128,7 @@ def test_cdata_properly():
     </bar></zap>
     <selfclosing />
     <><><><""><!><
-    ]]>""", "foo.xul", should_fail=False)
+    ]]>""", 'foo.xul', should_fail=False)
 
 
 def test_non_js_not_executed():
@@ -141,7 +141,7 @@ def test_non_js_not_executed():
     <><><><""><!><
     ]]>
     </script>
-    </foo>""", "foo.xul", should_fail=False)
+    </foo>""", 'foo.xul', should_fail=False)
 
     err = _test_xul_raw("""<foo>
     <script type="application/javascript">
@@ -152,7 +152,7 @@ def test_non_js_not_executed():
     <><><><""><!><
     ]]>
     </script>
-    </foo>""", "foo.xul", should_fail=True)
+    </foo>""", 'foo.xul', should_fail=True)
 
     err = _test_xul_raw("""<foo>
     <script>
@@ -163,76 +163,76 @@ def test_non_js_not_executed():
     <><><><""><!><
     ]]>
     </script>
-    </foo>""", "foo.xul", should_fail=True)
+    </foo>""", 'foo.xul', should_fail=True)
 
 
 def test_xml_overclosing():
-    "Tests an XML file that has overclosed elements"
-    _test_xul("tests/resources/markup/markuptester/overclose.xml", True)
+    'Tests an XML file that has overclosed elements'
+    _test_xul('tests/resources/markup/markuptester/overclose.xml', True)
 
 
 def test_xml_extraclosing():
-    "Tests an XML file that has extraclosed elements"
-    _test_xul("tests/resources/markup/markuptester/extraclose.xml", True)
+    'Tests an XML file that has extraclosed elements'
+    _test_xul('tests/resources/markup/markuptester/extraclose.xml', True)
 
 
 def test_html_ignore_comment():
-    "Tests that HTML comment values are ignored"
-    _test_xul("tests/resources/markup/markuptester/ignore_comments.html")
+    'Tests that HTML comment values are ignored'
+    _test_xul('tests/resources/markup/markuptester/ignore_comments.html')
 
 
 def test_html_css_style():
-    "Tests that CSS within an element is passed to the CSS tester"
-    _test_xul("tests/resources/markup/markuptester/css_style.html", True)
+    'Tests that CSS within an element is passed to the CSS tester'
+    _test_xul('tests/resources/markup/markuptester/css_style.html', True)
 
 
 def test_html_css_inline():
-    "Tests that inline CSS is passed to the CSS tester"
-    _test_xul("tests/resources/markup/markuptester/css_inline.html", True)
+    'Tests that inline CSS is passed to the CSS tester'
+    _test_xul('tests/resources/markup/markuptester/css_inline.html', True)
 
 
 def test_xul_evil():
-    "Tests for evil kinds of scripts and iframes in XUL."
-    _test_xul("tests/resources/markup/markuptester/remote_src.xul", True)
-    _test_xul("tests/resources/markup/markuptester/bad_iframe_remote.xul", True)
-    _test_xul("tests/resources/markup/markuptester/bad_iframe_chrome.xul", True)
-    _test_xul("tests/resources/markup/markuptester/"
-              "bad_iframe_remote_missing.xul",
+    'Tests for evil kinds of scripts and iframes in XUL.'
+    _test_xul('tests/resources/markup/markuptester/remote_src.xul', True)
+    _test_xul('tests/resources/markup/markuptester/bad_iframe_remote.xul', True)
+    _test_xul('tests/resources/markup/markuptester/bad_iframe_chrome.xul', True)
+    _test_xul('tests/resources/markup/markuptester/'
+              'bad_iframe_remote_missing.xul',
               True)
 
 
 def test_lp_passing():
     """Test a valid language pack or theme file."""
-    _test_xul("tests/resources/markup/markuptester/_langpack/lp_safe.html",
+    _test_xul('tests/resources/markup/markuptester/_langpack/lp_safe.html',
               False, PACKAGE_LANGPACK)
-    _test_xul("tests/resources/markup/markuptester/_langpack/lp_safe.html",
+    _test_xul('tests/resources/markup/markuptester/_langpack/lp_safe.html',
               False, PACKAGE_THEME)
 
 
 def test_lp_unsafe():
     """Test a language pack or theme file that contains unsafe elements."""
-    _test_xul("tests/resources/markup/markuptester/_langpack/lp_unsafe.html",
+    _test_xul('tests/resources/markup/markuptester/_langpack/lp_unsafe.html',
               True, PACKAGE_LANGPACK)
-    _test_xul("tests/resources/markup/markuptester/_langpack/lp_unsafe.html",
+    _test_xul('tests/resources/markup/markuptester/_langpack/lp_unsafe.html',
               True, PACKAGE_THEME)
 
 
 def test_lp_remote():
     """Test a language pack file that contains remote references."""
-    _test_xul("tests/resources/markup/markuptester/_langpack/lp_remote.html",
+    _test_xul('tests/resources/markup/markuptester/_langpack/lp_remote.html',
               True, PACKAGE_LANGPACK)
-    _test_xul("tests/resources/markup/markuptester/_langpack/lp_remote.html",
+    _test_xul('tests/resources/markup/markuptester/_langpack/lp_remote.html',
               True, PACKAGE_THEME)
 
 
 def test_banned_markup():
-    "Tests that banned elements are flagged."
-    _test_xul("tests/resources/markup/markuptester/bad_banned.xml", True)
+    'Tests that banned elements are flagged.'
+    _test_xul('tests/resources/markup/markuptester/bad_banned.xml', True)
 
 
 def test_bad_encoding():
     """Test that bad encodings don't cause the parser to fail."""
-    _test_xul("tests/resources/markup/encoding.txt")
+    _test_xul('tests/resources/markup/encoding.txt')
 
 
 def test_self_closing_scripts():
@@ -244,7 +244,7 @@ def test_self_closing_scripts():
         <list_item />
         <list_item />
     </foo>
-    """, "foo.xul")
+    """, 'foo.xul')
 
 
 def test_generic_ids():
@@ -256,28 +256,28 @@ def test_generic_ids():
         <stringbundleset id="whatever" />
         <stringbundle id="whatever" />
     </foo>
-    """, "foo.xul")
+    """, 'foo.xul')
 
     # Test that a generic ID fails.
     _test_xul_raw("""
     <foo>
         <stringbundle id="strings" />
     </foo>
-    """, "foo.xul", should_fail=True)
+    """, 'foo.xul', should_fail=True)
 
     # Test that any element with a generic ID fails.
     _test_xul_raw("""
     <foo>
         <baz id="strings" />
     </foo>
-    """, "foo.xul", should_fail=True)
+    """, 'foo.xul', should_fail=True)
 
     # Test that another generic ID fails with a string bundle set.
     _test_xul_raw("""
     <foo>
         <stringbundleset id="string-bundle" />
     </foo>
-    """, "foo.xul", should_fail=True)
+    """, 'foo.xul', should_fail=True)
 
 
 def test_theme_attribute_prefixes():
@@ -285,15 +285,15 @@ def test_theme_attribute_prefixes():
 
     _test_xul_raw("""
     <foo><bar foo="http://bar" /></foo>
-    """, "foo.xul", type_=PACKAGE_THEME)
+    """, 'foo.xul', type_=PACKAGE_THEME)
 
     _test_xul_raw("""
     <foo><bar foo="data:bar" /></foo>
-    """, "foo.xul", type_=PACKAGE_THEME, should_fail=True)
+    """, 'foo.xul', type_=PACKAGE_THEME, should_fail=True)
 
     _test_xul_raw("""
     <foo><bar foo="javascript:bar" /></foo>
-    """, "foo.xul", type_=PACKAGE_THEME, should_fail=True)
+    """, 'foo.xul', type_=PACKAGE_THEME, should_fail=True)
 
 
 def test_theme_xbl():
@@ -303,7 +303,7 @@ def test_theme_xbl():
     _test_xul_raw("""
     <script> <a href="" /> <p> <span></span> </p> </script>
     <script> foo = "</scr" + "ipt>"; </script>
-    """, "foo.xul", type_=PACKAGE_THEME)
+    """, 'foo.xul', type_=PACKAGE_THEME)
 
 
 def test_theme_xbl():
@@ -311,31 +311,31 @@ def test_theme_xbl():
 
     _test_xul_raw("""
     <foo><xbl:foo /></foo>
-    """, "foo.xul", type_=PACKAGE_THEME)
+    """, 'foo.xul', type_=PACKAGE_THEME)
 
     _test_xul_raw("""
     <foo><xbl:constructor /></foo>
-    """, "foo.xul", type_=PACKAGE_THEME, should_fail=True)
+    """, 'foo.xul', type_=PACKAGE_THEME, should_fail=True)
 
     _test_xul_raw("""
     <foo><xbl:property /></foo>
-    """, "foo.xul", type_=PACKAGE_THEME)
+    """, 'foo.xul', type_=PACKAGE_THEME)
 
     _test_xul_raw("""
     <foo><xbl:property onset="foo()" /></foo>
-    """, "foo.xul", type_=PACKAGE_THEME, should_fail=True)
+    """, 'foo.xul', type_=PACKAGE_THEME, should_fail=True)
 
     _test_xul_raw("""
     <foo xmlns:xbl="http://www.mozilla.org/xbl">
         <property onset="" onget="" />
     </foo>
-    """, "foo.xul")
+    """, 'foo.xul')
 
     _test_xul_raw("""
     <foo xmlns:xbl="http://www.mozilla.org/xbl">
         <property onset="" onget="" />
     </foo>
-    """, "foo.xul", type_=PACKAGE_THEME, should_fail=True)
+    """, 'foo.xul', type_=PACKAGE_THEME, should_fail=True)
 
 
 def test_dom_mutation():
@@ -343,30 +343,30 @@ def test_dom_mutation():
 
     _test_xul_raw("""
     <foo><bar onzap="" /></foo>
-    """, "foo.xul")
+    """, 'foo.xul')
 
     _test_xul_raw("""
     <foo><bar ondomattrmodified="" /></foo>
-    """, "foo.xul", should_fail=True)
+    """, 'foo.xul', should_fail=True)
 
 
 def test_complex_script_detection():
     """Test that complex inline scripts are warned against."""
 
-    blanks = "";
+    blanks = '';
 
     err = _test_xul_raw("""
     <doc><script>
     """ + blanks + """
     </script></doc>
-    """, "foo.xul")
+    """, 'foo.xul')
 
     # short scripts are okay
     eq_(len(err.warnings), 0)
 
     err = _test_xul_raw("""
     <doc><script src="chrome://namespace/absolute.js"></script></doc>
-    """, "foo.xul")
+    """, 'foo.xul')
 
     # referenced scripts are okay
     eq_(len(err.warnings), 0)
@@ -378,13 +378,13 @@ def test_complex_script_detection():
     <doc><script>
     """ + blanks + """
     </script></doc>
-    """, "foo.xul")
+    """, 'foo.xul')
 
     # but long scripts are not
     assert err.warnings
     warning = err.warnings[0]
-    eq_(warning["file"], "foo.xul")
-    eq_(warning["id"], ("markup", "complex_script"))
+    eq_(warning['file'], 'foo.xul')
+    eq_(warning['id'], ('markup', 'complex_script'))
 
     # one and only one warning
     eq_(len(err.warnings), 1)
@@ -397,12 +397,12 @@ def test_proper_line_numbers():
     <script>
     eval("OWOWOWOWOWOWOWOW");
     </script>
-    </foo>""", "foo.xul")
+    </foo>""", 'foo.xul')
 
     assert err.warnings
     warning = err.warnings[0]
-    eq_(warning["file"], "foo.xul")
-    eq_(warning["line"], 3);
+    eq_(warning['file'], 'foo.xul')
+    eq_(warning['line'], 3);
 
 
 def test_script_scraping():
@@ -411,7 +411,7 @@ def test_script_scraping():
     err = ErrorBundle()
     err.supported_versions = {}
     parser = markuptester.MarkupParser(err, debug=True)
-    parser.process("foo.xul", """
+    parser.process('foo.xul', """
     <doc>
     <!-- One to be ignored -->
     <script type="text/javascript"></script>
@@ -419,11 +419,11 @@ def test_script_scraping():
     <script src="chrome://namespace/absolute.js"></script>
     <script src="very_relative.js"></script>
     </doc>
-    """, "xul")
+    """, 'xul')
 
     eq_(parser.found_scripts,
-        set(["/relative.js", "chrome://namespace/absolute.js",
-             "very_relative.js"]))
+        set(['/relative.js', 'chrome://namespace/absolute.js',
+             'very_relative.js']))
 
 
 def test_prefwindow_ids():
@@ -431,13 +431,13 @@ def test_prefwindow_ids():
 
     err = _test_xul_raw("""<foo>
     <prefwindow></prefwindow>
-    </foo>""", "foo.xul", should_fail=True)
+    </foo>""", 'foo.xul', should_fail=True)
 
     err = _test_xul_raw("""<foo>
     <prefwindow id="foobar"></prefwindow>
-    </foo>""", "foo.xul", should_fail=False)
+    </foo>""", 'foo.xul', should_fail=False)
 
 
 def test_valueless_attribute():
     """Test that valueless attributes generate no errors."""
-    _test_xul_raw("<foo bar />", "foo.xul", should_fail=False)
+    _test_xul_raw('<foo bar />', 'foo.xul', should_fail=False)

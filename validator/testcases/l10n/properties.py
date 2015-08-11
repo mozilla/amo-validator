@@ -29,7 +29,7 @@ class PropertiesParser(object):
         # Create a context!
         self.context = ContextGenerator(data)
 
-        split_data = data.split("\n")
+        split_data = data.split('\n')
         line_buffer = None
         line_number = 0
         for line in split_data:
@@ -41,11 +41,11 @@ class PropertiesParser(object):
             clean_line = line.strip()
             if not clean_line:
                 continue
-            if clean_line.startswith("#"):
+            if clean_line.startswith('#'):
                 continue
 
             # It's a line that wraps
-            if clean_line.count("=") == 0:
+            if clean_line.count('=') == 0:
                 if line_buffer:
                     line_buffer[-1] += clean_line
                 else:
@@ -60,7 +60,7 @@ class PropertiesParser(object):
                                        line_buffer[1].strip(),
                                        line_number))
 
-                line_buffer = clean_line.split("=", 1)
+                line_buffer = clean_line.split('=', 1)
 
         # Handle any left-over wrapped line data
         if line_buffer:

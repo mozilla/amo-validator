@@ -11,8 +11,8 @@ class JSObject(object):
     """
 
     def __init__(self, data=None, unwrapped=False):
-        self.type_ = "object"  # For use when an object is pushed as a context.
-        self.data = {u"prototype": lambda: JSPrototype()}
+        self.type_ = 'object'  # For use when an object is pushed as a context.
+        self.data = {u'prototype': lambda: JSPrototype()}
         if data:
             self.data.update(data)
         self.messages = []
@@ -21,13 +21,13 @@ class JSObject(object):
         self.recursing = False
 
     def get(self, name, instantiate=False, traverser=None):
-        "Returns the value associated with a property name"
+        'Returns the value associated with a property name'
         name = unicode(name)
         output = None
 
-        if name == "wrappedJSObject":
+        if name == 'wrappedJSObject':
             if traverser:
-                traverser._debug("Requested unwrapped JS object...")
+                traverser._debug('Requested unwrapped JS object...')
             clone = JSObject(unwrapped=True)
             clone.data = self.data
             return JSWrapper(clone, traverser=traverser)
@@ -41,7 +41,7 @@ class JSObject(object):
             self.set(name, output, traverser=traverser)
 
         if traverser:
-            modifier = instanceproperties.get_operation("get", name)
+            modifier = instanceproperties.get_operation('get', name)
             if modifier:
                 modifier(traverser)
 
@@ -52,11 +52,11 @@ class JSObject(object):
         return output
 
     def get_literal_value(self):
-        return u"[object Object]"
+        return u'[object Object]'
 
     def set(self, name, value, traverser=None):
         if traverser:
-            modifier = instanceproperties.get_operation("set", name)
+            modifier = instanceproperties.get_operation('set', name)
             if modifier:
                 modified_value = modifier(value, traverser)
                 if modified_value is not None:
@@ -64,23 +64,23 @@ class JSObject(object):
 
             if self.is_unwrapped:
                 traverser.warning(
-                    err_id=("testcases_javascript_jstypes", "JSObject_set",
-                            "unwrapped_js_object"),
+                    err_id=('testcases_javascript_jstypes', 'JSObject_set',
+                            'unwrapped_js_object'),
                     warning="Assignment of unwrapped JS Object's properties.",
-                    description="Improper use of unwrapped JS objects can "
-                                "result in serious security vulnerabilities. "
-                                "Please reconsider your use of unwrapped "
-                                "JS objects.",
-                    signing_help="Please avoid assigning to properties of "
-                                 "unwrapped objects from unprivileged scopes, "
-                                 "unless you are using an export API "
-                                 "(http://mzl.la/1fvvgm9) to expose API "
-                                 "functions to content scopes. "
-                                 "In this case, however, please note that "
-                                 "your add-on will be required to undergo "
-                                 "manual code review for at least one "
-                                 "submission.",
-                    signing_severity="high")
+                    description='Improper use of unwrapped JS objects can '
+                                'result in serious security vulnerabilities. '
+                                'Please reconsider your use of unwrapped '
+                                'JS objects.',
+                    signing_help='Please avoid assigning to properties of '
+                                 'unwrapped objects from unprivileged scopes, '
+                                 'unless you are using an export API '
+                                 '(http://mzl.la/1fvvgm9) to expose API '
+                                 'functions to content scopes. '
+                                 'In this case, however, please note that '
+                                 'your add-on will be required to undergo '
+                                 'manual code review for at least one '
+                                 'submission.',
+                    signing_severity='high')
 
         self.data[name] = value
 
@@ -90,7 +90,7 @@ class JSObject(object):
 
     def output(self):
         if self.recursing:
-            return u"(recursion)"
+            return u'(recursion)'
 
         # Prevent unruly recursion with a recursion buster.
         self.recursing = True
@@ -101,9 +101,9 @@ class JSObject(object):
                 continue
             elif (isinstance(self.data[key], JSWrapper) and
                   self.data[key].value == self):
-                output_dict[key] = u"(self)"
+                output_dict[key] = u'(self)'
             elif self.data[key] is None:
-                output_dict[key] = u"(None)"
+                output_dict[key] = u'(None)'
             else:
                 output_dict[key] = self.data[key].output()
 
@@ -112,9 +112,9 @@ class JSObject(object):
 
         output = []
         if self.is_unwrapped:
-            output.append("<unwrapped>: ")
+            output.append('<unwrapped>: ')
         output.append(str(output_dict))
-        return "".join(output)
+        return ''.join(output)
 
 
 class JSContext(JSObject):
@@ -131,16 +131,16 @@ class JSWrapper(object):
 
     def __init__(self, value=None, const=False, dirty=False, lazy=False,
                  is_global=False, traverser=None, callable=False,
-                 setter=None, context="chrome"):
+                 setter=None, context='chrome'):
 
         if is_global:
             assert not value
 
         if traverser is not None:
             traverser.debug_level += 1
-            traverser._debug("-----New JSWrapper-----")
+            traverser._debug('-----New JSWrapper-----')
             if isinstance(value, JSWrapper):
-                traverser._debug(">>> Rewrap <<<")
+                traverser._debug('>>> Rewrap <<<')
             traverser.debug_level -= 1
 
         self.const = const
@@ -175,11 +175,11 @@ class JSWrapper(object):
 
         if self.const and not overwrite_const:
             traverser.err.warning(
-                err_id=("testcases_javascript_traverser",
-                        "JSWrapper_set_value", "const_overwrite"),
-                warning="Overwritten constant value",
-                description="A variable declared as constant has been "
-                            "overwritten in some JS code.",
+                err_id=('testcases_javascript_traverser',
+                        'JSWrapper_set_value', 'const_overwrite'),
+                warning='Overwritten constant value',
+                description='A variable declared as constant has been '
+                            'overwritten in some JS code.',
                 filename=traverser.filename,
                 line=traverser.line,
                 column=traverser.position,
@@ -187,7 +187,7 @@ class JSWrapper(object):
 
         # Process any setter/modifier
         if self.setter:
-            traverser._debug("Running setter on JSWrapper...")
+            traverser._debug('Running setter on JSWrapper...')
             value = self.setter(value, traverser) or value or None
 
         if value == self.value:
@@ -197,15 +197,15 @@ class JSWrapper(object):
         if (self.is_global and
             (not traverser or
              not (traverser.is_jsm or
-                  traverser.err.get_resource("em:bootstrap") == "true")) and
+                  traverser.err.get_resource('em:bootstrap') == 'true')) and
             (isinstance(self.value, dict) and
-             not self.value.get("overwriteable", True))):
+             not self.value.get('overwriteable', True))):
             traverser.err.warning(
-                err_id=("testcases_javascript_jstypes", "JSWrapper_set_value",
-                        "global_overwrite"),
-                warning="Global overwrite",
-                description="An attempt to overwrite a global variable was "
-                            "made in some JS code.",
+                err_id=('testcases_javascript_jstypes', 'JSWrapper_set_value',
+                        'global_overwrite'),
+                warning='Global overwrite',
+                description='An attempt to overwrite a global variable was '
+                            'made in some JS code.',
                 filename=traverser.filename,
                 line=traverser.line,
                 column=traverser.position,
@@ -229,8 +229,8 @@ class JSWrapper(object):
 
         if not isinstance(value, dict):
             self.is_global = False
-        elif "context" in value:
-            self.context = value["context"]
+        elif 'context' in value:
+            self.context = value['context']
 
         self.value = value
         return self
@@ -248,7 +248,7 @@ class JSWrapper(object):
         dirty = value is None
         context = self.context
         if self.is_global:
-            if "value" not in value:
+            if 'value' not in value:
                 output = JSWrapper(JSObject(), traverser=traverser)
                 output.value = {}
 
@@ -256,7 +256,7 @@ class JSWrapper(object):
                     if name in self.value:
                         output.value[name] = self.value[name]
 
-                map(apply_value, ("dangerous", "readonly", "context", "name"))
+                map(apply_value, ('dangerous', 'readonly', 'context', 'name'))
                 output.is_global = True
                 output.context = self.context
                 return output
@@ -267,7 +267,7 @@ class JSWrapper(object):
                 else:
                     return node
 
-            value_val = value["value"]
+            value_val = value['value']
             value_val = _evaluate_lambdas(value_val)
 
             if isinstance(value_val, dict):
@@ -275,14 +275,14 @@ class JSWrapper(object):
                     value_val = _evaluate_lambdas(value_val[name])
                     output = traverser._build_global(name=name,
                                                      entity=value_val)
-                    if "context" not in value_val:
+                    if 'context' not in value_val:
                         output.context = self.context
                     return output
             else:
                 value = value_val
 
         # Process any getters that are present for the current property.
-        modifier = instanceproperties.get_operation("get", name)
+        modifier = instanceproperties.get_operation('get', name)
         if modifier:
             modifier(traverser)
 
@@ -301,7 +301,7 @@ class JSWrapper(object):
         # If we can predetermine the setter for the wrapper, we can save a ton
         # of lookbehinds in the future. This greatly simplifies the
         # MemberExpression support.
-        setter = instanceproperties.get_operation("set", name)
+        setter = instanceproperties.get_operation('set', name)
         if setter:
             output.setter = setter
         return output
@@ -310,10 +310,10 @@ class JSWrapper(object):
         """The member `member` will be deleted from the value of the wrapper"""
         if self.is_global:
             self.traverser.err.warning(
-                err_id=("testcases_js_jstypes", "del_value",
-                        "global_member_deletion"),
-                warning="Global member deletion",
-                description="Members of global object may not be deleted.",
+                err_id=('testcases_js_jstypes', 'del_value',
+                        'global_member_deletion'),
+                warning='Global member deletion',
+                description='Members of global object may not be deleted.',
                 filename=self.traverser.filename,
                 line=self.traverser.line,
                 column=self.traverser.position,
@@ -351,10 +351,10 @@ class JSWrapper(object):
         """Returns the literal value of the wrapper"""
 
         if self.is_global:
-            if "literal" in self.value:
-                return self.value["literal"](self.traverser)
+            if 'literal' in self.value:
+                return self.value['literal'](self.traverser)
             else:
-                return "[object Object]"
+                return '[object Object]'
         if self.value is None:
             return None
 
@@ -364,9 +364,9 @@ class JSWrapper(object):
     def output(self):
         """Returns a readable version of the object"""
         if self.value is None:
-            return "(None)"
+            return '(None)'
         elif self.is_global:
-            return "(Global)"
+            return '(Global)'
 
         return self.value.output()
 
@@ -380,23 +380,23 @@ class JSWrapper(object):
         if not self.traverser:
             return
 
-        self.traverser._debug("INSPECTING: %s" % value)
+        self.traverser._debug('INSPECTING: %s' % value)
 
         if isinstance(value, types.StringTypes):
-            if ("is_jetpack" in self.traverser.err.metadata and
-                    value.startswith("resource://") and
-                    "-data/" in value):
+            if ('is_jetpack' in self.traverser.err.metadata and
+                    value.startswith('resource://') and
+                    '-data/' in value):
                 # Since Jetpack files are ignored, this should not be scanning
                 # anything inside the jetpack directories.
                 self.traverser.warning(
-                    err_id=("javascript_js_jstypes", "jswrapper",
-                            "jetpack_abs_uri"),
-                    warning="Absolute URIs in Jetpack 1.4 are disallowed",
-                    description=("As of Jetpack 1.4, absolute URIs are no "
-                                 "longer allowed within add-ons.",
-                                 "See %s for more information."
+                    err_id=('javascript_js_jstypes', 'jswrapper',
+                            'jetpack_abs_uri'),
+                    warning='Absolute URIs in Jetpack 1.4 are disallowed',
+                    description=('As of Jetpack 1.4, absolute URIs are no '
+                                 'longer allowed within add-ons.',
+                                 'See %s for more information.'
                                  % JETPACK_URI_URL),
-                    compatibility_type="error")
+                    compatibility_type='error')
 
     def __unicode__(self):
         """Returns a textual version of the object."""
@@ -423,7 +423,7 @@ class JSLiteral(JSObject):
         return self.value
 
     def get_literal_value(self):
-        "Returns the literal value of a this literal. Heh."
+        'Returns the literal value of a this literal. Heh.'
         return self.value
 
 
@@ -442,7 +442,7 @@ class JSPrototype(JSObject):
         output = super(JSPrototype, self).get(name, instantiate, traverser)
         if output is not None:
             return output
-        if name == "prototype":
+        if name == 'prototype':
             prototype = JSWrapper(JSPrototype(), traverser=traverser)
             self.data[name] = prototype
 
@@ -457,7 +457,7 @@ class JSArray(JSObject):
         self.elements = []
 
     def get(self, index, instantiate=False, traverser=None):
-        if index == "length":
+        if index == 'length':
             return len(self.elements)
 
         # Courtesy of Ian Bicking: http://bit.ly/hxv6qt
@@ -473,7 +473,7 @@ class JSArray(JSObject):
         """Arrays return a comma-delimited version of themselves."""
 
         if self.recursing:
-            return u"(recursion)"
+            return u'(recursion)'
 
         self.recursing = True
 
@@ -481,8 +481,8 @@ class JSArray(JSObject):
         # x = [4]
         # y = x * 3 // y = 12 since x equals "4"
 
-        output = u",".join(
-            [unicode(w.get_literal_value() if w is not None else u"") for w in
+        output = u','.join(
+            [unicode(w.get_literal_value() if w is not None else u'') for w in
              self.elements if
              not (isinstance(w, JSWrapper) and w.value == self)])
 
@@ -510,4 +510,4 @@ class JSArray(JSObject):
             self.elements.append(JSWrapper(value=value, traverser=traverser))
 
     def output(self):
-        return u"[%s]" % self.get_literal_value()
+        return u'[%s]' % self.get_literal_value()

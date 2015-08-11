@@ -14,22 +14,22 @@ import validator.testcases.regex as regex
 
 def _do_test(path, test, failure=True,
              require_install=False, set_type=0,
-             listed=False, xpi_mode="r"):
+             listed=False, xpi_mode='r'):
 
-    package_data = open(path, "rb")
+    package_data = open(path, 'rb')
     package = XPIManager(package_data, mode=xpi_mode, name=path)
     err = ErrorBundle()
     if listed:
-        err.save_resource("listed", True)
+        err.save_resource('listed', True)
 
     # Populate in the dependencies.
     if set_type:
         err.detected_type = set_type # Conduit test requires type
     if require_install:
-        err.save_resource("has_install_rdf", True)
-        rdf_data = package.read("install.rdf")
+        err.save_resource('has_install_rdf', True)
+        rdf_data = package.read('install.rdf')
         install_rdf = RDFParser(err, rdf_data)
-        err.save_resource("install_rdf", install_rdf)
+        err.save_resource('install_rdf', install_rdf)
 
     populate_chrome_manifest(err, package)
 
@@ -75,9 +75,9 @@ class TestCase(object):
         self.err.handler = OutputHandler(sys.stdout, True)
 
         if self.is_jetpack:
-            self.err.metadata["is_jetpack"] = True
+            self.err.metadata['is_jetpack'] = True
         if self.is_bootstrapped:
-            self.err.save_resource("em:bootstrap", True)
+            self.err.save_resource('em:bootstrap', True)
         if self.detected_type is not None:
             self.err.detected_Type = self.detected_type
 
@@ -98,7 +98,7 @@ class TestCase(object):
         """
         assert self.err.failed(
             fail_on_warnings=with_warnings or with_warnings is None), \
-            "Test did not fail; failure was expected."
+            'Test did not fail; failure was expected.'
 
         def find_message(messages, props):
             # Returns true if any message in messages has all of the
@@ -113,9 +113,9 @@ class TestCase(object):
                 assert all(find_message(messages, props)
                            for props in expected)
             elif expected:
-                assert messages, "Expected %s." % mtype
+                assert messages, 'Expected %s.' % mtype
             elif expected is not None:
-                assert not messages, ("Tests found unexpected %s: %s" %
+                assert not messages, ('Tests found unexpected %s: %s' %
                                       mtype,
                                       self.err.print_summary(verbose=True))
 
@@ -127,7 +127,7 @@ class TestCase(object):
         process.
 
         """
-        assert self.err.notices, "Notices were expected."
+        assert self.err.notices, 'Notices were expected.'
 
     def assert_passes(self, warnings_pass=False):
         """Assert that no errors have been raised. If `warnings_pass` is True,
@@ -135,8 +135,8 @@ class TestCase(object):
 
         """
         assert not self.failed(fail_on_warnings=not warnings_pass), \
-                ("Test was intended to pass%s, but it did not." %
-                     (" with warnings" if warnings_pass else ""))
+                ('Test was intended to pass%s, but it did not.' %
+                     (' with warnings' if warnings_pass else ''))
 
     def assert_silent(self):
         """
@@ -147,16 +147,16 @@ class TestCase(object):
         assert not self.err.warnings, 'Got these: %s' % self.err.warnings
         assert not self.err.notices, 'Got these: %s' % self.err.notices
         assert not any(self.err.compat_summary.values()), \
-                "Found compatibility messages."
+                'Found compatibility messages.'
 
     def assert_got_errid(self, errid):
         """
         Assert that a message with the given errid has been generated during
         the validation process.
         """
-        assert any(msg["id"] == errid for msg in
+        assert any(msg['id'] == errid for msg in
                    (self.err.errors + self.err.warnings + self.err.notices)), \
-                "%s was expected, but it was not found." % repr(errid)
+                '%s was expected, but it was not found.' % repr(errid)
 
 
 class RegexTestCase(TestCase):
@@ -174,13 +174,13 @@ class RegexTestCase(TestCase):
             input = '<input onclick="%s" />' % input
         else:
             input = "'use strict';\n%s" % input
-        regex.run_regex_tests(input, self.err, "foo.txt", is_js=is_js)
+        regex.run_regex_tests(input, self.err, 'foo.txt', is_js=is_js)
 
     def run_js_regex(self, input):
         """Run the standard regex tests for JavaScript input."""
         if self.err is None:
             self.setup_err()
-        regex.run_regex_tests(input, self.err, "foo.txt", is_js=True)
+        regex.run_regex_tests(input, self.err, 'foo.txt', is_js=True)
 
 
 class MockZipFile:
@@ -197,14 +197,14 @@ class MockXPI:
         self.zf = MockZipFile()
         self.data = data
         self.subpackage = subpackage
-        self.filename = "mock_xpi.xpi"
+        self.filename = 'mock_xpi.xpi'
 
     def test(self):
         return True
 
     def info(self, name):
-        return {"name_lower": name.lower(),
-                "extension": name.lower().split(".")[-1]}
+        return {'name_lower': name.lower(),
+                'extension': name.lower().split('.')[-1]}
 
     def __iter__(self):
         def i():

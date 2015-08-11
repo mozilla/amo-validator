@@ -15,14 +15,14 @@ class XPIManager(object):
     worry about things like zip files or IO.
     """
 
-    def __init__(self, package, mode="r", name=None, subpackage=False):
-        "Create a new managed XPI package"
+    def __init__(self, package, mode='r', name=None, subpackage=False):
+        'Create a new managed XPI package'
 
         self.zf = ZipFile(package, mode=mode)
 
         # Store away the filename for future use.
         self.filename = name or package
-        self.extension = self.filename.split(".")[-1]
+        self.extension = self.filename.split('.')[-1]
         self.subpackage = subpackage
 
         self.contents_cache = None
@@ -38,7 +38,7 @@ class XPIManager(object):
         return self.package_contents()[name]
 
     def package_contents(self):
-        "Returns a dictionary of file information"
+        'Returns a dictionary of file information'
 
         if self.contents_cache:
             return self.contents_cache
@@ -50,11 +50,11 @@ class XPIManager(object):
         # Iterate through each file in the XPI.
         for file_ in files:
 
-            file_doc = {"name": file_.filename,
-                        "size": file_.file_size,
-                        "name_lower": file_.filename.lower()}
+            file_doc = {'name': file_.filename,
+                        'size': file_.file_size,
+                        'name_lower': file_.filename.lower()}
 
-            file_doc["extension"] = file_doc["name_lower"].split(".")[-1]
+            file_doc['extension'] = file_doc['name_lower'].split('.')[-1]
 
             out_files[file_.filename] = file_doc
 
@@ -62,7 +62,7 @@ class XPIManager(object):
         return out_files
 
     def read(self, filename):
-        "Reads a file from the archive and returns a string."
+        'Reads a file from the archive and returns a string.'
 
         data = self.zf.read(filename)
         return data

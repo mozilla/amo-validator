@@ -9,7 +9,7 @@ class MockXPI:
         files = range(4)
         def i():
             for f in files:
-                yield "file%d.foo" % f
+                yield 'file%d.foo' % f
         return i()
 
     def __contains__(self, item):
@@ -23,22 +23,22 @@ def test_version_decorators_accepted():
     """
 
     err = ErrorBundle()
-    err.supported_versions = {"firefox": ["1.2.3"]}
+    err.supported_versions = {'firefox': ['1.2.3']}
 
     tests = decorator.TEST_TIERS
     decorator.TEST_TIERS = {}
 
-    @decorator.register_test(tier=5, versions={"firefox": ["1.0.0",
-                                                           "1.2.3"]})
+    @decorator.register_test(tier=5, versions={'firefox': ['1.0.0',
+                                                           '1.2.3']})
     def version_test(err, xpi):
-        print "Ran test"
-        err.save_resource("executed", True)
+        print 'Ran test'
+        err.save_resource('executed', True)
 
     print decorator.TEST_TIERS
 
     validator.submain.test_inner_package(err, MockXPI())
 
-    assert err.get_resource("executed")
+    assert err.get_resource('executed')
     decorator.TEST_TIERS = tests
 
 
@@ -49,15 +49,15 @@ def test_version_decorators_denied_guid():
     """
 
     err = ErrorBundle()
-    err.supported_versions = {"firefox": ["1.2.3"]}
+    err.supported_versions = {'firefox': ['1.2.3']}
 
     tests = decorator.TEST_TIERS
     decorator.TEST_TIERS = {}
 
-    @decorator.register_test(tier=5, versions={"foobarfox": ["1.0.0",
-                                                             "1.2.3"]})
+    @decorator.register_test(tier=5, versions={'foobarfox': ['1.0.0',
+                                                             '1.2.3']})
     def version_test(err, xpi):
-        raise Exception("Should not have run!")
+        raise Exception('Should not have run!')
 
     print decorator.TEST_TIERS
 
@@ -72,15 +72,15 @@ def test_version_decorators_denied_version():
     """
 
     err = ErrorBundle()
-    err.supported_versions = {"firefox": ["1.2.3"]}
+    err.supported_versions = {'firefox': ['1.2.3']}
 
     tests = decorator.TEST_TIERS
     decorator.TEST_TIERS = {}
 
-    @decorator.register_test(tier=5, versions={"firefox": ["1.0.0",
-                                                           "2.0.0"]})
+    @decorator.register_test(tier=5, versions={'firefox': ['1.0.0',
+                                                           '2.0.0']})
     def version_test(err, xpi):
-        raise Exception("Should not have run!")
+        raise Exception('Should not have run!')
 
     print decorator.TEST_TIERS
 
@@ -94,24 +94,24 @@ def test_version_forappversions_accepted():
     """
 
     err = ErrorBundle()
-    err.supported_versions = {"firefox": ["1.2.3"]}
+    err.supported_versions = {'firefox': ['1.2.3']}
 
     tests = decorator.TEST_TIERS
     decorator.TEST_TIERS = {}
 
-    @decorator.register_test(tier=5, versions={"firefox": ["1.0.0",
-                                                           "1.2.3"]})
+    @decorator.register_test(tier=5, versions={'firefox': ['1.0.0',
+                                                           '1.2.3']})
     def version_test(err, xpi):
-        print "Ran test"
-        err.save_resource("executed", True)
+        print 'Ran test'
+        err.save_resource('executed', True)
 
     print decorator.TEST_TIERS
 
     validator.submain.test_inner_package(err, MockXPI(),
-                                         for_appversions={"firefox":
-                                                              ["1.2.3"]})
+                                         for_appversions={'firefox':
+                                                              ['1.2.3']})
 
-    assert err.get_resource("executed")
+    assert err.get_resource('executed')
     decorator.TEST_TIERS = tests
 
 
@@ -121,22 +121,22 @@ def test_version_forappversions_denied():
     """
 
     err = ErrorBundle()
-    err.supported_versions = {"firefox": ["1.2.3"]}
+    err.supported_versions = {'firefox': ['1.2.3']}
 
     tests = decorator.TEST_TIERS
     decorator.TEST_TIERS = {}
 
-    @decorator.register_test(tier=5, versions={"firefox": ["1.0.0",
-                                                           "1.2.3"]})
+    @decorator.register_test(tier=5, versions={'firefox': ['1.0.0',
+                                                           '1.2.3']})
     def version_test(err, xpi):
-        raise Exception("Should not have run!")
+        raise Exception('Should not have run!')
 
     print decorator.TEST_TIERS
 
     validator.submain.test_inner_package(err, MockXPI(),
-                                         for_appversions={"thunderbird":
-                                                              ["1.2.3"]})
+                                         for_appversions={'thunderbird':
+                                                              ['1.2.3']})
 
-    assert not err.get_resource("executed")
+    assert not err.get_resource('executed')
     decorator.TEST_TIERS = tests
 

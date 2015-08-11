@@ -9,16 +9,16 @@ def _build_definition(maj_version_num, firefox=True, fennec=True,
                       thunderbird=True, android=True):
     definition = {}
     app_version_range = (
-        lambda app: version_range(app, "%d.0a1" % maj_version_num,
-                                       "%d.0a1" % (maj_version_num + 1)))
+        lambda app: version_range(app, '%d.0a1' % maj_version_num,
+                                       '%d.0a1' % (maj_version_num + 1)))
     if firefox:
-        definition[FIREFOX_GUID] = app_version_range("firefox")
+        definition[FIREFOX_GUID] = app_version_range('firefox')
     if fennec:
-        definition[FENNEC_GUID] = app_version_range("fennec")
+        definition[FENNEC_GUID] = app_version_range('fennec')
     if thunderbird:
-        definition[TB_GUID] = app_version_range("thunderbird")
+        definition[TB_GUID] = app_version_range('thunderbird')
     if android:
-        definition[ANDROID_GUID] = app_version_range("android")
+        definition[ANDROID_GUID] = app_version_range('android')
 
     return definition
 

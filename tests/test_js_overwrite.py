@@ -33,8 +33,8 @@ class TestOverwrite(TestCase):
         var y = x.foo;
         var z = x["foo"];
         """)
-        self.assert_var_eq("y", "bar")
-        self.assert_var_eq("z", "bar")
+        self.assert_var_eq('y', 'bar')
+        self.assert_var_eq('z', 'bar')
 
     def test_global_overwrite(self):
         """Tests that important objects cannot be overridden by JS."""
@@ -60,7 +60,7 @@ class TestOverwrite(TestCase):
         def test(self, script):
             self.setUp()
             self.run_script(script, bootstrap=True)
-            assert not any("global_overwrite" in m["id"] for
+            assert not any('global_overwrite' in m['id'] for
                            m in self.err.warnings)
 
         yield test, self, 'Number = "asdf"'
@@ -114,7 +114,7 @@ class TestOverwrite(TestCase):
         var z = x["foo"];
         """)
         self.assert_silent()
-        self.assert_var_eq("z", "zap")
+        self.assert_var_eq('z', 'zap')
 
     def test_with_statement_tested(self):
         """
@@ -165,7 +165,7 @@ class TestOverwrite(TestCase):
             self.run_script("""%s = "foo";""" % constructor)
             self.assert_failed(with_warnings=True)
 
-        for constructor in ["Function", "Object", "String", "Number", "RegExp",
-                            "File", "Boolean", "Array", "Date"]:
+        for constructor in ['Function', 'Object', 'String', 'Number', 'RegExp',
+                            'File', 'Boolean', 'Array', 'Date']:
             yield test, self, constructor
 

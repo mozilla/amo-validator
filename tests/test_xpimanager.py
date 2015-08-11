@@ -31,7 +31,7 @@ def test_get_list():
 
 
 def test_valid_name():
-    "Test that the manager can retrieve the correct file name."
+    'Test that the manager can retrieve the correct file name.'
     z = XPIManager(get_path('xpi/install_rdf_only.xpi'))
     contents = z.package_contents()
     assert 'install.rdf' in contents

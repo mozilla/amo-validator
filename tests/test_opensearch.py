@@ -21,93 +21,93 @@ def _do_test(url, failure=True, listed=False):
         assert not err.failed(), 'Expected pass'
 
 def test_opensearch():
-    "Tests that the OpenSearch detection is working."
+    'Tests that the OpenSearch detection is working.'
 
-    _do_test("tests/resources/searchprovider/pass.xml", False)
+    _do_test('tests/resources/searchprovider/pass.xml', False)
 
 def test_missing_xmlns():
-    "Tests that an xmlns attribute is present."
+    'Tests that an xmlns attribute is present.'
 
-    _do_test("tests/resources/searchprovider/no_xmlns.xml")
+    _do_test('tests/resources/searchprovider/no_xmlns.xml')
 
 def test_bad_xmlns():
-    "Tests that an xmlns attribute is an appropriate value."
+    'Tests that an xmlns attribute is an appropriate value.'
 
-    _do_test("tests/resources/searchprovider/bad_xmlns.xml")
+    _do_test('tests/resources/searchprovider/bad_xmlns.xml')
 
 def test_nonparsing_xml():
     """Tests that a failure is generated for bad XML on OpenSearch"""
 
     err = ErrorBundle()
-    detect_opensearch(err, "tests/resources/searchprovider/bad_xml.xml")
+    detect_opensearch(err, 'tests/resources/searchprovider/bad_xml.xml')
     assert err.failed()
 
 def test_broken_updateURL():
     "Tests that there isn't an updateURL element in the provider."
 
-    _do_test("tests/resources/searchprovider/sp_updateurl.xml")
+    _do_test('tests/resources/searchprovider/sp_updateurl.xml')
 
 def test_broken_notos():
-    "Tests that the provider is indeed OpenSearch."
+    'Tests that the provider is indeed OpenSearch.'
 
-    _do_test("tests/resources/searchprovider/sp_notos.xml")
+    _do_test('tests/resources/searchprovider/sp_notos.xml')
 
 def test_broken_shortname():
-    "Tests that the provider has a <ShortName> element."
+    'Tests that the provider has a <ShortName> element.'
 
-    _do_test("tests/resources/searchprovider/sp_no_shortname.xml")
-    _do_test("tests/resources/searchprovider/sp_dup_shortname.xml")
-    _do_test("tests/resources/searchprovider/sp_long_shortname.xml")
+    _do_test('tests/resources/searchprovider/sp_no_shortname.xml')
+    _do_test('tests/resources/searchprovider/sp_dup_shortname.xml')
+    _do_test('tests/resources/searchprovider/sp_long_shortname.xml')
 
 def test_broken_description():
-    "Tests that the provider has a <Description> element."
+    'Tests that the provider has a <Description> element.'
 
-    _do_test("tests/resources/searchprovider/sp_no_description.xml")
+    _do_test('tests/resources/searchprovider/sp_no_description.xml')
 
 def test_broken_url():
-    "Tests that the provider has a <Url> element."
+    'Tests that the provider has a <Url> element.'
 
-    _do_test("tests/resources/searchprovider/sp_no_url.xml")
+    _do_test('tests/resources/searchprovider/sp_no_url.xml')
 
 def test_rel_self_url():
-    "Tests that the parser skips over rel=self URLs"
+    'Tests that the parser skips over rel=self URLs'
 
-    _do_test("tests/resources/searchprovider/rel_self_url.xml", listed=True)
-    _do_test("tests/resources/searchprovider/rel_self_url.xml", False)
+    _do_test('tests/resources/searchprovider/rel_self_url.xml', listed=True)
+    _do_test('tests/resources/searchprovider/rel_self_url.xml', False)
 
 def test_broken_url_attributes():
-    "Tests that the provider is passing the proper attributes for its urls."
+    'Tests that the provider is passing the proper attributes for its urls.'
 
-    _do_test("tests/resources/searchprovider/sp_bad_url_atts.xml")
+    _do_test('tests/resources/searchprovider/sp_bad_url_atts.xml')
 
 def test_broken_template_attr():
     "Test that there's no traceback for a missing template attribute."
 
-    _do_test("tests/resources/searchprovider/sp_no_template_attr.xml")
+    _do_test('tests/resources/searchprovider/sp_no_template_attr.xml')
 
 def test_broken_url_searchterms():
-    "Tests that a search term field is provided for the <Url> element."
+    'Tests that a search term field is provided for the <Url> element.'
 
-    _do_test("tests/resources/searchprovider/sp_no_url_template.xml")
+    _do_test('tests/resources/searchprovider/sp_no_url_template.xml')
 
 def test_broken_url_searchterms_inline():
-    "Tests that a valid inline search term field is provided."
+    'Tests that a valid inline search term field is provided.'
 
-    _do_test("tests/resources/searchprovider/sp_inline_template.xml", False)
+    _do_test('tests/resources/searchprovider/sp_inline_template.xml', False)
 
 def test_broken_url_searchterms_param():
-    "Tests that a valid search term field is provided in a <Param />"
+    'Tests that a valid search term field is provided in a <Param />'
 
-    _do_test("tests/resources/searchprovider/sp_param_template.xml", False)
+    _do_test('tests/resources/searchprovider/sp_param_template.xml', False)
 
 def test_broken_url_searchterms_param_atts():
-    "Tests that necessary attributes are provided in a <Param />"
+    'Tests that necessary attributes are provided in a <Param />'
 
-    _do_test("tests/resources/searchprovider/sp_bad_param_atts.xml")
+    _do_test('tests/resources/searchprovider/sp_bad_param_atts.xml')
 
 
 def test_search_pass():
-    "Tests the submain test_search function with passing data."
+    'Tests the submain test_search function with passing data.'
 
     err = ErrorBundle()
     submain.detect_opensearch = lambda err, x, listed: err
@@ -116,7 +116,7 @@ def test_search_pass():
     assert not err.failed()
 
 def test_search_bad_type():
-    "Tests the submain test_search function with a bad package type."
+    'Tests the submain test_search function with a bad package type.'
 
     err = ErrorBundle()
     submain.detect_opensearch = lambda err, x, listed: err
@@ -125,21 +125,21 @@ def test_search_bad_type():
     assert err.failed()
 
 def test_search_failure():
-    "Tests the submain test_search function with a failure"
+    'Tests the submain test_search function with a failure'
 
     err = ErrorBundle()
     submain.detect_opensearch = (
-        lambda err, x, listed: err.error(("foo", ), "Test"))
+        lambda err, x, listed: err.error(('foo', ), 'Test'))
     submain.test_search(err, None, PACKAGE_ANY)
 
     assert err.failed()
 
 def test_search_failure_undecided():
-    "Tests the submain test_search function with an unrejected fail case"
+    'Tests the submain test_search function with an unrejected fail case'
 
     err = ErrorBundle()
-    submain.detect_opensearch = lambda err, x, listed: err.error(("foo", ),
-                                                                  "Test")
+    submain.detect_opensearch = lambda err, x, listed: err.error(('foo', ),
+                                                                  'Test')
     submain.test_search(err, None, PACKAGE_ANY)
 
     assert err.failed()
@@ -149,10 +149,10 @@ def test_search_security_error():
     """Test that the DefusedXmlException is handled as a security error."""
 
     err = ErrorBundle()
-    url = "tests/resources/searchprovider/lol.xml"
+    url = 'tests/resources/searchprovider/lol.xml'
     detect_opensearch(err, url, listed=False)
 
-    assert err.failed(), "Expected failure"
+    assert err.failed(), 'Expected failure'
     assert err.errors[0]['id'] == ('opensearch', 'security_error')
 
 
@@ -160,5 +160,5 @@ def test_treat_unicode_paths_as_files():
     """Test that unicode filepaths are treated as filepaths"""
 
     err = ErrorBundle()
-    detect_opensearch(err, u"tests/resources/searchprovider/pass.xml")
+    detect_opensearch(err, u'tests/resources/searchprovider/pass.xml')
     assert not err.failed()

@@ -23,31 +23,31 @@ class TestSearchService(TestCase, RegexTestCase):
             self.assert_failed(with_warnings=warnings)
 
         objs = ("Cc[''].getService(Ci.nsIBrowserSearchService)",
-                "Services.search")
+                'Services.search')
 
         for obj in objs:
-            warnings = {"signing_severity": "high",
-                        "id": ("testcases_javascript_actions",
-                               "search_service",
-                               "changes")},
+            warnings = {'signing_severity': 'high',
+                        'id': ('testcases_javascript_actions',
+                               'search_service',
+                               'changes')},
 
-            for prop in "currentEngine", "defaultEngine":
-                yield test, obj, prop, " = foo", warnings
+            for prop in 'currentEngine', 'defaultEngine':
+                yield test, obj, prop, ' = foo', warnings
 
-            warnings[0]["signing_severity"] = "medium"
+            warnings[0]['signing_severity'] = 'medium'
 
-            for meth in ("addEngine", "addEngineWithDetails",
-                         "removeEngine", "moveEngine"):
-                yield test, obj, meth, "(foo, bar, baz)", warnings
+            for meth in ('addEngine', 'addEngineWithDetails',
+                         'removeEngine', 'moveEngine'):
+                yield test, obj, meth, '(foo, bar, baz)', warnings
 
     def test_registry_write(self):
         """Tests that Windows registry writes trigger warnings."""
 
-        warnings = ({"id": ("testcases_javascript_actions",
-                            "windows_registry", "write"),
-                     "signing_severity": "medium"},
-                    {"id": ("js", "traverser", "dangerous_global"),
-                     "signing_severity": "low"})
+        warnings = ({'id': ('testcases_javascript_actions',
+                            'windows_registry', 'write'),
+                     'signing_severity': 'medium'},
+                    {'id': ('js', 'traverser', 'dangerous_global'),
+                     'signing_severity': 'low'})
 
         def test(method):
             self.setUp()
@@ -56,8 +56,8 @@ class TestSearchService(TestCase, RegexTestCase):
             """ % method)
             self.assert_failed(with_warnings=warnings)
 
-        for method in ("create", "createChild", "writeBinaryValue",
-                       "writeInt64Value", "writeIntValue", "writeStringValue"):
+        for method in ('create', 'createChild', 'writeBinaryValue',
+                       'writeInt64Value', 'writeIntValue', 'writeStringValue'):
             yield test, method
 
     def test_evalInSandbox(self):
@@ -66,7 +66,7 @@ class TestSearchService(TestCase, RegexTestCase):
         self.run_script("""
             Cu.evalInSandbox("foobar()", sandbox);
         """)
-        self.assert_failed(with_warnings=[{"signing_severity": "low"}])
+        self.assert_failed(with_warnings=[{'signing_severity': 'low'}])
 
     def test_pref_branches(self):
         """
@@ -75,8 +75,8 @@ class TestSearchService(TestCase, RegexTestCase):
 
         def test(pref, severity):
             warnings = [
-                {"message": "Attempt to set a dangerous preference",
-                 "signing_severity": severity}]
+                {'message': 'Attempt to set a dangerous preference',
+                 'signing_severity': severity}]
 
             self.setUp()
             self.run_script("""
@@ -84,25 +84,25 @@ class TestSearchService(TestCase, RegexTestCase):
             """ % pref)
             self.assert_failed(with_warnings=warnings)
 
-        PREFS = (("browser.newtab.url", "high"),
-                 ("browser.newtabpage.enabled", "high"),
-                 ("browser.search.defaultenginename", "high"),
-                 ("browser.startup.homepage", "high"),
-                 ("keyword.URL", "high"),
-                 ("keyword.enabled", "high"),
+        PREFS = (('browser.newtab.url', 'high'),
+                 ('browser.newtabpage.enabled', 'high'),
+                 ('browser.search.defaultenginename', 'high'),
+                 ('browser.startup.homepage', 'high'),
+                 ('keyword.URL', 'high'),
+                 ('keyword.enabled', 'high'),
 
-                 ("app.update.*", "high"),
-                 ("browser.addon-watch.*", "high"),
-                 ("datareporting.", "high"),
-                 ("extensions.blocklist.*", "high"),
-                 ("extensions.getAddons.*", "high"),
-                 ("extensions.update.*", "high"),
+                 ('app.update.*', 'high'),
+                 ('browser.addon-watch.*', 'high'),
+                 ('datareporting.', 'high'),
+                 ('extensions.blocklist.*', 'high'),
+                 ('extensions.getAddons.*', 'high'),
+                 ('extensions.update.*', 'high'),
 
-                 ("security.*", "high"),
+                 ('security.*', 'high'),
 
-                 ("network.proxy.*", "low"),
-                 ("network.http.*", "low"),
-                 ("network.websocket.*", "low"))
+                 ('network.proxy.*', 'low'),
+                 ('network.http.*', 'low'),
+                 ('network.websocket.*', 'low'))
 
         for pref, severity in PREFS:
             yield test, pref, severity
@@ -114,8 +114,8 @@ class TestSearchService(TestCase, RegexTestCase):
         """
 
         warnings = [
-            {"message": "Attempt to set a dangerous preference",
-             "signing_severity": "high"}]
+            {'message': 'Attempt to set a dangerous preference',
+             'signing_severity': 'high'}]
 
         self.run_script("""
             Services.prefs.getBranch('browser.star')
@@ -134,15 +134,15 @@ class TestSearchService(TestCase, RegexTestCase):
         """Tests that warnings for preference literals are reported only when
         necessary."""
 
-        CALL_WARNING = {"id": ("testcases_javascript_actions",
-                               "_call_expression", "called_set_preference")}
+        CALL_WARNING = {'id': ('testcases_javascript_actions',
+                               '_call_expression', 'called_set_preference')}
 
-        LITERAL_WARNING = {"id": regex.PREFERENCE_ERROR_ID}
+        LITERAL_WARNING = {'id': regex.PREFERENCE_ERROR_ID}
 
-        SUMMARY = {"trivial": 0,
-                   "low": 0,
-                   "medium": 0,
-                   "high": 1}
+        SUMMARY = {'trivial': 0,
+                   'low': 0,
+                   'medium': 0,
+                   'high': 1}
 
         # Literal without pref set call.
         self.run_script("""
@@ -154,7 +154,7 @@ class TestSearchService(TestCase, RegexTestCase):
         eq_(self.err.signing_summary, SUMMARY)
 
         # Literal with pref set call.
-        for method in ("Services.prefs.setCharPref", "Preferences.set"):
+        for method in ('Services.prefs.setCharPref', 'Preferences.set'):
             self.setUp()
             self.run_script("""
                 %s('browser.startup.homepage', '');
@@ -171,7 +171,7 @@ class TestSearchService(TestCase, RegexTestCase):
             Services.prefs.setCharPref(bsh, '');
         """)
 
-        SUMMARY["high"] += 1
+        SUMMARY['high'] += 1
         self.assert_failed(with_warnings=[CALL_WARNING, LITERAL_WARNING])
         eq_(len(self.err.warnings), 2)
         eq_(self.err.signing_summary, SUMMARY)
@@ -180,7 +180,7 @@ class TestSearchService(TestCase, RegexTestCase):
         """Tests that string literals provably used only to read, but not
         write, preferences do not cause warnings."""
 
-        LITERAL_WARNING = {"id": regex.PREFERENCE_ERROR_ID}
+        LITERAL_WARNING = {'id': regex.PREFERENCE_ERROR_ID}
 
         # Literal without pref get or set call.
         self.run_script("""
@@ -191,8 +191,8 @@ class TestSearchService(TestCase, RegexTestCase):
         eq_(len(self.err.warnings), 1)
 
         # Literal passed directly pref get call.
-        for method in ("Services.prefs.getCharPref",
-                       "Preferences.get"):
+        for method in ('Services.prefs.getCharPref',
+                       'Preferences.get'):
             self.setUp()
             self.run_script("""
                 let thing = %s('browser.startup.homepage');
@@ -221,20 +221,20 @@ class TestSearchService(TestCase, RegexTestCase):
 
         warnings = self.err.warnings
         assert warnings[0]['id'] == regex.PREFERENCE_ERROR_ID
-        assert warnings[1]['id'] == ("testcases_javascript_actions",
-                                     "_call_expression",
-                                     "called_set_preference")
+        assert warnings[1]['id'] == ('testcases_javascript_actions',
+                                     '_call_expression',
+                                     'called_set_preference')
 
         # Check that descriptions and help are the same, except for
         # an added message in the bare string.
-        for key in "description", "signing_help":
+        for key in 'description', 'signing_help':
             val1 = maybe_tuple(warnings[0][key])
             val2 = maybe_tuple(warnings[1][key])
 
             eq_(val2, val1[:len(val2)])
 
             # And that the added message is what we expect.
-            assert "Preferences.get" in val1[-1]
+            assert 'Preferences.get' in val1[-1]
 
     def test_profile_filenames(self):
         """
@@ -243,19 +243,19 @@ class TestSearchService(TestCase, RegexTestCase):
         """
 
         warnings = [
-            {"id": ("testcases_regex", "string", "profile_filenames"),
-             "message": "Reference to critical user profile data",
-             "signing_severity": "low"}]
+            {'id': ('testcases_regex', 'string', 'profile_filenames'),
+             'message': 'Reference to critical user profile data',
+             'signing_severity': 'low'}]
 
         def fail(script):
             self.setUp()
             self.run_script(script)
             self.assert_failed(with_warnings=warnings)
 
-        paths = (r"addons.json",
-                 r"safebrowsing",
-                 r"safebrowsing\\foo.bar",
-                 r"safebrowsing/foo.bar")
+        paths = (r'addons.json',
+                 r'safebrowsing',
+                 r'safebrowsing\\foo.bar',
+                 r'safebrowsing/foo.bar')
 
         patterns = ("'%s'",
                     "'/%s'",
@@ -270,11 +270,11 @@ class TestSearchService(TestCase, RegexTestCase):
     def test_categories(self):
         """Tests that dangerous category names are flagged in JS strings."""
 
-        warning = {"id": ("testcases_chromemanifest", "test_resourcemodules",
-                          "resource_modules"),
-                   "message": "Potentially dangerous category entry",
-                   "signing_severity": "medium",
-                   "editors_only": True}
+        warning = {'id': ('testcases_chromemanifest', 'test_resourcemodules',
+                          'resource_modules'),
+                   'message': 'Potentially dangerous category entry',
+                   'signing_severity': 'medium',
+                   'editors_only': True}
 
         self.run_script("'JavaScript-global-property'")
         self.assert_failed(with_warnings=[warning])
@@ -282,10 +282,10 @@ class TestSearchService(TestCase, RegexTestCase):
     def test_proxy_filter(self):
         """Tests that registering a proxy filter generates a warning."""
 
-        warning = {"id": ("testcases_javascript_actions",
-                          "predefinedentities", "proxy_filter"),
-                   "signing_severity": "low",
-                   "editors_only": True}
+        warning = {'id': ('testcases_javascript_actions',
+                          'predefinedentities', 'proxy_filter'),
+                   'signing_severity': 'low',
+                   'editors_only': True}
 
         self.run_script("""
             Cc[""].getService(Ci.nsIProtocolProxyService)
@@ -296,9 +296,9 @@ class TestSearchService(TestCase, RegexTestCase):
     def test_addon_install(self):
         """Tests attempts to install an add-on are flagged."""
 
-        warning = {"id": ("js", "traverser", "dangerous_global"),
-                   "editors_only": True,
-                   "signing_severity": "high"}
+        warning = {'id': ('js', 'traverser', 'dangerous_global'),
+                   'editors_only': True,
+                   'signing_severity': 'high'}
 
         def test(method):
             self.setUp()
@@ -307,8 +307,8 @@ class TestSearchService(TestCase, RegexTestCase):
             """ % method)
             self.assert_failed(with_warnings=[warning])
 
-        for method in (u"getInstallForFile",
-                       u"getInstallForURL"):
+        for method in (u'getInstallForFile',
+                       u'getInstallForURL'):
             yield test, method
 
     def test_addon_settings(self):
@@ -316,20 +316,20 @@ class TestSearchService(TestCase, RegexTestCase):
         AddonManager API are flagged."""
 
         warning = {
-            "description":
-                "Changing this preference may have severe security "
-                "implications, and is forbidden under most circumstances.",
-            "editors_only": True,
-            "signing_severity": "high"}
+            'description':
+                'Changing this preference may have severe security '
+                'implications, and is forbidden under most circumstances.',
+            'editors_only': True,
+            'signing_severity': 'high'}
 
-        props = (u"autoUpdateDefault",
-                 u"checkUpdateSecurity",
-                 u"checkUpdateSecurityDefault",
-                 u"updateEnabled")
+        props = (u'autoUpdateDefault',
+                 u'checkUpdateSecurity',
+                 u'checkUpdateSecurityDefault',
+                 u'updateEnabled')
 
         def test(prop):
             self.setUp()
-            self.run_script("AddonManager.%s = false;" % prop)
+            self.run_script('AddonManager.%s = false;' % prop)
             self.assert_failed(with_warnings=[warning])
 
         for prop in props:
@@ -342,9 +342,9 @@ class TestSearchService(TestCase, RegexTestCase):
             ctypes.open("libc.so.6");
         """)
         self.assert_failed(with_warnings=[
-            {"id": ("js", "traverser", "dangerous_global"),
-             "editors_only": True,
-             "signing_severity": "high"}])
+            {'id': ('js', 'traverser', 'dangerous_global'),
+             'editors_only': True,
+             'signing_severity': 'high'}])
 
     def test_nsIProcess(self):
         """Tests that usage of `nsIProcess` generates warnings."""
@@ -353,20 +353,20 @@ class TestSearchService(TestCase, RegexTestCase):
             Cc[""].createInstance(Ci.nsIProcess);
         """)
         self.assert_failed(with_warnings=[
-            {"id": ("js", "traverser", "dangerous_global"),
-             "editors_only": True,
-             "signing_severity": "high"}])
+            {'id': ('js', 'traverser', 'dangerous_global'),
+             'editors_only': True,
+             'signing_severity': 'high'}])
 
     def test_eval(self):
         """Tests that usage of eval-related functions generates warnings."""
 
-        functions = ("eval",
-                     "Function",
-                     "setTimeout",
-                     "setInterval")
+        functions = ('eval',
+                     'Function',
+                     'setTimeout',
+                     'setInterval')
 
-        warning = {"id": ("javascript", "dangerous_global", "eval"),
-                   "signing_severity": "high"}
+        warning = {'id': ('javascript', 'dangerous_global', 'eval'),
+                   'signing_severity': 'high'}
 
         def test(func):
             self.setUp()
@@ -379,18 +379,18 @@ class TestSearchService(TestCase, RegexTestCase):
     def test_cert_service(self):
         """Tests that changes to certificate trust leads to warnings."""
 
-        interfaces = ("nsIX509CertDB",
-                      "nsIX509CertDB2",
-                      "nsIX509CertList",
-                      "nsICertOverrideService")
+        interfaces = ('nsIX509CertDB',
+                      'nsIX509CertDB2',
+                      'nsIX509CertList',
+                      'nsICertOverrideService')
 
-        contracts = ("@mozilla.org/security/x509certdb;1",
-                     "@mozilla.org/security/x509certlist;1",
-                     "@mozilla.org/security/certoverride;1")
+        contracts = ('@mozilla.org/security/x509certdb;1',
+                     '@mozilla.org/security/x509certlist;1',
+                     '@mozilla.org/security/certoverride;1')
 
-        warning = {"id": ("javascript", "predefinedentities", "cert_db"),
-                   "editors_only": True,
-                   "signing_severity": "high"}
+        warning = {'id': ('javascript', 'predefinedentities', 'cert_db'),
+                   'editors_only': True,
+                   'signing_severity': 'high'}
 
         def fail(script):
             self.setUp()
@@ -411,11 +411,11 @@ class TestSearchService(TestCase, RegexTestCase):
             'if (bar === "about:blank") doStuff();',
             "if (baz==='about:newtab') doStuff();",
             "if ('about:newtab' == thing) doStuff();",
-            "/^about:newtab$/.test(thing)",
-            "/about:newtab/.test(thing)",
+            '/^about:newtab$/.test(thing)',
+            '/about:newtab/.test(thing)',
             "'@mozilla.org/network/protocol/about;1?what=newtab'")
 
-        warning = {"signing_severity": "low"}
+        warning = {'signing_severity': 'low'}
 
         def fail(script):
             self.setUp()
@@ -428,9 +428,9 @@ class TestSearchService(TestCase, RegexTestCase):
     def test_script_creation(self):
         """Tests that creation of script tags generates warnings."""
 
-        warning = {"id": ("testcases_javascript_instanceactions",
-                          "_call_expression", "called_createelement"),
-                   "signing_severity": "medium"}
+        warning = {'id': ('testcases_javascript_instanceactions',
+                          '_call_expression', 'called_createelement'),
+                   'signing_severity': 'medium'}
 
         self.run_script("""
             doc.createElement("script");
@@ -440,9 +440,9 @@ class TestSearchService(TestCase, RegexTestCase):
     def test_event_attributes(self):
         """Tests that creation of event handler attributes is flagged."""
 
-        warning = {"id": ("testcases_javascript_instanceactions",
-                          "setAttribute", "setting_on*"),
-                   "signing_severity": "medium"}
+        warning = {'id': ('testcases_javascript_instanceactions',
+                          'setAttribute', 'setting_on*'),
+                   'signing_severity': 'medium'}
 
         self.run_script("""
             elem.setAttribute("onhover", "doStuff();" + with_stuff);
@@ -453,9 +453,9 @@ class TestSearchService(TestCase, RegexTestCase):
         """Tests that creation of event handler attributes via innerHTML
         assignment is flagged."""
 
-        warning = {"id": ("testcases_javascript_instancetypes",
-                          "set_innerHTML", "event_assignment"),
-                   "signing_severity": "medium"}
+        warning = {'id': ('testcases_javascript_instancetypes',
+                          'set_innerHTML', 'event_assignment'),
+                   'signing_severity': 'medium'}
 
         self.run_script("""
             elem.innerHTML = '<a onhover="doEvilStuff()"></a>';
@@ -466,9 +466,9 @@ class TestSearchService(TestCase, RegexTestCase):
         """Tests that dynamic values passed as contentScript properties
         trigger signing warnings."""
 
-        warning = {"id": ("testcases_javascript_instanceproperties",
-                          "contentScript", "set_non_literal"),
-                   "signing_severity": "high"}
+        warning = {'id': ('testcases_javascript_instanceproperties',
+                          'contentScript', 'set_non_literal'),
+                   'signing_severity': 'high'}
 
         self.run_script("""
             tab.attach({ contentScript: evil })
@@ -486,9 +486,9 @@ class TestSearchService(TestCase, RegexTestCase):
         self.assert_silent()
 
         # Test unsafe value.
-        warning = {"id": ("testcases_javascript_instanceactions",
-                          "_call_expression", "called_createelement"),
-                   "signing_severity": "medium"}
+        warning = {'id': ('testcases_javascript_instanceactions',
+                          '_call_expression', 'called_createelement'),
+                   'signing_severity': 'medium'}
 
         self.setUp()
         self.run_script("""

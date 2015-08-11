@@ -12,12 +12,12 @@ def test_pagemod_noop():
     def wrap(script):
         assert not _do_test_raw(script).failed()
 
-    yield wrap, "foo.PageMod();"
-    yield wrap, "foo.PageMod(null);"
-    yield wrap, "foo.PageMod({});"
-    yield wrap, "foo.PageMod(window);"
-    yield wrap, "foo.PageMod({contentScript: null});"
-    yield wrap, "foo.PageMod({contentScript: 4});"
+    yield wrap, 'foo.PageMod();'
+    yield wrap, 'foo.PageMod(null);'
+    yield wrap, 'foo.PageMod({});'
+    yield wrap, 'foo.PageMod(window);'
+    yield wrap, 'foo.PageMod({contentScript: null});'
+    yield wrap, 'foo.PageMod({contentScript: 4});'
 
 
 def test_pagemod_pass():

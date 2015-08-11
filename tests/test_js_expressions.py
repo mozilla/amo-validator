@@ -19,18 +19,18 @@ def test_boolean_comparison():
         k = false < 1,
         l = false == 0;
     """)
-    eq_(_get_var(scope, "a"), True)
-    eq_(_get_var(scope, "b"), True)
-    eq_(_get_var(scope, "c"), False)
-    eq_(_get_var(scope, "d"), False)
-    eq_(_get_var(scope, "e"), False)
-    eq_(_get_var(scope, "f"), False)
-    eq_(_get_var(scope, "g"), True)
-    eq_(_get_var(scope, "h"), True)
-    eq_(_get_var(scope, "i"), True)
-    eq_(_get_var(scope, "j"), True)
-    eq_(_get_var(scope, "k"), True)
-    eq_(_get_var(scope, "l"), True)
+    eq_(_get_var(scope, 'a'), True)
+    eq_(_get_var(scope, 'b'), True)
+    eq_(_get_var(scope, 'c'), False)
+    eq_(_get_var(scope, 'd'), False)
+    eq_(_get_var(scope, 'e'), False)
+    eq_(_get_var(scope, 'f'), False)
+    eq_(_get_var(scope, 'g'), True)
+    eq_(_get_var(scope, 'h'), True)
+    eq_(_get_var(scope, 'i'), True)
+    eq_(_get_var(scope, 'j'), True)
+    eq_(_get_var(scope, 'k'), True)
+    eq_(_get_var(scope, 'l'), True)
 
 
 def test_string_comparison():
@@ -44,12 +44,12 @@ def test_string_comparison():
         e = "string" < "astring",
         f = "string" < "strings";
     """)
-    eq_(_get_var(scope, "a"), False)
-    eq_(_get_var(scope, "b"), True)
-    eq_(_get_var(scope, "c"), True)
-    eq_(_get_var(scope, "d"), False)
-    eq_(_get_var(scope, "e"), False)
-    eq_(_get_var(scope, "f"), True)
+    eq_(_get_var(scope, 'a'), False)
+    eq_(_get_var(scope, 'b'), True)
+    eq_(_get_var(scope, 'c'), True)
+    eq_(_get_var(scope, 'd'), False)
+    eq_(_get_var(scope, 'e'), False)
+    eq_(_get_var(scope, 'f'), True)
 
     # We can assume that the converses are true; Spidermonkey makes that easy.
 
@@ -65,12 +65,12 @@ def test_signed_zero():
         e = -0 == 0,
         f = -0 != 0;
     """)
-    eq_(_get_var(scope, "a"), True)
-    eq_(_get_var(scope, "b"), False)
-    eq_(_get_var(scope, "c"), True)
-    eq_(_get_var(scope, "d"), False)
-    eq_(_get_var(scope, "e"), True)
-    eq_(_get_var(scope, "f"), False)
+    eq_(_get_var(scope, 'a'), True)
+    eq_(_get_var(scope, 'b'), False)
+    eq_(_get_var(scope, 'c'), True)
+    eq_(_get_var(scope, 'd'), False)
+    eq_(_get_var(scope, 'e'), True)
+    eq_(_get_var(scope, 'f'), False)
 
 
 def test_typecasting():
@@ -81,9 +81,9 @@ def test_typecasting():
         b = 255 == '0xff',
         c = 0 == '\\r';
     """)
-    eq_(_get_var(scope, "a"), True)
-    eq_(_get_var(scope, "b"), True)
-    eq_(_get_var(scope, "c"), True)
+    eq_(_get_var(scope, 'a'), True)
+    eq_(_get_var(scope, 'b'), True)
+    eq_(_get_var(scope, 'c'), True)
 
 
 def test_additive_typecasting():
@@ -101,12 +101,12 @@ def test_additive_typecasting():
         e = second + third,
         f = String("foo") + Number(-100);
     """)
-    eq_(_get_var(scope, "a"), "truefoo")
-    eq_(_get_var(scope, "b"), "footrue")
-    eq_(_get_var(scope, "c"), "truefoo")
-    eq_(_get_var(scope, "d"), "foofalse")
-    eq_(_get_var(scope, "e"), "foo345")
-    eq_(_get_var(scope, "f"), "foo-100")
+    eq_(_get_var(scope, 'a'), 'truefoo')
+    eq_(_get_var(scope, 'b'), 'footrue')
+    eq_(_get_var(scope, 'c'), 'truefoo')
+    eq_(_get_var(scope, 'd'), 'foofalse')
+    eq_(_get_var(scope, 'e'), 'foo345')
+    eq_(_get_var(scope, 'f'), 'foo-100')
 
 
 def test_addition_expressions():
@@ -120,8 +120,8 @@ def test_addition_expressions():
     var c = x + y,
         d = Number(x) + Number(y);
     """)
-    eq_(_get_var(scope, "a"), 1)
-    eq_(_get_var(scope, "b"), 1)
-    eq_(_get_var(scope, "c"), 99)
-    eq_(_get_var(scope, "d"), 99)
+    eq_(_get_var(scope, 'a'), 1)
+    eq_(_get_var(scope, 'b'), 1)
+    eq_(_get_var(scope, 'c'), 99)
+    eq_(_get_var(scope, 'd'), 99)
 

@@ -7,23 +7,23 @@ scripting.traverser.DEBUG = True
 def _test(script):
     err = ErrorBundle()
     err.supported_versions = {}
-    err.save_resource("em:bootstrap", "true")
-    scripting.test_js_file(err, "foo", script)
+    err.save_resource('em:bootstrap', 'true')
+    scripting.test_js_file(err, 'foo', script)
 
     return err
 
 
 def test_bootstrapped():
-    "Performs a test on a JS file"
+    'Performs a test on a JS file'
 
     methods = (
-        ("nsICategoryManager", "addCategoryEntry()"),
-        ("nsIObserverService", "addObserver()"),
-        ("nsIResProtocolHandler", "setSubstitution('foo', 'bar')"),
-        ("nsIStyleSheetService", "loadAndRegisterSheet()"),
-        ("nsIStringBundleService", "createStringBundle()"),
-        ("nsIWindowMediator", "registerNotification()"),
-        ("nsIWindowWatcher", "addListener()"),
+        ('nsICategoryManager', 'addCategoryEntry()'),
+        ('nsIObserverService', 'addObserver()'),
+        ('nsIResProtocolHandler', "setSubstitution('foo', 'bar')"),
+        ('nsIStyleSheetService', 'loadAndRegisterSheet()'),
+        ('nsIStringBundleService', 'createStringBundle()'),
+        ('nsIWindowMediator', 'registerNotification()'),
+        ('nsIWindowWatcher', 'addListener()'),
     )
 
     def test_wrap(js):
@@ -32,7 +32,7 @@ def test_bootstrapped():
     for method in methods:
         yield test_wrap, 'Cc[""].getService(Ci.%s).%s;' % method
 
-    yield test_wrap, "XPCOMUtils.categoryManager.addCategoryEntry();"
+    yield test_wrap, 'XPCOMUtils.categoryManager.addCategoryEntry();'
 
 
 def test_bootstrapped_pass():

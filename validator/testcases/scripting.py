@@ -5,9 +5,9 @@ from validator.testcases.javascript.spidermonkey import get_tree
 
 
 def test_js_file(err, filename, data, line=0, context=None, pollutable=False):
-    "Test a JS file by parsing and analyzing its tokens."
+    'Test a JS file by parsing and analyzing its tokens.'
 
-    spidermonkey = err.get_resource("SPIDERMONKEY")
+    spidermonkey = err.get_resource('SPIDERMONKEY')
     if spidermonkey is False:  # False: Use default. None: Don't run.
         spidermonkey = SPIDERMONKEY_INSTALLATION
     if spidermonkey is None:
@@ -15,11 +15,11 @@ def test_js_file(err, filename, data, line=0, context=None, pollutable=False):
 
     if err.detected_type == PACKAGE_THEME:
         err.warning(
-                err_id=("testcases_scripting",
-                        "test_js_file",
-                        "theme_js"),
-                warning="JS run from full theme",
-                description="Themes should not contain executable code.",
+                err_id=('testcases_scripting',
+                        'test_js_file',
+                        'theme_js'),
+                warning='JS run from full theme',
+                description='Themes should not contain executable code.',
                 filename=filename,
                 line=line)
 
@@ -40,8 +40,8 @@ def test_js_file(err, filename, data, line=0, context=None, pollutable=False):
         context = ContextGenerator(data)
 
     t = traverser.Traverser(err, filename, line, context=context,
-                            is_jsm=(filename.endswith(".jsm") or
-                                    "EXPORTED_SYMBOLS" in data))
+                            is_jsm=(filename.endswith('.jsm') or
+                                    'EXPORTED_SYMBOLS' in data))
     t.pollutable = pollutable
     t.run(tree)
 
@@ -51,13 +51,13 @@ def test_js_file(err, filename, data, line=0, context=None, pollutable=False):
 
 
 def test_js_snippet(err, data, filename, line=0, context=None):
-    "Process a JS snippet by passing it through to the file tester."
+    'Process a JS snippet by passing it through to the file tester.'
 
     if not data:
         return
 
     # Wrap snippets in a function to prevent the parser from freaking out
     # when return statements exist without a corresponding function.
-    data = "(function(){%s\n})()" % data
+    data = '(function(){%s\n})()' % data
 
     test_js_file(err, filename, data, line, context, pollutable=False)

@@ -10,7 +10,7 @@ def testopen():
     """Tests that the RDF parser is capable of loading an RDF file
     successfully."""
 
-    r = RDFParser(None, open("tests/resources/rdf/pass.rdf"))
+    r = RDFParser(None, open('tests/resources/rdf/pass.rdf'))
     assert r.rdf
 
 
@@ -19,7 +19,7 @@ def test_load_bad():
     """Tests that the RDF parser throws an error for invalid, damaged,
     or corrupt RDF files."""
 
-    r = RDFParser(None, open("tests/resources/rdf/fail.rdf"))
+    r = RDFParser(None, open('tests/resources/rdf/fail.rdf'))
     assert not r.rdf
 
 
@@ -27,35 +27,35 @@ def test_load_rdf_stringio():
     """Tests that the RDF parser is capable of loading an RDF file
     from a StringIO object successfully."""
 
-    r = RDFParser(None, StringIO(open("tests/resources/rdf/pass.rdf").read()))
+    r = RDFParser(None, StringIO(open('tests/resources/rdf/pass.rdf').read()))
     assert r.rdf
 
 
 def test_namespacing():
     """Tests that the RDF parser successfully creates namespaces."""
 
-    r = RDFParser(None, open("tests/resources/rdf/pass.rdf"), "foo")
+    r = RDFParser(None, open('tests/resources/rdf/pass.rdf'), 'foo')
 
-    assert r.namespace == "foo"
-    assert str(r.uri("bar")) == "foo#bar"
-    assert str(r.uri("bar", "abc")) == "abc#bar"
+    assert r.namespace == 'foo'
+    assert str(r.uri('bar')) == 'foo#bar'
+    assert str(r.uri('bar', 'abc')) == 'abc#bar'
 
 
 def test_namespacing():
     """Tests that the RDF parser successfully creates namespaces."""
 
-    r = RDFParser(None, open("tests/resources/rdf/pass.rdf"), "foo")
+    r = RDFParser(None, open('tests/resources/rdf/pass.rdf'), 'foo')
 
-    assert r.namespace == "foo"
-    assert str(r.uri("bar")) == "foo#bar"
-    assert str(r.uri("bar", "abc")) == "abc#bar"
+    assert r.namespace == 'foo'
+    assert str(r.uri('bar')) == 'foo#bar'
+    assert str(r.uri('bar', 'abc')) == 'abc#bar'
 
 
 def test_get_root_subject():
-    "Tests the integrity of the get_root_subject() function"
+    'Tests the integrity of the get_root_subject() function'
 
-    r = RDFParser(None, open("tests/resources/rdf/pass.rdf"))
-    type_uri = r.uri("type")
+    r = RDFParser(None, open('tests/resources/rdf/pass.rdf'))
+    type_uri = r.uri('type')
 
     emtype = r.get_object(None, type_uri)
     assert emtype is not None
@@ -68,8 +68,8 @@ def test_get_object():
     """"Tests the integrity of the get_object() and get_objects()
     functions."""
 
-    r = RDFParser(None, open("tests/resources/rdf/pass.rdf"))
-    test_uri = r.uri("test")
+    r = RDFParser(None, open('tests/resources/rdf/pass.rdf'))
+    test_uri = r.uri('test')
 
     emtest = r.get_object(None, test_uri)
     assert emtest is not None

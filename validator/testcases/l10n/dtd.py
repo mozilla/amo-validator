@@ -9,7 +9,7 @@ except ImportError:
 
 
 class DTDParser(object):
-    "Parses and serializes DTD files. This is useful for L10n tests."
+    'Parses and serializes DTD files. This is useful for L10n tests.'
 
     def __init__(self, dtd):
         """
@@ -21,7 +21,7 @@ class DTDParser(object):
         self.entities = {}
         self.items = []
 
-        data = ""
+        data = ''
         if isinstance(dtd, types.StringTypes):
             with open(dtd) as dtd_instance:
                 data = dtd_instance.read()
@@ -39,13 +39,13 @@ class DTDParser(object):
         return len(self.entities)
 
     def _parse(self, data):
-        "Parses the DTD data and stores it in an aggregate format."
+        'Parses the DTD data and stores it in an aggregate format.'
 
         parser = DTDXMLParser()
         # Feed the DTD file in line-by-line.
-        for split_line in data.split("\n"):
+        for split_line in data.split('\n'):
             try:
-                parser.feed(split_line + "\n")
+                parser.feed(split_line + '\n')
             except HTMLParseError:
                 parser = DTDXMLParser()
             else:
@@ -57,7 +57,7 @@ class DTDParser(object):
 
 
 class DTDXMLParser(HTMLParser):
-    "Parses the individual XML entities in a DTD document."
+    'Parses the individual XML entities in a DTD document.'
 
     def __init__(self):
         HTMLParser.__init__(self)
@@ -68,12 +68,12 @@ class DTDXMLParser(HTMLParser):
         self.unknown_decl(data)
 
     def unknown_decl(self, decl):
-        "Handles non-DOCTYPE SGML declarations in *ML documents."
+        'Handles non-DOCTYPE SGML declarations in *ML documents.'
 
         decl = decl.strip()
         split_decl = decl.split()
 
-        if not split_decl[0] == "ENTITY" or len(split_decl) < 3:
+        if not split_decl[0] == 'ENTITY' or len(split_decl) < 3:
             # Interestingly enough, it legitimately IS an unknown
             # declaration. Funny thing, you know?
             return
@@ -83,5 +83,5 @@ class DTDXMLParser(HTMLParser):
                                 self.getpos()[0]))  # Pos 0 is the line no.
 
     def clear_buffer(self):
-        "Clears the return buffer."
+        'Clears the return buffer.'
         self.out_buffer = []

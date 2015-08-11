@@ -8,7 +8,7 @@ import sys
 
 from StringIO import StringIO
 
-COLORS = ("BLUE", "RED", "GREEN", "YELLOW", "WHITE", "BLACK")
+COLORS = ('BLUE', 'RED', 'GREEN', 'YELLOW', 'WHITE', 'BLACK')
 
 
 class OutputHandler:
@@ -32,7 +32,7 @@ class OutputHandler:
 
             # Initialize a store for the colors and pre-populate it
             # with the un-color color.
-            self.colors = {"NORMAL": curses.tigetstr("sgr0") or ''}
+            self.colors = {'NORMAL': curses.tigetstr('sgr0') or ''}
 
             # Determines capabilities of the terminal.
             fgColorSeq = curses.tigetstr('setaf') or \
@@ -57,30 +57,30 @@ class OutputHandler:
         in your string."""
 
         # Take note of where the escape sequences are.
-        rnormal = text.rfind("<<NORMAL")
-        rany = text.rfind("<<")
+        rnormal = text.rfind('<<NORMAL')
+        rany = text.rfind('<<')
 
         # Put in the escape sequences.
         for color, code in self.colors.items():
-            text = text.replace("<<%s>>" % color, code)
+            text = text.replace('<<%s>>' % color, code)
 
         # Make sure that the last sequence is a NORMAL sequence.
         if rany > -1 and rnormal < rany:
-            text += self.colors["NORMAL"]
+            text += self.colors['NORMAL']
 
         return text
 
     def write(self, text):
-        "Uses curses to print in the fanciest way possible."
+        'Uses curses to print in the fanciest way possible.'
 
         # Add color to the terminal.
         if not self.no_color:
             text = self.colorize_text(text)
         else:
-            pattern = re.compile("\<\<[A-Z]*?\>\>")
-            text = pattern.sub("", text)
+            pattern = re.compile('\<\<[A-Z]*?\>\>')
+            text = pattern.sub('', text)
 
-        text += "\n"
+        text += '\n'
 
         self.buffer.write(text)
 

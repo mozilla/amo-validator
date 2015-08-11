@@ -17,9 +17,9 @@ class TestWrappedJSObject(TestCase):
 
     def assert_wrappedjs_failure(self):
         """A set of assertions for wrappedJSObject-related errors."""
-        warning = {"id": ("testcases_javascript_jstypes", "JSObject_set",
-                          "unwrapped_js_object"),
-                   "signing_severity": "high"}
+        warning = {'id': ('testcases_javascript_jstypes', 'JSObject_set',
+                          'unwrapped_js_object'),
+                   'signing_severity': 'high'}
         self.assert_failed(with_warnings=[warning])
 
     def test_cant_assign(self):
@@ -135,5 +135,5 @@ class TestWrappedJSObject(TestCase):
             XPCNativeWrapper(unsafeWindow, "foo");
         """)
         self.assert_failed(with_warnings=[
-            {"id": ("testcases_js_xpcom", "xpcnativewrapper", "shallow"),
-             "signing_severity": "high"}])
+            {'id': ('testcases_js_xpcom', 'xpcnativewrapper', 'shallow'),
+             'signing_severity': 'high'}])

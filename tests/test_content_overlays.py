@@ -17,20 +17,20 @@ def test_marking_overlays():
     c = ChromeManifest("""
     content ns1 foo/
     overlay chrome://foo chrome://ns1/content/main.xul
-    """, "chrome.manifest")
-    err.save_resource("chrome.manifest", c)
-    err.save_resource("chrome.manifest_nopush", c)
+    """, 'chrome.manifest')
+    err.save_resource('chrome.manifest', c)
+    err.save_resource('chrome.manifest_nopush', c)
 
-    xpi = MockXPI({"foo/main.xul": "tests/resources/content/script_list.xul"})
+    xpi = MockXPI({'foo/main.xul': 'tests/resources/content/script_list.xul'})
 
     content.test_packed_packages(err, xpi)
     assert not err.failed()
 
-    marked_scripts = err.get_resource("marked_scripts")
+    marked_scripts = err.get_resource('marked_scripts')
 
-    eq_(marked_scripts, set(["chrome://ns1/foo.js",
-                             "chrome://ns1/bar.js",
-                             "chrome://asdf/foo.js"]))
+    eq_(marked_scripts, set(['chrome://ns1/foo.js',
+                             'chrome://ns1/bar.js',
+                             'chrome://asdf/foo.js']))
 
 
 def test_marking_overlays_root_package():
@@ -43,20 +43,20 @@ def test_marking_overlays_root_package():
     manifest = ChromeManifest("""
     content ns1 /
     overlay chrome://foo chrome://ns1/content/main.xul
-    """, "chrome.manifest")
-    err.save_resource("chrome.manifest", manifest)
-    err.save_resource("chrome.manifest_nopush", manifest)
+    """, 'chrome.manifest')
+    err.save_resource('chrome.manifest', manifest)
+    err.save_resource('chrome.manifest_nopush', manifest)
 
-    xpi = MockXPI({"main.xul": "tests/resources/content/script_list.xul"})
+    xpi = MockXPI({'main.xul': 'tests/resources/content/script_list.xul'})
 
     content.test_packed_packages(err, xpi)
     assert not err.failed()
 
-    marked_scripts = err.get_resource("marked_scripts")
+    marked_scripts = err.get_resource('marked_scripts')
 
-    eq_(marked_scripts, set(["chrome://ns1/foo.js",
-                             "chrome://ns1/bar.js",
-                             "chrome://asdf/foo.js"]))
+    eq_(marked_scripts, set(['chrome://ns1/foo.js',
+                             'chrome://ns1/bar.js',
+                             'chrome://asdf/foo.js']))
 
 
 def test_marking_overlays_no_overlay():
@@ -70,16 +70,16 @@ def test_marking_overlays_no_overlay():
     c = ChromeManifest("""
     content ns1 foo/
     #overlay chrome://foo chrome://ns1/main.xul
-    """, "chrome.manifest")
-    err.save_resource("chrome.manifest", c)
-    err.save_resource("chrome.manifest_nopush", c)
+    """, 'chrome.manifest')
+    err.save_resource('chrome.manifest', c)
+    err.save_resource('chrome.manifest_nopush', c)
 
-    xpi = MockXPI({"foo/main.xul": "tests/resources/content/script_list.xul"})
+    xpi = MockXPI({'foo/main.xul': 'tests/resources/content/script_list.xul'})
 
     content.test_packed_packages(err, xpi)
     assert not err.failed()
 
-    marked_scripts = err.get_resource("marked_scripts")
+    marked_scripts = err.get_resource('marked_scripts')
     print marked_scripts
     assert not marked_scripts
 
@@ -95,22 +95,22 @@ def test_marking_overlays_subdir():
     c = ChromeManifest("""
     content ns1 foo/
     overlay chrome://foo chrome://ns1/content/subdir/main.xul
-    """, "chrome.manifest")
-    err.save_resource("chrome.manifest", c)
-    err.save_resource("chrome.manifest_nopush", c)
+    """, 'chrome.manifest')
+    err.save_resource('chrome.manifest', c)
+    err.save_resource('chrome.manifest_nopush', c)
 
-    xpi = MockXPI({"foo/subdir/main.xul":
-                       "tests/resources/content/script_list.xul"})
+    xpi = MockXPI({'foo/subdir/main.xul':
+                       'tests/resources/content/script_list.xul'})
 
     content.test_packed_packages(err, xpi)
     assert not err.failed()
 
-    marked_scripts = err.get_resource("marked_scripts")
+    marked_scripts = err.get_resource('marked_scripts')
     print marked_scripts
     assert marked_scripts
 
-    eq_(marked_scripts, set(["chrome://ns1/subdir/foo.js", "chrome://ns1/bar.js",
-                             "chrome://asdf/foo.js"]))
+    eq_(marked_scripts, set(['chrome://ns1/subdir/foo.js', 'chrome://ns1/bar.js',
+                             'chrome://asdf/foo.js']))
 
 
 def test_script_scraping():
@@ -118,19 +118,19 @@ def test_script_scraping():
 
     err = ErrorBundle()
     err.supported_versions = {}
-    xpi = MockXPI({"foo.js": "tests/resources/junk.xpi",
-                   "dir/bar.jsm": "tests/resources/junk.xpi"})
+    xpi = MockXPI({'foo.js': 'tests/resources/junk.xpi',
+                   'dir/bar.jsm': 'tests/resources/junk.xpi'})
 
     content.test_packed_packages(err, xpi)
     assert not err.failed()
 
-    scripts = err.get_resource("scripts")
+    scripts = err.get_resource('scripts')
     print scripts
     assert scripts
 
     for bundle in scripts:
-        assert "foo.js" in bundle["scripts"]
-        assert "dir/bar.jsm" in bundle["scripts"]
-        eq_(bundle["package"], xpi)
-        eq_(bundle["state"], [])
+        assert 'foo.js' in bundle['scripts']
+        assert 'dir/bar.jsm' in bundle['scripts']
+        eq_(bundle['package'], xpi)
+        eq_(bundle['state'], [])
 

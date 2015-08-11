@@ -1,7 +1,7 @@
 from js_helper import _do_test_raw
 
 def test_settimeout_fail():
-    "Test cases in which setTimeout should fail"
+    'Test cases in which setTimeout should fail'
 
     assert _do_test_raw("""
     setTimeout("abc.def()", 1000);
@@ -23,7 +23,7 @@ def test_settimeout_fail():
 
 
 def test_settimeout_pass():
-    "Test cases in which setTimeout should be allowed"
+    'Test cases in which setTimeout should be allowed'
 
     assert not _do_test_raw("""
     setTimeout(function(){foo.bar();}, 1000);
@@ -43,7 +43,7 @@ def test_settimeout_pass():
 
 
 def test_settimeout_bind_pass():
-    "Test cases in which setTimeout should be allowed"
+    'Test cases in which setTimeout should be allowed'
 
     assert not _do_test_raw("""
     setTimeout(function(){foo.bar();}.bind(this), 1000);

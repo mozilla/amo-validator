@@ -16,7 +16,7 @@ class TestFX39Compat(CompatTestCase):
           };
         """)
         self.assert_silent()
-        self.assert_compat_warning(type_="warning")
+        self.assert_compat_warning(type_='warning')
 
     def test_noSuchMethod_assignment(self):
         self.run_script_for_compat("""
@@ -26,7 +26,7 @@ class TestFX39Compat(CompatTestCase):
             };
         """)
         self.assert_silent()
-        self.assert_compat_warning(type_="warning")
+        self.assert_compat_warning(type_='warning')
 
     def test_noSuchMethod_string_assignment(self):
         self.run_script_for_compat("""
@@ -36,7 +36,7 @@ class TestFX39Compat(CompatTestCase):
             };
         """)
         self.assert_silent()
-        self.assert_compat_warning(type_="warning")
+        self.assert_compat_warning(type_='warning')
 
     def test_sendAsBinary(self):
         self.run_script_for_compat("""

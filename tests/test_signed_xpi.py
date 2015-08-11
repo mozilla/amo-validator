@@ -35,7 +35,7 @@ def test_mozilla_signed_xpi():
     assert err.warnings
     assert not err.errors
 
-    eq_(err.warnings[0]["id"], ("testcases_content", "signed_xpi"))
+    eq_(err.warnings[0]['id'], ('testcases_content', 'signed_xpi'))
 
 
 def test_other_signed_xpi():
@@ -55,4 +55,4 @@ def test_other_signed_xpi():
     assert err.warnings
     assert not err.errors
 
-    eq_(err.warnings[0]["id"], ("testcases_content", "signed_xpi"))
+    eq_(err.warnings[0]['id'], ('testcases_content', 'signed_xpi'))

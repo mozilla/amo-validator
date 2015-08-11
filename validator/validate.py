@@ -11,9 +11,9 @@ import loader  # noqa
 import submain
 
 
-def validate(path, format="json",
+def validate(path, format='json',
              approved_applications=os.path.join(os.path.dirname(__file__),
-                                                "app_versions.json"),
+                                                'app_versions.json'),
              determined=True,
              spidermonkey=False,
              listed=True,
@@ -63,7 +63,7 @@ def validate(path, format="json",
     bundle = ErrorBundle(listed=listed, determined=determined,
                          overrides=overrides, spidermonkey=spidermonkey,
                          for_appversions=for_appversions)
-    bundle.save_resource("is_compat_test", compat_test)
+    bundle.save_resource('is_compat_test', compat_test)
 
     if isinstance(approved_applications, types.StringTypes):
         # Load up the target applications if the approved applications is a
@@ -75,7 +75,7 @@ def validate(path, format="json",
         # that instead of trying to pull from a file.
         apps = approved_applications
     else:
-        raise ValueError("Unknown format for `approved_applications`.")
+        raise ValueError('Unknown format for `approved_applications`.')
 
     constants.APPROVED_APPLICATIONS.clear()
     constants.APPROVED_APPLICATIONS.update(apps)
@@ -89,7 +89,7 @@ def validate(path, format="json",
 
 def format_result(bundle, format):
     # Write the results to the pipe
-    formats = {"json": lambda b: b.render_json()}
+    formats = {'json': lambda b: b.render_json()}
     if format is not None:
         return formats[format](bundle)
     else:

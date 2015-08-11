@@ -12,28 +12,28 @@ from validator.testcases.javascript.spidermonkey import JSShell, get_tree
 
 
 def test_scripting_disabled():
-    "Ensure that Spidermonkey is not run if it is set to be disabled."
+    'Ensure that Spidermonkey is not run if it is set to be disabled.'
 
     err = ErrorBundle()
-    err.save_resource("SPIDERMONKEY", None)
-    assert scripting.test_js_file(err, "abc def", "foo bar") is None
+    err.save_resource('SPIDERMONKEY', None)
+    assert scripting.test_js_file(err, 'abc def', 'foo bar') is None
 
-    with mock.patch.object(scripting, "SPIDERMONKEY_INSTALLATION", new=None):
+    with mock.patch.object(scripting, 'SPIDERMONKEY_INSTALLATION', new=None):
         err = ErrorBundle()
-        assert scripting.test_js_file(err, "abc def", "foo bar") is None
+        assert scripting.test_js_file(err, 'abc def', 'foo bar') is None
 
 
 def test_scripting_snippet():
-    "Assert that JS snippets are treated equally."
+    'Assert that JS snippets are treated equally.'
 
     err = ErrorBundle()
     err.supported_versions = {}
-    scripting.test_js_snippet(err, "alert(1 + 1 == 2)", "bar.zap")
+    scripting.test_js_snippet(err, 'alert(1 + 1 == 2)', 'bar.zap')
     assert not err.failed()
 
     err = ErrorBundle()
     err.supported_versions = {}
-    scripting.test_js_snippet(err, "eval('foo');", "bar.zap")
+    scripting.test_js_snippet(err, "eval('foo');", 'bar.zap')
     assert err.failed()
 
 
@@ -44,10 +44,10 @@ def test_unicode_escapes():
 
     assert not result.failed()
 
-    eq_(_get_var(result, "foo"), u"\u263a''")
+    eq_(_get_var(result, 'foo'), u"\u263a''")
 
 
-@mock.patch("subprocess.Popen")
+@mock.patch('subprocess.Popen')
 def test_cleanup(Popen):
     """Test that the spidermonkey processes are terminated during cleanup."""
 
@@ -57,10 +57,10 @@ def test_cleanup(Popen):
     assert not Popen.called
 
     process = mock.Mock()
-    process.stdout.readline.return_value = "{}\n"
+    process.stdout.readline.return_value = '{}\n'
     Popen.return_value = process
 
-    get_tree("hello();", shell=SPIDERMONKEY_INSTALLATION)
+    get_tree('hello();', shell=SPIDERMONKEY_INSTALLATION)
 
     eq_(Popen.call_count, 1)
     eq_(JSShell.shells.keys(), [SPIDERMONKEY_INSTALLATION])
@@ -72,7 +72,7 @@ def test_cleanup(Popen):
     eq_(JSShell.shells, {})
 
 
-@mock.patch("subprocess.Popen")
+@mock.patch('subprocess.Popen')
 def test_cleanup_on_error(Popen):
     """Test that the cached shells are removed on IO error."""
 
@@ -81,11 +81,11 @@ def test_cleanup_on_error(Popen):
     eq_(JSShell.shells, {})
 
     process = mock.Mock()
-    process.stdout.readline.return_value = "{}"
+    process.stdout.readline.return_value = '{}'
     Popen.side_effect = lambda *args, **kw: process
 
     # Success, should have cached shell.
-    get_tree("hello();", shell=SPIDERMONKEY_INSTALLATION)
+    get_tree('hello();', shell=SPIDERMONKEY_INSTALLATION)
     eq_(Popen.call_count, 1)
 
     eq_(JSShell.shells.keys(), [SPIDERMONKEY_INSTALLATION])
@@ -95,7 +95,7 @@ def test_cleanup_on_error(Popen):
     process.stdout.readline.side_effect = IOError
 
     with assert_raises(IOError):
-        get_tree("hello();", shell=SPIDERMONKEY_INSTALLATION)
+        get_tree('hello();', shell=SPIDERMONKEY_INSTALLATION)
 
     # No new processes created, since we had a cached shell from last time.
     eq_(Popen.call_count, 1)
@@ -109,7 +109,7 @@ def test_cleanup_on_error(Popen):
     process.stdin.write.side_effect = IOError
 
     with assert_raises(IOError):
-        get_tree("hello();", shell=SPIDERMONKEY_INSTALLATION)
+        get_tree('hello();', shell=SPIDERMONKEY_INSTALLATION)
 
     # Cached shell should have been removed in the last run. New
     # process should be created.
