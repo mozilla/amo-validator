@@ -58,7 +58,7 @@ def _set_HTML_property(function, new_value, traverser):
                     signing_severity='medium')
             elif ('<script' in literal_value or
                   JS_URL.search(literal_value)):
-                traverser.err.warning(
+                traverser.warning(
                     err_id=('testcases_javascript_instancetypes',
                             'set_%s' % function, 'script_assignment'),
                     warning='Scripts should not be created with `%s`'
@@ -80,7 +80,7 @@ def _set_HTML_property(function, new_value, traverser):
 
     else:
         # Variable assignments
-        traverser.err.warning(
+        traverser.warning(
             err_id=('testcases_javascript_instancetypes', 'set_%s' % function,
                     'variable_assignment'),
             warning='Markup should not be passed to `%s` dynamically.'
@@ -89,11 +89,7 @@ def _set_HTML_property(function, new_value, traverser):
                         '%s may not be set using dynamic values which have '
                         'not been adequately sanitized. This can lead to '
                         'security issues or fairly serious performance '
-                        'degradation.' % function,
-            filename=traverser.filename,
-            line=traverser.line,
-            column=traverser.position,
-            context=traverser.context)
+                        'degradation.' % function)
 
 
 def set_on_event(new_value, traverser):
