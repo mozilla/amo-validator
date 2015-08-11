@@ -1,5 +1,6 @@
 import simplejson as json
-import subprocess
+
+from spidermonkey import Spidermonkey
 
 from validator import unicodehelper
 from validator.contextgenerator import ContextGenerator
@@ -10,7 +11,7 @@ def get_tree(code, err=None, filename=None, shell=None):
     """Retrieve the parse tree for a JS snippet."""
 
     try:
-        return JSShell.get_shell(shell).get_tree(code)
+        return JSShell.get_shell().get_tree(code)
     except JSReflectException as exc:
         str_exc = str(exc)
         if 'SyntaxError' in str_exc or 'ReferenceError' in str_exc:
@@ -42,8 +43,8 @@ def get_tree(code, err=None, filename=None, shell=None):
 
 
 @register_cleanup
-class JSShell(object):
-    shells = {}
+class JSShell(Spidermonkey):
+    instance = None
 
     SCRIPT = """
         function output(object) {
@@ -64,44 +65,43 @@ class JSShell(object):
         }
     """
 
-    def __init__(self, shell):
-        self.shell = shell
-
-        cmd = [shell, '-e', self.SCRIPT]
-        self.process = subprocess.Popen(
-            cmd, shell=False, stdin=subprocess.PIPE, stdout=subprocess.PIPE)
+    def __init__(self):
+        super(JSShell, self).__init__(code=self.SCRIPT)
 
     def __del__(self):
-        self.process.terminate()
+        if self.returncode is None:
+            self.terminate()
+        super(Spidermonkey, self).__del__()
 
     @classmethod
-    def get_shell(cls, shell):
-        """Get a running JSShell instance for `shell`, or create a new one
-        if one does not already exist."""
+    def get_shell(cls):
+        """Get a running JSShell instance, or create a new one if one does not
+        already exist."""
 
-        if shell not in cls.shells:
-            cls.shells[shell] = JSShell(shell)
+        if not cls.instance:
+            cls.instance = cls()
 
-        return cls.shells[shell]
+        return cls.instance
 
     @classmethod
     def cleanup(cls):
-        """Clears any saved shells, and terminates their Spidermonkey processes
-        if there are no further references."""
-        cls.shells.clear()
+        """Clear our saved instance, and terminate its Spidermonkey process,
+        if there are no further references to it."""
+        cls.instance = None
 
     def get_tree(self, code):
         if isinstance(code, str):
             code = unicodehelper.decode(code)
 
         try:
-            self.process.stdin.write(json.dumps(code))
-            self.process.stdin.write('\n')
+            self.stdin.write(json.dumps(code))
+            self.stdin.write('\n')
 
-            output = json.loads(self.process.stdout.readline(), strict=False)
+            output = json.loads(self.stdout.readline(), strict=False)
         except Exception:
-            if self.shell in self.shells:
-                del self.shells[self.shell]
+            # If this instance is the cached instance, clear it.
+            if self == self.__class__.instance:
+                self.__class__.instance = None
             raise
 
         if output.get('error'):

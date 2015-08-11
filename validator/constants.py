@@ -43,8 +43,6 @@ APPLICATIONS = {
 with open(os.path.join(os.path.dirname(__file__), 'app_versions.json')) as avs:
     APPROVED_APPLICATIONS = json.load(avs)
 
-SPIDERMONKEY_INSTALLATION = os.environ.get('SPIDERMONKEY_INSTALLATION')
-
 BUGZILLA_BUG = 'https://bugzil.la/%d'
 MDN_DOC = 'https://developer.mozilla.org/docs/%s'
 
@@ -66,25 +64,7 @@ SIGNING_SEVERITIES = ('trivial', 'low', 'medium', 'high')
 # TODO(valcom): Move this to valcom when that's a thing.
 EVENT_ASSIGNMENT = re.compile('<.+ on[a-z]+=')
 
-# Graciously provided by @kumar in bug 614574
-if (not SPIDERMONKEY_INSTALLATION or
-    not os.path.exists(SPIDERMONKEY_INSTALLATION)):
-    for p in os.environ.get('PATH', '').split(':'):
-        SPIDERMONKEY_INSTALLATION = os.path.join(p, 'js')
-        if os.path.exists(os.path.join(p, SPIDERMONKEY_INSTALLATION)):
-            break
-
-if not os.path.exists(SPIDERMONKEY_INSTALLATION):
-
-    ############ Edit this to change the Spidermonkey location #############
-    SPIDERMONKEY_INSTALLATION = '/usr/bin/js'
-
-    if not os.path.exists(SPIDERMONKEY_INSTALLATION):
-        # The fallback is simply to disable JS tests.
-        SPIDERMONKEY_INSTALLATION = None
-
 try:
-    from validator.constants_local import *
+    from validator.constants_local import *  # noqa
 except ImportError:
     pass
-

@@ -30,15 +30,13 @@ class ErrorBundle(object):
     **overrides**
         dict of install.rdf values to override. Possible keys:
         targetapp_minVersion, targetapp_maxVersion
-    **spidermonkey**
-        Optional path to the local spidermonkey installation
     **for_appversions**
         A dict of app GUIDs referencing lists of versions. Determines which
         version-dependant tests should be run.
     """
 
     def __init__(self, determined=True, listed=True, instant=False,
-                 overrides=None, spidermonkey=False, for_appversions=None):
+                 overrides=None, for_appversions=None):
 
         self.handler = None
 
@@ -76,7 +74,6 @@ class ErrorBundle(object):
         self.version_requirements = None
 
         self.overrides = overrides or None
-        self.save_resource('SPIDERMONKEY', spidermonkey or False)
 
         self.supported_versions = self.for_appversions = for_appversions
 
