@@ -254,8 +254,8 @@ class JSPrototypeExtRegexTests(RegexTestGenerator):
 
     def js_tests(self):
         yield self.get_test(
-                r'(String|Object|Number|Date|RegExp|Function|Boolean|Array|'
-                r'Iterator)\.prototype(\.[a-zA-Z0-9]+|\[.+\]) =',
+                r'\b(String|Object|Number|Date|RegExp|Function|Boolean|Array|'
+                r'Iterator)\.prototype(\.[a-zA-Z0-9]+|\[.+\])\s*=',
                 'JS prototype extension',
                 'It appears that an extension of a built-in JS type was made. '
                 'This is not allowed for security and compatibility reasons.',
