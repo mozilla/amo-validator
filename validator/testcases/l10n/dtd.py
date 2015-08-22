@@ -73,7 +73,7 @@ class DTDXMLParser(HTMLParser):
         decl = decl.strip()
         split_decl = decl.split()
 
-        if not split_decl[0] == 'ENTITY' or len(split_decl) < 3:
+        if len(split_decl) < 3 or split_decl[0] != 'ENTITY':
             # Interestingly enough, it legitimately IS an unknown
             # declaration. Funny thing, you know?
             return
