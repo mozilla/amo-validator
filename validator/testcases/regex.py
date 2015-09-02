@@ -2,7 +2,7 @@ import re
 from functools import wraps
 
 from validator.compat import (
-    FX38_DEFINITION, FX39_DEFINITION, FX40_DEFINITION,
+    FX38_DEFINITION, FX39_DEFINITION, FX40_DEFINITION, FX41_DEFINITION,
     TB29_DEFINITION, TB30_DEFINITION, TB31_DEFINITION)
 from validator.constants import BUGZILLA_BUG, MDN_DOC
 from validator.contextgenerator import ContextGenerator
@@ -421,6 +421,23 @@ class Gecko40RegexTests(CompatRegexTestHelper):
             % 'https://developer.mozilla.org/en-US/Add-ons/SDK/'
               'High-Level_APIs/widget',
             log_function=self.err.warning,
+            compat_type='error')
+
+
+@register_generator
+class Gecko41RegexTests(CompatRegexTestHelper):
+    """Regex tests for Gecko 41 updates."""
+
+    VERSION = FX41_DEFINITION
+
+    def tests(self):
+        yield self.get_test(
+            r'\bbrowser.newtab.url\b',
+            'The browser.newtab.url preference has been removed.',
+            'The browser.newtab.url preference has been removed. You can use '
+            'the override function in NewTabURL.jsm instead. See %s for more '
+            'information.' % 'http://mxr.mozilla.org/mozilla-beta/source/'
+                             'browser/modules/NewTabURL.jsm',
             compat_type='error')
 
 
