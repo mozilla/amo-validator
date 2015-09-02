@@ -149,6 +149,28 @@ def nsITransferable_init(traverser):
     return {'return': on_init}
 
 
+@register_entity('NewTabURL.override')
+def NewTabURL_override(traverser):
+    def on_override(wrapper, arguments, traverser):
+        # Import loop.
+        from validator.testcases.javascript.predefinedentities import (
+            CUSTOMIZATION_API_HELP)
+        traverser.err.warning(
+            err_id=('js_entity_values', 'NewTabURL', 'override'),
+            warning='Extensions must not alter user preferences such as the '
+                    'new tab URL without explicit user consent.',
+            description='Extensions must not alter user preferences such as '
+                        'the new tab URL without explicit user consent. Such '
+                        'changes must also be reverted when the extension is '
+                        'disabled or uninstalled.',
+            signing_severity='high',
+            signing_help='Add-ons which directly change these preferences must '
+                         'undergo manual code review for at least one '
+                         'submission. ' + CUSTOMIZATION_API_HELP,
+        )
+    return {'return': on_override}
+
+
 # Thunderbird 29 JS changes
 TB29_JS_ENTITIES = [
     {'name':'DisablePhishingWarning',

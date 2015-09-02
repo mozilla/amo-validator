@@ -1011,6 +1011,7 @@ GLOBAL_ENTITIES = {
     u'MarionetteServer': {'dangerous_on_read': MARIONETTE_MESSAGE},
 
     'Application': {'dangerous_on_read': fuel_error},
+    'NewTabURL': {'value': {'override': entity('NewTabURL.override')}},
 
     # Common third-party libraries
     'Handlebars': {
