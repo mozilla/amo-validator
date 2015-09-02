@@ -642,7 +642,7 @@ DANGEROUS_EVAL = {
     'err_id': ('javascript', 'dangerous_global', 'eval'),
     'description': ('Evaluation of strings as code can lead to security '
                     'vulnerabilities and performance issues, even in the '
-                    'most innocuous of circumstances. Please avoid using ',
+                    'most innocuous of circumstances. Please avoid using '
                     '`eval` and the `Function` constructor when at all '
                     'possible.',
                     'Alternatives are available for most use cases. See '
