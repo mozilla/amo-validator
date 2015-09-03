@@ -13,6 +13,85 @@ from validator.outputhandlers.shellcolors import OutputHandler
 log = logging.getLogger('amo.validator')
 
 
+def maybe_tuple(value):
+    """Return `value` as a tuple. If it is already a tuple, return it
+    unchanged. Otherwise return a 1-element tuple containing `value`."""
+
+    if isinstance(value, tuple):
+        return value
+    return (value,)
+
+
+def merge_description(base, description):
+    """Merge a description with a base message.
+
+    `description` may be one of:
+
+        * A string, which is set as the message's "description" property.
+        * A dict, which is merged into the base message.
+
+    If `description` is a dict, and contains an `err_id` property which is
+    a string, that string will be added as the third element of the base
+    message's `err_id` property.
+    """
+
+    msg = base.copy()
+    if isinstance(description, dict):
+        msg.update(description)
+    elif description not in (True, False, None):
+        msg['description'] = description
+
+    # If `err_id` is a string, add it as the third element of the
+    # previous error id.
+    if isinstance(msg.get('err_id'), basestring):
+        assert isinstance(base.get('err_id'), tuple), (
+            'No valid base error ID to append string to.')
+
+        msg['err_id'] = base['err_id'][:2] + (msg['err_id'],)
+
+    return msg
+
+
+def format_message(message, **kw):
+    """Format the text properties of an ErrorBundle message dict with the given
+    keyword args, and the string `.format` method.
+
+    The following keys will be formatted, if present:
+
+        * 'message'
+        * 'error'
+        * 'warning'
+        * 'notice'
+        * 'description'
+        * 'signing_help'
+
+    Any of these properties may be either tuples or strings. If they are
+    tuples, each element will be formatted, and must be a string.
+
+    Example:
+
+        `format_message({'warning': 'Access to {thing} is deprecated',
+                         'description': ('Please do not ever use {thing}.',
+                                         'It is simply uncool.')},
+                        thing='eval')`
+
+    Becomes:
+
+        `{'warning': 'Access to eval is deprecated',
+          'description': ('Please do not ever use eval.',
+                          'It is simply uncool.')}`
+    """
+
+    for key in ('message', 'error', 'warning', 'notice', 'description',
+                'signing_help'):
+        if key in message:
+            if isinstance(message[key], tuple):
+                message[key] = tuple(string.format(**kw)
+                                     for string in message[key])
+            else:
+                message[key] = message[key].format(**kw)
+
+
 class ErrorBundle(object):
     """This class does all sorts of cool things. It gets passed around
     from test to test and collects up all the errors like the candy man
@@ -120,6 +199,40 @@ class ErrorBundle(object):
     error = _message('errors', 'error')
     warning = _message('warnings', 'warning')
     notice = _message('notices', 'notice')
+
+    def report(self, base_message, *messages):
+        """Create a message from the given base message, updating it with
+        properties from each message in a non-keyword argument, and report
+        it to the correct reporting function.
+
+        The correct reporting function is determined by the presence of either
+        a "error", "warning", or "notice" key in the test properties, as
+        expected by the so-named error bundle method.
+
+        Example:
+
+            `report({'err_id': ('javascript', 'dangerous_global', 'generic'),
+                     'warning': 'Access to dangerous global',
+                     'description': 'Evil. *hiss*'},
+                    {'err_id': 'eval',
+                     'warning': 'Do not use eval. Ugh.'})`
+
+        Reports a new warning:
+
+            `warning(err_id=('javascript', 'dangerous_global', 'eval'),
+                     warning='Do not use eval. Ugh.',
+                     description='Evil. *hiss*')`
+        """
+
+        # Merge additional message properties into the base message.
+        message = reduce(merge_description, messages, base_message)
+
+        # Get the message type based on which message key is included in the
+        # properties.
+        TYPES = 'error', 'warning', 'notice'
+        message_type = next(type_ for type_ in TYPES if type_ in message)
+
+        return getattr(self, message_type)(**message)
 
     def system_error(self, msg_id=None, message=None, description=None,
                      validation_timeout=False, exc_info=None, **kw):

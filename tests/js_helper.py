@@ -8,7 +8,7 @@ from validator.errorbundler import ErrorBundle
 from validator.outputhandlers.shellcolors import OutputHandler
 import validator.testcases.content
 import validator.testcases.scripting
-validator.testcases.scripting.traverser.DEBUG = True
+validator.testcases.scripting.traverser.IN_TESTS = True
 
 
 def _do_test(path):
@@ -20,10 +20,9 @@ def _do_test(path):
 
 def _do_test_raw(script, path='foo.js', bootstrap=False, ignore_pollution=True,
                  detected_type=None, jetpack=False):
-    'Performs a test on a JS file'
+    """Perform a test on a JS file."""
 
     err = ErrorBundle(instant=True)
-    err.save_resource('SPIDERMONKEY', False)
     if jetpack:
         err.metadata['is_jetpack'] = True
 
@@ -35,7 +34,7 @@ def _do_test_raw(script, path='foo.js', bootstrap=False, ignore_pollution=True,
         err.detected_type = detected_type
 
     validator.testcases.content._process_file(
-            err, MockXPI(), path, script, path.lower(), not ignore_pollution)
+        err, MockXPI(), path, script, path.lower(), not ignore_pollution)
     if err.final_context is not None:
         print err.final_context.output()
 
@@ -99,8 +98,6 @@ class TestCase(helper.TestCase):
         Run the standard set of JS engine tests on the script passed via
         `script`.
         """
-        if self.err is None:
-            self.setup_err()
         if self.err.supported_versions is None:
             self.err.supported_versions = {}
         if bootstrap:

@@ -2,8 +2,6 @@ from validator.errorbundler import ErrorBundle
 from validator.testcases import scripting
 
 
-scripting.traverser.DEBUG = True
-
 def _test(script):
     err = ErrorBundle()
     err.supported_versions = {}

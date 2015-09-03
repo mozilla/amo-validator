@@ -87,14 +87,10 @@ def test_get_line():
 
     d = open('tests/resources/contextgenerator/data.txt').read()
     c = ContextGenerator(d)
-    print c.data
 
-    print c.get_line(30)
     assert c.get_line(30) == 3
-    print c.get_line(11)
     assert c.get_line(11) == 2
-    print c.get_line(10000)
-    assert c.get_line(10000) == 11
+    assert c.get_line(10000) is None
 
 
 def test_leading_whitespace():
@@ -121,4 +117,3 @@ def test_leading_whitespace():
         ' One\n'
         ' One',
         ('None', ' One', ' One'))
-

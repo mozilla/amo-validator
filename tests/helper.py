@@ -52,6 +52,7 @@ class TestCase(object):
         self.is_bootstrapped = False
         self.detected_type = None
         self.listed = True
+        self.setup_err()
 
     def reset(self):
         """
@@ -165,22 +166,18 @@ class RegexTestCase(TestCase):
     regex test scenarios.
     """
 
-    def run_regex(self, input, is_js=False):
+    def run_regex(self, input, is_js):
         """Run the standard regex tests for non-JavaScript input."""
-        if self.err is None:
-            self.setup_err()
-
         if not is_js:
             input = '<input onclick="%s" />' % input
+            regex.run_regex_tests(input, self.err, 'foo.html')
         else:
             input = "'use strict';\n%s" % input
-        regex.run_regex_tests(input, self.err, 'foo.txt', is_js=is_js)
+            regex.run_regex_tests(input, self.err, 'foo.js')
 
     def run_js_regex(self, input):
         """Run the standard regex tests for JavaScript input."""
-        if self.err is None:
-            self.setup_err()
-        regex.run_regex_tests(input, self.err, 'foo.txt', is_js=True)
+        regex.run_regex_tests(input, self.err, 'foo.js')
 
 
 class MockZipFile:

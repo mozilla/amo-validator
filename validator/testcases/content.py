@@ -127,7 +127,6 @@ def test_packed_packages(err, xpi_package=None):
                 continue
 
         # Process the file.
-        processed = False
         name_lower = name.lower()
         if name_lower.endswith(('.js', '.jsm')):
             # Add the scripts to a list to be processed later.
@@ -167,16 +166,12 @@ def test_packed_packages(err, xpi_package=None):
 
         else:
             # For all other files, simply throw it at _process_file.
-            processed = _process_file(err, xpi_package, name, file_data,
-                                      name_lower)
-            # If the file is processed, it will return True. If the process
-            # goes badly, it will return False. If the processing is skipped,
-            # it returns None. We should respect that.
-            if processed is None:
-                continue
+            _process_file(err, xpi_package, name, file_data, name_lower)
 
         # This is tested in test_langpack.py
-        if err.detected_type == PACKAGE_LANGPACK and not processed:
+        if err.detected_type == PACKAGE_LANGPACK and name_lower.endswith((
+                '.html', '.xhtml', '.xul', '.xml', '.xbl', '.properties',
+                '.dtd')):
             testendpoint_langpack.test_unsafe_html(err, name, file_data)
 
         # This aids in creating unit tests.
@@ -247,7 +242,7 @@ def test_packed_scripts(err, xpi_package):
         for script in script_bundle['scripts']:
             file_data = unicodehelper.decode(package.read(script))
 
-            run_regex_tests(file_data, err, script, is_js=True)
+            run_regex_tests(file_data, err, script)
             # If we're not running an exhaustive set of tests, skip the full JS
             # parse and traversal.
             if not exhaustive:
@@ -289,8 +284,10 @@ def _process_file(err, xpi_package, name, file_data, name_lower,
                   pollutable=False):
     """Process a single file's content tests."""
 
+    extension = os.path.splitext(name_lower)[1]
+
     # If that item is a container file, unzip it and scan it.
-    if name_lower.endswith('.jar'):
+    if extension == '.jar':
         # This is either a subpackage or a nested theme.
         is_subpackage = not err.get_resource('is_multipackage')
         # Unpack the package and load it up.
@@ -306,7 +303,7 @@ def _process_file(err, xpi_package, name, file_data, name_lower,
                       'The subpackage appears to be corrupt, and could not '
                       'be opened.',
                       name)
-            return None
+            return
 
         # Let the error bunder know we're in a sub-package.
         err.push_state(name)
@@ -327,7 +324,7 @@ def _process_file(err, xpi_package, name, file_data, name_lower,
 
         err.supported_versions = supported_versions
 
-    elif name_lower.endswith('.xpi'):
+    elif extension == '.xpi':
         # It's not a subpackage, it's a nested extension. These are
         # found in multi-extension packages.
 
@@ -344,32 +341,21 @@ def _process_file(err, xpi_package, name, file_data, name_lower,
         err.pop_state()
         err.set_tier(2)  # Reset to the current tier
 
-    elif name_lower.endswith(('.css', '.js', '.jsm')):
+    else:
 
         if not file_data:
-            return None
+            return
 
-        # Convert the file data to unicode
+        # Convert the file data to unicode.
         file_data = unicodehelper.decode(file_data)
-        is_js = name_lower.endswith(('.js', '.jsm'))
 
-        if name_lower.endswith('.css'):
-            testendpoint_css.test_css_file(err, name, file_data)
-
-        elif is_js:
+        if extension in ('.js', '.jsm'):
             testendpoint_js.test_js_file(err, name, file_data,
                                          pollutable=pollutable)
+        elif extension == '.css':
+            testendpoint_css.test_css_file(err, name, file_data)
 
-        run_regex_tests(file_data, err, name, is_js=is_js)
-
-        return True
-
-    else:
-        if file_data:
-            file_data = unicodehelper.decode(file_data)
-            run_regex_tests(file_data, err, name, explicit=True)
-
-    return False
+        run_regex_tests(file_data, err, filename=name)
 
 
 def _make_script_absolute(xul_path, script):

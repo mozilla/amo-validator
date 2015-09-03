@@ -106,16 +106,11 @@ class ContextGenerator:
         return data
 
     def get_line(self, position):
-        'Returns the line number that the given string position is found on'
+        """Return the line number of the given character position in our
+        file."""
 
-        datalen = len(self.data)
-        count = len(self.data[0])
-        line = 1
-        while count < position:
-            if line >= datalen:
-                break
-            count += len(self.data[line]) + 1
-            line += 1
-
-        return line
-
+        byte = 0
+        for i, line in enumerate(self.data):
+            byte += len(line) + 1  # +1 for or \n.
+            if position < byte:
+                return i + 1

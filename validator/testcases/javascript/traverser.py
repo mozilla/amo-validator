@@ -13,6 +13,7 @@ from .predefinedentities import GLOBAL_ENTITIES
 
 
 DEBUG = False
+IN_TESTS = False
 IGNORE_POLLUTION = False
 POLLUTION_COMPONENTS_PATH = re.compile(r'/?components/.*\.jsm?')
 POLLUTION_EXCEPTIONS = set(['Cc', 'Ci', 'Cu', ])
@@ -67,11 +68,6 @@ class Traverser(object):
         return self._debug_level
 
     def run(self, data):
-        if DEBUG:
-            x = open('/tmp/output.js', 'w')
-            x.write(unicode(data))
-            x.close()
-
         self._debug('START>>')
         try:
             self.function_collection.append([])
@@ -87,9 +83,9 @@ class Traverser(object):
         self._debug('END>>')
 
         if self.contexts:
-            # If we're in debug mode, save a copy of the global context for
-            # analysis during unit tests.
-            if DEBUG:
+            # If we're running tests, save a copy of the global context for
+            # inspection.
+            if IN_TESTS:
                 self.err.final_context = self.contexts[0]
 
             if self.pollutable:
@@ -365,6 +361,10 @@ class Traverser(object):
         }
         err_kwargs.update(kwargs)
         return err_kwargs
+
+    def report(self, *args, **kwargs):
+        return self.err.report(self._err_kwargs({}),
+                               *args, **kwargs)
 
     def error(self, **kwargs):
         err_kwargs = self._err_kwargs(kwargs)

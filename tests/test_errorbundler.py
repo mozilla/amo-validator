@@ -1,12 +1,14 @@
 import json
-import nose
 import sys
-from nose.tools import eq_
 from StringIO import StringIO
 
-import validator.errorbundler as errorbundler
-from validator.errorbundler import ErrorBundle
+import nose
+from nose.tools import assert_raises, eq_
+
+from .helper import TestCase
+
 from validator.contextgenerator import ContextGenerator
+from validator.errorbundler import ErrorBundle
 
 
 def test_message_completeness():
@@ -39,7 +41,7 @@ def test_json():
     """Test the JSON output capability of the error bundler."""
 
     # Use the StringIO as an output buffer.
-    bundle = ErrorBundle() # No color since no output
+    bundle = ErrorBundle()
     bundle.detected_type = 4
     bundle.set_tier(4)
     bundle.set_tier(3)
@@ -167,7 +169,7 @@ def test_file_structure():
     """
 
     # Use the StringIO as an output buffer.
-    bundle = ErrorBundle(True) # No color since no output
+    bundle = ErrorBundle(determined=True)
 
     # Populate the bundle with some test data.
     bundle.error((), 'error', description='',
@@ -475,3 +477,41 @@ def test_forappversions():
     for m in jdata['messages']:
         assert m['for_appversions'] == app_test_data
 
+
+class TestReport(TestCase):
+    def test_merge_err_id(self):
+        """Test that `err_id` values are merged as expected."""
+
+        self.err.report({'err_id': ('foo', 'bar', 'baz'),
+                         'warning': 'Hello.'},
+                        {'err_id': 'quux'})
+        self.assert_failed(with_warnings=[{'id': ('foo', 'bar', 'quux')}])
+
+        self.setup_err()
+        self.err.report({'err_id': ('foo', 'bar', 'baz'),
+                         'warning': 'Hello.'},
+                        {'err_id': ('a', 'b', 'c')})
+        self.assert_failed(with_warnings=[{'id': ('a', 'b', 'c')}])
+
+        with assert_raises(AssertionError):
+            self.err.report({'err_id': 'foo'}, {'err_id': 'quux'})
+
+        with assert_raises(AssertionError):
+            self.err.report({}, {'err_id': 'quux'})
+
+    def test_message_type(self):
+        """Test that we emit a message of the correct type for each reporter
+        function."""
+
+        for type_ in 'notice', 'warning', 'error':
+            err = ErrorBundle()
+            err.report({'err_id': ('a', 'b', 'c'),
+                        type_: 'Hello.'})
+
+            # Make sure we have this message in the list for the expected
+            # message type.
+            messages = getattr(err, '{0}s'.format(type_))
+            eq_(messages[0]['message'], 'Hello.')
+
+            # Make sure we only have this message in one place.
+            eq_(len(err.notices + err.warnings + err.errors), 1)

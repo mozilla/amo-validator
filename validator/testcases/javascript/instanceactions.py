@@ -11,7 +11,7 @@ node
 """
 
 import actions
-from instanceproperties import _set_HTML_property
+from .instanceproperties import _set_HTML_property
 
 
 def addEventListener(args, traverser, node, wrapper):
@@ -293,7 +293,7 @@ def drop_pref_messages(wrapper):
 
     if wrapper.value.source == 'arguments':
         # Avoid import loop.
-        from validator.testcases.regex import PREFERENCE_ERROR_ID
+        from validator.testcases.regex.javascript import PREFERENCE_ERROR_ID
 
         for msg in wrapper.value.messages:
             if (msg['id'] == PREFERENCE_ERROR_ID and
@@ -338,7 +338,7 @@ def set_preference(wrapper, arguments, traverser):
 
         # Local import to prevent import loop.
         from validator.testcases.regex import validate_pref
-        validate_pref(pref, traverser, kw, wrapper=arg)
+        validate_pref(pref, traverser=traverser, extra=kw, wrapper=arg)
 
 
 INSTANCE_DEFINITIONS = {

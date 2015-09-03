@@ -292,9 +292,7 @@ def test_langpack():
     err.detected_type = PACKAGE_LANGPACK
     mock_package = MockXPI({'foo.dtd': 'tests/resources/content/junk.xpi'})
 
-    result = content.test_packed_packages(err, mock_package)
-    print result
-    assert result == 1
+    content.test_packed_packages(err, mock_package)
     content.testendpoint_langpack.assert_expectation('test_unsafe_html', 1)
     content.testendpoint_langpack.assert_expectation('test_unsafe_html', 0,
                                                      'subpackage')

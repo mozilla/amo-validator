@@ -7,8 +7,8 @@ from nose.tools import eq_
 from .helper import RegexTestCase
 from .js_helper import TestCase
 
-from validator.testcases import regex
-from validator.testcases.regex import maybe_tuple
+from validator.testcases.regex.javascript import (PREFERENCE_ERROR_ID,
+                                                  maybe_tuple)
 
 
 class TestSearchService(TestCase, RegexTestCase):
@@ -137,7 +137,7 @@ class TestSearchService(TestCase, RegexTestCase):
         CALL_WARNING = {'id': ('testcases_javascript_actions',
                                '_call_expression', 'called_set_preference')}
 
-        LITERAL_WARNING = {'id': regex.PREFERENCE_ERROR_ID}
+        LITERAL_WARNING = {'id': PREFERENCE_ERROR_ID}
 
         SUMMARY = {'trivial': 0,
                    'low': 0,
@@ -180,7 +180,7 @@ class TestSearchService(TestCase, RegexTestCase):
         """Tests that string literals provably used only to read, but not
         write, preferences do not cause warnings."""
 
-        LITERAL_WARNING = {'id': regex.PREFERENCE_ERROR_ID}
+        LITERAL_WARNING = {'id': PREFERENCE_ERROR_ID}
 
         # Literal without pref get or set call.
         self.run_script("""
@@ -220,7 +220,7 @@ class TestSearchService(TestCase, RegexTestCase):
         """)
 
         warnings = self.err.warnings
-        assert warnings[0]['id'] == regex.PREFERENCE_ERROR_ID
+        assert warnings[0]['id'] == PREFERENCE_ERROR_ID
         assert warnings[1]['id'] == ('testcases_javascript_actions',
                                      '_call_expression',
                                      'called_set_preference')

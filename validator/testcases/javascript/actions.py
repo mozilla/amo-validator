@@ -412,7 +412,7 @@ def test_literal(traverser, wrapper):
     if isinstance(value, basestring):
         # Local import to prevent import loop.
         from validator.testcases.regex import validate_string
-        validate_string(value, traverser, wrapper=wrapper)
+        validate_string(value, traverser=traverser, wrapper=wrapper)
 
 
 def _call_expression(traverser, node):
