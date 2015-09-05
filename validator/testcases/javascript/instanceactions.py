@@ -340,7 +340,6 @@ def set_preference(wrapper, arguments, traverser):
         from validator.testcases.regex import validate_pref
         validate_pref(pref, traverser, kw, wrapper=arg)
 
-
 INSTANCE_DEFINITIONS = {
     'addEventListener': addEventListener,
     'bind': bind,

@@ -424,23 +424,6 @@ class Gecko40RegexTests(CompatRegexTestHelper):
             compat_type='error')
 
 
-@register_generator
-class Gecko41RegexTests(CompatRegexTestHelper):
-    """Regex tests for Gecko 41 updates."""
-
-    VERSION = FX41_DEFINITION
-
-    def tests(self):
-        yield self.get_test(
-            r'\bbrowser.newtab.url\b',
-            'The browser.newtab.url preference has been removed.',
-            'The browser.newtab.url preference has been removed. You can use '
-            'the override function in NewTabURL.jsm instead. See %s for more '
-            'information.' % 'http://mxr.mozilla.org/mozilla-beta/source/'
-                             'browser/modules/NewTabURL.jsm',
-            compat_type='error')
-
-
 #############################
 #  Thunderbird Regex Tests  #
 #############################
@@ -813,6 +796,20 @@ PREF_REGEXPS = (
                         'the `%s` preference branch' % branch)))
         for branch, reason in BANNED_PREF_BRANCHES))
 
+COMPAT_PREF_REGEXPS = [
+    (r'\bbrowser.newtab.url\b', {
+        'message': 'The browser.newtab.url preference has been removed.',
+        'warning': 'The browser.newtab.url preference has been removed. You '
+                   'can use the override function in NewTabURL.jsm instead. '
+                   'See %s for more information.' %
+                       'http://mxr.mozilla.org/mozilla-beta/source/browser/'
+                       'modules/NewTabURL.jsm',
+        'tier': 5,
+        'for_appversions': FX41_DEFINITION,
+        'compatibility_type': 'error',
+    }),
+]
+
 # For tests in literal strings, add help text suggesting passing the
 # preference directly to reference getter functions.
 PREF_STRING_HELP = (
@@ -854,3 +851,4 @@ PREF_REGEXPS += (
 
 validate_string = RegexTest(STRING_REGEXPS).test
 validate_pref = RegexTest(PREF_REGEXPS).test
+validate_compat_pref = RegexTest(COMPAT_PREF_REGEXPS).test

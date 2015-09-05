@@ -8,10 +8,11 @@ class TestFX41Compat(CompatTestCase):
     VERSION = FX41_DEFINITION
 
     def test_browser_newtab_url_pref(self):
-        # Use `run_regex_for_compat` since this triggers warnings for changing
-        # preferences.
-        self.run_regex_for_compat("""
+        self.run_script_for_compat("""
             require("sdk/preferences/service").set("browser.newtab.url", false);
         """)
-        self.assert_silent()
+        self.assert_failed(with_warnings=[{
+            "message": "Potentially unsafe preference branch referenced",
+            "signing_severity": "high",
+        }])
         self.assert_compat_error()
