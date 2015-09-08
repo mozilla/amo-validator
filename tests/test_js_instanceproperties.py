@@ -127,3 +127,14 @@ class TestHandleEvent(TestCase):
         foo.onclick = {handleEvent: function() {alert("bar");}};
         """)
         self.assert_failed(with_warnings=True)
+
+
+class TestNewTabURL(TestCase):
+    def test_NewTabURL_override(self):
+        """Test that NewTabURL.override triggers a warning."""
+
+        self.run_script("""
+            NewTabURL.override('https://www.mozilla.org');
+        """)
+        warnings = [{'signing_severity': 'high'}]
+        self.assert_failed(with_warnings=warnings)
