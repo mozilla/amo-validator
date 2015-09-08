@@ -71,6 +71,7 @@ def prepare_package(err, path, expectation=0, for_appversions=None,
         err.system_error(
             msg_id='validation_timeout',
             message='Validation has timed out',
+            signing_severity='high',
             description=('Validation was unable to complete in the allotted '
                          'time. This is most likely due to the size or '
                          'complexity of your add-on.',
