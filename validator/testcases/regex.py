@@ -2,7 +2,7 @@ import re
 from functools import wraps
 
 from validator.compat import (
-    FX38_DEFINITION, FX39_DEFINITION, FX40_DEFINITION,
+    FX38_DEFINITION, FX39_DEFINITION, FX40_DEFINITION, FX41_DEFINITION,
     TB29_DEFINITION, TB30_DEFINITION, TB31_DEFINITION)
 from validator.constants import BUGZILLA_BUG, MDN_DOC
 from validator.contextgenerator import ContextGenerator
@@ -796,6 +796,20 @@ PREF_REGEXPS = (
                         'the `%s` preference branch' % branch)))
         for branch, reason in BANNED_PREF_BRANCHES))
 
+COMPAT_PREF_REGEXPS = [
+    (r'\bbrowser.newtab.url\b', {
+        'message': 'The browser.newtab.url preference has been removed.',
+        'warning': 'The browser.newtab.url preference has been removed. You '
+                   'can use the override function in NewTabURL.jsm instead. '
+                   'See %s for more information.' %
+                       'http://mxr.mozilla.org/mozilla-beta/source/browser/'
+                       'modules/NewTabURL.jsm',
+        'tier': 5,
+        'for_appversions': FX41_DEFINITION,
+        'compatibility_type': 'error',
+    }),
+]
+
 # For tests in literal strings, add help text suggesting passing the
 # preference directly to reference getter functions.
 PREF_STRING_HELP = (
@@ -837,3 +851,4 @@ PREF_REGEXPS += (
 
 validate_string = RegexTest(STRING_REGEXPS).test
 validate_pref = RegexTest(PREF_REGEXPS).test
+validate_compat_pref = RegexTest(COMPAT_PREF_REGEXPS).test
