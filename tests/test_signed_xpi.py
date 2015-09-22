@@ -56,3 +56,56 @@ def test_other_signed_xpi():
     assert not err.errors
 
     eq_(err.warnings[0]['id'], ('testcases_content', 'signed_xpi'))
+
+
+def test_mozilla_signed_multi_xpi():
+    """Test that signed packages raise warning"""
+    xpi = MockXPI({
+        'META-INF/manifest.mf': 'tests/resources/main/foo.bar',
+        'META-INF/mozilla.rsa': 'tests/resources/main/foo.bar',
+        'META-INF/mozilla.sf': 'tests/resources/main/foo.bar',
+    }, subpackage=True)
+
+    err = ErrorBundle()
+    err.supported_versions = {}
+    err.push_state('sub.xpi')
+
+    content.test_signed_xpi(err, xpi)
+
+    assert not err.failed()
+
+
+def test_unsigned_multi_xpi():
+    """Test that signed packages raise warning"""
+    xpi = MockXPI(subpackage=True)
+
+    err = ErrorBundle()
+    err.supported_versions = {}
+    err.push_state('sub.xpi')
+
+    content.test_signed_xpi(err, xpi)
+
+    assert err.failed()
+    assert not err.warnings
+    assert err.errors
+    eq_(err.errors[0]['id'], ('testcases_content', 'unsigned_sub_xpi'))
+
+
+def test_other_signed_multi_xpi():
+    """Test that signed packages raise warning"""
+    xpi = MockXPI({
+        'META-INF/manifest.mf': 'tests/resources/main/foo.bar',
+        'META-INF/zigbert.rsa': 'tests/resources/main/foo.bar',
+        'META-INF/zigbert.sf': 'tests/resources/main/foo.bar',
+    }, subpackage=True)
+
+    err = ErrorBundle()
+    err.supported_versions = {}
+    err.push_state('sub.xpi')
+
+    content.test_signed_xpi(err, xpi)
+
+    assert err.failed()
+    assert not err.warnings
+    assert err.errors
+    eq_(err.errors[0]['id'], ('testcases_content', 'unsigned_sub_xpi'))

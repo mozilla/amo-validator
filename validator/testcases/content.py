@@ -269,6 +269,16 @@ def test_packed_scripts(err, xpi_package):
             err.pop_state()
 
 
+def is_mozilla_signed(xpi_package):
+    return ('META-INF/manifest.mf' in xpi_package and
+            'META-INF/mozilla.rsa' in xpi_package and
+            'META-INF/mozilla.sf' in xpi_package)
+
+
+def is_signed(xpi_package):
+    return 'META-INF/manifest.mf' in xpi_package
+
+
 @decorator.register_test(tier=2)
 def test_signed_xpi(err, xpi_package):
     """Checks if XPI is signed.
@@ -276,7 +286,14 @@ def test_signed_xpi(err, xpi_package):
     We don't want to specifically test for mozilla.* or zigbert.* filenames
     here, because the filenames could be just anything. Testing the presence of
     the manifest.mf file should be a good indicator that the file is signed."""
-    if 'META-INF/manifest.mf' in xpi_package:
+    if err.is_nested_package:
+        if not is_mozilla_signed(xpi_package):
+            err.error(
+                err_id=('testcases_content', 'unsigned_sub_xpi'),
+                error='Sub-package must be signed',
+                description='Add-ons which contain sub-packages must have all '
+                            'sub-packages signed before uploading.')
+    elif is_signed(xpi_package):
         err.warning(
             err_id=('testcases_content', 'signed_xpi'),
             warning='Package already signed',
