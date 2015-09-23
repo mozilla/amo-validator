@@ -165,27 +165,27 @@ def _test_rdf(err, install):
             if not (str(predicates['updateURL']).lower().startswith('https:')
                     or 'updateKey' in predicates):
                 # TODO: Validate updateKey value
-                err.warning(('testcases_installrdf',
-                             '_test_rdf',
-                             'missing_updateKey'),
-                            'Missing updateKey element',
-                            'Your updateURL is not served over a secure '
-                            'connection, and your install.rdf does not '
-                            'specify an update key. This means that serving '
-                            'updates for this version will not be possible.',
-                            'install.rdf',
-                            signing_severity='trivial')
+                err.notice(('testcases_installrdf',
+                            '_test_rdf',
+                            'missing_updateKey'),
+                           'Missing updateKey element',
+                           'Your updateURL is not served over a secure '
+                           'connection, and your install.rdf does not '
+                           'specify an update key. This means that serving '
+                           'updates for this version will not be possible.',
+                           'install.rdf',
+                           signing_severity='trivial')
         else:
-            err.warning(('testcases_installrdf',
-                         '_test_rdf',
-                         'missing_updateURL'),
-                        'Missing updateURL element',
-                        'Your add-on does not specify an update URL. This '
-                        'means that it will be impossible for you to serve '
-                        'updates to this add-on which are not listed publicly '
-                        'on addons.mozilla.org.',
-                        'install.rdf',
-                        signing_severity='trivial')
+            err.notice(('testcases_installrdf',
+                        '_test_rdf',
+                        'missing_updateURL'),
+                       'Missing updateURL element',
+                       'Your add-on does not specify an update URL. This '
+                       'means that it will be impossible for you to serve '
+                       'updates to this add-on which are not listed publicly '
+                       'on addons.mozilla.org.',
+                       'install.rdf',
+                       signing_severity='trivial')
 
     # Once all of the predicates have been tested, make sure there are
     # no mandatory elements that haven't been found.
