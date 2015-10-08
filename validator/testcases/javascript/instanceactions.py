@@ -159,12 +159,6 @@ def setAttribute(args, traverser, node, wrapper):
             signing_severity='medium')
 
 
-def nsIDOMFile_deprec(args, traverser, node, wrapper):
-    """A wrapper for call_definitions.nsIDOMFile_deprec."""
-    from call_definitions import nsIDOMFile_deprec as cd_nsIDOMFile_deprec
-    cd_nsIDOMFile_deprec(None, [], traverser)
-
-
 def insertAdjacentHTML(args, traverser, node, wrapper):
     """
     Perfrom the same tests on content inserted into the DOM via
@@ -348,8 +342,6 @@ INSTANCE_DEFINITIONS = {
     'createAsyncStatement': _check_dynamic_sql,
     'createStatement': createStatement,
     'executeSimpleSQL': executeSimpleSQL,
-    'getAsBinary': nsIDOMFile_deprec,
-    'getAsDataURL': nsIDOMFile_deprec,
     'getBranch': create_preference_branch,
     'getDefaultBranch': create_preference_branch,
     'getInterface': getInterface,
