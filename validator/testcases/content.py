@@ -286,7 +286,7 @@ def test_signed_xpi(err, xpi_package):
     We don't want to specifically test for mozilla.* or zigbert.* filenames
     here, because the filenames could be just anything. Testing the presence of
     the manifest.mf file should be a good indicator that the file is signed."""
-    if err.is_nested_package:
+    if err.is_nested_package and err.get_resource('is_multipackage'):
         if not is_mozilla_signed(xpi_package):
             err.error(
                 err_id=('testcases_content', 'unsigned_sub_xpi'),
