@@ -32,6 +32,15 @@ BACKBONE_VERSIONS = [
     "1.1.1",
     "1.1.2",
 ]
+BACKBONE_LOCALSTORAGE_VERSIONS = [
+    "1.1.10",
+    "1.1.12",
+    "1.1.13",
+    "1.1.14",
+    "1.1.15",
+    "1.1.16",
+]
+
 DOJO_VERSIONS = [
     "1.4.0",
     "1.4.1",
@@ -152,6 +161,13 @@ JQUERYUI_VERSIONS = [
     "1.11.2",
     "1.11.3",
     "1.11.4",
+]
+MOMENTJS_VERSIONS = [
+    "2.10.6",
+    "2.10.5",
+    "2.10.3",
+    "2.10.2",
+    "2.9.0",
 ]
 MOOTOOLS_VERSIONS = [
     "1.1.1",
@@ -317,6 +333,14 @@ get_pattern("backbone",
             "https://raw.githubusercontent.com/jashkenas/backbone/%s/backbone-min.js",
             BACKBONE_VERSIONS)
 
+# Backbone.localStorage versions
+get_pattern("backbone.localStorage",
+            "https://raw.githubusercontent.com/jeromegn/Backbone.localStorage/v%s/backbone.localStorage.js",
+            BACKBONE_LOCALSTORAGE_VERSIONS)
+get_pattern("backbone.localStorage",
+            "https://raw.githubusercontent.com/jeromegn/Backbone.localStorage/v%s/backbone.localStorage-min.js",
+            BACKBONE_LOCALSTORAGE_VERSIONS)
+
 # Dojo Toolkit
 get_pattern("dojo",
             "http://download.dojotoolkit.org/release-%s/dojo.js",
@@ -348,6 +372,15 @@ get_pattern("jqueryui",
 get_pattern("jqueryui",
             "https://ajax.googleapis.com/ajax/libs/jqueryui/%s/jquery-ui.js",
             JQUERYUI_VERSIONS)
+
+# moment.js
+get_pattern("moment",
+            "https://raw.githubusercontent.com/moment/moment/%s/moment.js",
+            MOMENTJS_VERSIONS)
+get_pattern("moment",
+            "https://raw.githubusercontent.com/moment/moment/%s/min/moment.min.js",
+            MOMENTJS_VERSIONS)
+
 
 # MooTools
 get_pattern("mootools",
