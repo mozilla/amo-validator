@@ -51,3 +51,36 @@ class TestFX42Compat(CompatTestCase):
             window.mozRequestAnimationFrame();
         """)
         self.assert_compat_error()
+
+    def _test_nsIPermissionManager(self, method):
+        self.run_script_for_compat("""
+            var perms = Cc["@mozilla.org/permissionmanager;1"]
+                          .getService(Ci.nsIPermissionManager);
+            %s
+        """ % method)
+        self.assert_compat_error()
+
+    def _test_ServicesPerms(self, method):
+        self.run_script_for_compat("""
+            Components.utils.import("resource://gre/modules/Services.jsm");
+            var perms = Services.perms;
+            %s
+        """ % method)
+        self.assert_compat_error()
+
+    def test_nsIPermissionManagerMethods(self):
+        methods = ("perms.add(url, 'cookie', 1);",
+                   "perms.addFromPrincipal(url, 'cookie', 1);",
+                   "perms.remove('yahoo.com', 'cookie');",
+                   "perms.removeFromPrincipal('yahoo.com', 'cookie');",
+                   "perms.removeAll();",
+                   "perms.testExactPermission(url, cookie);"
+                   "perms.testExactPermissionFromPrincipal(url, cookie);",
+                   "perms.testPermission(url, cookie);",
+                   "perms.testPermissionFromPrincipal(url, cookie);")
+
+        for method in methods:
+            yield self._test_nsIPermissionManager, method
+
+        for method in methods:
+            yield self._test_ServicesPerms, method
