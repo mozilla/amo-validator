@@ -38,3 +38,16 @@ class TestFX42Compat(CompatTestCase):
                 'chrome.manifest'))
         content.test_newTab_xul(err, None)
         assert err.failed()
+
+    def test_mozRequestAnimationFrame(self):
+        self.run_script_for_compat("""
+            // Don't flag comments: window.mozRequestAnimationFrame()
+            window.requestAnimationFrame();
+        """)
+        assert not self.compat_err.errors
+        assert not self.compat_err.warnings
+
+        self.run_script_for_compat("""
+            window.mozRequestAnimationFrame();
+        """)
+        self.assert_compat_error()

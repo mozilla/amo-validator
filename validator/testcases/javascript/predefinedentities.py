@@ -947,6 +947,8 @@ GLOBAL_ENTITIES = {
     u'width': {'readonly': False},
     u'height': {'readonly': False},
     u'top': {'readonly': actions._readonly_top},
+    u'mozRequestAnimationFrame': {
+        'value': actions._renamed_mozRequestAnimationFrame},
 
     u'content':
         {'context': 'content',
