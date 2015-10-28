@@ -1,5 +1,8 @@
 from helper import CompatTestCase
+from validator.chromemanifest import ChromeManifest
 from validator.compat import FX42_DEFINITION
+from validator.errorbundler import ErrorBundle
+from validator.testcases import content
 
 
 class TestFX42Compat(CompatTestCase):
@@ -15,3 +18,23 @@ class TestFX42Compat(CompatTestCase):
             netutil.parseContentType('text/html', 'utf-8', {});
         """)
         self.assert_compat_error()
+
+    def test_newTab_xul(self):
+        """Tests that the newTab.xul overlay is not in the chrome.manifest."""
+
+        err = ErrorBundle()
+        assert content.test_newTab_xul(err, None) is None
+
+        err.save_resource('chrome.manifest',
+                          ChromeManifest('foo bar', 'chrome.manifest'))
+        content.test_newTab_xul(err, None)
+        assert not err.failed()
+
+        err.save_resource(
+            'chrome.manifest',
+            ChromeManifest(
+                ('overlay chrome://browser/content/newtab/newTab.xul '
+                 'chrome://ch/content/newtab/index.xul'),
+                'chrome.manifest'))
+        content.test_newTab_xul(err, None)
+        assert err.failed()
