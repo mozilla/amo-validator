@@ -256,6 +256,16 @@ class Traverser(object):
         # Look for the variable in the local contexts first
         local_variable = self._seek_local_variable(variable)
         if local_variable is not None:
+            # If this variable is also global maintain the xpcom_wildcard value
+            # so that it stays linked to its entities. This handles a bug where
+            # something like `var Cc = Components.classes` would cause
+            # references to `Cc['@some/class']` to not find the right entity.
+            if variable in GLOBAL_ENTITIES:
+                global_variable = self._build_global(
+                    variable, GLOBAL_ENTITIES[variable])
+                if 'xpcom_wildcard' in global_variable.value:
+                    local_variable.value['xpcom_wildcard'] = (
+                        global_variable.value['xpcom_wildcard'])
             return local_variable
 
         # Seek in globals for the variable instead.
