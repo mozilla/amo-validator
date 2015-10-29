@@ -171,6 +171,33 @@ def NewTabURL_override(traverser):
     return {'return': on_override}
 
 
+@register_entity('nsIPermissionManager.add')
+@register_entity('nsIPermissionManager.addFromPrincipal')
+@register_entity('nsIPermissionManager.remove')
+@register_entity('nsIPermissionManager.removeFromPrincipal')
+@register_entity('nsIPermissionManager.removeAll')
+@register_entity('nsIPermissionManager.testExactPermission')
+@register_entity('nsIPermissionManager.testExactPermissionFromPrincipal')
+@register_entity('nsIPermissionManager.testPermission')
+@register_entity('nsIPermissionManager.testPermissionFromPrincipal')
+def nsIPermissionManager(traverser):
+    traverser.err.warning(
+        err_id=('testcases_javascript_entity_values',
+                'nsIPermissionManager'),
+        warning='The Permission Manager now uses origins instead of hosts.',
+        description=(
+            'The Permission Manager now uses origins instead of hosts, '
+            'meaning that http://mozilla.com and https://mozilla.com now '
+            'have different permissions. Some methods in the component now '
+            'take nsIURI instead of strings. '
+            'See %s for more information.' % BUGZILLA_BUG % 1165263),
+        filename=traverser.filename,
+        line=traverser.line,
+        column=traverser.position,
+        compatibility_type='error',
+        context=traverser.context)
+
+
 # Thunderbird 29 JS changes
 TB29_JS_ENTITIES = [
     {'name':'DisablePhishingWarning',

@@ -479,7 +479,17 @@ INTERFACES = {
                                    u'writeIntValue': REGISTRY_WRITE,
                                    u'writeStringValue': REGISTRY_WRITE,
                                   }},
-    }
+    'nsIPermissionManager': {'value': {
+                                'add': entity('nsIPermissionManager.add'),
+                                'addFromPrincipal': entity('nsIPermissionManager.addFromPrincipal'),
+                                'remove': entity('nsIPermissionManager.remove'),
+                                'removeFromPrincipal': entity('nsIPermissionManager.removeFromPrincipal'),
+                                'removeAll': entity('nsIPermissionManager.removeAll'),
+                                'testExactPermission': entity('nsIPermissionManager.testExactPermission'),
+                                'testExactPermissionFromPrincipal': entity('nsIPermissionManager.testExactPermissionFromPrincipal'),
+                                'testPermission': entity('nsIPermissionManager.testPermission'),
+                                'testPermissionFromPrincipal': entity('nsIPermissionManager.testPermissionFromPrincipal')}},
+}
 
 INTERFACE_ENTITIES = {u'nsIXMLHttpRequest':
                           {'xpcom_map':
@@ -947,6 +957,8 @@ GLOBAL_ENTITIES = {
     u'width': {'readonly': False},
     u'height': {'readonly': False},
     u'top': {'readonly': actions._readonly_top},
+    u'mozRequestAnimationFrame': {
+        'value': actions._renamed_mozRequestAnimationFrame},
 
     u'content':
         {'context': 'content',

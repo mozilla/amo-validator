@@ -27,6 +27,7 @@ FX38_DEFINITION = _build_definition(38)
 FX39_DEFINITION = _build_definition(39)
 FX40_DEFINITION = _build_definition(40)
 FX41_DEFINITION = _build_definition(41)
+FX42_DEFINITION = _build_definition(42)
 
 _tb_definition = (lambda ver:
     _build_definition(ver, firefox=False, fennec=False, android=False))
