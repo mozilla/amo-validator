@@ -260,7 +260,8 @@ class Traverser(object):
             # so that it stays linked to its entities. This handles a bug where
             # something like `var Cc = Components.classes` would cause
             # references to `Cc['@some/class']` to not find the right entity.
-            if variable in GLOBAL_ENTITIES:
+            if (variable in GLOBAL_ENTITIES and
+                    isinstance(local_variable.value, dict)):
                 global_variable = self._build_global(
                     variable, GLOBAL_ENTITIES[variable])
                 if 'xpcom_wildcard' in global_variable.value:
