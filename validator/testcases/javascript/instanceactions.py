@@ -350,7 +350,8 @@ def parseContentType(args, traverser, node, wrapper):
         line=traverser.line,
         column=traverser.position,
         compatibility_type='error',
-        context=traverser.context)
+        context=traverser.context,
+        tier=5)
 
 
 INSTANCE_DEFINITIONS = {

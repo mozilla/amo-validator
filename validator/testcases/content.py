@@ -52,7 +52,7 @@ def test_xpcnativewrappers(err, xpi_package=None):
                         context=triple['context'])
 
 
-@decorator.register_test(tier=1)
+@decorator.register_test(tier=5)
 def test_newTab_xul(err, xpi_package=None):
     """Tests the chrome.manifest file to ensure that it doesn't contain the
     deprecated chrome://browser/content/newtab/newTab.xul overlay."""
@@ -73,6 +73,7 @@ def test_newTab_xul(err, xpi_package=None):
                 'See %s for more information.' % BUGZILLA_BUG % 1167601,
                 filename=triple['filename'],
                 line=triple['line'],
+                compatibility_type='error',
                 context=triple['context'])
 
 

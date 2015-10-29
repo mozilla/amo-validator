@@ -624,7 +624,8 @@ def _renamed_mozRequestAnimationFrame(traverser):
                     'prefixed form, please use requestAnimationFrame instead. '
                     'See %s for more information.' %
                     MDN_DOC % 'Web/API/window/requestAnimationFrame',
-        compatibility_type='error')
+        compatibility_type='error',
+        tier=5)
 
 
 def _expression(traverser, node):
