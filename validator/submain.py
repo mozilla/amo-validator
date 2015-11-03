@@ -125,15 +125,21 @@ def test_package(err, file_, name, expectation=PACKAGE_ANY,
         package = XPIManager(file_, mode='r', name=name)
 
         has_package_json = 'package.json' in package
+        has_manifest_json = 'manifest.json' in package
         has_install_rdf = 'install.rdf' in package
 
-        # install.rdf? | package.json? | error | use-file
-        # Yes          | No            | No    | install.rdf
-        # Yes          | Yes           | No    | install.rdf
-        # No           | No            | Yes   | install.rdf
-        # No           | Yes           | No    | package.json
+        # install.rdf? | package.json? | manifest.json? | error | use-file
+        # Yes          | No            | No             | No    | install.rdf
+        # Yes          | Yes           | No             | No    | install.rdf
+        # Yes          | No            | Yes            | No    | install.rdf
+        # No           | No            | Yes            | No    | manifest.json
+        # No           | No            | No             | Yes   | install.rdf
+        # No           | Yes           | No             | No    | package.json
+        # No           | No            | Yes            | Yes   | install.rdf
         if has_package_json:
             _load_package_json(err, package, expectation)
+        if has_manifest_json:
+            _load_manifest_json(err, package, expectation)
         if has_install_rdf:
             _load_install_rdf(err, package, expectation)
     except IOError:
@@ -229,6 +235,23 @@ def _load_package_json(err, package, expectation):
     else:
         err.save_resource('has_package_json', True, pushable=True)
         err.save_resource('package_json', package_json, pushable=True)
+        err.detected_type = PACKAGE_EXTENSION
+
+
+def _load_manifest_json(err, package, expectation):
+    raw_manifest_json = package.read('manifest.json')
+    try:
+        manifest_json = json.loads(raw_manifest_json)
+    except ValueError:
+        err.error(
+            err_id=('main', 'test_package', 'parse_error'),
+            error='Could not parse `manifest.json`.',
+            description='The JSON parser was unable to parse the '
+                        'manifest.json file included with this add-on.',
+            filename='manifest.json')
+    else:
+        err.save_resource('has_manifest_json', True, pushable=True)
+        err.save_resource('manifest_json', manifest_json, pushable=True)
         err.detected_type = PACKAGE_EXTENSION
 
 

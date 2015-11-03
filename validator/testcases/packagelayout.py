@@ -180,18 +180,19 @@ def test_compatibility_binary(err, xpi_package):
 def test_layout_all(err, xpi_package):
     'Tests the well-formedness of extensions.'
 
-    # Subpackages don't need to be tested for install.rdf.
+    # Subpackages don't need to be tested for a manifest.
     if xpi_package.subpackage:
         return
 
     if (not err.get_resource('has_install_rdf') and
             not err.get_resource('bad_install_rdf') and
-            not err.get_resource('has_package_json')):
+            not err.get_resource('has_package_json') and
+            not err.get_resource('has_manifest_json')):
         err.error(('testcases_packagelayout',
                   'test_layout_all',
                   'missing_install_rdf'),
-                  'Add-on missing install.rdf.',
-                  'All add-ons require an install.rdf file.')
+                  'Add-on missing manifest.',
+                  'All add-ons require a manifest file.')
         return
 
     package_namelist = list(xpi_package.zf.namelist())

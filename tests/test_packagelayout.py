@@ -241,7 +241,7 @@ def test_has_installrdfs():
 
 
 def test_has_package_json():
-    """Tests that having an install.rdf is not require with a package.json."""
+    """Tests that having an install.rdf is not required with a package.json."""
     assert not _do_config_test(
         packagelayout.test_layout_all,
         has_install_rdf=False,
@@ -255,7 +255,28 @@ def test_no_package_json():
         packagelayout.test_layout_all,
         has_install_rdf=False,
         has_package_json=False), (
-        'no errors and no install.rdf and package.json')
+        'no errors and no install.rdf or package.json')
+
+
+def test_has_manifest_json():
+    """Tests that having an install.rdf or package.json is not required with a
+    manifest.json."""
+    assert not _do_config_test(
+        packagelayout.test_layout_all,
+        has_install_rdf=False,
+        has_package_json=False,
+        has_manifest_json=True), 'errors when only manifest.json present'
+
+
+def test_no_manifest_json():
+    """Tests that there are errors when there is not an install.rdf or a
+    package.json or a manifest.json"""
+    assert _do_config_test(
+        packagelayout.test_layout_all,
+        has_install_rdf=False,
+        has_package_json=False,
+        has_manifest_json=False), (
+        'no errors and no install.rdf or package.json or manifest.json')
 
 
 class MockDupeZipFile(object):
@@ -283,7 +304,7 @@ def test_duplicate_files():
 
 
 def _do_config_test(function, has_install_rdf=True, has_package_json=False,
-                    xpi=None):
+                    has_manifest_json=False, xpi=None):
     'Helps to test that install.rdf files are present'
 
     err = ErrorBundle()
@@ -295,6 +316,9 @@ def _do_config_test(function, has_install_rdf=True, has_package_json=False,
     if has_package_json:
         content['package.json'] = True
         err.save_resource('has_package_json', True)
+    if has_manifest_json:
+        content['manifest.json'] = True
+        err.save_resource('has_manifest_json', True)
 
     if xpi is None:
         xpi = MockXPI(content)

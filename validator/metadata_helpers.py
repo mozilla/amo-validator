@@ -4,7 +4,7 @@ VERSION_PATTERN = re.compile('^[-+*.\w]{,32}$')
 
 
 def validate_name(err, value, source):
-    'Tests an install.rdf name value for trademarks.'
+    'Tests a manifest name value for trademarks.'
 
     ff_pattern = re.compile('(mozilla|firefox)', re.I)
 
@@ -21,7 +21,7 @@ def validate_name(err, value, source):
 
 
 def validate_id(err, value, source):
-    'Tests an install.rdf UUID value'
+    'Tests a manifest UUID value'
 
     field_name = '<em:id>' if source == 'install.rdf' else 'id'
 
@@ -51,7 +51,7 @@ def validate_id(err, value, source):
 
 
 def validate_version(err, value, source):
-    'Tests an install.rdf version number'
+    'Tests a manifest version number'
 
 
     field_name = '<em:version>' if source == 'install.rdf' else 'version'
