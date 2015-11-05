@@ -14,9 +14,6 @@ THUNDERBIRD_GUID = '{3550f703-e582-4d05-9a08-453d09bdfdc6}'
 
 
 def _validator(file_path, for_appversions=None, overrides=None):
-    # TODO(Kumar) This is currently copied from Zamboni because
-    # it's really hard to import from zamboni outside of itself.
-    # TODO(Kumar) remove this when validator is fixed, see bug 620503
     from validator.testcases import scripting
     import validator
     import validator.constants
