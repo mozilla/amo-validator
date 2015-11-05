@@ -1,0 +1,15 @@
+<OpenSearchDescription xmlns="http://a9.com/-/spec/opensearch/1.1/"
+                       xmlns:moz="http://www.mozilla.org/2006/browser/search/"><ShortName>(G)mailto:</ShortName>
+<ShortName>(G)mailto:</ShortName>
+<Description>g-mailto</Description>
+<InputEncoding>UTF-8</InputEncoding>
+<Image width="16" height="16">data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAACZUlEQVQ4jY2Ry08aURTGL666alK3TRPX3XZrADWlsKsLt121SXXZVfunmJjU7qyp1pqgiTpDOjIODAOIdgAZoFZEMYz1Na8749yvCxCN9nWSk3z35JzfeVxCCAmQa7vSfQeb26/tbfU0tRx/19/ff/8q3s0J3Mq/DrwYG3volEuLpiRRU0zC2JB8e6e8trSw8PhGceB2cYAQ0nf6o/7KyuX2TFGEmU7D1jSYsgxDFGEq2eY3QXg5MDBw71YdIW8mJh7RSvW9mUq5pijCKhTgnZ2BMYZLy4JdLncgkuTp+fyHt+PjD7rrEPJxcvK5kcuphpiEKUlwajX4ngvGGAAADGCXl3BbhzBlGaaYhLW1tadtbkcIIX3EWF/H+eoqjFQKtHUEjzrwXPeuUwp6cgKzUMDF6hoMQWjMTk8/IdVoDLVIBKfxOFz9uOv6DX0M91jvxnQY+RxqTyPYGR1FIy2rpDI8gmp4CBcJHv9jtqahGgqjGI2hLqyDVIZHoIXDOOevAb39/wDQQiGo0RjqgoDeBOcc98/ujDE4XUAxGkOtBwh1AIyxztc5DpzdXdiqCtrYg09pD2DfANyZwHddOAdNWEUVnt6G73lwj1qwSyU4+/vwXQ92pXJ3Ai0Uws+5TzCLKuhBE77n9e7AAPieB9o6hFUs4mJjA1rwN4CT+Tn4lP71gD6lMFIpVIJBqFcAbWgYWnAQzakptBUFbSXb8UxH6923nsuhrWRx+GUR2uAgSs+iqAtfQfKfF6DMziKzvASFTyCbSCDD8ZA5DjLPI8NxyHAcZJ6DwvOQV1aQnpmBMj+Pxvda/Bcam/UA7uZvlAAAAABJRU5ErkJggg==</Image>
+<moz:SearchForm>https://mail.google.com/mail/#compose</moz:SearchForm>
+<Url type="text/html" method="GET" template="https://mail.google.com/mail/">
+  <Param name="view" value="cm"/>
+  <Param name="fs" value="1"/>
+  <Param name="tf" value="1"/>
+  <Param name="source" value="mailto"/>
+  <Param name="to" value="{searchTerms}"/>
+</Url>
+</OpenSearchDescription>

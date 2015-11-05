@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<OpenSearchDescription xmlns="http://a9.com/-/spec/opensearch/1.1/"
+                       xmlns:moz="http://www.mozilla.org/2006/browser/search/">
+  <ShortName>SMS Search</ShortName>
+  <Description>Search the best SMS collection. Love, Romantic, Birthday, Valentine days sms and much more.</Description>
+  <InputEncoding>UTF-8</InputEncoding>
+  <Image width="16" height="16" type="image/x-icon">data:image/x-icon;base64,AAABAAEAEBAAAAEAIABoBAAAFgAAACgAAAAQAAAAIAAAAAEAIAAAAAAAAAAAABMLAAAT
+CwAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA4uXdOsDCwXZ7fHzOWlpa2FNTU9hZWVnY
+ZGRl2JGSkrnHyMlr297fQ+fq6wwAAAAAAAAAAAAAAADj5uwEb27Zcl5dxo4yMjfDAAAA
+/wAAAP8AAAD/AAAA/wMDA/8lJSX0cXJylsHDxR4AAAAAAAAAAAAAAAAAAAAAdHTafwAA
+z/8AANT/AABF/wAAAP8AAAD/AAAA/wAAAP8AAAD/BAQE/xISEv9BQkLmvL6/OAAAAAAA
+AAAAAAAAAD9H5cYHEuf/AgPt/wMCmP8CAgD/AAAA/wAAAP8AAAD/AAAA/wAAAP8GBgb/
+FhYW/09PUOTW2doUAAAAAMHAxgtCULfcM1L9/xsw/P8DBeX/AQBV/w8PD/8YGBj/FhYW
+/w8PD/8ICAj/AAAA/wcHB/8eHh3/jpCQfwAAAACjpKA6DA0h/z9Sy/8yTfz/Ex7m/yYk
+sP9ydHv/fn57/39+f/9wcHD/aWlp/0RERP8NDQ3/Dw8O/1paW8oAAAAAUFJSXgMCAP9M
+TFr/TVCC/x4fOP8dHhj/EhIQ/wgICP8KCgr/FBQU/y0tLf9ZWVn/aGho/yIiIv80NDTn
+AAAAAEVGR2A3ODj/WlpW/ywqIv8xMCv/Kisp/yEhIf8UFBT/BgYG/wAAAP8AAAD/AAAA
+/x8fH/9dXV3/Kioq6QAAAACRk5M/LS0t/0BAQP9LS0v/RUVF/zk5Of8zMzP/JiYm/xIS
+Ev8KCgr/MjIy/ygoKP8AAAD/KSkp/1hYWNMAAAAAyMrLDENERN9UVFT/WVlZ/3BwcP+Q
+kJD/UFBQ/zExMf8hISH/oKCg//Pz8//e3t7/XFxc/wAAAP90dXaOAAAAAAAAAACJioty
+TExM/2RkZP/j4+P/ra2t/7Kysv8sLCz/V1dX//39/f/5+fn//////8PDw/8QEBD1rrGy
+JQAAAAAAAAAA0tTWCFRUVLlLS0v/6enp//////+enp7/MTEx/11dXf+fn5//sbGx////
+//+xsbH/Pz9AtwAAAAAAAAAAAAAAAAAAAACam5wLYWJikEtMTPlsbGz/SUlJ/0hISP8m
+Jib/fX19/9vb2/++vr7/KCgo/5OVllcAAAAAAAAAAAAAAAAAAAAA1NbYBKGjpB97fH04
+U1NUiUVGRsAnJyf0EhIR/xEREeEnJyfhHBwcz3JzdGcAAAAAAAAAAAAAAAAAAAAAAAAA
+AODj5AJ4enonlpeYAQAAAAAAAAAAjY6QJU5PUJufoKI+nJ6fCp2foAScnZ4IxsjKEwAA
+AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAADDxcYU5+nrBAAAAACr
+rK0EaGpqQ5ucnhgAAAAA8AEAAMAD8L/AAQAAwAAAAIAAAACAAAAAgAAAAIAAAACAAAAA
+gACDQMAAAADAAQAA4AH//+AD///jAZIH/5EAAA==
+</Image>
+  <Url type="text/html" method="GET" template="http://sms.smile4friends.com/search?cx=011753032400493950399%3Avmqrbptahly&amp;cof=FORID%3A11&amp;ie=UTF-8&amp;q={searchTerms}&amp;sa=Search#1355" />
+  <Url type="application/x-suggestions+json" template="http://suggestqueries.google.com/complete/search?output=firefox&amp;client=firefox&amp;hl=en&amp;q={searchTerms}"/>
+  <AdultContent>false</AdultContent>
+  <Url type="application/opensearchdescription+xml"
+     rel="self"
+     template="http://sms.smile4friends.com/opensearch.xml" />
+
+  <moz:SearchForm>http://sms.smile4friends.com/</moz:SearchForm>
+</OpenSearchDescription>
