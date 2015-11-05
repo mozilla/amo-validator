@@ -321,7 +321,23 @@ The same rule applies for the end of a file and for files with only one line.
 Unit tests can be run with
 
 ```bash
-nosetests
+nosetests tests/
+```
+
+Functional tests, which take longer, can be run with
+
+```bash
+nosetests --processes=2 functional_tests/
+```
+
+Then make a cup of tea while all of those tests run. It takes a while. If you
+have more than two cores on your machine or you don't mind pwnage, you can try
+to increase the number of parallel processes used for testing.
+
+If you just want to run all the tests at once, run
+
+```bash
+nosetests --processes=2
 ```
 
 
