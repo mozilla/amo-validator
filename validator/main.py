@@ -61,9 +61,9 @@ def main():
                         hosted on addons.mozilla.org. This allows the
                         <em:updateURL> element to be set.""")
     parser.add_argument('--approved_applications',
-                        default='validator/app_versions.json',
                         help="""A JSON file containing acceptable applications
-                        and their versions""")
+                        and their versions""",
+                        required=False)
     parser.add_argument('--target-maxversion',
                         help="""JSON string to override the package's
                         targetapp_maxVersion for validation. The JSON object
