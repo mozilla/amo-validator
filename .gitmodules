@@ -1,6 +1,6 @@
 [submodule "jetpack/addon-sdk"]
 	path = jetpack/addon-sdk
 	url = git://github.com/mozilla/addon-sdk.git
-[submodule "jetpack/jpm"]
-	path = jetpack/jpm
-	url = https://github.com/mozilla/jpm.git
+[submodule "jetpack/jpm-core"]
+	path = jetpack/jpm-core
+	url = git://github.com/mozilla-jetpack/jpm-core.git

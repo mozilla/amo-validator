@@ -3,7 +3,7 @@
 rm ../validator/testcases/jetpack_data.txt
 rm ../validator/testcases/jetpack_data.txt.pickle
 
-pushd jpm
+pushd jpm-core
 git fetch --tags
 for tagname in `git tag`;
 do
