@@ -4,7 +4,7 @@ import sys
 import unittest
 from cStringIO import StringIO
 
-from nose.tools import eq_
+from nose.tools import eq_, ok_
 from validator.validate import validate
 
 
@@ -293,3 +293,24 @@ class SearchTools(ValidatorTest):
     def test_too_many(self):
         self.validate('addon-12201-latest.xml')
         self.expectMsg(u'OpenSearch: Too many <ShortName> elements')
+
+
+class JetpackDetection(ValidatorTest):
+
+    def test_jetpack_one_signing(self):
+        results = self.validate('jetpack-one.xpi')
+        eq_(results['signing_summary']['high'], 0)
+
+    def test_jetpack_one_jetpack(self):
+        results = self.validate('jetpack-one.xpi')
+        ok_(results['metadata']['jetpack_identified_files'],
+            'expected jetpack files')
+
+    def test_jetpack_two_signing(self):
+        results = self.validate('jetpack-two.xpi')
+        eq_(results['signing_summary']['high'], 0)
+
+    def test_jetpack_two_jetpack(self):
+        results = self.validate('jetpack-two.xpi')
+        ok_(results['metadata']['jetpack_identified_files'],
+            'expected jetpack files')

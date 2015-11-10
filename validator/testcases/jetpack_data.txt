@@ -35,7 +35,13 @@
 ./app-extension/bootstrap.js firefox-24-06-06-2013 314b849906e2d9d62cd942f90281f2c4d5fe4385b377ba7b2578185ef9f8d58c
 ./app-extension/bootstrap.js firefox-24-06-12-2013 314b849906e2d9d62cd942f90281f2c4d5fe4385b377ba7b2578185ef9f8d58c
 ./app-extension/bootstrap.js firefox-24-dev 314b849906e2d9d62cd942f90281f2c4d5fe4385b377ba7b2578185ef9f8d58c
-./data/bootstrap.js 0.0.12 63d6b92dc63c78fdb745ec4b2bdf5bc7926b3de90a5058d64b6dbcd7eb72dd26
+./data/bootstrap.js 0.0.3 6dd2986ad9f63a7a6122b335968cba44b89798400f4ff5371d9ff4b1748209fd
+./data/bootstrap.js 0.0.4 fdc8312a128e61a3598c4e0d0137a91fa5fb3671bb46ff55b1896f5f8aa9056e
+./data/bootstrap.js 0.0.5 fdc8312a128e61a3598c4e0d0137a91fa5fb3671bb46ff55b1896f5f8aa9056e
+./data/bootstrap.js 0.0.6 fdc8312a128e61a3598c4e0d0137a91fa5fb3671bb46ff55b1896f5f8aa9056e
+./data/bootstrap.js 0.0.7 72ebae834bf76a256f4a6c96475ebca7fae19478c1466deae7262ba42cf197b0
+./data/bootstrap.js 0.0.8 201dae746ee91a5230cd38eb6fa760b31d22f75f31dfa319aa443d2857cf0ff5
+./data/bootstrap.js 0.0.9 201dae746ee91a5230cd38eb6fa760b31d22f75f31dfa319aa443d2857cf0ff5
 ./data/index.html 1.12 023b0fbb9bc21fb2b7e23b46ba4cc22735b723a36a3c7fdb7bc6b14bbaef9e9a
 ./data/index.html 1.12b1 023b0fbb9bc21fb2b7e23b46ba4cc22735b723a36a3c7fdb7bc6b14bbaef9e9a
 ./data/index.html 1.12b2 023b0fbb9bc21fb2b7e23b46ba4cc22735b723a36a3c7fdb7bc6b14bbaef9e9a
