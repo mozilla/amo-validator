@@ -222,13 +222,13 @@ ADDON_INSTALL_METHOD = {
             'their safety.'),
         'editors_only': True,
         'signing_help': (
-            'Rather than directly install other add-ons, you should offer '
-            'users the opportunity to install them via the normal web install '
-            'process, using an install link or button connected to the '
-            '`InstallTrigger` API: '
-            'https://developer.mozilla.org/en-US/docs/Web/API/InstallTrigger',
-            'Updates to existing add-ons should be provided via the '
-            'install.rdf `updateURL` mechanism.'),
+            "Rather than directly install other add-ons, you should offer "
+            "users the opportunity to install them via the normal web install "
+            "process, using an install link or button connected to the "
+            "`InstallTrigger` API: "
+            "https://developer.mozilla.org/en-US/docs/Web/API/InstallTrigger",
+            "Updates to existing add-ons should be provided via the "
+            "manifest's `updateURL` mechanism."),
         'signing_severity': 'high'},
 }
 

@@ -27,7 +27,7 @@ def test_name_is_required():
     with setup_err_and_package() as (err, package):
         del package['name']
     packagejson.test_package_json_params(err)
-    assert err.failed(), 'expected name to be reuqired'
+    assert err.failed(), 'expected name to be required'
 
 
 def test_id_is_required_to_be_valid():

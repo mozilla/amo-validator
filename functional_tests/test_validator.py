@@ -185,7 +185,7 @@ class GeneralTests(ValidatorTest):
 
     def test_unrecognized_element(self):
         self.validate('littlemonkey-1.8.56-sm.xpi')
-        self.expectMsg(u'Add-on missing install.rdf.')
+        self.expectMsg(u'Add-on missing manifest.')
 
     def test_invalid_id(self):
         self.validate('add-ongoogle-201101121132.xpi')
@@ -202,6 +202,11 @@ class GeneralTests(ValidatorTest):
     def test_non_ascii_html_markup(self):
         # should be no Unicode errors
         self.validate('non-ascii-html.xpi')
+
+    def test_webextension_seen_as_extension(self):
+        validation = self.validate('beastify.xpi')
+        eq_(validation['detected_type'], 'extension')
+        eq_(validation['errors'], 0)
 
 
 class LocalizationTests(ValidatorTest):
