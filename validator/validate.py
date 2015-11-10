@@ -12,8 +12,7 @@ import submain
 
 
 def validate(path, format='json',
-             approved_applications=os.path.join(os.path.dirname(__file__),
-                                                'app_versions.json'),
+             approved_applications=None,
              determined=True,
              listed=True,
              expectation=PACKAGE_ANY,
@@ -57,6 +56,10 @@ def validate(path, format='json',
     bundle = ErrorBundle(listed=listed, determined=determined,
                          overrides=overrides, for_appversions=for_appversions)
     bundle.save_resource('is_compat_test', compat_test)
+
+    if approved_applications is None:
+        approved_applications = os.path.join(os.path.dirname(__file__),
+                                             'app_versions.json')
 
     if isinstance(approved_applications, types.StringTypes):
         # Load up the target applications if the approved applications is a
