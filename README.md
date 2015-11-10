@@ -46,8 +46,8 @@ so that you get all of the goodies inside.
 A working copy of Spidermonkey (debug or non-debug is fine) is required.  The
 easiest way to do this is to just [download the binary](http://ftp.mozilla.org/pub/mozilla.org/firefox/nightly/latest-trunk/jsshell-linux-x86_64.zip).
 
-If you want to build it from scratch, [clone](http://hg.mozilla.org/mozilla-central/) 
-the mozilla-central repo or 
+If you want to build it from scratch, [clone](http://hg.mozilla.org/mozilla-central/)
+the mozilla-central repo or
 [download the tip](http://hg.mozilla.org/mozilla-central/archive/tip.tar.bz2)
 (which is faster). Then build it from source like this
 
@@ -334,6 +334,22 @@ Then make a cup of tea while all of those tests run. It takes a while. If you
 have more than two cores on your machine or you don't mind pwnage, you can try
 to increase the number of parallel processes used for testing.
 
+## Releasing
+
+Follow these steps to release a new version of the `amo-validator` Python package:
+
+1. Increment the `__version__` attribute at the top of
+   `./validator/__init__.py`.
+2. Commit your change to the master branch and run `git push`.
+3. Tag master with the new version number, such as `git tag 1.9.8`.
+4. Push the new tag with `git push --tags`
+5. TravisCI will build and release a new version of `amo-validator`
+   to PyPI from your tag commit.
+   [Here is an example](https://travis-ci.org/mozilla/amo-validator/builds/90333989).
+6. Copy the deployed source distribution (`.tar.gz`) and wheel distribution
+   (`.whl`) from [amo-validator on PyPI](https://pypi.python.org/pypi/amo-validator)
+   to [Mozilla's PyRepo](https://mana.mozilla.org/wiki/display/WebDev/pyrepo).
+   Be sure to set the right permissions (`0644`).
 
 ## Updating
 
