@@ -70,7 +70,7 @@ def test_bad_harnessoptions():
 def test_pass_jetpack():
     """Test that a minimalistic Jetpack setup will pass."""
 
-    harnessoptions = {'sdkVersion': '1.8-dev',
+    harnessoptions = {'sdkVersion': '1.17',
                       'jetpackID': '',
                       'manifest': {}}
 
@@ -124,7 +124,7 @@ def test_package_json_different_bootstrap():
 def test_missing_elements():
     """Test that missing elements in harness-options will fail."""
 
-    harnessoptions = {'sdkVersion': '1.8-dev',
+    harnessoptions = {'sdkVersion': '1.17',
                       'jetpackID': ''}
 
     with open('tests/resources/bootstrap.js') as bootstrap_file:
@@ -139,7 +139,7 @@ def test_missing_elements():
 def test_skip_safe_files():
     """Test that missing elements in harness-options will fail."""
 
-    harnessoptions = {'sdkVersion': '1.8-dev',
+    harnessoptions = {'sdkVersion': '1.17',
                       'jetpackID': '',
                       'manifest': {}}
 
@@ -166,7 +166,7 @@ def test_pass_manifest_elements():
 
     harnessoptions = {
             'jetpackID': 'foobar',
-            'sdkVersion': '1.8-dev',
+            'sdkVersion': '1.17',
             'manifest': {
                 'bootstrap.js':
                     {'requirements': {},
@@ -203,7 +203,7 @@ def test_ok_resource():
 
     harnessoptions = {
             'jetpackID': 'foobar',
-            'sdkVersion': '1.8-dev',
+            'sdkVersion': '1.17',
             'manifest': {
                 'resource://bootstrap.js':
                     {'requirements': {},
@@ -229,7 +229,7 @@ def test_bad_resource():
         bootstrap_hash = hashlib.sha256(bootstrap).hexdigest()
 
     harnessoptions = {
-            'sdkVersion': '1.8-dev',
+            'sdkVersion': '1.17',
             'jetpackID': 'foobar',
             'manifest':
                 {'http://foo.com/bar/bootstrap.js':
@@ -256,7 +256,7 @@ def test_missing_manifest_elements():
         bootstrap_hash = hashlib.sha256(bootstrap).hexdigest()
 
     harnessoptions = {
-            'sdkVersion': '1.8-dev',
+            'sdkVersion': '1.17',
             'jetpackID': 'foobar',
             'manifest':
                 {'resource://bootstrap.js':
@@ -281,7 +281,7 @@ def test_mismatched_hash():
     """
 
     harnessoptions = {
-            'sdkVersion': '1.8-dev',
+            'sdkVersion': '1.17',
             'jetpackID': 'foobar',
             'manifest':
                 {'resource://bootstrap.js':
@@ -315,7 +315,7 @@ def test_mismatched_db_hash():
         bootstrap_hash = hashlib.sha256(bootstrap).hexdigest()
 
     harnessoptions = {
-            'sdkVersion': '1.8-dev',
+            'sdkVersion': '1.17',
             'jetpackID': 'foobar',
             'manifest':
                 {'resource://bootstrap.js':
@@ -472,8 +472,7 @@ def test_bad_sdkversion():
 
     with open('tests/resources/bootstrap.js') as bootstrap_file:
         bootstrap = bootstrap_file.read()
-    with open('jetpack/addon-sdk/packages/test-harness/lib/'
-                  'harness.js') as harness_file:
+    with open('jetpack/addon-sdk/lib/sdk/test/harness.js') as harness_file:
         harness = harness_file.read()
     err = _do_test(MockXPI({'bootstrap.js': bootstrap,
                             'components/harness.js': harness,
