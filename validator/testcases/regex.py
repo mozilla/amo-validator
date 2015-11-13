@@ -278,7 +278,9 @@ class XPIProviderRegexTests(RegexTestGenerator):
             yield self.get_test(
                 name,
                 'Usage of %s is not permitted.' % name,
-                'Usage of %s is not permitted' % name)
+                {'description': (
+                    'Usage of %s is not permitted' % name),
+                 'signing_severity': 'high'})
 
 
 class CompatRegexTestHelper(RegexTestGenerator):
