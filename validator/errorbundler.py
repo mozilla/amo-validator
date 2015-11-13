@@ -417,7 +417,7 @@ class ErrorBundle(object):
         if self.unfinished:
             self.handler.write('<<RED>>Validation terminated early')
             self.handler.write('Errors during validation are preventing '
-                               'the validation proecss from completing.')
+                               'the validation process from completing.')
             self.handler.write('Use the <<YELLOW>>--determined<<NORMAL>> '
                                'flag to ignore these errors.')
             self.handler.write('\n')

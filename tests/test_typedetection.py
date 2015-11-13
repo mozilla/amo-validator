@@ -33,9 +33,18 @@ def _test_type(file_, expectation, failure=False):
 def test_extension():
     "Tests that type detection can detect an addon of type 'extension'"
 
-    err =_test_type('tests/resources/typedetection/td_notype_ext.xpi',
-                    PACKAGE_EXTENSION)
+    err = _test_type('tests/resources/typedetection/td_notype_ext.xpi',
+                     PACKAGE_EXTENSION)
     assert err.notices
+
+
+def test_experiment():
+    """Tests that type detection can detect an addon of type 'extension' for
+    the 'experiment' (see bug 1220583)."""
+
+    err = _test_type('tests/resources/typedetection/td_experiment.xpi',
+                     PACKAGE_EXTENSION)
+    assert not err.notices
 
 
 def test_multipackage():

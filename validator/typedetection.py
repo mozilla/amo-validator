@@ -12,7 +12,9 @@ def detect_type(err, install_rdf=None, xpi_package=None):
                         '4': PACKAGE_THEME,
                         '8': PACKAGE_LANGPACK,
                         '32': PACKAGE_MULTI,
-                        '64': PACKAGE_DICTIONARY}
+                        '64': PACKAGE_DICTIONARY,
+                        # New "experiment" type: see bug 1220097.
+                        '128': PACKAGE_EXTENSION}
 
     # If we're missing our install.rdf file, we can try to make some
     # assumptions.
