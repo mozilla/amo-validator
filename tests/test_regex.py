@@ -50,6 +50,18 @@ def test_dom_mutation_fail():
     assert _do_test_raw('foo.DOMAttrModified = bar;').failed()
 
 
+def test_bug_1200929():
+    """Test that XPIProvider and AddonManagerInternal are not used."""
+
+    real_world_usage = (
+        'XPIProviderBP = Cu.import("resource://gre/modules/XPIProvider.jsm", {});')
+
+    assert _do_test_raw(real_world_usage).failed();
+    assert _do_test_raw('// XPIProvider').failed();
+    assert _do_test_raw('AddonManagerInternal.getAddonByID(1234);').failed();
+    assert _do_test_raw('// AddonManagerInternal').failed();
+
+
 def test_bug_548645():
     'Tests that banned entities are disallowed'
 
