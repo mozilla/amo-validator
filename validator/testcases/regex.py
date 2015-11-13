@@ -262,6 +262,23 @@ class JSPrototypeExtRegexTests(RegexTestGenerator):
                 flags=re.I)
 
 
+@register_generator
+class XPIProviderRegexTests(RegexTestGenerator):
+    """
+    These regex tests ensure that developers are not using the XPIProvider
+    or AddonManagerInternal symbols.
+
+    Added from bug 1200929.
+    """
+
+    def tests(self):
+        msg = 'Access to AddonManagerInternal and XPIProvider is not allowed.'
+
+        yield self.get_test(
+            r'\b(XPIProvider|AddonManagerInternal)\b',
+            msg, {'description': msg, 'signing_severity': 'high'})
+
+
 class CompatRegexTestHelper(RegexTestGenerator):
     """
     A helper that makes it easier to stay DRY. This will automatically check
