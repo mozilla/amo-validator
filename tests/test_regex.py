@@ -60,16 +60,7 @@ def test_bug_1200929():
     assert err.failed()
     assert err.signing_summary['high'] == 1
 
-    err = _do_test_raw('// XPIProvider')
-    assert err.failed()
-    assert err.signing_summary['high'] == 1
-
     err = _do_test_raw('AddonManagerInternal.getAddonByID(1234);')
-    assert err.failed()
-    assert err.signing_summary['high'] == 1
-
-    err = _do_test_raw('// AddonManagerInternal')
-
     assert err.failed()
     assert err.signing_summary['high'] == 1
 
