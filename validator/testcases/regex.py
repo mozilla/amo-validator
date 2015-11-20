@@ -271,16 +271,12 @@ class XPIProviderRegexTests(RegexTestGenerator):
     Added from bug 1200929
     """
 
-    NAMES = ('XPIProvider', 'AddonManagerInternal')
-
     def tests(self):
-        for name in self.NAMES:
-            yield self.get_test(
-                name,
-                'Usage of %s is not permitted.' % name,
-                {'description': (
-                    'Usage of %s is not permitted' % name),
-                 'signing_severity': 'high'})
+        msg = 'Access to AddonManagerInternal and XPIProvider is not allowed.'
+
+        yield self.get_test(
+            r'\b(XPIProvider|AddonManagerInternal)\b',
+            msg, {'description': msg, 'signing_severity': 'high'})
 
 
 class CompatRegexTestHelper(RegexTestGenerator):

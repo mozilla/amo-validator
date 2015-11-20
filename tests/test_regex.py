@@ -56,10 +56,22 @@ def test_bug_1200929():
     real_world_usage = (
         'XPIProviderBP = Cu.import("resource://gre/modules/XPIProvider.jsm", {});')
 
-    assert _do_test_raw(real_world_usage).failed();
-    assert _do_test_raw('// XPIProvider').failed();
-    assert _do_test_raw('AddonManagerInternal.getAddonByID(1234);').failed();
-    assert _do_test_raw('// AddonManagerInternal').failed();
+    err = _do_test_raw(real_world_usage)
+    assert err.failed()
+    assert err.signing_summary['high'] == 1
+
+    err = _do_test_raw('// XPIProvider')
+    assert err.failed()
+    assert err.signing_summary['high'] == 1
+
+    err = _do_test_raw('AddonManagerInternal.getAddonByID(1234);')
+    assert err.failed()
+    assert err.signing_summary['high'] == 1
+
+    err = _do_test_raw('// AddonManagerInternal')
+
+    assert err.failed()
+    assert err.signing_summary['high'] == 1
 
 
 def test_bug_548645():
