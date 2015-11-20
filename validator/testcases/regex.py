@@ -266,9 +266,9 @@ class JSPrototypeExtRegexTests(RegexTestGenerator):
 class XPIProviderRegexTests(RegexTestGenerator):
     """
     These regex tests ensure that developers are not using the XPIProvider
-    or AddonManagerInternal symbols
+    or AddonManagerInternal symbols.
 
-    Added from bug 1200929
+    Added from bug 1200929.
     """
 
     def tests(self):
