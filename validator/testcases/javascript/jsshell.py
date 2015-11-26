@@ -66,7 +66,12 @@ class JSShell(Spidermonkey):
     """
 
     def __init__(self):
-        super(JSShell, self).__init__(code=self.SCRIPT)
+        # Use "version(180)" so we don't use the latest version (185 at the
+        # time of this writing:
+        # https://developer.mozilla.org/en-US/docs/Mozilla/Projects/SpiderMonkey/JSAPI_reference/JSVersion)  # noqa
+        # which deprecates generators with 'function' (see
+        # https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Statements/Legacy_generator_function)  # noqa
+        super(JSShell, self).__init__(code=['version(180)', self.SCRIPT])
 
     def __del__(self):
         if self.returncode is None:

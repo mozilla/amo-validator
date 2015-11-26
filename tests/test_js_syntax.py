@@ -120,6 +120,44 @@ def test_blocks_evaluated():
         yield test, block
 
 
+def test_generators():
+    """
+    Tests that generators inside simple `function`s (opposed to `function*`)
+    are not raising syntax errors.
+    We use `version(180)` in `testcases.javascript.jsshell.JSShell` so we don't
+    use the latest "version" (185 at the time of this writing) when running
+    spidermonkey. See
+    https://developer.mozilla.org/en-US/docs/Mozilla/Projects/SpiderMonkey/JSAPI_reference/JSVersion)  # noqa
+    which deprecates generators with 'function' (see
+    https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Statements/Legacy_generator_function)  # noqa
+    If we get to the point where we want to drop support for generators as
+    `function`s, then we'll need to remove `version(180)` and modify this test.
+    """
+
+    ID = ('javascript', 'dangerous_global', 'eval')
+
+    EVIL = 'eval(evilStuff)'
+    BLOCKS = (
+        'function foo() { %s; yield 1; }',
+        'function foo() { yield %s; }',
+        'var foo = function () { %s; yield 1; }',
+        'function* foo() { %s; yield 1; }',
+        'function* foo() { yield %s; }',
+        'var foo = function* () { %s; yield 1; }'
+    )
+
+    def test(block):
+        # The following should raise a "dangerous global", and not a syntax
+        # error.
+        err = _do_test_raw(block % EVIL)
+        assert err.message_count == 1, \
+            'Missing expected failure for block: %s' % block
+        eq_(err.warnings[0]['id'], ID)
+
+    for block in BLOCKS:
+        yield test, block
+
+
 class TestTemplateString(TestCase):
     WARNING = {'id': ('testcases_chromemanifest', 'test_resourcemodules',
                       'resource_modules')}

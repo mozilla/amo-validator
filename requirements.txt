@@ -7,4 +7,4 @@ argparse==1.1
 fastchardet==0.2.0
 mock==1.0.0
 simplejson==3.8.0
-spidermonkey==41.0a2.post1
+spidermonkey==44.0a2.post2
