@@ -495,3 +495,33 @@ class TestSearchService(TestCase, RegexTestCase):
             tab.attach({ contentScript: 'doc.createElement("script")' });
         """)
         self.assert_failed(with_warnings=[warning])
+
+
+class TestObserverEvents(TestCase, RegexTestCase):
+    """Tests that code related to observer events trigger warnings."""
+
+    def test_on_newtab_changed(self):
+        """
+        Tests that adding an observer to the `newtab-url-changed` event triggers
+        a high signing severity warning.
+        """
+        patterns = (
+            'Services.obs.addObserver(NewTabObserver, "newtab-url-changed", false);',
+            (
+              'var foo = Cc["foo"].getService(Ci.nsIObserverService);'
+              'foo.addObserver(NewTabObserver, "newtab-url-changed", false);'
+            )
+        )
+
+        warning = {
+            'id': ('js_entity_values', 'nsIObserverService', 'newtab_url_changed'),
+            'signing_severity': 'high'
+        }
+
+        def fail(script):
+            self.setUp()
+            self.run_script(script)
+            self.assert_failed(with_warnings=[warning])
+
+        for pattern in patterns:
+            yield fail, pattern
