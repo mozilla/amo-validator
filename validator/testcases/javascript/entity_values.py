@@ -171,6 +171,38 @@ def NewTabURL_override(traverser):
     return {'return': on_override}
 
 
+@register_entity('nsIObserverService.addObserver')
+def nsIObserverService_addObserver(traverser):
+    def on_addObserver(wrapper, arguments, traverser):
+        if not arguments:
+            return
+
+        first_arg = traverser._traverse_node(arguments[1]).get_literal_value()
+
+        if first_arg == 'newtab-url-changed':
+            traverser.err.warning(
+                err_id=('js_entity_values', 'nsIObserverService', 'newtab_url_changed'),
+                warning='Extensions must not use the `newtab-url-changed` event to '
+                        'revert changes made to the new tab url.',
+                description='To avoid conflicts, extensions are not allowed to '
+                            'add an observer to the `newtab-url-changed` event '
+                            'in order to revert changes that have been made to '
+                            'the new tab url.',
+                signing_severity='high',
+                signing_help='Add-ons which use `newtab-url-changed` to change '
+                             'the new tab url are not allowed.')
+
+    # Return the addObserver handler and a general dangerous warning.
+    return {
+        'return': on_addObserver,
+        'dangerous': lambda a, t, e:
+            e.get_resource('em:bootstrap') and
+            'Authors of bootstrapped add-ons must take care '
+            'to remove any added observers '
+            'at shutdown.'
+    }
+
+
 @register_entity('nsIPermissionManager.add')
 @register_entity('nsIPermissionManager.addFromPrincipal')
 @register_entity('nsIPermissionManager.remove')

@@ -347,13 +347,7 @@ INTERFACES = {
             {u'forceFolderDBClosed': entity('nsIMsgDatabase.forceFolderDBClosed')}},
     u'nsIObserverService':
         {'value':
-            {u'addObserver':
-                {'dangerous':
-                    lambda a, t, e:
-                        e.get_resource('em:bootstrap') and
-                        'Authors of bootstrapped add-ons must take care '
-                        'to remove any added observers '
-                        'at shutdown.'}},
+            {u'addObserver': entity('nsIObserverService.addObserver')},
          'dangerous': lambda a, t, e:
             lambda t, e: (
                 e.metadata.get('is_jetpack') and
