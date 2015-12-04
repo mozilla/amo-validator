@@ -3,7 +3,7 @@ from functools import wraps
 
 from validator.compat import (
     FX38_DEFINITION, FX39_DEFINITION, FX40_DEFINITION, FX41_DEFINITION,
-    TB29_DEFINITION, TB30_DEFINITION, TB31_DEFINITION)
+    FX43_DEFINITION, TB29_DEFINITION, TB30_DEFINITION, TB31_DEFINITION)
 from validator.constants import BUGZILLA_BUG, MDN_DOC
 from validator.contextgenerator import ContextGenerator
 from .chromemanifest import DANGEROUS_CATEGORIES, DANGEROUS_CATEGORY_WARNING
@@ -437,6 +437,23 @@ class Gecko40RegexTests(CompatRegexTestHelper):
             'ToggleButton instead. See %s for more information.'
             % 'https://developer.mozilla.org/en-US/Add-ons/SDK/'
               'High-Level_APIs/widget',
+            log_function=self.err.warning,
+            compat_type='error')
+
+
+@register_generator
+class Gecko43RegexTests(CompatRegexTestHelper):
+    """Regex tests for Firefox 43 updates."""
+
+    VERSION = FX43_DEFINITION
+
+    def tests(self):
+        yield self.get_test(
+            r'\bmozFetchAsStream\b',
+            'The mozFetchAsStream function has been removed.',
+            'The mozFetchAsStream function has been removed. '
+            'You should use one of the standard canvas APIs instead. '
+            'See %s for more information.' % MDN_DOC % 'Web/API/HTMLCanvasElement',
             log_function=self.err.warning,
             compat_type='error')
 
