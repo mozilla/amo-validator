@@ -97,6 +97,7 @@ class TestSearchService(TestCase, RegexTestCase):
                  ('extensions.blocklist.*', 'high'),
                  ('extensions.getAddons.*', 'high'),
                  ('extensions.update.*', 'high'),
+                 ('xpinstall.signatures.required', 'high'),
 
                  ('security.*', 'high'),
 
