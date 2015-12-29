@@ -117,6 +117,7 @@ BANNED_PREF_BRANCHES = (
     (u'extensions.checkCompatibility', None),
     (u'extensions.getAddons.', SECURITY_PREF_MESSAGE),
     (u'extensions.update.', SECURITY_PREF_MESSAGE),
+    (u'xpinstall.signatures.required', SECURITY_PREF_MESSAGE),
 
     # Let's see if we can get away with this...
     # Changing any preference in this branch should result in a
