@@ -475,6 +475,15 @@ class Gecko44RegexTests(CompatRegexTestHelper):
             log_function=self.err.warning,
             compat_type='error')
 
+        yield self.get_test(
+            r'\b__noSuchMethod__\b',
+            '__noSuchMethod__ has been removed.',
+            '__noSuchMethod__ has been removed. '
+            'Proxies should be used instead, if necessary. See %s for '
+            'more information.' % MDN_DOC
+            % 'Web/JavaScript/Reference/Global_Objects/Proxy',
+            log_function=self.err.warning,
+            compat_type='error')
 
 
 #############################
