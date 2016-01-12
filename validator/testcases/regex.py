@@ -3,7 +3,8 @@ from functools import wraps
 
 from validator.compat import (
     FX38_DEFINITION, FX39_DEFINITION, FX40_DEFINITION, FX41_DEFINITION,
-    FX43_DEFINITION, TB29_DEFINITION, TB30_DEFINITION, TB31_DEFINITION)
+    FX43_DEFINITION, FX44_DEFINITION, TB29_DEFINITION, TB30_DEFINITION,
+    TB31_DEFINITION)
 from validator.constants import BUGZILLA_BUG, MDN_DOC
 from validator.contextgenerator import ContextGenerator
 from .chromemanifest import DANGEROUS_CATEGORIES, DANGEROUS_CATEGORY_WARNING
@@ -454,6 +455,24 @@ class Gecko43RegexTests(CompatRegexTestHelper):
             'The mozFetchAsStream function has been removed. '
             'You should use one of the standard canvas APIs instead. '
             'See %s for more information.' % MDN_DOC % 'Web/API/HTMLCanvasElement',
+            log_function=self.err.warning,
+            compat_type='error')
+
+
+@register_generator
+class Gecko44RegexTests(CompatRegexTestHelper):
+    """Regex tests for Gecko 44 updates."""
+
+    VERSION = FX44_DEFINITION
+
+    def tests(self):
+        yield self.get_test(
+            r'\b__noSuchMethod__\b',
+            '__noSuchMethod__ has been removed.',
+            '__noSuchMethod__ has been removed. '
+            'Proxies should be used instead, if necessary. See %s for '
+            'more information.' % MDN_DOC
+            % 'Web/JavaScript/Reference/Global_Objects/Proxy',
             log_function=self.err.warning,
             compat_type='error')
 
