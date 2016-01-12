@@ -461,7 +461,7 @@ class Gecko43RegexTests(CompatRegexTestHelper):
 
 @register_generator
 class Gecko44RegexTests(CompatRegexTestHelper):
-    """Regex tests for Gecko 44 updates."""
+    """Regex tests for Firefox 44 updates."""
 
     VERSION = FX44_DEFINITION
 
@@ -482,6 +482,15 @@ class Gecko44RegexTests(CompatRegexTestHelper):
             'Proxies should be used instead, if necessary. See %s for '
             'more information.' % MDN_DOC
             % 'Web/JavaScript/Reference/Global_Objects/Proxy',
+            log_function=self.err.warning,
+            compat_type='error')
+
+        yield self.get_test(
+            r'\bgetAllStyleSheets\b',
+            'The getAllStyleSheets function has been removed.',
+            'The getAllStyleSheets function has been removed. '
+            'You can use getBrowserStyleSheets instead. '
+            'See %s for more information. ' % BUGZILLA_BUG % 1141041,
             log_function=self.err.warning,
             compat_type='error')
 

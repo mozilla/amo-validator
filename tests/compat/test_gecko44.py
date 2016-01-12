@@ -49,5 +49,10 @@ class TestFX44Compat(CompatTestCase):
               console.log(id, '(' + args.join(', ') + ')');
             };
         """)
+
+    def test_getAllStyleSheets(self):
+        self.run_script_for_compat(
+            'let stylesheets = window.getAllStyleSheets(config.browser.contentWindow);'
+        )
         self.assert_silent()
         self.assert_compat_error()
