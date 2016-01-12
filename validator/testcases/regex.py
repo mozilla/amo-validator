@@ -3,7 +3,8 @@ from functools import wraps
 
 from validator.compat import (
     FX38_DEFINITION, FX39_DEFINITION, FX40_DEFINITION, FX41_DEFINITION,
-    FX43_DEFINITION, TB29_DEFINITION, TB30_DEFINITION, TB31_DEFINITION)
+    FX43_DEFINITION, FX44_DEFINITION, TB29_DEFINITION, TB30_DEFINITION,
+    TB31_DEFINITION)
 from validator.constants import BUGZILLA_BUG, MDN_DOC
 from validator.contextgenerator import ContextGenerator
 from .chromemanifest import DANGEROUS_CATEGORIES, DANGEROUS_CATEGORY_WARNING
@@ -454,6 +455,23 @@ class Gecko43RegexTests(CompatRegexTestHelper):
             'The mozFetchAsStream function has been removed. '
             'You should use one of the standard canvas APIs instead. '
             'See %s for more information.' % MDN_DOC % 'Web/API/HTMLCanvasElement',
+            log_function=self.err.warning,
+            compat_type='error')
+
+
+@register_generator
+class Gecko44RegexTests(CompatRegexTestHelper):
+    """Regex tests for Firefox 44 updates."""
+
+    VERSION = FX44_DEFINITION
+
+    def tests(self):
+        yield self.get_test(
+            r'\bgetAllStyleSheets\b',
+            'The getAllStyleSheets function has been removed.',
+            'The getAllStyleSheets function has been removed. '
+            'You can use getBrowserStyleSheets instead. '
+            'See %s for more information. ' % BUGZILLA_BUG % 1141041,
             log_function=self.err.warning,
             compat_type='error')
 
