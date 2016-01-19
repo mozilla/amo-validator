@@ -485,3 +485,6 @@ ea4cb751250b32b88ed6f5baf5a38841a3a85e7ca44fff94689d3f5050ab01ed  besttoolbars-1
 6afb0d77079e481376c131765412f6a3da5790c27b42641ff951a8465ae3fab4  besttoolbars-1.2.11.16/ci.options.js
 a48d7ba5e559f9797f444116b450d76276e4079ad86548b1d4d025ec84e1e73e  besttoolbars-1.2.11.16/framework.js
 36471e2ad8ab2f1f9c2a3d101cb3af0b5db8fb4694d7def68e922447c3888b10  besttoolbars-1.2.11.16/subscriptloader.js
+b42a7e06f3c8e3c98bff187b8e4259d99755e14f3febf5f208a230dcc1bab0fc  besttoolbars-1.3.1.12/ci.options.js
+eb0d7de58b5aa97c05675a9aa9095cc61dfab6a4f85cbdbc9aca7f932cce92d7  besttoolbars-1.3.1.12/framework.js
+ff2a36119c2f3b8ccbadc325cd32717cecdf87019d3e5e0246f97104b0990e3f  besttoolbars-1.3.1.12/subscriptloader.js
