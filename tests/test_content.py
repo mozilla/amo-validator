@@ -317,9 +317,9 @@ def test_jar_subpackage_bad():
 def test_subpackage_metadata_preserved():
     """Tests that metadata is preserved for sub-packages."""
 
-    xpi1 = open('tests/resources/jetpack/jetpack-1.16-outdated.xpi')
+    xpi1 = open('tests/resources/jetpack/jetpack-1.8-outdated.xpi')
     xpi2 = MockXPI({
-        'thing.xpi': 'tests/resources/jetpack/jetpack-1.16-outdated.xpi'})
+        'thing.xpi': 'tests/resources/jetpack/jetpack-1.8-outdated.xpi'})
 
     err1 = ErrorBundle()
     err1.detected_type = PACKAGE_EXTENSION
@@ -327,7 +327,7 @@ def test_subpackage_metadata_preserved():
     err2 = ErrorBundle()
     err2.detected_type = PACKAGE_EXTENSION
 
-    submain.test_package(err1, xpi1, 'jetpack-1.16-outdated.xpi')
+    submain.test_package(err1, xpi1, 'jetpack-1.8-outdated.xpi')
     content.test_packed_packages(err2, xpi2)
 
     assert 'sub_packages' in err2.metadata

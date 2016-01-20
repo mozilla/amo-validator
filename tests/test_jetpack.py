@@ -350,7 +350,7 @@ def test_mismatched_module_version():
     other than the version they claim.
     """
 
-    xpi = XPIManager('tests/resources/jetpack/jetpack-1.16-pretending-1.17.xpi')
+    xpi = XPIManager('tests/resources/jetpack/jetpack-1.8-pretending-1.8.1.xpi')
     err = _do_test(xpi)
 
     assert err.failed()
@@ -487,7 +487,7 @@ def test_outdated_sdkversion():
     are warned against, but module hashes are still recognized.
     """
 
-    xpi = XPIManager('tests/resources/jetpack/jetpack-1.16-outdated.xpi')
+    xpi = XPIManager('tests/resources/jetpack/jetpack-1.8-outdated.xpi')
     err = _do_test(xpi, allow_old_sdk=False)
 
     assert err.failed()
