@@ -5,6 +5,7 @@ import types
 
 # Global import of predefinedentities will cause an import loop
 import instanceactions
+from validator.compat import FX42_DEFINITION
 from validator.constants import (BUGZILLA_BUG, DESCRIPTION_TYPES, FENNEC_GUID,
                                  FIREFOX_GUID, MAX_STR_SIZE, MDN_DOC)
 from validator.decorator import version_range
@@ -624,6 +625,7 @@ def _renamed_mozRequestAnimationFrame(traverser):
                     'prefixed form, please use requestAnimationFrame instead. '
                     'See %s for more information.' %
                     MDN_DOC % 'Web/API/window/requestAnimationFrame',
+        for_appversions=FX42_DEFINITION,
         compatibility_type='error',
         tier=5)
 

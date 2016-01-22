@@ -12,6 +12,7 @@ node
 
 import actions
 from instanceproperties import _set_HTML_property
+from validator.compat import FX42_DEFINITION
 from validator.constants import BUGZILLA_BUG
 
 
@@ -349,6 +350,7 @@ def parseContentType(args, traverser, node, wrapper):
         filename=traverser.filename,
         line=traverser.line,
         column=traverser.position,
+        for_appversions=FX42_DEFINITION,
         compatibility_type='error',
         context=traverser.context,
         tier=5)

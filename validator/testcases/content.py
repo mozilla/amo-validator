@@ -13,9 +13,10 @@ import validator.testcases.markup.markuptester as testendpoint_markup
 import validator.testcases.markup.csstester as testendpoint_css
 import validator.testcases.scripting as testendpoint_js
 import validator.testcases.langpack as testendpoint_langpack
-from validator.xpi import XPIManager
+from validator.compat import FX42_DEFINITION
 from validator.constants import (BUGZILLA_BUG, PACKAGE_LANGPACK,
                                  PACKAGE_SUBPACKAGE, PACKAGE_THEME)
+from validator.xpi import XPIManager
 
 
 FLAGGED_FILES = set(['.DS_Store', 'Thumbs.db'])
@@ -73,6 +74,7 @@ def test_newTab_xul(err, xpi_package=None):
                 'See %s for more information.' % BUGZILLA_BUG % 1167601,
                 filename=triple['filename'],
                 line=triple['line'],
+                for_appversions=FX42_DEFINITION,
                 compatibility_type='error',
                 context=triple['context'])
 

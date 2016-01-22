@@ -1,6 +1,7 @@
 from call_definitions import open_in_chrome_context
 from instanceproperties import _set_HTML_property
-from validator.compat import TB29_DEFINITION, TB30_DEFINITION, TB31_DEFINITION
+from validator.compat import (FX42_DEFINITION, TB29_DEFINITION,
+                              TB30_DEFINITION, TB31_DEFINITION)
 from validator.constants import BUGZILLA_BUG
 
 
@@ -226,6 +227,7 @@ def nsIPermissionManager(traverser):
         filename=traverser.filename,
         line=traverser.line,
         column=traverser.position,
+        for_appversions=FX42_DEFINITION,
         compatibility_type='error',
         context=traverser.context,
         tier=5)
