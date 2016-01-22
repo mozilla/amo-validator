@@ -1,6 +1,6 @@
 from helper import CompatTestCase
 from validator.chromemanifest import ChromeManifest
-from validator.compat import FX42_DEFINITION
+from validator.compat import FX43_DEFINITION
 from validator.errorbundler import ErrorBundle
 from validator.testcases import content
 
@@ -8,7 +8,7 @@ from validator.testcases import content
 class TestFX42Compat(CompatTestCase):
     """Test that compatibility tests for Gecko 42 are properly executed."""
 
-    VERSION = FX42_DEFINITION
+    VERSION = FX43_DEFINITION
 
     def test_parseContentType(self):
         self.run_script_for_compat("""
