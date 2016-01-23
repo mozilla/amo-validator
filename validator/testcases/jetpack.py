@@ -240,9 +240,10 @@ class HarnessOptionsValidator(object):
                         'outdated_version'),
                 warning='Outdated version of Add-on SDK',
                 description='You are using version %s of the Add-on SDK, '
-                            'which is outdated. Please upgrade to version '
-                            '%s and repack your add-on'
-                            % (sdk_version, latest_jetpack))
+                            'which is outdated. Please migrate to "jpm" '
+                            '(%s) and repack your add-on.'
+                            % (sdk_version, 'https://developer.mozilla.org/'
+                                'en-US/Add-ons/SDK/Tools/cfx_to_jpm'))
         elif Version(sdk_version) > latest_jetpack:
             self.err.notice(
                 err_id=('testcases_jetpack', 'inspect_jetpack',
