@@ -269,10 +269,11 @@ class MarkupParser(HTMLParser):
                 not (type_ in SAFE_IFRAME_TYPES or
                      not remote_src)):
                 self.err.warning(('markup', 'starttag', 'iframe_type_unsafe'),
-                                 "iframe/browser missing 'type' attribute",
+                                 'iframe/browser missing or unsafe `type` '
+                                 'attribute',
                                  'All iframe and browser elements must have '
-                                 'either a valid `type` attribute or a `src` '
-                                 'attribute that points to a local file.',
+                                 'either a valid and safe `type` attribute or a'
+                                 '`src` attribute that points to a local file.',
                                  self.filename,
                                  line=self.line,
                                  context=self.context)
