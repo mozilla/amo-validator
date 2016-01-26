@@ -63,6 +63,15 @@ def detect_type(err, install_rdf=None, xpi_package=None):
 
     if any(file_ for file_ in xpi_package if
                file_.startswith('dictionaries/')):
+        em_type = err.get_resource('em:type')
+
+        if em_type != 64:
+            err.error(('typedetection',
+                       'dictionary_valid_type',
+                       'invalid_em_type'),
+                      'Invalid <em:type> value.',
+                      'The package appears to be a dictionary but does not have '
+                      'the correct <em:type> set in the install manifest.')
         return PACKAGE_DICTIONARY
 
     if type_ is None:

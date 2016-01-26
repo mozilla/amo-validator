@@ -65,13 +65,15 @@ def test_theme():
 def test_dictionary():
     "Tests that type detection can detect an addon of type 'dictionary'"
 
-    err =_test_type('tests/resources/typedetection/td_dictionary.xpi',
+    err = _test_type('tests/resources/typedetection/td_dictionary.xpi',
                     PACKAGE_DICTIONARY)
     assert not err.notices
 
-    err =_test_type('tests/resources/typedetection/td_notype_dictionary.xpi',
-                    PACKAGE_DICTIONARY)
-    assert not err.notices
+    err = _test_type('tests/resources/typedetection/td_notype_dictionary.xpi',
+                    PACKAGE_DICTIONARY, failure=True)
+    assert err.errors[0]['id'] == (
+        'typedetection', 'dictionary_valid_type', 'invalid_em_type')
+
 
 
 def test_langpack():
