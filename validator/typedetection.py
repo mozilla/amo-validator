@@ -63,9 +63,7 @@ def detect_type(err, install_rdf=None, xpi_package=None):
 
     if any(file_ for file_ in xpi_package if
                file_.startswith('dictionaries/')):
-        em_type = err.get_resource('em:type')
-
-        if em_type != 64:
+        if type_ != '64':
             err.error(('typedetection',
                        'dictionary_valid_type',
                        'invalid_em_type'),
