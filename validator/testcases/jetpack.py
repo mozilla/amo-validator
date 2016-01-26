@@ -53,10 +53,16 @@ def inspect_jetpack(err, xpi_package, allow_old_sdk=False):
         err.save_resource('pretested_files', [])
 
     if is_old_jetpack(xpi_package):
-        metadata_validator = HarnessOptionsValidator(
-            err, xpi_package, allow_old_sdk)
-        if not metadata_validator.is_valid():
-            return
+        err.error(
+            err_id=('jetpack', 'inspect_jetpack',
+                    'cfx'),
+            error='Add-ons built with "cfx" are no longer accepted.',
+            description='Due to breaking changes in Firefox 44, add-ons packed '
+                        'with the "cfx" tool won\'t work any longer. To make '
+                        'your add-on compatible again, please use the "jpm" '
+                        'tool (http://mzl.la/1PwF5fY). You can find steps to '
+                        'migrate from "cfx" to "jpm" at http://mzl.la/1ncmH3A')
+        return
     else:
         metadata_validator = PackageJsonValidator(err, xpi_package)
 
@@ -170,187 +176,6 @@ def has_harness_options(xpi):
 
 def has_package_json(xpi):
     return 'package.json' in xpi
-
-
-class HarnessOptionsValidator(object):
-    def __init__(self, err, xpi, allow_old_sdk):
-        self.err = err
-        self.xpi = xpi
-        self.allow_old_sdk = allow_old_sdk
-        self.tested_files = {}
-        self.file_hashes = {}
-        self.suppress_warnings = False
-        self.use_latest_version = False
-
-    def is_valid(self):
-        try:
-            harnessoptions = json.loads(self.xpi.read('harness-options.json'))
-        except ValueError:
-            self.err.warning(
-                err_id=('testcases_jetpack',
-                        'inspect_jetpack',
-                        'bad_harness-options.json'),
-                warning='harness-options.json is not decodable JSON',
-                description='The harness-options.json file is not decodable '
-                            'as valid JSON data.',
-                filename='harness-options.json')
-            return
-
-        # Test the harness-options file for the mandatory values.
-        mandatory_elements = ('sdkVersion', 'manifest', 'jetpackID')
-        missing_elements = []
-        for element in mandatory_elements:
-            if element not in harnessoptions:
-                missing_elements.append(element)
-
-        if missing_elements:
-            self.err.warning(
-                err_id=('testcases_jetpack',
-                        'inspect_jetpack',
-                        'harness-options_missing_elements'),
-                warning='Elements are missing from harness-options.json',
-                description=('The harness-options.json file seems to be '
-                             'missing elements. It may have been tampered '
-                             'with or is corrupt.',
-                             'Missing elements: %s'
-                             % ', '.join(missing_elements)),
-                filename='harness-options.json')
-            return
-
-        # Save the SDK version information to the metadata.
-        sdk_version = harnessoptions['sdkVersion']
-        self.err.metadata['jetpack_sdk_version'] = sdk_version
-
-        # Check that the version number isn't a redacted version.
-        if sdk_version in ('1.4', '1.4.1', '1.4.2', ):
-            self.err.error(
-                err_id=('testcases_jetpack', 'inspect_jetpack',
-                        'redacted_version'),
-                error='Unsupported version of Add-on SDK',
-                description='Versions 1.4, 1.4.1, and 1.4.2 of the add-on SDK '
-                            'may cause issues with data loss in some modules. '
-                            'You should upgrade the SDK to at least 1.4.3 in '
-                            'order to avoid these issues.')
-
-        pretested_files = self.err.get_resource('pretested_files')
-
-        if not self.allow_old_sdk and Version(sdk_version) < latest_jetpack:
-            self.err.warning(
-                err_id=('testcases_jetpack', 'inspect_jetpack',
-                        'outdated_version'),
-                warning='Outdated version of Add-on SDK',
-                description='You are using version %s of the Add-on SDK, '
-                            'which is outdated. Please upgrade to version '
-                            '%s and repack your add-on'
-                            % (sdk_version, latest_jetpack))
-        elif Version(sdk_version) > latest_jetpack:
-            self.err.notice(
-                err_id=('testcases_jetpack', 'inspect_jetpack',
-                        'future_version'),
-                notice='Future version of Add-on SDK unrecognized',
-                description="We've detected that the add-on uses a version of "
-                            'the add-on SDK that we do not yet recognize.')
-            self.suppress_warnings = True
-
-        loaded_modules = []
-        mandatory_module_elements = (
-            'moduleName', 'packageName', 'requirements', 'sectionName',
-            'docsSHA256', 'jsSHA256')
-
-        # Iterate each loaded module and perform a sha256 hash on the files.
-        for uri, module in harnessoptions['manifest'].items():
-
-            # Make sure the module is a resource:// URL
-            if uri.startswith(('http://', 'https://', 'ftp://')):
-                self.err.warning(
-                    err_id=('testcases_jetpack',
-                            'inspect_jetpack',
-                            'irregular_module_location'),
-                    warning='Irregular Jetpack module location',
-                    description=('A Jetpack module is referenced with a '
-                                 'remote URI.',
-                                 'Referenced URI: %s' % uri),
-                    filename='harness-options.json')
-                continue
-
-            # Make sure all of the mandatory elements are present.
-            if not all(el in module for el in mandatory_module_elements):
-                self.err.warning(
-                    err_id=('testcases_jetpack',
-                            'inspect_jetpack',
-                            'irregular_module_elements'),
-                    warning='Irregular Jetpack module elements',
-                    description=('A Jetpack module in harness-options.json is '
-                                 'missing some of its required JSON elements.',
-                                 'Module: %s' % uri),
-                    filename='harness-options.json')
-                continue
-
-            # Strip off the resource:// if it exists
-            if uri.startswith('resource://'):
-                uri = uri[11:]
-            zip_path = 'resources/%s' % uri.replace('@', '-at-')
-
-            # The key is no longer a URI in newer versions of the SDK
-            if zip_path not in self.xpi:
-                zip_path = 'resources/%s/%s/%s.js' % (
-                    module['packageName'], module['sectionName'],
-                    module['moduleName'])
-
-            # Check the zipname element if it exists.
-            if zip_path not in self.xpi:
-                self.err.warning(
-                    err_id=('testcases_jetpack',
-                            'inspect_jetpack',
-                            'missing_jetpack_module'),
-                    warning='Missing Jetpack module',
-                    description=('A Jetpack module listed in '
-                                 'harness-options.json could not be found in '
-                                 'the add-on.',
-                                 'Path: %s' % zip_path),
-                    filename='harness-options.json')
-                continue
-
-            file_data = self.xpi.read(zip_path)
-            if not file_data.strip():
-                continue
-            blob_hash = hashlib.sha256(file_data).hexdigest()
-            self.file_hashes[zip_path] = blob_hash
-
-            # Make sure that the module's hash matches what the manifest says.
-            if blob_hash != module['jsSHA256']:
-                self.err.warning(
-                    err_id=('testcases_jetpack',
-                            'inspect_jetpack',
-                            'mismatched_checksum'),
-                    warning='Jetpack module hash mismatch',
-                    description=('A file in the Jetpack add-on does not match '
-                                 'the corresponding hash listed in '
-                                 'harness-options.json.',
-                                 'Module: %s' % zip_path,
-                                 'Hashes: %s/%s'
-                                 % (blob_hash, module['jsSHA256'])),
-                    filename=zip_path)
-
-            # We aren't going to keep track of anything that isn't an official
-            # Jetpack file.
-            if module['jsSHA256'] not in jetpack_hash_table:
-                continue
-
-            # Keep track of all of the valid modules that were loaded.
-            loaded_modules.append(''.join([module['packageName'], '-',
-                                           module['sectionName'], '/',
-                                           module['moduleName'], '.js']))
-
-            # Save information on what was matched.
-            self.tested_files[zip_path] = jetpack_hash_table[
-                module['jsSHA256']]
-            pretested_files.append(zip_path)
-
-        self.err.save_resource('pretested_files', pretested_files)
-        self.err.metadata['jetpack_loaded_modules'] = loaded_modules
-
-        return True
 
 
 class PackageJsonValidator(object):

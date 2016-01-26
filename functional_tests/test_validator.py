@@ -327,3 +327,7 @@ class JetpackDetection(ValidatorTest):
         results = self.validate('jetpack-two.xpi')
         ok_(results['metadata']['jetpack_identified_files'],
             'expected jetpack files')
+
+    def test_jetpack_fail_for_cfx_usage(self):
+        self.validate('cfx.xpi')
+        self.expectMsg(u'Add-ons built with "cfx" are no longer accepted.')
