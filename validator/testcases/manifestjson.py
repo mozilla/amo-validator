@@ -13,7 +13,7 @@ def test_manifest_json_params(err, xpi_manifest=None):
 
 
 def validate_required_id(err):
-    manifest_json = err.get_resource('manifest_json')
+    manifest_json = err.get_resource('manifest_json').data
     if ('applications' in manifest_json and
             'gecko' in manifest_json['applications'] and
             'id' in manifest_json['applications']['gecko']):
@@ -24,7 +24,7 @@ def validate_required_id(err):
 
 
 def validate_required_field(err, field, validate_fn):
-    manifest_json = err.get_resource('manifest_json')
+    manifest_json = err.get_resource('manifest_json').data
     if field in manifest_json:
         value = manifest_json[field]
         validate_fn(err, value)
