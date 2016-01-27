@@ -4,6 +4,7 @@ import sys
 # Import this first so we get the same order of imports as runtime,
 # and avoid import loops.
 import validator.validate  # noqa
+from validator.json_parser import ManifestJsonParser
 from validator.submain import populate_chrome_manifest
 from validator.rdf import RDFParser
 from validator.xpi import XPIManager
@@ -26,10 +27,16 @@ def _do_test(path, test, failure=True,
     if set_type:
         err.detected_type = set_type # Conduit test requires type
     if require_install:
-        err.save_resource('has_install_rdf', True)
-        rdf_data = package.read('install.rdf')
-        install_rdf = RDFParser(err, rdf_data)
-        err.save_resource('install_rdf', install_rdf)
+        if 'install.rdf' in package:
+            err.save_resource('has_install_rdf', True)
+            rdf_data = package.read('install.rdf')
+            install_rdf = RDFParser(err, rdf_data)
+            err.save_resource('install_rdf', install_rdf)
+        elif 'manifest.json' in package:
+            err.save_resource('has_manifest_json', True)
+            manifest_data = package.read('manifest.json')
+            manifest_json = ManifestJsonParser(err, manifest_data)
+            err.save_resource('install_rdf', manifest_json)
 
     populate_chrome_manifest(err, package)
 

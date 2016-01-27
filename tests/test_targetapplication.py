@@ -2,6 +2,7 @@ import json
 from mock import patch
 import validator.testcases.targetapplication as targetapp
 from validator.errorbundler import ErrorBundle
+from validator.json_parser import ManifestJsonParser
 from validator.rdf import RDFParser
 from helper import _do_test
 
@@ -19,6 +20,16 @@ def _do_test_raw(rdf, listed=True, overrides=None):
 
     targetapp.test_targetedapplications(err)
     print err.print_summary()
+    return err
+
+
+def _do_test_raw_webextension(manifest, listed=True):
+    err = ErrorBundle(listed=listed)
+    manifest = ManifestJsonParser(err, manifest)
+    err.save_resource('has_manifest_json', True)
+    err.save_resource('manifest_json', manifest)
+
+    targetapp.test_targetedapplications(err)
     return err
 
 
@@ -59,6 +70,21 @@ def test_missing_min_max():
              True,
              True)
 
+
+def test_valid_targetapps_webextension_missing_min_max():
+    results = _do_test('tests/resources/targetapplication/webextension.xpi',
+                       targetapp.test_targetedapplications,
+                       False,
+                       True)
+    supports = results.get_resource('supports')
+    assert 'firefox' in supports
+    assert len(supports) == 1
+
+    supported_versions = results.supported_versions
+    assert (supported_versions['{ec8030f7-c20a-464f-9b0e-13a3a9e97384}'] ==
+            ['42.0', '42.*'])
+
+
 def test_bad_min_max():
     """Tests that the lower/upper-bound version number for a
     targetApplication entry is indeed a valid version number"""
@@ -69,6 +95,21 @@ def test_bad_min_max():
              True)
 
     _do_test('tests/resources/targetapplication/bad_max.xpi',
+             targetapp.test_targetedapplications,
+             True,
+             True)
+
+
+def test_bad_min_max_webextension():
+    """Tests that the lower/upper-bound version number is indeed a valid
+    version number."""
+
+    _do_test('tests/resources/targetapplication/webextension_bad_min.xpi',
+             targetapp.test_targetedapplications,
+             True,
+             True)
+
+    _do_test('tests/resources/targetapplication/webextension_bad_max.xpi',
              targetapp.test_targetedapplications,
              True,
              True)
@@ -220,6 +261,21 @@ def test_no_supported_mozilla_apps():
 
     assert _do_test_raw(failure_case).failed()
     assert not _do_test_raw(failure_case, listed=False).failed()
+
+    assert not _do_test_raw_webextension("""{
+        "name": "My Awesome Addon",
+        "version": "1.25",
+
+        "applications": {
+            "gecko": {
+                "id": "my@awesome.addon"
+            }
+        }
+    }""").failed()
+
+    failure_case = """{"name": "My Awesome Addon", "version": "1.25"}"""
+    assert _do_test_raw_webextension(failure_case).failed()
+    assert not _do_test_raw_webextension(failure_case, listed=False).failed()
 
 
 MISSING_ANDROID_APPROVED_APPLICATIONS = {

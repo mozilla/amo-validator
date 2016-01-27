@@ -3,7 +3,7 @@ import json
 from validator.constants import FIREFOX_GUID
 
 
-class ManifestJsonParser():
+class ManifestJsonParser(object):
     """Parser wrapper for manifest.json files."""
 
     def __init__(self, err, data, namespace=None):
