@@ -10,6 +10,7 @@ from defusedxml.common import DefusedXmlException
 import validator
 from validator import decorator
 from validator.chromemanifest import ChromeManifest
+from validator.json_parser import ManifestJsonParser
 from validator.opensearch import detect_opensearch
 from validator.rdf import RDFException, RDFParser
 from validator.typedetection import detect_type
@@ -241,7 +242,7 @@ def _load_package_json(err, package, expectation):
 def _load_manifest_json(err, package, expectation):
     raw_manifest_json = package.read('manifest.json')
     try:
-        manifest_json = json.loads(raw_manifest_json)
+        manifest_json = ManifestJsonParser(err, raw_manifest_json)
     except ValueError:
         err.error(
             err_id=('main', 'test_package', 'parse_error'),

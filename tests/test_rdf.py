@@ -2,7 +2,6 @@ from StringIO import StringIO
 
 from nose.tools import raises
 
-import validator.rdf as rdf
 from validator.rdf import RDFParser, RDFException
 
 
@@ -41,16 +40,6 @@ def test_namespacing():
     assert str(r.uri('bar', 'abc')) == 'abc#bar'
 
 
-def test_namespacing():
-    """Tests that the RDF parser successfully creates namespaces."""
-
-    r = RDFParser(None, open('tests/resources/rdf/pass.rdf'), 'foo')
-
-    assert r.namespace == 'foo'
-    assert str(r.uri('bar')) == 'foo#bar'
-    assert str(r.uri('bar', 'abc')) == 'abc#bar'
-
-
 def test_get_root_subject():
     'Tests the integrity of the get_root_subject() function'
 
@@ -65,7 +54,7 @@ def test_get_root_subject():
 
 
 def test_get_object():
-    """"Tests the integrity of the get_object() and get_objects()
+    """Tests the integrity of the get_object() and get_objects()
     functions."""
 
     r = RDFParser(None, open('tests/resources/rdf/pass.rdf'))
@@ -78,3 +67,12 @@ def test_get_object():
     assert len(emtests) == 3
     assert emtests[0] == emtest
 
+
+def test_get_applications():
+    """Test the get_applications method on the RDFParser."""
+    parser = RDFParser(None, open('tests/resources/installrdf/pass.rdf'))
+    applications = parser.get_applications()
+    assert applications == [{
+        'guid': u'{ec8030f7-c20a-464f-9b0e-13a3a9e97384}',
+        'min_version': u'3.7a5pre',
+        'max_version': u'0.3'}]

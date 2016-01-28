@@ -7,6 +7,9 @@ from StringIO import StringIO
 from xml.sax import ContentHandler, SAXParseException
 
 
+from validator.constants import APPLICATIONS, APPROVED_APPLICATIONS
+
+
 class RDFException(Exception):
     """Exception thrown when the RDF parser encounters a problem."""
 
@@ -156,3 +159,18 @@ class RDFParser(object):
         # Get the result of the search
         results = self.rdf.objects(subject, predicate)
         return list(results)
+
+    def get_applications(self):
+        """Return the list of supported applications."""
+        applications = []
+
+        # Isolate all of the bnodes referring to target applications
+        for target_app in self.get_objects(None,
+                                           self.uri('targetApplication')):
+            applications.append({
+                'guid': self.get_object(target_app, self.uri('id')),
+                'min_version': self.get_object(target_app,
+                                               self.uri('minVersion')),
+                'max_version': self.get_object(target_app,
+                                               self.uri('maxVersion'))})
+        return applications
