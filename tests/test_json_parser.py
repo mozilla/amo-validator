@@ -43,7 +43,7 @@ def test_get_applications():
     parser = ManifestJsonParser(None, manifest_json)
     assert parser.get_applications() == [{u'guid': FIREFOX_GUID,
                                           u'min_version': u'42.0',
-                                          u'max_version': u'42.*'}]
+                                          u'max_version': u'*'}]
 
 
 def test_get_applications_with_versions():
