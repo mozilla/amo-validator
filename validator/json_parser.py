@@ -17,7 +17,7 @@ class ManifestJsonParser(object):
             return []
         app = self.data['applications']['gecko']
         min_version = app.get('strict_min_version', u'42.0')
-        max_version = app.get('strict_max_version', u'42.*')
+        max_version = app.get('strict_max_version', u'*')
         return [{u'guid': FIREFOX_GUID,
                  u'min_version': min_version,
                  u'max_version': max_version}]

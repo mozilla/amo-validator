@@ -1,14 +1,11 @@
 import json
 from mock import patch
 import validator.testcases.targetapplication as targetapp
+from validator.constants import APPROVED_APPLICATIONS
 from validator.errorbundler import ErrorBundle
 from validator.json_parser import ManifestJsonParser
 from validator.rdf import RDFParser
 from helper import _do_test
-
-
-targetapp.APPROVED_APPLICATIONS = \
-        json.load(open('validator/app_versions.json'))
 
 
 def _do_test_raw(rdf, listed=True, overrides=None):
@@ -81,8 +78,10 @@ def test_valid_targetapps_webextension_missing_min_max():
     assert len(supports) == 1
 
     supported_versions = results.supported_versions
-    assert (supported_versions['{ec8030f7-c20a-464f-9b0e-13a3a9e97384}'] ==
-            ['42.0', '42.*'])
+    supported_firefox_versions = supported_versions[
+        '{ec8030f7-c20a-464f-9b0e-13a3a9e97384}']
+    assert '42.0' in supported_firefox_versions  # Automatic min version.
+    assert '*' in supported_firefox_versions  # Automatic max version.
 
 
 def test_bad_min_max():
