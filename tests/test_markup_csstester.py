@@ -22,18 +22,18 @@ def _do_test(path, should_fail=False, detected_type=None):
 
 
 def test_css_file():
-    'Tests a package with a valid CSS file.'
+    """Tests a package with a valid CSS file."""
     _do_test('tests/resources/markup/csstester/pass.css')
 
 
 def test_css_moz_binding():
-    'Tests that remote scripts in CSS are blocked.'
+    """Tests that remote scripts in CSS are blocked."""
     _do_test('tests/resources/markup/csstester/mozbinding.css', True)
     _do_test('tests/resources/markup/csstester/mozbinding-pass.css', False)
 
 
 def test_css_identitybox():
-    "Tests that the identity box isn't played with."
+    """Tests that the identity box isn't played with."""
     _do_test('tests/resources/markup/csstester/identity-box.css', True)
 
 
@@ -44,7 +44,7 @@ def test_css_identitybox_themes():
 
 
 def test_remote_urls():
-    'Tests the Regex used to detect remote URLs'
+    """Tests the Regex used to detect remote URLs"""
 
     t = lambda s: csstester.BAD_URL.match(s) is not None
 
@@ -63,3 +63,12 @@ def test_remote_urls():
 
     assert not t('UrL(/abc.def)')
     assert t('url(HTTP://foo.bar/)')
+
+
+def test_cssutils_unicode_space():
+    """Tests that cssutils parses `content:"\00a0|\00a0"` correctly.
+
+    See https://bugzilla.mozilla.org/show_bug.cgi?id=1244644 for more details.
+    """
+    _do_test('tests/resources/markup/csstester/unicode_space.css',
+             should_fail=False)
