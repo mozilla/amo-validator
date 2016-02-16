@@ -1,7 +1,5 @@
-import json
 from mock import patch
 import validator.testcases.targetapplication as targetapp
-from validator.constants import APPROVED_APPLICATIONS
 from validator.errorbundler import ErrorBundle
 from validator.json_parser import ManifestJsonParser
 from validator.rdf import RDFParser
@@ -16,7 +14,6 @@ def _do_test_raw(rdf, listed=True, overrides=None):
     err.save_resource('install_rdf', rdf)
 
     targetapp.test_targetedapplications(err)
-    print err.print_summary()
     return err
 
 
@@ -41,34 +38,43 @@ def test_valid_targetapps():
                        False,
                        True)
     supports = results.get_resource('supports')
-    print supports
     assert 'firefox' in supports and 'mozilla' in supports
     assert len(supports) == 2
 
     supported_versions = results.supported_versions
-    print supported_versions
     assert (supported_versions['{ec8030f7-c20a-464f-9b0e-13a3a9e97384}'] ==
-                ['3.6', '3.6.4', '3.6.*'])
+            ['3.6', '3.6.4', '3.6.*'])
 
 
 def test_missing_min_max():
     """
     Test that the minVersion and maxVersion properties of each
-    targetApplication are present.
+    targetApplication are mandatory.
     """
 
-    _do_test('tests/resources/targetapplication/missing_min.xpi',
-             targetapp.test_targetedapplications,
-             True,
-             True)
+    results = _do_test('tests/resources/targetapplication/missing_min.xpi',
+                       targetapp.test_targetedapplications,
+                       True,
+                       True)
+    # _do_test() checks for .failed(), but by default this includes warnings.
+    # We want to make sure it's a hard error and not just a warning.
+    assert results.errors[0]['id'] == ('testcases_targetapplication',
+                                       'test_targetedapplications',
+                                       'missing_minversion')
 
-    _do_test('tests/resources/targetapplication/missing_max.xpi',
-             targetapp.test_targetedapplications,
-             True,
-             True)
+    results = _do_test('tests/resources/targetapplication/missing_max.xpi',
+                       targetapp.test_targetedapplications,
+                       True,
+                       True)
+    assert results.errors[0]['id'] == ('testcases_targetapplication',
+                                       'test_targetedapplications',
+                                       'missing_maxversion')
 
 
 def test_valid_targetapps_webextension_missing_min_max():
+    """
+    Test that min/max version are *not* mandatory for web extensions.
+    """
     results = _do_test('tests/resources/targetapplication/webextension.xpi',
                        targetapp.test_targetedapplications,
                        False,
@@ -329,7 +335,7 @@ def test_unsupported_mozilla_app_in_approved_apps():
     err = _do_test_raw(failure_case)
     assert err.failed()
     assert err.errors[0]['id'] == ('testcases_targetapplication',
-                                   'test_targetedapplication',
+                                   'test_targetedapplications',
                                    'no_mozilla_support')
 
 
