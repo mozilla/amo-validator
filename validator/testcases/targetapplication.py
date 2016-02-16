@@ -71,9 +71,27 @@ def test_targetedapplications(err, xpi_package=None):
 
             app_name = APPLICATIONS[guid] if guid in APPLICATIONS else guid
 
+            if min_version is None:
+                err.error(('testcases_targetapplication',
+                           'test_targetedapplications',
+                           'missing_minversion'),
+                          'Missing minVersion property',
+                          'A target application element is missing its '
+                          'min version property.',
+                          filename=manifest_file)
+                continue
+            elif max_version is None:
+                err.error(('testcases_targetapplication',
+                           'test_targetedapplications',
+                           'missing_maxversion'),
+                          'Missing maxVersion property',
+                          'A target application element is missing its '
+                          'max version property.',
+                          filename=manifest_file)
+                continue
+
             try:
-                if min_version is not None:
-                    min_ver_pos = app_versions.index(min_version)
+                min_ver_pos = app_versions.index(min_version)
             except ValueError:
                 err.error(('testcases_targetapplication',
                            'test_targetedapplications',
@@ -89,8 +107,7 @@ def test_targetedapplications(err, xpi_package=None):
                 continue
 
             try:
-                if max_version is not None:
-                    max_ver_pos = app_versions.index(max_version)
+                max_ver_pos = app_versions.index(max_version)
             except ValueError:
                 err.error(('testcases_targetapplication',
                            'test_targetedapplications',
@@ -107,9 +124,7 @@ def test_targetedapplications(err, xpi_package=None):
 
             # Now we need to check to see if the version numbers
             # are in the right order.
-            if (min_version is not None and
-                    max_version is not None and
-                    min_ver_pos > max_ver_pos):
+            if min_ver_pos > max_ver_pos:
                 err.error(('testcases_targetapplication',
                            'test_targetedapplications',
                            'invalid_version_order'),
@@ -121,27 +136,6 @@ def test_targetedapplications(err, xpi_package=None):
                            '"%s" is not less than "%s".' % (min_version,
                                                             max_version)],
                           manifest_file)
-                continue
-
-            if min_version is None:
-                err.warning(('testcases_targetapplication',
-                             'test_targetedapplications',
-                             'missing_minversion'),
-                            'Missing minVersion property',
-                            'A target application element is missing its '
-                            'min version property. This may cause it to be '
-                            'ignored as invalid.',
-                            filename=manifest_file)
-                continue
-            elif max_version is None:
-                err.warning(('testcases_targetapplication',
-                             'test_targetedapplications',
-                             'missing_maxversion'),
-                            'Missing maxVersion property',
-                            'A target application element is missing its '
-                            'max version property. This may cause it to be '
-                            'ignored as invalid.',
-                            filename=manifest_file)
                 continue
 
             all_supported_versions[guid] = (
@@ -162,7 +156,7 @@ def test_targetedapplications(err, xpi_package=None):
 
     if len(used_targets) != len(no_duplicate_targets):
         err.warning(('testcases_targetapplication',
-                     'test_targetedapplication',
+                     'test_targetedapplications',
                      'duplicate_targetapps'),
                     'Found duplicate target application elements.',
                     'Multiple target application elements were found in the '
@@ -184,7 +178,7 @@ def test_targetedapplications(err, xpi_package=None):
     if not supports and err.get_resource('listed'):
         err.error(
             err_id=('testcases_targetapplication',
-                    'test_targetedapplication',
+                    'test_targetedapplications',
                     'no_mozilla_support'),
             error='No Mozilla products listed as target applications',
             description=(
