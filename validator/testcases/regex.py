@@ -3,8 +3,8 @@ from functools import wraps
 
 from validator.compat import (
     FX38_DEFINITION, FX39_DEFINITION, FX40_DEFINITION, FX41_DEFINITION,
-    FX43_DEFINITION, FX44_DEFINITION, TB29_DEFINITION, TB30_DEFINITION,
-    TB31_DEFINITION)
+    FX43_DEFINITION, FX44_DEFINITION, FX45_DEFINITION, TB29_DEFINITION,
+    TB30_DEFINITION, TB31_DEFINITION)
 from validator.constants import BUGZILLA_BUG, MDN_DOC
 from validator.contextgenerator import ContextGenerator
 from .chromemanifest import DANGEROUS_CATEGORIES, DANGEROUS_CATEGORY_WARNING
@@ -493,6 +493,47 @@ class Gecko44RegexTests(CompatRegexTestHelper):
             'See %s for more information. ' % BUGZILLA_BUG % 1141041,
             log_function=self.err.warning,
             compat_type='error')
+
+
+@register_generator
+class Gecko45RegexTests(CompatRegexTestHelper):
+    """Regex tests for Firefox 45 updates."""
+
+    VERSION = FX45_DEFINITION
+
+    def tests(self):
+        yield self.get_test(
+            r'\bnsIURIChecker\b',
+            'The nsIURIChecker interface has been removed',
+            'The nsIURIChecker interface has been removed. '
+            'See %s for more information.' % BUGZILLA_BUG % 1222829,
+            log_function=self.err.warning,
+            compat_type='error')
+
+        yield self.get_test(
+            r'\b(gProxyFavIcon|\"page-proxy-favicon\")\b',
+            (
+                'The site identity interface has changed, '
+                'which means gProxyFavIcon and "page-proxy-favicon" '
+                'are no longer valid.'
+            ),
+            (
+                'The site identity interface has changed, '
+                'which means gProxyFavIcon and "page-proxy-favicon" '
+                'are no longer valid. See %s for more information'
+                % BUGZILLA_BUG % 1206244
+            ),
+            log_function=self.err.warning,
+            compat_type='error')
+
+        yield self.get_test(
+            r'\bremoveAllPages\b',
+            'The removeAllPages function is now deprecated.',
+            'The removeAllPages function is now deprecated. '
+            'You should use PlacesUtils.history.clear(); instead. '
+            'See %s for more information.' % BUGZILLA_BUG % 1124185,
+            log_function=self.err.warning,
+            compat_type='warning')
 
 
 #############################
