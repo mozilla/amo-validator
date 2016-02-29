@@ -3,8 +3,8 @@ from functools import wraps
 
 from validator.compat import (
     FX38_DEFINITION, FX39_DEFINITION, FX40_DEFINITION, FX41_DEFINITION,
-    FX43_DEFINITION, FX44_DEFINITION, TB29_DEFINITION, TB30_DEFINITION,
-    TB31_DEFINITION)
+    FX43_DEFINITION, FX44_DEFINITION, FX46_DEFINITION, TB29_DEFINITION,
+    TB30_DEFINITION, TB31_DEFINITION)
 from validator.constants import BUGZILLA_BUG, MDN_DOC
 from validator.contextgenerator import ContextGenerator
 from .chromemanifest import DANGEROUS_CATEGORIES, DANGEROUS_CATEGORY_WARNING
@@ -491,6 +491,28 @@ class Gecko44RegexTests(CompatRegexTestHelper):
             'The getAllStyleSheets function has been removed. '
             'You can use getBrowserStyleSheets instead. '
             'See %s for more information. ' % BUGZILLA_BUG % 1141041,
+            log_function=self.err.warning,
+            compat_type='error')
+
+
+@register_generator
+class Gecko46RegexTests(CompatRegexTestHelper):
+    """Regex tests for Firefox 46 updates."""
+
+    VERSION = FX46_DEFINITION
+
+    def tests(self):
+        yield self.get_test(
+            r'\b(mTabListeners|mTabFilters)\b',
+            (
+                'mTabListeners and mTabFilters are now Map objects and have '
+                'been renamed to _tabListeners and _tabFilters, respectively.'
+            ),
+            (
+                'mTabListeners and mTabFilters are now Map objects and have '
+                'been renamed to _tabListeners and _tabFilters, respectively. '
+                'See %s for more information' % BUGZILLA_BUG % 1238685
+            ),
             log_function=self.err.warning,
             compat_type='error')
 
