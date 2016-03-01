@@ -30,6 +30,7 @@ FX41_DEFINITION = _build_definition(41)
 FX42_DEFINITION = _build_definition(42)
 FX43_DEFINITION = _build_definition(43)
 FX44_DEFINITION = _build_definition(44)
+FX45_DEFINITION = _build_definition(45)
 FX46_DEFINITION = _build_definition(46)
 
 
