@@ -43,10 +43,6 @@ APPLICATIONS = {
 with open(os.path.join(os.path.dirname(__file__), 'app_versions.json')) as avs:
     APPROVED_APPLICATIONS = json.load(avs)
 
-# Add the '*' fake max version. Used specifically for WebExtensions, see
-# https://github.com/mozilla/amo-validator/issues/390.
-APPROVED_APPLICATIONS['1']['versions'].append('*')
-
 BUGZILLA_BUG = 'https://bugzil.la/%d'
 MDN_DOC = 'https://developer.mozilla.org/docs/%s'
 
