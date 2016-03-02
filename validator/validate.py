@@ -66,9 +66,6 @@ def validate(path, format='json',
         # path (string).
         with open(approved_applications) as approved_apps:
             apps = json.load(approved_apps)
-        # Add the '*' fake max version. Used specifically for WebExtensions,
-        # see https://github.com/mozilla/amo-validator/issues/390.
-        apps['1']['versions'].append('*')
     elif isinstance(approved_applications, dict):
         # If the lists of approved applications are already in a dict, just use
         # that instead of trying to pull from a file.
