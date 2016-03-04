@@ -53,6 +53,9 @@ def inspect_jetpack(err, xpi_package, allow_old_sdk=False):
         err.save_resource('pretested_files', [])
 
     if is_old_jetpack(xpi_package):
+        # Ignore this test for cfx based add-ons if run as part of bulk
+        # validation because existing add-ons on AMO have been re-packed.
+        # We just need this for validation during upload.
         if err.get_resource('is_compat_test'):
             return
         err.error(
