@@ -53,6 +53,8 @@ def inspect_jetpack(err, xpi_package, allow_old_sdk=False):
         err.save_resource('pretested_files', [])
 
     if is_old_jetpack(xpi_package):
+        if err.get_resource('is_compat_test'):
+            return
         err.error(
             err_id=('jetpack', 'inspect_jetpack',
                     'cfx'),
