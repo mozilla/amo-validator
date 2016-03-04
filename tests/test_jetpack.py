@@ -11,9 +11,11 @@ from validator.errorbundler import ErrorBundle
 from validator.xpi import XPIManager
 
 
-def _do_test(xpi_package, allow_old_sdk=True):
+def _do_test(xpi_package, allow_old_sdk=True, compat=False):
 
     err = ErrorBundle()
+    if compat:
+        err.save_resource('is_compat_test', True)
     jetpack.inspect_jetpack(err, xpi_package, allow_old_sdk=allow_old_sdk)
     return err
 
@@ -244,3 +246,31 @@ def test_fail_on_cfx():
     print err.print_summary(verbose=True)
     assert err.failed() and err.errors
 
+
+def test_pass_cfx_for_compat():
+    """
+    Test that we fail for add-ons built with 'cfx'.
+    """
+
+    with open('tests/resources/bootstrap.js') as bootstrap_file:
+        bootstrap = bootstrap_file.read()
+        bootstrap_hash = hashlib.sha256(bootstrap).hexdigest()
+
+    harnessoptions = {
+            'jetpackID': 'foobar',
+            'sdkVersion': '1.17',
+            'manifest': {
+                'bootstrap.js':
+                    {'requirements': {},
+                     'packageName': 'addon-kit',
+                     'sectionName': 'lib',
+                     'moduleName': 'drawing',
+                     'jsSHA256': bootstrap_hash,
+                     'docsSHA256': bootstrap_hash}}}
+
+    err = _do_test(MockXPI({'bootstrap.js': bootstrap,
+                            'harness-options.json':
+                                json.dumps(harnessoptions)}),
+                   compat=True)
+    print err.print_summary(verbose=True)
+    assert not err.failed() and not err.errors
