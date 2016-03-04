@@ -227,20 +227,20 @@ def test_fail_on_cfx():
         bootstrap_hash = hashlib.sha256(bootstrap).hexdigest()
 
     harnessoptions = {
-            'jetpackID': 'foobar',
-            'sdkVersion': '1.17',
-            'manifest': {
-                'bootstrap.js':
-                    {'requirements': {},
-                     'packageName': 'addon-kit',
-                     'sectionName': 'lib',
-                     'moduleName': 'drawing',
-                     'jsSHA256': bootstrap_hash,
-                     'docsSHA256': bootstrap_hash}}}
+        'jetpackID': 'foobar',
+        'sdkVersion': '1.17',
+        'manifest': {
+            'bootstrap.js':
+                {'requirements': {},
+                 'packageName': 'addon-kit',
+                 'sectionName': 'lib',
+                 'moduleName': 'drawing',
+                 'jsSHA256': bootstrap_hash,
+                 'docsSHA256': bootstrap_hash}}}
 
     err = _do_test(MockXPI({'bootstrap.js': bootstrap,
                             'harness-options.json':
                                 json.dumps(harnessoptions)}))
     print err.print_summary(verbose=True)
     assert err.failed() and err.errors
-
+    eq_(err.errors[0]['compatibility_type'], 'warning')

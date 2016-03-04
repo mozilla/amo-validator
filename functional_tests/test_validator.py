@@ -136,6 +136,16 @@ class CompatibilityTests(CompatValidatorTest):
             'new-tab-xul.xpi', FIREFOX_GUID, '43.0')
         self.shouldNotGetMsg('newTab.xul is now newTab.xhtml.')
 
+    def test_cfx_anytime(self):
+        self.validate_for_appver('cfx.xpi', FIREFOX_GUID, '45.0')
+        message_id = ['jetpack', 'inspect_jetpack', 'cfx']
+        cfx_messages = [
+            message
+            for message in self.validation['messages']
+            if message['id'] == message_id]
+        eq_(len(cfx_messages), 1, 'the cfx message should exist once')
+        eq_(cfx_messages[0]['compatibility_type'], 'warning')
+
 
 class JavaScriptTests(ValidatorTest):
 
