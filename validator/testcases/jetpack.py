@@ -1,7 +1,6 @@
 from collections import defaultdict
 import hashlib
 from itertools import imap
-import json
 import os
 import pickle
 
@@ -54,9 +53,9 @@ def inspect_jetpack(err, xpi_package, allow_old_sdk=False):
 
     if is_old_jetpack(xpi_package):
         err.error(
-            err_id=('jetpack', 'inspect_jetpack',
-                    'cfx'),
+            err_id=('jetpack', 'inspect_jetpack', 'cfx'),
             error='Add-ons built with "cfx" are no longer accepted.',
+            compatibility_type='warning',
             description='Due to breaking changes in Firefox 44, add-ons packed '
                         'with the "cfx" tool won\'t work any longer. To make '
                         'your add-on compatible again, please use the "jpm" '
