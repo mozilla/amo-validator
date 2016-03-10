@@ -77,7 +77,8 @@ def prepare_package(err, path, expectation=0, for_appversions=None,
                          'time. This is most likely due to the size or '
                          'complexity of your add-on.',
                          'This timeout has been logged, but please consider '
-                         'filing an issue report here: http://mzl.la/1DG0sFd'),
+                         'filing an issue report here: '
+                         'https://bit.ly/1paBbSy'),
             exc_info=sys.exc_info())
 
     except Exception:
