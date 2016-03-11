@@ -39,21 +39,6 @@ def detect_type(err, install_rdf=None, xpi_package=None):
     type_uri = install_rdf.uri('type')
     type_ = install_rdf.get_object(None, type_uri)
 
-    if type_ is not None:
-        if type_ in translated_types:
-            err.save_resource('is_multipackage', type_ == '32', pushable=True)
-            # Make sure we translate back to the normalized version
-            return translated_types[type_]
-        else:
-            err.error(('typedetection',
-                       'detect_type',
-                       'invalid_em_type'),
-                      'Invalid <em:type> value.',
-                      'The only valid values for <em:type> are 2, 4, 8, and '
-                      '32. Any other values are either invalid or deprecated.',
-                      'install.rdf')
-            return
-
     # Dictionaries are weird too, they might not have the obligatory
     # em:type. We can assume that if they have a /dictionaries/ folder,
     # they are a dictionary because even if they aren't, dictionaries
@@ -72,7 +57,21 @@ def detect_type(err, install_rdf=None, xpi_package=None):
                       'the correct <em:type> set in the install manifest.')
         return PACKAGE_DICTIONARY
 
-    if type_ is None:
+    if type_ is not None:
+        if type_ in translated_types:
+            err.save_resource('is_multipackage', type_ == '32', pushable=True)
+            # Make sure we translate back to the normalized version
+            return translated_types[type_]
+        else:
+            err.error(('typedetection',
+                       'detect_type',
+                       'invalid_em_type'),
+                      'Invalid <em:type> value.',
+                      'The only valid values for <em:type> are 2, 4, 8, and '
+                      '32. Any other values are either invalid or deprecated.',
+                      'install.rdf')
+            return
+    else:
         err.notice(
             err_id=('typedetection',
                     'detect_type',
