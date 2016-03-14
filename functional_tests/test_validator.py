@@ -221,6 +221,11 @@ class GeneralTests(ValidatorTest):
         eq_(validation['detected_type'], 'extension')
         eq_(validation['errors'], 0)
 
+    def test_install_rdf_and_manifest_json(self):
+        validation = self.validate('installrdf-and-manifestjson.xpi')
+        eq_(validation['detected_type'], 'extension')
+        eq_(validation['errors'], 0, validation['messages'])
+
 
 class LocalizationTests(ValidatorTest):
 
