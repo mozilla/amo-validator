@@ -15,12 +15,12 @@ def test_targetedapplications(err, xpi_package=None):
     manifest_json = err.get_resource('manifest_json')
     install_rdf = err.get_resource('install_rdf')
 
-    if manifest_json:
-        applications = manifest_json.get_applications()
-        manifest_file = 'manifest.json'
-    elif install_rdf:
+    if install_rdf:
         applications = install_rdf.get_applications()
         manifest_file = 'install.rdf'
+    elif manifest_json:
+        applications = manifest_json.get_applications()
+        manifest_file = 'manifest.json'
     else:  # No manifest.json, no install.rdf file.
         if err.supported_versions is None:
             err.supported_versions = {}

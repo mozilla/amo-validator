@@ -5,6 +5,24 @@ from validator.json_parser import ManifestJsonParser
 from validator.rdf import RDFParser
 from helper import _do_test
 
+INVALID_MANIFEST_JSON = """{"name": "My Awesome Addon", "version": "1.25"}"""
+
+VALID_INSTALL_RDF = """
+<?xml version="1.0"?>
+<RDF xmlns="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+        xmlns:em="http://www.mozilla.org/2004/em-rdf#">
+    <Description about="urn:mozilla:install-manifest">
+        <em:targetApplication>
+            <Description> <!-- Firefox -->
+                <em:id>{ec8030f7-c20a-464f-9b0e-13a3a9e97384}</em:id>
+                <em:minVersion>1.5</em:minVersion>
+                <em:maxVersion>3.0.*</em:maxVersion>
+            </Description>
+        </em:targetApplication>
+    </Description>
+</RDF>
+"""
+
 
 def _do_test_raw(rdf, listed=True, overrides=None):
     err = ErrorBundle(listed=listed)
@@ -202,21 +220,7 @@ def test_no_supported_mozilla_apps():
     application.
     """
 
-    assert not _do_test_raw("""
-    <?xml version="1.0"?>
-    <RDF xmlns="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
-         xmlns:em="http://www.mozilla.org/2004/em-rdf#">
-        <Description about="urn:mozilla:install-manifest">
-            <em:targetApplication>
-                <Description> <!-- Firefox -->
-                    <em:id>{ec8030f7-c20a-464f-9b0e-13a3a9e97384}</em:id>
-                    <em:minVersion>1.5</em:minVersion>
-                    <em:maxVersion>3.0.*</em:maxVersion>
-                </Description>
-            </em:targetApplication>
-        </Description>
-    </RDF>
-    """).failed()
+    assert not _do_test_raw(VALID_INSTALL_RDF).failed()
 
     assert not _do_test_raw("""
     <?xml version="1.0"?>
@@ -278,9 +282,9 @@ def test_no_supported_mozilla_apps():
         }
     }""").failed()
 
-    failure_case = """{"name": "My Awesome Addon", "version": "1.25"}"""
-    assert _do_test_raw_webextension(failure_case).failed()
-    assert not _do_test_raw_webextension(failure_case, listed=False).failed()
+    assert _do_test_raw_webextension(INVALID_MANIFEST_JSON).failed()
+    assert not _do_test_raw_webextension(
+        INVALID_MANIFEST_JSON, listed=False).failed()
 
 
 MISSING_ANDROID_APPROVED_APPLICATIONS = {
@@ -384,3 +388,16 @@ def test_overrides():
                         {'{ec8030f7-c20a-464f-9b0e-13a3a9e97384}': 'bar'}}
             ).failed()
 
+
+def test_manifest_ordering():
+    err = ErrorBundle(listed=True)
+    manifest = ManifestJsonParser(err, INVALID_MANIFEST_JSON)
+    err.save_resource('has_manifest_json', True)
+    err.save_resource('manifest_json', manifest)
+    rdf = RDFParser(err, VALID_INSTALL_RDF.strip())
+    err.save_resource('has_install_rdf', True)
+    err.save_resource('install_rdf', rdf)
+
+    targetapp.test_targetedapplications(err)
+
+    assert not err.failed()
