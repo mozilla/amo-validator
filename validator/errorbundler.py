@@ -152,7 +152,7 @@ class ErrorBundle(object):
                     'to an unexpected error.',
                     'The error has been logged, but please consider '
                     'filing an issue report here: '
-                    'https://bit.ly/1paBbSy'),
+                    'https://bit.ly/1POrYYU'),
                    tier=1, **kw)
 
         # Move the error message to the beginning of the list.
