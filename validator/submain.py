@@ -78,7 +78,7 @@ def prepare_package(err, path, expectation=0, for_appversions=None,
                          'complexity of your add-on.',
                          'This timeout has been logged, but please consider '
                          'filing an issue report here: '
-                         'https://bit.ly/1paBbSy'),
+                         'https://bit.ly/1POrYYU'),
             exc_info=sys.exc_info())
 
     except Exception:
