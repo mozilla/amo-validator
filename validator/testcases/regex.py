@@ -4,7 +4,7 @@ from functools import wraps
 from validator.compat import (
     FX38_DEFINITION, FX39_DEFINITION, FX40_DEFINITION, FX41_DEFINITION,
     FX43_DEFINITION, FX44_DEFINITION, FX45_DEFINITION, FX46_DEFINITION,
-    TB29_DEFINITION, TB30_DEFINITION, TB31_DEFINITION)
+    FX47_DEFINITION, TB29_DEFINITION, TB30_DEFINITION, TB31_DEFINITION)
 from validator.constants import BUGZILLA_BUG, MDN_DOC
 from validator.contextgenerator import ContextGenerator
 from .chromemanifest import DANGEROUS_CATEGORIES, DANGEROUS_CATEGORY_WARNING
@@ -553,6 +553,24 @@ class Gecko46RegexTests(CompatRegexTestHelper):
                 'mTabListeners and mTabFilters are now Map objects and have '
                 'been renamed to _tabListeners and _tabFilters, respectively. '
                 'See %s for more information' % BUGZILLA_BUG % 1238685
+            ),
+            log_function=self.err.warning,
+            compat_type='error')
+
+
+@register_generator
+class Gecko47RegexTests(CompatRegexTestHelper):
+    """Regex tests for Firefox 47 updates."""
+
+    VERSION = FX47_DEFINITION
+
+    def tests(self):
+        yield self.get_test(
+            r'\bnsIX509CertDB\b',
+            'Most methods in nsIX509CertDB had their unused arguments removed.',
+            (
+                'Most methods in nsIX509CertDB had their unused arguments '
+                'removed. See %s for more information.' % BUGZILLA_BUG % 1241646
             ),
             log_function=self.err.warning,
             compat_type='error')
