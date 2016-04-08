@@ -608,6 +608,16 @@ class Gecko47RegexTests(CompatRegexTestHelper):
             log_function=self.err.warning,
             compat_type='error')
 
+        yield self.get_test(
+            r'\b(CustomizationTabPreloader|about:customizing)\b',
+            'The customization panel is no longer loaded via about:customizing.',
+            (
+                'The customization panel is no longer loaded via about:customizing. '
+                'See %s for more information.' % BUGZILLA_BUG % 1014185
+            ),
+            log_function=self.err.warning,
+            compat_type='error')
+
 
 #############################
 #  Thunderbird Regex Tests  #

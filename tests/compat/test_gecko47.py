@@ -153,3 +153,46 @@ class TestFX47Compat(CompatTestCase):
         assert not self.compat_err.notices
         assert not self.compat_err.errors
         assert not self.compat_err.warnings
+
+    def test_about_customizing_removed(self):
+        """https://github.com/mozilla/addons-server/issues/2217"""
+        message = 'The customization panel is no longer loaded via about:customizing'
+
+        script = (
+            '// * modified from: resource:///modules/'
+            'CustomizationTabPreloader.jsm')
+
+        self.run_script_for_compat(script)
+
+        assert not self.compat_err.notices
+        assert not self.compat_err.errors
+
+        assert len(self.compat_err.warnings) == 1
+        assert self.compat_err.warnings[0]['compatibility_type'] == 'error'
+        assert self.compat_err.warnings[0]['message'].startswith(message)
+
+        script = (
+            '// * ensurePreloading starts the preloading of the '
+            'about:customizing')
+
+        self.run_script_for_compat(script)
+
+        assert not self.compat_err.notices
+        assert not self.compat_err.errors
+
+        assert len(self.compat_err.warnings) == 1
+        assert self.compat_err.warnings[0]['compatibility_type'] == 'error'
+        assert self.compat_err.warnings[0]['message'].startswith(message)
+
+        script = (
+            'Components.utils.import("resource:///modules/'
+            'CustomizationTabPreloader.jsm");')
+
+        self.run_script_for_compat(script)
+
+        assert not self.compat_err.notices
+        assert not self.compat_err.errors
+
+        assert len(self.compat_err.warnings) == 1
+        assert self.compat_err.warnings[0]['compatibility_type'] == 'error'
+        assert self.compat_err.warnings[0]['message'].startswith(message)
