@@ -34,7 +34,6 @@ class TestFX47Compat(CompatTestCase):
             certdb.importCertsFromFile(null, fp.file, nsIX509Cert.CA_CERT);
         '''
 
-        self.reset()
         self.run_script_for_compat(script)
 
         assert not self.compat_err.notices
@@ -48,7 +47,6 @@ class TestFX47Compat(CompatTestCase):
 
         script = 'const nsIX509CertDB = Components.interfaces.nsIX509CertDB;'
 
-        self.reset()
         self.run_script_for_compat(script)
 
         assert not self.compat_err.notices
@@ -59,3 +57,40 @@ class TestFX47Compat(CompatTestCase):
         assert len(self.compat_err.warnings) == 3
         assert self.compat_err.warnings[2]['compatibility_type'] == 'error'
         assert self.compat_err.warnings[2]['message'].startswith(expected)
+
+    def test_changed_return_type(self):
+        """https://github.com/mozilla/addons-server/issues/2220"""
+        message = (
+            'listTokens() and listSlots() now return '
+            'nsISimpleEnumerator instead of nsIEnumerator.')
+
+        script = 'let tokenList = gTokenDB.listTokens();'
+
+        self.run_script_for_compat(script)
+
+        assert not self.compat_err.notices
+        assert not self.compat_err.errors
+
+        assert len(self.compat_err.warnings) == 1
+        assert self.compat_err.warnings[0]['compatibility_type'] == 'error'
+        assert self.compat_err.warnings[0]['message'].startswith(message)
+
+        script = 'slot = belgiumEidPKCS11Module.listSlots().currentItem();'
+
+        self.run_script_for_compat(script)
+
+        assert not self.compat_err.notices
+        assert not self.compat_err.errors
+
+        assert len(self.compat_err.warnings) == 1
+        assert self.compat_err.warnings[0]['compatibility_type'] == 'error'
+        assert self.compat_err.warnings[0]['message'].startswith(message)
+
+        script = 'let slots = testModule.listSlots();'
+
+        assert not self.compat_err.notices
+        assert not self.compat_err.errors
+
+        assert len(self.compat_err.warnings) == 1
+        assert self.compat_err.warnings[0]['compatibility_type'] == 'error'
+        assert self.compat_err.warnings[0]['message'].startswith(message)

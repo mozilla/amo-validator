@@ -575,6 +575,16 @@ class Gecko47RegexTests(CompatRegexTestHelper):
             log_function=self.err.warning,
             compat_type='error')
 
+        yield self.get_test(
+            r'\b(listTokens|listSlots)\b',
+            'listTokens() and listSlots() now return nsISimpleEnumerator instead of nsIEnumerator.',
+            (
+                'listTokens() and listSlots() now return nsISimpleEnumerator instead '
+                'of nsIEnumerator. See %s for more information.' % BUGZILLA_BUG % 1220237
+            ),
+            log_function=self.err.warning,
+            compat_type='error')
+
 
 #############################
 #  Thunderbird Regex Tests  #
