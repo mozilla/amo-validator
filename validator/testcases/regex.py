@@ -585,6 +585,18 @@ class Gecko47RegexTests(CompatRegexTestHelper):
             log_function=self.err.warning,
             compat_type='error')
 
+        yield self.get_test(
+            r'\bgDevTools.jsm\b',
+            'The gDevTools.jsm module should no longer be used.',
+            (
+                'The gDevTools.jsm module should no longer be used. '
+                'The object should now be loaded using '
+                'require("devtools/client/framework/devtools"). See '
+                '%s for more information.' % BUGZILLA_BUG % 1188405
+            ),
+            log_function=self.err.warning,
+            compat_type='warning')
+
 
 #############################
 #  Thunderbird Regex Tests  #

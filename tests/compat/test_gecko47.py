@@ -94,3 +94,18 @@ class TestFX47Compat(CompatTestCase):
         assert len(self.compat_err.warnings) == 1
         assert self.compat_err.warnings[0]['compatibility_type'] == 'error'
         assert self.compat_err.warnings[0]['message'].startswith(message)
+
+    def test_gDevTools_moved(self):
+        """https://github.com/mozilla/addons-server/issues/2219"""
+        message = 'The gDevTools.jsm module should no longer be used.'
+
+        script = 'Components.utils.import("resource:///modules/devtools/client/framework/gDevTools.jsm", ainspectorSidebar);'
+
+        self.run_script_for_compat(script)
+
+        assert not self.compat_err.notices
+        assert not self.compat_err.errors
+
+        assert len(self.compat_err.warnings) == 1
+        assert self.compat_err.warnings[0]['compatibility_type'] == 'warning'
+        assert self.compat_err.warnings[0]['message'].startswith(message)
