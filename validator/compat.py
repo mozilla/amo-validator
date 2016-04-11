@@ -32,6 +32,7 @@ FX43_DEFINITION = _build_definition(43)
 FX44_DEFINITION = _build_definition(44)
 FX45_DEFINITION = _build_definition(45)
 FX46_DEFINITION = _build_definition(46)
+FX47_DEFINITION = _build_definition(47)
 
 
 _tb_definition = (lambda ver:

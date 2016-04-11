@@ -4,7 +4,7 @@ from functools import wraps
 from validator.compat import (
     FX38_DEFINITION, FX39_DEFINITION, FX40_DEFINITION, FX41_DEFINITION,
     FX43_DEFINITION, FX44_DEFINITION, FX45_DEFINITION, FX46_DEFINITION,
-    TB29_DEFINITION, TB30_DEFINITION, TB31_DEFINITION)
+    FX47_DEFINITION, TB29_DEFINITION, TB30_DEFINITION, TB31_DEFINITION)
 from validator.constants import BUGZILLA_BUG, MDN_DOC
 from validator.contextgenerator import ContextGenerator
 from .chromemanifest import DANGEROUS_CATEGORIES, DANGEROUS_CATEGORY_WARNING
@@ -553,6 +553,67 @@ class Gecko46RegexTests(CompatRegexTestHelper):
                 'mTabListeners and mTabFilters are now Map objects and have '
                 'been renamed to _tabListeners and _tabFilters, respectively. '
                 'See %s for more information' % BUGZILLA_BUG % 1238685
+            ),
+            log_function=self.err.warning,
+            compat_type='error')
+
+
+@register_generator
+class Gecko47RegexTests(CompatRegexTestHelper):
+    """Regex tests for Firefox 47 updates."""
+
+    VERSION = FX47_DEFINITION
+
+    def tests(self):
+        yield self.get_test(
+            r'\bnsIX509CertDB\b',
+            'Most methods in nsIX509CertDB had their unused arguments removed.',
+            (
+                'Most methods in nsIX509CertDB had their unused arguments '
+                'removed. See %s for more information.' % BUGZILLA_BUG % 1241646
+            ),
+            log_function=self.err.warning,
+            compat_type='error')
+
+        yield self.get_test(
+            r'\b(listTokens|listSlots)\b',
+            'listTokens() and listSlots() now return nsISimpleEnumerator instead of nsIEnumerator.',
+            (
+                'listTokens() and listSlots() now return nsISimpleEnumerator instead '
+                'of nsIEnumerator. See %s for more information.' % BUGZILLA_BUG % 1220237
+            ),
+            log_function=self.err.warning,
+            compat_type='error')
+
+        yield self.get_test(
+            r'\bgDevTools.jsm\b',
+            'The gDevTools.jsm module should no longer be used.',
+            (
+                'The gDevTools.jsm module should no longer be used. '
+                'The object should now be loaded using '
+                'require("devtools/client/framework/devtools"). See '
+                '%s for more information.' % BUGZILLA_BUG % 1188405
+            ),
+            log_function=self.err.warning,
+            compat_type='warning')
+
+        yield self.get_test(
+            r'\b(fuelIApplication|Application|extIApplication)\b',
+            'The FUEL library is no longer supported.',
+            (
+                'The FUEL library is no longer supported. Please use the '
+                'Add-ons SDK instead. See %s for more information.'
+                % MDN_DOC % 'Add-ons/SDK'
+            ),
+            log_function=self.err.warning,
+            compat_type='error')
+
+        yield self.get_test(
+            r'\b(CustomizationTabPreloader|about:customizing)\b',
+            'The customization panel is no longer loaded via about:customizing.',
+            (
+                'The customization panel is no longer loaded via about:customizing. '
+                'See %s for more information.' % BUGZILLA_BUG % 1014185
             ),
             log_function=self.err.warning,
             compat_type='error')
