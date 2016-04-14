@@ -368,15 +368,11 @@ application versions. This information can be found on AMO:
 
 ### JS Libraries
 
-A list of JS library hashes is kept to allow for whitelisting. This must be
-regenerated with each new library version. To update:
+Lists of JS library hashes are kept to allow for whitelisting or warning. These
+must be regenerated with each new library version. To update:
 
 ```bash
-cd extras
-mkdir jslibs
-python jslibfetcher.py
-python build_whitelist.py jslibs/
-mv whitelist_hashes.txt ../validator/testcases/hashes.txt
+python extras/update_hashes.py
 ```
 
 To add new libraries to the mix, edit `extras/jslibfetcher.py` and add the

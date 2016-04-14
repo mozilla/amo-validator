@@ -23,10 +23,14 @@ FLAGGED_FILES = set(['.DS_Store', 'Thumbs.db'])
 FLAGGED_EXTENSIONS = set(['.orig', '.old', '~'])
 OSX_REGEX = re.compile('__MACOSX')
 
-hash_library = {}
-for hash_list in 'hashes.txt', 'static_hashes.txt':
+hash_library_allowed = {}
+for hash_list in 'hashes-allowed.txt', 'static_hashes.txt':
     with open(os.path.join(os.path.dirname(__file__), hash_list)) as f:
-        hash_library.update(s.strip().split(None, 1) for s in f)
+        hash_library_allowed.update(s.strip().split(None, 1) for s in f)
+
+hash_library_warning = {}
+with open(os.path.join(os.path.dirname(__file__), "hashes-warning.txt")) as f:
+        hash_library_warning.update(s.strip().split(None, 1) for s in f)
 
 
 @decorator.register_test(tier=1)
@@ -138,9 +142,25 @@ def test_packed_packages(err, xpi_package=None):
 
         if not err.for_appversions:
             hash = hashlib.sha256(file_data).hexdigest()
-            identified = hash_library.get(hash)
-            if identified is not None:
-                identified_files[name] = {'path': identified}
+            identified_warning = hash_library_warning.get(hash)
+            if identified_warning is not None:
+                identified_files[name] = {'path': identified_warning}
+                err.warning(
+                    err_id=('testcases_content',
+                            'test_packed_packages',
+                            'dangerous_js_library'),
+                    warning='Dangerous JS Library Detected',
+                    description=('A potentially dangerous JavaScript library '
+                                 'requires careful review by an '
+                                 'administrative reviewer.',
+                                 'File %r might be a dangerous JS '
+                                 'library' % name),
+                    filename=name)
+                continue
+
+            identified_allowed = hash_library_allowed.get(hash)
+            if identified_allowed is not None:
+                identified_files[name] = {'path': identified_allowed}
                 err.notice(
                     err_id=('testcases_content',
                             'test_packed_packages',
