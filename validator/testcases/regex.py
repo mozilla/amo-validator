@@ -566,6 +566,40 @@ class Gecko47RegexTests(CompatRegexTestHelper):
 
     def tests(self):
         yield self.get_test(
+            r'\bgDevTools.jsm\b',
+            'The gDevTools.jsm module should no longer be used.',
+            (
+                'The gDevTools.jsm module should no longer be used. '
+                'The object should now be loaded using '
+                'require("devtools/client/framework/devtools"). See '
+                '%s for more information.' % BUGZILLA_BUG % 1188405
+            ),
+            log_function=self.err.warning,
+            compat_type='warning')
+
+        yield self.get_test(
+            r'\b(CustomizationTabPreloader|about:customizing)\b',
+            'The customization panel is no longer loaded via about:customizing.',
+            (
+                'The customization panel is no longer loaded via about:customizing. '
+                'See %s for more information.' % BUGZILLA_BUG % 1014185
+            ),
+            log_function=self.err.warning,
+            compat_type='error')
+
+    def js_tests(self):
+        yield self.get_test(
+            r'\b(fuelIApplication|Application|extIApplication)\b',
+            'The FUEL library is no longer supported.',
+            (
+                'The FUEL library is no longer supported. Please use the '
+                'Add-ons SDK instead. See %s for more information.'
+                % MDN_DOC % 'Add-ons/SDK'
+            ),
+            log_function=self.err.warning,
+            compat_type='error')
+
+        yield self.get_test(
             r'\bnsIX509CertDB\b',
             'Most methods in nsIX509CertDB had their unused arguments removed.',
             (
@@ -581,39 +615,6 @@ class Gecko47RegexTests(CompatRegexTestHelper):
             (
                 'listTokens() and listSlots() now return nsISimpleEnumerator instead '
                 'of nsIEnumerator. See %s for more information.' % BUGZILLA_BUG % 1220237
-            ),
-            log_function=self.err.warning,
-            compat_type='error')
-
-        yield self.get_test(
-            r'\bgDevTools.jsm\b',
-            'The gDevTools.jsm module should no longer be used.',
-            (
-                'The gDevTools.jsm module should no longer be used. '
-                'The object should now be loaded using '
-                'require("devtools/client/framework/devtools"). See '
-                '%s for more information.' % BUGZILLA_BUG % 1188405
-            ),
-            log_function=self.err.warning,
-            compat_type='warning')
-
-        yield self.get_test(
-            r'\b(fuelIApplication|Application|extIApplication)\b',
-            'The FUEL library is no longer supported.',
-            (
-                'The FUEL library is no longer supported. Please use the '
-                'Add-ons SDK instead. See %s for more information.'
-                % MDN_DOC % 'Add-ons/SDK'
-            ),
-            log_function=self.err.warning,
-            compat_type='error')
-
-        yield self.get_test(
-            r'\b(CustomizationTabPreloader|about:customizing)\b',
-            'The customization panel is no longer loaded via about:customizing.',
-            (
-                'The customization panel is no longer loaded via about:customizing. '
-                'See %s for more information.' % BUGZILLA_BUG % 1014185
             ),
             log_function=self.err.warning,
             compat_type='error')
