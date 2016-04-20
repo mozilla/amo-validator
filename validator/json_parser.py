@@ -1,5 +1,6 @@
 import json
 
+from validator import unicodehelper
 from validator.constants import FIREFOX_GUID
 
 
@@ -8,7 +9,7 @@ class ManifestJsonParser(object):
 
     def __init__(self, err, data, namespace=None):
         self.err = err
-        self.data = json.loads(data)
+        self.data = json.loads(unicodehelper.decode(data))
 
     def get_applications(self):
         """Return the list of supported applications."""
