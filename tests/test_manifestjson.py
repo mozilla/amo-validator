@@ -58,6 +58,23 @@ def test_version_must_be_valid():
     assert err.failed(), 'expected invalid version to fail'
 
 
+def test_supports_bom_encoding():
+    err = ErrorBundle()
+    manifest_json = """\xef\xbb\xbf{
+        "name": "My Awesome Addon",
+        "version": "1.25",
+
+        "applications": {
+            "gecko": {
+                "id": "my@awesome.addon"
+            }
+        }
+    }"""
+    err.save_resource('has_manifest_json', True)
+    err.save_resource('manifest_json', ManifestJsonParser(err, manifest_json))
+    assert not err.failed()
+
+
 def setup_err():
     err = ErrorBundle()
     manifest_json = """{
