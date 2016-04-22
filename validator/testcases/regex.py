@@ -566,7 +566,7 @@ class Gecko47RegexTests(CompatRegexTestHelper):
 
     def tests(self):
         yield self.get_test(
-            r'\bgDevTools.jsm\b',
+            r'\bgDevTools\.jsm\b',
             'The gDevTools.jsm module should no longer be used.',
             (
                 'The gDevTools.jsm module should no longer be used. '
