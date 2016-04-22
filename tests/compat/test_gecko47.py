@@ -115,6 +115,16 @@ class TestFX47Compat(CompatTestCase):
         assert self.compat_err.warnings[0]['compatibility_type'] == 'warning'
         assert self.compat_err.warnings[0]['message'].startswith(message)
 
+        # Test that we actually match on "." and not "any character"
+        script = (
+            'Components.utils.import("resource:///modules/devtools/client'
+            '/framework/gDevTools_jsm", ainspectorSidebar);')
+        self.run_script_for_compat(script)
+
+        assert not self.compat_err.notices
+        assert not self.compat_err.errors
+        assert not self.compat_err.warnings
+
     def test_FUEL_library_removed(self):
         """https://github.com/mozilla/addons-server/issues/2218"""
         message = 'The FUEL library is no longer supported.'
