@@ -8,7 +8,7 @@ from call_definitions import xpcom_constructor as xpcom_const, python_wrap
 from entity_values import entity
 import instanceactions
 from jstypes import JSWrapper
-from validator.compat import FX40_DEFINITION
+from validator.compat import FX47_DEFINITION
 from validator.constants import MDN_DOC
 
 
@@ -97,13 +97,13 @@ MARIONETTE_MESSAGE = {
 def fuel_error(traverse_node, err):
     traverse_node.im_self.warning(
         err_id=('js', 'traverser', 'dangerous_global'),
-        warning='The FUEL library is now deprecated.',
-        description='The FUEL library is now deprecated. You should use the '
-                    'add-ons SDK or Services.jsm. See %s for more information.'
-                    % MDN_DOC % 'Mozilla/Tech/Toolkit_API/FUEL',
-        for_appversions=FX40_DEFINITION,
+        warning='The FUEL library is no longer supported.',
+        description='The FUEL library is no longer supported. Please use the '
+                    'Add-ons SDK instead. See %s for more information.'
+                    % MDN_DOC % 'Add-ons/SDK',
+        for_appversions=FX47_DEFINITION,
         tier=5,
-        compatibility_type='warning')
+        compatibility_type='error')
 
 
 BANNED_PREF_BRANCHES = (

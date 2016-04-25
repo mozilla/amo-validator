@@ -129,9 +129,9 @@ class TestFX47Compat(CompatTestCase):
         """https://github.com/mozilla/addons-server/issues/2218"""
         message = 'The FUEL library is no longer supported.'
 
-        script = (
-            'var app = getService("@mozilla.org/fuel/application;1", '
-            'Ci.fuelIApplication);')
+        script = ('var app = Components'
+                  '.classes["@mozilla.org/fuel/application;1"]'
+                  '.getService(Components.interfaces.fuelIApplication);')
 
         self.run_script_for_compat(script)
 

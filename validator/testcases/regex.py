@@ -589,13 +589,10 @@ class Gecko47RegexTests(CompatRegexTestHelper):
 
     def js_tests(self):
         yield self.get_test(
-            r'\b(fuelIApplication|Application|extIApplication)\b',
+            r'\b(fuelIApplication|extIApplication)\b',
             'The FUEL library is no longer supported.',
-            (
-                'The FUEL library is no longer supported. Please use the '
-                'Add-ons SDK instead. See %s for more information.'
-                % MDN_DOC % 'Add-ons/SDK'
-            ),
+            'The FUEL library is no longer supported. Please use the Add-ons '
+            'SDK instead. See %s for more information.' % MDN_DOC % 'Add-ons/SDK',
             log_function=self.err.warning,
             compat_type='error')
 
