@@ -484,6 +484,9 @@ INTERFACES = {
                                 'testExactPermissionFromPrincipal': entity('nsIPermissionManager.testExactPermissionFromPrincipal'),
                                 'testPermission': entity('nsIPermissionManager.testPermission'),
                                 'testPermissionFromPrincipal': entity('nsIPermissionManager.testPermissionFromPrincipal')}},
+    'nsIPK11TokenDB': {'value': {'listTokens': entity('nsIPK11TokenDB.listTokens')}},
+    'nsIPKCS11ModuleDB': {'value': {'listModules': entity('nsIPKCS11ModuleDB.listModules')}},
+    'nsIPKCS11Module': {'value': {'listSlots': entity('nsIPKCS11Module.listSlots')}},
 }
 
 INTERFACE_ENTITIES = {u'nsIXMLHttpRequest':
