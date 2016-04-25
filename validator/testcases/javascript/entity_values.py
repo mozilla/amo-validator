@@ -1,7 +1,8 @@
 from call_definitions import open_in_chrome_context
 from instanceproperties import _set_HTML_property
 from validator.compat import (FX42_DEFINITION, TB29_DEFINITION,
-                              TB30_DEFINITION, TB31_DEFINITION)
+                              TB30_DEFINITION, TB31_DEFINITION,
+                              FX47_DEFINITION)
 from validator.constants import BUGZILLA_BUG
 
 
@@ -228,6 +229,27 @@ def nsIPermissionManager(traverser):
         line=traverser.line,
         column=traverser.position,
         for_appversions=FX42_DEFINITION,
+        compatibility_type='error',
+        context=traverser.context,
+        tier=5)
+
+@register_entity('nsIPK11TokenDB.listTokens')
+@register_entity('nsIPKCS11ModuleDB.listModules')
+@register_entity('nsIPKCS11Module.listSlots')
+def nsIPK11TokenDB(traverser):
+    traverser.err.warning(
+        err_id=('testcases_javascript_entity_values',
+                'nsIPKThings'),
+        warning='listTokens(), listModules() and listSlots() now return '
+                'nsISimpleEnumerator instead of nsIEnumerator.',
+        description=(
+            'listTokens(), listModules() and listSlots() now return '
+            'nsISimpleEnumerator instead of nsIEnumerator.'
+            'See %s for more information.' % BUGZILLA_BUG % 1220237),
+        filename=traverser.filename,
+        line=traverser.line,
+        column=traverser.position,
+        for_appversions=FX47_DEFINITION,
         compatibility_type='error',
         context=traverser.context,
         tier=5)

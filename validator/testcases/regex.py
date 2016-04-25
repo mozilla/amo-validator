@@ -589,13 +589,10 @@ class Gecko47RegexTests(CompatRegexTestHelper):
 
     def js_tests(self):
         yield self.get_test(
-            r'\b(fuelIApplication|Application|extIApplication)\b',
+            r'\b(fuelIApplication|extIApplication)\b',
             'The FUEL library is no longer supported.',
-            (
-                'The FUEL library is no longer supported. Please use the '
-                'Add-ons SDK instead. See %s for more information.'
-                % MDN_DOC % 'Add-ons/SDK'
-            ),
+            'The FUEL library is no longer supported. Please use the Add-ons '
+            'SDK instead. See %s for more information.' % MDN_DOC % 'Add-ons/SDK',
             log_function=self.err.warning,
             compat_type='error')
 
@@ -605,16 +602,6 @@ class Gecko47RegexTests(CompatRegexTestHelper):
             (
                 'Most methods in nsIX509CertDB had their unused arguments '
                 'removed. See %s for more information.' % BUGZILLA_BUG % 1241646
-            ),
-            log_function=self.err.warning,
-            compat_type='error')
-
-        yield self.get_test(
-            r'\b(listTokens|listSlots)\b',
-            'listTokens() and listSlots() now return nsISimpleEnumerator instead of nsIEnumerator.',
-            (
-                'listTokens() and listSlots() now return nsISimpleEnumerator instead '
-                'of nsIEnumerator. See %s for more information.' % BUGZILLA_BUG % 1220237
             ),
             log_function=self.err.warning,
             compat_type='error')

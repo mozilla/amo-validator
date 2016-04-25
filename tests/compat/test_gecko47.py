@@ -64,11 +64,14 @@ class TestFX47Compat(CompatTestCase):
     def test_changed_return_type(self):
         """https://github.com/mozilla/addons-server/issues/2220"""
         message = (
-            'listTokens() and listSlots() now return '
+            'listTokens(), listModules() and listSlots() now return '
             'nsISimpleEnumerator instead of nsIEnumerator.')
 
-        script = 'let tokenList = gTokenDB.listTokens();'
-
+        script = '''
+            var db = Components.classes["@mozilla.org/security/pk11tokendb;1"]
+                        .getService(Components.interfaces.nsIPK11TokenDB);
+            var modules = db.listTokens();
+        '''
         self.run_script_for_compat(script)
 
         assert not self.compat_err.notices
@@ -78,8 +81,11 @@ class TestFX47Compat(CompatTestCase):
         assert self.compat_err.warnings[0]['compatibility_type'] == 'error'
         assert self.compat_err.warnings[0]['message'].startswith(message)
 
-        script = 'slot = belgiumEidPKCS11Module.listSlots().currentItem();'
-
+        script = '''
+            var db = Components.classes["@mozilla.org/security/pkcs11moduledb;1"]
+                        .getService(Components.interfaces.nsIPKCS11ModuleDB);
+            var modules = db.listModules();
+        '''
         self.run_script_for_compat(script)
 
         assert not self.compat_err.notices
@@ -89,7 +95,11 @@ class TestFX47Compat(CompatTestCase):
         assert self.compat_err.warnings[0]['compatibility_type'] == 'error'
         assert self.compat_err.warnings[0]['message'].startswith(message)
 
-        script = 'let slots = testModule.listSlots();'
+        script = '''
+            var modules = modules.QueryInterface(Components.interfaces.nsIPKCS11Module);
+            modules.listSlots();
+        '''
+        self.run_script_for_compat(script)
 
         assert not self.compat_err.notices
         assert not self.compat_err.errors
@@ -97,6 +107,13 @@ class TestFX47Compat(CompatTestCase):
         assert len(self.compat_err.warnings) == 1
         assert self.compat_err.warnings[0]['compatibility_type'] == 'error'
         assert self.compat_err.warnings[0]['message'].startswith(message)
+
+        script = 'var modules = mylib.listModules();'
+        self.run_script_for_compat(script)
+
+        assert not self.compat_err.notices
+        assert not self.compat_err.errors
+        assert not self.compat_err.warnings
 
     def test_gDevTools_moved(self):
         """https://github.com/mozilla/addons-server/issues/2219"""
@@ -129,9 +146,9 @@ class TestFX47Compat(CompatTestCase):
         """https://github.com/mozilla/addons-server/issues/2218"""
         message = 'The FUEL library is no longer supported.'
 
-        script = (
-            'var app = getService("@mozilla.org/fuel/application;1", '
-            'Ci.fuelIApplication);')
+        script = ('var app = Components'
+                  '.classes["@mozilla.org/fuel/application;1"]'
+                  '.getService(Components.interfaces.fuelIApplication);')
 
         self.run_script_for_compat(script)
 
