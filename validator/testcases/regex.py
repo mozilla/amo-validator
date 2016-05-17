@@ -91,7 +91,7 @@ class RegexTestGenerator(object):
         return []
 
     def get_test(self, pattern, title, message, log_function=None,
-                 compat_type=None, app_versions=None, flags=0):
+                 compat_type=None, app_versions=None, flags=0, editors_only=False):
         """
         Return a function that, when called, will log a compatibility warning
         or error.
@@ -109,7 +109,8 @@ class RegexTestGenerator(object):
                       'context': self.context,
                       'compatibility_type': compat_type,
                       'for_appversions': app_versions,
-                      'tier': self.err.tier if app_versions is None else 5}
+                      'tier': self.err.tier if app_versions is None else 5,
+                      'editors_only': editors_only}
 
                 log_function(**merge_description(kw, message))
                 matched = True
@@ -298,6 +299,21 @@ class CompatRegexTestHelper(RegexTestGenerator):
 DEP_INTERFACE = 'Deprecated interface in use'
 DEP_INTERFACE_DESC = ('This add-on uses `%s`, which is deprecated in Gecko %d '
                       'and should not be used.')
+
+
+@register_generator
+class unblockerytRegexTests(RegexTestGenerator):
+    """
+    Checks for the use of `unblocker.yt` which is used by a dangerous add-on.
+    """
+
+    def tests(self):
+        yield self.get_test(
+                r'unblocker\.yt',
+                'Potentially malicious domain usage.',
+                'This add-on uses a potentially malicious domain. Please '
+                'escalate for admin review.',
+                editors_only=True)
 
 
 @register_generator
