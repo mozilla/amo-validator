@@ -124,19 +124,6 @@ class CompatValidatorTest(ValidatorTest):
                              for_appversions={app_guid: [app_ver]})
 
 
-class CompatibilityTests(CompatValidatorTest):
-
-    def test_new_tab_xul_42(self):
-        self.validate_for_appver(
-            'new-tab-xul.xpi', FIREFOX_GUID, '42.0')
-        self.expectMsg('newTab.xul is now newTab.xhtml.')
-
-    def test_new_tab_xul_43(self):
-        self.validate_for_appver(
-            'new-tab-xul.xpi', FIREFOX_GUID, '43.0')
-        self.shouldNotGetMsg('newTab.xul is now newTab.xhtml.')
-
-
 class JavaScriptTests(ValidatorTest):
 
     def test_createelement__used(self):

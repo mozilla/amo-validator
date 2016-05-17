@@ -12,7 +12,6 @@ node
 
 import actions
 from instanceproperties import _set_HTML_property
-from validator.compat import FX42_DEFINITION
 from validator.constants import BUGZILLA_BUG
 
 
@@ -337,25 +336,6 @@ def set_preference(wrapper, arguments, traverser):
         validate_pref(pref, traverser, kw, wrapper=arg)
 
 
-def parseContentType(args, traverser, node, wrapper):
-    traverser.err.warning(
-        err_id=('testcases_javascript_entity_values',
-                'nsINetUtilParseContentType'),
-        warning='`nsINetUtil.parseContentType()` method has been renamed to '
-                '`nsINetUtil.parseResponseContentType`.',
-        description='The `nsINetUtil.parseContentType()` method has been '
-                    'renamed to `nsINetUtil.parseResponseContentType()`. Its '
-                    'behavior should remain the same.'
-                    'See %s for more information.' % BUGZILLA_BUG % 1214929,
-        filename=traverser.filename,
-        line=traverser.line,
-        column=traverser.position,
-        for_appversions=FX42_DEFINITION,
-        compatibility_type='error',
-        context=traverser.context,
-        tier=5)
-
-
 INSTANCE_DEFINITIONS = {
     'addEventListener': addEventListener,
     'bind': bind,
@@ -372,5 +352,4 @@ INSTANCE_DEFINITIONS = {
     'openDialog': openDialog,
     'QueryInterface': QueryInterface,
     'setAttribute': setAttribute,
-    'parseContentType': parseContentType,
 }

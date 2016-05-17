@@ -5,7 +5,6 @@ import types
 
 # Global import of predefinedentities will cause an import loop
 import instanceactions
-from validator.compat import FX42_DEFINITION
 from validator.constants import (BUGZILLA_BUG, DESCRIPTION_TYPES, FENNEC_GUID,
                                  FIREFOX_GUID, MAX_STR_SIZE, MDN_DOC)
 from validator.decorator import version_range
@@ -412,10 +411,8 @@ def test_literal(traverser, wrapper):
     value = wrapper.get_literal_value()
     if isinstance(value, basestring):
         # Local import to prevent import loop.
-        from validator.testcases.regex import (validate_compat_pref,
-                                               validate_string)
+        from validator.testcases.regex import validate_string
         validate_string(value, traverser, wrapper=wrapper)
-        validate_compat_pref(value, traverser, wrapper=wrapper)
 
 
 def _call_expression(traverser, node):
@@ -612,21 +609,6 @@ def _readonly_top(traverser, right, node_right):
                          FENNEC_GUID: version_range('fennec',
                                                     '6.0a1', '7.0a1')},
         compatibility_type='warning',
-        tier=5)
-
-
-def _renamed_mozRequestAnimationFrame(traverser):
-    """Handle the deprecation of mozRequestAnimationFrame."""
-    traverser.err.warning(
-        err_id=('testcases_javascript_actions',
-                '_renamed_mozRequestAnimationFrame'),
-        warning='window.mozRequestionAnimationFrame has been unprefixed',
-        description='mozRequestAnimationFrame is no longer supported in '
-                    'prefixed form, please use requestAnimationFrame instead. '
-                    'See %s for more information.' %
-                    MDN_DOC % 'Web/API/window/requestAnimationFrame',
-        for_appversions=FX42_DEFINITION,
-        compatibility_type='error',
         tier=5)
 
 

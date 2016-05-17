@@ -13,7 +13,6 @@ import validator.testcases.markup.markuptester as testendpoint_markup
 import validator.testcases.markup.csstester as testendpoint_css
 import validator.testcases.scripting as testendpoint_js
 import validator.testcases.langpack as testendpoint_langpack
-from validator.compat import FX42_DEFINITION
 from validator.constants import (BUGZILLA_BUG, PACKAGE_LANGPACK,
                                  PACKAGE_SUBPACKAGE, PACKAGE_THEME)
 from validator.xpi import XPIManager
@@ -55,32 +54,6 @@ def test_xpcnativewrappers(err, xpi_package=None):
                         filename=triple['filename'],
                         line=triple['line'],
                         context=triple['context'])
-
-
-@decorator.register_test(tier=5)
-def test_newTab_xul(err, xpi_package=None):
-    """Tests the chrome.manifest file to ensure that it doesn't contain the
-    deprecated chrome://browser/content/newtab/newTab.xul overlay."""
-
-    # Don't even both with the test(s) if there's no chrome.manifest.
-    chrome = err.get_resource('chrome.manifest')
-    if not chrome:
-        return None
-
-    for triple in chrome.triples:
-        # Test to make sure that the triple's subject is valid
-        if triple['predicate'] == 'chrome://browser/content/newtab/newTab.xul':
-            err.warning(
-                ('testcases_content', 'test_newTab_xul',
-                 'found_in_chrome_manifest'),
-                'newTab.xul is now newTab.xhtml.',
-                'newTab.xul is now newTab.xhtml. '
-                'See %s for more information.' % BUGZILLA_BUG % 1167601,
-                filename=triple['filename'],
-                line=triple['line'],
-                for_appversions=FX42_DEFINITION,
-                compatibility_type='error',
-                context=triple['context'])
 
 
 @decorator.register_test(tier=2)
