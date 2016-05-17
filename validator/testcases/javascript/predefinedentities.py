@@ -343,9 +343,6 @@ INTERFACES = {
                 {'return': call_definitions.nsIJSON_deprec},
              u'decode':
                 {'return': call_definitions.nsIJSON_deprec}}},
-    u'nsIMsgDatabase':
-        {'value':
-            {u'forceFolderDBClosed': entity('nsIMsgDatabase.forceFolderDBClosed')}},
     u'nsIObserverService':
         {'value':
             {u'addObserver': entity('nsIObserverService.addObserver')},
@@ -453,19 +450,6 @@ INTERFACES = {
                        call_definitions.webbrowserpersist_saveuri},
               u'savePrivacyAwareURI':
                   {'return': call_definitions.webbrowserpersist}}},
-    u'nsIMsgCompose':
-        {'value':
-             {u'checkAndPopulateRecipients': entity('nsIMsgCompose.checkAndPopulateRecipients')}},
-    u'nsIFolderLookupService':
-        {'value':
-             {u'getFolderById': entity('nsIFolderLookupService.getFolderById')}},
-    u'nsIAbCard':
-        {'value':
-             {u'kAllowRemoteContentProperty': entity('nsIAbCard.kAllowRemoteContentProperty')}},
-    u'nsIAddrDatabase':
-        {'value':
-             {u'addAllowRemoteContent': entity('nsIAddrDatabase.addAllowRemoteContent')}},
-
     'nsIWindowsRegKey': {'value': {u'create': REGISTRY_WRITE,
                                    u'createChild': registry_key(write=True),
                                    u'openChild': registry_key(),
@@ -474,16 +458,6 @@ INTERFACES = {
                                    u'writeIntValue': REGISTRY_WRITE,
                                    u'writeStringValue': REGISTRY_WRITE,
                                   }},
-    'nsIPermissionManager': {'value': {
-                                'add': entity('nsIPermissionManager.add'),
-                                'addFromPrincipal': entity('nsIPermissionManager.addFromPrincipal'),
-                                'remove': entity('nsIPermissionManager.remove'),
-                                'removeFromPrincipal': entity('nsIPermissionManager.removeFromPrincipal'),
-                                'removeAll': entity('nsIPermissionManager.removeAll'),
-                                'testExactPermission': entity('nsIPermissionManager.testExactPermission'),
-                                'testExactPermissionFromPrincipal': entity('nsIPermissionManager.testExactPermissionFromPrincipal'),
-                                'testPermission': entity('nsIPermissionManager.testPermission'),
-                                'testPermissionFromPrincipal': entity('nsIPermissionManager.testPermissionFromPrincipal')}},
     'nsIPK11TokenDB': {'value': {'listTokens': entity('nsIPK11TokenDB.listTokens')}},
     'nsIPKCS11ModuleDB': {'value': {'listModules': entity('nsIPKCS11ModuleDB.listModules')}},
     'nsIPKCS11Module': {'value': {'listSlots': entity('nsIPKCS11Module.listSlots')}},
@@ -955,9 +929,6 @@ GLOBAL_ENTITIES = {
     u'width': {'readonly': False},
     u'height': {'readonly': False},
     u'top': {'readonly': actions._readonly_top},
-    u'mozRequestAnimationFrame': {
-        'value': actions._renamed_mozRequestAnimationFrame},
-
     u'content':
         {'context': 'content',
          'value':
@@ -1000,22 +971,6 @@ GLOBAL_ENTITIES = {
 
     u'XPCOMUtils':
         {'value': {u'categoryManager': {'value': CATEGORY_MANAGER}}},
-    u'updateCharsetPopupMenu': entity('updateCharsetPopupMenu'),
-    u'EditorSetDocumentCharacterSet': entity('EditorSetDocumentCharacterSet'),
-    u'DisablePhishingWarning': entity('DisablePhishingWarning'),
-    u'RoomInfo': entity('RoomInfo'),
-    u'FillInHTMLTooltip': entity('FillInHTMLTooltip'),
-    u'escapeXMLchars': entity('escapeXMLchars'),
-    u'getNonHtmlRecipients': entity('getNonHtmlRecipients'),
-    u'updateCharsetPopupMenu': entity('updateCharsetPopupMenu'),
-    u'EditorSetDocumentCharacterSet': entity('EditorSetDocumentCharacterSet'),
-    u'awArrowHit': entity('awArrowHit'),
-    u'UpdateMailEditCharset': entity('UpdateMailEditCharset'),
-    u'InitCharsetMenuCheckMark': entity('InitCharsetMenuCheckMark'),
-    u'allowRemoteContentForSender': entity('allowRemoteContentForSender'),
-    u'allowRemoteContentForSite': entity('allowRemoteContentForSite'),
-    u'createNewHeaderView': entity('createNewHeaderView'),
-
 
     u'MarionetteComponent': {'dangerous_on_read': MARIONETTE_MESSAGE},
     u'MarionetteServer': {'dangerous_on_read': MARIONETTE_MESSAGE},

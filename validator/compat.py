@@ -23,21 +23,6 @@ def _build_definition(maj_version_num, firefox=True, fennec=True,
     return definition
 
 
-FX38_DEFINITION = _build_definition(38)
-FX39_DEFINITION = _build_definition(39)
-FX40_DEFINITION = _build_definition(40)
-FX41_DEFINITION = _build_definition(41)
-FX42_DEFINITION = _build_definition(42)
-FX43_DEFINITION = _build_definition(43)
-FX44_DEFINITION = _build_definition(44)
 FX45_DEFINITION = _build_definition(45)
 FX46_DEFINITION = _build_definition(46)
 FX47_DEFINITION = _build_definition(47)
-
-
-_tb_definition = (lambda ver:
-    _build_definition(ver, firefox=False, fennec=False, android=False))
-
-TB29_DEFINITION = _tb_definition(29)
-TB30_DEFINITION = _tb_definition(30)
-TB31_DEFINITION = _tb_definition(31)
