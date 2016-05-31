@@ -79,7 +79,6 @@ def test_app_versions():
     'Tests that the validate function properly loads app_versions.json'
     validate(path='tests/resources/junk.xpi',
              approved_applications='tests/resources/test_app_versions.json')
-    print constants.APPROVED_APPLICATIONS
     assert constants.APPROVED_APPLICATIONS['1']['name'] == 'Foo App'
 
 
@@ -92,7 +91,6 @@ def test_app_versions_dict():
     with open('tests/resources/test_app_versions.json') as f:
         apps = json.load(f)
     validate(path='tests/resources/junk.xpi', approved_applications=apps)
-    print constants.APPROVED_APPLICATIONS
     assert constants.APPROVED_APPLICATIONS['1']['name'] == 'Foo App'
 
 
@@ -105,3 +103,144 @@ def test_is_compat():
     out = validate(path='tests/resources/junk.xpi', format=None,
                    compat_test=True)
     assert out.get_resource('is_compat_test')
+
+
+def test_validate_webextension():
+    """Integration test for a basic webextension, without mocks.
+
+    We're not supposed to use amo-validator for webextensions anymore now that
+    we have addons-linter, but let's make sure that we don't completely
+    blow up anyway."""
+    result = validate(path='tests/resources/validate/webextension.xpi')
+    data = json.loads(result)
+
+    assert data['success'] is True
+    assert data['errors'] == 0
+    assert data['notices'] == 0
+    assert data['warnings'] == 0
+    assert data['compatibility_summary']
+    assert data['compatibility_summary']['errors'] == 0
+    assert data['compatibility_summary']['notices'] == 0
+    assert data['compatibility_summary']['warnings'] == 0
+    assert data['detected_type'] == 'extension'
+    assert data['messages'] == []
+    assert data['message_tree'] == {}
+    assert data['signing_summary']['high'] == 0
+    assert data['signing_summary']['medium'] == 0
+    assert data['signing_summary']['low'] == 0
+    assert data['signing_summary']['trivial'] == 0
+
+
+def test_validate_old_xpi():
+    """Integration test for a basic old-style extension xpi, without mocks."""
+    result = validate(path='tests/resources/validate/extension.xpi')
+    data = json.loads(result)
+
+    assert data['success'] is False
+    assert data['errors'] == 0
+    assert data['notices'] == 0
+    assert data['warnings'] == 1
+    assert data['compatibility_summary']
+    assert data['compatibility_summary']['errors'] == 0
+    assert data['compatibility_summary']['notices'] == 0
+    assert data['compatibility_summary']['warnings'] == 0
+    assert data['detected_type'] == 'extension'
+    assert len(data['messages']) == 1
+    assert data['messages'][0]['id'] == [
+        u'submain', u'test_inner_package', u'not_multiprocess_compatible']
+    assert data['message_tree']
+    assert data['signing_summary']['high'] == 0
+    assert data['signing_summary']['medium'] == 0
+    assert data['signing_summary']['low'] == 0
+    assert data['signing_summary']['trivial'] == 0
+    assert data['metadata']
+    assert data['metadata']['name'] == u'name_value'
+    assert data['metadata']['version'] == u'1.2.3.4'
+    assert data['metadata']['listed'] == True
+    assert data['metadata']['id'] == u'bastatestapp1@basta.mozilla.com'
+
+
+def test_validate_old_xpi_multiprocess_compatible():
+    """Integration test for a multiprocess compatible old-style extension xpi,
+    without mocks."""
+    result = validate(
+        path='tests/resources/validate/extension_multiprocess.xpi')
+    data = json.loads(result)
+
+    assert data['success'] is True
+    assert data['errors'] == 0
+    assert data['notices'] == 0
+    assert data['warnings'] == 0
+    assert data['compatibility_summary']
+    assert data['compatibility_summary']['errors'] == 0
+    assert data['compatibility_summary']['notices'] == 0
+    assert data['compatibility_summary']['warnings'] == 0
+    assert data['detected_type'] == 'extension'
+    assert data['messages'] == []
+    assert data['message_tree'] == {}
+    assert data['signing_summary']['high'] == 0
+    assert data['signing_summary']['medium'] == 0
+    assert data['signing_summary']['low'] == 0
+    assert data['signing_summary']['trivial'] == 0
+    assert data['metadata']
+    assert data['metadata']['name'] == u'name_value'
+    assert data['metadata']['version'] == u'1.2.3.4'
+    assert data['metadata']['listed'] == True
+    assert data['metadata']['id'] == u'bastatestapp1@basta.mozilla.com'
+
+
+def test_validate_jpm():
+    """Integration test for a basic jpm-style extension xpi, without mocks."""
+    result = validate(path='tests/resources/validate/jpm.xpi')
+    data = json.loads(result)
+
+    assert data['success'] is False
+    assert data['errors'] == 0
+    assert data['notices'] == 0
+    assert data['warnings'] == 1
+    assert data['compatibility_summary']
+    assert data['compatibility_summary']['errors'] == 0
+    assert data['compatibility_summary']['notices'] == 0
+    assert data['compatibility_summary']['warnings'] == 0
+    assert data['detected_type'] == 'extension'
+    assert len(data['messages']) == 1
+    assert data['messages'][0]['id'] == [
+        u'submain', u'test_inner_package', u'not_multiprocess_compatible']
+    assert data['message_tree']
+    assert data['signing_summary']['high'] == 0
+    assert data['signing_summary']['medium'] == 0
+    assert data['signing_summary']['low'] == 0
+    assert data['signing_summary']['trivial'] == 0
+    assert data['metadata']
+    assert data['metadata']['name'] == u'My Jetpack Addon'
+    assert data['metadata']['version'] == u'0.0.3'
+    assert data['metadata']['listed'] == True
+    assert data['metadata']['id'] == u'@test-addon'
+
+
+def test_validate_jpm_multiprocess_compatible():
+    """Integration test for a multiprocess compatible jpm-style extension xpi,
+    without mocks."""
+    result = validate(path='tests/resources/validate/jpm_multiprocess.xpi')
+    data = json.loads(result)
+
+    assert data['success'] is True
+    assert data['errors'] == 0
+    assert data['notices'] == 0
+    assert data['warnings'] == 0
+    assert data['compatibility_summary']
+    assert data['compatibility_summary']['errors'] == 0
+    assert data['compatibility_summary']['notices'] == 0
+    assert data['compatibility_summary']['warnings'] == 0
+    assert data['detected_type'] == 'extension'
+    assert data['messages'] == []
+    assert data['message_tree'] == {}
+    assert data['signing_summary']['high'] == 0
+    assert data['signing_summary']['medium'] == 0
+    assert data['signing_summary']['low'] == 0
+    assert data['signing_summary']['trivial'] == 0
+    assert data['metadata']
+    assert data['metadata']['name'] == u'My Jetpack Addon'
+    assert data['metadata']['version'] == u'0.0.3'
+    assert data['metadata']['listed'] == True
+    assert data['metadata']['id'] == u'@test-addon'
