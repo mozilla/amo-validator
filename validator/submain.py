@@ -10,6 +10,7 @@ from defusedxml.common import DefusedXmlException
 import validator
 from validator import decorator
 from validator.chromemanifest import ChromeManifest
+from validator.constants import MDN_DOC
 from validator.json_parser import ManifestJsonParser
 from validator.opensearch import detect_opensearch
 from validator.rdf import RDFException, RDFParser
@@ -380,6 +381,34 @@ def test_inner_package(err, xpi_package, for_appversions=None):
             err.unfinished = True
             err.discard_unused_messages(ending_tier=tier)
             return err
+
+    supports = err.get_resource('supports') or []
+    if (not err.get_resource('has_manifest_json') and
+            not err.get_resource('is_multiprocess_compatible') and
+            'firefox' in supports):
+        # If it's an old-style xpi, or a sdk extension, that supports Firefox,
+        # but is not a Web Extension, then we raise a warning if multiprocess
+        # compatible property was not found in install.rdf.
+        format_args = {}
+        if err.get_resource('has_package_json'):
+            format_args['filename'] = 'package.json'
+            format_args['field'] = 'multiprocess'
+            format_args['link'] = (
+                MDN_DOC %
+                'Mozilla/Add-ons/SDK/Guides/Multiprocess_Firefox_and_the_SDK')
+        else:
+            format_args['filename'] = 'install.rdf'
+            format_args['field'] = '<em:multiprocessCompatible>'
+            format_args['link'] = (
+                MDN_DOC % 'Mozilla/Add-ons/Working_with_multiprocess_Firefox')
+        err.warning(
+            ('submain', 'test_inner_package', 'not_multiprocess_compatible'),
+            'Extension is not marked as compatible with Multi Process',
+            "Your extension is not marked as compatible with "
+            "Multi-Process Firefox and may not work in future versions "
+            "of Firefox. Please review it, make changes if needed and "
+            "set {field} to true in {filename} if it's compatible. "
+            "See {link} for more information.".format(**format_args))
 
     # Return the results.
     return err

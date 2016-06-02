@@ -88,12 +88,15 @@ def _test_rdf(err, install):
         if predicate == 'unpack':
             err.save_resource('em:unpack', value, pushable=True)
 
-        if predicate == 'bootstrap':
+        elif predicate == 'bootstrap':
             err.save_resource('em:bootstrap', value)
             err.metadata['bootstrapped'] = value == 'true'
 
+        elif predicate == 'multiprocessCompatible':
+            err.save_resource('is_multiprocess_compatible', value == 'true')
+
         # Test if the predicate is banned
-        if predicate in shouldnt_exist:
+        elif predicate in shouldnt_exist:
             err.error(('testcases_installrdf',
                        '_test_rdf',
                        'shouldnt_exist'),
@@ -105,7 +108,7 @@ def _test_rdf(err, install):
             continue
 
         # Test if the predicate is obsolete
-        if predicate in obsolete:
+        elif predicate in obsolete:
             err.notice(('testcases_installrdf',
                         '_test_rdf',
                         'obsolete'),
@@ -128,7 +131,7 @@ def _test_rdf(err, install):
             continue
 
         # Do the same for may_exist_once.
-        if predicate in may_exist_once:
+        elif predicate in may_exist_once:
             if (predicate == 'optionsType' and
                     str(value) not in OPTIONS_TYPE_VALUES):
                 err.warning(
@@ -144,7 +147,7 @@ def _test_rdf(err, install):
             continue
 
         # If the element is safe for repetition, continue
-        if predicate in may_exist:
+        elif predicate in may_exist:
             continue
 
         # If the predicate isn't in any of the above lists, it is
