@@ -156,7 +156,36 @@ def test_validate_old_xpi():
     assert data['metadata']
     assert data['metadata']['name'] == u'name_value'
     assert data['metadata']['version'] == u'1.2.3.4'
-    assert data['metadata']['listed'] == True
+    assert data['metadata']['listed'] is True
+    assert data['metadata']['id'] == u'bastatestapp1@basta.mozilla.com'
+
+
+def test_validate_old_xpi_thunderbird_only():
+    """Integration test for a thunderbird-only old-style extension xpi
+    without mocks."""
+    result = validate(
+        path='tests/resources/validate/thunderbird_extension.xpi')
+    data = json.loads(result)
+
+    assert data['success'] is True
+    assert data['errors'] == 0
+    assert data['notices'] == 0
+    assert data['warnings'] == 0
+    assert data['compatibility_summary']
+    assert data['compatibility_summary']['errors'] == 0
+    assert data['compatibility_summary']['notices'] == 0
+    assert data['compatibility_summary']['warnings'] == 0
+    assert data['detected_type'] == 'extension'
+    assert data['messages'] == []
+    assert data['message_tree'] == {}
+    assert data['signing_summary']['high'] == 0
+    assert data['signing_summary']['medium'] == 0
+    assert data['signing_summary']['low'] == 0
+    assert data['signing_summary']['trivial'] == 0
+    assert data['metadata']
+    assert data['metadata']['name'] == u'name_value'
+    assert data['metadata']['version'] == u'1.2.3.4'
+    assert data['metadata']['listed'] is True
     assert data['metadata']['id'] == u'bastatestapp1@basta.mozilla.com'
 
 
@@ -185,7 +214,7 @@ def test_validate_old_xpi_multiprocess_compatible():
     assert data['metadata']
     assert data['metadata']['name'] == u'name_value'
     assert data['metadata']['version'] == u'1.2.3.4'
-    assert data['metadata']['listed'] == True
+    assert data['metadata']['listed'] is True
     assert data['metadata']['id'] == u'bastatestapp1@basta.mozilla.com'
 
 
@@ -214,7 +243,7 @@ def test_validate_jpm():
     assert data['metadata']
     assert data['metadata']['name'] == u'My Jetpack Addon'
     assert data['metadata']['version'] == u'0.0.3'
-    assert data['metadata']['listed'] == True
+    assert data['metadata']['listed'] is True
     assert data['metadata']['id'] == u'@test-addon'
 
 
@@ -242,5 +271,5 @@ def test_validate_jpm_multiprocess_compatible():
     assert data['metadata']
     assert data['metadata']['name'] == u'My Jetpack Addon'
     assert data['metadata']['version'] == u'0.0.3'
-    assert data['metadata']['listed'] == True
+    assert data['metadata']['listed'] is True
     assert data['metadata']['id'] == u'@test-addon'
