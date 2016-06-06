@@ -1,7 +1,7 @@
 from call_definitions import open_in_chrome_context
 from instanceproperties import _set_HTML_property
-from validator.compat import FX47_DEFINITION
-from validator.constants import BUGZILLA_BUG
+from validator.compat import FX47_DEFINITION, FX48_DEFINITION
+from validator.constants import BUGZILLA_BUG, MDN_DOC
 
 
 ENTITIES = {}
@@ -221,5 +221,30 @@ def nsIPK11TokenDB(traverser):
         column=traverser.position,
         for_appversions=FX47_DEFINITION,
         compatibility_type='error',
+        context=traverser.context,
+        tier=5)
+
+
+
+@register_entity('nsIIOService.newChannel')
+@register_entity('nsIIOService.newChannelFromURI')
+@register_entity('nsIIOService.newChannelFromURIWithProxyFlags')
+def nsIIOService(traverser):
+    traverser.err.warning(
+        err_id=('testcases_javascript_entity_values',
+                'nsIIOService'),
+        warning=(
+            'The "newChannel" functions have been deprecated in favor of '
+            'their new versions (ending with 2).'),
+        description=(
+            'The "newChannel" functions have been deprecated in favor of '
+            'their new versions (ending with 2). '
+            'See %s for more information.'
+            % MDN_DOC % 'Mozilla/Tech/XPCOM/Reference/Interface/nsIIOService'),
+        filename=traverser.filename,
+        line=traverser.line,
+        column=traverser.position,
+        for_appversions=FX48_DEFINITION,
+        compatibility_type='warning',
         context=traverser.context,
         tier=5)
