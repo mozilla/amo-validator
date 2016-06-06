@@ -69,3 +69,47 @@ class TestFX48Compat(CompatTestCase):
         warning = [msg for msg in self.compat_err.warnings if msg['message'] == expected]
         assert warning
         assert warning[0]['compatibility_type'] == 'warning'
+
+    def test_Proxy_createFunction_removed(self):
+        """https://github.com/mozilla/addons-server/issues/2678"""
+        expected = 'Proxy.create and Proxy.createFunction are no longer supported.'
+
+        script = '''
+             function f() { "use strict"; return this; }
+
+            var p = Proxy.createFunction(f, f);
+        '''
+
+        self.run_script_for_compat(script)
+
+        assert not self.compat_err.notices
+        assert not self.compat_err.errors
+
+        warning = [msg for msg in self.compat_err.warnings if msg['message'] == expected]
+        assert warning
+        assert warning[0]['compatibility_type'] == 'error'
+
+    def test_Proxy_create_removed(self):
+        """https://github.com/mozilla/addons-server/issues/2678"""
+        expected = 'Proxy.create and Proxy.createFunction are no longer supported.'
+
+        script = '''
+            var handler = {
+                getPropertyDescriptor(name) {
+                    /* toSource may be called to generate error message. */
+                    assertEq(name, "toSource");
+                    return { value: () => "foo" };
+                }
+            };
+
+            var proxiedFunctionPrototype = Proxy.create(handler, Function.prototype, undefined);
+        '''
+
+        self.run_script_for_compat(script)
+
+        assert not self.compat_err.notices
+        assert not self.compat_err.errors
+
+        warning = [msg for msg in self.compat_err.warnings if msg['message'] == expected]
+        assert warning
+        assert warning[0]['compatibility_type'] == 'error'

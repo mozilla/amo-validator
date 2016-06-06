@@ -2,7 +2,7 @@ import re
 from functools import wraps
 
 from validator.compat import (
-    FX45_DEFINITION, FX46_DEFINITION, FX47_DEFINITION)
+    FX45_DEFINITION, FX46_DEFINITION, FX47_DEFINITION, FX48_DEFINITION)
 from validator.constants import BUGZILLA_BUG, MDN_DOC
 from validator.contextgenerator import ContextGenerator
 from .chromemanifest import DANGEROUS_CATEGORIES, DANGEROUS_CATEGORY_WARNING
@@ -424,6 +424,25 @@ class Gecko47RegexTests(CompatRegexTestHelper):
             ),
             log_function=self.err.warning,
             compat_type='error')
+
+
+@register_generator
+class Gecko48RegexTests(CompatRegexTestHelper):
+    """Regex tests for Firefox 48 updates."""
+
+    VERSION = FX48_DEFINITION
+
+    def tests(self):
+        yield self.get_test(
+            r'\b(Proxy.create|Proxy.createFunction)\b',
+            'Proxy.create and Proxy.createFunction are no longer supported.',
+            'Proxy.create and Proxy.createFunction are no longer supported. '
+            'If this flag appears on Add-ons SDK code, make sure you download '
+            'the latest version of the SDK and submit a new version. '
+            'See %s for more information.' % BUGZILLA_BUG % 892903,
+            log_function=self.err.warning,
+            compat_type='error'
+        )
 
 
 class RegexTest(object):
