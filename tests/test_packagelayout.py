@@ -17,6 +17,8 @@ def test_blacklisted_files():
                    packagelayout.test_blacklisted_files,
                    True)
     assert err.metadata['contains_binary_extension']
+    assert any(warning['id'][1] == 'test_blacklisted_files'
+        and warning['file'] == 'omgitsadll.dll' for warning in err.warnings)
     assert not any(count for (key, count) in err.compat_summary.items())
 
     # Run the compatibility test on this, but it shouldn't fail or produce

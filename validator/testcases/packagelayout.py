@@ -122,7 +122,7 @@ def test_blacklisted_files(err, xpi_package=None):
                 editors_only=True,
                 signing_help=HELP,
                 signing_severity='medium',
-                filename=name)
+                filename=', '.join(flagged_files))
 
 
 @decorator.register_test(tier=1)
