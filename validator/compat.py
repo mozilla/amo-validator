@@ -26,3 +26,4 @@ def _build_definition(maj_version_num, firefox=True, fennec=True,
 FX45_DEFINITION = _build_definition(45)
 FX46_DEFINITION = _build_definition(46)
 FX47_DEFINITION = _build_definition(47)
+FX48_DEFINITION = _build_definition(48)

@@ -461,6 +461,11 @@ INTERFACES = {
     'nsIPK11TokenDB': {'value': {'listTokens': entity('nsIPK11TokenDB.listTokens')}},
     'nsIPKCS11ModuleDB': {'value': {'listModules': entity('nsIPKCS11ModuleDB.listModules')}},
     'nsIPKCS11Module': {'value': {'listSlots': entity('nsIPKCS11Module.listSlots')}},
+    'nsIIOService': {'value': {
+        'newChannel': entity('nsIIOService.newChannel'),
+        'newChannelFromURI': entity('nsIIOService.newChannelFromURI'),
+        'newChannelFromURIWithProxyFlags': entity('nsIIOService.newChannelFromURIWithProxyFlags'),
+    }}
 }
 
 INTERFACE_ENTITIES = {u'nsIXMLHttpRequest':
@@ -977,6 +982,13 @@ GLOBAL_ENTITIES = {
 
     'Application': {'dangerous_on_read': fuel_error},
     'NewTabURL': {'value': {'override': entity('NewTabURL.override')}},
+    'Proxy':
+        {'value':
+            {u'createFunction':
+                {'return': call_definitions.Proxy_deprec},
+             u'create':
+                {'return': call_definitions.Proxy_deprec}}},
+
 
     # Common third-party libraries
     'Handlebars': {

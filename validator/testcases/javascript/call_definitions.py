@@ -5,6 +5,8 @@ import actions
 import predefinedentities
 from jstypes import JSArray, JSObject, JSWrapper
 
+from validator.constants import BUGZILLA_BUG
+
 # Function prototypes should implement the following:
 #  wrapper : The JSWrapper instace that is being called
 #  arguments : A list of argument nodes; untraversed
@@ -349,3 +351,19 @@ def open_in_chrome_context(uri, method, traverser):
             line=traverser.line,
             column=traverser.position,
             context=traverser.context)
+
+
+def Proxy_deprec(wrapper, arguments, traverser):
+    traverser.warning(
+        err_id=('testcases_javascript_calldefinitions', 'Proxy', 'deprec'),
+        warning='Proxy.create and Proxy.createFunction are no longer supported.',
+        description=(
+            'Proxy.create and Proxy.createFunction are no longer supported. '
+            'If this flag appears on Add-ons SDK code, make sure you download '
+            'the latest version of the SDK and submit a new version. '
+            'See %s for more information.' % BUGZILLA_BUG % 892903),
+        compatibility_type='error',
+        filename=traverser.filename,
+        line=traverser.line,
+        column=traverser.position,
+        context=traverser.context)
