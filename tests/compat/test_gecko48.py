@@ -77,7 +77,7 @@ class TestFX48Compat(CompatTestCase):
         script = '''
              function f() { "use strict"; return this; }
 
-            var p = Proxy.createFunction(f, f);
+             var p = Proxy.createFunction(f, f);
         '''
 
         self.run_script_for_compat(script)
@@ -94,13 +94,7 @@ class TestFX48Compat(CompatTestCase):
         expected = 'Proxy.create and Proxy.createFunction are no longer supported.'
 
         script = '''
-            var handler = {
-                getPropertyDescriptor(name) {
-                    /* toSource may be called to generate error message. */
-                    assertEq(name, "toSource");
-                    return { value: () => "foo" };
-                }
-            };
+            var handler = {};
 
             var proxiedFunctionPrototype = Proxy.create(handler, Function.prototype, undefined);
         '''
@@ -113,3 +107,30 @@ class TestFX48Compat(CompatTestCase):
         warning = [msg for msg in self.compat_err.warnings if msg['message'] == expected]
         assert warning
         assert warning[0]['compatibility_type'] == 'error'
+
+    def test_throbber_icon_moved(self):
+        """https://github.com/mozilla/addons-server/issues/2678"""
+        expected = 'The throbber icon your add-on points to has been moved'
+
+        paths = (
+            'chrome://browser/skin/tabbrowser/loading.png',
+            'chrome://global/skin/icons/loading_16.png'
+        )
+
+        script = '''
+            #foo {
+                list-style-image: url("%s");
+            }
+        '''
+
+        for path in paths:
+            self.run_regex_for_compat(script % path, is_js=False)
+
+            assert not self.compat_err.notices
+            assert not self.compat_err.errors
+
+            warning = [
+                msg for msg in self.compat_err.warnings
+                if msg['message'].startswith(expected)]
+            assert warning
+            assert warning[0]['compatibility_type'] == 'warning'

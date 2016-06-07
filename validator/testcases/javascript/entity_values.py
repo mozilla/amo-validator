@@ -225,7 +225,6 @@ def nsIPK11TokenDB(traverser):
         tier=5)
 
 
-
 @register_entity('nsIIOService.newChannel')
 @register_entity('nsIIOService.newChannelFromURI')
 @register_entity('nsIIOService.newChannelFromURIWithProxyFlags')

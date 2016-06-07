@@ -432,9 +432,9 @@ class Gecko48RegexTests(CompatRegexTestHelper):
 
     VERSION = FX48_DEFINITION
 
-    def tests(self):
+    def js_tests(self):
         yield self.get_test(
-            r'\b(Proxy.create|Proxy.createFunction)\b',
+            r'\bProxy\.(create|createFunction)\b',
             'Proxy.create and Proxy.createFunction are no longer supported.',
             'Proxy.create and Proxy.createFunction are no longer supported. '
             'If this flag appears on Add-ons SDK code, make sure you download '
@@ -442,6 +442,23 @@ class Gecko48RegexTests(CompatRegexTestHelper):
             'See %s for more information.' % BUGZILLA_BUG % 892903,
             log_function=self.err.warning,
             compat_type='error'
+        )
+
+    def tests(self):
+        instances = (
+            'chrome://global/skin/icons/loading_16.png|'
+            'chrome://browser/skin/tabbrowser/loading.png')
+
+        msg = (
+            'The throbber icon your add-on points to has been '
+            'moved to "chrome://global/skin/icons/loading.png".')
+
+        yield self.get_test(
+            r'\b(%s)\b' % instances,
+            msg,
+            msg + ' See %s for more information.' % BUGZILLA_BUG % 750054,
+            log_function=self.err.warning,
+            compat_type='warning'
         )
 
 
