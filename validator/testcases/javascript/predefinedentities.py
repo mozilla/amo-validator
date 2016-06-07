@@ -982,6 +982,13 @@ GLOBAL_ENTITIES = {
 
     'Application': {'dangerous_on_read': fuel_error},
     'NewTabURL': {'value': {'override': entity('NewTabURL.override')}},
+    'Proxy':
+        {'value':
+            {u'createFunction':
+                {'return': call_definitions.Proxy_deprec},
+             u'create':
+                {'return': call_definitions.Proxy_deprec}}},
+
 
     # Common third-party libraries
     'Handlebars': {

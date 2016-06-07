@@ -432,18 +432,6 @@ class Gecko48RegexTests(CompatRegexTestHelper):
 
     VERSION = FX48_DEFINITION
 
-    def js_tests(self):
-        yield self.get_test(
-            r'\bProxy\.(create|createFunction)\b',
-            'Proxy.create and Proxy.createFunction are no longer supported.',
-            'Proxy.create and Proxy.createFunction are no longer supported. '
-            'If this flag appears on Add-ons SDK code, make sure you download '
-            'the latest version of the SDK and submit a new version. '
-            'See %s for more information.' % BUGZILLA_BUG % 892903,
-            log_function=self.err.warning,
-            compat_type='error'
-        )
-
     def tests(self):
         instances = (
             'chrome://global/skin/icons/loading_16.png|'
