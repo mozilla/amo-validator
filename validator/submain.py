@@ -383,7 +383,8 @@ def test_inner_package(err, xpi_package, for_appversions=None):
             return err
 
     supports = err.get_resource('supports') or []
-    if (not err.get_resource('has_manifest_json') and
+    if (err.get_resource('has_install_rdf') and
+            not err.get_resource('has_manifest_json') and
             not err.get_resource('is_multiprocess_compatible') and
             'firefox' in supports):
         # If it's an old-style xpi, or a sdk extension, that supports Firefox,
