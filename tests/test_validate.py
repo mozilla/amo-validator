@@ -160,6 +160,36 @@ def test_validate_old_xpi():
     assert data['metadata']['id'] == u'bastatestapp1@basta.mozilla.com'
 
 
+def test_validate_old_xpi_with_jar_in_it():
+    """Integration test for a basic old-style extension xpi that contains a
+    .jar file, without mocks."""
+    result = validate(path='tests/resources/validate/extension_with_jar.xpi')
+    data = json.loads(result)
+
+    assert data['success'] is False
+    assert data['errors'] == 0
+    assert data['notices'] == 0
+    assert data['warnings'] == 1
+    assert data['compatibility_summary']
+    assert data['compatibility_summary']['errors'] == 0
+    assert data['compatibility_summary']['notices'] == 0
+    assert data['compatibility_summary']['warnings'] == 0
+    assert data['detected_type'] == 'extension'
+    assert len(data['messages']) == 1
+    assert data['messages'][0]['id'] == [
+        u'submain', u'test_inner_package', u'not_multiprocess_compatible']
+    assert data['message_tree']
+    assert data['signing_summary']['high'] == 0
+    assert data['signing_summary']['medium'] == 0
+    assert data['signing_summary']['low'] == 0
+    assert data['signing_summary']['trivial'] == 0
+    assert data['metadata']
+    assert data['metadata']['name'] == u'xpi name'
+    assert data['metadata']['version'] == u'0.2'
+    assert data['metadata']['listed'] is True
+    assert data['metadata']['id'] == u'guid@xpi'
+
+
 def test_validate_old_xpi_thunderbird_only():
     """Integration test for a thunderbird-only old-style extension xpi
     without mocks."""
