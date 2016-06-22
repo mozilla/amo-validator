@@ -434,8 +434,8 @@ class Gecko48RegexTests(CompatRegexTestHelper):
 
     def tests(self):
         instances = (
-            'chrome://global/skin/icons/loading_16.png|'
-            'chrome://browser/skin/tabbrowser/loading.png')
+            'chrome://global/skin/icons/loading_16\.png|'
+            'chrome://browser/skin/tabbrowser/loading\.png')
 
         msg = (
             'The throbber icon your add-on points to has been '
