@@ -123,11 +123,11 @@ def test_packed_packages(err, xpi_package=None):
                             'test_packed_packages',
                             'dangerous_js_library'),
                     warning='Dangerous JS Library Detected',
-                    description=('A potentially dangerous JavaScript library '
-                                 'requires careful review by an '
-                                 'administrative reviewer.',
-                                 'File %r might be a dangerous JS '
-                                 'library' % name),
+                    description=('Your add-on uses a JavaScript library we do '
+                                 'not recommend. Read more: '
+                                 'https://bit.ly/1TRIyZY',
+                                 'File %r might be a dangerous or deprecated '
+                                 'JavaScript library' % name),
                     filename=name)
                 continue
 
