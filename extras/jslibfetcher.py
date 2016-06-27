@@ -9,7 +9,7 @@ WARNING = "warning"
 
 ANGULARJS_VERSIONS = {
     WARNING: [
-        "1.5.5",
+        "1.5.7",
     ],
 }
 
@@ -47,7 +47,7 @@ DOJO_VERSIONS = {
 }
 
 JQUERY_VERSIONS = {
-    ALLOWED: [
+    WARNING: [
         "1.5",
         "1.5.1",
         "1.5.2",
@@ -77,6 +77,8 @@ JQUERY_VERSIONS = {
         "1.12.2",
         "1.12.3",
         "1.12.4",
+    ],
+    ALLOWED: [
         "2.0.0",
         "2.0.1",
         "2.0.2",
@@ -91,6 +93,7 @@ JQUERY_VERSIONS = {
         "2.2.2",
         "2.2.3",
         "2.2.4",
+        "3.0.0",
     ]
 }
 
@@ -290,21 +293,6 @@ def get_patterns():
     get_pattern("underscore",
                 "https://raw.github.com/documentcloud/underscore/%s/underscore-min.js",
                 UNDERSCORE_VERSIONS)
-
-    CRYPTO_FILES = {
-        ALLOWED: ["aes", "cipher-core", "core", "enc-base64", "enc-utf16", "evpkdf",
-                  "format-hex", "hmac", "lib-typedarrays", "md5", "mode-cfb",
-                  "mode-ctr-gladman", "mode-ctr", "mode-ecb", "mode-ofb",
-                  "pad-ansix923", "pad-iso10126", "pad-iso97971", "pad-nopadding",
-                  "pad-zeropadding", "pbkdf2", "rabbit-legacy", "rabbit", "rc4",
-                  "ripemd160", "sha1", "sha224", "sha256", "sha3", "sha384",
-                  "sha512", "tripledes", "x64-core"]
-    }
-
-    get_pattern(
-        "crypto_js", "https://crypto-js.googlecode.com/svn/tags/3.1.2/src/%s.js",
-        CRYPTO_FILES)
-
 
 print "Downloading third-party library files..."
 get_patterns()
