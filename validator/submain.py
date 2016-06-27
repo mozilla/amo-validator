@@ -18,7 +18,7 @@ from validator.typedetection import detect_type
 from validator.xpi import XPIManager
 
 from constants import (PACKAGE_ANY, PACKAGE_EXTENSION, PACKAGE_SEARCHPROV,
-                       PACKAGE_THEME)
+                       PACKAGE_SUBPACKAGE, PACKAGE_THEME)
 
 
 types = {0: 'Unknown',
@@ -386,6 +386,7 @@ def test_inner_package(err, xpi_package, for_appversions=None):
     if (err.get_resource('has_install_rdf') and
             not err.get_resource('has_manifest_json') and
             not err.get_resource('is_multiprocess_compatible') and
+            err.detected_type in (PACKAGE_EXTENSION, PACKAGE_SUBPACKAGE) and
             'firefox' in supports):
         # If it's an old-style xpi, or a sdk extension, that supports Firefox,
         # but is not a Web Extension, then we raise a warning if multiprocess

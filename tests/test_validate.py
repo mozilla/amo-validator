@@ -303,3 +303,29 @@ def test_validate_jpm_multiprocess_compatible():
     assert data['metadata']['version'] == u'0.0.3'
     assert data['metadata']['listed'] is True
     assert data['metadata']['id'] == u'@test-addon'
+
+
+def test_validate_dictionnary_no_multiprocess_compatible_warning():
+    """Integration test for a dictionnary xpi, without mocks."""
+    result = validate(path='tests/resources/validate/dictionary.xpi')
+    data = json.loads(result)
+    assert data['success'] is True
+    assert data['errors'] == 0
+    assert data['notices'] == 0
+    assert data['warnings'] == 0
+    assert data['compatibility_summary']
+    assert data['compatibility_summary']['errors'] == 0
+    assert data['compatibility_summary']['notices'] == 0
+    assert data['compatibility_summary']['warnings'] == 0
+    assert data['detected_type'] == 'dictionary'
+    assert data['messages'] == []
+    assert data['message_tree'] == {}
+    assert data['signing_summary']['high'] == 0
+    assert data['signing_summary']['medium'] == 0
+    assert data['signing_summary']['low'] == 0
+    assert data['signing_summary']['trivial'] == 0
+    assert data['metadata']
+    assert data['metadata']['name'] == u'My Fake Dictionary'
+    assert data['metadata']['version'] == u'1.0.0'
+    assert data['metadata']['listed'] is True
+    assert data['metadata']['id'] == u'my@dict'
