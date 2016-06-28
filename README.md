@@ -346,10 +346,6 @@ Follow these steps to release a new version of the `amo-validator` Python packag
 5. TravisCI will build and release a new version of `amo-validator`
    to PyPI from your tag commit.
    [Here is an example](https://travis-ci.org/mozilla/amo-validator/builds/90333989).
-6. Copy the deployed source distribution (`.tar.gz`) and wheel distribution
-   (`.whl`) from [amo-validator on PyPI](https://pypi.python.org/pypi/amo-validator)
-   to [Mozilla's PyRepo](https://mana.mozilla.org/wiki/display/WebDev/pyrepo).
-   Be sure to set the right permissions (`0644`).
 
 ## Updating
 
