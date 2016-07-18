@@ -22,16 +22,32 @@ BACKBONE_VERSIONS = {
     ]
 }
 
+BOOTSTRAP_VERSIONS = {
+    ALLOWED: [
+        "3.1.1",
+        "3.2.0",
+        "3.3.0",
+        "3.3.1",
+        "3.3.2",
+        "3.3.4",
+        "3.3.5",
+        "3.3.6",
+    ]
+}
+
 DOJO_VERSIONS = {
     ALLOWED: [
-        "1.5.0",
-        "1.5.1",
-        "1.6.0",
-        "1.6.1",
         "1.7.0",
         "1.7.1",
         "1.7.2",
         "1.7.3",
+        "1.7.4",
+        "1.7.5",
+        "1.7.6",
+        "1.7.7",
+        "1.7.8",
+        "1.7.9",
+        "1.7.10",
         "1.8.0",
         "1.8.1",
         "1.8.2",
@@ -39,10 +55,45 @@ DOJO_VERSIONS = {
         "1.8.4",
         "1.8.5",
         "1.8.6",
+        "1.8.7",
+        "1.8.8",
+        "1.8.9",
+        "1.8.10",
+        "1.8.11",
+        "1.8.12",
         "1.9.0",
         "1.9.1",
         "1.9.2",
         "1.9.3",
+        "1.9.4",
+        "1.9.5",
+        "1.9.6",
+        "1.9.7",
+        "1.9.8",
+        "1.9.9",
+        "1.10.0",
+        "1.10.1",
+        "1.10.2",
+        "1.10.3",
+        "1.10.4",
+        "1.10.5",
+        "1.10.6",
+        "1.11.0",
+        "1.11.1",
+        "1.11.2",
+    ]
+}
+
+DOMPURIFY_VERSIONS = {
+    ALLOWED: [
+        "0.7.0",
+        "0.7.1",
+        "0.7.2",
+        "0.7.3",
+        "0.7.4",
+        "0.8.0",
+        "0.8.1",
+        "0.8.2",
     ]
 }
 
@@ -94,6 +145,7 @@ JQUERY_VERSIONS = {
         "2.2.3",
         "2.2.4",
         "3.0.0",
+        "3.1.0",
     ]
 }
 
@@ -140,35 +192,113 @@ MOMENTJS_VERSIONS = {
         "2.10.3",
         "2.10.5",
         "2.10.6",
+        "2.11.0",
+        "2.11.1",
+        "2.11.2",
+        "2.12.0",
+        "2.13.0",
+        "2.14.0",
+        "2.14.1",
     ]
 }
 
 MOOTOOLS_VERSIONS = {
     ALLOWED: [
-        "1.3.1",
-        "1.3.2",
-        "1.4.0",
-        "1.4.1",
-        "1.4.2",
-        "1.4.3",
-        "1.4.4",
-        "1.4.5",
-        "1.5.0",
+        "1.5.2",
+        "1.6.0",
     ]
 }
 
 PROTOTYPE_VERSIONS = {
     ALLOWED: [
+        "1.7.0.0",
         "1.7.1.0",
         "1.7.2.0",
+        "1.7.3.0",
+    ]
+}
+
+REACT_VERSIONS = {
+    ALLOWED: [
+        # Some urls resolve to a 500...
+        "0.0.1",
+        "0.0.2",
+        "0.0.3",
+        "0.1.2",
+        "0.2.0",
+        "0.2.1",
+        "0.2.2",
+        "0.2.3",
+        "0.2.4",
+        "0.2.5",
+        "0.2.6",
+#        "0.3.0",
+        "0.3.4",
+        "0.3.5",
+#        "0.5.0",
+#        "0.5.1",
+#        "0.5.2",
+        "0.6.0",
+        "0.6.1",
+        "0.6.2",
+        "0.6.3",
+        "0.7.0",
+        "0.7.1",
+#        "0.8.0",
+#        "0.9.0",
+        "0.10.0",
+        "0.11.0",
+        "0.11.1",
+        "0.11.2",
+        "0.12.0",
+        "0.12.1",
+        "0.12.2",
+        "0.13.0",
+        "0.13.1",
+        "0.13.2",
+        "0.13.3",
+        "0.14.0",
+        "0.14.1",
+        "0.14.2",
+        "0.14.3",
+        "0.14.4",
+        "0.14.5",
+        "0.14.6",
+        "0.14.7",
+        "0.14.8",
+        "15.0.0",
+        "15.0.1",
+        "15.0.2",
+        "15.1.0",
+        "15.2.0",
+        "15.2.1",
+
+    ]
+}
+
+REACT_DOM_VERSIONS = {
+    ALLOWED: [
+        "0.1.0",
+        "0.14.0",
+        "0.14.1",
+        "0.14.2",
+        "0.14.3",
+        "0.14.4",
+        "0.14.5",
+        "0.14.6",
+        "0.14.7",
+        "0.14.8",
+        "15.0.0",
+        "15.0.1",
+        "15.0.2",
+        "15.1.0",
+        "15.2.0",
+        "15.2.1",
     ]
 }
 
 UNDERSCORE_VERSIONS = {
     ALLOWED: [
-        "1.1.4",
-        "1.1.5",
-        "1.1.7",
         "1.2.0",
         "1.2.1",
         "1.2.2",
@@ -213,9 +343,9 @@ def process(url, rule, file):
         with open(destination, "wb") as code:
             code.write(response.content)
             print "Downloaded: {}".format(url)
-    except requests.exceptions.HTTPError as e:
+    except requests.exceptions.HTTPError:
         global download_errors
-        download_errors.append((response.url, response.status_code, response.reason))
+        download_errors.append((url, response.status_code, response.reason))
 
 
 def get_pattern(prefix, url_pattern, library):
@@ -242,6 +372,14 @@ def get_patterns():
                 "https://raw.githubusercontent.com/jashkenas/backbone/%s/backbone-min.js",
                 BACKBONE_VERSIONS)
 
+    # Bootstrap
+    get_pattern("bootstrap",
+                "https://raw.githubusercontent.com/twbs/bootstrap/v%s/dist/js/bootstrap.js",
+                BOOTSTRAP_VERSIONS)
+    get_pattern("bootstrap",
+                "https://raw.githubusercontent.com/twbs/bootstrap/v%s/dist/js/bootstrap.min.js",
+                BOOTSTRAP_VERSIONS)
+
     # Dojo Toolkit
     get_pattern("dojo",
                 "https://download.dojotoolkit.org/release-%s/dojo.js",
@@ -249,6 +387,14 @@ def get_patterns():
     get_pattern("dojo",
                 "https://download.dojotoolkit.org/release-%s/dojo.js.uncompressed.js",
                 DOJO_VERSIONS)
+
+    # DOMPurify
+    get_pattern("dompurify",
+                "https://raw.githubusercontent.com/cure53/DOMPurify/%s/src/purify.js",
+                DOMPURIFY_VERSIONS)
+    get_pattern("dompurify",
+                "https://raw.githubusercontent.com/cure53/DOMPurify/%s/dist/purify.min.js",
+                DOMPURIFY_VERSIONS)
 
     # jQuery
     get_pattern("jquery",
@@ -276,7 +422,7 @@ def get_patterns():
 
     # MooTools
     get_pattern("mootools",
-                "https://ajax.googleapis.com/ajax/libs/mootools/%s/mootools-yui-compressed.js",
+                "https://ajax.googleapis.com/ajax/libs/mootools/%s/mootools.min.js",
                 MOOTOOLS_VERSIONS)
     get_pattern("mootools",
                 "https://ajax.googleapis.com/ajax/libs/mootools/%s/mootools.js",
@@ -286,6 +432,22 @@ def get_patterns():
     get_pattern("prototype",
                 "https://ajax.googleapis.com/ajax/libs/prototype/%s/prototype.js",
                 PROTOTYPE_VERSIONS)
+
+    # React
+    get_pattern("react",
+                "https://fb.me/react-%s.js",
+                REACT_VERSIONS)
+    get_pattern("react",
+                "https://fb.me/react-%s.min.js",
+                REACT_VERSIONS)
+
+    # React DOM
+    get_pattern("react_dom",
+                "https://fb.me/react-dom-%s.js",
+                REACT_DOM_VERSIONS)
+    get_pattern("react_dom",
+                "https://fb.me/react-dom-%s.min.js",
+                REACT_DOM_VERSIONS)
 
     # Underscore
     get_pattern("underscore",
