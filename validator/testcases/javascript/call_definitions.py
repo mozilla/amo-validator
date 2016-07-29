@@ -6,6 +6,7 @@ import predefinedentities
 from jstypes import JSArray, JSObject, JSWrapper
 
 from validator.constants import BUGZILLA_BUG
+from validator.compat import FX48_DEFINITION
 
 # Function prototypes should implement the following:
 #  wrapper : The JSWrapper instace that is being called
@@ -366,4 +367,5 @@ def Proxy_deprec(wrapper, arguments, traverser):
         filename=traverser.filename,
         line=traverser.line,
         column=traverser.position,
-        context=traverser.context)
+        context=traverser.context,
+        for_appversions=FX48_DEFINITION)
