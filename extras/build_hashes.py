@@ -2,6 +2,8 @@ import sys
 import os
 import hashlib
 
+from natsort import natsorted
+
 hashes = {}
 
 print "Building third-party library hashes..."
@@ -11,7 +13,7 @@ for entry in os.listdir(libs_folder_root):
     if os.path.isdir(entry_path):
         with open(os.path.join(libs_folder_root, "hashes-{}.txt".format(entry)),
                   mode="w") as output:
-            for filename in os.listdir(entry_path):
+            for filename in natsorted(os.listdir(entry_path)):
                 path = os.path.join(entry_path, filename)
                 hash = hashlib.sha256(open(path).read()).hexdigest()
                 if hash not in hashes:
