@@ -1,5 +1,5 @@
-1b3bd62810b9fa18aff89004db9ac6b1fd634f2771b82516a63bd9cf741b08a1 angularjs.1.5.7.angular.js
-fb479d4b1f6a64ed66d8eede4ed94c03c8c441c519415410b46e18377147cc9a angularjs.1.5.7.angular.min.js
+3b10ac187fe3da4f946fa2e8e794e263067de1bbfd26682f6e7ee00da86d888b angularjs.1.5.8.angular.js
+e92af41ea36051ffe9f3c83abec97cec2ac09cdaa2396863958e8b4bc8de5870 angularjs.1.5.8.angular.min.js
 8aa0f84b5331efcc3cb72c7d504c2bc6ebd861da003d72c33df99ce650d4531d jquery.1.10.0.jquery-1.10.0.js
 dbe2f39d679680bec02757226881b9ac53fb18a7a6cf397e2bbe6d4724c1c8e1 jquery.1.10.0.jquery-1.10.0.min.js
 ebaded49db62a60060caa2577f2a4ec1ff68726bc40861bc65d977abeb64fa7d jquery.1.10.1.jquery-1.10.1.js
