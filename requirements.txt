@@ -9,3 +9,4 @@ mock==1.0.0
 simplejson==3.8.1
 spidermonkey==48.0a2
 requests==2.9.1
+natsort==5.0.1
