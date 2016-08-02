@@ -212,6 +212,7 @@ MOMENTJS_VERSIONS = {
 
 MOOTOOLS_VERSIONS = {
     ALLOWED: [
+        "1.5.1",
         "1.5.2",
         "1.6.0",
     ]
@@ -388,11 +389,11 @@ def get_patterns():
                 JQUERY_VERSIONS)
 
     # jQueryUI
-    get_pattern("jqueryui",
-                "https://code.jquery.com/ui/%s/jquery-ui.min.js",
-                JQUERYUI_VERSIONS)
-    get_pattern("jqueryui",
+    get_pattern("jquery-ui",
                 "https://code.jquery.com/ui/%s/jquery-ui.js",
+                JQUERYUI_VERSIONS)
+    get_pattern("jquery-ui",
+                "https://code.jquery.com/ui/%s/jquery-ui.min.js",
                 JQUERYUI_VERSIONS)
 
     # moment.js
@@ -405,10 +406,10 @@ def get_patterns():
 
     # MooTools
     get_pattern("mootools",
-                "https://ajax.googleapis.com/ajax/libs/mootools/%s/mootools.min.js",
+                "https://raw.githubusercontent.com/mootools/mootools-core/%s/dist/mootools-core.js",
                 MOOTOOLS_VERSIONS)
     get_pattern("mootools",
-                "https://ajax.googleapis.com/ajax/libs/mootools/%s/mootools.js",
+                "https://raw.githubusercontent.com/mootools/mootools-core/%s/dist/mootools-core.min.js",
                 MOOTOOLS_VERSIONS)
 
     # Prototype.js
@@ -425,10 +426,10 @@ def get_patterns():
                 REACT_VERSIONS)
 
     # React DOM
-    get_pattern("react_dom",
+    get_pattern("react-dom",
                 "https://fb.me/react-dom-%s.js",
                 REACT_DOM_VERSIONS)
-    get_pattern("react_dom",
+    get_pattern("react-dom",
                 "https://fb.me/react-dom-%s.min.js",
                 REACT_DOM_VERSIONS)
 
