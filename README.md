@@ -1,3 +1,5 @@
+[![Requirements Status](https://requires.io/github/mozilla/amo-validator/requirements.svg?branch=master)](https://requires.io/github/mozilla/amo-validator/requirements/?branch=master)
+
 # addons.mozilla.org Validator
 
 The AMO Validator is a tool designed to scan Mozilla add-on packages for
