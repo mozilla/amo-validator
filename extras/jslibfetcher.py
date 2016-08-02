@@ -212,6 +212,7 @@ MOMENTJS_VERSIONS = {
 
 MOOTOOLS_VERSIONS = {
     ALLOWED: [
+        "1.5.1",
         "1.5.2",
         "1.6.0",
     ]
