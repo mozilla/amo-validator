@@ -1,5 +1,4 @@
 from mock import patch
-from nose.tools import eq_
 
 from js_helper import _do_test_raw, TestCase
 
@@ -102,7 +101,7 @@ def test_on_event():
     x.attr({ onclick: "bar" });
     """)
     assert err.failed()
-    eq_(err.warnings[0]['signing_severity'], 'medium')
+    assert err.warnings[0]['signing_severity'] == 'medium'
 
 
 def test_on_event_null():

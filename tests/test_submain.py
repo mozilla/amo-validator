@@ -1,8 +1,6 @@
 import mock
 import time
 
-from nose.tools import eq_
-
 from validator import submain
 from validator.chromemanifest import ChromeManifest
 from validator.errorbundler import ErrorBundle
@@ -31,9 +29,9 @@ def test_validation_timeout(test_package):
     submain.prepare_package(err, 'tests/resources/main/foo.xpi', timeout=0.1)
 
     # Make sure that our error got moved to the front of the list.
-    eq_(len(err.errors), 2)
-    eq_(err.errors[0]['id'],
-        ('validator', 'unexpected_exception', 'validation_timeout'))
+    assert len(err.errors) == 2
+    assert err.errors[0]['id'] == ('validator', 'unexpected_exception',
+                                   'validation_timeout')
 
 
 @mock.patch('validator.submain.test_package')
@@ -52,8 +50,8 @@ def test_validation_error(log, test_package):
     assert log.error.called
 
     # Make sure that our error got moved to the front of the list.
-    eq_(len(err.errors), 2)
-    eq_(err.errors[0]['id'], ('validator', 'unexpected_exception'))
+    assert len(err.errors) == 2
+    assert err.errors[0]['id'] == ('validator', 'unexpected_exception')
 
 
 @mock.patch('validator.submain.test_search')
@@ -67,16 +65,16 @@ def test_prepare_package_extension(test_search):
 
     assert not test_search.called
 
-    eq_(len(err.errors), 1)
-    eq_(err.errors[0]['id'], ('main', 'prepare_package', 'not_found'))
+    assert len(err.errors) == 1
+    assert err.errors[0]['id'] == ('main', 'prepare_package', 'not_found')
 
     # Files which do not exist raise an error prior to calling `test_search`.
     err = ErrorBundle()
     submain.prepare_package(err, 'foo/bar/test.xml')
 
     assert not test_search.called
-    eq_(len(err.errors), 1)
-    eq_(err.errors[0]['id'], ('main', 'prepare_package', 'not_found'))
+    assert len(err.errors) == 1
+    assert err.errors[0]['id'] == ('main', 'prepare_package', 'not_found')
 
 
 def test_prepare_package_missing():
@@ -182,8 +180,8 @@ def test_proper_linked_manifest():
     # From the linked manifest:
     zaps = list(chrome.get_triples(subject='zap'))
     assert zaps
-    eq_(zaps[0]['filename'], 'submanifest.manifest')
-    eq_(zaps[0]['context'].data, ['zap baz', ''])
+    assert zaps[0]['filename'] == 'submanifest.manifest'
+    assert zaps[0]['context'].data == ['zap baz', '']
 
 
 def test_proper_linked_manifest_relative():
@@ -208,8 +206,8 @@ def test_proper_linked_manifest_relative():
     # From the linked manifest:
     zaps = list(chrome.get_triples(subject='zap'))
     assert zaps
-    eq_(zaps[0]['filename'], 'dir/foo.manifest')
-    eq_(zaps[0]['context'].data, ['zap baz', ''])
+    assert zaps[0]['filename'] == 'dir/foo.manifest'
+    assert zaps[0]['context'].data == ['zap baz', '']
 
 
 def test_missing_manifest_link():

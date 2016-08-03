@@ -1,6 +1,6 @@
 from StringIO import StringIO
 
-from nose.tools import raises
+import pytest
 
 from validator.rdf import RDFParser, RDFException
 
@@ -13,13 +13,12 @@ def testopen():
     assert r.rdf
 
 
-@raises(RDFException)
 def test_load_bad():
     """Tests that the RDF parser throws an error for invalid, damaged,
     or corrupt RDF files."""
-
-    r = RDFParser(None, open('tests/resources/rdf/fail.rdf'))
-    assert not r.rdf
+    with pytest.raises(RDFException):
+        r = RDFParser(None, open('tests/resources/rdf/fail.rdf'))
+        assert not r.rdf
 
 
 def test_load_rdf_stringio():

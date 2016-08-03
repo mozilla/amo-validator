@@ -1,9 +1,6 @@
 # -*- coding: utf8 -*-
 import os
 import tempfile
-from zipfile import BadZipfile, ZipFile
-
-from nose.tools import eq_
 
 from validator.xpi import XPIManager
 
@@ -27,7 +24,7 @@ def test_get_list():
     assert z.package_contents()
     assert z.contents_cache  # Spelling check!
     z.contents_cache = 'foo'
-    eq_(z.package_contents(), 'foo')
+    assert z.package_contents() == 'foo'
 
 
 def test_valid_name():
@@ -51,7 +48,7 @@ def test_write_file():
             z = XPIManager(temp_fn, mode='w')
             f, d = 'install.rdf', '注目のコレクション'.decode('utf-8')
             z.write(f, d)
-            eq_(z.read(f), d.encode('utf-8'))
+            assert z.read(f) == d.encode('utf-8')
         finally:
             os.unlink(temp_fn)
 

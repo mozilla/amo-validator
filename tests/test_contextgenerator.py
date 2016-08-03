@@ -1,4 +1,3 @@
-from nose.tools import eq_
 from validator.contextgenerator import ContextGenerator
 
 
@@ -31,9 +30,9 @@ def test_get_context():
     print c_end
     # Contexts are always length 3
     assert len(c_start) == 3
-    assert c_start[0] == None
+    assert c_start[0] is None
     assert len(c_end) == 3
-    assert c_end[2] == None
+    assert c_end[2] is None
 
     assert c_start[1] == '0123456789'
     assert c_end[0] == '9012345678'
@@ -61,7 +60,7 @@ def test_get_context_trimming():
     print [len(x) for x in trimmed]
 
     for i in range(3):
-        eq_(len(trimmed[i]), proper_lengths[i])
+        assert len(trimmed[i]) == proper_lengths[i]
 
 
 def test_get_context_trimming_inverse():
@@ -105,7 +104,7 @@ def test_leading_whitespace():
         data = '\n'.join(filter(None, data.split('\n')))
         # Get the context and assert its equality.
         c = ContextGenerator(data)
-        eq_(c.get_context(line), expectation)
+        assert c.get_context(line) == expectation
 
     run(' One space\n'
         '  Two spaces\n'
@@ -121,4 +120,3 @@ def test_leading_whitespace():
         ' One\n'
         ' One',
         ('None', ' One', ' One'))
-

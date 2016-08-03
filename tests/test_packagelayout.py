@@ -1,7 +1,5 @@
 from itertools import repeat
 
-from nose.tools import eq_
-
 from .helper import _do_test, MockXPI
 
 from validator.errorbundler import ErrorBundle
@@ -42,8 +40,8 @@ def test_java_jar_detection():
     packagelayout.test_blacklisted_files(err, mock_xpi)
 
     assert err.warnings
-    eq_(err.warnings[0]['id'],
-        ('testcases_packagelayout', 'test_blacklisted_files', 'java_jar'))
+    assert err.warnings[0]['id'] == ('testcases_packagelayout',
+                                     'test_blacklisted_files', 'java_jar')
 
 
 def test_blacklisted_magic_numbers():

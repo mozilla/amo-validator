@@ -1,7 +1,5 @@
 import mock
 
-from nose.tools import eq_
-
 from validator import submain
 from validator.errorbundler import ErrorBundle
 from validator.constants import PACKAGE_ANY, PACKAGE_SEARCHPROV
@@ -67,4 +65,4 @@ def test_package_extension_bad_expectation(test_inner_package):
 
     assert test_inner_package.called
     assert err.failed()
-    eq_(err.errors[0]['id'], ('main', 'test_package', 'unexpected_type'))
+    assert err.errors[0]['id'] == ('main', 'test_package', 'unexpected_type')

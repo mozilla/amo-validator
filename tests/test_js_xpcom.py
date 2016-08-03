@@ -1,6 +1,4 @@
-from nose.tools import eq_
-
-from js_helper import _do_test_raw, _do_real_test_raw, TestCase
+from js_helper import _do_test_raw, TestCase
 
 
 def test_xmlhttprequest():
@@ -27,13 +25,13 @@ def test_nsiaccessibleretrieval():
     var c = Components.classes[""].createInstance(
         Components.interfaces.nsIAccessibleRetrievalWhatever);
     """)
-    eq_(len(err.warnings), 0)
+    assert len(err.warnings) == 0
 
     err = _do_test_raw("""
     var c = Components.classes[""].createInstance(
         Components.interfaces.nsIAccessibleRetrieval);
     """)
-    eq_(len(err.warnings), 1)
+    assert len(err.warnings) == 1
 
 
 def test_evalinsandbox():
@@ -57,6 +55,7 @@ def test_evalinsandbox():
     """)
     assert err.failed()
 
+
 def test_getinterface():
     """Test the functionality of the getInterface method."""
 
@@ -64,6 +63,7 @@ def test_getinterface():
         obj.getInterface(Components.interfaces.nsIXMLHttpRequest)
            .open("GET", "foo", false);
     """).failed()
+
 
 def test_queryinterface():
     """Test the functionality of the QueryInterface method."""
@@ -119,6 +119,7 @@ def test_queryinterface():
             obj.foo.open("GET", "foo", false);
         """).failed()
 
+
 def test_overwritability():
     """Test that XPCOM globals can be overwritten."""
 
@@ -156,14 +157,14 @@ def test_xpcom_shortcut_ci():
                          .getService(Ci.nsIWindowMediator);
     item.registerNotification();
     """, bootstrap=True)
-    eq_(len(err.warnings), 1)
+    assert len(err.warnings) == 1
 
     err = _do_test_raw("""
     var item = Components.classes["@mozilla.org/windowmediator;1"]
                          .getService(Ci.nsIWindowMediator);
     item.registerNotification();
     """, bootstrap=False)
-    eq_(len(err.warnings), 0)
+    assert len(err.warnings) == 0
 
 
 def test_xpcom_shortcut_cc():
@@ -174,14 +175,14 @@ def test_xpcom_shortcut_cc():
                    .getService(Components.interfaces.nsIWindowMediator);
     item.registerNotification();
     """, bootstrap=True)
-    eq_(len(err.warnings), 1)
+    assert len(err.warnings) == 1
 
     err = _do_test_raw("""
     var item = Cc["@mozilla.org/windowmediator;1"]
                    .getService(Components.interfaces.nsIWindowMediator);
     item.registerNotification();
     """, bootstrap=False)
-    eq_(len(err.warnings), 0)
+    assert len(err.warnings) == 0
 
 
 def test_xpcom_shortcut_services_wm():
@@ -190,6 +191,7 @@ def test_xpcom_shortcut_services_wm():
     _test_when_bootstrapped("""
     Services.wm.registerNotification();
     """)
+
 
 def test_xpcom_shortcut_services_ww():
     """Test that Services.ww throws a warning when bootstrapped."""
@@ -252,7 +254,7 @@ def test_xpcom_nsiwebbrowserpersist():
         err = _do_test_raw(js)
         if err.warnings:
             result = err.warnings[0]['id'][-1] != 'webbrowserpersist_saveuri'
-            eq_(result, want_pass)
+            assert result == want_pass
         else:
             assert want_pass
 
@@ -271,7 +273,6 @@ def test_xpcom_nsiwebbrowserpersist():
     var foo = Cc["foo"].getService(Components.interfaces.nsIWebBrowserPersist);
     foo.saveURI(null, null, null, null, null, null, thing);
     """, True)
-
 
 
 def test_xpcom_nsiwebbrowserpersist_deprecation():
@@ -330,7 +331,6 @@ class TestnsIWindowWatcher(TestCase):
             self.setup_err()
             self._run_against_foo('foo.openWindow("%s")' % uri)
             self.assert_failed(with_warnings=True)
-
 
         uris = ['http://foo/bar/',
                 'https://foo/bar/',

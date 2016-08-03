@@ -2,8 +2,6 @@
 Various tests related to validation for automated signing.
 """
 
-from nose.tools import eq_
-
 from .helper import RegexTestCase
 from .js_helper import TestCase
 
@@ -151,8 +149,8 @@ class TestSearchService(TestCase, RegexTestCase):
         """)
 
         self.assert_failed(with_warnings=[LITERAL_WARNING])
-        eq_(len(self.err.warnings), 1)
-        eq_(self.err.signing_summary, SUMMARY)
+        assert len(self.err.warnings) == 1
+        assert self.err.signing_summary == SUMMARY
 
         # Literal with pref set call.
         for method in ('Services.prefs.setCharPref', 'Preferences.set'):
@@ -162,8 +160,8 @@ class TestSearchService(TestCase, RegexTestCase):
             """ % method)
 
             self.assert_failed(with_warnings=[CALL_WARNING])
-            eq_(len(self.err.warnings), 1)
-            eq_(self.err.signing_summary, SUMMARY)
+            assert len(self.err.warnings) == 1
+            assert self.err.signing_summary == SUMMARY
 
         # Literal with pref set call on different line.
         self.setUp()
@@ -174,8 +172,8 @@ class TestSearchService(TestCase, RegexTestCase):
 
         SUMMARY['high'] += 1
         self.assert_failed(with_warnings=[CALL_WARNING, LITERAL_WARNING])
-        eq_(len(self.err.warnings), 2)
-        eq_(self.err.signing_summary, SUMMARY)
+        assert len(self.err.warnings) == 2
+        assert self.err.signing_summary == SUMMARY
 
     def test_get_preference_calls_ignored(self):
         """Tests that string literals provably used only to read, but not
@@ -189,7 +187,7 @@ class TestSearchService(TestCase, RegexTestCase):
         """)
 
         self.assert_failed(with_warnings=[LITERAL_WARNING])
-        eq_(len(self.err.warnings), 1)
+        assert len(self.err.warnings) == 1
 
         # Literal passed directly pref get call.
         for method in ('Services.prefs.getCharPref',
@@ -199,7 +197,7 @@ class TestSearchService(TestCase, RegexTestCase):
                 let thing = %s('browser.startup.homepage');
             """ % method)
 
-            eq_(len(self.err.warnings), 0)
+            assert len(self.err.warnings) == 0
 
         # Literal passed indirectly pref get call.
         self.setUp()
@@ -209,7 +207,7 @@ class TestSearchService(TestCase, RegexTestCase):
         """)
 
         self.assert_failed(with_warnings=[LITERAL_WARNING])
-        eq_(len(self.err.warnings), 1)
+        assert len(self.err.warnings) == 1
 
     def test_pref_help_added_to_bare_strings(self):
         """Test that a help messages about passing literals directly to
@@ -232,7 +230,7 @@ class TestSearchService(TestCase, RegexTestCase):
             val1 = maybe_tuple(warnings[0][key])
             val2 = maybe_tuple(warnings[1][key])
 
-            eq_(val2, val1[:len(val2)])
+            assert val2 == val1[:len(val2)]
 
             # And that the added message is what we expect.
             assert 'Preferences.get' in val1[-1]

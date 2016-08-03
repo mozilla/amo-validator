@@ -1,6 +1,7 @@
 from defusedxml.common import DefusedXmlException
 from mock import patch
-from nose.tools import raises
+
+import pytest
 
 import validator.testcases.installrdf as installrdf
 from validator.constants import PACKAGE_THEME
@@ -224,6 +225,7 @@ def test_invalid_id():
     assert any('<em:id> is invalid' in msg['message']
                for msg in err.errors)
 
+
 def test_overrides():
     """Test that overrides will work on the install.rdf file."""
 
@@ -296,7 +298,6 @@ def test_optionsType_fail():
     """, failure=True)
 
 
-@raises(DefusedXmlException)
 def test_billion_laughs_fail():
     """Test that the parsing fails for XML will a billion laughs attack."""
     xml = """<?xml version="1.0"?>
@@ -330,4 +331,5 @@ def test_billion_laughs_fail():
     </Description>
 </RDF>
 """
-    RDFParser(ErrorBundle(), xml)
+    with pytest.raises(DefusedXmlException):
+        RDFParser(ErrorBundle(), xml)

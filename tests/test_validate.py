@@ -1,7 +1,6 @@
 import json
 
 from mock import patch
-from nose.tools import eq_
 
 import validator
 from validator import constants
@@ -12,31 +11,33 @@ from .helper import TestCase
 
 class TestValidate(TestCase):
 
-    def run(self, path, **kwargs):
+    def runValidation(self, path, **kwargs):
         self.output = validate(path=path, **kwargs)
 
     def test_metadata(self):
         """Test that the generated JSON has the appropriate metadata
         values."""
-        self.run('tests/resources/packagelayout/theme.jar')
+        self.runValidation('tests/resources/packagelayout/theme.jar')
         j = json.loads(self.output)
-        eq_(j['metadata']['name'], 'name_value')
-        eq_(j['metadata']['validator_version'], validator.__version__)
+        assert j['metadata']['name'] == 'name_value'
+        assert j['metadata']['validator_version'] == validator.__version__
 
     def test_metadata_bundle(self):
         """
         Test that the error bundle returned by validate() has the appropriate
         values within it.
         """
-        self.run('tests/resources/packagelayout/theme.jar', format=None)
-        eq_(self.output.metadata['name'], 'name_value')
+        self.runValidation('tests/resources/packagelayout/theme.jar',
+                           format=None)
+        assert self.output.metadata['name'] == 'name_value'
 
     def test_spidermonkey(self):
         """
         Test that the appropriate path for Spidermonkey is set through the
         `validate()` function.
         """
-        self.run('tests/resources/packagelayout/theme.jar', format=None)
+        self.runValidation('tests/resources/packagelayout/theme.jar',
+                           format=None)
         assert self.output.determined
         assert self.output.get_resource('listed')
 
@@ -45,33 +46,33 @@ class TestValidate(TestCase):
         Test that when the validation is run with `determined=False`, that
         value is pushed through the full validation process.
         """
-        self.run('tests/resources/packagelayout/theme.jar', format=None,
-                 determined=False)
+        self.runValidation('tests/resources/packagelayout/theme.jar',
+                            format=None, determined=False)
         assert not self.output.determined
         assert self.output.get_resource('listed')
-        eq_(self.output.metadata['listed'], True)
+        assert self.output.metadata['listed'] is True
 
     def test_unlisted(self):
         """
         Test that when the validation is run with `listed=False`, that value
         is pushed through the full validation process.
         """
-        self.run('tests/resources/packagelayout/theme.jar', format=None,
-                 listed=False)
+        self.runValidation('tests/resources/packagelayout/theme.jar',
+                           format=None, listed=False)
         assert self.output.determined
         assert not self.output.get_resource('listed')
-        eq_(self.output.metadata['listed'], False)
+        assert self.output.metadata['listed'] is False
 
     def test_overrides(self):
         """
         Test that when the validation is run with `overrides={"foo": "foo"}`,
         that value is pushed through the full validation process.
         """
-        self.run('tests/resources/packagelayout/theme.jar', format=None,
-                 overrides={'foo': 'foo'})
+        self.runValidation('tests/resources/packagelayout/theme.jar',
+                           format=None, overrides={'foo': 'foo'})
         assert self.output.determined
         assert self.output.get_resource('listed')
-        eq_(self.output.overrides, {'foo': 'foo'})
+        assert self.output.overrides == {'foo': 'foo'}
 
 
 @patch.dict('validator.constants.APPROVED_APPLICATIONS')

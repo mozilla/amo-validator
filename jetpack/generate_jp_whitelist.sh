@@ -38,4 +38,4 @@ popd
 
 sort ../validator/testcases/jetpack_data.txt -d -o ../validator/testcases/jetpack_data.txt
 # This will generate the new pickle file.
-cd .. && nosetests
+cd .. && py.test

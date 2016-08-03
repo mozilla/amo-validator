@@ -1,6 +1,4 @@
 # -*- coding: utf-8 -*-
-from nose.tools import eq_
-
 import validator.testcases.markup.markuptester as markuptester
 from validator.errorbundler import ErrorBundle
 from validator.constants import *
@@ -83,7 +81,7 @@ def test_has_cdata():
 def test_cdata_properly():
     """CDATA should be treated as text and be ignored by the parser."""
 
-    err = _test_xul_raw("""<foo>
+    _test_xul_raw("""<foo>
     <script type="text/x-jquery-tmpl">
     <![CDATA[
     <button><p><span><foo>
@@ -96,7 +94,7 @@ def test_cdata_properly():
 
     # Test that there are no problems if the CDATA element starts or ends on
     # the same line as the parent tag.
-    err = _test_xul_raw("""<foo>
+    _test_xul_raw("""<foo>
     <script type="text/x-jquery-tmpl"><![CDATA[
     <button><p><span><foo>
     </bar></zap>
@@ -107,13 +105,13 @@ def test_cdata_properly():
 
     # Test that there are no problems if multiple CDATA elements open and
     # close on the same line.
-    err = _test_xul_raw("""<foo>
+    _test_xul_raw("""<foo>
     <foo><![CDATA[</bar></foo>]]></foo><![CDATA[
     <![CDATA[ <-- Should be ignored since we're buffering.</bar><zap>
     ]]>
     </foo>""", 'foo.xul', should_fail=False)
 
-    err = _test_xul_raw("""<foo>
+    _test_xul_raw("""<foo>
     <![CDATA[
     <button><p><span><foo>
     </bar></zap>
@@ -122,7 +120,7 @@ def test_cdata_properly():
     ]]>
     </foo>""", 'foo.xul', should_fail=False)
 
-    err = _test_xul_raw("""
+    _test_xul_raw("""
     <![CDATA[
     <button><p><span><foo>
     </bar></zap>
@@ -132,7 +130,7 @@ def test_cdata_properly():
 
 
 def test_non_js_not_executed():
-    err = _test_xul_raw("""<foo>
+    _test_xul_raw("""<foo>
     <script type="text/x-jquery-tmpl">
     <![CDATA[
     <button><p><span><foo>
@@ -143,7 +141,7 @@ def test_non_js_not_executed():
     </script>
     </foo>""", 'foo.xul', should_fail=False)
 
-    err = _test_xul_raw("""<foo>
+    _test_xul_raw("""<foo>
     <script type="application/javascript">
     <![CDATA[
     <button><p><span><foo>
@@ -154,7 +152,7 @@ def test_non_js_not_executed():
     </script>
     </foo>""", 'foo.xul', should_fail=True)
 
-    err = _test_xul_raw("""<foo>
+    _test_xul_raw("""<foo>
     <script>
     <![CDATA[
     <button><p><span><foo>
@@ -306,7 +304,7 @@ def test_theme_xbl():
     """, 'foo.xul', type_=PACKAGE_THEME)
 
 
-def test_theme_xbl():
+def test_theme_xbl_2():
     """Test that themes ban a good chunk of XBL."""
 
     _test_xul_raw("""
@@ -353,7 +351,7 @@ def test_dom_mutation():
 def test_complex_script_detection():
     """Test that complex inline scripts are warned against."""
 
-    blanks = '';
+    blanks = ''
 
     err = _test_xul_raw("""
     <doc><script>
@@ -362,17 +360,17 @@ def test_complex_script_detection():
     """, 'foo.xul')
 
     # short scripts are okay
-    eq_(len(err.warnings), 0)
+    assert len(err.warnings) == 0
 
     err = _test_xul_raw("""
     <doc><script src="chrome://namespace/absolute.js"></script></doc>
     """, 'foo.xul')
 
     # referenced scripts are okay
-    eq_(len(err.warnings), 0)
+    assert len(err.warnings) == 0
 
     blanks = """
-    """ * 1001;
+    """ * 1001
 
     err = _test_xul_raw("""
     <doc><script>
@@ -383,11 +381,11 @@ def test_complex_script_detection():
     # but long scripts are not
     assert err.warnings
     warning = err.warnings[0]
-    eq_(warning['file'], 'foo.xul')
-    eq_(warning['id'], ('markup', 'complex_script'))
+    assert warning['file'] == 'foo.xul'
+    assert warning['id'] == ('markup', 'complex_script')
 
     # one and only one warning
-    eq_(len(err.warnings), 1)
+    assert len(err.warnings) == 1
 
 
 def test_proper_line_numbers():
@@ -401,8 +399,8 @@ def test_proper_line_numbers():
 
     assert err.warnings
     warning = err.warnings[0]
-    eq_(warning['file'], 'foo.xul')
-    eq_(warning['line'], 3);
+    assert warning['file'] == 'foo.xul'
+    assert warning['line'] == 3;
 
 
 def test_script_scraping():
@@ -421,19 +419,19 @@ def test_script_scraping():
     </doc>
     """, 'xul')
 
-    eq_(parser.found_scripts,
-        set(['/relative.js', 'chrome://namespace/absolute.js',
-             'very_relative.js']))
+    assert parser.found_scripts == set(['/relative.js',
+                                        'chrome://namespace/absolute.js',
+                                        'very_relative.js'])
 
 
 def test_prefwindow_ids():
     """Test that `<prefwindow>` tags without IDs are flagged."""
 
-    err = _test_xul_raw("""<foo>
+    _test_xul_raw("""<foo>
     <prefwindow></prefwindow>
     </foo>""", 'foo.xul', should_fail=True)
 
-    err = _test_xul_raw("""<foo>
+    _test_xul_raw("""<foo>
     <prefwindow id="foobar"></prefwindow>
     </foo>""", 'foo.xul', should_fail=False)
 

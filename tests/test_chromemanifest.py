@@ -1,5 +1,3 @@
-from nose.tools import eq_
-
 from validator.chromemanifest import ChromeManifest
 from validator.errorbundler import ErrorBundle
 
@@ -41,10 +39,10 @@ def test_lines():
     four def abc
     """.strip(), 'chrome.manifest')
 
-    eq_(list(c.get_triples(subject='zero'))[0]['line'], 1)
-    eq_(list(c.get_triples(subject='one'))[0]['line'], 2)
-    eq_(list(c.get_triples(subject='two'))[0]['line'], 3)
-    eq_(list(c.get_triples(subject='four'))[0]['line'], 5)
+    assert list(c.get_triples(subject='zero'))[0]['line'] == 1
+    assert list(c.get_triples(subject='one'))[0]['line'] == 2
+    assert list(c.get_triples(subject='two'))[0]['line'] == 3
+    assert list(c.get_triples(subject='four'))[0]['line'] == 5
 
 
 def test_incomplete_triplets():
@@ -93,10 +91,10 @@ def test_applicable_overlays():
 
     gac = c.get_applicable_overlays
 
-    eq_(gac(MockPackStack()), set(['/baz/root/dir/o5.xul']))
-    eq_(gac(MockPackStack(['foo.jar'])), set(['/o1.xul', '/o2.xul']))
-    eq_(gac(MockPackStack(['bar.jar'])), set(['/o3.xul']))
-    eq_(gac(MockPackStack(['zap.jar'])), set(['/content/dir/o4.xul']))
+    assert gac(MockPackStack()) == set(['/baz/root/dir/o5.xul'])
+    assert gac(MockPackStack(['foo.jar'])) == set(['/o1.xul', '/o2.xul'])
+    assert gac(MockPackStack(['bar.jar'])) == set(['/o3.xul'])
+    assert gac(MockPackStack(['zap.jar'])) == set(['/content/dir/o4.xul'])
 
 
 def test_reverse_lookup():
@@ -111,22 +109,22 @@ def test_reverse_lookup():
     content ns4 jar:bar.jar!/subdir2
     """, 'chrome.manifest')
 
-    eq_(c.reverse_lookup(MockPackStack(), 'random.js'), None)
-    eq_(c.reverse_lookup(MockPackStack(), '/dir1/x.js'),
-        'chrome://ns1/x.js')
-    eq_(c.reverse_lookup(MockPackStack(), '/dir2/x.js'), None)
-    eq_(c.reverse_lookup(MockPackStack(), '/dir2/foo/x.js'),
-        'chrome://ns2/x.js')
-    eq_(c.reverse_lookup(MockPackStack(), '/dir3/x.js'),
-        'chrome://nsbad1/x.js')
-    eq_(c.reverse_lookup(MockPackStack(['foo.jar']), '/x.js'),
-        'chrome://ns3/subdir1/x.js')
-    eq_(c.reverse_lookup(MockPackStack(['foo.jar']), '/zap/x.js'),
-        'chrome://ns3/subdir1/zap/x.js')
-    eq_(c.reverse_lookup(MockPackStack(['bar.jar']), '/x.js'),
-        'chrome://ns4/subdir2/x.js')
-    eq_(c.reverse_lookup(MockPackStack(['zap.jar']), '/x.js'),
-        'chrome://ns3/altdir1/x.js')
+    assert c.reverse_lookup(MockPackStack(), 'random.js') is None
+    assert c.reverse_lookup(MockPackStack(),
+                            '/dir1/x.js') == 'chrome://ns1/x.js'
+    assert c.reverse_lookup(MockPackStack(), '/dir2/x.js') is None
+    assert c.reverse_lookup(MockPackStack(),
+                            '/dir2/foo/x.js') == 'chrome://ns2/x.js'
+    assert c.reverse_lookup(MockPackStack(),
+                            '/dir3/x.js') == 'chrome://nsbad1/x.js'
+    assert c.reverse_lookup(MockPackStack(['foo.jar']),
+                            '/x.js') == 'chrome://ns3/subdir1/x.js'
+    assert c.reverse_lookup(MockPackStack(['foo.jar']),
+                            '/zap/x.js') == 'chrome://ns3/subdir1/zap/x.js'
+    assert c.reverse_lookup(MockPackStack(['bar.jar']),
+                            '/x.js') == 'chrome://ns4/subdir2/x.js'
+    assert c.reverse_lookup(MockPackStack(['zap.jar']),
+                            '/x.js') == 'chrome://ns3/altdir1/x.js'
 
 
 def test_overlay_object():
@@ -163,4 +161,3 @@ class MockPackStack(object):
     @property
     def is_nested_package(self):
         return bool(self.package_stack)
-

@@ -1,5 +1,3 @@
-from nose.tools import eq_
-
 from helper import MockXPI
 
 from validator.chromemanifest import ChromeManifest
@@ -104,14 +102,13 @@ def test_packed_scripts_pollution():
 
     content.test_packed_scripts(err, x)
 
-    eq_(err.package_stack, [])
+    assert err.package_stack == []
 
     assert err.failed()
     assert err.warnings
     assert not err.errors
 
-    eq_(err.warnings[0]['file'],
-        ['subpackage.jar', 'subsubpackage', 'foo/bar.js'])
+    assert err.warnings[0]['file'] == ['subpackage.jar', 'subsubpackage', 'foo/bar.js']
 
 
 def test_packed_scripts_no_pollution():
@@ -139,8 +136,6 @@ def test_packed_scripts_no_pollution():
 
     content.test_packed_scripts(err, x)
 
-    eq_(err.package_stack, [])
+    assert err.package_stack == []
 
     assert not err.failed()
-
-

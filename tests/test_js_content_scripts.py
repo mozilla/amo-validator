@@ -1,5 +1,3 @@
-from nose.tools import eq_
-
 from js_helper import _do_test_raw
 
 

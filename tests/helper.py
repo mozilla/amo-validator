@@ -1,6 +1,8 @@
 import collections
 import sys
 
+from unittest import TestCase
+
 # Import this first so we get the same order of imports as runtime,
 # and avoid import loops.
 import validator.validate  # noqa
@@ -52,7 +54,7 @@ def _do_test(path, test, failure=True,
     return err
 
 
-class TestCase(object):
+class TestCase(TestCase):
     def setUp(self):
         self.err = None
         self.is_jetpack = False

@@ -1,5 +1,3 @@
-from nose.tools import eq_
-
 from helper import MockXPI
 
 import validator.testcases.content as content
@@ -35,7 +33,7 @@ def test_mozilla_signed_xpi():
     assert err.warnings
     assert not err.errors
 
-    eq_(err.warnings[0]['id'], ('testcases_content', 'signed_xpi'))
+    assert err.warnings[0]['id'] == ('testcases_content', 'signed_xpi')
 
 
 def test_other_signed_xpi():
@@ -55,7 +53,7 @@ def test_other_signed_xpi():
     assert err.warnings
     assert not err.errors
 
-    eq_(err.warnings[0]['id'], ('testcases_content', 'signed_xpi'))
+    assert err.warnings[0]['id'] == ('testcases_content', 'signed_xpi')
 
 
 def test_mozilla_signed_multi_xpi():
@@ -90,7 +88,7 @@ def test_unsigned_multi_xpi():
     assert err.failed()
     assert not err.warnings
     assert err.errors
-    eq_(err.errors[0]['id'], ('testcases_content', 'unsigned_sub_xpi'))
+    assert err.errors[0]['id'] == ('testcases_content', 'unsigned_sub_xpi')
 
 
 def test_other_signed_multi_xpi():
@@ -111,7 +109,7 @@ def test_other_signed_multi_xpi():
     assert err.failed()
     assert not err.warnings
     assert err.errors
-    eq_(err.errors[0]['id'], ('testcases_content', 'unsigned_sub_xpi'))
+    assert err.errors[0]['id'] == ('testcases_content', 'unsigned_sub_xpi')
 
 
 def test_unsigned_inner_xpi():

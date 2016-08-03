@@ -1,5 +1,3 @@
-from nose.tools import eq_
-
 import validator.testcases.javascript.jstypes as jstypes
 from js_helper import _do_test_raw
 
@@ -93,8 +91,8 @@ def test_jsobject_computed_properties():
         };
     """)
 
-    eq_(err1.warnings[0]['id'], ID)
-    eq_(err2.warnings[0]['id'], ID)
+    assert err1.warnings[0]['id'] == ID
+    assert err2.warnings[0]['id'] == ID
 
     assert not _do_test_raw("""
         var foo = {
@@ -113,7 +111,7 @@ def test_jsobject_get_wrap():
 
     out = x.get('foo')
     assert isinstance(out, jstypes.JSWrapper)
-    eq_(out.get_literal_value(), 'bar')
+    assert out.get_literal_value() == 'bar'
 
 
 def test_jsarray_get_wrap():
@@ -124,4 +122,4 @@ def test_jsarray_get_wrap():
 
     out = x.get('1')
     assert isinstance(out, jstypes.JSWrapper)
-    eq_(out.get_literal_value(), 'bar')
+    assert out.get_literal_value() == 'bar'

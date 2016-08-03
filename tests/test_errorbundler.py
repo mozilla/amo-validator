@@ -1,10 +1,7 @@
 import json
-import nose
 import sys
-from nose.tools import eq_
 from StringIO import StringIO
 
-import validator.errorbundler as errorbundler
 from validator.errorbundler import ErrorBundle
 from validator.contextgenerator import ContextGenerator
 
@@ -24,22 +21,22 @@ def test_message_completeness():
     )
 
     results = json.loads(bundle.render_json())
-    eq_(len(results['messages']), 1, 'Unexpected number of messages.')
+    assert len(results['messages']) == 1
 
     message = results['messages'][0]
-    eq_(message['id'], ['id'])
-    eq_(message['message'], 'error')
-    eq_(message['description'], 'description')
-    eq_(message['file'], 'file')
-    eq_(message['line'], 123)
-    eq_(message['column'], 456)
+    assert message['id'] == ['id']
+    assert message['message'] == 'error'
+    assert message['description'] == 'description'
+    assert message['file'] == 'file'
+    assert message['line'] == 123
+    assert message['column'] == 456
 
 
 def test_json():
     """Test the JSON output capability of the error bundler."""
 
     # Use the StringIO as an output buffer.
-    bundle = ErrorBundle() # No color since no output
+    bundle = ErrorBundle()  # No color since no output
     bundle.detected_type = 4
     bundle.set_tier(4)
     bundle.set_tier(3)
@@ -152,7 +149,7 @@ def test_states():
 
         if message['id'] == 'comp':
             assert message['compatibility_type'] == 'error'
-            assert message['editors_only'] == True
+            assert message['editors_only'] is True
             assert message['signing_severity'] == 'high'
 
     assert not messages
@@ -167,7 +164,7 @@ def test_file_structure():
     """
 
     # Use the StringIO as an output buffer.
-    bundle = ErrorBundle(True) # No color since no output
+    bundle = ErrorBundle(True)  # No color since no output
 
     # Populate the bundle with some test data.
     bundle.error((), 'error', description='',
@@ -404,10 +401,10 @@ def test_json_compatibility():
     jdata = json.loads(results)
 
     assert 'compatibility_summary' in jdata
-    nose.tools.eq_(jdata['compatibility_summary'],
-                   {'errors': 2,
-                    'warnings': 2,
-                    'notices': 1})
+    assert jdata['compatibility_summary'] == {
+                     'errors': 2,
+                     'warnings': 2,
+                     'notices': 1}
     reference = {'m1': 'error',
                  'm2': 'error',
                  'm3': 'notice',
@@ -420,8 +417,7 @@ def test_json_compatibility():
             print (message['id'],
                    reference[message['id']],
                    message['compatibility_type'])
-            nose.tools.eq_(reference[message['id']],
-                           message['compatibility_type'])
+            assert reference[message['id']] == message['compatibility_type']
 
 
 def test_pushable_resources():
@@ -474,4 +470,3 @@ def test_forappversions():
     assert len(jdata['messages']) == 3
     for m in jdata['messages']:
         assert m['for_appversions'] == app_test_data
-
