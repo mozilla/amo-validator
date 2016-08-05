@@ -1,8 +1,7 @@
-from nose.tools import eq_
-
 from validator.constants import MAX_STR_SIZE
 
 from js_helper import _do_test, _do_test_raw, _get_var
+
 
 def test_basic_concatenation():
     'Tests that contexts work and that basic concat ops are executed properly'
@@ -61,7 +60,7 @@ def test_max_str_size_aug_assig():
     x += x;
     x += x;
     """ % ('x' * (MAX_STR_SIZE / 2)))
-    eq_(len(_get_var(err, 'x')), MAX_STR_SIZE)
+    assert len(_get_var(err, 'x')) == MAX_STR_SIZE
 
 
 def test_max_str_size_binop():
@@ -73,4 +72,4 @@ def test_max_str_size_binop():
     x = x + x;
     x = x + x;
     """ % ('x' * (MAX_STR_SIZE / 2)))
-    eq_(len(_get_var(err, 'x')), MAX_STR_SIZE)
+    assert len(_get_var(err, 'x')) == MAX_STR_SIZE

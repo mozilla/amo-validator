@@ -1,4 +1,3 @@
-from nose.tools import eq_
 from js_helper import _do_real_test_raw, _do_test_raw, _do_test_scope, _get_var
 
 
@@ -71,11 +70,11 @@ def test_in_operator():
     """)
     assert err.message_count == 0
 
-    assert _get_var(err, 'x') == True
-    assert _get_var(err, 'y') == True
+    assert _get_var(err, 'x') is True
+    assert _get_var(err, 'y') is True
     print _get_var(err, 'a'), '<<<'
-    assert _get_var(err, 'a') == False
-    assert _get_var(err, 'b') == False
+    assert _get_var(err, 'a') is False
+    assert _get_var(err, 'b') is False
 
 
 def test_function_instanceof():
@@ -123,36 +122,36 @@ def test_unary_typeof():
         x = typeof(function() {}),
         y = typeof(Math.abs);
     """)
-    eq_(_get_var(scope, 'a'), 'undefined')
-    eq_(_get_var(scope, 'b'), 'object')
-    eq_(_get_var(scope, 'c'), 'boolean')
-    eq_(_get_var(scope, 'd'), 'boolean')
-    eq_(_get_var(scope, 'e'), 'object')
-    eq_(_get_var(scope, 'f'), 'object')
-    eq_(_get_var(scope, 'g'), 'boolean')
-    eq_(_get_var(scope, 'h'), 'boolean')
-    eq_(_get_var(scope, 'i'), 'boolean')
+    assert _get_var(scope, 'a') == 'undefined'
+    assert _get_var(scope, 'b') == 'object'
+    assert _get_var(scope, 'c') == 'boolean'
+    assert _get_var(scope, 'd') == 'boolean'
+    assert _get_var(scope, 'e') == 'object'
+    assert _get_var(scope, 'f') == 'object'
+    assert _get_var(scope, 'g') == 'boolean'
+    assert _get_var(scope, 'h') == 'boolean'
+    assert _get_var(scope, 'i') == 'boolean'
     # TODO: Implement "typeof" for predefined entities
-    # eq_(_get_var(scope, "j"), "number")
-    # eq_(_get_var(scope, "k"), "number")
-    # eq_(_get_var(scope, "l"), "number")
-    eq_(_get_var(scope, 'm'), 'number')
-    eq_(_get_var(scope, 'n'), 'number')
-    eq_(_get_var(scope, 'o'), 'number')
-    eq_(_get_var(scope, 'p'), 'number')
-    eq_(_get_var(scope, 'q'), 'string')
-    eq_(_get_var(scope, 'r'), 'number')
-    eq_(_get_var(scope, 's'), 'number')
-    eq_(_get_var(scope, 't'), 'object')
-    eq_(_get_var(scope, 'u'), 'object')
-    eq_(_get_var(scope, 'v'), 'object')
-    eq_(_get_var(scope, 'x'), 'function')
-    eq_(_get_var(scope, 'y'), 'function')
+    # assert _get_var(scope, "j") == "number"
+    # assert _get_var(scope, "k") == "number"
+    # assert _get_var(scope, "l") == "number"
+    assert _get_var(scope, 'm') == 'number'
+    assert _get_var(scope, 'n') == 'number'
+    assert _get_var(scope, 'o') == 'number'
+    assert _get_var(scope, 'p') == 'number'
+    assert _get_var(scope, 'q') == 'string'
+    assert _get_var(scope, 'r') == 'number'
+    assert _get_var(scope, 's') == 'number'
+    assert _get_var(scope, 't') == 'object'
+    assert _get_var(scope, 'u') == 'object'
+    assert _get_var(scope, 'v') == 'object'
+    assert _get_var(scope, 'x') == 'function'
+    assert _get_var(scope, 'y') == 'function'
 
 
 # TODO(basta): Still working on the delete operator...should be done soon.
 
-#def test_delete_operator():
+# def test_delete_operator():
 #    """Test that the delete operator works correctly."""
 #
 #    # Test that array elements can be destroyed.
@@ -204,25 +203,25 @@ def test_logical_not():
         r = !('string'),
         s = !(new String('')); // This should cover all type globals.
     """)
-    eq_(_get_var(scope, 'a'), True)
-    # eq_(_get_var(scope, "b"), True)
-    eq_(_get_var(scope, 'c'), True)
-    eq_(_get_var(scope, 'd'), True)
-    eq_(_get_var(scope, 'e'), False)
-    # eq_(_get_var(scope, "f"), True)
-    eq_(_get_var(scope, 'g'), True)
-    eq_(_get_var(scope, 'h'), True)
-    # eq_(_get_var(scope, "i"), True)
-    eq_(_get_var(scope, 'j'), False)
-    eq_(_get_var(scope, 'k'), False)
-    eq_(_get_var(scope, 'l'), False)
-    eq_(_get_var(scope, 'm'), False)
-    eq_(_get_var(scope, 'n'), False)
-    eq_(_get_var(scope, 'o'), True)
-    eq_(_get_var(scope, 'p'), False)
-    eq_(_get_var(scope, 'q'), False)
-    eq_(_get_var(scope, 'r'), False)
-    eq_(_get_var(scope, 's'), False)
+    assert _get_var(scope, 'a') is True
+    # assert _get_var(scope, "b") is True
+    assert _get_var(scope, 'c') is True
+    assert _get_var(scope, 'd') is True
+    assert _get_var(scope, 'e') is False
+    # assert _get_var(scope, "f") is True
+    assert _get_var(scope, 'g') is True
+    assert _get_var(scope, 'h') is True
+    # assert _get_var(scope, "i") is True
+    assert _get_var(scope, 'j') is False
+    assert _get_var(scope, 'k') is False
+    assert _get_var(scope, 'l') is False
+    assert _get_var(scope, 'm') is False
+    assert _get_var(scope, 'n') is False
+    assert _get_var(scope, 'o') is True
+    assert _get_var(scope, 'p') is False
+    assert _get_var(scope, 'q') is False
+    assert _get_var(scope, 'r') is False
+    assert _get_var(scope, 's') is False
 
 
 def test_concat_plus_infinity():

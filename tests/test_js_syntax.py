@@ -1,5 +1,3 @@
-from nose.tools import eq_
-
 from .js_helper import TestCase, _do_test_raw
 
 from validator.testcases.javascript.jstypes import JSWrapper
@@ -27,7 +25,7 @@ def test_get_as_num():
     """Test that _get_as_num performs as expected."""
 
     def test(input, output):
-        eq_(_get_as_num(input), output)
+        assert _get_as_num(input) == output
 
     yield test, 1, 1
     yield test, 1.0, 1.0
@@ -114,7 +112,7 @@ def test_blocks_evaluated():
         err = _do_test_raw(block % EVIL)
         assert err.message_count == 1, \
             'Missing expected failure for block: %s' % block
-        eq_(err.warnings[0]['id'], ID)
+        assert err.warnings[0]['id'] == ID
 
     for block in BLOCKS:
         yield test, block
@@ -152,7 +150,7 @@ def test_generators():
         err = _do_test_raw(block % EVIL)
         assert err.message_count == 1, \
             'Missing expected failure for block: %s' % block
-        eq_(err.warnings[0]['id'], ID)
+        assert err.warnings[0]['id'] == ID
 
     for block in BLOCKS:
         yield test, block

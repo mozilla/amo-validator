@@ -1,5 +1,3 @@
-from nose.tools import eq_
-
 import validator.testcases.chromemanifest as tc_chromemanifest
 from validator.errorbundler import ErrorBundle
 from validator.chromemanifest import ChromeManifest
@@ -46,7 +44,7 @@ def test_js_categories_gecko2():
                'editors_only': True}
     msg = err.warnings[0]
     for key, value in warning.iteritems():
-        eq_(msg[key], value)
+        assert msg[key] == value
 
 
 def test_js_categories_gecko1():
@@ -119,4 +117,3 @@ def test_content_instructions_trailing_slash():
     tc_chromemanifest.test_content_instructions(err)
     assert not err.failed()
     assert not err.notices
-

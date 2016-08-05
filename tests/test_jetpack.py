@@ -1,8 +1,5 @@
-from nose.tools import eq_
-
 import hashlib
 import json
-import nose
 
 from js_helper import _do_real_test_raw as _js_test
 from validator.testcases.markup.markuptester import MarkupParser
@@ -45,7 +42,7 @@ def test_not_jetpack():
     assert not err.errors
     assert not err.warnings
     assert not err.notices
-    eq_(err.metadata.get('is_jetpack', False), False)
+    assert err.metadata.get('is_jetpack', False) is False
 
 
 def test_package_json_jetpack():
@@ -54,7 +51,7 @@ def test_package_json_jetpack():
     assert not err.errors
     assert not err.warnings
     assert not err.notices
-    eq_(err.metadata.get('is_jetpack'), True)
+    assert err.metadata.get('is_jetpack') is True
 
 
 def test_package_json_pass_jetpack():
@@ -109,8 +106,8 @@ def test_mismatched_db_hash():
 
     assert 'jetpack_unknown_files' in err.metadata
     unknown_files = err.metadata['jetpack_unknown_files']
-    nose.tools.eq_(len(unknown_files), 2)
-    nose.tools.ok_('bootstrap.js' in unknown_files)
+    assert len(unknown_files) == 2
+    assert 'bootstrap.js' in unknown_files
 
 
 def test_new_module_location_spec():
@@ -143,7 +140,7 @@ def test_safe_require():
     def base_case():
         err = _js_test("""var foo = require("bar");""",
                        jetpack=True)
-        eq_(err.metadata['requires_chrome'], False)
+        assert err.metadata['requires_chrome'] is False
     yield base_case
 
 
@@ -160,10 +157,10 @@ def test_unsafe_safe_require():
 
         first_message = err.warnings[0]['message']
         assert 'non-SDK interface' in first_message, ('unexpected: %s' %
-                                                          first_message)
+                                                      first_message)
         assert 'requires_chrome' in err.metadata, \
-                'unexpected: "requires_chrome" should be in metadata'
-        eq_(err.metadata['requires_chrome'], True)
+               'unexpected: "requires_chrome" should be in metadata'
+        assert err.metadata['requires_chrome'] is True
 
     for case in interfaces:
         yield interface_cases, case
@@ -176,7 +173,7 @@ def test_absolute_uris_in_js():
 
     bad_js = 'alert("resource://foo-data/bar/zap.png");'
     assert not _js_test(bad_js).failed()
-    err =_js_test(bad_js, jetpack=True)
+    err = _js_test(bad_js, jetpack=True)
     assert err.failed()
     assert err.compat_summary['errors']
 
@@ -184,7 +181,7 @@ def test_absolute_uris_in_js():
     # operation.
     bad_js = 'alert("resou" + "rce://foo-" + "data/bar/zap.png");'
     assert not _js_test(bad_js).failed()
-    err =_js_test(bad_js, jetpack=True)
+    err = _js_test(bad_js, jetpack=True)
     assert err.failed()
     assert err.compat_summary['errors']
 

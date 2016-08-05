@@ -1,5 +1,4 @@
 from mock import patch
-from nose.tools import eq_
 
 from helper import MockXPI
 from js_helper import _do_test_raw
@@ -74,7 +73,7 @@ class MockTestEndpoint(object):
 
         print self.expectations
         assert name in self.expectations
-        eq_(self.expectations[name][type_], count)
+        assert self.expectations[name][type_] == count
 
 
 class MockMarkupEndpoint(MockTestEndpoint):
@@ -116,9 +115,9 @@ def test_jar_subpackage():
     err.supported_versions = {'foo': ['1.2.3']}
     mock_package = MockXPI(
         {'chrome/subpackage.jar':
-             'tests/resources/content/subpackage.jar',
+         'tests/resources/content/subpackage.jar',
          'subpackage.jar':
-             'tests/resources/content/subpackage.jar'})
+         'tests/resources/content/subpackage.jar'})
 
     result = content.test_packed_packages(err, mock_package)
     print result
@@ -142,7 +141,7 @@ def test_xpi_subpackage():
     err.detected_type = PACKAGE_EXTENSION
     mock_package = MockXPI(
         {'chrome/package.xpi':
-             'tests/resources/content/subpackage.jar'})
+         'tests/resources/content/subpackage.jar'})
 
     result = content.test_packed_packages(err, mock_package)
 
@@ -164,7 +163,7 @@ def test_xpi_tiererror():
         {'foo.xpi': 'tests/resources/content/subpackage.jar'})
 
     err.set_tier(2)
-    result = content.test_packed_packages(err, mock_package)
+    content.test_packed_packages(err, mock_package)
     assert err.errors[0]['tier'] == 1
     assert err.tier == 2
     assert all(x == 1 for x in content.testendpoint_validator.found_tiers)
@@ -180,9 +179,9 @@ def test_jar_nonsubpackage():
     err.save_resource('is_multipackage', True)
     mock_package = MockXPI(
         {'foo.jar':
-             'tests/resources/content/subpackage.jar',
+         'tests/resources/content/subpackage.jar',
          'chrome/bar.jar':
-             'tests/resources/content/subpackage.jar'})
+         'tests/resources/content/subpackage.jar'})
 
     result = content.test_packed_packages(err, mock_package)
     print result
@@ -274,7 +273,7 @@ def test_password_in_defaults_prefs():
     err = ErrorBundle()
     err.supported_versions = {}
     mock_package = MockXPI({'defaults/preferences/foo.js':
-                                'tests/resources/content/password.js'})
+                            'tests/resources/content/password.js'})
 
     content._process_file(err, mock_package, 'defaults/preferences/foo.js',
                           password_js, 'foo.js')
@@ -331,16 +330,15 @@ def test_subpackage_metadata_preserved():
     content.test_packed_packages(err2, xpi2)
 
     assert 'sub_packages' in err2.metadata
-    eq_(err1.metadata, err2.metadata['sub_packages']
-                           .get('thing.xpi'))
+    assert err1.metadata == err2.metadata['sub_packages'].get('thing.xpi')
 
 
 def test_make_script_absolute():
     """Test that _make_script_absolute() works properly."""
 
     msa = content._make_script_absolute
-    eq_(msa('chrome://a/b.xul', 'chrome://foo/bar.js'), 'chrome://foo/bar.js')
-    eq_(msa('chrome://a/b.xul', '/foo.js'), 'chrome://a/foo.js')
-    eq_(msa('chrome://a/b/c.xul', '/foo/bar.js'), 'chrome://a/foo/bar.js')
-    eq_(msa('chrome://a/b/c.xul', 'foo.js'), 'chrome://a/b/foo.js')
-    eq_(msa('chrome://a/b/c.xul', 'foo/bar.js'), 'chrome://a/b/foo/bar.js')
+    assert msa('chrome://a/b.xul', 'chrome://foo/bar.js') == 'chrome://foo/bar.js'
+    assert msa('chrome://a/b.xul', '/foo.js') == 'chrome://a/foo.js'
+    assert msa('chrome://a/b/c.xul', '/foo/bar.js') == 'chrome://a/foo/bar.js'
+    assert msa('chrome://a/b/c.xul', 'foo.js') == 'chrome://a/b/foo.js'
+    assert msa('chrome://a/b/c.xul', 'foo/bar.js') == 'chrome://a/b/foo/bar.js'

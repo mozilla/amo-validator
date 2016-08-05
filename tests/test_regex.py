@@ -1,5 +1,4 @@
 from mock import Mock
-from nose.tools import eq_
 
 from helper import MockXPI
 from js_helper import _do_real_test_raw as _do_test_raw
@@ -13,6 +12,7 @@ def test_valid():
     'Tests a valid string in a JS bit'
     assert not _do_test_raw("var x = 'network.foo';").failed()
 
+
 def test_marionette_preferences_and_references_fail():
     'Tests that check for marionette. Added in bug 741812'
 
@@ -24,6 +24,7 @@ def test_marionette_preferences_and_references_fail():
     assert _dtr("var x = '{786a1369-dca5-4adc-8486-33d23c88010a}';").failed()
     assert _dtr('var x = MarionetteComponent;').failed()
     assert _dtr('var x = MarionetteServer;').failed()
+
 
 def test_basic_regex_fail():
     'Tests that a simple Regex match causes a warning'
@@ -155,8 +156,8 @@ def test_mouseevents():
 def test_munge_filename():
     """Tests that the munge_filename function has the expected results."""
 
-    eq_(regex.munge_filename('foo.bar'), r'foo\.bar'),
-    eq_(regex.munge_filename('foo.bar/*'), r'foo\.bar(?:[/\\].*)?')
+    assert regex.munge_filename('foo.bar') == r'foo\.bar'
+    assert regex.munge_filename('foo.bar/*') == r'foo\.bar(?:[/\\].*)?'
 
 
 class TestRegexTest(object):
@@ -167,23 +168,21 @@ class TestRegexTest(object):
 
         # Test that plain strings stay unmolested
         string = r'foo\*+?.|{}[]()^$'
-        eq_(key(string), string)
+        assert key(string) == string
 
         # Test that tuples are converted to expected full-string regexps
-        eq_(key(('foo',)), r'^(?:foo)$')
+        assert key(('foo',)) == r'^(?:foo)$'
 
-        eq_(key(('foo', 'bar')), r'^(?:foo|bar)$')
+        assert key(('foo', 'bar')) == r'^(?:foo|bar)$'
 
-        eq_(key((r'foo\*+?.|{}[]()^$', 'bar')),
-            r'^(?:foo\\\*\+\?\.\|\{\}\[\]\(\)\^\$|bar)$')
+        assert key((r'foo\*+?.|{}[]()^$', 'bar')) == r'^(?:foo\\\*\+\?\.\|\{\}\[\]\(\)\^\$|bar)$'
 
     def test_glomming(self):
         """Tests that multiple regular expressions are glommed together
         properly."""
 
         def expect(keys, val):
-            eq_(RegexTest(tuple((key, {}) for key in keys)).regex_source,
-                val)
+            assert RegexTest(tuple((key, {}) for key in keys)).regex_source == val
 
         expect(['foo'], r'(?P<test_0>foo)')
 
@@ -201,9 +200,8 @@ class TestRegexTest(object):
         inst = RegexTest((('f.o', {'thing': 'foo'}),
                           ('b.r', {'thing': 'bar'})))
 
-        eq_(inst.regex_source, r'(?P<test_0>f.o)|(?P<test_1>b.r)')
+        assert inst.regex_source == r'(?P<test_0>f.o)|(?P<test_1>b.r)'
 
         inst.test('foo bar baz fxo', traverser)
 
-        eq_([args[1]['thing'] for args in traverser.warning.call_args_list],
-            ['foo', 'bar', 'foo'])
+        assert([args[1]['thing'] for args in traverser.warning.call_args_list] == ['foo', 'bar', 'foo'])

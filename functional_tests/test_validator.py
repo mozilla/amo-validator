@@ -4,7 +4,6 @@ import sys
 import unittest
 from cStringIO import StringIO
 
-from nose.tools import eq_, ok_
 from validator.validate import validate
 
 
@@ -29,14 +28,14 @@ def _validator(file_path, for_appversions=None, overrides=None):
     sys.stderr = StringIO()
     try:
         result = validate(file_path, format='json',
-                        # Test all tiers at once. This will make sure we see
-                        # all error messages.
-                        determined=True,
-                        approved_applications=apps,
-                        spidermonkey=js,
-                        for_appversions=for_appversions,
-                        timeout=60 * 3,  # seconds
-                        overrides=overrides)
+                          # Test all tiers at once. This will make
+                          # sure we see all error messages.
+                          determined=True,
+                          approved_applications=apps,
+                          spidermonkey=js,
+                          for_appversions=for_appversions,
+                          timeout=60 * 3,  # seconds
+                          overrides=overrides)
         sys.stdout.write(sys.stderr.getvalue())
         if 'Traceback' in sys.stderr.getvalue():
             # the validator catches and ignores certain errors in an attempt
@@ -205,13 +204,13 @@ class GeneralTests(ValidatorTest):
 
     def test_webextension_seen_as_extension(self):
         validation = self.validate('beastify.xpi')
-        eq_(validation['detected_type'], 'extension')
-        eq_(validation['errors'], 0)
+        assert validation['detected_type'] == 'extension'
+        assert validation['errors'] == 0
 
     def test_install_rdf_and_manifest_json(self):
         validation = self.validate('installrdf-and-manifestjson.xpi')
-        eq_(validation['detected_type'], 'extension')
-        eq_(validation['errors'], 0, validation['messages'])
+        assert validation['detected_type'] == 'extension'
+        assert validation['errors'] == 0
 
 
 class LocalizationTests(ValidatorTest):
@@ -261,11 +260,11 @@ class NoErrorsExpected(ValidatorTest):
 
     def test_an_attempt(self):
         d = self.validate('tmp.xpi')
-        eq_(d['errors'], 0)
+        assert d['errors'] == 0
 
     def test_don_t_freak(self):
         d = self.validate('test (1).xpi')
-        eq_(d['errors'], 0)
+        assert d['errors'] == 0
 
     def test_don_t_freak_2(self):
         d = self.validate('littlemonkey-1.8.56-sm.xpi')
@@ -278,11 +277,11 @@ class NoErrorsExpected(ValidatorTest):
 
     def test_unknown_file(self):
         d = self.validate('add-on20101228444 (1).jar')
-        eq_(d['errors'], 0)
+        assert d['errors'] == 0
 
     def test_chromemanifest_traceback(self):
         d = self.validate('chromemanifest-traceback.jar')
-        eq_(d['errors'], 0)
+        assert d['errors'] == 0
 
 
 class SearchTools(ValidatorTest):
@@ -304,21 +303,19 @@ class JetpackDetection(ValidatorTest):
 
     def test_jetpack_one_signing(self):
         results = self.validate('jetpack-one.xpi')
-        eq_(results['signing_summary']['high'], 0)
+        assert results['signing_summary']['high'] == 0
 
     def test_jetpack_one_jetpack(self):
         results = self.validate('jetpack-one.xpi')
-        ok_(results['metadata']['jetpack_identified_files'],
-            'expected jetpack files')
+        assert results['metadata']['jetpack_identified_files']
 
     def test_jetpack_two_signing(self):
         results = self.validate('jetpack-two.xpi')
-        eq_(results['signing_summary']['high'], 0)
+        assert results['signing_summary']['high'] == 0
 
     def test_jetpack_two_jetpack(self):
         results = self.validate('jetpack-two.xpi')
-        ok_(results['metadata']['jetpack_identified_files'],
-            'expected jetpack files')
+        assert results['metadata']['jetpack_identified_files']
 
     def test_jetpack_fail_for_cfx_usage(self):
         self.validate('cfx.xpi')

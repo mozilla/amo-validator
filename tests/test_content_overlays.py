@@ -1,5 +1,3 @@
-from nose.tools import eq_
-
 from helper import MockXPI
 
 from validator.chromemanifest import ChromeManifest
@@ -28,9 +26,9 @@ def test_marking_overlays():
 
     marked_scripts = err.get_resource('marked_scripts')
 
-    eq_(marked_scripts, set(['chrome://ns1/foo.js',
-                             'chrome://ns1/bar.js',
-                             'chrome://asdf/foo.js']))
+    assert marked_scripts == set(['chrome://ns1/foo.js',
+                                  'chrome://ns1/bar.js',
+                                  'chrome://asdf/foo.js'])
 
 
 def test_marking_overlays_root_package():
@@ -54,9 +52,9 @@ def test_marking_overlays_root_package():
 
     marked_scripts = err.get_resource('marked_scripts')
 
-    eq_(marked_scripts, set(['chrome://ns1/foo.js',
-                             'chrome://ns1/bar.js',
-                             'chrome://asdf/foo.js']))
+    assert marked_scripts == set(['chrome://ns1/foo.js',
+                                  'chrome://ns1/bar.js',
+                                  'chrome://asdf/foo.js'])
 
 
 def test_marking_overlays_no_overlay():
@@ -100,7 +98,7 @@ def test_marking_overlays_subdir():
     err.save_resource('chrome.manifest_nopush', c)
 
     xpi = MockXPI({'foo/subdir/main.xul':
-                       'tests/resources/content/script_list.xul'})
+                   'tests/resources/content/script_list.xul'})
 
     content.test_packed_packages(err, xpi)
     assert not err.failed()
@@ -109,8 +107,9 @@ def test_marking_overlays_subdir():
     print marked_scripts
     assert marked_scripts
 
-    eq_(marked_scripts, set(['chrome://ns1/subdir/foo.js', 'chrome://ns1/bar.js',
-                             'chrome://asdf/foo.js']))
+    assert marked_scripts == set(['chrome://ns1/subdir/foo.js',
+                                  'chrome://ns1/bar.js',
+                                  'chrome://asdf/foo.js'])
 
 
 def test_script_scraping():
@@ -131,6 +130,5 @@ def test_script_scraping():
     for bundle in scripts:
         assert 'foo.js' in bundle['scripts']
         assert 'dir/bar.jsm' in bundle['scripts']
-        eq_(bundle['package'], xpi)
-        eq_(bundle['state'], [])
-
+        assert bundle['package'] == xpi
+        assert bundle['state'] == []

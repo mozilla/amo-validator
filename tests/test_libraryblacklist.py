@@ -1,5 +1,3 @@
-from nose.tools import eq_
-
 import validator.testcases.content as test_content
 from validator.constants import FIREFOX_GUID
 from validator.decorator import version_range
@@ -24,9 +22,9 @@ def test_blacklisted_files():
 
     assert err.notices
     assert not err.failed()
-    eq_(err.metadata.get('identified_files'),
-        {'test.js': {'path': 'This file is a false script to facilitate '
-                             'testing of library blacklisting.'}})
+    assert err.metadata.get('identified_files') == {'test.js': {
+        'path': 'This file is a false script to facilitate '
+                'testing of library blacklisting.'}}
 
 
 def test_skip_blacklisted_file():
@@ -53,5 +51,4 @@ def test_validate_libs_in_compat_mode():
         test_content.test_packed_packages(err, package)
     assert err.get_resource('scripts'), (
                     'expected mootools scripts to be marked for proessing')
-    eq_(err.get_resource('scripts')[0]['scripts'],
-        set(['content/mootools.js']))
+    assert err.get_resource('scripts')[0]['scripts'] == set(['content/mootools.js'])

@@ -1,6 +1,5 @@
-from nose.tools import eq_
-
 from js_helper import _do_test_raw, _get_var
+
 
 def test_createElement():
     'Tests that createElement and createElementNS throw errors.'
@@ -57,6 +56,7 @@ def test_createElement():
     document.createElement();
     """)
 
+
 def test_enablePrivilege():
     """Tests that enablePrivilege throws a warning."""
 
@@ -65,9 +65,9 @@ def test_enablePrivilege():
     """)
     assert err.warnings
 
-    eq_(err.warnings[0]['id'],
-        ('js', 'traverser', 'dangerous_global'))
-    eq_(err.warnings[0]['signing_severity'], 'high')
+    assert err.warnings[0]['id'] == ('js', 'traverser', 'dangerous_global')
+    assert err.warnings[0]['signing_severity'] == 'high'
+
 
 def test_privileged_unprivileged_interaction():
     """Tests that functions which may lead to privilege escalation are
@@ -79,15 +79,15 @@ def test_privileged_unprivileged_interaction():
         """ % meth)
         assert err.warnings
 
-        eq_(err.warnings[0]['id'],
-            ('js', 'traverser', 'dangerous_global'))
-        eq_(err.warnings[0]['signing_severity'], 'low')
+        assert err.warnings[0]['id'] == ('js', 'traverser', 'dangerous_global')
+        assert err.warnings[0]['signing_severity'] == 'low'
 
     for form in ('var obj = { __exposedProps__: {} };',
                  'var obj = {}; obj.__exposedProps__ = {};'):
         err = _do_test_raw(form)
         assert err.warnings
-        eq_(err.warnings[0]['signing_severity'], 'high')
+        assert err.warnings[0]['signing_severity'] == 'high'
+
 
 def test_synchronous_xhr():
     'Tests that syncrhonous AJAX requests are marked as dangerous'
@@ -105,6 +105,7 @@ def test_synchronous_xhr():
     x.send(null);
     """)
     assert err.message_count
+
 
 def test_bug652577_loadOverlay():
     """Make sure that loadOverlay is dangerous."""
@@ -128,6 +129,7 @@ def test_bug652577_loadOverlay():
     assert not _do_test_raw("""
     document.loadOverlay("resource:foo/bar/");
     """).failed()
+
 
 def test_extraneous_globals():
     """Globals should not be registered from function parameters."""
@@ -156,13 +158,13 @@ def test_number_global_conversions():
         nan = window.NaN;
     """)
     assert not err.failed()
-    eq_(_get_var(err, 'a'), 0)
-    eq_(_get_var(err, 'b'), 123)
-    eq_(_get_var(err, 'c'), 123.123)
-    eq_(_get_var(err, 'd'), 123)
-    eq_(_get_var(err, 'e'), 123.456)
-    eq_(_get_var(err, 'f'), _get_var(err, 'nan'))
-    eq_(_get_var(err, 'g'), _get_var(err, 'nan'))
+    assert _get_var(err, 'a') == 0
+    assert _get_var(err, 'b') == 123
+    assert _get_var(err, 'c') == 123.123
+    assert _get_var(err, 'd') == 123
+    assert _get_var(err, 'e') == 123.456
+    assert _get_var(err, 'f') == _get_var(err, 'nan')
+    assert _get_var(err, 'g') == _get_var(err, 'nan')
 
 
 def test_unsafe_template_methods():

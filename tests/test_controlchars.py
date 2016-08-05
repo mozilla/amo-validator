@@ -1,7 +1,5 @@
 import sys
 
-from nose.tools import eq_
-
 from validator.errorbundler import ErrorBundle
 from validator.outputhandlers.shellcolors import OutputHandler
 import validator.unicodehelper
@@ -34,5 +32,5 @@ def test_controlchars_ascii_warn():
     """
 
     err = _do_test('tests/resources/controlchars/controlchars_ascii_warn.js')
-    eq_(len(err.warnings), 1)
-    eq_(err.warnings[0]['id'][2], 'syntax_error')
+    assert len(err.warnings) == 1
+    assert err.warnings[0]['id'][2] == 'syntax_error'

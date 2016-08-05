@@ -13,18 +13,6 @@ as thorough.
 
 ### Prerequisites
 
-Python Libraries:
-
-- argparse
-- cssutils
-- rdflib
-- fastchardet
-
-Python Libraries for Testing:
-
-- nose
-- coverage
-
 You can install everything you need for running and testing with
 
 ```bash
@@ -320,17 +308,17 @@ The same rule applies for the end of a file and for files with only one line.
 
 ## Testing
 
-Unit tests can be run with
+Tests can be run with
 
 ```bash
-nosetests
+py.test tests/
 ```
 
 Functional tests, which take longer, can be run with
 
-```bash
-nosetests --processes=2 functional_tests/
-```
+ ```bash
+py.test functional_tests/
+ ```
 
 Then make a cup of tea while all of those tests run. It takes a while. If you
 have more than two cores on your machine or you don't mind pwnage, you can try

@@ -1,7 +1,5 @@
 import sys
 
-from nose.tools import eq_
-
 import helper
 from helper import MockXPI
 from validator.errorbundler import ErrorBundle
@@ -75,7 +73,7 @@ def _do_test_scope(script, vars):
             var_val *= 100000
             var_val = round(var_val)
             var_val /= 100000
-        eq_(var_val, value)
+        assert var_val == value
 
 
 class TestCase(helper.TestCase):
@@ -122,12 +120,11 @@ class TestCase(helper.TestCase):
             return self.final_context.data[name].get_literal_value()
         except KeyError:
             raise ('Test seeking variable (%s) not found in final context.' %
-                       name)
+                   name)
 
     def assert_var_eq(self, name, value):
         """
         Assert that the value of a variable from the final script context
         contains the value specified.
         """
-        eq_(self.get_var(name), value)
-
+        assert self.get_var(name) == value

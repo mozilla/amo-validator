@@ -1,6 +1,5 @@
 import mock
-
-from nose.tools import assert_raises, eq_
+import pytest
 
 from .js_helper import _do_test_raw, _get_var
 
@@ -31,7 +30,7 @@ def test_unicode_escapes():
 
     assert not result.failed()
 
-    eq_(_get_var(result, 'foo'), u"\u263a''")
+    assert _get_var(result, 'foo') == u"\u263a''"
 
 
 def patch_init(mock_):
@@ -59,7 +58,7 @@ def test_cleanup(Popen):
 
     get_tree('hello();')
 
-    eq_(Popen.call_count, 1)
+    assert Popen.call_count == 1
     # Clear the reference to `self` in the call history so it can be reaped.
     Popen.reset_mock()
 
@@ -87,7 +86,7 @@ def test_cleanup_on_error(Popen):
 
     # Success, should have cached shell.
     get_tree('hello();')
-    eq_(Popen.call_count, 1)
+    assert Popen.call_count == 1
 
     assert JSShell.instance
     assert not process.terminate.called
@@ -96,11 +95,11 @@ def test_cleanup_on_error(Popen):
     process.stdout.readline.reset_mock()
     process.stdin.write.side_effect = IOError
 
-    with assert_raises(IOError):
+    with pytest.raises(IOError):
         get_tree('hello();')
 
     # No new processes created, since we had a cached shell from last time.
-    eq_(Popen.call_count, 1)
+    assert Popen.call_count == 1
     assert process.stdin.write.called
     assert not process.stdout.readline.called
 
@@ -109,14 +108,14 @@ def test_cleanup_on_error(Popen):
     process.stdin.write.side_effect = None
     process.stdout.readline.side_effect = IOError
 
-    with assert_raises(IOError):
+    with pytest.raises(IOError):
         get_tree('hello();')
 
     assert JSShell.instance is None
 
     # Cached shell should have been removed in the last run. New
     # process should be created.
-    eq_(Popen.call_count, 2)
+    assert Popen.call_count == 2
     assert process.stdin.write.called
     assert process.stdout.readline.called
 

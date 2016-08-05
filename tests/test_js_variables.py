@@ -1,4 +1,3 @@
-from nose.tools import eq_
 from js_helper import _do_test_raw, _get_var
 
 
@@ -66,8 +65,8 @@ def test_lazy_object_member_assgt():
         b = zap.fizz.buzz;
     """)
     assert not results.failed()
-    eq_(_get_var(results, 'a'), 'asdf')
-    eq_(_get_var(results, 'b'), 123)
+    assert _get_var(results, 'a') == 'asdf'
+    assert _get_var(results, 'b') == 123
 
 
 def test_prototype_array_instantiation():
@@ -75,7 +74,7 @@ def test_prototype_array_instantiation():
     Test that JSPrototypes and JSArrays handle deep instantiation properly.
     """
 
-    results = _do_test_raw("""
+    _do_test_raw("""
     var x = {};
     x.prototype.foo.bar = "asdf";
     var y = [];
@@ -87,8 +86,7 @@ def test_prototype_array_instantiation():
 def test_this_tracebacks():
     """Test to make sure `this` doesn't generate tracebacks."""
 
-    results = _do_test_raw("""
+    _do_test_raw("""
     var x = this;
-    """);
+    """)
     # The output is irrelevant for now.
-
