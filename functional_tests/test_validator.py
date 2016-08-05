@@ -17,8 +17,6 @@ def _validator(file_path, for_appversions=None, overrides=None):
     import validator
     import validator.constants
     js = os.environ.get('SPIDERMONKEY_INSTALLATION', 'js')
-    scripting.SPIDERMONKEY_INSTALLATION = js
-    validator.constants.SPIDERMONKEY_INSTALLATION = js
     apps = os.path.join(os.path.dirname(validator.__file__),
                         'app_versions.json')
     if not os.path.exists(apps):
