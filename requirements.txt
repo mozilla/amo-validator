@@ -5,7 +5,7 @@ fastchardet==0.2.0
 mock==2.0.0
 natsort==5.0.1
 pytest==2.9.2
-rdflib==3.4.0
+rdflib==4.2.1
 requests==2.10.0
 simplejson==3.8.2
 spidermonkey==48.0a2
