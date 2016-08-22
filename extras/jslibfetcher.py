@@ -102,6 +102,7 @@ DOMPURIFY_VERSIONS = {
         "0.8.0",
         "0.8.1",
         "0.8.2",
+        "0.8.3",
     ]
 }
 
@@ -256,7 +257,7 @@ REACT_VERSIONS = {
         "15.2.0",
         "15.2.1",
         "15.3.0",
-
+        "15.3.1",
     ]
 }
 
@@ -278,6 +279,7 @@ REACT_DOM_VERSIONS = {
         "15.2.0",
         "15.2.1",
         "15.3.0",
+        "15.3.1",
     ]
 }
 
@@ -422,23 +424,19 @@ def get_patterns():
 
     # React
     get_pattern("react",
-                "https://fb.me/react-%s.js",
-                REACT_VERSIONS,
-                "react.js")
+                "https://npmcdn.com/react@%s/dist/react.js",
+                REACT_VERSIONS)
     get_pattern("react",
-                "https://fb.me/react-%s.min.js",
-                REACT_VERSIONS,
-                "react.min.js")
+                "https://npmcdn.com/react@%s/dist/react.min.js",
+                REACT_VERSIONS)
 
     # React DOM
     get_pattern("react-dom",
-                "https://fb.me/react-dom-%s.js",
-                REACT_DOM_VERSIONS,
-                "react-dom.js")
+                "https://npmcdn.com/react-dom@%s/dist/react-dom.js",
+                REACT_DOM_VERSIONS)
     get_pattern("react-dom",
-                "https://fb.me/react-dom-%s.min.js",
-                REACT_DOM_VERSIONS,
-                "react-dom.min.js")
+                "https://npmcdn.com/react-dom@%s/dist/react-dom.min.js",
+                REACT_DOM_VERSIONS)
 
     # Underscore
     get_pattern("underscore",
