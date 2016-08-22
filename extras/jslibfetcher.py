@@ -332,11 +332,12 @@ def process(url, rule, file):
         download_errors.append((url, response.status_code, response.reason))
 
 
-def get_pattern(prefix, url_pattern, library):
+def get_pattern(prefix, url_pattern, library, outputFilename=None):
     for rule, versions in library.iteritems():
         for version in versions:
             url = url_pattern % version
-            process(url, rule, "%s.%s.%s" % (prefix, version, url.split("/")[-1]))
+            filenameSuffix = outputFilename or url.split("/")[-1]
+            process(url, rule, "%s.%s.%s" % (prefix, version, filenameSuffix))
 
 
 def get_patterns():
@@ -383,10 +384,12 @@ def get_patterns():
     # jQuery
     get_pattern("jquery",
                 "https://code.jquery.com/jquery-%s.js",
-                JQUERY_VERSIONS)
+                JQUERY_VERSIONS,
+                "jquery.js")
     get_pattern("jquery",
                 "https://code.jquery.com/jquery-%s.min.js",
-                JQUERY_VERSIONS)
+                JQUERY_VERSIONS,
+                "jquery.min.js")
 
     # jQueryUI
     get_pattern("jquery-ui",
@@ -420,18 +423,22 @@ def get_patterns():
     # React
     get_pattern("react",
                 "https://fb.me/react-%s.js",
-                REACT_VERSIONS)
+                REACT_VERSIONS,
+                "react.js")
     get_pattern("react",
                 "https://fb.me/react-%s.min.js",
-                REACT_VERSIONS)
+                REACT_VERSIONS,
+                "react.min.js")
 
     # React DOM
     get_pattern("react-dom",
                 "https://fb.me/react-dom-%s.js",
-                REACT_DOM_VERSIONS)
+                REACT_DOM_VERSIONS,
+                "react-dom.js")
     get_pattern("react-dom",
                 "https://fb.me/react-dom-%s.min.js",
-                REACT_DOM_VERSIONS)
+                REACT_DOM_VERSIONS,
+                "react-dom.min.js")
 
     # Underscore
     get_pattern("underscore",
