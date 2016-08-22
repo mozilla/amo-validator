@@ -1,4 +1,5 @@
 from mock import patch
+import pytest
 
 from helper import MockXPI
 from js_helper import _do_test_raw
@@ -242,23 +243,22 @@ def test_css():
                                                 'subpackage')
 
 
-def test_hidden_files():
+@pytest.mark.parametrize("test_input", [
+    {'.hidden': 'tests/resources/content/junk.xpi'},
+    {'dir/__MACOSX/foo': 'tests/resources/content/junk.xpi'},
+    {'dir/.foo.swp': 'tests/resources/content/junk.xpi'},
+    {'dir/file.old': 'tests/resources/content/junk.xpi'},
+    {'dir/file.xul~': 'tests/resources/content/junk.xpi'}
+])
+def test_hidden_files(test_input):
     """Tests that hidden files are reported."""
 
-    def test_structure(structure):
-        err = ErrorBundle()
-        err.supported_versions = {}
-        mock_package = MockXPI(structure)
-        content.test_packed_packages(err, mock_package)
-        print err.print_summary(verbose=True)
-        assert err.failed()
-
-    for structure in ({'.hidden': 'tests/resources/content/junk.xpi'},
-                      {'dir/__MACOSX/foo': 'tests/resources/content/junk.xpi'},
-                      {'dir/.foo.swp': 'tests/resources/content/junk.xpi'},
-                      {'dir/file.old': 'tests/resources/content/junk.xpi'},
-                      {'dir/file.xul~': 'tests/resources/content/junk.xpi'}):
-        yield test_structure, structure
+    err = ErrorBundle()
+    err.supported_versions = {}
+    mock_package = MockXPI(test_input)
+    content.test_packed_packages(err, mock_package)
+    print err.print_summary(verbose=True)
+    assert err.failed()
 
 
 def test_password_in_defaults_prefs():
