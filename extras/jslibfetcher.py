@@ -424,18 +424,18 @@ def get_patterns():
 
     # React
     get_pattern("react",
-                "https://npmcdn.com/react@%s/dist/react.js",
+                "https://unpkg.com/react@%s/dist/react.js",
                 REACT_VERSIONS)
     get_pattern("react",
-                "https://npmcdn.com/react@%s/dist/react.min.js",
+                "https://unpkg.com/react@%s/dist/react.min.js",
                 REACT_VERSIONS)
 
     # React DOM
     get_pattern("react-dom",
-                "https://npmcdn.com/react-dom@%s/dist/react-dom.js",
+                "https://unpkg.com/react-dom@%s/dist/react-dom.js",
                 REACT_DOM_VERSIONS)
     get_pattern("react-dom",
-                "https://npmcdn.com/react-dom@%s/dist/react-dom.min.js",
+                "https://unpkg.com/react-dom@%s/dist/react-dom.min.js",
                 REACT_DOM_VERSIONS)
 
     # Underscore
