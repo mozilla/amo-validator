@@ -47,6 +47,17 @@ def test_experiment():
     assert not err.notices
 
 
+def test_webextension_experiment():
+    """Tests that type detection can detect an addon of type 'extension' for
+    'webextension experiments'.
+    (see https://github.com/mozilla/addons-server/issues/3315)"""
+
+    err = _test_type(
+        'tests/resources/typedetection/webextension_experiment.xpi',
+        PACKAGE_EXTENSION)
+    assert not err.notices
+
+
 def test_multipackage():
     'Tests that type detection can detect multipackage add-ons'
 
