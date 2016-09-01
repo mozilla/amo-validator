@@ -13,8 +13,10 @@ def detect_type(err, install_rdf=None, xpi_package=None):
                         '8': PACKAGE_LANGPACK,
                         '32': PACKAGE_MULTI,
                         '64': PACKAGE_DICTIONARY,
-                        # New "experiment" type: see bug 1220097.
-                        '128': PACKAGE_EXTENSION}
+                        # New "experiment" types: see bug 1220097 and
+                        # https://github.com/mozilla/addons-server/issues/3315
+                        '128': PACKAGE_EXTENSION,
+                        '256': PACKAGE_EXTENSION,}
 
     # If we're missing our install.rdf file, we can try to make some
     # assumptions.
