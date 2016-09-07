@@ -31,9 +31,9 @@ class TestFX50Compat(CompatTestCase):
         assert not self.compat_err.notices
         assert not self.compat_err.errors
 
-        error = [msg for msg in self.compat_err.warnings if msg['message'] == expected]
-        assert error
-        assert error[0]['compatibility_type'] == 'error'
+        warning = [msg for msg in self.compat_err.warnings if msg['message'] == expected]
+        assert warning
+        assert warning[0]['compatibility_type'] == 'error'
 
     def test_nsIX509Cert_requestUsagesArrayAsync_removed(self):
         """https://github.com/mozilla/addons-server/issues/3408"""
@@ -57,9 +57,9 @@ class TestFX50Compat(CompatTestCase):
         assert not self.compat_err.notices
         assert not self.compat_err.errors
 
-        error = [msg for msg in self.compat_err.warnings if msg['message'] == expected]
-        assert error
-        assert error[0]['compatibility_type'] == 'error'
+        warning = [msg for msg in self.compat_err.warnings if msg['message'] == expected]
+        assert warning
+        assert warning[0]['compatibility_type'] == 'error'
 
     def test_nsIX509Cert_getUsagesString(self):
         """https://github.com/mozilla/addons-server/issues/3408"""
@@ -83,9 +83,9 @@ class TestFX50Compat(CompatTestCase):
         assert not self.compat_err.notices
         assert not self.compat_err.errors
 
-        error = [msg for msg in self.compat_err.warnings if msg['message'] == expected]
-        assert error
-        assert error[0]['compatibility_type'] == 'error'
+        warning = [msg for msg in self.compat_err.warnings if msg['message'] == expected]
+        assert warning
+        assert warning[0]['compatibility_type'] == 'error'
 
     def test_events_removed_html_xul(self):
         """https://github.com/mozilla/addons-server/issues/3407"""
