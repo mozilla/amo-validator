@@ -286,6 +286,13 @@ def registry_key(write=False):
     return res
 
 
+NSIX509CERT_METHODS = {
+    'getUsagesArray': entity('nsIX509Cert.getUsagesArray'),
+    'requestUsagesArrayAsync': entity('nsIX509Cert.requestUsagesArrayAsync'),
+    'getUsagesString': entity('nsIX509Cert.getUsagesString'),
+}
+
+
 INTERFACES = {
     u'nsISupports': {'value': {}},
     u'mozIStorageBaseStatement':
@@ -465,7 +472,10 @@ INTERFACES = {
         'newChannel': entity('nsIIOService.newChannel'),
         'newChannelFromURI': entity('nsIIOService.newChannelFromURI'),
         'newChannelFromURIWithProxyFlags': entity('nsIIOService.newChannelFromURIWithProxyFlags'),
-    }}
+    }},
+    'nsIX509Cert': {'value': NSIX509CERT_METHODS},
+    'nsIX509Cert2': {'value': NSIX509CERT_METHODS},
+    'nsIX509Cert3': {'value': NSIX509CERT_METHODS}
 }
 
 INTERFACE_ENTITIES = {u'nsIXMLHttpRequest':

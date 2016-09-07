@@ -2,7 +2,8 @@ import re
 from functools import wraps
 
 from validator.compat import (
-    FX45_DEFINITION, FX46_DEFINITION, FX47_DEFINITION, FX48_DEFINITION)
+    FX45_DEFINITION, FX46_DEFINITION, FX47_DEFINITION, FX48_DEFINITION,
+    FX50_DEFINITION)
 from validator.constants import BUGZILLA_BUG, MDN_DOC
 from validator.contextgenerator import ContextGenerator
 from .chromemanifest import DANGEROUS_CATEGORIES, DANGEROUS_CATEGORY_WARNING
@@ -447,6 +448,33 @@ class Gecko48RegexTests(CompatRegexTestHelper):
             msg + ' See %s for more information.' % BUGZILLA_BUG % 750054,
             log_function=self.err.warning,
             compat_type='warning'
+        )
+
+
+@register_generator
+class Gecko50RegexTests(CompatRegexTestHelper):
+    """Regex tests for Firefox 50 updates."""
+
+    VERSION = FX50_DEFINITION
+
+    def tests(self):
+        instances = ('draggesture', 'dragdrop', 'ondraggesture', 'ondragdrop')
+
+        msg = (
+            'The draggesture and dragdrop events are no longer supported. '
+            'You should use the standard equivalents instead: '
+            'dragstart and drop.')
+
+        description = (
+            msg + ' See %s for more information.'
+            % MDN_DOC % 'Web/API/HTML_Drag_and_Drop_API')
+
+        yield self.get_test(
+            r'[\'"]?(%s)([\'"]|=)' % ('|'.join(instances)),
+            msg,
+            description,
+            log_function=self.err.warning,
+            compat_type='error'
         )
 
 

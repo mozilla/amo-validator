@@ -23,7 +23,8 @@ def _build_definition(maj_version_num, firefox=True, fennec=True,
     return definition
 
 
-FX45_DEFINITION = _build_definition(45)
-FX46_DEFINITION = _build_definition(46)
-FX47_DEFINITION = _build_definition(47)
-FX48_DEFINITION = _build_definition(48)
+FX45_DEFINITION = _build_definition(45, fennec=False, android=False, thunderbird=False)
+FX46_DEFINITION = _build_definition(46, fennec=False, android=False, thunderbird=False)
+FX47_DEFINITION = _build_definition(47, fennec=False, android=False, thunderbird=False)
+FX48_DEFINITION = _build_definition(48, fennec=False, android=False, thunderbird=False)
+FX50_DEFINITION = _build_definition(50, fennec=False, android=False, thunderbird=False)
