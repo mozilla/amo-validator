@@ -86,3 +86,54 @@ class TestFX50Compat(CompatTestCase):
         error = [msg for msg in self.compat_err.warnings if msg['message'] == expected]
         assert error
         assert error[0]['compatibility_type'] == 'error'
+
+    def test_events_removed_html_xul(self):
+        """https://github.com/mozilla/addons-server/issues/3407"""
+        expected = (
+            'The draggesture and dragdrop events are no longer supported. '
+            'You should use the standard equivalents instead: '
+            'dragstart and drop.')
+
+        events = ('draggesture', 'dragdrop', 'ondraggesture', 'ondragdrop')
+
+        base = '''
+            <treechildren
+                {0}="nsDragAndDrop.startDrag(event, foxclocks.mainManager)"/>
+        '''
+
+        for event in events:
+            self.run_regex_for_compat(base.format(event), is_js=False)
+
+            assert not self.compat_err.notices
+            assert not self.compat_err.errors
+
+            warning = [
+                msg for msg in self.compat_err.warnings
+                if msg['message'].startswith(expected)]
+            assert warning
+            assert warning[0]['compatibility_type'] == 'error'
+
+    def test_events_removed_js(self):
+        """https://github.com/mozilla/addons-server/issues/3407"""
+        expected = (
+            'The draggesture and dragdrop events are no longer supported. '
+            'You should use the standard equivalents instead: '
+            'dragstart and drop.')
+
+        events = ('draggesture', 'dragdrop', 'ondraggesture', 'ondragdrop')
+
+        base = '''
+            $.on('{0}');
+        '''
+
+        for event in events:
+            self.run_regex_for_compat(base.format(event))
+
+            assert not self.compat_err.notices
+            assert not self.compat_err.errors
+
+            warning = [
+                msg for msg in self.compat_err.warnings
+                if msg['message'].startswith(expected)]
+            assert warning
+            assert warning[0]['compatibility_type'] == 'error'
