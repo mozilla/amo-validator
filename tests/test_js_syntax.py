@@ -1,3 +1,5 @@
+import pytest
+
 from .js_helper import TestCase, _do_test_raw
 
 from validator.testcases.javascript.jstypes import JSWrapper
@@ -21,23 +23,20 @@ def test_array_destructuring():
     """).failed()
 
 
-def test_get_as_num():
-    """Test that _get_as_num performs as expected."""
-
-    def test(input, output):
-        assert _get_as_num(input) == output
-
-    yield test, 1, 1
-    yield test, 1.0, 1.0
-    yield test, '1', 1
-    yield test, '1.0', 1.0
-    yield test, None, 0
-    yield test, '0xF', 15
-    yield test, True, 1
-    yield test, False, 0
-
-    yield test, JSWrapper(3), 3
-    yield test, JSWrapper(None), 0
+@pytest.mark.parametrize("input,output", [
+    (1, 1),
+    (1.0, 1.0),
+    ('1', 1),
+    ('1.0', 1.0),
+    (None, 0),
+    ('0xF', 15),
+    (True, 1),
+    (False, 0),
+    (JSWrapper(3), 3),
+    (JSWrapper(None), 0),
+])
+def test_get_as_num(input, output):
+    assert _get_as_num(input) == output
 
 
 def test_spidermonkey_warning():
@@ -56,69 +55,68 @@ def test_spidermonkey_warning():
     """).failed()
 
 
-def test_blocks_evaluated():
+@pytest.mark.parametrize("test_input", [
+    ('function foo() { %s; }'),
+    ('function foo() { %s; yield 1; }'),
+    ('function foo() { yield %s; }'),
+    ('var foo = function () { %s; }'),
+    ('var foo = function () { %s; yield 1; }'),
+    ('function* foo() { %s; }'),
+    ('var foo = function* () { %s; }'),
+    ('var foo = function () %s'),
+    ('var foo = () => %s'),
+    ('var foo = () => { %s }'),
+    ('if (true) { %s }'),
+    ('if (true) ; else { %s }'),
+    ('while (true) { %s }'),
+    ('do { %s } while (true)'),
+
+    ('for (;;) { %s }'),
+
+    ('for (x=%s;;) {}'),
+    ('for (let x=%s;;) {}'),
+    ('for (var x=%s;;) {}'),
+    ('for (const x=%s;;) {}'),
+
+    ('for (let x=foo;;) { %s }'),
+    ('for (var x=foo;;) { %s }'),
+
+    ('for (; %s;) {}'),
+    ('for (;; %s) {}'),
+
+    ('for (let x in y) { %s }'),
+    ('for (let x of y) { %s }'),
+    ('for (let x in (%s)) {}'),
+    ('for (let x of (%s)) {}'),
+
+    ('try { %s } catch (e) {}'),
+    ('try {} catch (e) { %s }'),
+    ('try {} finally { %s }'),
+    ('try {} catch (e if %s) {}'),
+    ('let x = %s'),
+    ('var x = %s'),
+    ('const x = %s'),
+])
+def test_blocks_evaluated(test_input):
     """
     Tests that blocks of code are actually evaluated under normal
     circumstances.
     """
-
-    ID = ('javascript', 'dangerous_global', 'eval')
-
-    EVIL = 'eval(evilStuff)'
-    BLOCKS = (
-        'function foo() { %s; }',
-        'function foo() { %s; yield 1; }',
-        'function foo() { yield %s; }',
-        'var foo = function () { %s; }',
-        'var foo = function () { %s; yield 1; }',
-        'function* foo() { %s; }',
-        'var foo = function* () { %s; }',
-        'var foo = function () %s',
-        'var foo = () => %s',
-        'var foo = () => { %s }',
-        'if (true) { %s }',
-        'if (true) ; else { %s }',
-        'while (true) { %s }',
-        'do { %s } while (true)',
-
-        'for (;;) { %s }',
-
-        'for (x=%s;;) {}',
-        'for (let x=%s;;) {}',
-        'for (var x=%s;;) {}',
-        'for (const x=%s;;) {}',
-
-        'for (let x=foo;;) { %s }',
-        'for (var x=foo;;) { %s }',
-
-        'for (; %s;) {}',
-        'for (;; %s) {}',
-
-        'for (let x in y) { %s }',
-        'for (let x of y) { %s }',
-        'for (let x in (%s)) {}',
-        'for (let x of (%s)) {}',
-
-        'try { %s } catch (e) {}',
-        'try {} catch (e) { %s }',
-        'try {} finally { %s }',
-        'try {} catch (e if %s) {}',
-        'let x = %s',
-        'var x = %s',
-        'const x = %s',
-    )
-
-    def test(block):
-        err = _do_test_raw(block % EVIL)
-        assert err.message_count == 1, \
-            'Missing expected failure for block: %s' % block
-        assert err.warnings[0]['id'] == ID
-
-    for block in BLOCKS:
-        yield test, block
+    err = _do_test_raw(test_input % 'eval(evilStuff)')
+    assert err.message_count == 1, \
+        'Missing expected failure for block: %s' % test_input
+    assert err.warnings[0]['id'] == ('javascript', 'dangerous_global', 'eval')
 
 
-def test_generators():
+@pytest.mark.parametrize("test_input", [
+    'function foo() { %s; yield 1; }',
+    'function foo() { yield %s; }',
+    'var foo = function () { %s; yield 1; }',
+    'function* foo() { %s; yield 1; }',
+    'function* foo() { yield %s; }',
+    'var foo = function* () { %s; yield 1; }',
+])
+def test_generators(test_input):
     """
     Tests that generators inside simple `function`s (opposed to `function*`)
     are not raising syntax errors.
@@ -135,25 +133,12 @@ def test_generators():
     ID = ('javascript', 'dangerous_global', 'eval')
 
     EVIL = 'eval(evilStuff)'
-    BLOCKS = (
-        'function foo() { %s; yield 1; }',
-        'function foo() { yield %s; }',
-        'var foo = function () { %s; yield 1; }',
-        'function* foo() { %s; yield 1; }',
-        'function* foo() { yield %s; }',
-        'var foo = function* () { %s; yield 1; }'
-    )
-
-    def test(block):
-        # The following should raise a "dangerous global", and not a syntax
-        # error.
-        err = _do_test_raw(block % EVIL)
-        assert err.message_count == 1, \
-            'Missing expected failure for block: %s' % block
-        assert err.warnings[0]['id'] == ID
-
-    for block in BLOCKS:
-        yield test, block
+    # The following should raise a "dangerous global", and not a syntax
+    # error.
+    err = _do_test_raw(test_input % EVIL)
+    assert err.message_count == 1, \
+        'Missing expected failure for block: %s' % test_input
+    assert err.warnings[0]['id'] == ID
 
 
 class TestTemplateString(TestCase):

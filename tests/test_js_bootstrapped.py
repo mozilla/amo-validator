@@ -1,8 +1,11 @@
+import pytest
+
 from validator.errorbundler import ErrorBundle
 from validator.testcases import scripting
 
 
 scripting.traverser.DEBUG = True
+
 
 def _test(script):
     err = ErrorBundle()
@@ -13,26 +16,20 @@ def _test(script):
     return err
 
 
-def test_bootstrapped():
+@pytest.mark.parametrize("test_input", [
+    ('nsICategoryManager', 'addCategoryEntry()'),
+    ('nsIObserverService', 'addObserver()'),
+    ('nsIResProtocolHandler', "setSubstitution('foo', 'bar')"),
+    ('nsIStyleSheetService', 'loadAndRegisterSheet()'),
+    ('nsIStringBundleService', 'createStringBundle()'),
+    ('nsIWindowMediator', 'registerNotification()'),
+    ('nsIWindowWatcher', 'addListener()'),
+])
+def test_bootstrapped(test_input):
     'Performs a test on a JS file'
-
-    methods = (
-        ('nsICategoryManager', 'addCategoryEntry()'),
-        ('nsIObserverService', 'addObserver()'),
-        ('nsIResProtocolHandler', "setSubstitution('foo', 'bar')"),
-        ('nsIStyleSheetService', 'loadAndRegisterSheet()'),
-        ('nsIStringBundleService', 'createStringBundle()'),
-        ('nsIWindowMediator', 'registerNotification()'),
-        ('nsIWindowWatcher', 'addListener()'),
-    )
-
-    def test_wrap(js):
-        assert _test(js).failed()
-
-    for method in methods:
-        yield test_wrap, 'Cc[""].getService(Ci.%s).%s;' % method
-
-    yield test_wrap, 'XPCOMUtils.categoryManager.addCategoryEntry();'
+    test = 'Cc[""].getService(Ci.%s).%s;' % test_input
+    assert _test(test).failed()
+    assert _test('XPCOMUtils.categoryManager.addCategoryEntry();').failed()
 
 
 def test_bootstrapped_pass():
