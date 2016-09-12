@@ -4,7 +4,7 @@ defusedxml==0.4.1
 fastchardet==0.2.0
 mock==2.0.0
 natsort==5.0.1
-pytest==3.0.0
+pytest==3.0.2
 rdflib==3.4.0
 requests==2.11.1
 simplejson==3.8.2
