@@ -31,6 +31,9 @@ hash_library_warning = {}
 with open(os.path.join(os.path.dirname(__file__), "hashes-warning.txt")) as f:
         hash_library_warning.update(s.strip().split(None, 1) for s in f)
 
+hash_library_error = {}
+with open(os.path.join(os.path.dirname(__file__), "hashes-error.txt")) as f:
+        hash_library_error.update(s.strip().split(None, 1) for s in f)
 
 @decorator.register_test(tier=1)
 def test_xpcnativewrappers(err, xpi_package=None):
@@ -115,6 +118,23 @@ def test_packed_packages(err, xpi_package=None):
 
         if not err.for_appversions:
             hash = hashlib.sha256(file_data).hexdigest()
+
+            identified_error = hash_library_error.get(hash)
+            if identified_error is not None:
+                identified_files[name] = {'path': identified_error}
+                err.error(
+                    err_id=('testcases_content',
+                            'test_packed_packages',
+                            'forbidden_file'),
+                    error='Forbidden JS Library Detected',
+                    description=('Your add-on uses a JavaScript library we do '
+                                 'not allow. Read more: '
+                                 'https://bit.ly/1TRIyZY',
+                                 'File %r is a forbidden '
+                                 'JavaScript library' % name),
+                    filename=name)
+                continue
+
             identified_warning = hash_library_warning.get(hash)
             if identified_warning is not None:
                 identified_files[name] = {'path': identified_warning}
