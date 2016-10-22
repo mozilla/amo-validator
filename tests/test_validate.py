@@ -133,8 +133,13 @@ def test_validate_webextension():
 
 
 def test_validate_old_xpi():
+    for is_compat_test in [True, False]:
+        _test_validate_old_xpi(compat_test=is_compat_test)
+
+
+def _test_validate_old_xpi(compat_test):
     """Integration test for a basic old-style extension xpi, without mocks."""
-    result = validate(path='tests/resources/validate/extension.xpi')
+    result = validate(path='tests/resources/validate/extension.xpi', compat_test=compat_test)
     data = json.loads(result)
 
     assert data['success'] is False
@@ -221,10 +226,15 @@ def test_validate_old_xpi_thunderbird_only():
 
 
 def test_validate_old_xpi_multiprocess_compatible():
+    for is_compat_test in [True, False]:
+        _test_validate_old_xpi_multiprocess_compatible(compat_test=is_compat_test)
+
+
+def _test_validate_old_xpi_multiprocess_compatible(compat_test):
     """Integration test for a multiprocess compatible old-style extension xpi,
     without mocks."""
     result = validate(
-        path='tests/resources/validate/extension_multiprocess.xpi')
+        path='tests/resources/validate/extension_multiprocess.xpi', compat_test=compat_test)
     data = json.loads(result)
 
     assert data['success'] is True
@@ -250,8 +260,13 @@ def test_validate_old_xpi_multiprocess_compatible():
 
 
 def test_validate_jpm():
+    for is_compat_test in [True, False]:
+        _test_validate_jpm(compat_test=is_compat_test)
+
+
+def _test_validate_jpm(compat_test):
     """Integration test for a basic jpm-style extension xpi, without mocks."""
-    result = validate(path='tests/resources/validate/jpm.xpi')
+    result = validate(path='tests/resources/validate/jpm.xpi', compat_test=compat_test)
     data = json.loads(result)
 
     assert data['success'] is False
@@ -279,9 +294,14 @@ def test_validate_jpm():
 
 
 def test_validate_jpm_multiprocess_compatible():
+    for is_compat_test in [True, False]:
+        _test_validate_jpm_multiprocess_compatible(compat_test=is_compat_test)
+
+
+def _test_validate_jpm_multiprocess_compatible(compat_test):
     """Integration test for a multiprocess compatible jpm-style extension xpi,
     without mocks."""
-    result = validate(path='tests/resources/validate/jpm_multiprocess.xpi')
+    result = validate(path='tests/resources/validate/jpm_multiprocess.xpi', compat_test=compat_test)
     data = json.loads(result)
 
     assert data['success'] is True
