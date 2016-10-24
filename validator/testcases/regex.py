@@ -3,7 +3,7 @@ from functools import wraps
 
 from validator.compat import (
     FX45_DEFINITION, FX46_DEFINITION, FX47_DEFINITION, FX48_DEFINITION,
-    FX50_DEFINITION)
+    FX50_DEFINITION, FX51_DEFINITION)
 from validator.constants import BUGZILLA_BUG, MDN_DOC
 from validator.contextgenerator import ContextGenerator
 from .chromemanifest import DANGEROUS_CATEGORIES, DANGEROUS_CATEGORY_WARNING
@@ -473,6 +473,41 @@ class Gecko50RegexTests(CompatRegexTestHelper):
             r'[\'"]?(%s)([\'"]|=)' % ('|'.join(instances)),
             msg,
             description,
+            log_function=self.err.warning,
+            compat_type='error'
+        )
+
+
+@register_generator
+class Gecko51RegexTests(CompatRegexTestHelper):
+    """Regex tests for Firefox 51 updates."""
+
+    VERSION = FX51_DEFINITION
+
+    def tests(self):
+        yield self.get_test_bug(
+            528005,
+            r'\bBrowserOpenNewTabOrWindow\b',
+            'The function BrowserOpenNewTabOrWindow has been removed.',
+            'You can use BrowserOpenTab instead, but its behavior is not identical. ',
+            log_function=self.err.warning,
+            compat_type='error',
+        )
+
+        yield self.get_test_bug(
+            812701,
+            r'\b(%s)\b' % ('|'.join(('mozVisibilityState', 'mozHidden'))),
+            'The mozVisibilityState and mozHidden properties are no longer prefixed.',
+            'You should use visibilityState and hidden instead.',
+            log_function=self.err.warning,
+            compat_type='error'
+        )
+
+        yield self.get_test_bug(
+            1167575,
+            r'\bonButtonClick\b',
+            'The function onButtonClick is now asynchronous.',
+            message='',
             log_function=self.err.warning,
             compat_type='error'
         )

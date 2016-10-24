@@ -1,6 +1,6 @@
 from call_definitions import open_in_chrome_context
 from instanceproperties import _set_HTML_property
-from validator.compat import FX47_DEFINITION, FX48_DEFINITION, FX50_DEFINITION
+from validator.compat import FX47_DEFINITION, FX48_DEFINITION, FX50_DEFINITION, FX51_DEFINITION
 from validator.constants import BUGZILLA_BUG, MDN_DOC
 
 
@@ -269,5 +269,28 @@ def nsIX509Cert(traverser):
         column=traverser.position,
         for_appversions=FX50_DEFINITION,
         compatibility_type='error',
+        context=traverser.context,
+        tier=5)
+
+
+@register_entity('mozIAsyncFavicons.setAndFetchFaviconForPage')
+@register_entity('mozIAsyncFavicons.replaceFaviconDataFromDataURL')
+def mozIAsyncFavicons(traverser):
+    traverser.err.warning(
+        err_id=('testcases_javascript_entity_values',
+                'mozIAsyncFavicons'),
+        warning=(
+            'The methods setAndFetchFaviconForPage and '
+            'replaceFaviconDataFromDataURL now default to using a null '
+            'principal for security reasons. An appropriate principal should '
+            'be passed if different behavior is required.'),
+        description=(
+            'See %s for more information.'
+            % BUGZILLA_BUG % 1227289),
+        filename=traverser.filename,
+        line=traverser.line,
+        column=traverser.position,
+        for_appversions=FX51_DEFINITION,
+        compatibility_type='warning',
         context=traverser.context,
         tier=5)

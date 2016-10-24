@@ -475,7 +475,11 @@ INTERFACES = {
     }},
     'nsIX509Cert': {'value': NSIX509CERT_METHODS},
     'nsIX509Cert2': {'value': NSIX509CERT_METHODS},
-    'nsIX509Cert3': {'value': NSIX509CERT_METHODS}
+    'nsIX509Cert3': {'value': NSIX509CERT_METHODS},
+    u'mozIAsyncFavicons': {'value': {
+        u'setAndFetchFaviconForPage': entity('mozIAsyncFavicons.setAndFetchFaviconForPage'),
+        u'replaceFaviconDataFromDataURL': entity('mozIAsyncFavicons.replaceFaviconDataFromDataURL'),
+    }},
 }
 
 INTERFACE_ENTITIES = {u'nsIXMLHttpRequest':
