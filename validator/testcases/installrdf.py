@@ -14,10 +14,6 @@ def test_install_rdf_params(err, xpi_package=None):
     if not err.get_resource('has_install_rdf'):
         return
 
-    # We skip over install.rdf tests during bulk validation. See bug 735841.
-    if err.get_resource('is_compat_test'):
-        return
-
     install = err.get_resource('install_rdf')
 
     # This returns for testing reasons
@@ -27,6 +23,8 @@ def test_install_rdf_params(err, xpi_package=None):
 def _test_rdf(err, install):
     """Wrapper for install.rdf testing to make unit testing so much
     easier."""
+
+    is_compat = err.get_resource('is_compat_test')
 
     shouldnt_exist = {'hidden'}
     if err.get_resource('listed'):
@@ -95,8 +93,8 @@ def _test_rdf(err, install):
         elif predicate == 'multiprocessCompatible':
             err.save_resource('is_multiprocess_compatible', value == 'true')
 
-        # Test if the predicate is banned
-        elif predicate in shouldnt_exist:
+        # We skip over install.rdf tests during bulk validation. See bug 735841
+        elif predicate in shouldnt_exist and not is_compat:
             err.error(('testcases_installrdf',
                        '_test_rdf',
                        'shouldnt_exist'),
@@ -108,7 +106,7 @@ def _test_rdf(err, install):
             continue
 
         # Test if the predicate is obsolete
-        elif predicate in obsolete:
+        elif predicate in obsolete and not is_compat:
             err.notice(('testcases_installrdf',
                         '_test_rdf',
                         'obsolete'),
@@ -133,7 +131,7 @@ def _test_rdf(err, install):
         # Do the same for may_exist_once.
         elif predicate in may_exist_once:
             if (predicate == 'optionsType' and
-                    str(value) not in OPTIONS_TYPE_VALUES):
+                    str(value) not in OPTIONS_TYPE_VALUES) and not is_compat:
                 err.warning(
                     err_id=('testcases_installrdf', '_test_rdf',
                             'optionsType'),
@@ -152,55 +150,58 @@ def _test_rdf(err, install):
 
         # If the predicate isn't in any of the above lists, it is
         # invalid and needs to go.
-        err.notice(('testcases_installrdf',
-                    '_test_rdf',
-                    'unrecognized'),
-                   'Unrecognized element in install.rdf',
-                   ['An element was found in the install manifest, however it '
-                    'does not appear to be a part of the specification, it '
-                    'has been used too many times, or is not applicable to '
-                    'the current configuration.',
-                    'Detected element: <em:%s>' % predicate],
-                   'install.rdf')
-
-    if not err.get_resource('listed'):
-        if 'updateURL' in predicates:
-            if not (str(predicates['updateURL']).lower().startswith('https:')
-                    or 'updateKey' in predicates):
-                # TODO: Validate updateKey value
-                err.notice(('testcases_installrdf',
-                            '_test_rdf',
-                            'missing_updateKey'),
-                           'Missing updateKey element',
-                           'Your updateURL is not served over a secure '
-                           'connection, and your install.rdf does not '
-                           'specify an update key. This means that serving '
-                           'updates for this version will not be possible.',
-                           'install.rdf',
-                           signing_severity='trivial')
-        else:
+        if not is_compat:
             err.notice(('testcases_installrdf',
                         '_test_rdf',
-                        'missing_updateURL'),
-                       'Missing updateURL element',
-                       'Your add-on does not specify an update URL. This '
-                       'means that it will be impossible for you to serve '
-                       'updates to this add-on which are not listed publicly '
-                       'on addons.mozilla.org.',
-                       'install.rdf',
-                       signing_severity='trivial')
+                        'unrecognized'),
+                       'Unrecognized element in install.rdf',
+                       ['An element was found in the install manifest, however it '
+                        'does not appear to be a part of the specification, it '
+                        'has been used too many times, or is not applicable to '
+                        'the current configuration.',
+                        'Detected element: <em:%s>' % predicate],
+                       'install.rdf')
 
-    # Once all of the predicates have been tested, make sure there are
-    # no mandatory elements that haven't been found.
-    if must_exist_once:
-        err.error(('testcases_installrdf',
-                   '_test_rdf',
-                   'missing_addon'),
-                  'install.rdf missing element(s).',
-                  ['The element listed is a required element in the install '
-                   'manifest specification. It must be added to your addon.',
-                   'Missing elements: %s' % ', '.join(must_exist_once)],
-                  'install.rdf')
+    # We skip over install.rdf tests during bulk validation. See bug 735841
+    if not is_compat:
+        if not err.get_resource('listed'):
+            if 'updateURL' in predicates:
+                if not (str(predicates['updateURL']).lower().startswith('https:')
+                        or 'updateKey' in predicates):
+                    # TODO: Validate updateKey value
+                    err.notice(('testcases_installrdf',
+                                '_test_rdf',
+                                'missing_updateKey'),
+                               'Missing updateKey element',
+                               'Your updateURL is not served over a secure '
+                               'connection, and your install.rdf does not '
+                               'specify an update key. This means that serving '
+                               'updates for this version will not be possible.',
+                               'install.rdf',
+                               signing_severity='trivial')
+            else:
+                err.notice(('testcases_installrdf',
+                            '_test_rdf',
+                            'missing_updateURL'),
+                           'Missing updateURL element',
+                           'Your add-on does not specify an update URL. This '
+                           'means that it will be impossible for you to serve '
+                           'updates to this add-on which are not listed publicly '
+                           'on addons.mozilla.org.',
+                           'install.rdf',
+                           signing_severity='trivial')
+
+        # Once all of the predicates have been tested, make sure there are
+        # no mandatory elements that haven't been found.
+        if must_exist_once:
+            err.error(('testcases_installrdf',
+                       '_test_rdf',
+                       'missing_addon'),
+                      'install.rdf missing element(s).',
+                      ['The element listed is a required element in the install '
+                       'manifest specification. It must be added to your addon.',
+                       'Missing elements: %s' % ', '.join(must_exist_once)],
+                      'install.rdf')
 
 
 PREDICATE_TESTS = {
