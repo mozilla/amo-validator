@@ -201,7 +201,7 @@ def test_jar_case():
 
     err = ErrorBundle()
     mock_package = MockXPI(
-        {'foo.JaR': 'tests/resources/packagelayout/ext_blacklist.xpi'})
+        {'foo.JaR': 'tests/resources/packagelayout/ext_deny.xpi'})
 
     content.test_packed_packages(err, mock_package)
 

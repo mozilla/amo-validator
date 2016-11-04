@@ -6,22 +6,22 @@ from validator.errorbundler import ErrorBundle
 from validator.testcases import packagelayout
 
 
-def test_blacklisted_files():
+def test_denied_files():
     """Tests that the validator will throw warnings on extensions
     containing files that have extensions which are not considered
     safe."""
 
-    err = _do_test('tests/resources/packagelayout/ext_blacklist.xpi',
-                   packagelayout.test_blacklisted_files,
+    err = _do_test('tests/resources/packagelayout/ext_deny.xpi',
+                   packagelayout.test_denied_files,
                    True)
     assert err.metadata['contains_binary_extension']
-    assert any(warning['id'][1] == 'test_blacklisted_files'
+    assert any(warning['id'][1] == 'test_denied_files'
         and warning['file'] == 'omgitsadll.dll' for warning in err.warnings)
     assert not any(count for (key, count) in err.compat_summary.items())
 
     # Run the compatibility test on this, but it shouldn't fail or produce
     # errors because the bianry content isn't in the appropriate directories.
-    err = _do_test('tests/resources/packagelayout/ext_blacklist.xpi',
+    err = _do_test('tests/resources/packagelayout/ext_deny.xpi',
                    packagelayout.test_compatibility_binary,
                    False)
     print err.compat_summary
@@ -37,18 +37,18 @@ def test_java_jar_detection():
     classes = ('c%d.class' % i for i in xrange(1000))
     mock_xpi = MockXPI(dict(zip(classes, repeat(''))))
     err = ErrorBundle(None, True)
-    packagelayout.test_blacklisted_files(err, mock_xpi)
+    packagelayout.test_denied_files(err, mock_xpi)
 
     assert err.warnings
     assert err.warnings[0]['id'] == ('testcases_packagelayout',
-                                     'test_blacklisted_files', 'java_jar')
+                                     'test_denied_files', 'java_jar')
 
 
-def test_blacklisted_magic_numbers():
-    'Tests that blacklisted magic numbers are banned'
+def test_denied_magic_numbers():
+    'Tests that denied magic numbers are banned'
 
     err = _do_test('tests/resources/packagelayout/magic_number.xpi',
-                   packagelayout.test_blacklisted_files,
+                   packagelayout.test_denied_files,
                    True)
     assert err.metadata['contains_binary_content']
 
@@ -70,7 +70,7 @@ def test_compat_binary_extensions():
     # This time when the compatibility checks are run, they should fire off
     # compatibility errors because the files are the /components/ directory
     # of the package.
-    err = _do_test('tests/resources/packagelayout/ext_blacklist_compat.xpi',
+    err = _do_test('tests/resources/packagelayout/ext_deny_compat.xpi',
                    packagelayout.test_compatibility_binary,
                    False)
     print err.compat_summary

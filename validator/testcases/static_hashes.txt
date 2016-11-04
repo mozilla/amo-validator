@@ -1,4 +1,4 @@
-2c424ecc3b35a0b11f3492452645a3e0c949f313cf3c36e2307ebcaef2f135bc  This file is a false script to facilitate testing of library blacklisting.
+2c424ecc3b35a0b11f3492452645a3e0c949f313cf3c36e2307ebcaef2f135bc  This file is a false script to facilitate testing of denied libraries.
 bf09094376256ea8b26982862dff3eae5c39a5f59b25f18f487b56d270a92820  bootstrap.js
 ceff151527069dd1bdf05dd11632bd13de1391cea198db881799944cfacf3290  crypto_js.aes.aes.js
 545bd3e6de76708712b654e0404257b5155752c0e24492b3fc9678c069635bf9  crypto_js.cipher-core.cipher-core.js

@@ -6,11 +6,11 @@ from validator.constants import (FF4_MIN, FIREFOX_GUID, FENNEC_GUID,
 import validator.decorator as decorator
 from validator.decorator import version_range
 
-# Detect blacklisted files based on their extension.
-blacklisted_extensions = ('dll', 'exe', 'dylib', 'so',
+# Detect denied files based on their extension.
+denied_extensions = ('dll', 'exe', 'dylib', 'so',
                           'sh', 'class', 'swf')
 
-blacklisted_magic_numbers = (
+denied_magic_numbers = (
         (0x4d, 0x5a),  # EXE/DLL
         (0x5a, 0x4d),  # Alternative for EXE/DLL
         (0x7f, 0x45, 0x4c, 0x46),  # UNIX elf
@@ -46,8 +46,8 @@ def test_unknown_file(err, filename):
 
 
 @decorator.register_test(tier=1)
-def test_blacklisted_files(err, xpi_package=None):
-    'Detects blacklisted files and extensions.'
+def test_denied_files(err, xpi_package=None):
+    'Detects denied files and extensions.'
 
     flagged_files = []
 
@@ -64,9 +64,9 @@ def test_blacklisted_files(err, xpi_package=None):
 
     for name in xpi_package:
         file_ = xpi_package.info(name)
-        # Simple test to ensure that the extension isn't blacklisted
+        # Simple test to ensure that the extension isn't denied
         extension = file_['extension']
-        if extension in blacklisted_extensions:
+        if extension in denied_extensions:
             # Note that there is a binary extension in the metadata
             err.metadata['contains_binary_extension'] = True
             flagged_files.append(name)
@@ -76,11 +76,11 @@ def test_blacklisted_files(err, xpi_package=None):
         # and executable file types.
         zip = xpi_package.zf.open(name)
         bytes = tuple([ord(x) for x in zip.read(4)])  # Longest is 4 bytes
-        if [x for x in blacklisted_magic_numbers if bytes[0:len(x)] == x]:
+        if [x for x in denied_magic_numbers if bytes[0:len(x)] == x]:
             # Note that there is binary content in the metadata
             err.metadata['contains_binary_content'] = True
             err.warning(
-                err_id=('testcases_packagelayout', 'test_blacklisted_files',
+                err_id=('testcases_packagelayout', 'test_denied_files',
                         'disallowed_file_type'),
                 warning='Flagged file type found',
                 description='A file was found to contain flagged content '
@@ -96,7 +96,7 @@ def test_blacklisted_files(err, xpi_package=None):
         if (sum(1 for f in flagged_files if f.endswith('.class')) >
                 JAVA_JAR_THRESHOLD):
             err.warning(
-                err_id=('testcases_packagelayout', 'test_blacklisted_files',
+                err_id=('testcases_packagelayout', 'test_denied_files',
                         'java_jar'),
                 warning='Java JAR file detected.',
                 description='A Java JAR file was detected in the add-on.',
@@ -106,7 +106,7 @@ def test_blacklisted_files(err, xpi_package=None):
         else:
             err.warning(
                 err_id=('testcases_packagelayout',
-                        'test_blacklisted_files',
+                        'test_denied_files',
                         'disallowed_extension'),
                 warning='Flagged file extensions found.',
                 description=('Files whose names end with flagged extensions '

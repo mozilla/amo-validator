@@ -160,11 +160,11 @@ class GeneralTests(ValidatorTest):
         self.validate('gabbielsan_tools-1.01-ff.xpi')
         self.expectMsg(u'Banned element in install.rdf')
 
-    def test_blacklisted_file(self):
+    def test_denied_file(self):
         self.validate('babuji-20110124355.xpi')
         self.expectMsg(u'Flagged file extensions found.')
 
-    def test_blacklisted_file_2(self):
+    def test_denied_file_2(self):
         self.validate('peerscape-3.1.5-fx.xpi')
         self.expectMsg(u'Flagged file type found')
 

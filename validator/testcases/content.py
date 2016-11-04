@@ -157,7 +157,7 @@ def test_packed_packages(err, xpi_package=None):
                 err.notice(
                     err_id=('testcases_content',
                             'test_packed_packages',
-                            'blacklisted_js_library'),
+                            'denied_js_library'),
                     notice='JS Library Detected',
                     description=('JavaScript libraries are discouraged for '
                                  'simple add-ons, but are generally '

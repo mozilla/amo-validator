@@ -5,14 +5,14 @@ from validator.errorbundler import ErrorBundle
 from validator.xpi import XPIManager
 
 
-def test_blacklisted_files():
+def test_denied_files():
     """
     Tests the validator's ability to hash each individual file and (based on
     this information) determine whether the addon passes or fails the
     validation process.
     """
 
-    package_data = open('tests/resources/libraryblacklist/blocked.xpi')
+    package_data = open('tests/resources/denied_libraries/blocked.xpi')
     package = XPIManager(package_data, mode='r', name='blocked.xpi')
     err = ErrorBundle()
 
@@ -24,13 +24,13 @@ def test_blacklisted_files():
     assert not err.failed()
     assert err.metadata.get('identified_files') == {'test.js': {
         'path': 'This file is a false script to facilitate '
-                'testing of library blacklisting.'}}
+                'testing of denied libraries.'}}
 
 
-def test_skip_blacklisted_file():
-    """Ensure blacklisted files are skipped for processing."""
+def test_skip_denied_file():
+    """Ensure denied files are skipped for processing."""
 
-    package_data = open('tests/resources/libraryblacklist/errors.xpi')
+    package_data = open('tests/resources/denied_libraries/errors.xpi')
     package = XPIManager(package_data, mode='r', name='errors.xpi')
     err = ErrorBundle()
 
@@ -42,7 +42,7 @@ def test_skip_blacklisted_file():
 
 
 def test_validate_libs_in_compat_mode():
-    xpi = 'tests/resources/libraryblacklist/addon_with_mootools.xpi'
+    xpi = 'tests/resources/denied_libraries/addon_with_mootools.xpi'
     with open(xpi) as data:
         package = XPIManager(data, mode='r', name='addon_with_mootools.xpi')
         appversions = {FIREFOX_GUID: version_range('firefox',
