@@ -6,6 +6,6 @@ mock==2.0.0
 natsort==5.0.1
 pytest==3.0.4
 rdflib==3.4.0
-requests==2.12.0
+requests==2.12.1
 simplejson==3.10.0
 spidermonkey==52.0a2.post1
