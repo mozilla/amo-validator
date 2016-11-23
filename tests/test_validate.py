@@ -350,3 +350,43 @@ def test_validate_dictionnary_no_multiprocess_compatible_warning():
     assert data['metadata']['version'] == u'1.0.0'
     assert data['metadata']['listed'] is True
     assert data['metadata']['id'] == u'my@dict'
+
+def test_validate_embedded_webextension_xpi():
+    """Integration test for the expected notice message on 'embedded webextension' add-ons."""
+
+    err_bundle = validate(path='tests/resources/validate/hybrid_extension.xpi', format=None)
+    assert err_bundle.get_resource('has_embedded_webextension') is True
+
+    result = validate(path='tests/resources/validate/hybrid_extension.xpi')
+    data = json.loads(result)
+
+    assert data['success'] is True
+    assert data['errors'] == 0
+    assert data['notices'] == 1
+    assert data['warnings'] == 0
+    assert data['compatibility_summary']
+    assert data['compatibility_summary']['errors'] == 0
+    assert data['compatibility_summary']['notices'] == 0
+    assert data['compatibility_summary']['warnings'] == 0
+    assert data['detected_type'] == 'extension'
+
+    assert len(data['messages']) == 1
+    assert data['messages'][0]['file'] == u'install.rdf'
+    assert data['messages'][0]['message'] == u'This add-on contains an embedded webextension'
+
+    expected_embedded_webext_desc = 'The embedded webextension is in the folder "webextension"'
+    expected_embedded_webext_doc_url = 'https://developer.mozilla.org/en-US/Add-ons/WebExtensions/Embedded_WebExtensions'
+
+    assert expected_embedded_webext_desc in data['messages'][0]['description']
+    assert expected_embedded_webext_doc_url in data['messages'][0]['description']
+
+    assert data['message_tree']
+    assert data['signing_summary']['high'] == 0
+    assert data['signing_summary']['medium'] == 0
+    assert data['signing_summary']['low'] == 0
+    assert data['signing_summary']['trivial'] == 0
+    assert data['metadata']
+    assert data['metadata']['name'] == u'name_value'
+    assert data['metadata']['version'] == u'1.2.3.4'
+    assert data['metadata']['listed'] is True
+    assert data['metadata']['id'] == u'an-hybrid-addon@mozilla.com'

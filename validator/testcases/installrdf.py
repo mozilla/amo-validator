@@ -44,6 +44,7 @@ def _test_rdf(err, install):
                       'homepageURL',
                       'creator',
                       'multiprocessCompatible',
+                      'hasEmbeddedWebExtension',
                       'optionsType',
                       'type',
                       'updateKey',
@@ -92,6 +93,17 @@ def _test_rdf(err, install):
 
         elif predicate == 'multiprocessCompatible':
             err.save_resource('is_multiprocess_compatible', value == 'true')
+
+        elif predicate == 'hasEmbeddedWebExtension':
+            err.notice(('testcases_installrdf',
+                        '_test_rdf',
+                        'hasEmbeddedWebExtension'),
+                       'This add-on contains an embedded webextension',
+                       'The embedded webextension is in the folder "webextension". '
+                       'Handle validation messages with care. For more information, refer to '
+                       'https://developer.mozilla.org/en-US/Add-ons/WebExtensions/Embedded_WebExtensions',
+                       'install.rdf')
+            err.save_resource('has_embedded_webextension', value == 'true')
 
         # We skip over install.rdf tests during bulk validation. See bug 735841
         elif predicate in shouldnt_exist and not is_compat:
