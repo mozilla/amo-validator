@@ -98,6 +98,9 @@ ANGULARJS_VERSIONS = {
         "1.5.7",
         "1.5.8",
     ],
+    ALLOWED: [
+        "1.5.9",
+    ],
 }
 
 BACKBONE_VERSIONS = {
