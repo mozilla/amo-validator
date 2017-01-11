@@ -36,6 +36,8 @@ def test_targetedapplications(err, xpi_package=None):
     used_targets = []
     all_supported_versions = {}
 
+    err.metadata['applications'] = {}
+
     # Isolate all of the bnodes referring to target applications
     for target_app in applications:
         guid = target_app['guid']
@@ -140,6 +142,11 @@ def test_targetedapplications(err, xpi_package=None):
 
             all_supported_versions[guid] = (
                 app_versions[min_ver_pos:max_ver_pos + 1])
+
+            err.metadata['applications'][APPLICATIONS[guid]] = {
+                'min': min_version,
+                'max': max_version,
+            }
 
             # Test whether it's a FF4 addon
 
