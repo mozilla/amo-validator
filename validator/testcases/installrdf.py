@@ -94,6 +94,9 @@ def _test_rdf(err, install):
         elif predicate == 'multiprocessCompatible':
             err.save_resource('is_multiprocess_compatible', value == 'true')
 
+        elif predicate == 'strictCompatibility':
+            err.metadata['strict_compatibility'] = value == 'true'
+
         elif predicate == 'hasEmbeddedWebExtension':
             err.notice(('testcases_installrdf',
                         '_test_rdf',
