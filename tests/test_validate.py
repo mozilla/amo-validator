@@ -132,6 +132,7 @@ def test_validate_webextension():
     assert data['signing_summary']['trivial'] == 0
     assert data['metadata']
     assert data['metadata'].get('strict_compatibility') is None
+    assert data['metadata']['is_extension'] is True
 
 
 def test_validate_old_xpi():
@@ -175,6 +176,7 @@ def _test_validate_old_xpi(compat_test):
     assert data['metadata']['applications']['mozilla'] == {
         'min': '1.0', 'max': '1.8+'
     }
+    assert data['metadata']['is_extension'] is True
 
 
 def test_validate_old_xpi_with_jar_in_it():
@@ -206,6 +208,7 @@ def test_validate_old_xpi_with_jar_in_it():
     assert data['metadata']['listed'] is True
     assert data['metadata']['id'] == u'guid@xpi'
     assert data['metadata'].get('strict_compatibility') is None
+    assert data['metadata']['is_extension'] is True
 
 
 def test_validate_old_xpi_thunderbird_only():
@@ -236,6 +239,7 @@ def test_validate_old_xpi_thunderbird_only():
     assert data['metadata']['listed'] is True
     assert data['metadata']['id'] == u'bastatestapp1@basta.mozilla.com'
     assert data['metadata'].get('strict_compatibility') is None
+    assert data['metadata']['is_extension'] is True
 
 
 def test_validate_old_xpi_multiprocess_compatible():
@@ -273,6 +277,7 @@ def _test_validate_old_xpi_multiprocess_compatible(compat_test):
     assert data['metadata']['listed'] is True
     assert data['metadata']['id'] == u'bastatestapp1@basta.mozilla.com'
     assert data['metadata'].get('strict_compatibility') is None
+    assert data['metadata']['is_extension'] is True
 
 
 def test_validate_jpm():
@@ -309,6 +314,7 @@ def _test_validate_jpm(compat_test):
     assert data['metadata']['listed'] is True
     assert data['metadata']['id'] == u'@test-addon'
     assert data['metadata'].get('strict_compatibility') is None
+    assert data['metadata']['is_extension'] is True
 
 
 def test_validate_jpm_multiprocess_compatible():
@@ -344,6 +350,7 @@ def _test_validate_jpm_multiprocess_compatible(compat_test):
     assert data['metadata']['listed'] is True
     assert data['metadata']['id'] == u'@test-addon'
     assert data['metadata'].get('strict_compatibility') is None
+    assert data['metadata']['is_extension'] is True
 
 
 def test_validate_dictionnary_no_multiprocess_compatible_warning():
@@ -371,6 +378,25 @@ def test_validate_dictionnary_no_multiprocess_compatible_warning():
     assert data['metadata']['listed'] is True
     assert data['metadata']['id'] == u'my@dict'
     assert data['metadata'].get('strict_compatibility') is None
+    assert data['metadata']['is_extension'] is False
+
+
+def test_validate_theme():
+    result = validate(path='tests/resources/validate/theme.xpi')
+    data = json.loads(result)
+    assert data['metadata']['is_extension'] is False
+
+
+def test_validate_search():
+    result = validate(path='tests/resources/validate/search.xml')
+    data = json.loads(result)
+    assert data['metadata']['is_extension'] is False
+
+
+def test_validate_language_pack():
+    result = validate(path='tests/resources/validate/langpack.xpi')
+    data = json.loads(result)
+    assert data['metadata']['is_extension'] is False
 
 
 def test_validate_embedded_webextension_xpi():
@@ -420,3 +446,4 @@ def test_validate_embedded_webextension_xpi():
     assert data['metadata']['listed'] is True
     assert data['metadata']['id'] == u'an-hybrid-addon@mozilla.com'
     assert data['metadata'].get('strict_compatibility') is None
+    assert data['metadata']['is_extension'] is True

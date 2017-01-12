@@ -69,6 +69,8 @@ def prepare_package(err, path, expectation=0, for_appversions=None,
             package = open(path, 'rb')
             test_package(err, package, path, expectation, for_appversions)
 
+        err.metadata['is_extension'] = err.detected_type == PACKAGE_EXTENSION
+
     except validator.ValidationTimeout:
         err.system_error(
             msg_id='validation_timeout',
