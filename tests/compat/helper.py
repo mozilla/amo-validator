@@ -69,20 +69,20 @@ class CompatTestCase(JSTestCase, RegexTestCase):
         assert not any(self.compat_err.compat_summary.values()), \
                 'Got %s' % self.compat_err.compat_summary
 
-    def assert_compat_error(self, type_='warning'):
+    def assert_compat_error(self, type_='warning', expected_message=None):
         """Assert that a compat error was raised as a message of type `type_`.
 
         """
-        self._assert_compat_type('error', type_)
+        self._assert_compat_type('error', type_, expected_message)
 
-    def assert_compat_warning(self, type_='notice'):
+    def assert_compat_warning(self, type_='notice', expected_message=None):
         """Assert that a compat warning was raised as a message of type
         `type_`.
 
         """
-        self._assert_compat_type('warning', type_)
+        self._assert_compat_type('warning', type_, expected_message)
 
-    def _assert_compat_type(self, compat_type, type_):
+    def _assert_compat_type(self, compat_type, type_, expected_message=None):
         print self.compat_err.print_summary()
         message_collection = {'error': self.compat_err.errors,
                               'warning': self.compat_err.warnings,
@@ -92,5 +92,12 @@ class CompatTestCase(JSTestCase, RegexTestCase):
         is_error = any(
             m['compatibility_type'] == compat_type
             for m in message_collection)
+
         assert is_error, ('No %ss that raise a compatibility %s were found.' %
                           (type_, compat_type))
+
+        if expected_message is not None:
+            has_message = any(
+                msg for msg in message_collection
+                if msg['message'] == expected_message)
+            assert has_message, ('No message \'%s\' found.' % expected_message)
