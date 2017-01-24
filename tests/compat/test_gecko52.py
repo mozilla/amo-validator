@@ -25,3 +25,37 @@ class TestFX52Compat(CompatTestCase):
         assert not self.compat_err.errors
 
         self.assert_compat_warning('warning', expected)
+
+    def test_mozDash_error(self):
+        """https://github.com/mozilla/amo-validator/issues/492"""
+        expected = 'The mozDash and mozDashOffset properties are no longer supported.'
+
+        script = '''
+            var canvas = document.getElementById('mycanvas');
+            var ctx = canvas.getContext('2d');
+            console.log(ctx.mozDash);
+        '''
+
+        self.run_script_for_compat(script)
+
+        assert not self.compat_err.notices
+        assert not self.compat_err.errors
+
+        self.assert_compat_error('warning', expected)
+
+    def test_mozDashOffset_error(self):
+        """https://github.com/mozilla/amo-validator/issues/492"""
+        expected = 'The mozDash and mozDashOffset properties are no longer supported.'
+
+        script = '''
+            var canvas = document.getElementById('mycanvas');
+            var ctx = canvas.getContext('2d');
+            console.log(ctx.mozDashOffset);
+        '''
+
+        self.run_script_for_compat(script)
+
+        assert not self.compat_err.notices
+        assert not self.compat_err.errors
+
+        self.assert_compat_error('warning', expected)
