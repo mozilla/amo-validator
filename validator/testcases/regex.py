@@ -3,7 +3,7 @@ from functools import wraps
 
 from validator.compat import (
     FX45_DEFINITION, FX46_DEFINITION, FX47_DEFINITION, FX48_DEFINITION,
-    FX50_DEFINITION, FX51_DEFINITION)
+    FX50_DEFINITION, FX51_DEFINITION, FX52_DEFINITION)
 from validator.constants import BUGZILLA_BUG, MDN_DOC
 from validator.contextgenerator import ContextGenerator
 from .chromemanifest import DANGEROUS_CATEGORIES, DANGEROUS_CATEGORY_WARNING
@@ -508,6 +508,23 @@ class Gecko51RegexTests(CompatRegexTestHelper):
             r'\bonButtonClick\b',
             'The function onButtonClick is now asynchronous.',
             message='',
+            log_function=self.err.warning,
+            compat_type='error'
+        )
+
+
+@register_generator
+class Gecko52RegexTests(CompatRegexTestHelper):
+    """Regex tests for Firefox 52 updates."""
+
+    VERSION = FX52_DEFINITION
+
+    def tests(self):
+        yield self.get_test_bug(
+            931389,
+            r'\b(%s)\b' % ('|'.join(('mozDash', 'mozDashOffset'))),
+            'The mozDash and mozDashOffset properties are no longer supported.',
+            'You can use setLineDash() instead.',
             log_function=self.err.warning,
             compat_type='error'
         )

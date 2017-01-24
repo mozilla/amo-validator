@@ -1,6 +1,8 @@
 from call_definitions import open_in_chrome_context
 from instanceproperties import _set_HTML_property
-from validator.compat import FX47_DEFINITION, FX48_DEFINITION, FX50_DEFINITION, FX51_DEFINITION
+from validator.compat import (
+    FX47_DEFINITION, FX48_DEFINITION, FX50_DEFINITION, FX51_DEFINITION,
+    FX52_DEFINITION)
 from validator.constants import BUGZILLA_BUG, MDN_DOC
 
 
@@ -291,6 +293,26 @@ def mozIAsyncFavicons(traverser):
         line=traverser.line,
         column=traverser.position,
         for_appversions=FX51_DEFINITION,
+        compatibility_type='warning',
+        context=traverser.context,
+        tier=5)
+
+
+@register_entity('nsISupportsArray')
+def nsISupportsArray(traverser):
+    traverser.err.warning(
+        err_id=('testcases_javascript_entity_values', 'nsISupportsArray'),
+        warning=(
+            'The nsISupportsArray interface is deprecated and is being '
+            'replaced by nsIArray.'),
+        description=(
+            'The nsISupportsArray interface is deprecated and is being '
+            'replaced by nsIArray. See %s for more information.'
+            % BUGZILLA_BUG % 792209),
+        filename=traverser.filename,
+        line=traverser.line,
+        column=traverser.position,
+        for_appversions=FX52_DEFINITION,
         compatibility_type='warning',
         context=traverser.context,
         tier=5)
