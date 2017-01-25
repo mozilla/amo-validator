@@ -342,7 +342,6 @@ class TestSearchService(TestCase, RegexTestCase):
         """)
         self.assert_failed(with_warnings=[
             {'id': ('js', 'traverser', 'dangerous_global'),
-             'editors_only': True,
              'signing_severity': 'high'}])
 
     def test_nsIProcess(self):

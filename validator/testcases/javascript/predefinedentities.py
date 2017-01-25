@@ -707,12 +707,12 @@ GLOBAL_ENTITIES = {
 
     u'ctypes': {'dangerous': {
         'description': (
-            'Insufficiently meticulous use of ctypes can lead to serious, '
-            'and often exploitable, errors. The use of bundled binary code, '
-            'or access to system libraries, may allow for add-ons to '
-            'perform unsafe operations. All ctypes use must be carefully '
-            'reviewed by a qualified reviewer.'),
-        'editors_only': True,
+            'Starting with Firefox 53, to be released on April 18, Firefox '
+            'will prevent the loading of third-party binaries. If you are '
+            'currently using JS-ctypes, you should begin immediately '
+            'transitioning to the Native Messaging API using WebExtensions '
+            '(see https://mzl.la/2j4bEwp for documentation and examples). '
+            'See also https://mzl.la/2joSS11 for the announcement blogpost.'),
         'signing_help': ('Please try to avoid interacting with or bundling '
                          'native binaries whenever possible. If you are '
                          'bundling binaries for performance reasons, please '
