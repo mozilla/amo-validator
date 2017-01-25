@@ -712,7 +712,7 @@ GLOBAL_ENTITIES = {
             'currently using JS-ctypes, you should begin immediately '
             'transitioning to the Native Messaging API using WebExtensions '
             '(see https://mzl.la/2j4bEwp for documentation and examples). '
-            'See also https://mzl.la/2joSS11 for the announcement blogpost.'),
+            'See also https://mzl.la/2joSS11 for the announcement blog post.'),
         'signing_help': ('Please try to avoid interacting with or bundling '
                          'native binaries whenever possible. If you are '
                          'bundling binaries for performance reasons, please '
