@@ -27,7 +27,6 @@ class TestFX53Compat(CompatTestCase):
 
         self.run_regex_for_compat(invalid, is_js=False)
 
-
         assert not self.compat_err.notices
         assert not self.compat_err.errors
 
@@ -40,3 +39,21 @@ class TestFX53Compat(CompatTestCase):
         assert not self.compat_err.notices
         assert not self.compat_err.errors
         assert not self.compat_err.warnings
+
+    def test_moz_calc_removed(self):
+        """https://github.com/mozilla/amo-validator/issues/505"""
+        expected = 'The -moz-calc function has been removed.'
+
+        invalid = [
+            'min-width: -moz-calc(6em - 14px);',
+            'background-size: -moz-calc(100% - 2px) -moz-calc(100% - 2px);',
+            '-moz-radial-gradient(-moz-calc(100px + -25px) top, red, blue)',
+        ]
+
+        for script in invalid:
+            self.run_regex_for_compat(script, is_js=False)
+            assert not self.compat_err.notices
+            assert not self.compat_err.errors
+            self.assert_compat_warning('warning', expected)
+
+            self.reset()

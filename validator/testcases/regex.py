@@ -543,6 +543,14 @@ class Gecko53RegexTests(CompatRegexTestHelper):
             log_function=self.err.warning,
             compat_type='error')
 
+        yield self.get_test_bug(
+            1331296,
+            r'\b[^-]*-moz-calc\b',
+            'The -moz-calc function has been removed.',
+            'You can use the equivalent calc instead',
+            log_function=self.err.warning,
+            compat_type='warning')
+
 
 class RegexTest(object):
     """
