@@ -3,7 +3,7 @@ from functools import wraps
 
 from validator.compat import (
     FX45_DEFINITION, FX46_DEFINITION, FX47_DEFINITION, FX48_DEFINITION,
-    FX50_DEFINITION, FX51_DEFINITION, FX52_DEFINITION)
+    FX50_DEFINITION, FX51_DEFINITION, FX52_DEFINITION, FX53_DEFINITION)
 from validator.constants import BUGZILLA_BUG, MDN_DOC
 from validator.contextgenerator import ContextGenerator
 from .chromemanifest import DANGEROUS_CATEGORIES, DANGEROUS_CATEGORY_WARNING
@@ -528,6 +528,43 @@ class Gecko52RegexTests(CompatRegexTestHelper):
             log_function=self.err.warning,
             compat_type='error'
         )
+
+
+@register_generator
+class Gecko53RegexTests(CompatRegexTestHelper):
+    VERSION = FX53_DEFINITION
+
+    def tests(self):
+        yield self.get_test_bug(
+            1321556,
+            r'\burlbarBindings.xml\#splitmenu\b',
+            'The splitmenu element has been removed.',
+            'The splitmenu element has been removed.',
+            log_function=self.err.warning,
+            compat_type='error')
+
+        yield self.get_test_bug(
+            1331296,
+            r'\b[^-]*-moz-calc\b',
+            'The -moz-calc function has been removed.',
+            'You can use the equivalent calc instead',
+            log_function=self.err.warning,
+            compat_type='warning')
+
+        # This needs a regex test since most add-ons I could find
+        # actually overwrite this method in various ways which we cannot
+        # match properly via traversing the AST.
+        msg = (
+            'The _openURIInNewTab function was changed and now requires '
+            'an nsIURI for the referrer.')
+
+        yield self.get_test_bug(
+            1147911,
+            r'\b_openURIInNewTab\b',
+            msg,
+            msg,
+            log_function=self.err.warning,
+            compat_type='error')
 
 
 class RegexTest(object):
