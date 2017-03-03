@@ -99,3 +99,21 @@ class TestFX53Compat(CompatTestCase):
         assert not self.compat_err.errors
 
         self.assert_compat_error('warning', expected)
+
+    def test_nsIX509CertDB(self):
+        """https://github.com/mozilla/amo-validator/issues/502"""
+        expected = (
+            'The nsIX509CertDB interface was changed so it no longer '
+            'exposes the certificate nickname.')
+
+        script = '''
+            XmlMultiDSigUtil.mX509CertDB = Components.classes["@mozilla.org/security/x509certdb;1"]
+                            .getService(Components.interfaces.nsIX509CertDB);
+            signerCert = XmlMultiDSigUtil.mX509CertDB.findCertByNickname(null, signerCertNickname);
+        '''
+
+        self.run_script_for_compat(script)
+        assert not self.compat_err.notices
+        assert not self.compat_err.errors
+
+        self.assert_compat_error('warning', expected)

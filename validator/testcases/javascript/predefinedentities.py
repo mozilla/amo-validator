@@ -479,6 +479,12 @@ INTERFACES = {
     'nsIX509Cert': {'value': NSIX509CERT_METHODS},
     'nsIX509Cert2': {'value': NSIX509CERT_METHODS},
     'nsIX509Cert3': {'value': NSIX509CERT_METHODS},
+    'nsIX509CertDB': {'value': {
+        'findCertByNickname': entity('nsIX509CertDB.findCertByNickname'),
+        'findEmailEncryptionCert': entity('nsIX509CertDB.findEmailEncryptionCert'),
+        'findEmailSigningCert': entity('nsIX509CertDB.findEmailSigningCert'),
+        'addCert': entity('nsIX509CertDB.addCert'),
+    }},
     'nsISupportsArray': entity('nsISupportsArray'),
     u'mozIAsyncFavicons': {'value': {
         u'setAndFetchFaviconForPage': entity('mozIAsyncFavicons.setAndFetchFaviconForPage'),

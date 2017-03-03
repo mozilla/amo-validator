@@ -335,3 +335,27 @@ def nsINavBookmarksService(traverser):
         compatibility_type='error',
         context=traverser.context,
         tier=5)
+
+
+@register_entity('nsIX509CertDB.findCertByNickname')
+@register_entity('nsIX509CertDB.findEmailEncryptionCert')
+@register_entity('nsIX509CertDB.findEmailSigningCert')
+@register_entity('nsIX509CertDB.addCert')
+def nsIX509CertDB(traverser):
+    traverser.err.warning(
+        err_id=('testcases_javascript_entity_values',
+                'nsIX509Cert'),
+        warning=(
+            'The nsIX509CertDB interface was changed so it no longer '
+            'exposes the certificate nickname.'),
+        description=(
+            'The nsIX509CertDB interface was changed so it no longer '
+            'exposes the certificate nickname. See %s for more information.'
+            % BUGZILLA_BUG % 857627),
+        filename=traverser.filename,
+        line=traverser.line,
+        column=traverser.position,
+        for_appversions=FX53_DEFINITION,
+        compatibility_type='error',
+        context=traverser.context,
+        tier=5)
