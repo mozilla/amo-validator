@@ -551,6 +551,21 @@ class Gecko53RegexTests(CompatRegexTestHelper):
             log_function=self.err.warning,
             compat_type='warning')
 
+        # This needs a regex test since most add-ons I could find
+        # actually overwrite this method in various ways which we cannot
+        # match properly via traversing the AST.
+        msg = (
+            'The _openURIInNewTab function was changed and now requires '
+            'an nsIURI for the referrer.')
+
+        yield self.get_test_bug(
+            1147911,
+            r'\b_openURIInNewTab\b',
+            msg,
+            msg,
+            log_function=self.err.warning,
+            compat_type='error')
+
 
 class RegexTest(object):
     """

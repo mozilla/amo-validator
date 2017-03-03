@@ -59,6 +59,7 @@ class TestFX53Compat(CompatTestCase):
             self.reset()
 
     def test_geturiforkeyword_removed(self):
+        """https://github.com/mozilla/amo-validator/issues/504"""
         expected = 'The getURIForKeyword function was removed.'
 
         script = '''
@@ -66,6 +67,31 @@ class TestFX53Compat(CompatTestCase):
                        getService(Ci.nsINavBookmarksService);
           if (bmserv.getURIForKeyword(alias.value))
             bduplicate = true;
+        '''
+
+        self.run_script_for_compat(script)
+        assert not self.compat_err.notices
+        assert not self.compat_err.errors
+
+        self.assert_compat_error('warning', expected)
+
+    def test_openuriinnewntab_changed(self):
+        """https://github.com/mozilla/amo-validator/issues/503"""
+        expected = (
+            'The _openURIInNewTab function was changed and now requires '
+            'an nsIURI for the referrer.')
+
+        script = '''
+          let _original__openURIInNewTab = nsBrowserAccess._openURIInNewTab;
+
+          nsBrowserAccess.prototype._openURIInNewTab = function(aURI, aReferrer, aReferrerPolicy, aIsPrivate,
+                                                                aIsExternal, aForceNotRemote=false) {
+            let browser = _original__openURIInNewTab.apply(nsBrowserAccess.prototype, arguments);
+            if (!aIsExternal) {
+              browser.setAttribute("diverted", "true");
+            }
+            return browser;
+          };
         '''
 
         self.run_script_for_compat(script)
