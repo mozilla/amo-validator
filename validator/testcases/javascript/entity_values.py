@@ -2,7 +2,7 @@ from call_definitions import open_in_chrome_context
 from instanceproperties import _set_HTML_property
 from validator.compat import (
     FX47_DEFINITION, FX48_DEFINITION, FX50_DEFINITION, FX51_DEFINITION,
-    FX52_DEFINITION)
+    FX52_DEFINITION, FX53_DEFINITION)
 from validator.constants import BUGZILLA_BUG, MDN_DOC
 
 
@@ -314,5 +314,24 @@ def nsISupportsArray(traverser):
         column=traverser.position,
         for_appversions=FX52_DEFINITION,
         compatibility_type='warning',
+        context=traverser.context,
+        tier=5)
+
+
+@register_entity('nsINavBookmarksService.getURIForKeyword')
+def nsINavBookmarksService(traverser):
+    traverser.err.warning(
+        err_id=('testcases_javascript_entity_values',
+                'nsINavBookmarksService'),
+        warning='The getURIForKeyword function was removed.',
+        description=(
+            'You can use PlacesUtils.keywords.fetch instead. '
+            'See %s for more information.'
+            % BUGZILLA_BUG % 1329926),
+        filename=traverser.filename,
+        line=traverser.line,
+        column=traverser.position,
+        for_appversions=FX53_DEFINITION,
+        compatibility_type='error',
         context=traverser.context,
         tier=5)

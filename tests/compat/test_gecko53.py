@@ -57,3 +57,19 @@ class TestFX53Compat(CompatTestCase):
             self.assert_compat_warning('warning', expected)
 
             self.reset()
+
+    def test_geturiforkeyword_removed(self):
+        expected = 'The getURIForKeyword function was removed.'
+
+        script = '''
+          let bmserv = Cc["@mozilla.org/browser/nav-bookmarks-service;1"].
+                       getService(Ci.nsINavBookmarksService);
+          if (bmserv.getURIForKeyword(alias.value))
+            bduplicate = true;
+        '''
+
+        self.run_script_for_compat(script)
+        assert not self.compat_err.notices
+        assert not self.compat_err.errors
+
+        self.assert_compat_error('warning', expected)

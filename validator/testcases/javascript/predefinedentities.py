@@ -350,6 +350,9 @@ INTERFACES = {
                 {'return': call_definitions.nsIJSON_deprec},
              u'decode':
                 {'return': call_definitions.nsIJSON_deprec}}},
+    u'nsINavBookmarksService': {'value': {
+        'getURIForKeyword': entity('nsINavBookmarksService.getURIForKeyword'),
+    }},
     u'nsIObserverService':
         {'value':
             {u'addObserver': entity('nsIObserverService.addObserver')},
