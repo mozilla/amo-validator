@@ -359,3 +359,31 @@ def nsIX509CertDB(traverser):
         compatibility_type='error',
         context=traverser.context,
         tier=5)
+
+
+@register_entity('nsIPK11TokenDB.findTokenByName')
+def nsIPK11TokenDBfindTokenByName(traverser):
+    def _return(wrapper, arguments, traverser):
+        if not arguments:
+            return
+
+        first_arg = traverser._traverse_node(arguments[0])
+        link = 'https://hg.mozilla.org/mozilla-central/rev/6f732b38a5a2#l1.12'
+
+        if first_arg.get_literal_value() == '':
+            traverser.err.warning(
+                err_id=('testcases_javascript_entity_values',
+                        'nsIPK11TokenDB', 'findTokenByName'),
+                warning='Calling findTokenByName("") is no longer valid.',
+                description=(
+                    'Calling findTokenByName("") is no longer valid. '
+                    'If you need to determine if there\'s a master password '
+                    'set, please see %s for more information.' % link),
+                filename=traverser.filename,
+                line=traverser.line,
+                column=traverser.position,
+                for_appversions=FX53_DEFINITION,
+                compatibility_type='error',
+                context=traverser.context,
+                tier=5)
+    return {'return': _return}

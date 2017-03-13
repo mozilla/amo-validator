@@ -468,7 +468,10 @@ INTERFACES = {
                                    u'writeIntValue': REGISTRY_WRITE,
                                    u'writeStringValue': REGISTRY_WRITE,
                                   }},
-    'nsIPK11TokenDB': {'value': {'listTokens': entity('nsIPK11TokenDB.listTokens')}},
+    'nsIPK11TokenDB': {'value': {
+        'listTokens': entity('nsIPK11TokenDB.listTokens'),
+        'findTokenByName': entity('nsIPK11TokenDB.findTokenByName')
+    }},
     'nsIPKCS11ModuleDB': {'value': {'listModules': entity('nsIPKCS11ModuleDB.listModules')}},
     'nsIPKCS11Module': {'value': {'listSlots': entity('nsIPKCS11Module.listSlots')}},
     'nsIIOService': {'value': {

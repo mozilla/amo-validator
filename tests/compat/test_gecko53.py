@@ -117,3 +117,32 @@ class TestFX53Compat(CompatTestCase):
         assert not self.compat_err.errors
 
         self.assert_compat_error('warning', expected)
+
+    def test_nsIPK11TokenDBfindTokenByName(self):
+        """https://github.com/mozilla/amo-validator/issues/507"""
+        expected = 'Calling findTokenByName("") is no longer valid.'
+
+        script = '''
+            Components.classes["@mozilla.org/security/pk11tokendb;1"]
+                .getService(Components.interfaces.nsIPK11TokenDB)
+                .findTokenByName("").logoutAndDropAuthenticatedResources();
+        '''
+
+        self.run_script_for_compat(script)
+        assert not self.compat_err.notices
+        assert not self.compat_err.errors
+
+        self.assert_compat_error('warning', expected)
+
+        # Make sure that we explicitly check for an empty first argument
+        script = '''
+            Components.classes["@mozilla.org/security/pk11tokendb;1"]
+                .getService(Components.interfaces.nsIPK11TokenDB)
+                .findTokenByName("not empty")
+                .logoutAndDropAuthenticatedResources();
+        '''
+
+        self.run_script_for_compat(script)
+        assert not self.compat_err.notices
+        assert not self.compat_err.errors
+        assert not self.compat_err.warnings
