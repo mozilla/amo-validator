@@ -1,4 +1,4 @@
-[![Requirements Status](https://requires.io/github/mozilla/amo-validator/requirements.svg?branch=master)](https://requires.io/github/mozilla/amo-validator/requirements/?branch=master)
+[![Updates](https://pyup.io/repos/github/mozilla/amo-validator/shield.svg)](https://pyup.io/repos/github/mozilla/amo-validator/)
 
 # addons.mozilla.org Validator
 
@@ -99,7 +99,7 @@ The path to the XPI should point to an XPI file.
     add-on supports for the corresponding application GUID. E.g.:
     `{"{ec8030f7-c20a-464f-9b0e-13a3a9e97384}": "6.*"}`
     <dt>--target-minversion
-    <dd>Identical to `--target-minversion`, except overrides the min version
+    <dd>Identical to `--target-maxversion`, except overrides the min version
     instead of the max.
     <dt>--for-appversions
     <dd>Accepts a JSON string containing an object whose keys are GUIDs and
