@@ -8,4 +8,4 @@ pytest==3.0.7
 rdflib==4.2.2
 requests==2.13.0
 simplejson==3.10.0
-spidermonkey==52.0a2.post1
+spidermonkey==54.0a2.post2
