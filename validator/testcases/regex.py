@@ -537,7 +537,7 @@ class Gecko53RegexTests(CompatRegexTestHelper):
     def tests(self):
         yield self.get_test_bug(
             1321556,
-            r'\burlbarBindings.xml\#splitmenu\b',
+            r'\burlbarBindings\.xml#splitmenu\b',
             'The splitmenu element has been removed.',
             'The splitmenu element has been removed.',
             log_function=self.err.warning,
@@ -545,7 +545,7 @@ class Gecko53RegexTests(CompatRegexTestHelper):
 
         yield self.get_test_bug(
             1331296,
-            r'\b[^-]*-moz-calc\b',
+            r'-moz-calc\b',
             'The -moz-calc function has been removed.',
             'You can use the equivalent calc instead',
             log_function=self.err.warning,
