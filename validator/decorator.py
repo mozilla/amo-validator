@@ -103,4 +103,5 @@ def version_range(guid, version, before=None, app_versions=None):
     before_pos = None
     if before is not None and before in all_versions:
         before_pos = all_versions.index(before)
+
     return all_versions[version_pos:before_pos]
