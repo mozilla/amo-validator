@@ -31,3 +31,4 @@ FX50_DEFINITION = _build_definition(50, fennec=False, android=False, thunderbird
 FX51_DEFINITION = _build_definition(51, fennec=False, android=False, thunderbird=False)
 FX52_DEFINITION = _build_definition(52, fennec=False, android=False, thunderbird=False)
 FX53_DEFINITION = _build_definition(53, fennec=False, android=False, thunderbird=False)
+FX54_DEFINITION = _build_definition(54, fennec=False, android=False, thunderbird=False)
