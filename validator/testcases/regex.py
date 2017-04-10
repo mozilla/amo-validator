@@ -577,7 +577,7 @@ class Gecko54RegexTests(CompatRegexTestHelper):
             1333482,
             r'-moz-appearance\b',
             '-moz-appearance can only be used in chrome stylesheets.',
-            'All other users will be ignored.',
+            'All other uses will be ignored.',
             log_function=self.err.warning,
             compat_type='warning')
 
