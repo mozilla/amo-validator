@@ -493,6 +493,7 @@ INTERFACES = {
         u'setAndFetchFaviconForPage': entity('mozIAsyncFavicons.setAndFetchFaviconForPage'),
         u'replaceFaviconDataFromDataURL': entity('mozIAsyncFavicons.replaceFaviconDataFromDataURL'),
     }},
+    u'nsIFormHistory2': entity('nsIFormHistory2'),
 }
 
 INTERFACE_ENTITIES = {u'nsIXMLHttpRequest':

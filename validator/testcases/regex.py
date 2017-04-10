@@ -3,7 +3,8 @@ from functools import wraps
 
 from validator.compat import (
     FX45_DEFINITION, FX46_DEFINITION, FX47_DEFINITION, FX48_DEFINITION,
-    FX50_DEFINITION, FX51_DEFINITION, FX52_DEFINITION, FX53_DEFINITION)
+    FX50_DEFINITION, FX51_DEFINITION, FX52_DEFINITION, FX53_DEFINITION,
+    FX54_DEFINITION)
 from validator.constants import BUGZILLA_BUG, MDN_DOC
 from validator.contextgenerator import ContextGenerator
 from .chromemanifest import DANGEROUS_CATEGORIES, DANGEROUS_CATEGORY_WARNING
@@ -565,6 +566,20 @@ class Gecko53RegexTests(CompatRegexTestHelper):
             msg,
             log_function=self.err.warning,
             compat_type='error')
+
+
+@register_generator
+class Gecko54RegexTests(CompatRegexTestHelper):
+    VERSION = FX54_DEFINITION
+
+    def tests(self):
+        yield self.get_test_bug(
+            1333482,
+            r'-moz-appearance\b',
+            '-moz-appearance can only be used in chrome stylesheets.',
+            'All other uses will be ignored.',
+            log_function=self.err.warning,
+            compat_type='warning')
 
 
 class RegexTest(object):
