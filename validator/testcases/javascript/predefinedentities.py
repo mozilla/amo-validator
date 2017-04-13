@@ -169,9 +169,7 @@ BANNED_PREF_BRANCHES = (
     (u'nglayout.debug.disable_xul_cache', None),
 
     # Marionette
-    (u'marionette.force-local', MARIONETTE_MESSAGE),
-    (u'marionette.defaultPrefs.enabled', MARIONETTE_MESSAGE),
-    (u'marionette.defaultPrefs.port', MARIONETTE_MESSAGE),
+    (u'marionette.', MARIONETTE_MESSAGE),
 )
 
 BANNED_PREF_REGEXPS = [
