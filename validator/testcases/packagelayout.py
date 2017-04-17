@@ -1,4 +1,5 @@
-from fnmatch import fnmatch as fnm
+from fnmatch import fnmatch
+from zipfile import BadZipfile
 
 from validator.constants import (FF4_MIN, FIREFOX_GUID, FENNEC_GUID,
                                  THUNDERBIRD_GUID as TB_GUID, ANDROID_GUID,
@@ -74,7 +75,17 @@ def test_blacklisted_files(err, xpi_package=None):
 
         # Perform a deep inspection to detect magic numbers for known binary
         # and executable file types.
-        zip = xpi_package.zf.open(name)
+        try:
+            zip = xpi_package.zf.open(name)
+        except BadZipfile:
+            err.error(('testcases_content',
+                       'test_packed_packages',
+                       'jar_subpackage_corrupt'),
+                      'Package corrupt',
+                      'The package appears to be corrupt.',
+                      file=xpi_package.filename)
+            break
+
         bytes = tuple([ord(x) for x in zip.read(4)])  # Longest is 4 bytes
         if [x for x in blacklisted_magic_numbers if bytes[0:len(x)] == x]:
             # Note that there is binary content in the metadata
@@ -345,7 +356,7 @@ def test_layout(err, xpi, mandatory, whitelisted,
 
         # Remove the file from the mandatory file list.
         #if file_ in mandatory_files:
-        mfile_list = [mf for mf in mandatory if fnm(file_, mf)]
+        mfile_list = [mf for mf in mandatory if fnmatch(file_, mf)]
         if mfile_list:
             # Isolate the mandatory file pattern and remove it.
             mfile = mfile_list[0]
@@ -353,7 +364,7 @@ def test_layout(err, xpi, mandatory, whitelisted,
             continue
 
         # Test if the file is in the whitelist.
-        if any(fnm(file_, wlfile) for wlfile in whitelisted):
+        if any(fnmatch(file_, wlfile) for wlfile in whitelisted):
             continue
 
         # Is it a directory?

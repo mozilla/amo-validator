@@ -113,8 +113,16 @@ def test_packed_packages(err, xpi_package=None):
         file_data = u''
         try:
             file_data = xpi_package.read(name)
-        except KeyError:  # pragma: no cover
+        except KeyError:
             pass
+        except BadZipfile:
+            err.error(('testcases_content',
+                       'test_packed_packages',
+                       'jar_subpackage_corrupt'),
+                      'Package corrupt',
+                      'The package appears to be corrupt.',
+                      file=xpi_package.filename)
+            break
 
         if not err.for_appversions:
             hash = hashlib.sha256(file_data).hexdigest()
