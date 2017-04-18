@@ -480,3 +480,5 @@ c45c8504a0e57560128479b578e703f9533b6d56feaee5c773030138a3d3b4a1 underscore.1.8.
 b84a7a5ac0e8afc4f176b95606590bfc56044eeae9286097bdee013a6909fde5 underscore.1.8.2.underscore.js
 a1b6400a21ddee090e93d8882ffa629963132785bfa41b0abbea199d278121e9 underscore.1.8.3.underscore-min.js
 4b328e42c558197d5b99d7727cfcc60bac9763fad660651230e8baf93f6067ed underscore.1.8.3.underscore.js
+8c24e09024338ca43d2e2bdcc349433f94b1bf3a3787bed077f97fbda163d3b1 webextension-polyfill.0.1.1.browser-polyfill.js
+11970caafca2eaee807b79f1c6ca412100e47328d64721dad64aa619dda41cff webextension-polyfill.0.1.1.browser-polyfill.min.js

@@ -455,6 +455,11 @@ UNDERSCORE_VERSIONS = {
     ]
 }
 
+WEBEXTENSION_POLYFILL_VERSIONS = {
+    ALLOWED: [
+        "0.1.1",
+    ]
+}
 
 def process(url, rule, file):
     dest_folder = os.path.join(os.path.abspath(os.path.dirname(__file__)),
@@ -589,6 +594,14 @@ def get_patterns():
     get_pattern("underscore",
                 "https://raw.github.com/documentcloud/underscore/%s/underscore-min.js",
                 UNDERSCORE_VERSIONS)
+
+    # Webextension polyfill
+    get_pattern("webextension-polyfill",
+                "https://unpkg.com/webextension-polyfill@%s/dist/browser-polyfill.js",
+                WEBEXTENSION_POLYFILL_VERSIONS)
+    get_pattern("webextension-polyfill",
+                "https://unpkg.com/webextension-polyfill@%s/dist/browser-polyfill.min.js",
+                WEBEXTENSION_POLYFILL_VERSIONS)
 
 print "Downloading third-party library files..."
 get_patterns()
