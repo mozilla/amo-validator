@@ -439,51 +439,28 @@ def _call_expression(traverser, node):
             column=traverser.position,
             context=traverser.context)
 
-    if member.is_global:
-        if callable(member.value.get('dangerous', None)):
-            result = member.value['dangerous'](a=args, t=traverser._traverse_node,
-                                               e=traverser.err)
-            name = member.value.get('name', '')
+    if member.is_global and callable(member.value.get('dangerous', None)):
+        result = member.value['dangerous'](a=args, t=traverser._traverse_node,
+                                           e=traverser.err)
+        name = member.value.get('name', '')
 
-            if result and name:
-                kwargs = {
-                    'err_id': ('testcases_javascript_actions', '_call_expression',
-                               'called_dangerous_global'),
-                    'warning': '`%s` called in potentially dangerous manner' %
-                               member.value['name'],
-                    'description':
-                        'The global `%s` function was called using a set '
-                        'of dangerous parameters. Calls of this nature '
-                        'are deprecated.' % member.value['name']}
+        if result and name:
+            kwargs = {
+                'err_id': ('testcases_javascript_actions', '_call_expression',
+                           'called_dangerous_global'),
+                'warning': '`%s` called in potentially dangerous manner' %
+                           member.value['name'],
+                'description':
+                    'The global `%s` function was called using a set '
+                    'of dangerous parameters. Calls of this nature '
+                    'are deprecated.' % member.value['name']}
 
-                if isinstance(result, DESCRIPTION_TYPES):
-                    kwargs['description'] = result
-                elif isinstance(result, dict):
-                    kwargs.update(result)
+            if isinstance(result, DESCRIPTION_TYPES):
+                kwargs['description'] = result
+            elif isinstance(result, dict):
+                kwargs.update(result)
 
-                traverser.warning(**kwargs)
-
-        if callable(member.value.get('forbidden', None)):
-            result = member.value['forbidden'](a=args, t=traverser._traverse_node,
-                                               e=traverser.err)
-            name = member.value.get('name', '')
-
-            if result and name:
-                kwargs = {
-                    'err_id': ('testcases_javascript_actions', '_call_expression',
-                               'called_forbidden_global'),
-                    'warning': ' Forbidden `%s` called' %
-                               member.value['name'],
-                    'description':
-                        'The forbidden global `%s` function was called.'
-                        % member.value['name']}
-
-                if isinstance(result, DESCRIPTION_TYPES):
-                    kwargs['description'] = result
-                elif isinstance(result, dict):
-                    kwargs.update(result)
-
-                traverser.error(**kwargs)
+            traverser.warning(**kwargs)
 
     elif (node['callee']['type'] == 'MemberExpression' and
           node['callee']['property']['type'] == 'Identifier'):

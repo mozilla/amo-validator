@@ -325,27 +325,6 @@ class Traverser(object):
                 self._debug('DANGEROUS')
                 self.warning(**kwargs)
 
-        if not callable(entity.get('forbidden')):
-            dang = entity.get('forbidden')
-
-            if callable(dang):
-                dang = dang(self._traverse_node, self.err)
-
-            if dang:
-                kwargs = dict(
-                    err_id=('js', 'traverser', 'forbidden_global'),
-                    error='Access to the `%s` global' % name,
-                    description='Access to the `%s` property is '
-                                'forbidden.' % name)
-
-                if isinstance(dang, DESCRIPTION_TYPES):
-                    kwargs['description'] = dang
-                elif isinstance(dang, dict):
-                    kwargs.update(dang)
-
-                self._debug('FORBIDDEN')
-                self.error(**kwargs)
-
         entity.setdefault('name', name)
 
         # Build out the wrapper object from the global definition.

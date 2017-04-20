@@ -718,12 +718,25 @@ GLOBAL_ENTITIES = {
             u'getInstallForURL': ADDON_INSTALL_METHOD,
             u'installAddonsFromWebpage': ADDON_INSTALL_METHOD}},
 
-    u'ctypes': {'forbidden': {
+    u'ctypes': {'dangerous': {
         'description': (
-            'Starting with Firefox 53, add-ons loading binary libraries are '
-            'not allowed. Native Messaging is the only allowed method to '
-            'communicate with external binaries. For more information, please '
-            'refer to https://developer.mozilla.org/en-US/Add-ons/WebExtensions/Native_messaging')}},
+            'Insufficiently meticulous use of ctypes can lead to serious, '
+            'and often exploitable, errors. The use of bundled binary code, '
+            'or access to system libraries, may allow for add-ons to '
+            'perform unsafe operations. All ctypes use must be carefully '
+            'reviewed by a qualified reviewer.'),
+        'editors_only': True,
+        'signing_help': ('Please try to avoid interacting with or bundling '
+                         'native binaries whenever possible. If you are '
+                         'bundling binaries for performance reasons, please '
+                         'consider alternatives such as Emscripten '
+                         '(http://mzl.la/1KrSUh2), JavaScript typed arrays '
+                         '(http://mzl.la/1Iw02sr), and Worker threads '
+                         '(http://mzl.la/1OGfAcc).',
+                         'Any code which makes use of the `ctypes` API '
+                         'must undergo manual code review for at least one '
+                         'submission.'),
+        'signing_severity': 'high'}},
 
     u'document':
         {'value':
@@ -913,7 +926,7 @@ GLOBAL_ENTITIES = {
                                          'Care should be taken to ensure that '
                                          'this is done safely.')}},
                              u'import':
-                                 {'forbidden':
+                                 {'dangerous':
                                       lambda a, t, e:
                                           a and 'ctypes.jsm' in _get_as_str(t(a[0]))},
 

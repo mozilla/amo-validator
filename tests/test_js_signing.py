@@ -335,19 +335,15 @@ class TestSearchService(TestCase, RegexTestCase):
             yield test, prop
 
     def test_ctypes(self):
-        """Tests that usage of `ctypes` generates errors."""
+        """Tests that usage of `ctypes` generates warnings."""
 
         self.run_script("""
             ctypes.open("libc.so.6");
         """)
-        self.assert_failed(with_errors=[
-            {'id': ('js', 'traverser', 'forbidden_global')}])
-
-        self.run_script("""
-            Components.utils.import("resource://gre/modules/ctypes.jsm")
-        """)
-        self.assert_failed(with_errors=[
-            {'id': ('js', 'traverser', 'forbidden_global')}])
+        self.assert_failed(with_warnings=[
+            {'id': ('js', 'traverser', 'dangerous_global'),
+             'editors_only': True,
+             'signing_severity': 'high'}])
 
     def test_nsIProcess(self):
         """Tests that usage of `nsIProcess` generates warnings."""
