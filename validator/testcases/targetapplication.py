@@ -162,15 +162,15 @@ def test_targetedapplications(err, xpi_package=None):
     no_duplicate_targets = set(used_targets)
 
     if len(used_targets) != len(no_duplicate_targets):
-        err.warning(('testcases_targetapplication',
-                     'test_targetedapplications',
-                     'duplicate_targetapps'),
-                    'Found duplicate target application elements.',
-                    'Multiple target application elements were found in the '
-                    'manifest file that refer to the same application GUID. '
-                    'There should not be duplicate target applications '
-                    'entries.',
-                    'install.rdf')
+        err.error(('testcases_targetapplication',
+                   'test_targetedapplications',
+                   'duplicate_targetapps'),
+                  'Found duplicate target application elements.',
+                  'Multiple target application elements were found in the '
+                  'manifest file that refer to the same application GUID. '
+                  'There should not be duplicate target applications '
+                  'entries.',
+                  'install.rdf')
 
     # This finds the UUID of the supported applications and puts it in
     # a fun and easy-to-use format for use in other tests.
