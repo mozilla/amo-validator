@@ -151,10 +151,14 @@ def test_bad_order():
 def test_dup_targets():
     """Tests that there are no duplicate targetAppication elements."""
 
-    _do_test('tests/resources/targetapplication/dup_targapp.xpi',
-             targetapp.test_targetedapplications,
-             True,
-             True)
+    results = _do_test(
+        'tests/resources/targetapplication/dup_targapp.xpi',
+        targetapp.test_targetedapplications,
+        True,
+        True)
+    assert results.errors[0]['id'] == ('testcases_targetapplication',
+                                       'test_targetedapplications',
+                                       'duplicate_targetapps')
 
 
 def test_missing_installrdfs_are_handled():
