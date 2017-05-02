@@ -101,9 +101,10 @@ ANGULARJS_VERSIONS = {
         "1.6.0",
         "1.6.1",
         "1.6.2",
+        "1.6.3",
     ],
     ALLOWED: [
-        "1.6.3",
+        "1.6.4",
     ],
 }
 
@@ -200,16 +201,8 @@ DOJO_VERSIONS = {
 
 DOMPURIFY_VERSIONS = {
     ALLOWED: [
-        "0.7.0",
-        "0.7.1",
-        "0.7.2",
-        "0.7.3",
-        "0.7.4",
-        "0.8.0",
-        "0.8.1",
-        "0.8.2",
-        "0.8.3",
-        "0.8.4",
+        "0.8.6",
+        "0.8.7",
     ]
 }
 
@@ -261,20 +254,6 @@ JQUERY_VERSIONS = {
         "1.12.4",
     ],
     ALLOWED: [
-        "2.0.0",
-        "2.0.1",
-        "2.0.2",
-        "2.0.3",
-        "2.1.0",
-        "2.1.1",
-        "2.1.2",
-        "2.1.3",
-        "2.1.4",
-        "2.2.0",
-        "2.2.1",
-        "2.2.2",
-        "2.2.3",
-        "2.2.4",
         "3.0.0",
         "3.1.0",
         "3.1.1",
@@ -285,26 +264,6 @@ JQUERY_VERSIONS = {
 
 JQUERYUI_VERSIONS = {
     ALLOWED: [
-        "1.8.8",
-        "1.8.9",
-        "1.8.10",
-        "1.8.11",
-        "1.8.12",
-        "1.8.13",
-        "1.8.14",
-        "1.8.15",
-        "1.8.16",
-        "1.8.17",
-        "1.8.18",
-        "1.8.19",
-        "1.8.20",
-        "1.8.21",
-        "1.8.22",
-        "1.8.23",
-        "1.8.24",
-        "1.9.0",
-        "1.9.1",
-        "1.9.2",
         "1.10.0",
         "1.10.1",
         "1.10.2",
@@ -322,13 +281,6 @@ JQUERYUI_VERSIONS = {
 
 MOMENTJS_VERSIONS = {
     ALLOWED: [
-        "2.9.0",
-        "2.10.2",
-        "2.10.3",
-        "2.10.5",
-        "2.10.6",
-        "2.11.0",
-        "2.11.1",
         "2.11.2",
         "2.12.0",
         "2.13.0",
@@ -365,16 +317,6 @@ PROTOTYPE_VERSIONS = {
 
 REACT_VERSIONS = {
     ALLOWED: [
-        "0.11.0",
-        "0.11.1",
-        "0.11.2",
-        "0.12.0",
-        "0.12.1",
-        "0.12.2",
-        "0.13.0",
-        "0.13.1",
-        "0.13.2",
-        "0.13.3",
         "0.14.0",
         "0.14.1",
         "0.14.2",
@@ -396,34 +338,7 @@ REACT_VERSIONS = {
         "15.4.0",
         "15.4.1",
         "15.4.2",
-        "15.5.0",
-    ]
-}
-
-REACT_DOM_VERSIONS = {
-    ALLOWED: [
-        "0.14.0",
-        "0.14.1",
-        "0.14.2",
-        "0.14.3",
-        "0.14.4",
-        "0.14.5",
-        "0.14.6",
-        "0.14.7",
-        "0.14.8",
-        "15.0.0",
-        "15.0.1",
-        "15.0.2",
-        "15.1.0",
-        "15.2.0",
-        "15.2.1",
-        "15.3.0",
-        "15.3.1",
-        "15.3.2",
-        "15.4.0",
-        "15.4.1",
-        "15.4.2",
-        "15.5.0",
+        "15.5.4",
     ]
 }
 
@@ -460,6 +375,7 @@ WEBEXTENSION_POLYFILL_VERSIONS = {
         "0.1.1",
     ]
 }
+
 
 def process(url, rule, file):
     dest_folder = os.path.join(os.path.abspath(os.path.dirname(__file__)),
@@ -582,10 +498,10 @@ def get_patterns():
     # React DOM
     get_pattern("react-dom",
                 "https://unpkg.com/react-dom@%s/dist/react-dom.js",
-                REACT_DOM_VERSIONS)
+                REACT_VERSIONS)
     get_pattern("react-dom",
                 "https://unpkg.com/react-dom@%s/dist/react-dom.min.js",
-                REACT_DOM_VERSIONS)
+                REACT_VERSIONS)
 
     # Underscore
     get_pattern("underscore",
@@ -602,6 +518,7 @@ def get_patterns():
     get_pattern("webextension-polyfill",
                 "https://unpkg.com/webextension-polyfill@%s/dist/browser-polyfill.min.js",
                 WEBEXTENSION_POLYFILL_VERSIONS)
+
 
 print "Downloading third-party library files..."
 get_patterns()
