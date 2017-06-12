@@ -959,7 +959,6 @@ GLOBAL_ENTITIES = {
     u'innerWidth': {'readonly': False},
     u'width': {'readonly': False},
     u'height': {'readonly': False},
-    u'top': {'readonly': actions._readonly_top},
     u'content':
         {'context': 'content',
          'value':

@@ -594,24 +594,6 @@ def test_preference(value):
             'distinct string unique to and indicative of your add-on.')
 
 
-def _readonly_top(traverser, right, node_right):
-    """Handle the readonly callback for window.top."""
-    traverser.notice(
-        err_id=('testcases_javascript_actions',
-                '_readonly_top'),
-        notice='window.top is a reserved variable',
-        description='The `top` global variable is reserved and cannot be '
-                    'assigned any values starting with Gecko 6. Review your '
-                    'code for any uses of the `top` global, and refer to '
-                    '%s for more information.' % BUGZILLA_BUG % 654137,
-        for_appversions={FIREFOX_GUID: version_range('firefox',
-                                                     '6.0a1', '7.0a1'),
-                         FENNEC_GUID: version_range('fennec',
-                                                    '6.0a1', '7.0a1')},
-        compatibility_type='warning',
-        tier=5)
-
-
 def _expression(traverser, node):
     """
     This is a helper method that allows node definitions to point at
