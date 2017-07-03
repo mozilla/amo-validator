@@ -160,6 +160,16 @@ fd7b354ea4679db1bca2e0d0a6b307cb6e89f43fe601330899778d7cc1afcc14 dompurify.0.8.9
 6f7de9dc43bc9dabb5d22f616080de4a2f263a094a640d078ef8f893c65a269d dompurify.0.8.9.purify.min.js
 629b968eb40b3ad271d577a538f5defb899b1f7495dbbf0290a6b59b109c9c01 dompurify.0.9.0.purify.js
 a4b7ef8cada38f5248c1bcc1252e7221a1a4c9002a0515d253dafe3f232fa886 dompurify.0.9.0.purify.min.js
+1a9ea1a741fe03b6b1835b44ac2b9c59e39cdfc8abb64556a546c16528fc2828 jquery-slim.3.0.0.jquery.slim.js
+45fe0169d7f20adb2f1e63bcf4151971b62f34dbd9bce4f4f002df133bc2b03d jquery-slim.3.0.0.jquery.slim.min.js
+2faa690232fa8e0b5199f8ae8a0784139030348da91ff5fd2016cfc9a9c9799c jquery-slim.3.1.0.jquery.slim.js
+711a568e848ec3929cc8839a64da388ba7d9f6d28f85861bea2e53f51495246f jquery-slim.3.1.0.jquery.slim.min.js
+e62fe6437d3433befd3763950eb975ea56e88705cd51dccbfd1d9a5545f25d60 jquery-slim.3.1.1.jquery.slim.js
+fd222b36abfc87a406283b8da0b180e22adeb7e9327ac0a41c6cd5514574b217 jquery-slim.3.1.1.jquery.slim.min.js
+f18ac10930e84233b80814f5595bcc1f6ffad74047d038d997114e08880aec03 jquery-slim.3.2.0.jquery.slim.js
+a8b02fd240408a170764b2377efdd621329e46c517dbb85deaea4105ad0c4a8c jquery-slim.3.2.0.jquery.slim.min.js
+b40f32d17aa2c27a7098e225dd218070597646fc478c0f2aa74fb5b821a64668 jquery-slim.3.2.1.jquery.slim.js
+9365920887b11b33a3dc4ba28a0f93951f200341263e3b9cefd384798e4be398 jquery-slim.3.2.1.jquery.slim.min.js
 324b0783a50c21c9b2a105b39b7cd1767e8d44f288f08be5f6e2267d5ad83920 jquery-ui.1.10.0.jquery-ui.js
 853a5b7955e180299f3bb9c6716a7d77590898a6f363a80dd15a39bb9c0bbacb jquery-ui.1.10.0.jquery-ui.min.js
 76bbcc0a2f087f63a426cd3047494a9636d23d8b8880131f8fb477df150ca457 jquery-ui.1.10.1.jquery-ui.js
