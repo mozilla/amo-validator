@@ -264,6 +264,16 @@ JQUERY_VERSIONS = {
     ]
 }
 
+JQUERY_SLIM_VERSIONS = {
+    ALLOWED: [
+        "3.0.0",
+        "3.1.0",
+        "3.1.1",
+        "3.2.0",
+        "3.2.1",
+    ]
+}
+
 JQUERYUI_VERSIONS = {
     ALLOWED: [
         "1.10.0",
@@ -461,6 +471,16 @@ def get_patterns():
                 "https://code.jquery.com/jquery-%s.min.js",
                 JQUERY_VERSIONS,
                 "jquery.min.js")
+
+    # jQuery.slim
+    get_pattern("jquery-slim",
+                "https://code.jquery.com/jquery-%s.slim.js",
+                JQUERY_SLIM_VERSIONS,
+                "jquery.slim.js")
+    get_pattern("jquery-slim",
+                "https://code.jquery.com/jquery-%s.slim.min.js",
+                JQUERY_SLIM_VERSIONS,
+                "jquery.slim.min.js")
 
     # jQueryUI
     get_pattern("jquery-ui",
