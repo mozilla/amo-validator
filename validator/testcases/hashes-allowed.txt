@@ -1,5 +1,5 @@
-85f0e3be1ab367bc4a68eb5d9a7437161635dae77627a1d500b305f9e7b7609a angularjs.1.6.4.angular.js
-8c50aa8567731858e81bcfd2027718d9a7c8fd7bf54cf496499adbf5da5741b9 angularjs.1.6.4.angular.min.js
+20c03410880b139dda494ee31722ed5fabb886a319e80792c654a088143eeb6d angularjs.1.6.5.angular.js
+cc1cb5976581021daf3c5f2b9e314c517ba3b1f90a8f26b4272e63eb22a3d3e4 angularjs.1.6.5.angular.min.js
 918b67113f134ec866265fb26365dc1497c88af997f75bbd70ef8450ca7658e6 backbone.1.0.0.backbone-min.js
 2ebbacdc8393dac4ce1d4cfbb8eb1957ba7bd7811fa7bed67c94a4a1193a78f3 backbone.1.0.0.backbone.js
 453ec40e1cf3ecc3309a6a5bbf0ae555ee2f5f80075e48e86ce37dc247dc135c backbone.1.1.0.backbone-min.js
