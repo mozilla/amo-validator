@@ -4,7 +4,7 @@ defusedxml==0.5.0
 fastchardet==0.2.0
 mock==2.0.0
 natsort==5.0.3
-pytest==3.1.2
+pytest==3.1.3
 rdflib==3.4.0 # pyup: <4.0
 requests==2.18.1
 simplejson==3.11.1
