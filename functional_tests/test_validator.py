@@ -203,7 +203,9 @@ class GeneralTests(ValidatorTest):
     def test_webextension_seen_as_extension(self):
         validation = self.validate('beastify.xpi')
         assert validation['detected_type'] == 'extension'
-        assert validation['errors'] == 0
+        # WebExtensions are not supported by amo-validator anymore now that we
+        # have addons-linter.
+        assert validation['errors'] == 1
 
     def test_install_rdf_and_manifest_json(self):
         validation = self.validate('installrdf-and-manifestjson.xpi')
