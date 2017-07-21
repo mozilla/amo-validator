@@ -58,6 +58,14 @@ def test_createElementNS():
     x.createElementNS("foo", bar);
     """).failed()
 
+    # Test for https://github.com/mozilla/amo-validator/issues/368
+    assert not _do_test_raw("""
+        var x = "foo",
+            nsXUL = "http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul";
+
+        x.createElementNS(nsXUL, 'panelview')
+    """).failed()
+
 
 def test_sql_methods():
     """Tests that warnings on SQL methods are emitted properly"""
