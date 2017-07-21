@@ -1,4 +1,4 @@
-__version__ = '1.10.69'
+__version__ = '1.10.70'
 
 
 class ValidationTimeout(Exception):
