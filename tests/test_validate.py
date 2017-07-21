@@ -115,8 +115,8 @@ def test_validate_webextension():
     result = validate(path='tests/resources/validate/webextension.xpi')
     data = json.loads(result)
 
-    assert data['success'] is True
-    assert data['errors'] == 0
+    assert data['success'] is False
+    assert data['errors'] == 1
     assert data['notices'] == 0
     assert data['warnings'] == 0
     assert data['compatibility_summary']
@@ -124,14 +124,20 @@ def test_validate_webextension():
     assert data['compatibility_summary']['notices'] == 0
     assert data['compatibility_summary']['warnings'] == 0
     assert data['detected_type'] == 'extension'
-    assert data['messages'] == []
-    assert data['message_tree'] == {}
+    assert len(data['messages']) == 1
+    assert data['messages'][0]['id'] == [
+        u'submain', u'test_inner_package', u'webextension']
+    assert data['messages'][0]['message'] == (
+            'This tool only works with legacy add-ons. See '
+            'https://developer.mozilla.org/docs/Mozilla/Add-ons/WebExtensions '
+            'for more information about WebExtension APIs.')
+    assert data['messages'][0]['tier'] == 1
+    assert data['messages'][0]['type'] == 'error'
     assert data['signing_summary']['high'] == 0
     assert data['signing_summary']['medium'] == 0
     assert data['signing_summary']['low'] == 0
     assert data['signing_summary']['trivial'] == 0
     assert data['metadata']
-    assert data['metadata'].get('strict_compatibility') is None
     assert data['metadata']['is_extension'] is True
 
 

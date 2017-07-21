@@ -166,7 +166,23 @@ def test_package(err, file_, name, expectation=PACKAGE_ANY,
             err.error(('main', 'test_package', 'unexpected_type'),
                       'Unexpected package type (found theme)')
 
-    test_inner_package(err, package, for_appversions)
+    if (err.get_resource('has_manifest_json') and
+            not err.get_resource('has_package_json') and
+            not err.get_resource('has_install_rdf')):
+        # It's a WebExtension. Those are not supported by amo-validator, we
+        # should be using the linter instead. Only reason we could be using
+        # amo validator with a WebExtension is if a developer tried to use
+        # the compatibilty checker with a WebExtension, so add a relevant error
+        # message.
+        format_args = {
+            'link': MDN_DOC % 'Mozilla/Add-ons/WebExtensions'
+        }
+        err.error(
+            ('submain', 'test_inner_package', 'webextension'),
+            'This tool only works with legacy add-ons. See {link} for more '
+            'information about WebExtension APIs.'.format(**format_args))
+    else:
+        test_inner_package(err, package, for_appversions)
 
 
 def _load_install_rdf(err, package, expectation):
