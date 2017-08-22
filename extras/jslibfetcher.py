@@ -103,9 +103,10 @@ ANGULARJS_VERSIONS = {
         "1.6.2",
         "1.6.3",
         "1.6.4",
+        "1.6.5",
     ],
     ALLOWED: [
-        "1.6.5",
+        "1.6.6",
     ],
 }
 
@@ -206,6 +207,8 @@ DOMPURIFY_VERSIONS = {
         "0.8.7",
         "0.8.9",
         "0.9.0",
+        "1.0.0",
+        "1.0.1",
     ]
 }
 
@@ -457,7 +460,7 @@ def get_patterns():
 
     # DOMPurify
     get_pattern("dompurify",
-                "https://raw.githubusercontent.com/cure53/DOMPurify/%s/src/purify.js",
+                "https://raw.githubusercontent.com/cure53/DOMPurify/%s/dist/purify.js",
                 DOMPURIFY_VERSIONS)
     get_pattern("dompurify",
                 "https://raw.githubusercontent.com/cure53/DOMPurify/%s/dist/purify.min.js",

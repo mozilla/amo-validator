@@ -1,5 +1,5 @@
-20c03410880b139dda494ee31722ed5fabb886a319e80792c654a088143eeb6d angularjs.1.6.5.angular.js
-cc1cb5976581021daf3c5f2b9e314c517ba3b1f90a8f26b4272e63eb22a3d3e4 angularjs.1.6.5.angular.min.js
+3ca7274302353b8386c230cfed846b122a97fe60a611ff73e88a657d56cc3a3b angularjs.1.6.6.angular.js
+35f73a70cca067828be9e0a712b8b48908e1bc4490637c62bd70158f95cd6e27 angularjs.1.6.6.angular.min.js
 918b67113f134ec866265fb26365dc1497c88af997f75bbd70ef8450ca7658e6 backbone.1.0.0.backbone-min.js
 2ebbacdc8393dac4ce1d4cfbb8eb1957ba7bd7811fa7bed67c94a4a1193a78f3 backbone.1.0.0.backbone.js
 453ec40e1cf3ecc3309a6a5bbf0ae555ee2f5f80075e48e86ce37dc247dc135c backbone.1.1.0.backbone-min.js
@@ -160,6 +160,10 @@ fd7b354ea4679db1bca2e0d0a6b307cb6e89f43fe601330899778d7cc1afcc14 dompurify.0.8.9
 6f7de9dc43bc9dabb5d22f616080de4a2f263a094a640d078ef8f893c65a269d dompurify.0.8.9.purify.min.js
 629b968eb40b3ad271d577a538f5defb899b1f7495dbbf0290a6b59b109c9c01 dompurify.0.9.0.purify.js
 a4b7ef8cada38f5248c1bcc1252e7221a1a4c9002a0515d253dafe3f232fa886 dompurify.0.9.0.purify.min.js
+6d25a56340a6af1f462ccc83ea43764a648baeca6f6fb87845ae3443c15fb856 dompurify.1.0.0.purify.js
+a0a1e9bbc45a925a2defca10de8268de0bf54bb1894823be6f6f85823f381bd8 dompurify.1.0.0.purify.min.js
+9d8f3248df827a5a0bf6abc251154f75ddc0c3350b32a3734d0bdd0d71743348 dompurify.1.0.1.purify.js
+ce372d4399f7650e1d5fcec5f969cb09cd6f9b2cec3c78f09ab3e22b7fde4af9 dompurify.1.0.1.purify.min.js
 1a9ea1a741fe03b6b1835b44ac2b9c59e39cdfc8abb64556a546c16528fc2828 jquery-slim.3.0.0.jquery.slim.js
 45fe0169d7f20adb2f1e63bcf4151971b62f34dbd9bce4f4f002df133bc2b03d jquery-slim.3.0.0.jquery.slim.min.js
 2faa690232fa8e0b5199f8ae8a0784139030348da91ff5fd2016cfc9a9c9799c jquery-slim.3.1.0.jquery.slim.js
