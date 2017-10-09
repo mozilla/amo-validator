@@ -8,4 +8,4 @@ pytest==3.2.3
 rdflib==3.4.0 # pyup: <4.0
 requests==2.18.4
 simplejson==3.11.1
-spidermonkey==55.0a1.post2
+spidermonkey==58.0a1.post2
