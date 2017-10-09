@@ -152,6 +152,8 @@ fd7d2224091238fa3377bcba9e3719c433c6c99f4904b11bebb3c6b1a761943d dojo.1.11.3.doj
 f6f3d579099f5e4162993b74e90b32f83dd119e2d6786a00eabdb323cdaf0184 dojo.1.12.1.dojo.js.uncompressed.js
 61c97a067f2d2302c333ddff7f03428c89acfa0a65e82fb5236a2ba85faa7474 dojo.1.12.2.dojo.js
 baf6f5ee117ebb0822db977ed294f6d269f0703f6060b1e29798b1f72af0d17e dojo.1.12.2.dojo.js.uncompressed.js
+290c9d104f746a149b91e0bafca3026e235845ebff77ed857a9c3373a1c2820e dojo.1.13.0.dojo.js
+9d3b7434011411f6bfd0ae888745e29fcca2307b412e2065e051aa49376366e8 dojo.1.13.0.dojo.js.uncompressed.js
 1abe22b7bcc1cf26646ea0d17ae07e4b52f4623fdf9ad0d998a4a71fc41c6202 dompurify.0.8.6.purify.js
 73640f6842937faa9cf86a4ed997b290ff9297cbf0b2cfd1a1c694d61b5c75f6 dompurify.0.8.6.purify.min.js
 87dfdcf2ce754721f9d594a40d2de4d2909a40675b1cec7be3ee552d26a20dbe dompurify.0.8.7.purify.js
@@ -248,6 +250,10 @@ dedea3aa22a087b3745c9635e7a3d65e772d57ce590b541a6a32069a0b1d60b9 prototype.1.7.0
 48a4fd51466ac55d081ff932371021b328f118f74ee6ba93c0ec8fd163e34a30 prototype.1.7.1.0.prototype.js
 a6b4f5343dd13746d73c87e9f2e6187768e92fdfd1334fb4613dd23c6cd3e819 prototype.1.7.2.0.prototype.js
 46bc7c7b853bf69ab0b165153453f7c1e84bf6982fe8adb6245088a5f3de8360 prototype.1.7.3.0.prototype.js
+2cf49421691b9dbf1916f970e1532a724f39c10b36b3becc794114559f6e352b react16.16.0.0.react-dom.development.js
+0dcb93a5c7859e1fa909ffe239b591ec329bfea81bf5e059ecb1b6f7e1ca7058 react16.16.0.0.react-dom.production.min.js
+493ecfdc30046522c71c19c2f80c913460d115b4872bb1223c2de10639153990 react16.16.0.0.react.development.js
+de59b0d4504aa0350c13775fec9b78859f3eda83dea21d60dded98bb7866d54a react16.16.0.0.react.production.min.js
 41ea89287f31b51b3fbfc1e1b669a4219ec4e5843fd396f222c96484ff72e7cf react-dom.0.14.0.react-dom.js
 58017697b5c3f3b6315ca22886afbd6546d746321c013d1a632e61c7f0723805 react-dom.0.14.0.react-dom.min.js
 fd2f9a60bdb40ea48429d32c3f96cbc982ce550f061844bd36caad35430e385c react-dom.0.14.1.react-dom.js
@@ -392,3 +398,7 @@ a1b6400a21ddee090e93d8882ffa629963132785bfa41b0abbea199d278121e9 underscore.1.8.
 4b328e42c558197d5b99d7727cfcc60bac9763fad660651230e8baf93f6067ed underscore.1.8.3.underscore.js
 8c24e09024338ca43d2e2bdcc349433f94b1bf3a3787bed077f97fbda163d3b1 webextension-polyfill.0.1.1.browser-polyfill.js
 11970caafca2eaee807b79f1c6ca412100e47328d64721dad64aa619dda41cff webextension-polyfill.0.1.1.browser-polyfill.min.js
+240c7c3a9da915a6bbd2cebf2702aaa7fda54b493cb6f1db8ce44ca510734d2f webextension-polyfill.0.1.2.browser-polyfill.js
+c204650eb44c44f4ec19a7bc19995f5f2642b3de009fbbb1b999677fca65a714 webextension-polyfill.0.1.2.browser-polyfill.min.js
+824a321eba5fc21f06a9efeba19861b83e1a1c8cddee92cfca16064d771056d0 webextension-polyfill.0.2.0.browser-polyfill.js
+0912829eb35b502c83046395b1f89b6e6038ea0b0a2ac4c882077984f66002d3 webextension-polyfill.0.2.0.browser-polyfill.min.js

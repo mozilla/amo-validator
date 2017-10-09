@@ -198,6 +198,7 @@ DOJO_VERSIONS = {
         "1.11.4",
         "1.12.1",
         "1.12.2",
+        "1.13.0",
     ]
 }
 
@@ -361,6 +362,12 @@ REACT_VERSIONS = {
     ]
 }
 
+REACT16_VERSIONS = {
+    ALLOWED: [
+        "16.0.0",
+    ]
+}
+
 UNDERSCORE_VERSIONS = {
     ALLOWED: [
         "1.2.0",
@@ -392,6 +399,8 @@ UNDERSCORE_VERSIONS = {
 WEBEXTENSION_POLYFILL_VERSIONS = {
     ALLOWED: [
         "0.1.1",
+        "0.1.2",
+        "0.2.0",
     ]
 }
 
@@ -524,6 +533,14 @@ def get_patterns():
                 "https://unpkg.com/react@%s/dist/react.min.js",
                 REACT_VERSIONS)
 
+    # React16
+    get_pattern("react16",
+                "https://unpkg.com/react@%s/umd/react.development.js",
+                REACT16_VERSIONS)
+    get_pattern("react16",
+                "https://unpkg.com/react@%s/umd/react.production.min.js",
+                REACT16_VERSIONS)
+
     # React DOM
     get_pattern("react-dom",
                 "https://unpkg.com/react-dom@%s/dist/react-dom.js",
@@ -531,6 +548,14 @@ def get_patterns():
     get_pattern("react-dom",
                 "https://unpkg.com/react-dom@%s/dist/react-dom.min.js",
                 REACT_VERSIONS)
+
+    # React DOM16
+    get_pattern("react16",
+                "https://unpkg.com/react-dom@%s/umd/react-dom.development.js",
+                REACT16_VERSIONS)
+    get_pattern("react16",
+                "https://unpkg.com/react-dom@%s/umd/react-dom.production.min.js",
+                REACT16_VERSIONS)
 
     # Underscore
     get_pattern("underscore",
