@@ -7,5 +7,5 @@ natsort==5.1.1
 pytest==3.2.5
 rdflib==3.4.0 # pyup: <4.0
 requests==2.18.4
-simplejson==3.12.0
+simplejson==3.13.0
 spidermonkey==58.0a1.post2
