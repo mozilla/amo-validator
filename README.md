@@ -404,4 +404,3 @@ change the locations that the various language files are stored in.
 
 Also note that this tool should only be run against the en-US versions of these
 applications.
-foo
