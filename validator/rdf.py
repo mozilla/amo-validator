@@ -79,18 +79,20 @@ class RDFParser(object):
         self.manifest = u'urn:mozilla:install-manifest'
         self.namespace = namespace or 'http://www.mozilla.org/2004/em-rdf'
 
-        if isinstance(data, types.StringTypes):
-            data = StringIO(data)  # Wrap data in a pseudo-file
+        if (hasattr(data, 'read') and hasattr(data, 'readline') or
+            isinstance(data, StringIO)
+        ):
+            # It could be a file-like object, let's read it so that we can
+            # wrap it in StringIO so that we can re-open at any time
+            data.seek(0)
+            data = data.read()
 
         try:
             # Use an empty ContentHandler, we just want to make sure it parses.
-            parse(data, ContentHandler())
+            parse(StringIO(data), ContentHandler())
         except SAXParseException as ex:
             # Raise the SAX parse exceptions so we get some line info.
             raise RDFException(orig_exception=ex)
-        else:
-            # We consumed the file, start over from the beginning.
-            data.seek(0)
 
         from rdflib.plugins.parsers import rdfxml
         orig_create_parser = rdfxml.create_parser
@@ -105,7 +107,7 @@ class RDFParser(object):
 
             # Load up and parse the file in XML format.
             graph = Graph()
-            graph.parse(data, format='xml')
+            graph.parse(StringIO(data), format='xml')
             self.rdf = graph
 
         except ParserError as ex:
