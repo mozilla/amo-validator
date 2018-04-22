@@ -3,9 +3,9 @@ cssutils==1.0.2
 defusedxml==0.5.0
 fastchardet==0.2.0
 mock==2.0.0
-natsort==5.2.0
+natsort==5.3.0
 pytest==3.5.0
 rdflib==3.4.0 # pyup: <4.0
 requests==2.18.4
-simplejson==3.13.2
+simplejson==3.14.0
 spidermonkey==58.0a1.post2
