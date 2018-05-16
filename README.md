@@ -1,16 +1,17 @@
 [![Updates](https://pyup.io/repos/github/mozilla/amo-validator/shield.svg)](https://pyup.io/repos/github/mozilla/amo-validator/)
 
+
 # addons.mozilla.org Validator
+
+:warning: :warning: :fire: This tool is being deprecated and going away eventually. :warning: :warning: :fire:
+
+It is still used on addons.mozilla.org for legacy add-ons but once support for updates for legacy add-ons goes away from AMO this tool will be archived.
 
 The AMO Validator is a tool designed to scan Mozilla add-on packages for
 problems such as security vulnerabilities, exploits, spamware and badware,
 and lots of other gunk. By using a combination of various techniques and
 detection mechanisms, the validator is capable of being both efficient as well
 as thorough.
-
-:warning: :warning: :fire: This tool is being deprecated and going away eventually. :warning: :warning: :fire:
-
-It is still used on addons.mozilla.org for legacy add-ons but once support for updates for legacy add-ons goes away from AMO this tool will be archived. Please don't use it.
 
 
 ## Setup
