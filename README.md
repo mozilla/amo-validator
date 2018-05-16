@@ -8,8 +8,8 @@ and lots of other gunk. By using a combination of various techniques and
 detection mechanisms, the validator is capable of being both efficient as well
 as thorough.
 
-![#f03c15](https://placehold.it/15/f03c15/000000?text=+) This tool is being deprecated and going away eventually.
-    It is still used on addons.mozilla.org for legacy add-ons but once support for updates for legacy add-ons goes away from AMO this tool will be archived. Please don't use it.
+:warning: :warning: :fire: This tool is being deprecated and going away eventually. ::warning: :warning: :fire:
+It is still used on addons.mozilla.org for legacy add-ons but once support for updates for legacy add-ons goes away from AMO this tool will be archived. Please don't use it.
 
 
 ## Setup
