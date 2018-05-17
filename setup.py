@@ -19,7 +19,7 @@ setup(
                       not p.startswith(('#', '-e'))],
     scripts=["addon-validator"],
     classifiers=[
-        'Development Status :: 4 - Beta',
+        'Development Status :: 7 - Inactive',
         'Environment :: Web Environment',
         'Intended Audience :: Developers',
         'License :: OSI Approved :: BSD License',
