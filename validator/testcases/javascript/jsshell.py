@@ -73,11 +73,6 @@ class JSShell(Spidermonkey):
         # https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Statements/Legacy_generator_function)  # noqa
         super(JSShell, self).__init__(code=['version(180)', self.SCRIPT])
 
-    def __del__(self):
-        if self.returncode is None:
-            self.terminate()
-        super(Spidermonkey, self).__del__()
-
     @classmethod
     def get_shell(cls):
         """Get a running JSShell instance, or create a new one if one does not
@@ -92,6 +87,8 @@ class JSShell(Spidermonkey):
     def cleanup(cls):
         """Clear our saved instance, and terminate its Spidermonkey process,
         if there are no further references to it."""
+        if cls.instance is not None and cls.instance.returncode is None:
+            cls.instance.terminate()
         cls.instance = None
 
     def get_tree(self, code):
