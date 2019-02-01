@@ -1,9 +1,11 @@
-[![Updates](https://pyup.io/repos/github/mozilla/amo-validator/shield.svg)](https://pyup.io/repos/github/mozilla/amo-validator/)
+[![No Maintenance Intended](http://unmaintained.tech/badge.svg)](http://unmaintained.tech/)
+
+
+:warning: This tool is now considered fully deprecated and is no longer maintained.
 
 
 # addons.mozilla.org Validator
 
-:warning: :warning: :fire: This tool is being deprecated and going away eventually. :warning: :warning: :fire:
 
 It is still used on addons.mozilla.org for legacy add-ons but once support for updates for legacy add-ons goes away from AMO this tool will be archived.
 
